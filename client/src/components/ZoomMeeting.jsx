@@ -116,34 +116,8 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         console.log('[Zoom] Successfully joined meeting');
         
-        // Try to maximize the video view after joining
-        try {
-          // Wait a moment for Zoom UI to fully render
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          // Try to switch to gallery view for better layout
-          if (client.getCurrentUser && client.getAttendeeslist) {
-            console.log('[Zoom] Attempting to optimize video layout...');
-            
-            // Get the video element and try to render it larger
-            const stream = client.getMediaStream();
-            if (stream) {
-              console.log('[Zoom] Media stream available, rendering video...');
-              await stream.renderVideo(
-                meetingSDKElement.current,
-                client.getCurrentUser().userId,
-                meetingSDKElement.current.offsetWidth,
-                meetingSDKElement.current.offsetHeight,
-                0,
-                0,
-                3 // Video quality: 0=90p, 1=180p, 2=360p, 3=720p
-              );
-            }
-          }
-        } catch (viewErr) {
-          console.warn('[Zoom] Could not optimize view layout:', viewErr);
-          // Non-critical error, continue anyway
-        }
+        // The Zoom SDK handles video rendering automatically
+        // No manual optimization needed
         
         if (mounted) {
           setLoading(false);
