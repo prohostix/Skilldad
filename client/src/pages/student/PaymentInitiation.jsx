@@ -41,6 +41,7 @@ const PaymentInitiation = () => {
     const [paymentMode, setPaymentMode] = useState('summary'); // summary, elements
 
     const GST_RATE = 0.18;
+    const SERVICE_CHARGE_RATE = 0.02;
 
     useEffect(() => {
         fetchCourseDetails();
@@ -96,7 +97,7 @@ const PaymentInitiation = () => {
     };
 
     const calculatePricing = () => {
-        if (!course) return { original: 0, discount: 0, subtotal: 0, gst: 0, total: 0 };
+        if (!course) return { original: 0, discount: 0, subtotal: 0, serviceCharge: 0, gst: 0, total: 0 };
 
         const original = parseFloat(course.price);
         let discount = 0;
@@ -110,13 +111,15 @@ const PaymentInitiation = () => {
         }
 
         const subtotal = original - discount;
+        const serviceCharge = subtotal * SERVICE_CHARGE_RATE;
         const gst = subtotal * GST_RATE;
-        const total = subtotal + gst;
+        const total = subtotal + serviceCharge + gst;
 
         return {
             original: original.toFixed(2),
             discount: discount.toFixed(2),
             subtotal: subtotal.toFixed(2),
+            serviceCharge: serviceCharge.toFixed(2),
             gst: gst.toFixed(2),
             total: total.toFixed(2)
         };
@@ -315,6 +318,10 @@ const PaymentInitiation = () => {
                                             </div>
                                         )}
                                         <div className="flex justify-between text-sm pt-4 border-t border-white/10">
+                                            <span className="text-gray-400">Service Charge (2%)</span>
+                                            <span className="text-white font-semibold">₹{pricing.serviceCharge}</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm">
                                             <span className="text-gray-400">GST (18%)</span>
                                             <span className="text-white font-semibold">₹{pricing.gst}</span>
                                         </div>
