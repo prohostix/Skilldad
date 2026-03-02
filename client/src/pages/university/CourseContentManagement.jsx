@@ -14,6 +14,7 @@ const CourseContentManagement = () => {
     const [editingVideo, setEditingVideo] = useState(null);
     const [showAddModule, setShowAddModule] = useState(false);
     const [showAddVideo, setShowAddVideo] = useState(null);
+    const [showEditCourse, setShowEditCourse] = useState(false);
 
     useEffect(() => {
         fetchCourse();
@@ -62,6 +63,20 @@ const CourseContentManagement = () => {
         }
     };
 
+    const handleUpdateCourse = async (courseData) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: { Authorization: `Bearer ${userInfo.token}` }
+            };
+            await axios.put(`/api/courses/${courseId}`, courseData, config);
+            fetchCourse();
+            setShowEditCourse(false);
+        } catch (error) {
+            console.error('Error updating course:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
@@ -94,14 +109,29 @@ const CourseContentManagement = () => {
                         <div>
                             <h1 className="text-3xl font-bold text-white mb-2">{course.title}</h1>
                             <p className="text-white/60">{course.description}</p>
+                            <div className="flex gap-4 mt-2 text-sm">
+                                <span className="text-primary font-bold">₹{course.price}</span>
+                                <span className="text-white/40">•</span>
+                                <span className="text-white/60">{course.category || 'Uncategorized'}</span>
+                            </div>
                         </div>
-                        <ModernButton
-                            onClick={() => setShowAddModule(true)}
-                            className="flex items-center gap-2"
-                        >
-                            <Plus size={18} />
-                            Add Module
-                        </ModernButton>
+                        <div className="flex gap-3">
+                            <ModernButton
+                                onClick={() => setShowEditCourse(true)}
+                                variant="secondary"
+                                className="flex items-center gap-2"
+                            >
+                                <Edit2 size={18} />
+                                Edit Course
+                            </ModernButton>
+                            <ModernButton
+                                onClick={() => setShowAddModule(true)}
+                                className="flex items-center gap-2"
+                            >
+                                <Plus size={18} />
+                                Add Module
+                            </ModernButton>
+                        </div>
                     </div>
                 </div>
 
@@ -206,6 +236,15 @@ const CourseContentManagement = () => {
                     moduleId={showAddVideo}
                     onClose={() => setShowAddVideo(null)}
                     onSave={(videoData) => handleAddVideo(showAddVideo, videoData)}
+                />
+            )}
+
+            {/* Edit Course Modal */}
+            {showEditCourse && (
+                <EditCourseModal
+                    course={course}
+                    onClose={() => setShowEditCourse(false)}
+                    onSave={handleUpdateCourse}
                 />
             )}
         </div>
@@ -325,6 +364,104 @@ const AddVideoModal = ({ moduleId, onClose, onSave }) => {
                         <ModernButton type="submit" className="flex-1">
                             <Save size={18} className="mr-2" />
                             Save Video
+                        </ModernButton>
+                        <ModernButton type="button" variant="secondary" onClick={onClose}>
+                            Cancel
+                        </ModernButton>
+                    </div>
+                </form>
+            </GlassCard>
+        </div>
+    );
+};
+
+// Edit Course Modal Component
+const EditCourseModal = ({ course, onClose, onSave }) => {
+    const [title, setTitle] = useState(course.title || '');
+    const [description, setDescription] = useState(course.description || '');
+    const [price, setPrice] = useState(course.price || '');
+    const [category, setCategory] = useState(course.category || '');
+    const [level, setLevel] = useState(course.level || 'Beginner');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ title, description, price: Number(price), category, level });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <GlassCard className="w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-white">Edit Course Details</h3>
+                    <button onClick={onClose} className="text-white/60 hover:text-white">
+                        <X size={24} />
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Course Title *</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                            placeholder="e.g., Complete React Course"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Description *</label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                            rows="4"
+                            placeholder="Describe what students will learn in this course"
+                            required
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-white/80 text-sm mb-2">Price (₹) *</label>
+                            <input
+                                type="number"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                                placeholder="e.g., 2999"
+                                required
+                                min="0"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-white/80 text-sm mb-2">Level *</label>
+                            <select
+                                value={level}
+                                onChange={(e) => setLevel(e.target.value)}
+                                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                                required
+                            >
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Category *</label>
+                        <input
+                            type="text"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                            placeholder="e.g., Web Development, Data Science"
+                            required
+                        />
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                        <ModernButton type="submit" className="flex-1">
+                            <Save size={18} className="mr-2" />
+                            Update Course
                         </ModernButton>
                         <ModernButton type="button" variant="secondary" onClick={onClose}>
                             Cancel
