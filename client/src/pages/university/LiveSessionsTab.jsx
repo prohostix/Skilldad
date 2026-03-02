@@ -492,6 +492,7 @@ const SessionCard = ({
     onDelete, 
     onJoinHost = () => {}, 
     onJoinStudent = () => {}, 
+    onGetUrl = () => {},
     loadingId 
 }) => {
     const isLoading = loadingId === session._id;
@@ -601,7 +602,7 @@ const SessionCard = ({
                     {(session.status === 'scheduled' || session.status === 'live') && session.zoom?.meetingId && (
                         <button
                             onClick={() => onJoinHost(session._id)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
                             title="Join meeting as host (embedded)"
                         >
                             <Radio size={13} /> Enter Studio
@@ -612,7 +613,7 @@ const SessionCard = ({
                     {(session.status === 'scheduled' || session.status === 'live') && session.zoom?.meetingId && (
                         <button
                             onClick={() => onJoinStudent(session._id)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold hover:bg-blue-500/20 transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold hover:bg-blue-500/20 transition-colors"
                             title="Join meeting as student (embedded)"
                         >
                             <Video size={13} /> Join Session
@@ -625,7 +626,7 @@ const SessionCard = ({
                             href={session.meetingLink}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold hover:bg-amber-500/20 transition-colors"
                         >
                             <ExternalLink size={13} /> Join Zoom/Meet
                         </a>
@@ -634,7 +635,7 @@ const SessionCard = ({
                     {/* Get signed URL */}
                     {(session.status === 'live' || session.status === 'ended') && (
                         <button
-                            onClick={() => handleGetUrl(session._id)}
+                            onClick={() => onGetUrl(session._id)}
                             disabled={isLoading}
                             title="Get secure playback URL"
                             className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold hover:bg-blue-500/20 transition-colors disabled:opacity-50"
@@ -993,6 +994,7 @@ const LiveSessionsTab = ({ students }) => {
                                     onDelete={handleDelete}
                                     onJoinHost={handleJoinHost}
                                     onJoinStudent={handleJoinStudent}
+                                    onGetUrl={handleGetUrl}
                                     loadingId={loadingId}
                                 />
                             </motion.div>
