@@ -118,11 +118,11 @@ This implementation adds interactive learning elements (exercises, practice prob
     - **Property 10: Enrollment Requirement** - Only enrolled students can submit
     - **Validates: Requirements 5.3, 5.2, 12.5**
 
-- [ ] 5. Checkpoint - Ensure all tests pass
+- [x] 5. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Implement manual grading queue
-  - [ ] 6.1 Create ManualGradingQueue controller
+- [x] 6. Implement manual grading queue
+  - [x] 6.1 Create ManualGradingQueue controller
     - Implement getPendingSubmissions endpoint filtered by course
     - Implement gradeSubmission endpoint with validation
     - Validate points are within valid range [0, question.points]
