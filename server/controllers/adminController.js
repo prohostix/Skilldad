@@ -783,14 +783,33 @@ async function inviteUser(req, res) {
                 emailSubject = 'Welcome to SkillDad - Instructor Account Created';
             }
             
+            console.log('[inviteUser] Attempting to send email to:', user.email);
+            console.log('[inviteUser] Email subject:', emailSubject);
+            console.log('[inviteUser] CLIENT_URL:', process.env.CLIENT_URL);
+            
             await sendEmail({
                 email: user.email,
                 subject: emailSubject,
                 message: `Hello ${user.name},\n\nWelcome to SkillDad! You have been invited to join our platform as a ${user.role}.\n\nYour login credentials:\nUsername (Email): ${user.email}\nTemporary Password: ${password}\n\nPlease login and change your password immediately.\n\nLogin URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}/login`,
                 html: emailTemplates.invitation(user.name, user.role, user.email, password)
             });
+            
+            console.log('[inviteUser] Email sent successfully to:', user.email);
         } catch (emailError) {
-            console.error('Failed to send invitation email:', emailError);
+            console.error('[inviteUser] Failed to send invitation email:', emailError);
+            console.error('[inviteUser] Email error details:', {
+                message: emailError.message,
+                code: emailError.code,
+                command: emailError.command,
+                stack: emailError.stack
+            });
+            console.error('[inviteUser] Email configuration check:', {
+                hasEmailHost: !!process.env.EMAIL_HOST,
+                hasEmailUser: !!process.env.EMAIL_USER,
+                hasEmailPassword: !!process.env.EMAIL_PASSWORD,
+                emailHost: process.env.EMAIL_HOST ? process.env.EMAIL_HOST.substring(0, 10) + '...' : 'NOT SET',
+                emailUser: process.env.EMAIL_USER ? process.env.EMAIL_USER.substring(0, 5) + '...' : 'NOT SET'
+            });
             // We tell the admin the user was created but email failed
             return res.status(201).json({
                 message: 'User created successfully, but invitation email failed to send. Please provide credentials manually.',
@@ -803,7 +822,8 @@ async function inviteUser(req, res) {
                 credentials: {
                     email: user.email,
                     temporaryPassword: password
-                }
+                },
+                emailError: emailError.message
             });
         }
 
