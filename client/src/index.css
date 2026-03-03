@@ -427,3 +427,9 @@ input[type='date']::-webkit-calendar-picker-indicator {
 input[type='date']::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
+
+/* Dropdown Window Options Background */
+select option {
+  background-color: #0a0a0a;
+  color: #ffffff;
+}
