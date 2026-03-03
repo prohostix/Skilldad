@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-    CreditCard,
     Tag,
     CheckCircle,
     AlertCircle,
     Loader2,
-    ArrowRight,
     ShieldCheck,
-    Info,
-    ChevronLeft,
-    Globe
 } from 'lucide-react';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
-import StripePaymentForm from '../../components/payment/StripePaymentForm';
+import { loadRazorpayScript, initializeRazorpay } from '../../utils/razorpay';
 
 const PaymentInitiation = () => {
     const { courseId } = useParams();
@@ -34,18 +26,24 @@ const PaymentInitiation = () => {
     const [discountError, setDiscountError] = useState('');
     const [maintenanceMode, setMaintenanceMode] = useState(false);
 
-    // Stripe Elements State
-    const [clientSecret, setClientSecret] = useState('');
-    const [transactionId, setTransactionId] = useState('');
-    const [stripePromise, setStripePromise] = useState(null);
-    const [paymentMode, setPaymentMode] = useState('summary'); // summary, elements
+    // Razorpay State
+    const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
     const GST_RATE = 0.18;
     const SERVICE_CHARGE_RATE = 0.02;
 
     useEffect(() => {
         fetchCourseDetails();
+        loadRazorpay();
     }, [courseId]);
+
+    const loadRazorpay = async () => {
+        const loaded = await loadRazorpayScript();
+        setRazorpayLoaded(loaded);
+        if (!loaded) {
+            setError('Failed to load payment gateway. Please refresh the page.');
+        }
+    };
 
     const fetchCourseDetails = async () => {
         try {
@@ -125,7 +123,12 @@ const PaymentInitiation = () => {
         };
     };
 
-    const handleProceedToPayment = async (mode = 'elements') => {
+    const handleProceedToPayment = async () => {
+        if (!razorpayLoaded) {
+            setError('Payment gateway not loaded. Please refresh the page.');
+            return;
+        }
+
         setProcessing(true);
         setError('');
 
@@ -141,7 +144,6 @@ const PaymentInitiation = () => {
                 {
                     courseId,
                     discountCode: appliedDiscount ? discountCode.toUpperCase() : undefined,
-                    mode: mode // elements or checkout
                 },
                 {
                     headers: {
@@ -151,16 +153,35 @@ const PaymentInitiation = () => {
                 }
             );
 
-            if (mode === 'elements') {
-                setStripePromise(loadStripe(data.publishableKey));
-                setClientSecret(data.clientSecret);
-                setTransactionId(data.transactionId);
-                setPaymentMode('elements');
-                setProcessing(false);
-            } else {
-                // Redirect to payment gateway (Checkout)
-                window.location.href = data.paymentUrl;
-            }
+            // Initialize Razorpay checkout
+            const razorpay = initializeRazorpay({
+                keyId: data.keyId,
+                orderId: data.orderId,
+                amount: parseFloat(pricing.total) * 100, // Convert to paise
+                currency: 'INR',
+                name: 'SkillDad',
+                description: `${course.title} - Course Enrollment`,
+                customerName: userInfo.name,
+                customerEmail: userInfo.email,
+                customerPhone: userInfo.phone || '',
+                onSuccess: async (response) => {
+                    // Payment successful - redirect to callback
+                    const callbackUrl = `/api/payment/callback?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&razorpay_signature=${response.razorpay_signature}`;
+                    window.location.href = callbackUrl;
+                },
+                onFailure: (error) => {
+                    setError(`Payment failed: ${error.error_description || 'Unknown error'}`);
+                    setProcessing(false);
+                },
+                onDismiss: () => {
+                    setProcessing(false);
+                },
+            });
+
+            // Open Razorpay checkout
+            razorpay.open();
+            setProcessing(false);
+
         } catch (err) {
             const errorData = err.response?.data;
 
@@ -202,184 +223,117 @@ const PaymentInitiation = () => {
 
     const pricing = calculatePricing();
 
-    const appearance = {
-        theme: 'night',
-        variables: {
-            colorPrimary: '#7c3aed',
-            colorBackground: '#0f172a',
-            colorText: '#ffffff',
-            colorDanger: '#df1b41',
-            fontFamily: 'Inter, system-ui, sans-serif',
-            spacingUnit: '4px',
-            borderRadius: '12px',
-        },
-    };
-
-    const options = {
-        clientSecret,
-        appearance,
-    };
-
     return (
         <div className="max-w-5xl mx-auto space-y-6 pb-20">
-            <div className="flex items-center gap-4 mb-2">
-                {paymentMode !== 'summary' && (
-                    <button
-                        onClick={() => setPaymentMode('summary')}
-                        className="p-2 hover:bg-white/5 rounded-full transition-colors text-white/50 hover:text-white"
-                    >
-                        <ChevronLeft size={24} />
-                    </button>
-                )}
-                <DashboardHeading
-                    title={paymentMode === 'summary' ? "Complete Your Payment" : "Secure Checkout"}
-                    className="text-2xl font-black"
-                />
-            </div>
+            <DashboardHeading
+                title="Complete Your Payment"
+                className="text-2xl font-black"
+            />
 
-            <AnimatePresence mode="wait">
-                {paymentMode === 'summary' ? (
-                    <motion.div
-                        key="summary"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        className="space-y-6"
-                    >
-                        {/* Error Banner */}
-                        {error && (
-                            <div className={`p-6 border rounded-2xl ${maintenanceMode ? 'bg-amber-500/10 border-amber-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
-                                <div className="flex items-start gap-4">
-                                    <AlertCircle className={`${maintenanceMode ? 'text-amber-400' : 'text-red-400'} flex-shrink-0 mt-1`} size={24} />
-                                    <div className="flex-1">
-                                        <h3 className={`text-lg font-bold ${maintenanceMode ? 'text-amber-400' : 'text-red-400'} mb-2`}>
-                                            {maintenanceMode ? 'Payment Gateway Temporarily Unavailable' : 'Payment Initiation Failed'}
-                                        </h3>
-                                        <p className="text-sm text-gray-300 mb-2">{error}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+            {/* Error Banner */}
+            {error && (
+                <div className={`p-6 border rounded-2xl ${maintenanceMode ? 'bg-amber-500/10 border-amber-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                    <div className="flex items-start gap-4">
+                        <AlertCircle className={`${maintenanceMode ? 'text-amber-400' : 'text-red-400'} flex-shrink-0 mt-1`} size={24} />
+                        <div className="flex-1">
+                            <h3 className={`text-lg font-bold ${maintenanceMode ? 'text-amber-400' : 'text-red-400'} mb-2`}>
+                                {maintenanceMode ? 'Payment Gateway Temporarily Unavailable' : 'Payment Initiation Failed'}
+                            </h3>
+                            <p className="text-sm text-gray-300 mb-2">{error}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
-                        <div className="grid lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 space-y-6">
-                                <GlassCard className="p-6">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Course Details</h3>
-                                    <div className="flex gap-4">
-                                        <img
-                                            src={course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
-                                            alt={course.title}
-                                            className="w-32 h-20 object-cover rounded-xl"
-                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
-                                        />
-                                        <div className="flex-1">
-                                            <h2 className="text-lg font-bold text-white mb-1">{course.title}</h2>
-                                            <p className="text-sm text-gray-400 mb-2">by {course.instructor?.name || 'SkillDad'}</p>
-                                        </div>
-                                    </div>
-                                </GlassCard>
-
-                                <GlassCard className="p-6">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                        <Tag size={14} /> Discount Code
-                                    </h3>
-                                    {!appliedDiscount ? (
-                                        <div className="flex gap-3">
-                                            <input
-                                                type="text"
-                                                value={discountCode}
-                                                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                                                placeholder="Enter discount code"
-                                                className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm"
-                                            />
-                                            <ModernButton onClick={validateDiscountCode} disabled={validatingDiscount || !discountCode.trim()}>
-                                                {validatingDiscount ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
-                                            </ModernButton>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                                            <div className="flex items-center gap-3">
-                                                <CheckCircle className="text-emerald-400" size={20} />
-                                                <span className="text-sm font-bold text-white">{discountCode} Applied!</span>
-                                            </div>
-                                            <button onClick={removeDiscount} className="text-xs text-gray-400 hover:text-white">Remove</button>
-                                        </div>
-                                    )}
-                                </GlassCard>
-                            </div>
-
-                            <div className="lg:col-span-1">
-                                <GlassCard className="p-6 sticky top-6">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Price Summary</h3>
-                                    <div className="space-y-4 mb-8">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-400">Course Price</span>
-                                            <span className="text-white font-semibold">₹{pricing.original}</span>
-                                        </div>
-                                        {appliedDiscount && (
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-emerald-400">Discount</span>
-                                                <span className="text-emerald-400 font-semibold">-₹{pricing.discount}</span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between text-sm pt-4 border-t border-white/10">
-                                            <span className="text-gray-400">Service Charge (2%)</span>
-                                            <span className="text-white font-semibold">₹{pricing.serviceCharge}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-400">GST (18%)</span>
-                                            <span className="text-white font-semibold">₹{pricing.gst}</span>
-                                        </div>
-                                        <div className="flex justify-between text-lg font-bold pt-4 border-t border-white/10">
-                                            <span className="text-white">Total</span>
-                                            <span className="text-primary">₹{pricing.total}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <ModernButton onClick={() => handleProceedToPayment('elements')} disabled={processing} className="w-full !py-4">
-                                            {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Payment"}
-                                        </ModernButton>
-
-                                        <button
-                                            onClick={() => handleProceedToPayment('checkout')}
-                                            disabled={processing}
-                                            className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white flex items-center justify-center gap-2 transition-all"
-                                        >
-                                            <Globe size={12} /> External Gateway Redirect
-                                        </button>
-                                    </div>
-
-                                    <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-center gap-2 text-[10px] text-white/20 font-black uppercase tracking-widest">
-                                        <ShieldCheck size={12} /> Secure Stripe Encryption
-                                    </div>
-                                </GlassCard>
+            <div className="grid lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <GlassCard className="p-6">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Course Details</h3>
+                        <div className="flex gap-4">
+                            <img
+                                src={course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                alt={course.title}
+                                className="w-32 h-20 object-cover rounded-xl"
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
+                            />
+                            <div className="flex-1">
+                                <h2 className="text-lg font-bold text-white mb-1">{course.title}</h2>
+                                <p className="text-sm text-gray-400 mb-2">by {course.instructor?.name || 'SkillDad'}</p>
                             </div>
                         </div>
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="elements"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="max-w-2xl mx-auto"
-                    >
-                        <GlassCard className="p-8">
-                            {clientSecret && stripePromise && (
-                                <Elements stripe={stripePromise} options={options}>
-                                    <StripePaymentForm
-                                        clientSecret={clientSecret}
-                                        transactionId={transactionId}
-                                        amount={pricing.total}
-                                        onCancel={() => setPaymentMode('summary')}
-                                    />
-                                </Elements>
+                    </GlassCard>
+
+                    <GlassCard className="p-6">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                            <Tag size={14} /> Discount Code
+                        </h3>
+                        {!appliedDiscount ? (
+                            <div className="flex gap-3">
+                                <input
+                                    type="text"
+                                    value={discountCode}
+                                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                                    placeholder="Enter discount code"
+                                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm"
+                                />
+                                <ModernButton onClick={validateDiscountCode} disabled={validatingDiscount || !discountCode.trim()}>
+                                    {validatingDiscount ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                                </ModernButton>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                    <CheckCircle className="text-emerald-400" size={20} />
+                                    <span className="text-sm font-bold text-white">{discountCode} Applied!</span>
+                                </div>
+                                <button onClick={removeDiscount} className="text-xs text-gray-400 hover:text-white">Remove</button>
+                            </div>
+                        )}
+                    </GlassCard>
+                </div>
+
+                <div className="lg:col-span-1">
+                    <GlassCard className="p-6 sticky top-6">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Price Summary</h3>
+                        <div className="space-y-4 mb-8">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-400">Course Price</span>
+                                <span className="text-white font-semibold">₹{pricing.original}</span>
+                            </div>
+                            {appliedDiscount && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-emerald-400">Discount</span>
+                                    <span className="text-emerald-400 font-semibold">-₹{pricing.discount}</span>
+                                </div>
                             )}
-                        </GlassCard>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                            <div className="flex justify-between text-sm pt-4 border-t border-white/10">
+                                <span className="text-gray-400">Service Charge (2%)</span>
+                                <span className="text-white font-semibold">₹{pricing.serviceCharge}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-400">GST (18%)</span>
+                                <span className="text-white font-semibold">₹{pricing.gst}</span>
+                            </div>
+                            <div className="flex justify-between text-lg font-bold pt-4 border-t border-white/10">
+                                <span className="text-white">Total</span>
+                                <span className="text-primary">₹{pricing.total}</span>
+                            </div>
+                        </div>
+
+                        <ModernButton 
+                            onClick={handleProceedToPayment} 
+                            disabled={processing || !razorpayLoaded} 
+                            className="w-full !py-4"
+                        >
+                            {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Payment"}
+                        </ModernButton>
+
+                        <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-center gap-2 text-[10px] text-white/20 font-black uppercase tracking-widest">
+                            <ShieldCheck size={12} /> Secure Payment Gateway
+                        </div>
+                    </GlassCard>
+                </div>
+            </div>
         </div>
     );
 };

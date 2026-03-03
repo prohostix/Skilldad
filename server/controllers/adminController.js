@@ -721,23 +721,37 @@ async function deleteDirector(req, res) {
 // @route   POST /api/admin/users/invite
 // @access  Private (Admin)
 async function inviteUser(req, res) {
+    const fs = require('fs');
+    const path = require('path');
+    const logPath = path.join(__dirname, '../debug_invite.log');
+    const timestamp = new Date().toISOString();
+
     try {
         const { name, email, password, role, universityId } = req.body;
+        const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
-        if (!name || !email || !password || !role) {
-            return res.status(400).json({ message: 'Please provide all required fields' });
+        fs.appendFileSync(logPath, `[${timestamp}] INVITE ATTEMPT: ${normalizedEmail}, Role: ${role}, BodyKeys: ${Object.keys(req.body)}\n`);
+
+        if (!name || !normalizedEmail || !password || !role) {
+            fs.appendFileSync(logPath, `[${timestamp}] FAILED: Missing fields. Name: ${!!name}, Email: ${!!normalizedEmail}, Pwd: ${!!password}, Role: ${!!role}\n`);
+            return res.status(400).json({
+                message: 'Please provide all required fields',
+                debug: { name: !!name, email: !!normalizedEmail, password: !!password, role: !!role }
+            });
         }
 
         // Check if user already exists
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: normalizedEmail });
         if (userExists) {
-            return res.status(400).json({ message: 'A user with this email already exists' });
+            fs.appendFileSync(logPath, `[${timestamp}] FAILED: User already exists: ${normalizedEmail}\n`);
+            return res.status(400).json({ message: `A user with email ${normalizedEmail} already exists` });
         }
 
         // Create the user
+        fs.appendFileSync(logPath, `[${timestamp}] CREATING USER: ${normalizedEmail}\n`);
         const user = await User.create({
             name,
-            email,
+            email: normalizedEmail,
             password,
             role,
             universityId: universityId || undefined,
@@ -745,6 +759,7 @@ async function inviteUser(req, res) {
         });
 
         // Send invitation email
+        fs.appendFileSync(logPath, `[${timestamp}] SENDING EMAIL to ${normalizedEmail}\n`);
         try {
             await sendEmail({
                 email: user.email,
@@ -752,8 +767,10 @@ async function inviteUser(req, res) {
                 message: `Hello ${user.name},\n\nYou have been invited to SkillDad as a ${user.role}.`,
                 html: emailTemplates.invitation(user.name, user.role, user.email, password)
             });
+            fs.appendFileSync(logPath, `[${timestamp}] EMAIL SENT to ${normalizedEmail}\n`);
         } catch (emailError) {
             console.error('Failed to send invitation email:', emailError);
+            fs.appendFileSync(logPath, `[${timestamp}] EMAIL FAILED for ${normalizedEmail}: ${emailError.message}\n`);
             // We tell the admin the user was created but email failed
             return res.status(201).json({
                 message: 'User created successfully, but invitation email failed to send. Please provide credentials manually.',
@@ -776,6 +793,10 @@ async function inviteUser(req, res) {
             }
         });
     } catch (error) {
+        fs.appendFileSync(logPath, `[${timestamp}] CRITICAL ERROR for ${req.body.email}: ${error.message}\n`);
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'A user with this email or ID already exists (Unique constraint violation)' });
+        }
         console.error('Invite user error:', error);
         res.status(500).json({ message: error.message || 'Server error inviting user' });
     }

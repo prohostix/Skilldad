@@ -7,7 +7,7 @@ An educational platform for universities and instructors to create, manage, and 
 - **Live Sessions**: Conduct live educational sessions using Zoom's embedded meeting SDK
 - **Course Management**: Create and manage courses with video content and materials
 - **Exam System**: Create and administer exams with automated grading
-- **Payment Integration**: Support for multiple payment gateways (Stripe, HDFC SmartGateway)
+- **Payment Integration**: Razorpay payment gateway for INR transactions with support for UPI, Cards, Netbanking, and Wallets
 - **Student Enrollment**: Automatic enrollment and access control
 - **Recording Management**: Automatic cloud recording retrieval and playback
 - **Notifications**: Email and WhatsApp notifications for important events
@@ -101,7 +101,7 @@ Key configuration areas:
 - **Database**: MongoDB and Redis connection strings
 - **Authentication**: JWT secret for token signing
 - **Email**: SMTP configuration for notifications
-- **Payment Gateways**: Stripe and HDFC SmartGateway credentials
+- **Payment Gateways**: Razorpay credentials for INR transactions
 - **WhatsApp**: Gupshup API for WhatsApp notifications
 
 ### Quick Setup

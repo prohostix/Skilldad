@@ -99,19 +99,19 @@ This implementation plan covers the complete migration from Stripe to Razorpay p
   - Check error handling and logging
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 5. Update frontend payment integration
-  - [-] 5.1 Remove Stripe dependencies from client
+- [x] 5. Update frontend payment integration
+  - [x] 5.1 Remove Stripe dependencies from client
     - Uninstall `@stripe/stripe-js` and `@stripe/react-stripe-js` packages
     - Remove Stripe imports from `client/src/pages/student/PaymentInitiation.jsx`
     - Remove StripePaymentForm component file
     - _Requirements: Clean dependency removal_
   
-  - [ ] 5.2 Install and configure Razorpay checkout
+  - [x] 5.2 Install and configure Razorpay checkout
     - Add Razorpay checkout script to `client/index.html` or load dynamically
     - Create utility function to load Razorpay script
     - _Requirements: Razorpay SDK integration_
   
-  - [ ] 5.3 Update PaymentInitiation component
+  - [x] 5.3 Update PaymentInitiation component
     - Remove Stripe Elements and stripePromise state
     - Update initiatePayment API call to handle Razorpay response
     - Implement Razorpay checkout modal initialization
@@ -121,7 +121,7 @@ This implementation plan covers the complete migration from Stripe to Razorpay p
     - Update UI text from "Stripe" to "Razorpay" or generic "Secure Payment"
     - _Requirements: Razorpay checkout integration, payment flow handling_
   
-  - [ ] 5.4 Create RazorpayCheckout component
+  - [x] 5.4 Create RazorpayCheckout component
     - Create `client/src/components/payment/RazorpayCheckout.jsx`
     - Implement Razorpay checkout initialization
     - Handle payment success callback
@@ -138,8 +138,8 @@ This implementation plan covers the complete migration from Stripe to Razorpay p
     - Mock Razorpay API calls
     - _Requirements: Frontend reliability, user flow validation_
 
-- [ ] 6. Update transaction model and database
-  - [ ] 6.1 Add Razorpay fields to transaction schema
+- [x] 6. Update transaction model and database
+  - [x] 6.1 Add Razorpay fields to transaction schema
     - Add `razorpay_order_id` field to transaction model
     - Add `razorpay_payment_id` field to transaction model
     - Add `razorpay_signature` field to transaction model
@@ -147,52 +147,52 @@ This implementation plan covers the complete migration from Stripe to Razorpay p
     - Update indexes if necessary
     - _Requirements: Data model updates, backward compatibility_
   
-  - [ ] 6.2 Create database migration script
+  - [x] 6.2 Create database migration script
     - Create migration to add Razorpay fields
     - Create migration to remove Stripe fields (optional, can be deprecated)
     - Test migration on development database
     - _Requirements: Database schema evolution, data integrity_
 
-- [ ] 7. Update payment routes and middleware
-  - [ ] 7.1 Update payment routes
+- [x] 7. Update payment routes and middleware
+  - [x] 7.1 Update payment routes
     - Review `server/routes/paymentRoutes.js` for any Stripe-specific routes
     - Ensure callback route accepts Razorpay parameters
     - Ensure webhook route is configured for Razorpay
     - Update route documentation/comments
     - _Requirements: API endpoint compatibility_
   
-  - [ ] 7.2 Update webhook endpoint configuration
+  - [x] 7.2 Update webhook endpoint configuration
     - Configure webhook URL in Razorpay dashboard (manual step, document in code comments)
     - Add webhook signature verification middleware
     - Test webhook endpoint with Razorpay test events
     - _Requirements: Webhook security, event handling_
 
-- [ ] 8. Remove Stripe code and dependencies
-  - [ ] 8.1 Remove Stripe service file
+- [x] 8. Remove Stripe code and dependencies
+  - [x] 8.1 Remove Stripe service file
     - Delete `server/services/payment/StripeGatewayService.js`
     - Remove any Stripe utility functions
     - _Requirements: Code cleanup_
   
-  - [ ] 8.2 Remove Stripe dependencies from package.json
+  - [x] 8.2 Remove Stripe dependencies from package.json
     - Remove `stripe` package from `server/package.json`
     - Remove `@stripe/stripe-js` from `client/package.json`
     - Remove `@stripe/react-stripe-js` from `client/package.json`
     - Run `npm install` in both directories to update lock files
     - _Requirements: Dependency cleanup_
   
-  - [ ] 8.3 Remove Stripe environment variables
+  - [x] 8.3 Remove Stripe environment variables
     - Remove STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET from `.env`
     - Update environment documentation
     - _Requirements: Configuration cleanup_
   
-  - [ ] 8.4 Update payment-related documentation
+  - [x] 8.4 Update payment-related documentation
     - Update any README or documentation files mentioning Stripe
     - Add Razorpay setup instructions
     - Document Razorpay webhook configuration
     - Document supported payment methods (UPI, Cards, Netbanking, Wallets)
     - _Requirements: Documentation accuracy_
 
-- [ ] 9. Testing and validation
+- [x] 9. Testing and validation
   - [ ]* 9.1 Test payment initiation flow
     - Test order creation with valid course
     - Test order creation with invalid course
@@ -232,7 +232,7 @@ This implementation plan covers the complete migration from Stripe to Razorpay p
     - Verify all methods work correctly
     - _Requirements: Payment method support_
 
-- [ ] 10. Final checkpoint and deployment preparation
+- [x] 10. Final checkpoint and deployment preparation
   - Ensure all tests pass (backend and frontend)
   - Verify no Stripe references remain in codebase
   - Review security logging and monitoring

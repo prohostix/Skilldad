@@ -17,8 +17,6 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
-    "@stripe/react-stripe-js": "^5.6.0",
-    "@stripe/stripe-js": "^8.8.0",
     "@zoom/meetingsdk": "^5.1.2",
     "axios": "^1.13.5",
     "chart.js": "^4.5.1",

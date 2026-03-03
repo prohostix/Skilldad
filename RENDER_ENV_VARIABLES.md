@@ -17,12 +17,19 @@ ZOOM_ENCRYPTION_KEY=fb3837389bb86ead184c5a249a3fdc4fe35b1314a9be3ded4689406ed002
 ZOOM_MOCK_MODE=false
 ```
 
+### Razorpay Credentials
+
+```
+RAZORPAY_KEY_ID=<your-razorpay-key-id>
+RAZORPAY_KEY_SECRET=<your-razorpay-key-secret>
+RAZORPAY_WEBHOOK_SECRET=<your-razorpay-webhook-secret>
+```
+
 ### Other Required Variables
 
 Make sure these are also set on Render:
 - `MONGODB_URI` - Your MongoDB connection string
 - `JWT_SECRET` - Your JWT secret
-- `STRIPE_SECRET_KEY` - Your Stripe secret key
 - `CLIENT_URL` - Your Vercel frontend URL
 - Any other environment variables from your local `.env`
 
