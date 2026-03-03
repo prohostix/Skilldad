@@ -144,30 +144,30 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using reliable CDN logos
+    // Prepare partner rows - using logo.dev CDN for reliable company logos
     const row1Static = [
-        { name: 'TCS', logo: 'https://companieslogo.com/img/orig/TCS.NS-7401f1bd.png' },
-        { name: 'Infosys', logo: 'https://companieslogo.com/img/orig/INFY-33b51f89.png' },
-        { name: 'Capgemini', logo: 'https://companieslogo.com/img/orig/CAP.PA-04d813c8.png' },
-        { name: 'Wipro', logo: 'https://companieslogo.com/img/orig/WIPRO.NS-7e4c3d5e.png' },
-        { name: 'Accenture', logo: 'https://companieslogo.com/img/orig/ACN-1a9c2e1e.png' },
-        { name: 'Cognizant', logo: 'https://companieslogo.com/img/orig/CTSH-48b6f6e0.png' },
-        { name: 'HCL Technologies', logo: 'https://companieslogo.com/img/orig/HCLTECH.NS-33974c09.png' },
-        { name: 'Tech Mahindra', logo: 'https://companieslogo.com/img/orig/TECHM.NS-7e9e75e0.png' },
-        { name: 'IBM', logo: 'https://companieslogo.com/img/orig/IBM-1f1a0f7c.png' },
-        { name: 'Deloitte', logo: 'https://logo.clearbit.com/deloitte.com' }
+        { name: 'TCS', logo: 'https://img.logo.dev/tcs.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Infosys', logo: 'https://img.logo.dev/infosys.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Capgemini', logo: 'https://img.logo.dev/capgemini.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Wipro', logo: 'https://img.logo.dev/wipro.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Accenture', logo: 'https://img.logo.dev/accenture.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Cognizant', logo: 'https://img.logo.dev/cognizant.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'HCL Technologies', logo: 'https://img.logo.dev/hcltech.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Tech Mahindra', logo: 'https://img.logo.dev/techmahindra.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'IBM', logo: 'https://img.logo.dev/ibm.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Deloitte', logo: 'https://img.logo.dev/deloitte.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' }
     ];
     const row2Static = [
-        { name: 'Google', logo: 'https://companieslogo.com/img/orig/GOOG-0ed88f7c.png' },
-        { name: 'Microsoft', logo: 'https://companieslogo.com/img/orig/MSFT-a203b22d.png' },
-        { name: 'Amazon', logo: 'https://companieslogo.com/img/orig/AMZN-e9f942e4.png' },
-        { name: 'Goldman Sachs', logo: 'https://companieslogo.com/img/orig/GS-0eb2e70e.png' },
-        { name: 'JP Morgan', logo: 'https://companieslogo.com/img/orig/JPM-e70c5c3f.png' },
-        { name: 'McKinsey', logo: 'https://logo.clearbit.com/mckinsey.com' },
-        { name: 'PwC', logo: 'https://logo.clearbit.com/pwc.com' },
-        { name: 'KPMG', logo: 'https://logo.clearbit.com/kpmg.com' },
-        { name: 'Ernst & Young', logo: 'https://logo.clearbit.com/ey.com' },
-        { name: 'Salesforce', logo: 'https://companieslogo.com/img/orig/CRM-9f1183c0.png' }
+        { name: 'Google', logo: 'https://img.logo.dev/google.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Microsoft', logo: 'https://img.logo.dev/microsoft.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Amazon', logo: 'https://img.logo.dev/amazon.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Goldman Sachs', logo: 'https://img.logo.dev/goldmansachs.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'JP Morgan', logo: 'https://img.logo.dev/jpmorganchase.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'McKinsey', logo: 'https://img.logo.dev/mckinsey.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'PwC', logo: 'https://img.logo.dev/pwc.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'KPMG', logo: 'https://img.logo.dev/kpmg.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Ernst & Young', logo: 'https://img.logo.dev/ey.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
+        { name: 'Salesforce', logo: 'https://img.logo.dev/salesforce.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' }
     ];
 
     const staticUnis = [
@@ -227,19 +227,8 @@ const LandingPage = () => {
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="flex items-center gap-3 transition-all duration-300">
-                                    <img
-                                        src={company.logo}
-                                        alt={company.name}
-                                        className="h-10 w-auto object-contain bg-white/95 p-2 rounded-lg border border-white/20 group-hover:border-primary/40 transition-all"
-                                        onError={(e) => {
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling.style.display = 'block';
-                                        }}
-                                    />
-                                    <div className="hidden px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
-                                        <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
-                                    </div>
+                                <div className="px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-primary/30 transition-all duration-300 group-hover:bg-white/10">
+                                    <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
                                 </div>
                             </div>
                         ))}
@@ -255,19 +244,8 @@ const LandingPage = () => {
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
-                                <div className="flex items-center gap-3 transition-all duration-300">
-                                    <img
-                                        src={company.logo}
-                                        alt={company.name}
-                                        className="h-10 w-auto object-contain bg-white/95 p-2 rounded-lg border border-white/20 group-hover:border-purple-400/40 transition-all"
-                                        onError={(e) => {
-                                            e.target.style.display = 'none';
-                                            e.target.nextSibling.style.display = 'block';
-                                        }}
-                                    />
-                                    <div className="hidden px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
-                                        <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
-                                    </div>
+                                <div className="px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-purple-400/30 transition-all duration-300 group-hover:bg-white/10">
+                                    <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
                                 </div>
                             </div>
                         ))}
