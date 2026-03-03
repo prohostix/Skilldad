@@ -24,6 +24,12 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Please provide your name, email, and password.' });
         }
 
+        // Check if user exists
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ message: 'An account with this email already exists. Please login.' });
+        }
+
         let userRole = 'student';
         let discountRate = 0;
         let isAdmin = false;
