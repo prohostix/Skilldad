@@ -303,9 +303,10 @@ const CourseEnrollment = () => {
                                     {/* Course Preview */}
                                     <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-800">
                                         <img
-                                            src={course.thumbnail}
+                                            src={course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                             alt={course.title}
                                             className="w-full h-full object-cover"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
                                         />
                                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                             <button className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">

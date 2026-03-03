@@ -134,7 +134,11 @@ const MyCourses = () => {
                                 <GlassCard className="!p-4 bg-white/40 hover:bg-white/60 transition-all border-white/40 group cursor-pointer" onClick={() => navigate(`/dashboard/course/${enrollment.course._id}`)}>
                                     <div className="flex items-center space-x-4">
                                         <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
-                                            <img src={enrollment.course.thumbnail} className="w-full h-full object-cover" alt="" />
+                                            <img src={enrollment.course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                                className="w-full h-full object-cover"
+                                                alt=""
+                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
+                                            />
                                         </div>
                                         <div className="flex-1 text-left min-w-0">
                                             <h4 className="font-bold text-black truncate font-poppins">{enrollment.course.title}</h4>
@@ -176,6 +180,7 @@ const MyCourses = () => {
                                         alt={enrollment.course.title}
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                         onError={(e) => {
+                                            e.target.onerror = null;
                                             e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800";
                                         }}
                                     />

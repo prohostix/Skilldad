@@ -207,6 +207,7 @@ const CourseDetail = () => {
                                 alt={course.title}
                                 className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
                                 onError={(e) => {
+                                    e.target.onerror = null;
                                     e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200";
                                 }}
                             />

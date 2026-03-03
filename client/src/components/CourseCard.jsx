@@ -43,6 +43,7 @@ const CourseCard = ({ course }) => {
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-20"
                     onError={(e) => {
+                        e.target.onerror = null;
                         e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800";
                     }}
                 />

@@ -268,9 +268,10 @@ const PaymentStatus = () => {
                             <div className="flex gap-4">
                                 {transaction.course?.thumbnail && (
                                     <img
-                                        src={transaction.course.thumbnail}
+                                        src={transaction.course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                         alt={transaction.course.title}
                                         className="w-32 h-20 object-cover rounded-xl"
+                                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
                                     />
                                 )}
                                 <div className="flex-1">
@@ -301,11 +302,10 @@ const PaymentStatus = () => {
                                 {timelineSteps.map((step, index) => (
                                     <div key={index} className="flex gap-4">
                                         <div className="flex flex-col items-center">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                                step.completed
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step.completed
                                                     ? 'bg-primary/20 border-2 border-primary'
                                                     : 'bg-white/5 border-2 border-white/10'
-                                            }`}>
+                                                }`}>
                                                 {step.completed ? (
                                                     <CheckCircle className="text-primary" size={20} />
                                                 ) : (
@@ -313,15 +313,13 @@ const PaymentStatus = () => {
                                                 )}
                                             </div>
                                             {index < timelineSteps.length - 1 && (
-                                                <div className={`w-0.5 h-12 ${
-                                                    step.completed ? 'bg-primary/30' : 'bg-white/10'
-                                                }`} />
+                                                <div className={`w-0.5 h-12 ${step.completed ? 'bg-primary/30' : 'bg-white/10'
+                                                    }`} />
                                             )}
                                         </div>
                                         <div className="flex-1 pb-6">
-                                            <p className={`text-sm font-bold ${
-                                                step.completed ? 'text-white' : 'text-gray-500'
-                                            }`}>
+                                            <p className={`text-sm font-bold ${step.completed ? 'text-white' : 'text-gray-500'
+                                                }`}>
                                                 {step.label}
                                             </p>
                                             {step.timestamp && (

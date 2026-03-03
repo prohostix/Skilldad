@@ -232,9 +232,10 @@ const StudentDashboard = () => {
                                 >
                                     <div className="relative aspect-[16/6] overflow-hidden">
                                         <img
-                                            src={enrollment.course.thumbnail}
+                                            src={enrollment.course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                             alt={enrollment.course.title}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
                                         <div className="absolute top-3 right-3">

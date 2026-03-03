@@ -148,7 +148,7 @@ const PaymentHistory = () => {
         <div className="space-y-6 pb-20">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <DashboardHeading title="Payment History" className="text-2xl font-black" />
-                
+
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
@@ -212,9 +212,10 @@ const PaymentHistory = () => {
                                         {/* Course Thumbnail */}
                                         <div className="flex-shrink-0">
                                             <img
-                                                src={transaction.course?.thumbnail || '/placeholder-course.jpg'}
+                                                src={transaction.course?.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                                 alt={transaction.course?.title}
                                                 className="w-24 h-16 object-cover rounded-lg"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
                                             />
                                         </div>
 
@@ -317,11 +318,10 @@ const PaymentHistory = () => {
                                                 )}
                                                 <button
                                                     onClick={() => setPagination(prev => ({ ...prev, currentPage: page }))}
-                                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                                                        pagination.currentPage === page
+                                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${pagination.currentPage === page
                                                             ? 'bg-primary text-white'
                                                             : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {page}
                                                 </button>

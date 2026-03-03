@@ -522,8 +522,8 @@ const UniversityDashboard = () => {
                         </div>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {courses.length > 0 ? courses.map((course) => (
-                                <GlassCard 
-                                    key={course._id || course} 
+                                <GlassCard
+                                    key={course._id || course}
                                     className="p-5 flex flex-col justify-between cursor-pointer hover:border-primary/50 transition-all"
                                     onClick={() => navigate(`/university/courses/${course._id}`)}
                                 >
@@ -531,7 +531,7 @@ const UniversityDashboard = () => {
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform overflow-hidden">
                                                 {course.thumbnail ? (
-                                                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+                                                    <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }} />
                                                 ) : <BookOpen size={24} />}
                                             </div>
                                             <span className="px-2 py-1 bg-white/5 border border-white/10 rounded text-[10px] font-bold text-white/50 tracking-wider">

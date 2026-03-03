@@ -266,7 +266,12 @@ const PaymentInitiation = () => {
                                 <GlassCard className="p-6">
                                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Course Details</h3>
                                     <div className="flex gap-4">
-                                        <img src={course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'} alt={course.title} className="w-32 h-20 object-cover rounded-xl" />
+                                        <img
+                                            src={course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                            alt={course.title}
+                                            className="w-32 h-20 object-cover rounded-xl"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
+                                        />
                                         <div className="flex-1">
                                             <h2 className="text-lg font-bold text-white mb-1">{course.title}</h2>
                                             <p className="text-sm text-gray-400 mb-2">by {course.instructor?.name || 'SkillDad'}</p>
