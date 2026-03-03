@@ -7,6 +7,7 @@ const PartnerLogo = require('../models/partnerLogoModel');
 const Director = require('../models/directorModel');
 const Enrollment = require('../models/enrollmentModel');
 const Document = require('../models/documentModel');
+const socketService = require('../services/SocketService');
 
 // @desc    Update entity (partner/university) details + discount rate
 // @route   PUT /api/admin/entities/:id
@@ -770,6 +771,9 @@ async function inviteUser(req, res) {
         });
 
         console.log('[inviteUser] User created successfully:', user._id);
+
+        // Notify all admins via WebSocket that a new user was created
+        socketService.notifyUserListUpdate('created', user);
 
         // Send invitation email
         try {

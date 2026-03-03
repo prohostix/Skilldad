@@ -16,8 +16,10 @@ import {
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import { useSocket } from '../../context/SocketContext';
 
 const UserList = () => {
+    const socket = useSocket();
     const [users, setUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [showPermissionModal, setShowPermissionModal] = useState(false);
@@ -75,13 +77,51 @@ const UserList = () => {
     useEffect(() => {
         fetchUsers();
         fetchUniversities();
-        // Auto-refresh every 30 seconds to get latest updates
+        
+        // Listen for real-time user list updates via WebSocket
+        if (socket) {
+            const handleUserListUpdate = (data) => {
+                console.log('[UserList] Received user list update:', data);
+                
+                if (data.action === 'created') {
+                    // Add new user to the list
+                    setUsers(prevUsers => {
+                        // Check if user already exists (avoid duplicates)
+                        const exists = prevUsers.some(u => u._id === data.user._id);
+                        if (exists) return prevUsers;
+                        
+                        // Add new user at the beginning of the list
+                        return [data.user, ...prevUsers];
+                    });
+                    
+                    // Show a subtle notification
+                    showToast('success', `New user added: ${data.user.name}`);
+                } else if (data.action === 'updated') {
+                    // Update existing user
+                    setUsers(prevUsers => 
+                        prevUsers.map(u => u._id === data.user._id ? { ...u, ...data.user } : u)
+                    );
+                } else if (data.action === 'deleted') {
+                    // Remove user from list
+                    setUsers(prevUsers => prevUsers.filter(u => u._id !== data.user._id));
+                }
+            };
+            
+            socket.on('userListUpdate', handleUserListUpdate);
+            
+            // Cleanup listener on unmount
+            return () => {
+                socket.off('userListUpdate', handleUserListUpdate);
+            };
+        }
+        
+        // Auto-refresh every 30 seconds as fallback
         const interval = setInterval(() => {
             fetchUsers();
         }, 30000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [socket]);
 
     const openPermissionModal = (user) => {
         setSelectedUser(user);

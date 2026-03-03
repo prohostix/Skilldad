@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const User = require('../models/userModel');
 const sendEmail = require('../utils/sendEmail');
 const emailTemplates = require('../utils/emailTemplates');
+const socketService = require('../services/SocketService');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -70,6 +71,9 @@ const registerUser = async (req, res) => {
 
         if (user) {
             console.log('User created successfully:', user._id);
+
+            // Notify all admins via WebSocket that a new user was created
+            socketService.notifyUserListUpdate('created', user);
 
             // Send response FIRST - then fire notification in background (non-blocking)
             res.status(201).json({
