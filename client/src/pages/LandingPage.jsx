@@ -144,30 +144,30 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using official logos from SimpleIcons CDN
+    // Prepare partner rows - using working logo URLs
     const row1Static = [
-        { name: 'TCS', logo: 'https://img.icons8.com/color/96/tcs.png' },
-        { name: 'Infosys', logo: 'https://img.icons8.com/color/96/infosys.png' },
-        { name: 'Capgemini', logo: 'https://img.icons8.com/color/96/capgemini.png' },
-        { name: 'Wipro', logo: 'https://img.icons8.com/color/96/wipro.png' },
-        { name: 'Accenture', logo: 'https://img.icons8.com/color/96/accenture.png' },
-        { name: 'Cognizant', logo: 'https://img.icons8.com/color/96/cognizant.png' },
-        { name: 'HCL Technologies', logo: 'https://img.icons8.com/color/96/hcl.png' },
-        { name: 'Tech Mahindra', logo: 'https://img.icons8.com/color/96/tech-mahindra.png' },
-        { name: 'IBM', logo: 'https://img.icons8.com/color/96/ibm.png' },
-        { name: 'Deloitte', logo: 'https://img.icons8.com/color/96/deloitte.png' }
+        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Tata_Consultancy_Services_Logo.svg/200px-Tata_Consultancy_Services_Logo.svg.png' },
+        { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Infosys_logo.svg/200px-Infosys_logo.svg.png' },
+        { name: 'Capgemini', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Capgemini_201x_logo.svg/200px-Capgemini_201x_logo.svg.png' },
+        { name: 'Wipro', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Wipro_Primary_Logo_Color_RGB.svg/200px-Wipro_Primary_Logo_Color_RGB.svg.png' },
+        { name: 'Accenture', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Accenture.svg/200px-Accenture.svg.png' },
+        { name: 'Cognizant', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Cognizant_logo_2022.svg/200px-Cognizant_logo_2022.svg.png' },
+        { name: 'HCL Technologies', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/HCL_Technologies_logo.svg/200px-HCL_Technologies_logo.svg.png' },
+        { name: 'Tech Mahindra', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Tech_Mahindra_New_Logo.svg/200px-Tech_Mahindra_New_Logo.svg.png' },
+        { name: 'IBM', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/200px-IBM_logo.svg.png' },
+        { name: 'Deloitte', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Deloitte.svg/200px-Deloitte.svg.png' }
     ];
     const row2Static = [
-        { name: 'Google', logo: 'https://img.icons8.com/color/96/google-logo.png' },
-        { name: 'Microsoft', logo: 'https://img.icons8.com/color/96/microsoft.png' },
-        { name: 'Amazon', logo: 'https://img.icons8.com/color/96/amazon.png' },
-        { name: 'Goldman Sachs', logo: 'https://img.icons8.com/color/96/goldman-sachs.png' },
-        { name: 'JP Morgan', logo: 'https://img.icons8.com/color/96/jp-morgan.png' },
-        { name: 'McKinsey', logo: 'https://img.icons8.com/color/96/mckinsey.png' },
-        { name: 'PwC', logo: 'https://img.icons8.com/color/96/pwc.png' },
-        { name: 'KPMG', logo: 'https://img.icons8.com/color/96/kpmg.png' },
-        { name: 'Ernst & Young', logo: 'https://img.icons8.com/color/96/ernst-and-young.png' },
-        { name: 'Salesforce', logo: 'https://img.icons8.com/color/96/salesforce.png' }
+        { name: 'Google', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/200px-Google_2015_logo.svg.png' },
+        { name: 'Microsoft', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/200px-Microsoft_logo.svg.png' },
+        { name: 'Amazon', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/200px-Amazon_logo.svg.png' },
+        { name: 'Goldman Sachs', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Goldman_Sachs.svg/200px-Goldman_Sachs.svg.png' },
+        { name: 'JP Morgan', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/JPMorgan_Chase_Logo_2008.svg/200px-JPMorgan_Chase_Logo_2008.svg.png' },
+        { name: 'McKinsey', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/McKinsey_and_Company_Logo_1.svg/200px-McKinsey_and_Company_Logo_1.svg.png' },
+        { name: 'PwC', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/PricewaterhouseCoopers_Logo.svg/200px-PricewaterhouseCoopers_Logo.svg.png' },
+        { name: 'KPMG', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/KPMG_logo.svg/200px-KPMG_logo.svg.png' },
+        { name: 'Ernst & Young', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/EY_logo_2019.svg/200px-EY_logo_2019.svg.png' },
+        { name: 'Salesforce', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Salesforce.com_logo.svg/200px-Salesforce.com_logo.svg.png' }
     ];
 
     const staticUnis = [
