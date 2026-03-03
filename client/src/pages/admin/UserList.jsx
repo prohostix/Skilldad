@@ -180,13 +180,16 @@ const UserList = () => {
                 timeout: 30000 // 30 second timeout
             };
 
+            console.log('[handleInviteUser] Sending invite data:', inviteData);
             const { data } = await axios.post('/api/admin/users/invite', inviteData, config);
+            console.log('[handleInviteUser] Success response:', data);
             setShowInviteModal(false);
             setInviteData({ name: '', email: '', password: '', role: 'student', universityId: '' });
             fetchUsers();
             showToast('success', data.message || `Account created for ${inviteData.email}`);
         } catch (error) {
-            console.error('Invite error:', error);
+            console.error('[handleInviteUser] Error:', error);
+            console.error('[handleInviteUser] Error response:', error.response?.data);
             const msg = error.code === 'ECONNABORTED'
                 ? 'Request timed out. The server may be under load — the account may have been created. Please check the user list.'
                 : (error.response?.data?.message || error.message || 'Failed to create account');
@@ -556,7 +559,7 @@ const UserList = () => {
                                     type="button"
                                     onClick={() => {
                                         setShowInviteModal(false);
-                                        setInviteData({ name: '', email: '', password: '', role: 'student' });
+                                        setInviteData({ name: '', email: '', password: '', role: 'student', universityId: '' });
                                     }}
                                     className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all font-medium"
                                 >

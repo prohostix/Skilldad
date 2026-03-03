@@ -144,30 +144,30 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using logo.dev CDN for reliable company logos
+    // Prepare partner rows - using clearbit for reliable company logos
     const row1Static = [
-        { name: 'TCS', logo: 'https://img.logo.dev/tcs.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Infosys', logo: 'https://img.logo.dev/infosys.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Capgemini', logo: 'https://img.logo.dev/capgemini.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Wipro', logo: 'https://img.logo.dev/wipro.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Accenture', logo: 'https://img.logo.dev/accenture.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Cognizant', logo: 'https://img.logo.dev/cognizant.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'HCL Technologies', logo: 'https://img.logo.dev/hcltech.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Tech Mahindra', logo: 'https://img.logo.dev/techmahindra.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'IBM', logo: 'https://img.logo.dev/ibm.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Deloitte', logo: 'https://img.logo.dev/deloitte.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' }
+        { name: 'TCS', logo: 'https://logo.clearbit.com/tcs.com' },
+        { name: 'Infosys', logo: 'https://logo.clearbit.com/infosys.com' },
+        { name: 'Capgemini', logo: 'https://logo.clearbit.com/capgemini.com' },
+        { name: 'Wipro', logo: 'https://logo.clearbit.com/wipro.com' },
+        { name: 'Accenture', logo: 'https://logo.clearbit.com/accenture.com' },
+        { name: 'Cognizant', logo: 'https://logo.clearbit.com/cognizant.com' },
+        { name: 'HCL Technologies', logo: 'https://logo.clearbit.com/hcltech.com' },
+        { name: 'Tech Mahindra', logo: 'https://logo.clearbit.com/techmahindra.com' },
+        { name: 'IBM', logo: 'https://logo.clearbit.com/ibm.com' },
+        { name: 'Deloitte', logo: 'https://logo.clearbit.com/deloitte.com' }
     ];
     const row2Static = [
-        { name: 'Google', logo: 'https://img.logo.dev/google.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Microsoft', logo: 'https://img.logo.dev/microsoft.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Amazon', logo: 'https://img.logo.dev/amazon.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Goldman Sachs', logo: 'https://img.logo.dev/goldmansachs.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'JP Morgan', logo: 'https://img.logo.dev/jpmorganchase.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'McKinsey', logo: 'https://img.logo.dev/mckinsey.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'PwC', logo: 'https://img.logo.dev/pwc.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'KPMG', logo: 'https://img.logo.dev/kpmg.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Ernst & Young', logo: 'https://img.logo.dev/ey.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' },
-        { name: 'Salesforce', logo: 'https://img.logo.dev/salesforce.com?token=pk_X-1ZO13CRYuFVeUUpq8sHA' }
+        { name: 'Google', logo: 'https://logo.clearbit.com/google.com' },
+        { name: 'Microsoft', logo: 'https://logo.clearbit.com/microsoft.com' },
+        { name: 'Amazon', logo: 'https://logo.clearbit.com/amazon.com' },
+        { name: 'Goldman Sachs', logo: 'https://logo.clearbit.com/goldmansachs.com' },
+        { name: 'JP Morgan', logo: 'https://logo.clearbit.com/jpmorganchase.com' },
+        { name: 'McKinsey', logo: 'https://logo.clearbit.com/mckinsey.com' },
+        { name: 'PwC', logo: 'https://logo.clearbit.com/pwc.com' },
+        { name: 'KPMG', logo: 'https://logo.clearbit.com/kpmg.com' },
+        { name: 'Ernst & Young', logo: 'https://logo.clearbit.com/ey.com' },
+        { name: 'Salesforce', logo: 'https://logo.clearbit.com/salesforce.com' }
     ];
 
     const staticUnis = [
@@ -227,8 +227,16 @@ const LandingPage = () => {
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-primary/30 transition-all duration-300 group-hover:bg-white/10">
-                                    <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
+                                <div className="px-6 py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-primary/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[140px] h-14">
+                                    {company.logo ? (
+                                        <img
+                                            src={company.logo}
+                                            alt={company.name}
+                                            className="h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
+                                        />
+                                    ) : (
+                                        <span className="text-white/70 font-bold text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -244,8 +252,16 @@ const LandingPage = () => {
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
-                                <div className="px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-purple-400/30 transition-all duration-300 group-hover:bg-white/10">
-                                    <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
+                                <div className="px-6 py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-purple-400/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[140px] h-14">
+                                    {company.logo ? (
+                                        <img
+                                            src={company.logo}
+                                            alt={company.name}
+                                            className="h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
+                                        />
+                                    ) : (
+                                        <span className="text-white/70 font-bold text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
+                                    )}
                                 </div>
                             </div>
                         ))}

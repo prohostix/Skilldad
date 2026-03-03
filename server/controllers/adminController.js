@@ -722,31 +722,54 @@ async function deleteDirector(req, res) {
 // @access  Private (Admin)
 async function inviteUser(req, res) {
     try {
+        console.log('[inviteUser] Received request body:', req.body);
         const { name, email, password, role, universityId } = req.body;
         const normalizedEmail = email ? email.toLowerCase().trim() : '';
+        const normalizedName = name ? name.trim() : '';
 
-        if (!name || !normalizedEmail || !password || !role) {
+        console.log('[inviteUser] Validation check:', { 
+            name: !!normalizedName, 
+            email: !!normalizedEmail, 
+            password: !!password, 
+            role: !!role,
+            nameValue: normalizedName,
+            emailValue: normalizedEmail,
+            passwordLength: password?.length,
+            roleValue: role
+        });
+
+        if (!normalizedName || !normalizedEmail || !password || !role) {
+            console.log('[inviteUser] Validation failed - missing required fields');
             return res.status(400).json({
                 message: 'Please provide all required fields',
-                debug: { name: !!name, email: !!normalizedEmail, password: !!password, role: !!role }
+                debug: { name: !!normalizedName, email: !!normalizedEmail, password: !!password, role: !!role }
             });
         }
 
         // Check if user already exists
         const userExists = await User.findOne({ email: normalizedEmail });
         if (userExists) {
+            console.log('[inviteUser] User already exists:', normalizedEmail);
             return res.status(400).json({ message: `A user with email ${normalizedEmail} already exists` });
         }
 
         // Create the user
+        console.log('[inviteUser] Creating user with data:', { 
+            name: normalizedName, 
+            email: normalizedEmail, 
+            role, 
+            universityId: universityId || undefined 
+        });
         const user = await User.create({
-            name,
+            name: normalizedName,
             email: normalizedEmail,
             password,
             role,
             universityId: universityId || undefined,
             isVerified: true
         });
+
+        console.log('[inviteUser] User created successfully:', user._id);
 
         // Send invitation email
         try {
