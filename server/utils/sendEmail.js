@@ -19,7 +19,9 @@ const sendEmail = async (options) => {
             },
             tls: {
                 rejectUnauthorized: false
-            }
+            },
+            // Force IPv4 to avoid IPv6 connectivity issues on some servers
+            family: 4
         };
 
         // If HOST is gmail, simpler to use service:'gmail'
