@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -158,9 +158,12 @@ const UserList = () => {
         }
     };
 
+    const isSubmitting = useRef(false);
+
     const handleInviteUser = async (e) => {
         e.preventDefault();
-        if (inviteSending) return;
+        if (isSubmitting.current) return;
+        isSubmitting.current = true;
         setInviteSending(true);
         try {
             const rawInfo = localStorage.getItem('userInfo');
@@ -190,9 +193,11 @@ const UserList = () => {
             showToast('error', msg);
         } finally {
             setInviteSending(false);
+            isSubmitting.current = false;
         }
     };
 
+    // Helper functions for alerts and toast...
     const filteredUsers = users
         .filter(user => {
             const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
