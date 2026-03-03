@@ -750,10 +750,20 @@ async function inviteUser(req, res) {
 
         // Send invitation email
         try {
+            // Customize subject based on role
+            let emailSubject = 'Welcome to SkillDad - Your Account Has Been Created';
+            if (role === 'partner' || role === 'b2b') {
+                emailSubject = 'Welcome to SkillDad - B2B Partner Account Created';
+            } else if (role === 'university') {
+                emailSubject = 'Welcome to SkillDad - University Partner Account Created';
+            } else if (role === 'instructor') {
+                emailSubject = 'Welcome to SkillDad - Instructor Account Created';
+            }
+            
             await sendEmail({
                 email: user.email,
-                subject: 'Security Protocol: Shared Neural Sync - SkillDad',
-                message: `Hello ${user.name},\n\nYou have been invited to SkillDad as a ${user.role}.`,
+                subject: emailSubject,
+                message: `Hello ${user.name},\n\nWelcome to SkillDad! You have been invited to join our platform as a ${user.role}.\n\nYour login credentials:\nUsername (Email): ${user.email}\nTemporary Password: ${password}\n\nPlease login and change your password immediately.\n\nLogin URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}/login`,
                 html: emailTemplates.invitation(user.name, user.role, user.email, password)
             });
         } catch (emailError) {
@@ -766,6 +776,10 @@ async function inviteUser(req, res) {
                     name: user.name,
                     email: user.email,
                     role: user.role
+                },
+                credentials: {
+                    email: user.email,
+                    temporaryPassword: password
                 }
             });
         }

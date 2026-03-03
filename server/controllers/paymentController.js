@@ -810,9 +810,6 @@ const handleCallback = async (req, res) => {
       session.endSession();
     }
   }
-};n.endSession();
-    }
-  }
 };
 
 // Helper function to generate success message HTML
