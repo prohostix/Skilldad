@@ -144,30 +144,30 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using Wikimedia SVGs for maximum reliability
+    // Prepare partner rows - using VectorLogoZone for reliable hotlinking
     const row1Static = [
-        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg' },
-        { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
-        { name: 'Wipro', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Wipro_Primary_Logo_Color_RGB.svg' },
-        { name: 'Accenture', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Accenture.svg' },
-        { name: 'IBM', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg' },
-        { name: 'HCL Technologies', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/HCL_Technologies_logo.svg' },
-        { name: 'Capgemini', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Capgemini_201x_logo.svg' },
-        { name: 'Cognizant', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Cognizant_logo_2022.svg' },
-        { name: 'Tech Mahindra', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Tech_Mahindra_New_Logo.svg' },
-        { name: 'Deloitte', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg' }
+        { name: 'TCS', logo: 'https://www.vectorlogo.zone/logos/tcs/tcs-ar21.svg' },
+        { name: 'Infosys', logo: 'https://www.vectorlogo.zone/logos/infosys/infosys-ar21.svg' },
+        { name: 'Wipro', logo: 'https://www.vectorlogo.zone/logos/wipro/wipro-ar21.svg' },
+        { name: 'Accenture', logo: 'https://www.vectorlogo.zone/logos/accenture/accenture-ar21.svg' },
+        { name: 'IBM', logo: 'https://www.vectorlogo.zone/logos/ibm/ibm-ar21.svg' },
+        { name: 'HCL Technologies', logo: 'https://www.vectorlogo.zone/logos/hcl/hcl-ar21.svg' },
+        { name: 'Capgemini', logo: 'https://www.vectorlogo.zone/logos/capgemini/capgemini-ar21.svg' },
+        { name: 'Cognizant', logo: 'https://www.vectorlogo.zone/logos/cognizant/cognizant-ar21.svg' },
+        { name: 'Tech Mahindra', logo: 'https://www.vectorlogo.zone/logos/techmahindra/techmahindra-ar21.svg' },
+        { name: 'Deloitte', logo: 'https://www.vectorlogo.zone/logos/deloitte/deloitte-ar21.svg' }
     ];
     const row2Static = [
-        { name: 'Google', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
-        { name: 'Microsoft', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg' },
-        { name: 'Amazon', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' },
-        { name: 'Meta', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
-        { name: 'Oracle', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg' },
-        { name: 'SAP', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg' },
-        { name: 'Adobe', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Adobe_Corporate_Logo.svg' },
-        { name: 'Intel', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Intel-logo.svg' },
-        { name: 'Goldman Sachs', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg' },
-        { name: 'Salesforce', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg' }
+        { name: 'Google', logo: 'https://www.vectorlogo.zone/logos/google/google-ar21.svg' },
+        { name: 'Microsoft', logo: 'https://www.vectorlogo.zone/logos/microsoft/microsoft-ar21.svg' },
+        { name: 'Amazon', logo: 'https://www.vectorlogo.zone/logos/amazon/amazon-ar21.svg' },
+        { name: 'Meta', logo: 'https://www.vectorlogo.zone/logos/facebook/facebook-ar21.svg' },
+        { name: 'Oracle', logo: 'https://www.vectorlogo.zone/logos/oracle/oracle-ar21.svg' },
+        { name: 'SAP', logo: 'https://www.vectorlogo.zone/logos/sap/sap-ar21.svg' },
+        { name: 'Adobe', logo: 'https://www.vectorlogo.zone/logos/adobe/adobe-ar21.svg' },
+        { name: 'Intel', logo: 'https://www.vectorlogo.zone/logos/intel/intel-ar21.svg' },
+        { name: 'Goldman Sachs', logo: 'https://www.vectorlogo.zone/logos/goldmansachs/goldmansachs-ar21.svg' },
+        { name: 'Salesforce', logo: 'https://www.vectorlogo.zone/logos/salesforce/salesforce-ar21.svg' }
     ];
 
     const staticUnis = [

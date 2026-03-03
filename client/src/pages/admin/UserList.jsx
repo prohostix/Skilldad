@@ -183,9 +183,19 @@ const UserList = () => {
             console.log('[handleInviteUser] Sending invite data:', inviteData);
             const { data } = await axios.post('/api/admin/users/invite', inviteData, config);
             console.log('[handleInviteUser] Success response:', data);
+            
+            // Close modal and reset form
             setShowInviteModal(false);
             setInviteData({ name: '', email: '', password: '', role: 'student', universityId: '' });
-            fetchUsers();
+            
+            // Add the new user to the list immediately for instant feedback
+            if (data.user) {
+                setUsers(prevUsers => [data.user, ...prevUsers]);
+            }
+            
+            // Also refresh the full list from server to ensure consistency
+            await fetchUsers();
+            
             showToast('success', data.message || `Account created for ${inviteData.email}`);
         } catch (error) {
             console.error('[handleInviteUser] Error:', error);
