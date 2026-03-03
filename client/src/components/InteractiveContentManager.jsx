@@ -32,11 +32,13 @@ const InteractiveContentManager = () => {
                 config
             );
 
-            setContents(data);
+            // Ensure data is an array
+            setContents(Array.isArray(data) ? data : []);
             setError(null);
         } catch (err) {
             console.error('Error fetching contents:', err);
             setError(err.response?.data?.message || 'Failed to load content');
+            setContents([]); // Set empty array on error
         } finally {
             setLoading(false);
         }
