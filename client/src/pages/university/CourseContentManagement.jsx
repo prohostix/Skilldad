@@ -105,6 +105,38 @@ const CourseContentManagement = () => {
         }
     };
 
+    const handleDeleteModule = async (moduleId) => {
+        if (!window.confirm('Are you sure you want to delete this module? This action cannot be undone.')) {
+            return;
+        }
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: { Authorization: `Bearer ${userInfo.token}` }
+            };
+            await axios.delete(`/api/courses/${courseId}/modules/${moduleId}`, config);
+            fetchCourse();
+        } catch (error) {
+            console.error('Error deleting module:', error);
+        }
+    };
+
+    const handleDeleteVideo = async (moduleId, videoId) => {
+        if (!window.confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
+            return;
+        }
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: { Authorization: `Bearer ${userInfo.token}` }
+            };
+            await axios.delete(`/api/courses/${courseId}/modules/${moduleId}/videos/${videoId}`, config);
+            fetchCourse();
+        } catch (error) {
+            console.error('Error deleting video:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
@@ -206,6 +238,13 @@ const CourseContentManagement = () => {
                                         >
                                             <Edit2 size={18} />
                                         </button>
+                                        <button
+                                            onClick={() => handleDeleteModule(module._id)}
+                                            className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
+                                            title="Delete Module"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
                                     </div>
                                 </div>
 
@@ -236,6 +275,7 @@ const CourseContentManagement = () => {
                                                         <Edit2 size={16} />
                                                     </button>
                                                     <button
+                                                        onClick={() => handleDeleteVideo(module._id, video._id)}
                                                         className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
                                                     >
                                                         <Trash2 size={16} />
