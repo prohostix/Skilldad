@@ -50,14 +50,20 @@ const UserList = () => {
 
     const fetchUsers = async () => {
         try {
+            console.log('[fetchUsers] Fetching users from server');
             const rawInfo = localStorage.getItem('userInfo');
-            if (!rawInfo) return;
+            if (!rawInfo) {
+                console.warn('[fetchUsers] No user info found');
+                return;
+            }
             const userInfo = JSON.parse(rawInfo);
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.get('/api/admin/users', config);
+            console.log('[fetchUsers] Received users:', data.users?.length, 'users');
             setUsers(data.users);
+            console.log('[fetchUsers] State updated with users');
         } catch (error) {
-            console.error(error);
+            console.error('[fetchUsers] Error:', error);
         }
     };
 
@@ -241,21 +247,8 @@ const UserList = () => {
             setShowInviteModal(false);
             setInviteData({ name: '', email: '', password: '', role: 'student', universityId: '' });
             
-            // Add the new user to the list immediately for instant feedback
-            if (data.user) {
-                console.log('[handleInviteUser] Adding user to list:', data.user);
-                setUsers(prevUsers => {
-                    console.log('[handleInviteUser] Previous users count:', prevUsers.length);
-                    const newUsers = [data.user, ...prevUsers];
-                    console.log('[handleInviteUser] New users count:', newUsers.length);
-                    return newUsers;
-                });
-            } else {
-                console.warn('[handleInviteUser] No user data in response');
-            }
-            
-            // Also refresh the full list from server to ensure consistency
-            console.log('[handleInviteUser] Fetching updated user list from server');
+            // CRITICAL: Refresh the user list immediately
+            console.log('[handleInviteUser] Refreshing user list');
             await fetchUsers();
             
             showToast('success', data.message || `Account created for ${inviteData.email}`);
