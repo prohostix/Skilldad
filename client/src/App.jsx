@@ -50,6 +50,7 @@ const PaymentInitiation = lazy(() => import('./pages/student/PaymentInitiation')
 const PaymentCallback = lazy(() => import('./pages/student/PaymentCallback'));
 const PaymentHistory = lazy(() => import('./pages/student/PaymentHistory'));
 const PaymentStatus = lazy(() => import('./pages/student/PaymentStatus'));
+const InteractiveContentPage = lazy(() => import('./pages/student/InteractiveContentPage'));
 
 // University Pages
 const UniversityDashboard = lazy(() => import('./pages/university/UniversityDashboard'));
@@ -145,6 +146,7 @@ function App() {
                     <Route path="documents" element={<Documents />} />
                     <Route path="exams" element={<Exams />} />
                     <Route path="course/:courseId" element={<CoursePlayer />} />
+                    <Route path="courses/:courseId/content/:contentId" element={<InteractiveContentPage />} />
                     <Route path="course/:courseId/projects" element={<ProjectView />} />
                     <Route path="course/:courseId/enroll" element={<CourseEnrollment />} />
                     <Route path="payment/:courseId" element={<PaymentInitiation />} />

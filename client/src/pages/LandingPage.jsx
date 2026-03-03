@@ -145,8 +145,30 @@ const LandingPage = () => {
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
     // Prepare partner rows - using dynamic data if available
-    const row1Static = ['TCS', 'Infosys', 'Capgemini', 'Wipro', 'Accenture', 'Cognizant', 'HCL Technologies', 'Tech Mahindra', 'IBM', 'Deloitte'];
-    const row2Static = ['Google', 'Microsoft', 'Amazon', 'Goldman Sachs', 'JP Morgan', 'McKinsey', 'PwC', 'KPMG', 'Ernst & Young', 'Salesforce'];
+    const row1Static = [
+        { name: 'TCS', logo: 'https://logo.clearbit.com/tcs.com' },
+        { name: 'Infosys', logo: 'https://logo.clearbit.com/infosys.com' },
+        { name: 'Capgemini', logo: 'https://logo.clearbit.com/capgemini.com' },
+        { name: 'Wipro', logo: 'https://logo.clearbit.com/wipro.com' },
+        { name: 'Accenture', logo: 'https://logo.clearbit.com/accenture.com' },
+        { name: 'Cognizant', logo: 'https://logo.clearbit.com/cognizant.com' },
+        { name: 'HCL Technologies', logo: 'https://logo.clearbit.com/hcltech.com' },
+        { name: 'Tech Mahindra', logo: 'https://logo.clearbit.com/techmahindra.com' },
+        { name: 'IBM', logo: 'https://logo.clearbit.com/ibm.com' },
+        { name: 'Deloitte', logo: 'https://logo.clearbit.com/deloitte.com' }
+    ];
+    const row2Static = [
+        { name: 'Google', logo: 'https://logo.clearbit.com/google.com' },
+        { name: 'Microsoft', logo: 'https://logo.clearbit.com/microsoft.com' },
+        { name: 'Amazon', logo: 'https://logo.clearbit.com/amazon.com' },
+        { name: 'Goldman Sachs', logo: 'https://logo.clearbit.com/goldmansachs.com' },
+        { name: 'JP Morgan', logo: 'https://logo.clearbit.com/jpmorgan.com' },
+        { name: 'McKinsey', logo: 'https://logo.clearbit.com/mckinsey.com' },
+        { name: 'PwC', logo: 'https://logo.clearbit.com/pwc.com' },
+        { name: 'KPMG', logo: 'https://logo.clearbit.com/kpmg.com' },
+        { name: 'Ernst & Young', logo: 'https://logo.clearbit.com/ey.com' },
+        { name: 'Salesforce', logo: 'https://logo.clearbit.com/salesforce.com' }
+    ];
 
     const staticUnis = [
         { name: 'Oxford Digital', location: 'United Kingdom', students: '12K+', programs: '45+' },
@@ -170,8 +192,8 @@ const LandingPage = () => {
         while (marqueeRow1.length < 10) marqueeRow1 = [...marqueeRow1, ...marqueeRow1];
         while (marqueeRow2.length < 10) marqueeRow2 = [...marqueeRow2, ...marqueeRow2];
     } else {
-        marqueeRow1 = row1Static.map(name => ({ name }));
-        marqueeRow2 = row2Static.map(name => ({ name }));
+        marqueeRow1 = row1Static;
+        marqueeRow2 = row2Static;
     }
 
     return (
@@ -205,11 +227,24 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
                                     {company.logo ? (
-                                        <img src={company.logo} alt={company.name} className="h-6 md:h-8 w-auto object-contain" />
+                                        <img
+                                            src={company.logo}
+                                            alt={company.name}
+                                            className="h-8 md:h-10 w-auto object-contain bg-white/90 p-1.5 rounded-lg"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                if (e.target.nextSibling) {
+                                                    e.target.nextSibling.style.display = 'block';
+                                                }
+                                            }}
+                                        />
                                     ) : (
                                         <Building2 size={16} className="text-primary hidden md:block" />
                                     )}
-                                    <span className="text-[11px] md:text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-primary transition-colors duration-300 font-inter">
+                                    <span
+                                        className="text-[11px] md:text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-primary transition-colors duration-300 font-inter"
+                                        style={{ display: company.logo ? 'none' : 'block' }}
+                                    >
                                         {company.name}
                                     </span>
                                 </div>
@@ -229,11 +264,24 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
                                     {company.logo ? (
-                                        <img src={company.logo} alt={company.name} className="h-6 md:h-8 w-auto object-contain" />
+                                        <img
+                                            src={company.logo}
+                                            alt={company.name}
+                                            className="h-8 md:h-10 w-auto object-contain bg-white/90 p-1.5 rounded-lg"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                                if (e.target.nextSibling) {
+                                                    e.target.nextSibling.style.display = 'block';
+                                                }
+                                            }}
+                                        />
                                     ) : (
                                         <Building2 size={16} className="text-primary hidden md:block" />
                                     )}
-                                    <span className="text-[11px] md:text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-primary transition-colors duration-300 font-inter">
+                                    <span
+                                        className="text-[11px] md:text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-primary transition-colors duration-300 font-inter"
+                                        style={{ display: company.logo ? 'none' : 'block' }}
+                                    >
                                         {company.name}
                                     </span>
                                 </div>
