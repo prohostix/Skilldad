@@ -169,8 +169,8 @@ This implementation adds interactive learning elements (exercises, practice prob
     - **Property 8: Progress Monotonicity** - Progress never decreases
     - **Validates: Requirements 9.1, 9.8**
 
-- [ ] 8. Implement quiz passing logic
-  - [ ] 8.1 Add quiz passing score validation
+- [x] 8. Implement quiz passing logic
+  - [x] 8.1 Add quiz passing score validation
     - Implement isPassing flag calculation based on passingScore
     - Update submission status when quiz is graded
     - Track passing status in progress records
@@ -180,8 +180,8 @@ This implementation adds interactive learning elements (exercises, practice prob
     - **Property 7: Quiz Passing Status Consistency** - isPassing matches score vs passingScore
     - **Validates: Requirements 8.5**
 
-- [ ] 9. Implement solution display logic
-  - [ ] 9.1 Add solution visibility controls
+- [x] 9. Implement solution display logic
+  - [x] 9.1 Add solution visibility controls
     - Implement showSolutionAfter logic (immediate, submission, never)
     - Return solutions in API response based on visibility settings
     - Include explanations with solutions
@@ -194,8 +194,8 @@ This implementation adds interactive learning elements (exercises, practice prob
     - Test explanation inclusion
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [ ] 10. Implement authentication and authorization middleware
-  - [ ] 10.1 Add role-based access control
+- [x] 10. Implement authentication and authorization middleware
+  - [x] 10.1 Add role-based access control
     - Verify JWT tokens on all protected routes
     - Check university role for content creation/modification
     - Check student role and enrollment for submissions
@@ -209,7 +209,7 @@ This implementation adds interactive learning elements (exercises, practice prob
     - Test rejection of unauthorized access attempts
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7_
 
-- [ ] 11. Checkpoint - Ensure all tests pass
+- [-] 11. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 12. Implement input validation and sanitization

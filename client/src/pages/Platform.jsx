@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
     GraduationCap,
@@ -17,6 +18,8 @@ import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 
 const Platform = () => {
+    const navigate = useNavigate();
+
     const universities = [
         {
             id: 1,
@@ -131,7 +134,8 @@ const Platform = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
                                 whileHover={{ y: -10 }}
-                                className="group"
+                                className="group cursor-pointer"
+                                onClick={() => navigate(`/university-profile/${encodeURIComponent(university.name)}`, { state: { university } })}
                             >
                                 <GlassCard className="overflow-hidden h-full hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 !p-0">
                                     {/* University Image */}

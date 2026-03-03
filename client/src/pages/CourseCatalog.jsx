@@ -26,6 +26,7 @@ const CourseCatalog = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [category, setCategory] = useState('All');
+    const [selectedUniversity, setSelectedUniversity] = useState('All');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [universityName, setUniversityName] = useState('');
 
@@ -64,17 +65,30 @@ const CourseCatalog = () => {
     const filteredCourses = useMemo(() => {
         return courses.filter(course => {
             const searchText = filter.toLowerCase();
+
             const matchesSearch =
-                course.title.toLowerCase().includes(searchText) ||
+                course.title?.toLowerCase().includes(searchText) ||
                 course.category?.toLowerCase().includes(searchText) ||
                 (course.instructorName || course.instructor?.name || '').toLowerCase().includes(searchText) ||
                 (course.universityName || course.instructor?.profile?.universityName || '').toLowerCase().includes(searchText);
 
-            return matchesSearch && (category === 'All' || course.category === category);
+            const courseUniversity = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad';
+            const matchesUniversity = selectedUniversity === 'All' || courseUniversity === selectedUniversity;
+
+            return matchesSearch && matchesUniversity && (category === 'All' || course.category === category);
         });
-    }, [courses, filter, category]);
+    }, [courses, filter, category, selectedUniversity]);
 
     const categories = useMemo(() => ['All', ...new Set(courses.map(c => c.category))], [courses]);
+
+    // Check if the user is already filtering uniquely by backend so we hide the filter
+    const isFixedUniversity = !!universityName;
+
+    const universities = useMemo(() => {
+        if (isFixedUniversity) return []; // No need to show filter if pinned
+        const allUnis = courses.map(course => course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad');
+        return ['All', ...new Set(allUnis.filter(Boolean))];
+    }, [courses, isFixedUniversity]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] relative overflow-hidden">
@@ -135,9 +149,9 @@ const CourseCatalog = () => {
                         </div>
 
                         {/* Category Filter and View Toggle Row */}
-                        <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center justify-between gap-4 flex-wrap md:flex-nowrap">
                             {/* Category Filter */}
-                            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar scroll-smooth flex-1">
+                            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar scroll-smooth flex-1 min-w-0">
                                 {categories.map((cat) => (
                                     <button
                                         key={cat}
@@ -152,12 +166,53 @@ const CourseCatalog = () => {
                                 ))}
                             </div>
 
-                            {/* View Toggle */}
-                            <div className="flex items-center space-x-2 bg-white/5 p-1 rounded-xl border border-white/10 flex-shrink-0">
-                                <button className="p-2 md:p-2.5 bg-primary text-white rounded-lg shadow-glow-purple"><LayoutGrid size={14} /></button>
-                                <button className="p-2 md:p-2.5 text-white/30 hover:text-white transition-colors"><List size={14} /></button>
+                            {/* Actions Right */}
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                                {/* University Filter */}
+                                {!isFixedUniversity && universities.length > 2 && (
+                                    <div className="relative group/univ hidden md:block">
+                                        <select
+                                            value={selectedUniversity}
+                                            onChange={(e) => setSelectedUniversity(e.target.value)}
+                                            className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-10 py-2.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-xs md:text-sm shadow-xl min-w-[140px] max-w-[200px] truncate"
+                                        >
+                                            <option value="All" className="bg-[#050514]">All Providers</option>
+                                            {universities.filter(u => u !== 'All').map(uni => (
+                                                <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
+                                            <Filter size={14} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* View Toggle */}
+                                <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10">
+                                    <button className="p-2 md:p-2 bg-primary text-white rounded-lg shadow-glow-purple"><LayoutGrid size={14} /></button>
+                                    <button className="p-2 md:p-2 text-white/30 hover:text-white transition-colors"><List size={14} /></button>
+                                </div>
                             </div>
                         </div>
+
+                        {/* Mobile University Filter (displays on small screens if needed) */}
+                        {!isFixedUniversity && universities.length > 2 && (
+                            <div className="relative group/univ md:hidden mt-2">
+                                <select
+                                    value={selectedUniversity}
+                                    onChange={(e) => setSelectedUniversity(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-10 py-3 text-white/80 focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-sm shadow-xl"
+                                >
+                                    <option value="All" className="bg-[#050514]">All Providers (Universities)</option>
+                                    {universities.filter(u => u !== 'All').map(uni => (
+                                        <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
+                                    <Filter size={16} />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 

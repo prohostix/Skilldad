@@ -32,6 +32,7 @@ const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
 const LinkZoomRecording = lazy(() => import('./pages/university/LinkZoomRecording'));
 const MockPaymentGateway = lazy(() => import('./pages/MockPaymentGateway'));
 import { PrivacyPolicy, TermsOfService, CookiePolicy, RefundPolicy } from './pages/LegalPages';
+const UniversityPublicDetail = lazy(() => import('./pages/UniversityPublicDetail'));
 
 
 
@@ -130,6 +131,7 @@ function App() {
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/cookies" element={<CookiePolicy />} />
                 <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/university-profile/:name" element={<UniversityPublicDetail />} />
 
                 {/* Protected Dashboard Routes */}
 

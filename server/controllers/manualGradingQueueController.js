@@ -149,6 +149,26 @@ const gradeSubmission = asyncHandler(async (req, res) => {
     // Save the updated submission
     await submission.save();
 
+    // Requirement 10.1, 10.2, 10.3, 10.4, 10.5: Include solutions in response if appropriate
+    let responseAnswers = submission.answers;
+    
+    if (allGraded) {
+        const shouldShowSolutions = 
+            submission.content.showSolutionAfter === 'immediate' || 
+            (submission.content.showSolutionAfter === 'submission' && submission.status === 'graded');
+
+        if (shouldShowSolutions) {
+            responseAnswers = submission.answers.map((answer, index) => {
+                const question = submission.content.questions[index];
+                return {
+                    ...answer.toObject(),
+                    correctAnswer: question.correctAnswer,
+                    explanation: question.explanation
+                };
+            });
+        }
+    }
+
     res.status(200).json({
         success: true,
         message: allGraded ? 'Submission fully graded' : 'Answer graded successfully',
@@ -157,7 +177,7 @@ const gradeSubmission = asyncHandler(async (req, res) => {
             score: submission.score,
             status: submission.status,
             isPassing: submission.isPassing,
-            answers: submission.answers
+            answers: responseAnswers
         }
     });
 });
