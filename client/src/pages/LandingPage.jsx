@@ -144,10 +144,10 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using VectorLogoZone for reliable hotlinking
+    // Prepare partner rows - using final verified SVG URLs
     const row1Static = [
-        { name: 'TCS', logo: 'https://www.vectorlogo.zone/logos/tcs/tcs-ar21.svg' },
-        { name: 'Infosys', logo: 'https://www.vectorlogo.zone/logos/infosys/infosys-ar21.svg' },
+        { name: 'TCS', logo: 'https://cdn.worldvectorlogo.com/logos/tata-consultancy-services-1.svg' },
+        { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
         { name: 'Wipro', logo: 'https://www.vectorlogo.zone/logos/wipro/wipro-ar21.svg' },
         { name: 'Accenture', logo: 'https://www.vectorlogo.zone/logos/accenture/accenture-ar21.svg' },
         { name: 'IBM', logo: 'https://www.vectorlogo.zone/logos/ibm/ibm-ar21.svg' },

@@ -1,6 +1,45 @@
 const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
 const sendEmail = async (options) => {
+    // Check if SendGrid is configured
+    if (process.env.SENDGRID_API_KEY && process.env.EMAIL_SERVICE === 'sendgrid') {
+        return await sendEmailWithSendGrid(options);
+    }
+    
+    // Fallback to SMTP (Gmail, etc.)
+    return await sendEmailWithSMTP(options);
+};
+
+// SendGrid implementation
+const sendEmailWithSendGrid = async (options) => {
+    try {
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        const msg = {
+            to: options.email,
+            from: process.env.EMAIL_FROM || 'noreply@skilldad.com',
+            subject: options.subject,
+            text: options.message,
+            html: options.html,
+        };
+        
+        console.log('[SendGrid] Sending email to:', options.email);
+        const response = await sgMail.send(msg);
+        console.log('[SendGrid] Email sent successfully:', response[0].statusCode);
+        
+        return { success: true, messageId: response[0].headers['x-message-id'] };
+    } catch (error) {
+        console.error('[SendGrid] Error sending email:', error.message);
+        if (error.response) {
+            console.error('[SendGrid] Error details:', error.response.body);
+        }
+        throw new Error(`SendGrid email could not be sent: ${error.message}`);
+    }
+};
+
+// SMTP implementation (Gmail, etc.)
+const sendEmailWithSMTP = async (options) => {
     // Check if configuration is present
     if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
         console.warn('Email configuration missing in .env file. Email will not be sent.');
@@ -37,7 +76,7 @@ const sendEmail = async (options) => {
 
         // Verify transporter configuration before sending
         await transporter.verify();
-        console.log('Email transporter verified successfully');
+        console.log('[SMTP] Email transporter verified successfully');
 
         // Define email options
         const mailOptions = {
@@ -51,17 +90,17 @@ const sendEmail = async (options) => {
 
         // Send the email
         const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully: %s', info.messageId);
+        console.log('[SMTP] Email sent successfully: %s', info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (error) {
-        console.error('Error sending email:', error.message);
-        console.error('Email error details:', {
+        console.error('[SMTP] Error sending email:', error.message);
+        console.error('[SMTP] Email error details:', {
             code: error.code,
             command: error.command,
             response: error.response,
             responseCode: error.responseCode
         });
-        throw new Error(`Email could not be sent: ${error.message}`);
+        throw new Error(`SMTP email could not be sent: ${error.message}`);
     }
 };
 
