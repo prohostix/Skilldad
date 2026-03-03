@@ -227,17 +227,8 @@ const LandingPage = () => {
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
-                                    <img
-                                        src={company.logo}
-                                        alt={company.name}
-                                        className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            const initials = company.name?.split(' ').map(w => w[0]).join('').substring(0, 2) || 'CO';
-                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true`;
-                                        }}
-                                    />
+                                <div className="px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-primary/30 transition-all duration-300 group-hover:bg-white/10">
+                                    <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
                                 </div>
                             </div>
                         ))}
@@ -253,17 +244,8 @@ const LandingPage = () => {
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
-                                <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
-                                    <img
-                                        src={company.logo}
-                                        alt={company.name}
-                                        className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            const initials = company.name?.split(' ').map(w => w[0]).join('').substring(0, 2) || 'CO';
-                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true`;
-                                        }}
-                                    />
+                                <div className="px-6 py-2.5 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 group-hover:border-purple-400/30 transition-all duration-300 group-hover:bg-white/10">
+                                    <span className="text-white font-bold text-sm tracking-wide whitespace-nowrap">{company.name}</span>
                                 </div>
                             </div>
                         ))}
