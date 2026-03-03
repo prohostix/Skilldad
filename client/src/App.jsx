@@ -60,6 +60,10 @@ const SessionDetail = lazy(() => import('./pages/university/SessionDetail'));
 const ScheduleClass = lazy(() => import('./pages/university/ScheduleClass'));
 const ExamManagement = lazy(() => import('./pages/university/ExamManagement'));
 const CourseContentManagement = lazy(() => import('./pages/university/CourseContentManagement'));
+const GradingQueue = lazy(() => import('./pages/university/GradingQueue'));
+const CreateInteractiveContent = lazy(() => import('./pages/university/CreateInteractiveContent'));
+const ManageInteractiveContent = lazy(() => import('./pages/university/ManageInteractiveContent'));
+const EditInteractiveContent = lazy(() => import('./pages/university/EditInteractiveContent'));
 
 // Partner Pages
 const PartnerDashboard = lazy(() => import('./pages/partner/PartnerDashboard'));
@@ -163,6 +167,10 @@ function App() {
                   <Route path="/university" element={<DashboardLayout />}>
                     <Route path="dashboard" element={<UniversityDashboard />} />
                     <Route path="courses/:courseId" element={<CourseContentManagement />} />
+                    <Route path="courses/:courseId/grading" element={<GradingQueue />} />
+                    <Route path="courses/:courseId/modules/:moduleId/content/create" element={<CreateInteractiveContent />} />
+                    <Route path="courses/:courseId/modules/:moduleId/content/manage" element={<ManageInteractiveContent />} />
+                    <Route path="courses/:courseId/modules/:moduleId/content/:contentId/edit" element={<EditInteractiveContent />} />
                     <Route path="groups" element={<GroupManagement />} />
                     <Route path="live-sessions" element={<LiveSessionsHub />} />
                     <Route path="session/:sessionId" element={<SessionDetail />} />

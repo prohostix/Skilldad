@@ -14,12 +14,12 @@ import {
 import axios from 'axios';
 import GlassCard from './ui/GlassCard';
 import ModernButton from './ui/ModernButton';
-import { UserContext } from '../context/UserContext';
+import { useUser } from '../context/UserContext';
 
 const InteractiveContentPlayer = ({ contentId, onComplete }) => {
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
     const navigate = useNavigate();
-    
+
     // State management
     const [content, setContent] = useState(null);
     const [answers, setAnswers] = useState({});
@@ -234,15 +234,14 @@ const InteractiveContentPlayer = ({ contentId, onComplete }) => {
                             {question.options.map((option, optIndex) => (
                                 <label
                                     key={optIndex}
-                                    className={`flex items-center p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                                        question.multipleCorrect
+                                    className={`flex items-center p-4 rounded-lg border-2 transition-all cursor-pointer ${question.multipleCorrect
                                             ? answer?.includes(option)
                                                 ? 'border-primary bg-primary/10'
                                                 : 'border-white/10 hover:border-white/20'
                                             : answer === option
                                                 ? 'border-primary bg-primary/10'
                                                 : 'border-white/10 hover:border-white/20'
-                                    } ${isSubmitted ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                        } ${isSubmitted ? 'opacity-60 cursor-not-allowed' : ''}`}
                                 >
                                     <input
                                         type={question.multipleCorrect ? 'checkbox' : 'radio'}
@@ -272,11 +271,10 @@ const InteractiveContentPlayer = ({ contentId, onComplete }) => {
                             {['True', 'False'].map((option) => (
                                 <label
                                     key={option}
-                                    className={`flex items-center p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                                        answer === option
+                                    className={`flex items-center p-4 rounded-lg border-2 transition-all cursor-pointer ${answer === option
                                             ? 'border-primary bg-primary/10'
                                             : 'border-white/10 hover:border-white/20'
-                                    } ${isSubmitted ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                        } ${isSubmitted ? 'opacity-60 cursor-not-allowed' : ''}`}
                                 >
                                     <input
                                         type="radio"
@@ -331,20 +329,18 @@ const InteractiveContentPlayer = ({ contentId, onComplete }) => {
                 {isSubmitted && questionResult && (
                     <div className="mt-4">
                         {questionResult.feedback && (
-                            <div className={`p-4 rounded-lg ${
-                                questionResult.isCorrect
+                            <div className={`p-4 rounded-lg ${questionResult.isCorrect
                                     ? 'bg-emerald-500/10 border border-emerald-500/20'
                                     : questionResult.pointsEarned !== undefined
                                         ? 'bg-red-500/10 border border-red-500/20'
                                         : 'bg-yellow-500/10 border border-yellow-500/20'
-                            }`}>
-                                <p className={`text-sm font-medium ${
-                                    questionResult.isCorrect
+                                }`}>
+                                <p className={`text-sm font-medium ${questionResult.isCorrect
                                         ? 'text-emerald-400'
                                         : questionResult.pointsEarned !== undefined
                                             ? 'text-red-400'
                                             : 'text-yellow-400'
-                                }`}>
+                                    }`}>
                                     {questionResult.feedback}
                                 </p>
                             </div>
@@ -428,9 +424,8 @@ const InteractiveContentPlayer = ({ contentId, onComplete }) => {
                     </div>
                     {timeRemaining !== null && !submission && (
                         <div className={`text-right ${timeRemaining < 60 ? 'animate-pulse' : ''}`}>
-                            <div className={`text-3xl font-extrabold font-poppins ${
-                                timeRemaining < 60 ? 'text-red-400' : 'text-primary'
-                            }`}>
+                            <div className={`text-3xl font-extrabold font-poppins ${timeRemaining < 60 ? 'text-red-400' : 'text-primary'
+                                }`}>
                                 {formatTime(timeRemaining)}
                             </div>
                             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
@@ -474,13 +469,12 @@ const InteractiveContentPlayer = ({ contentId, onComplete }) => {
 
             {/* Submission Result */}
             {submission && (
-                <GlassCard className={`border-2 ${
-                    submission.isPassing
+                <GlassCard className={`border-2 ${submission.isPassing
                         ? 'border-emerald-500/50 bg-emerald-500/5'
                         : submission.status === 'needs-review'
                             ? 'border-yellow-500/50 bg-yellow-500/5'
                             : 'border-red-500/50 bg-red-500/5'
-                }`}>
+                    }`}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             {submission.isPassing ? (
@@ -506,13 +500,12 @@ const InteractiveContentPlayer = ({ contentId, onComplete }) => {
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className={`text-4xl font-extrabold font-poppins ${
-                                submission.isPassing
+                            <div className={`text-4xl font-extrabold font-poppins ${submission.isPassing
                                     ? 'text-emerald-400'
                                     : submission.status === 'needs-review'
                                         ? 'text-yellow-400'
                                         : 'text-red-400'
-                            }`}>
+                                }`}>
                                 {submission.score.toFixed(0)}%
                             </div>
                             {content.contentType === 'quiz' && content.passingScore && (
