@@ -273,75 +273,153 @@ const PartnerStudentManagement = () => {
 
             {/* Register New Student Modal */}
             {showRegisterStudentModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[250] flex items-start justify-center p-4 pt-20 overflow-y-auto" onClick={(e) => { 
-                    if (e.target === e.currentTarget) {
-                        setShowRegisterStudentModal(false);
-                        setShowCustomCodeInput(false);
-                        setNewStudentData({ 
-                            name: '', 
-                            email: '', 
-                            phone: '', 
-                            password: '', 
-                            course: '', 
-                            courseFee: '',
-                            university: '',
-                            partnerCode: partnerCodes.length > 0 ? partnerCodes[0].code : '',
-                            customCode: ''
-                        });
-                    }
-                }}>
+                <div className="fixed inset-0 bg-black/80 flex items-start justify-center z-[99999] p-4 pt-20 overflow-y-auto">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-[#0B0F1A] border border-white/10 rounded-2xl p-6 max-w-md w-full"
+                        className="bg-slate-900 rounded-2xl p-6 max-w-md w-full relative z-[100000] border border-white/10"
                     >
-                        <h2 className="text-xl font-bold text-white mb-4">Register New Student</h2>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-semibold text-white">Register New Student</h2>
+                            <button 
+                                onClick={() => {
+                                    setShowRegisterStudentModal(false);
+                                    setShowCustomCodeInput(false);
+                                    setNewStudentData({ 
+                                        name: '', 
+                                        email: '', 
+                                        phone: '', 
+                                        password: '', 
+                                        course: '', 
+                                        courseFee: '',
+                                        university: '',
+                                        partnerCode: partnerCodes.length > 0 ? partnerCodes[0].code : '',
+                                        customCode: ''
+                                    });
+                                }} 
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Full Name *</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
                                 <input
                                     type="text"
+                                    required
                                     value={newStudentData.name}
                                     onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-primary"
                                     placeholder="Enter student's full name"
-                                    required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Email Address *</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Email</label>
                                 <input
                                     type="email"
+                                    required
                                     value={newStudentData.email}
                                     onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-primary"
                                     placeholder="student@example.com"
-                                    required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Password *</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Password</label>
                                 <input
                                     type="password"
+                                    required
                                     value={newStudentData.password}
                                     onChange={(e) => setNewStudentData({ ...newStudentData, password: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-primary"
                                     placeholder="Temporary password"
-                                    required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Phone Number</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Phone Number</label>
                                 <input
                                     type="text"
                                     value={newStudentData.phone}
                                     onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-primary"
                                     placeholder="+1 (555) 000-0000"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Course *</label>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">University / Institution</label>
+                                <select
+                                    value={newStudentData.university}
+                                    onChange={(e) => {
+                                        console.log('University selected:', e.target.value);
+                                        setNewStudentData({ ...newStudentData, university: e.target.value })}
+                                    }
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                                >
+                                    <option value="" className="bg-slate-900">Independent (No University)</option>
+                                    {availableUniversities.map(u => (
+                                        <option key={u._id} value={u._id} className="bg-slate-900">{u.profile?.universityName || u.name || u.email}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Course</label>
+                                <select
+                                    value={newStudentData.course}
+                                    onChange={(e) => handleCourseChange(e.target.value)}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                                >
+                                    <option value="" className="bg-slate-900">Select a course</option>
+                                    {availableCourses.map(course => (
+                                        <option key={course._id} value={course._id} className="bg-slate-900">
+                                            {course.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Course Fee</label>
+                                <input
+                                    type="text"
+                                    value={newStudentData.courseFee ? `₹${newStudentData.courseFee}` : ''}
+                                    readOnly
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white/60 cursor-not-allowed"
+                                    placeholder="Auto-filled based on course"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">Affiliation Code</label>
+                                <select
+                                    value={showCustomCodeInput ? 'custom' : newStudentData.partnerCode}
+                                    onChange={(e) => {
+                                        if (e.target.value === 'custom') {
+                                            setShowCustomCodeInput(true);
+                                            setNewStudentData({ ...newStudentData, partnerCode: '' });
+                                        } else {
+                                            setShowCustomCodeInput(false);
+                                            setNewStudentData({ ...newStudentData, partnerCode: e.target.value, customCode: '' });
+                                        }
+                                    }}
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary appearance-none cursor-pointer"
+                                    required
+                                >
+                                    <option value="" disabled className="bg-slate-900">Select an affiliation code</option>
+                                    {partnerCodes.map(c => (
+                                        <option key={c._id} value={c.code} className="bg-slate-900">{c.code} ({c.type === 'percentage' ? `${c.value}%` : `${c.value}`} off)</option>
+                                    ))}
+                                    <option value="custom" className="bg-slate-900">Custom Code</option>
+                                </select>
+                                {showCustomCodeInput && (
+                                    <input
+                                        type="text"
+                                        value={newStudentData.customCode}
+                                        onChange={(e) => setNewStudentData({ ...newStudentData, customCode: e.target.value })}
+                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-primary mt-2"
+                                        placeholder="Enter custom affiliation code"
+                                        required
+                                    />
+                                )}
+                            </div>
                                 <select
                                     value={newStudentData.course}
                                     onChange={(e) => handleCourseChange(e.target.value)}
