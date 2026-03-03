@@ -196,40 +196,7 @@ const LandingPage = () => {
         marqueeRow2 = row2Static;
     }
 
-    const enrichLogos = (rows) => {
-        const staticMap = {
-            'tcs': 'https://logo.clearbit.com/tcs.com',
-            'infosys': 'https://logo.clearbit.com/infosys.com',
-            'capgemini': 'https://logo.clearbit.com/capgemini.com',
-            'wipro': 'https://logo.clearbit.com/wipro.com',
-            'accenture': 'https://logo.clearbit.com/accenture.com',
-            'cognizant': 'https://logo.clearbit.com/cognizant.com',
-            'hcl technologies': 'https://logo.clearbit.com/hcltech.com',
-            'tech mahindra': 'https://logo.clearbit.com/techmahindra.com',
-            'ibm': 'https://logo.clearbit.com/ibm.com',
-            'deloitte': 'https://logo.clearbit.com/deloitte.com',
-            'google': 'https://logo.clearbit.com/google.com',
-            'microsoft': 'https://logo.clearbit.com/microsoft.com',
-            'amazon': 'https://logo.clearbit.com/amazon.com',
-            'goldman sachs': 'https://logo.clearbit.com/goldmansachs.com',
-            'jp morgan': 'https://logo.clearbit.com/jpmorgan.com',
-            'mckinsey': 'https://logo.clearbit.com/mckinsey.com',
-            'pwc': 'https://logo.clearbit.com/pwc.com',
-            'kpmg': 'https://logo.clearbit.com/kpmg.com',
-            'ernst & young': 'https://logo.clearbit.com/ey.com',
-            'salesforce': 'https://logo.clearbit.com/salesforce.com'
-        };
-
-        return rows.map(c => {
-            if (c.logo) return c;
-            const nameKey = c.name?.toLowerCase().trim();
-            const fallbackLogo = staticMap[nameKey] || `https://logo.clearbit.com/${nameKey?.replace(/[^a-z0-9]/g, '')}.com`;
-            return { ...c, logo: fallbackLogo };
-        });
-    };
-
-    marqueeRow1 = enrichLogos(marqueeRow1);
-    marqueeRow2 = enrichLogos(marqueeRow2);
+    // No need to enrich logos - they're already complete in the static arrays
 
     return (
         <div className="min-h-screen selection:bg-primary/30 relative overflow-x-hidden text-text-primary bg-black">
