@@ -2,13 +2,13 @@ import React, { useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import ProgressDashboard from '../../components/ProgressDashboard';
-import { UserContext } from '../../context/UserContext';
+import { useUser } from '../../context/UserContext';
 import ModernButton from '../../components/ui/ModernButton';
 
 const CourseProgress = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
-    const { user } = useContext(UserContext);
+    const { user } = useUser();
 
     if (!user) {
         return (

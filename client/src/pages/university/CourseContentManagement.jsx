@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BookOpen, Plus, Edit2, Trash2, Video, FileText, ArrowLeft, Save, X } from 'lucide-react';
+import { BookOpen, Plus, Edit2, Trash2, Video, FileText, ArrowLeft, Save, X, ClipboardList, Settings } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -151,14 +151,30 @@ const CourseContentManagement = () => {
                                     </div>
                                     <div className="flex gap-2">
                                         <button
-                                            onClick={() => setShowAddVideo(module._id)}
-                                            className="p-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-colors"
+                                            onClick={() => navigate(`/university/courses/${courseId}/modules/${module._id}/content/manage`)}
+                                            className="p-2 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg transition-colors"
+                                            title="Manage Interactive Content"
+                                        >
+                                            <ClipboardList size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => navigate(`/university/courses/${courseId}/modules/${module._id}/content/create`)}
+                                            className="p-2 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors"
+                                            title="Add Interactive Content"
                                         >
                                             <Plus size={18} />
                                         </button>
                                         <button
+                                            onClick={() => setShowAddVideo(module._id)}
+                                            className="p-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-colors"
+                                            title="Add Video"
+                                        >
+                                            <Video size={18} />
+                                        </button>
+                                        <button
                                             onClick={() => setEditingModule(module)}
                                             className="p-2 bg-white/5 text-white/60 hover:bg-white/10 rounded-lg transition-colors"
+                                            title="Edit Module"
                                         >
                                             <Edit2 size={18} />
                                         </button>
