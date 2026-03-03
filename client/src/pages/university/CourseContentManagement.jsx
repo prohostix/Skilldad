@@ -77,6 +77,34 @@ const CourseContentManagement = () => {
         }
     };
 
+    const handleUpdateModule = async (moduleId, moduleData) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: { Authorization: `Bearer ${userInfo.token}` }
+            };
+            await axios.put(`/api/courses/${courseId}/modules/${moduleId}`, moduleData, config);
+            fetchCourse();
+            setEditingModule(null);
+        } catch (error) {
+            console.error('Error updating module:', error);
+        }
+    };
+
+    const handleUpdateVideo = async (moduleId, videoId, videoData) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: { Authorization: `Bearer ${userInfo.token}` }
+            };
+            await axios.put(`/api/courses/${courseId}/modules/${moduleId}/videos/${videoId}`, videoData, config);
+            fetchCourse();
+            setEditingVideo(null);
+        } catch (error) {
+            console.error('Error updating video:', error);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
@@ -255,6 +283,24 @@ const CourseContentManagement = () => {
                 />
             )}
 
+            {/* Edit Module Modal */}
+            {editingModule && (
+                <EditModuleModal
+                    module={editingModule}
+                    onClose={() => setEditingModule(null)}
+                    onSave={(moduleData) => handleUpdateModule(editingModule._id, moduleData)}
+                />
+            )}
+
+            {/* Edit Video Modal */}
+            {editingVideo && (
+                <EditVideoModal
+                    video={editingVideo}
+                    onClose={() => setEditingVideo(null)}
+                    onSave={(videoData) => handleUpdateVideo(editingVideo.moduleId, editingVideo._id, videoData)}
+                />
+            )}
+
             {/* Edit Course Modal */}
             {showEditCourse && (
                 <EditCourseModal
@@ -380,6 +426,130 @@ const AddVideoModal = ({ moduleId, onClose, onSave }) => {
                         <ModernButton type="submit" className="flex-1">
                             <Save size={18} className="mr-2" />
                             Save Video
+                        </ModernButton>
+                        <ModernButton type="button" variant="secondary" onClick={onClose}>
+                            Cancel
+                        </ModernButton>
+                    </div>
+                </form>
+            </GlassCard>
+        </div>
+    );
+};
+
+// Edit Module Modal Component
+const EditModuleModal = ({ module, onClose, onSave }) => {
+    const [title, setTitle] = useState(module.title || '');
+    const [description, setDescription] = useState(module.description || '');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ title, description });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <GlassCard className="w-full max-w-md p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-white">Edit Module</h3>
+                    <button onClick={onClose} className="text-white/60 hover:text-white">
+                        <X size={24} />
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Module Title</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                            placeholder="e.g., Introduction to React"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Description (Optional)</label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                            rows="3"
+                            placeholder="Brief description of this module"
+                        />
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                        <ModernButton type="submit" className="flex-1">
+                            <Save size={18} className="mr-2" />
+                            Update Module
+                        </ModernButton>
+                        <ModernButton type="button" variant="secondary" onClick={onClose}>
+                            Cancel
+                        </ModernButton>
+                    </div>
+                </form>
+            </GlassCard>
+        </div>
+    );
+};
+
+// Edit Video Modal Component
+const EditVideoModal = ({ video, onClose, onSave }) => {
+    const [title, setTitle] = useState(video.title || '');
+    const [url, setUrl] = useState(video.url || '');
+    const [duration, setDuration] = useState(video.duration || '');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ title, url, duration });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <GlassCard className="w-full max-w-md p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-white">Edit Video</h3>
+                    <button onClick={onClose} className="text-white/60 hover:text-white">
+                        <X size={24} />
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Video Title</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                            placeholder="e.g., Introduction to Components"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Video URL</label>
+                        <input
+                            type="url"
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                            placeholder="https://youtube.com/embed/..."
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-white/80 text-sm mb-2">Duration (Optional)</label>
+                        <input
+                            type="text"
+                            value={duration}
+                            onChange={(e) => setDuration(e.target.value)}
+                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
+                            placeholder="e.g., 15:30"
+                        />
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                        <ModernButton type="submit" className="flex-1">
+                            <Save size={18} className="mr-2" />
+                            Update Video
                         </ModernButton>
                         <ModernButton type="button" variant="secondary" onClick={onClose}>
                             Cancel

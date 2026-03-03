@@ -261,27 +261,21 @@ const LandingPage = () => {
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
-                                    {company.logo ? (
-                                        <img
-                                            src={company.logo}
-                                            alt={company.name}
-                                            className="h-8 md:h-10 w-auto object-contain bg-white/90 p-1.5 rounded-lg"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                if (e.target.nextSibling) {
-                                                    e.target.nextSibling.style.display = 'block';
-                                                }
-                                            }}
-                                        />
-                                    ) : (
-                                        <Building2 size={16} className="text-primary hidden md:block" />
-                                    )}
-                                    <span
-                                        className="text-[11px] md:text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-primary transition-colors duration-300 font-inter"
-                                        style={{ display: company.logo ? 'none' : 'block' }}
-                                    >
-                                        {company.name}
-                                    </span>
+                                    <img
+                                        src={company.logo || `https://logo.clearbit.com/${company.name?.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`}
+                                        alt={company.name}
+                                        className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
+                                        onError={(e) => {
+                                            if (!e.target.dataset.retried) {
+                                                e.target.dataset.retried = 'true';
+                                                const cleanName = company.name?.toLowerCase().replace(/[^a-z0-9]/g, '');
+                                                e.target.src = `https://logo.clearbit.com/${cleanName}.com`;
+                                            } else {
+                                                e.target.onerror = null;
+                                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=ffffff&color=000&font-size=0.33&bold=true`;
+                                            }
+                                        }}
+                                    />
                                 </div>
                             </div>
                         ))}
@@ -298,27 +292,21 @@ const LandingPage = () => {
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
-                                    {company.logo ? (
-                                        <img
-                                            src={company.logo}
-                                            alt={company.name}
-                                            className="h-8 md:h-10 w-auto object-contain bg-white/90 p-1.5 rounded-lg"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                if (e.target.nextSibling) {
-                                                    e.target.nextSibling.style.display = 'block';
-                                                }
-                                            }}
-                                        />
-                                    ) : (
-                                        <Building2 size={16} className="text-primary hidden md:block" />
-                                    )}
-                                    <span
-                                        className="text-[11px] md:text-sm font-black uppercase tracking-[0.25em] text-white group-hover:text-primary transition-colors duration-300 font-inter"
-                                        style={{ display: company.logo ? 'none' : 'block' }}
-                                    >
-                                        {company.name}
-                                    </span>
+                                    <img
+                                        src={company.logo || `https://logo.clearbit.com/${company.name?.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`}
+                                        alt={company.name}
+                                        className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
+                                        onError={(e) => {
+                                            if (!e.target.dataset.retried) {
+                                                e.target.dataset.retried = 'true';
+                                                const cleanName = company.name?.toLowerCase().replace(/[^a-z0-9]/g, '');
+                                                e.target.src = `https://logo.clearbit.com/${cleanName}.com`;
+                                            } else {
+                                                e.target.onerror = null;
+                                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=ffffff&color=000&font-size=0.33&bold=true`;
+                                            }
+                                        }}
+                                    />
                                 </div>
                             </div>
                         ))}
