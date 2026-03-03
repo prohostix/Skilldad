@@ -9,25 +9,29 @@ const sendEmail = async (options) => {
 
     try {
         const port = parseInt(process.env.EMAIL_PORT || '587');
-        const secure = port === 465; // true for 465, false for 587/other
+        const secure = port === 465;
 
-        // Create a transporter with Gmail-specific configuration
-        const transporter = nodemailer.createTransport({
-            host: process.env.EMAIL_HOST,
-            port,
-            secure,
+        // Configuration for Gmail
+        const transporterConfig = {
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASSWORD,
             },
             tls: {
-                rejectUnauthorized: false // allow self-signed certs in dev
-            },
-            // Add connection timeout and retry logic
-            connectionTimeout: 10000, // 10 seconds
-            greetingTimeout: 10000,
-            socketTimeout: 10000,
-        });
+                rejectUnauthorized: false
+            }
+        };
+
+        // If HOST is gmail, simpler to use service:'gmail'
+        if (process.env.EMAIL_HOST?.includes('gmail')) {
+            transporterConfig.service = 'gmail';
+        } else {
+            transporterConfig.host = process.env.EMAIL_HOST;
+            transporterConfig.port = port;
+            transporterConfig.secure = secure;
+        }
+
+        const transporter = nodemailer.createTransport(transporterConfig);
 
         // Verify transporter configuration before sending
         await transporter.verify();

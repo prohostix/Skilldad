@@ -64,7 +64,7 @@ const registerUser = async (req, res) => {
             isVerified: true,
             discountRate: discountRate,
             profile: {
-                phone: phone.trim()
+                phone: phone ? phone.trim() : ''
             }
         });
 
