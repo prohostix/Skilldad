@@ -144,30 +144,30 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using dynamic data if available
+    // Prepare partner rows - using UI Avatars as fallback
     const row1Static = [
-        { name: 'TCS', logo: 'https://logo.clearbit.com/tcs.com' },
-        { name: 'Infosys', logo: 'https://logo.clearbit.com/infosys.com' },
-        { name: 'Capgemini', logo: 'https://logo.clearbit.com/capgemini.com' },
-        { name: 'Wipro', logo: 'https://logo.clearbit.com/wipro.com' },
-        { name: 'Accenture', logo: 'https://logo.clearbit.com/accenture.com' },
-        { name: 'Cognizant', logo: 'https://logo.clearbit.com/cognizant.com' },
-        { name: 'HCL Technologies', logo: 'https://logo.clearbit.com/hcltech.com' },
-        { name: 'Tech Mahindra', logo: 'https://logo.clearbit.com/techmahindra.com' },
-        { name: 'IBM', logo: 'https://logo.clearbit.com/ibm.com' },
-        { name: 'Deloitte', logo: 'https://logo.clearbit.com/deloitte.com' }
+        { name: 'TCS', logo: 'https://ui-avatars.com/api/?name=TCS&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'Infosys', logo: 'https://ui-avatars.com/api/?name=Infosys&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'Capgemini', logo: 'https://ui-avatars.com/api/?name=Capgemini&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'Wipro', logo: 'https://ui-avatars.com/api/?name=Wipro&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'Accenture', logo: 'https://ui-avatars.com/api/?name=Accenture&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'Cognizant', logo: 'https://ui-avatars.com/api/?name=Cognizant&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'HCL Technologies', logo: 'https://ui-avatars.com/api/?name=HCL&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'Tech Mahindra', logo: 'https://ui-avatars.com/api/?name=TM&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'IBM', logo: 'https://ui-avatars.com/api/?name=IBM&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'Deloitte', logo: 'https://ui-avatars.com/api/?name=Deloitte&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' }
     ];
     const row2Static = [
-        { name: 'Google', logo: 'https://logo.clearbit.com/google.com' },
-        { name: 'Microsoft', logo: 'https://logo.clearbit.com/microsoft.com' },
-        { name: 'Amazon', logo: 'https://logo.clearbit.com/amazon.com' },
-        { name: 'Goldman Sachs', logo: 'https://logo.clearbit.com/goldmansachs.com' },
-        { name: 'JP Morgan', logo: 'https://logo.clearbit.com/jpmorgan.com' },
-        { name: 'McKinsey', logo: 'https://logo.clearbit.com/mckinsey.com' },
-        { name: 'PwC', logo: 'https://logo.clearbit.com/pwc.com' },
-        { name: 'KPMG', logo: 'https://logo.clearbit.com/kpmg.com' },
-        { name: 'Ernst & Young', logo: 'https://logo.clearbit.com/ey.com' },
-        { name: 'Salesforce', logo: 'https://logo.clearbit.com/salesforce.com' }
+        { name: 'Google', logo: 'https://ui-avatars.com/api/?name=Google&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'Microsoft', logo: 'https://ui-avatars.com/api/?name=Microsoft&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'Amazon', logo: 'https://ui-avatars.com/api/?name=Amazon&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'Goldman Sachs', logo: 'https://ui-avatars.com/api/?name=GS&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'JP Morgan', logo: 'https://ui-avatars.com/api/?name=JPM&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'McKinsey', logo: 'https://ui-avatars.com/api/?name=McKinsey&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
+        { name: 'PwC', logo: 'https://ui-avatars.com/api/?name=PwC&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'KPMG', logo: 'https://ui-avatars.com/api/?name=KPMG&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'Ernst & Young', logo: 'https://ui-avatars.com/api/?name=EY&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
+        { name: 'Salesforce', logo: 'https://ui-avatars.com/api/?name=Salesforce&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' }
     ];
 
     const staticUnis = [
@@ -262,18 +262,12 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
                                     <img
-                                        src={company.logo || `https://logo.clearbit.com/${company.name?.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`}
+                                        src={company.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`}
                                         alt={company.name}
                                         className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
                                         onError={(e) => {
-                                            if (!e.target.dataset.retried) {
-                                                e.target.dataset.retried = 'true';
-                                                const cleanName = company.name?.toLowerCase().replace(/[^a-z0-9]/g, '');
-                                                e.target.src = `https://logo.clearbit.com/${cleanName}.com`;
-                                            } else {
-                                                e.target.onerror = null;
-                                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=ffffff&color=000&font-size=0.33&bold=true`;
-                                            }
+                                            e.target.onerror = null;
+                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`;
                                         }}
                                     />
                                 </div>
@@ -293,18 +287,12 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
                                     <img
-                                        src={company.logo || `https://logo.clearbit.com/${company.name?.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`}
+                                        src={company.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`}
                                         alt={company.name}
                                         className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
                                         onError={(e) => {
-                                            if (!e.target.dataset.retried) {
-                                                e.target.dataset.retried = 'true';
-                                                const cleanName = company.name?.toLowerCase().replace(/[^a-z0-9]/g, '');
-                                                e.target.src = `https://logo.clearbit.com/${cleanName}.com`;
-                                            } else {
-                                                e.target.onerror = null;
-                                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=ffffff&color=000&font-size=0.33&bold=true`;
-                                            }
+                                            e.target.onerror = null;
+                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`;
                                         }}
                                     />
                                 </div>
