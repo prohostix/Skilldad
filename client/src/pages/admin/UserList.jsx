@@ -80,16 +80,23 @@ const UserList = () => {
         
         // Listen for real-time user list updates via WebSocket
         if (socket) {
+            console.log('[UserList] Setting up WebSocket listener for userListUpdate');
+            
             const handleUserListUpdate = (data) => {
                 console.log('[UserList] Received user list update:', data);
                 
                 if (data.action === 'created') {
+                    console.log('[UserList] Adding new user:', data.user);
                     // Add new user to the list
                     setUsers(prevUsers => {
                         // Check if user already exists (avoid duplicates)
                         const exists = prevUsers.some(u => u._id === data.user._id);
-                        if (exists) return prevUsers;
+                        if (exists) {
+                            console.log('[UserList] User already exists, skipping');
+                            return prevUsers;
+                        }
                         
+                        console.log('[UserList] Adding user to list');
                         // Add new user at the beginning of the list
                         return [data.user, ...prevUsers];
                     });
@@ -97,22 +104,28 @@ const UserList = () => {
                     // Show a subtle notification
                     showToast('success', `New user added: ${data.user.name}`);
                 } else if (data.action === 'updated') {
+                    console.log('[UserList] Updating user:', data.user);
                     // Update existing user
                     setUsers(prevUsers => 
                         prevUsers.map(u => u._id === data.user._id ? { ...u, ...data.user } : u)
                     );
                 } else if (data.action === 'deleted') {
+                    console.log('[UserList] Removing user:', data.user);
                     // Remove user from list
                     setUsers(prevUsers => prevUsers.filter(u => u._id !== data.user._id));
                 }
             };
             
             socket.on('userListUpdate', handleUserListUpdate);
+            console.log('[UserList] WebSocket listener registered');
             
             // Cleanup listener on unmount
             return () => {
+                console.log('[UserList] Cleaning up WebSocket listener');
                 socket.off('userListUpdate', handleUserListUpdate);
             };
+        } else {
+            console.warn('[UserList] Socket not available');
         }
         
         // Auto-refresh every 30 seconds as fallback
@@ -230,10 +243,19 @@ const UserList = () => {
             
             // Add the new user to the list immediately for instant feedback
             if (data.user) {
-                setUsers(prevUsers => [data.user, ...prevUsers]);
+                console.log('[handleInviteUser] Adding user to list:', data.user);
+                setUsers(prevUsers => {
+                    console.log('[handleInviteUser] Previous users count:', prevUsers.length);
+                    const newUsers = [data.user, ...prevUsers];
+                    console.log('[handleInviteUser] New users count:', newUsers.length);
+                    return newUsers;
+                });
+            } else {
+                console.warn('[handleInviteUser] No user data in response');
             }
             
             // Also refresh the full list from server to ensure consistency
+            console.log('[handleInviteUser] Fetching updated user list from server');
             await fetchUsers();
             
             showToast('success', data.message || `Account created for ${inviteData.email}`);
