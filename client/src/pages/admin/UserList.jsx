@@ -160,6 +160,7 @@ const UserList = () => {
 
     const handleInviteUser = async (e) => {
         e.preventDefault();
+        if (inviteSending) return;
         setInviteSending(true);
         try {
             const rawInfo = localStorage.getItem('userInfo');
