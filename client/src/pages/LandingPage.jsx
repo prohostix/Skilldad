@@ -144,30 +144,30 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using UI Avatars as fallback
+    // Prepare partner rows - using official logos from SimpleIcons CDN
     const row1Static = [
-        { name: 'TCS', logo: 'https://ui-avatars.com/api/?name=TCS&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'Infosys', logo: 'https://ui-avatars.com/api/?name=Infosys&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'Capgemini', logo: 'https://ui-avatars.com/api/?name=Capgemini&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'Wipro', logo: 'https://ui-avatars.com/api/?name=Wipro&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'Accenture', logo: 'https://ui-avatars.com/api/?name=Accenture&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'Cognizant', logo: 'https://ui-avatars.com/api/?name=Cognizant&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'HCL Technologies', logo: 'https://ui-avatars.com/api/?name=HCL&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'Tech Mahindra', logo: 'https://ui-avatars.com/api/?name=TM&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'IBM', logo: 'https://ui-avatars.com/api/?name=IBM&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'Deloitte', logo: 'https://ui-avatars.com/api/?name=Deloitte&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' }
+        { name: 'TCS', logo: 'https://img.icons8.com/color/96/tcs.png' },
+        { name: 'Infosys', logo: 'https://img.icons8.com/color/96/infosys.png' },
+        { name: 'Capgemini', logo: 'https://img.icons8.com/color/96/capgemini.png' },
+        { name: 'Wipro', logo: 'https://img.icons8.com/color/96/wipro.png' },
+        { name: 'Accenture', logo: 'https://img.icons8.com/color/96/accenture.png' },
+        { name: 'Cognizant', logo: 'https://img.icons8.com/color/96/cognizant.png' },
+        { name: 'HCL Technologies', logo: 'https://img.icons8.com/color/96/hcl.png' },
+        { name: 'Tech Mahindra', logo: 'https://img.icons8.com/color/96/tech-mahindra.png' },
+        { name: 'IBM', logo: 'https://img.icons8.com/color/96/ibm.png' },
+        { name: 'Deloitte', logo: 'https://img.icons8.com/color/96/deloitte.png' }
     ];
     const row2Static = [
-        { name: 'Google', logo: 'https://ui-avatars.com/api/?name=Google&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'Microsoft', logo: 'https://ui-avatars.com/api/?name=Microsoft&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'Amazon', logo: 'https://ui-avatars.com/api/?name=Amazon&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'Goldman Sachs', logo: 'https://ui-avatars.com/api/?name=GS&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'JP Morgan', logo: 'https://ui-avatars.com/api/?name=JPM&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'McKinsey', logo: 'https://ui-avatars.com/api/?name=McKinsey&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' },
-        { name: 'PwC', logo: 'https://ui-avatars.com/api/?name=PwC&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'KPMG', logo: 'https://ui-avatars.com/api/?name=KPMG&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'Ernst & Young', logo: 'https://ui-avatars.com/api/?name=EY&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true' },
-        { name: 'Salesforce', logo: 'https://ui-avatars.com/api/?name=Salesforce&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2' }
+        { name: 'Google', logo: 'https://img.icons8.com/color/96/google-logo.png' },
+        { name: 'Microsoft', logo: 'https://img.icons8.com/color/96/microsoft.png' },
+        { name: 'Amazon', logo: 'https://img.icons8.com/color/96/amazon.png' },
+        { name: 'Goldman Sachs', logo: 'https://img.icons8.com/color/96/goldman-sachs.png' },
+        { name: 'JP Morgan', logo: 'https://img.icons8.com/color/96/jp-morgan.png' },
+        { name: 'McKinsey', logo: 'https://img.icons8.com/color/96/mckinsey.png' },
+        { name: 'PwC', logo: 'https://img.icons8.com/color/96/pwc.png' },
+        { name: 'KPMG', logo: 'https://img.icons8.com/color/96/kpmg.png' },
+        { name: 'Ernst & Young', logo: 'https://img.icons8.com/color/96/ernst-and-young.png' },
+        { name: 'Salesforce', logo: 'https://img.icons8.com/color/96/salesforce.png' }
     ];
 
     const staticUnis = [
@@ -262,12 +262,13 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
                                     <img
-                                        src={company.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`}
+                                        src={company.logo}
                                         alt={company.name}
                                         className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
                                         onError={(e) => {
                                             e.target.onerror = null;
-                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`;
+                                            const initials = company.name?.split(' ').map(w => w[0]).join('').substring(0, 2) || 'CO';
+                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true`;
                                         }}
                                     />
                                 </div>
@@ -287,12 +288,13 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
                                 <div className="flex items-center gap-3 grayscale-0 opacity-100 transition-all duration-300">
                                     <img
-                                        src={company.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`}
+                                        src={company.logo}
                                         alt={company.name}
                                         className="h-8 md:h-10 w-auto object-contain bg-white/95 p-1.5 rounded-lg border border-white/20"
                                         onError={(e) => {
                                             e.target.onerror = null;
-                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(company.name)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true&length=2`;
+                                            const initials = company.name?.split(' ').map(w => w[0]).join('').substring(0, 2) || 'CO';
+                                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=1a1a2e&color=16f2b3&font-size=0.4&bold=true`;
                                         }}
                                     />
                                 </div>
