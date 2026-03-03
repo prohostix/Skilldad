@@ -228,7 +228,7 @@ const HeroSection = () => {
     const navigate = useNavigate();
     const [partners, setPartners] = React.useState([
         "Oxford Digital", "MIT Horizon", "Stanford Online", "ETH Zurich",
-        "Berkeley Tech", "Cambridge AI", "Global Finance Core", "TechNexus B2B"
+        "Berkeley Tech", "Cambridge AI", "Harvard Tech", "Yale AI"
     ]);
 
     React.useEffect(() => {
@@ -237,10 +237,13 @@ const HeroSection = () => {
                 const response = await fetch('/api/public/partner-logos');
                 const data = await response.json();
                 if (data && data.length > 0) {
-                    setPartners(data.map(logo => logo.name));
+                    const universities = data.filter(logo => logo.type === 'university');
+                    if (universities.length > 0) {
+                        setPartners(universities.map(logo => logo.name));
+                    }
                 }
             } catch (error) {
-                console.error('Failed to fetch partner logos:', error);
+                console.error('Failed to fetch university partner logos:', error);
             }
         };
         fetchPartners();
