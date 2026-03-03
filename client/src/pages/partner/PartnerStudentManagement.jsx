@@ -187,11 +187,6 @@ const PartnerStudentManagement = () => {
                 <div>
                     <DashboardHeading title="Student Management" />
                 </div>
-                <div className="flex gap-3">
-                    <ModernButton variant="primary" onClick={() => setShowRegisterStudentModal(true)}>
-                        <UserPlus size={16} className="mr-2" /> Register Student
-                    </ModernButton>
-                </div>
             </div>
 
             {/* Search and Filter */}
