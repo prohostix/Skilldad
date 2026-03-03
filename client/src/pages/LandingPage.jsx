@@ -144,30 +144,30 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using clearbit for reliable company logos
+    // Prepare partner rows - using Wikimedia SVGs for maximum reliability
     const row1Static = [
-        { name: 'TCS', logo: 'https://logo.clearbit.com/tcs.com' },
-        { name: 'Infosys', logo: 'https://logo.clearbit.com/infosys.com' },
-        { name: 'Capgemini', logo: 'https://logo.clearbit.com/capgemini.com' },
-        { name: 'Wipro', logo: 'https://logo.clearbit.com/wipro.com' },
-        { name: 'Accenture', logo: 'https://logo.clearbit.com/accenture.com' },
-        { name: 'Cognizant', logo: 'https://logo.clearbit.com/cognizant.com' },
-        { name: 'HCL Technologies', logo: 'https://logo.clearbit.com/hcltech.com' },
-        { name: 'Tech Mahindra', logo: 'https://logo.clearbit.com/techmahindra.com' },
-        { name: 'IBM', logo: 'https://logo.clearbit.com/ibm.com' },
-        { name: 'Deloitte', logo: 'https://logo.clearbit.com/deloitte.com' }
+        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg' },
+        { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
+        { name: 'Wipro', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Wipro_Primary_Logo_Color_RGB.svg' },
+        { name: 'Accenture', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Accenture.svg' },
+        { name: 'IBM', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg' },
+        { name: 'HCL Technologies', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b8/HCL_Technologies_logo.svg' },
+        { name: 'Capgemini', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Capgemini_201x_logo.svg' },
+        { name: 'Cognizant', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Cognizant_logo_2022.svg' },
+        { name: 'Tech Mahindra', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Tech_Mahindra_New_Logo.svg' },
+        { name: 'Deloitte', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/56/Deloitte.svg' }
     ];
     const row2Static = [
-        { name: 'Google', logo: 'https://logo.clearbit.com/google.com' },
-        { name: 'Microsoft', logo: 'https://logo.clearbit.com/microsoft.com' },
-        { name: 'Amazon', logo: 'https://logo.clearbit.com/amazon.com' },
-        { name: 'Goldman Sachs', logo: 'https://logo.clearbit.com/goldmansachs.com' },
-        { name: 'JP Morgan', logo: 'https://logo.clearbit.com/jpmorganchase.com' },
-        { name: 'McKinsey', logo: 'https://logo.clearbit.com/mckinsey.com' },
-        { name: 'PwC', logo: 'https://logo.clearbit.com/pwc.com' },
-        { name: 'KPMG', logo: 'https://logo.clearbit.com/kpmg.com' },
-        { name: 'Ernst & Young', logo: 'https://logo.clearbit.com/ey.com' },
-        { name: 'Salesforce', logo: 'https://logo.clearbit.com/salesforce.com' }
+        { name: 'Google', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
+        { name: 'Microsoft', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg' },
+        { name: 'Amazon', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' },
+        { name: 'Meta', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
+        { name: 'Oracle', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg' },
+        { name: 'SAP', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg' },
+        { name: 'Adobe', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8d/Adobe_Corporate_Logo.svg' },
+        { name: 'Intel', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/c9/Intel-logo.svg' },
+        { name: 'Goldman Sachs', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg' },
+        { name: 'Salesforce', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg' }
     ];
 
     const staticUnis = [

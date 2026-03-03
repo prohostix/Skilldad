@@ -190,9 +190,16 @@ const UserList = () => {
         } catch (error) {
             console.error('[handleInviteUser] Error:', error);
             console.error('[handleInviteUser] Error response:', error.response?.data);
-            const msg = error.code === 'ECONNABORTED'
-                ? 'Request timed out. The server may be under load — the account may have been created. Please check the user list.'
-                : (error.response?.data?.message || error.message || 'Failed to create account');
+            
+            let msg = 'Failed to create account';
+            if (error.code === 'ECONNABORTED') {
+                msg = 'Request timed out. The server may be under load — the account may have been created. Please check the user list.';
+            } else if (error.response?.data?.message) {
+                msg = error.response.data.message;
+            } else if (error.message) {
+                msg = error.message;
+            }
+            
             showToast('error', msg);
         } finally {
             setInviteSending(false);
