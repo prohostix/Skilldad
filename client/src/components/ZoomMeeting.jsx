@@ -24,7 +24,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
     const initializeZoom = async () => {
       // Small pre-flight delay to ensure DOM and libraries are fully ready
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 100));
 
       // Prevent multiple initialization attempts
       if (!sessionId || initializationInProgress.current || isInitializedRef.current) {
@@ -66,10 +66,10 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         // Wait for the DOM element to be ready
         let retryCount = 0;
-        const maxRetries = 30;
+        const maxRetries = 20; // Reduced retries
         while (!meetingSDKElement.current && retryCount < maxRetries && mounted) {
           retryCount++;
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 50)); // Faster polling
         }
 
         if (!meetingSDKElement.current) {
@@ -100,11 +100,10 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
           }
         });
 
-        // CRITICAL: Wait for SDK to stabilize media caps before joining
-        // Increased to 3s to handle slower first-time loads
-        console.log('[Zoom] SDK initialized. Stabilization delay (3s)...');
+        // Optimized stabilization delay to remove perceived lag
+        console.log('[Zoom] SDK initialized. Stabilization delay (800ms)...');
         if (!mounted) return;
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 800));
 
         console.log('[Zoom] Joining meeting...');
 
