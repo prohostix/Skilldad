@@ -1110,15 +1110,8 @@ const getZoomSDKConfig = asyncHandler(async (req, res) => {
         throw new Error('Zoom SDK configuration error');
     }
 
-    // Decrypt the passcode before sending to client
-    let decryptedPasscode;
-    try {
-        decryptedPasscode = decryptPasscode(session.zoom.passcode);
-    } catch (error) {
-        console.error('[Zoom SDK] Passcode decryption failed:', error.message);
-        res.status(500);
-        throw new Error('Failed to decrypt meeting passcode');
-    }
+    // Decrypt the passcode (utility handles errors internally)
+    const decryptedPasscode = decryptPasscode(session.zoom.passcode);
 
     // Return SDK config object with all required fields
     const sdkConfig = {

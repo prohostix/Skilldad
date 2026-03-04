@@ -86,8 +86,9 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         await client.init({
           zoomAppRoot: meetingSDKElement.current,
           language: 'en-US',
-          patchJsMedia: true,
-          leaveOnPageUnload: true
+          patchJsMedia: false, // Changed from true to false to resolve 'caps' error
+          leaveOnPageUnload: true,
+          sdkKey: sdkConfig.sdkKey // Adding it back to init for older version compatibility
         });
 
         console.log('[Zoom] SDK initialized, joining meeting...');
@@ -95,6 +96,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         if (!mounted) return;
 
         await client.join({
+          sdkKey: sdkConfig.sdkKey, // Added sdkKey back for compatibility
           signature: sdkConfig.signature,
           meetingNumber: sdkConfig.meetingNumber,
           password: sdkConfig.passWord,
