@@ -641,160 +641,88 @@ const LiveSessionsHub = () => {
                     {/* Left: Session Lists */}
                     <div className="lg:col-span-2 space-y-10">
 
-                        {/* Live Now */}
-                        {liveNow.length > 0 && (
-                            <section className="space-y-4">
-                                <h3 className="text-[11px] font-black text-red-500 uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <span className="w-1.5 h-5 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.8)] inline-block animate-pulse" />
-                                    Live Now
-                                </h3>
-                                {liveNow.map(session => (
-                                    <GlassCard key={session.id} className="p-5 border-red-500/30 bg-red-500/5 hover:border-red-500/40 transition-all relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-28 h-28 bg-red-500/10 rounded-full blur-3xl -mr-14 -mt-14 pointer-events-none" />
-                                        <div className="flex flex-col sm:flex-row justify-between gap-4 relative z-10">
-                                            <div className="flex gap-3">
-                                                <div className="h-11 w-11 rounded-xl bg-red-500/15 flex items-center justify-center text-red-500 border border-red-500/20 shrink-0">
-                                                    <Radio size={20} className="animate-pulse" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-white">{session.title}</h4>
-                                                    <p className="text-white/45 text-xs">{session.course} · <span className="text-red-400">{session.instructor}</span></p>
-                                                    <div className="flex gap-3 mt-1.5">
-                                                        <span className="text-[11px] text-white/35 flex items-center gap-1"><Users size={11} /> {session.enrolledStudents} watching</span>
-                                                        <span className="text-[11px] text-white/35 flex items-center gap-1"><Clock size={11} /> {session.time}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2 self-center">
-                                                <ModernButton
-                                                    className="bg-red-500 hover:bg-red-600 text-sm px-4 py-2 h-9"
-                                                    onClick={() => handleEnterStudio(session.id)}
-                                                >
-                                                    Enter Studio
-                                                </ModernButton>
-                                                {notifyBtn(session.id)}
-                                            </div>
-                                        </div>
-                                    </GlassCard>
-                                ))}
-                            </section>
-                        )}
-
-                        {/* Upcoming */}
-                        <section className="space-y-4">
+                        <section className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-[11px] font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <span className="w-1.5 h-5 bg-primary rounded-full shadow-[0_0_10px_rgba(124,58,237,0.7)] inline-block" />
-                                    Upcoming Sessions
-                                </h3>
+                                <h2 className="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                                    <span className="w-2 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(124,58,237,0.5)] inline-block" />
+                                    All Live Sessions
+                                </h2>
                                 <button
                                     onClick={() => setShowModal(true)}
-                                    className="flex items-center gap-1 text-[11px] font-bold text-primary/60 hover:text-primary transition-colors"
+                                    className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-bold hover:bg-primary/20 transition-all flex items-center gap-2"
                                 >
-                                    <Plus size={13} /> Schedule
+                                    <Plus size={16} /> Schedule New
                                 </button>
                             </div>
 
-                            {upcoming.length === 0 ? (
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center min-h-[200px] gap-4">
+                                    <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                    <p className="text-white/30 text-sm font-medium animate-pulse">Loading sessions…</p>
+                                </div>
+                            ) : liveSessions.length === 0 ? (
                                 <div
                                     onClick={() => setShowModal(true)}
-                                    className="py-14 text-center border-2 border-dashed border-white/10 bg-white/[0.01] rounded-2xl cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                                    className="py-20 text-center border-2 border-dashed border-white/10 bg-white/[0.01] rounded-3xl cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all group"
                                 >
-                                    <Plus size={30} className="mx-auto mb-3 text-white/20 group-hover:text-primary/60 transition-all" />
-                                    <p className="text-sm font-medium text-white/25 group-hover:text-white/40">
-                                        No sessions scheduled — click to create one
+                                    <Video size={40} className="mx-auto mb-4 text-white/10 group-hover:text-primary/40 transition-all" />
+                                    <p className="text-base font-medium text-white/20 group-hover:text-white/40 mb-1">
+                                        No live sessions found
                                     </p>
+                                    <p className="text-xs text-white/10 group-hover:text-white/20">Click to schedule your first session</p>
                                 </div>
                             ) : (
-                                <div className="grid gap-4">
-                                    {upcoming.map(session => (
-                                        <GlassCard key={session.id} className="p-5 group relative overflow-hidden border-white/10 hover:border-primary/30 transition-all duration-400">
-                                            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-primary/10 transition-all pointer-events-none" />
-                                            <div className="flex flex-col sm:flex-row justify-between gap-4 relative z-10">
-                                                <div className="flex gap-3">
-                                                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/20 to-primary-dark/20 flex items-center justify-center text-primary border border-primary/20 shrink-0 group-hover:scale-110 transition-transform duration-400">
-                                                        <Video size={20} />
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-white group-hover:text-primary transition-colors">{session.title}</h4>
-                                                        <p className="text-white/45 text-xs">{session.course} · <span className="text-primary/70">{session.instructor}</span></p>
-                                                        <div className="flex flex-wrap gap-2 mt-2.5">
-                                                            <span className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-lg border border-white/5 text-[11px] font-bold text-white/55">
-                                                                <Calendar size={11} className="text-primary" /> {session.date}
-                                                            </span>
-                                                            <span className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-lg border border-white/5 text-[11px] font-bold text-white/55">
-                                                                <Clock size={11} className="text-primary" /> {session.time} ({session.duration})
-                                                            </span>
-                                                            <span className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-lg border border-white/5 text-[11px] font-bold text-white/55">
-                                                                <Users size={11} className="text-primary" /> {session.enrolledStudents} enrolled
-                                                            </span>
+                                <div className="grid gap-5">
+                                    {liveSessions
+                                        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                                        .map(session => (
+                                            <GlassCard key={session.id} className={`p-5 group relative overflow-hidden transition-all duration-400 border-white/10 hover:border-primary/30 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/20' : ''}`}>
+                                                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-primary/10 transition-all pointer-events-none" />
+                                                <div className="flex flex-col sm:flex-row justify-between gap-5 relative z-10">
+                                                    <div className="flex gap-4">
+                                                        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-400 group-hover:scale-110 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/20 text-red-500' : 'bg-primary/10 border-primary/20 text-primary'}`}>
+                                                            {session.status === 'live' ? <Radio size={22} className="animate-pulse" /> : <Video size={22} />}
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <h4 className="font-bold text-white text-lg group-hover:text-primary transition-colors">{session.title}</h4>
+                                                                {session.status === 'live' && (
+                                                                    <span className="px-2 py-0.5 rounded-md bg-red-500 text-[9px] font-black text-white uppercase animate-pulse">Live</span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-white/40 text-xs mb-3">{session.course} · <span className="text-primary/70">{session.instructor}</span></p>
+                                                            <div className="flex flex-wrap gap-2.5">
+                                                                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/5 text-[11px] font-bold text-white/50">
+                                                                    <Calendar size={12} className="text-primary" /> {session.date}
+                                                                </span>
+                                                                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/5 text-[11px] font-bold text-white/50">
+                                                                    <Clock size={12} className="text-primary" /> {session.time} · {session.duration}
+                                                                </span>
+                                                                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/5 text-[11px] font-bold text-white/50">
+                                                                    <Users size={12} className="text-primary" /> {session.enrolledStudents} enrolled
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div className="flex gap-2 self-center shrink-0">
-                                                    {notifyBtn(session.id)}
-                                                    {session.meetingLink ? (
+                                                    <div className="flex gap-2 self-center shrink-0">
+                                                        {notifyBtn(session.id)}
                                                         <ModernButton
                                                             variant="primary"
-                                                            className="text-xs px-4 py-2 h-9"
-                                                            onClick={() => handleJoinMeeting(session.meetingLink)}
+                                                            className="text-xs px-5 py-2 h-10 shadow-lg shadow-primary/20"
+                                                            onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
                                                         >
-                                                            Join
+                                                            {session.status === 'live' ? 'Studio' : (session.meetingLink ? 'Join' : 'Prepare')}
                                                         </ModernButton>
-                                                    ) : (
-                                                        <ModernButton
-                                                            variant="primary"
-                                                            className="text-xs px-4 py-2 h-9"
-                                                            onClick={() => handleEnterStudio(session.id)}
-                                                        >
-                                                            Studio
-                                                        </ModernButton>
-                                                    )}
-                                                    <button className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/35 hover:text-white hover:bg-white/8 transition-all">
-                                                        <MoreVertical size={15} />
-                                                    </button>
+                                                        <button className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/30 hover:text-white hover:bg-white/10 transition-all">
+                                                            <MoreVertical size={18} />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </GlassCard>
-                                    ))}
+                                            </GlassCard>
+                                        ))}
                                 </div>
                             )}
                         </section>
-
-                        {/* Past Sessions */}
-                        {past.length > 0 && (
-                            <section className="space-y-4">
-                                <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <span className="w-1.5 h-5 bg-white/10 rounded-full inline-block" />
-                                    Session History
-                                </h3>
-                                <div className="grid gap-3">
-                                    {past.map(session => (
-                                        <GlassCard key={session.id} className="p-4 border-white/5 bg-white/[0.01] hover:bg-white/[0.04] transition-all group">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="p-2.5 bg-white/5 rounded-xl text-white/20 group-hover:text-emerald-400 group-hover:bg-emerald-400/10 transition-all border border-transparent group-hover:border-emerald-500/20">
-                                                        <VideoOff size={16} />
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-white/65 group-hover:text-white transition-colors text-sm">{session.title}</h4>
-                                                        <p className="text-white/30 text-[11px] mt-0.5">{session.date} · {session.duration} · {session.enrolledStudents} attended</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2 shrink-0">
-                                                    <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white/35 hover:text-white hover:bg-white/10 text-[11px] font-bold transition-all">
-                                                        Recording
-                                                    </button>
-                                                    <button className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white/25 hover:text-white hover:bg-white/10 transition-all">
-                                                        <MoreVertical size={13} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </GlassCard>
-                                    ))}
-                                </div>
-                            </section>
-                        )}
                     </div>
 
                     {/* Right Sidebar */}

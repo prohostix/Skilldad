@@ -107,7 +107,7 @@ const LiveClasses = () => {
         };
     };
 
-    const renderSessionCard = (session, index, isCompleted = false) => {
+    const renderSessionCard = (session, index) => {
         const { day, time } = formatDate(session.startTime);
         return (
             <motion.div
@@ -116,10 +116,10 @@ const LiveClasses = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
             >
-                <GlassCard className={`h-full flex flex-col group hover:border-primary/50 transition-all duration-500 overflow-hidden ${isCompleted ? 'grayscale-[0.5] opacity-80' : ''}`}>
+                <GlassCard className="h-full flex flex-col group hover:border-primary/50 transition-all duration-500 overflow-hidden">
                     <div className="p-4 pb-0 flex justify-between items-start">
-                        <div className={`px-3 py-1 rounded-full ${isCompleted ? 'bg-white/5 border-white/10' : 'bg-primary/10 border-primary/20'} border`}>
-                            <span className={`text-[10px] font-bold uppercase tracking-widest ${isCompleted ? 'text-white/40' : 'text-primary'}`}>
+                        <div className="bg-primary/10 border-primary/20 border px-3 py-1 rounded-full">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
                                 {session.category || 'General'}
                             </span>
                         </div>
@@ -130,7 +130,7 @@ const LiveClasses = () => {
                     </div>
 
                     <div className="p-4 flex-1">
-                        <h3 className={`text-lg font-bold text-white mb-1 transition-colors ${!isCompleted && 'group-hover:text-primary'}`}>{session.topic}</h3>
+                        <h3 className="text-lg font-bold text-white mb-1 transition-colors group-hover:text-primary">{session.topic}</h3>
                         {session.course && (
                             <p className="text-primary/80 text-xs font-semibold mb-2">
                                 {session.course.title}
@@ -140,7 +140,7 @@ const LiveClasses = () => {
 
                         <div className="space-y-2">
                             <div className="flex items-center gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5">
-                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-primary/20 text-primary'}`}>
+                                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20 text-primary">
                                     <Calendar size={18} />
                                 </div>
                                 <div>
@@ -150,7 +150,7 @@ const LiveClasses = () => {
                             </div>
 
                             <div className="flex items-center gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5">
-                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-500/20 text-emerald-400">
                                     <Users size={18} />
                                 </div>
                                 <div>
@@ -166,16 +166,9 @@ const LiveClasses = () => {
                             onClick={() => handleJoin(session)}
                             className="w-full justify-center group/btn"
                             variant={session.status === 'live' ? 'primary' : 'secondary'}
-                            disabled={isCompleted && session.status !== 'live'}
                         >
-                            {isCompleted ? (
-                                <span className="flex items-center gap-2">Completed</span>
-                            ) : (
-                                <>
-                                    <Play size={18} className="mr-2 fill-white group-hover/btn:scale-110 transition-transform" />
-                                    {session.status === 'live' ? 'Watch Live Stream' : 'Join Session'}
-                                </>
-                            )}
+                            <Play size={18} className="mr-2 fill-white group-hover/btn:scale-110 transition-transform" />
+                            {session.status === 'live' ? 'Watch Live Stream' : 'Join Session'}
                         </ModernButton>
                     </div>
                 </GlassCard>
@@ -223,48 +216,18 @@ const LiveClasses = () => {
                 </div>
             )}
 
-            {/* Active Sessions */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <h2 className="text-xs font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-                        Upcoming & Live
-                    </h2>
-                    <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent"></div>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {sessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
-                        <GlassCard className="col-span-full p-12 text-center border-dashed border-white/10">
-                            <Video size={32} className="text-white/10 mx-auto mb-3" />
-                            <p className="text-white/40 text-sm">No active sessions at the moment.</p>
-                        </GlassCard>
-                    ) : (
-                        sessions
-                            .filter(s => s.status !== 'ended' && s.status !== 'archived')
-                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-                            .map((session, index) => renderSessionCard(session, index, false))
-                    )}
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {sessions.length === 0 ? (
+                    <GlassCard className="col-span-full p-12 text-center border-dashed border-white/10">
+                        <Video size={32} className="text-white/10 mx-auto mb-3" />
+                        <p className="text-white/40 text-sm">No live sessions available at the moment.</p>
+                    </GlassCard>
+                ) : (
+                    sessions
+                        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                        .map((session, index) => renderSessionCard(session, index))
+                )}
             </div>
-
-            {/* Completed Sessions */}
-            {sessions.filter(s => s.status === 'ended' || s.status === 'archived').length > 0 && (
-                <div className="space-y-6 pt-10">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-xs font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2">
-                            <Clock size={14} />
-                            Completed Live Sessions
-                        </h2>
-                        <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
-                    </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {sessions
-                            .filter(s => s.status === 'ended' || s.status === 'archived')
-                            .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
-                            .map((session, index) => renderSessionCard(session, index, true))}
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
