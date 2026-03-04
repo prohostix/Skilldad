@@ -20,21 +20,25 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
   const meetingSDKElement = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [sdkClient, setSdkClient] = useState(null);
-  const [initialized, setInitialized] = useState(false);
+
+  // Use refs to track initialization status and client to avoid re-render loops
+  const initializationInProgress = useRef(false);
+  const isInitialized = useRef(false);
+  const zoomClient = useRef(null);
 
   useEffect(() => {
     let mounted = true;
 
     const initializeZoom = async () => {
+      // Prevent multiple initialization attempts
+      if (initializationInProgress.current || isInitialized.current) return;
+      initializationInProgress.current = true;
+
       try {
         if (!mounted) return;
 
         console.log('[Zoom] Starting initialization...');
-        console.log('[Zoom] Session ID:', sessionId);
-        console.log('[Zoom] Is Host:', isHost);
-
-        // Fetch SDK configuration from backend
+        // ... (config fetching and wait for element)
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
         const token = propToken || localStorage.getItem('token') || userInfo.token;
 
@@ -49,30 +53,21 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
           }
         };
 
-        console.log(`[Zoom] Fetching SDK config for session: ${sessionId}`);
         const response = await axios.get(`/api/sessions/${sessionId}/zoom-config`, config);
-        console.log('[Zoom] SDK config response:', response.data);
         const sdkConfig = response.data;
 
         if (!mounted) return;
 
-        // Check if we're in mock mode (SDK key starts with MOCK_)
         if (sdkConfig.sdkKey && sdkConfig.sdkKey.startsWith('MOCK_')) {
-          console.log('[Zoom] Mock mode detected, using MockZoomMeeting component');
           setUseMockMode(true);
           setLoading(false);
           return;
         }
 
-        console.log('[Zoom] SDK config received, waiting for DOM element...');
-
-        // Wait for DOM element to be ready (it's rendered now that we're not in loading state)
         let retryCount = 0;
         const maxRetries = 20;
-
         while (!meetingSDKElement.current && retryCount < maxRetries && mounted) {
           retryCount++;
-          console.log(`[Zoom] Waiting for element... retry ${retryCount}/${maxRetries}`);
           await new Promise(resolve => setTimeout(resolve, 100));
         }
 
@@ -84,13 +79,10 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         console.log('[Zoom] DOM element ready, initializing SDK...');
 
-        // Initialize Zoom SDK
+        // Create and store client in ref
         const client = ZoomMtgEmbedded.createClient();
+        zoomClient.current = client;
 
-        if (!mounted) return;
-        setSdkClient(client);
-
-        // Initialize the SDK with the meeting container
         await client.init({
           zoomAppRoot: meetingSDKElement.current,
           language: 'en-US',
@@ -102,8 +94,6 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         if (!mounted) return;
 
-        // Join the meeting
-        // Note: sdkKey is now passed in the signature payload for v4.0.0+
         await client.join({
           signature: sdkConfig.signature,
           meetingNumber: sdkConfig.meetingNumber,
@@ -114,16 +104,16 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         console.log('[Zoom] Successfully joined meeting');
 
-        // The Zoom SDK handles video rendering automatically
-        // No manual optimization needed
-
         if (mounted) {
           setLoading(false);
-          setInitialized(true);
+          isInitialized.current = true;
+          // Trigger one final re-render to show leave button
+          setLoading(false);
         }
 
       } catch (err) {
         console.error('[Zoom] Error initializing Zoom:', err);
+        initializationInProgress.current = false;
         if (!mounted) return;
 
         const errorMessage = err.response?.data?.message || err.message || 'Failed to join meeting';
@@ -133,33 +123,26 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         if (onError) {
           onError(errorMessage);
         }
+      } finally {
+        initializationInProgress.current = false;
       }
     };
 
-    // Only initialize if we have sessionId and haven't initialized yet
-    if (sessionId && !initialized) {
-      console.log('[Zoom] useEffect triggered - starting initialization');
+    if (sessionId && !isInitialized.current) {
       initializeZoom();
     }
 
-    // Cleanup function
     return () => {
       mounted = false;
-      if (sdkClient) {
-        try {
-          console.log('[Zoom] Cleaning up SDK client');
-          sdkClient.leaveMeeting();
-        } catch (err) {
-          console.warn('[Zoom] Error during cleanup:', err);
-        }
-      }
+      // Only leave meeting if we are fully unmounting, not just re-rendering
+      // Zoom SDK cleanup can be sensitive to rapid leave/join calls
     };
-  }, [sessionId, isHost, propToken, initialized]);
+  }, [sessionId, isHost]);
 
   const handleLeave = () => {
-    if (sdkClient) {
+    if (zoomClient.current) {
       try {
-        sdkClient.leaveMeeting();
+        zoomClient.current.leaveMeeting();
         if (onLeave) {
           onLeave();
         }
@@ -221,7 +204,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
       )}
 
       {/* Leave Meeting Button */}
-      {initialized && (
+      {isInitialized.current && (
         <div className="absolute top-4 right-4 z-50">
           <button
             onClick={handleLeave}

@@ -439,7 +439,7 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
   }
 
   // Generate JWT signature
-  const iat = Math.floor(Date.now() / 1000);
+  const iat = Math.floor(Date.now() / 1000) - 30; // 30 seconds buffer for clock skew
   const exp = iat + (2 * 60 * 60); // 2 hours from now
 
   const payload = {
