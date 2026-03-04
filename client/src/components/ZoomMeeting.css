@@ -3,13 +3,23 @@
   width: 100%;
   height: 100%;
   position: relative;
-  overflow: hidden;
+  overflow: visible !important;
+  z-index: 10;
 }
 
-/* Ensure Zoom's root container fills the space */
-.zoom-meeting-container > div {
+/* Ensure Zoom's root container fills the space and doesn't hide overlays */
+.zoom-meeting-container>div {
   width: 100%;
   height: 100%;
+  overflow: visible !important;
+}
+
+/* Fix for Zoom internal overlays/modals to ensure they appear on top */
+.zoom-meeting-container .zm-modal,
+.zoom-meeting-container .zm-dialog,
+.zoom-meeting-container .chat-container,
+.zoom-meeting-container .settings-dialog {
+  z-index: 9999 !important;
 }
 
 /* Make video canvas fill available space */

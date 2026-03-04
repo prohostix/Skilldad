@@ -23,6 +23,7 @@ import { render, waitFor, act } from '@testing-library/react';
 import axios from 'axios';
 import UserList from '../pages/admin/UserList';
 import React from 'react';
+import { useSocket } from '../context/SocketContext';
 
 // Mock axios
 vi.mock('axios');
@@ -150,7 +151,6 @@ describe('Property 2: Preservation - Non-Invite WebSocket Behavior and Manual Re
   it('Test Case 1: WebSocket listener is registered for userListUpdate events', async () => {
     console.log('\n[PRESERVATION TEST] Test Case 1: WebSocket Listener Registration');
     
-    const { useSocket } = await import('../context/SocketContext');
     useSocket.mockReturnValue(mockSocket);
 
     render(<UserList />);
@@ -172,7 +172,6 @@ describe('Property 2: Preservation - Non-Invite WebSocket Behavior and Manual Re
   it('Test Case 2: WebSocket update action triggers state update', async () => {
     console.log('\n[PRESERVATION TEST] Test Case 2: WebSocket Update Action');
     
-    const { useSocket } = await import('../context/SocketContext');
     useSocket.mockReturnValue(mockSocket);
 
     render(<UserList />);

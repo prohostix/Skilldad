@@ -150,7 +150,7 @@ const SessionDetail = () => {
   if (inMeeting) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0b2e] to-[#0a0118] p-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto relative z-20 overflow-visible">
           <ZoomMeeting
             sessionId={sessionId}
             isHost={isHost}
@@ -181,8 +181,8 @@ const SessionDetail = () => {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
                 <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${session.status === 'live' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                    session.status === 'scheduled' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                      'bg-white/10 text-white/60 border border-white/20'
+                  session.status === 'scheduled' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                    'bg-white/10 text-white/60 border border-white/20'
                   }`}>
                   {session.status === 'live' ? '🔴 Live Now' :
                     session.status === 'scheduled' ? '📅 Scheduled' :
