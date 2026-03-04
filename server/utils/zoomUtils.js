@@ -423,7 +423,7 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
 
   // Check Redis cache if sessionId and userId are provided
   if (sessionId && userId) {
-    const cacheKey = `zoom:sig:${sessionId}:${userId}:${role}`;
+    const cacheKey = `zoom:sig:v2:${sessionId}:${userId}:${role}`;
     try {
       const r = redisCache.getRedis();
       if (r) {
@@ -464,7 +464,7 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
 
     // Cache signature for 1 hour if sessionId and userId are provided
     if (sessionId && userId) {
-      const cacheKey = `zoom:sig:${sessionId}:${userId}:${role}`;
+      const cacheKey = `zoom:sig:v2:${sessionId}:${userId}:${role}`;
       const cacheTTL = 60 * 60; // 1 hour in seconds
       try {
         const r = redisCache.getRedis();
