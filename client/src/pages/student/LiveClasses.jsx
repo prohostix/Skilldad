@@ -117,7 +117,7 @@ const LiveClasses = () => {
                 transition={{ delay: index * 0.1 }}
             >
                 <GlassCard className={`h-full flex flex-col group hover:border-primary/50 transition-all duration-500 overflow-hidden ${isCompleted ? 'grayscale-[0.5] opacity-80' : ''}`}>
-                    <div className="p-6 pb-0 flex justify-between items-start">
+                    <div className="p-4 pb-0 flex justify-between items-start">
                         <div className={`px-3 py-1 rounded-full ${isCompleted ? 'bg-white/5 border-white/10' : 'bg-primary/10 border-primary/20'} border`}>
                             <span className={`text-[10px] font-bold uppercase tracking-widest ${isCompleted ? 'text-white/40' : 'text-primary'}`}>
                                 {session.category || 'General'}
@@ -129,14 +129,19 @@ const LiveClasses = () => {
                         </div>
                     </div>
 
-                    <div className="p-6 flex-1">
-                        <h3 className={`text-xl font-bold text-white mb-2 transition-colors ${!isCompleted && 'group-hover:text-primary'}`}>{session.topic}</h3>
-                        <p className="text-white/50 text-sm line-clamp-2 mb-6">{session.description}</p>
+                    <div className="p-4 flex-1">
+                        <h3 className={`text-lg font-bold text-white mb-1 transition-colors ${!isCompleted && 'group-hover:text-primary'}`}>{session.topic}</h3>
+                        {session.course && (
+                            <p className="text-primary/80 text-xs font-semibold mb-2">
+                                {session.course.title}
+                            </p>
+                        )}
+                        <p className="text-white/50 text-sm line-clamp-2 mb-4">{session.description}</p>
 
-                        <div className="space-y-3">
-                            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-primary/20 text-primary'}`}>
-                                    <Calendar size={20} />
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5">
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-primary/20 text-primary'}`}>
+                                    <Calendar size={18} />
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Date & Time</p>
@@ -144,9 +149,9 @@ const LiveClasses = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
-                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                                    <Users size={20} />
+                            <div className="flex items-center gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5">
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                    <Users size={18} />
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Instructor</p>
@@ -156,7 +161,7 @@ const LiveClasses = () => {
                         </div>
                     </div>
 
-                    <div className="p-6 pt-0 mt-auto">
+                    <div className="p-4 pt-0 mt-auto">
                         <ModernButton
                             onClick={() => handleJoin(session)}
                             className="w-full justify-center group/btn"
