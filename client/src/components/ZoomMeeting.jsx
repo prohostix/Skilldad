@@ -90,7 +90,14 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
           patchJsMedia: false, // Essential for 'caps' error prevention
           leaveOnPageUnload: true,
           sdkKey: sdkConfig.sdkKey,
-          appKey: sdkConfig.sdkKey
+          appKey: sdkConfig.sdkKey,
+          video: {
+            isResizable: true,
+            viewSizes: {
+              default: { width: '100%', height: '100%' },
+              ribbon: { width: 300, height: 700 }
+            }
+          }
         });
 
         // CRITICAL: Wait for SDK to stabilize media caps before joining
@@ -110,7 +117,8 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
             userName: sdkConfig.userName,
             userEmail: sdkConfig.userEmail,
             sdkKey: sdkConfig.sdkKey,
-            appKey: sdkConfig.sdkKey
+            appKey: sdkConfig.sdkKey,
+            galleryViewColumnSize: 9 // Show maximum students (up to 9 in current SDK ribbon/grid)
           });
         } catch (joinErr) {
           console.warn('[Zoom] Initial join failed, retrying legacy...', joinErr);
@@ -121,6 +129,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
             password: sdkConfig.passWord,
             userName: sdkConfig.userName,
             userEmail: sdkConfig.userEmail,
+            galleryViewColumnSize: 9
           });
         }
 
