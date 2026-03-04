@@ -225,18 +225,48 @@ const LiveClasses = () => {
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {sessions.length === 0 ? (
-                    <GlassCard className="col-span-full p-12 text-center border-dashed border-white/10">
-                        <Video size={32} className="text-white/10 mx-auto mb-3" />
-                        <p className="text-white/40 text-sm">No live sessions available at the moment.</p>
-                    </GlassCard>
-                ) : (
-                    sessions
-                        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-                        .map((session, index) => renderSessionCard(session, index))
-                )}
+            {/* Upcoming & Live Sessions */}
+            <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                    <h2 className="text-xs font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                        Upcoming & Live
+                    </h2>
+                    <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent"></div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {sessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
+                        <GlassCard className="col-span-full p-12 text-center border-dashed border-white/10">
+                            <Video size={32} className="text-white/10 mx-auto mb-3" />
+                            <p className="text-white/40 text-sm">No upcoming or live sessions at the moment.</p>
+                        </GlassCard>
+                    ) : (
+                        sessions
+                            .filter(s => s.status !== 'ended' && s.status !== 'archived')
+                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                            .map((session, index) => renderSessionCard(session, index))
+                    )}
+                </div>
             </div>
+
+            {/* Completed Sessions */}
+            {sessions.filter(s => s.status === 'ended' || s.status === 'archived').length > 0 && (
+                <div className="space-y-6 pt-10">
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-xs font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2">
+                            <Clock size={14} />
+                            Completed Sessions
+                        </h2>
+                        <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {sessions
+                            .filter(s => s.status === 'ended' || s.status === 'archived')
+                            .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+                            .map((session, index) => renderSessionCard(session, index))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
