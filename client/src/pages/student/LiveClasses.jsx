@@ -28,6 +28,7 @@ const LiveClasses = () => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedCourse, setSelectedCourse] = useState('all');
     const navigate = useNavigate();
 
     const fetchSessions = async () => {
@@ -106,6 +107,14 @@ const LiveClasses = () => {
             time: date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
         };
     };
+
+    // Get unique courses from sessions
+    const uniqueCourses = [...new Set(sessions.map(s => s.course?.title).filter(Boolean))];
+
+    // Filter sessions based on selected course
+    const filteredSessions = selectedCourse === 'all' 
+        ? sessions 
+        : sessions.filter(s => s.course?.title === selectedCourse);
 
     const renderSessionCard = (session, index) => {
         const { day, time } = formatDate(session.startTime);
@@ -198,12 +207,28 @@ const LiveClasses = () => {
                     <DashboardHeading title="Live Learning Hub" />
                     <p className="text-white/50 mt-1">Join interactive sessions with world-class instructors.</p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-4 flex-wrap items-center">
+                    {/* Course Filter */}
+                    {uniqueCourses.length > 0 && (
+                        <select
+                            value={selectedCourse}
+                            onChange={(e) => setSelectedCourse(e.target.value)}
+                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-semibold hover:border-primary/50 transition-all focus:outline-none focus:border-primary"
+                        >
+                            <option value="all" className="bg-[#0a0a0a]">All Courses</option>
+                            {uniqueCourses.map((course, index) => (
+                                <option key={index} value={course} className="bg-[#0a0a0a]">
+                                    {course}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                    
                     <GlassCard className="px-4 py-2 flex items-center gap-2 border-primary/30">
                         <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                         <span className="text-white text-xs font-bold uppercase tracking-wider">
-                            {sessions.filter(s => s.status === 'live').length > 0
-                                ? `Live Now: ${sessions.filter(s => s.status === 'live').length} Session`
+                            {filteredSessions.filter(s => s.status === 'live').length > 0
+                                ? `Live Now: ${filteredSessions.filter(s => s.status === 'live').length} Session`
                                 : 'No Live Sessions'}
                         </span>
                     </GlassCard>
@@ -233,15 +258,24 @@ const LiveClasses = () => {
                         Upcoming & Live
                     </h2>
                     <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent"></div>
+                    {selectedCourse !== 'all' && (
+                        <span className="text-xs text-white/40">
+                            Filtered by: <span className="text-primary font-semibold">{selectedCourse}</span>
+                        </span>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {sessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
+                    {filteredSessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
                         <GlassCard className="col-span-full p-12 text-center border-dashed border-white/10">
                             <Video size={32} className="text-white/10 mx-auto mb-3" />
-                            <p className="text-white/40 text-sm">No upcoming or live sessions at the moment.</p>
+                            <p className="text-white/40 text-sm">
+                                {selectedCourse === 'all' 
+                                    ? 'No upcoming or live sessions at the moment.' 
+                                    : `No upcoming or live sessions for ${selectedCourse}.`}
+                            </p>
                         </GlassCard>
                     ) : (
-                        sessions
+                        filteredSessions
                             .filter(s => s.status !== 'ended' && s.status !== 'archived')
                             .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
                             .map((session, index) => renderSessionCard(session, index))
@@ -250,7 +284,7 @@ const LiveClasses = () => {
             </div>
 
             {/* Completed Sessions */}
-            {sessions.filter(s => s.status === 'ended' || s.status === 'archived').length > 0 && (
+            {filteredSessions.filter(s => s.status === 'ended' || s.status === 'archived').length > 0 && (
                 <div className="space-y-6 pt-10">
                     <div className="flex items-center gap-4">
                         <h2 className="text-xs font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -260,7 +294,7 @@ const LiveClasses = () => {
                         <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {sessions
+                        {filteredSessions
                             .filter(s => s.status === 'ended' || s.status === 'archived')
                             .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
                             .map((session, index) => renderSessionCard(session, index))}
