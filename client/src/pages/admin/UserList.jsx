@@ -83,14 +83,14 @@ const UserList = () => {
     useEffect(() => {
         fetchUsers();
         fetchUniversities();
-        
+
         // Listen for real-time user list updates via WebSocket
         if (socket) {
             console.log('[UserList] Setting up WebSocket listener for userListUpdate');
-            
+
             const handleUserListUpdate = (data) => {
                 console.log('[UserList] Received user list update:', data);
-                
+
                 if (data.action === 'created') {
                     console.log('[UserList] Adding new user:', data.user);
                     // Add new user to the list
@@ -101,18 +101,18 @@ const UserList = () => {
                             console.log('[UserList] User already exists, skipping');
                             return prevUsers;
                         }
-                        
+
                         console.log('[UserList] Adding user to list');
                         // Add new user at the beginning of the list
                         return [data.user, ...prevUsers];
                     });
-                    
+
                     // Show a subtle notification
                     showToast('success', `New user added: ${data.user.name}`);
                 } else if (data.action === 'updated') {
                     console.log('[UserList] Updating user:', data.user);
                     // Update existing user
-                    setUsers(prevUsers => 
+                    setUsers(prevUsers =>
                         prevUsers.map(u => u._id === data.user._id ? { ...u, ...data.user } : u)
                     );
                 } else if (data.action === 'deleted') {
@@ -121,10 +121,10 @@ const UserList = () => {
                     setUsers(prevUsers => prevUsers.filter(u => u._id !== data.user._id));
                 }
             };
-            
+
             socket.on('userListUpdate', handleUserListUpdate);
             console.log('[UserList] WebSocket listener registered');
-            
+
             // Cleanup listener on unmount
             return () => {
                 console.log('[UserList] Cleaning up WebSocket listener');
@@ -133,7 +133,7 @@ const UserList = () => {
         } else {
             console.warn('[UserList] Socket not available');
         }
-        
+
         // Auto-refresh every 30 seconds as fallback
         const interval = setInterval(() => {
             fetchUsers();
@@ -242,29 +242,40 @@ const UserList = () => {
             console.log('[handleInviteUser] Sending invite data:', inviteData);
             const { data } = await axios.post('/api/admin/users/invite', inviteData, config);
             console.log('[handleInviteUser] Success response:', data);
-            
+
             // Close modal and reset form
             setShowInviteModal(false);
             setInviteData({ name: '', email: '', password: '', role: 'student', universityId: '' });
-            
+
             // CRITICAL: Refresh the user list immediately
             console.log('[handleInviteUser] Refreshing user list');
             await fetchUsers();
-            
+
             showToast('success', data.message || `Account created for ${inviteData.email}`);
         } catch (error) {
             console.error('[handleInviteUser] Error:', error);
+
+            // Check if the user was actually created (Socket might have added them already)
+            const wasCreated = users.some(u => u.email.toLowerCase() === inviteData.email.toLowerCase());
+
+            if (wasCreated) {
+                console.log('[handleInviteUser] User was created via socket, ignoring request error');
+                setShowInviteModal(false);
+                setInviteData({ name: '', email: '', password: '', role: 'student', universityId: '' });
+                return;
+            }
+
             console.error('[handleInviteUser] Error response:', error.response?.data);
-            
+
             let msg = 'Failed to create account';
             if (error.code === 'ECONNABORTED') {
-                msg = 'Request timed out. The server may be under load — the account may have been created. Please check the user list.';
+                msg = 'Request is taking longer than expected. Please check the user list in a moment.';
             } else if (error.response?.data?.message) {
                 msg = error.response.data.message;
             } else if (error.message) {
                 msg = error.message;
             }
-            
+
             showToast('error', msg);
         } finally {
             setInviteSending(false);

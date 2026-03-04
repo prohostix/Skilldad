@@ -444,7 +444,8 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
 
   const payload = {
     sdkKey: ZOOM_SDK_KEY,
-    appKey: ZOOM_SDK_KEY, // Added for compatibility with newer SDK versions
+    appKey: ZOOM_SDK_KEY,
+    clientId: ZOOM_SDK_KEY, // Added for extra compatibility
     mn: meetingNumber.toString(),
     role: role,
     iat: iat,
@@ -453,7 +454,13 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
   };
 
   try {
-    const signature = jwt.sign(payload, ZOOM_SDK_SECRET);
+    const signature = jwt.sign(payload, ZOOM_SDK_SECRET, {
+      algorithm: 'HS256',
+      header: {
+        alg: 'HS256',
+        typ: 'JWT'
+      }
+    });
 
     // Cache signature for 1 hour if sessionId and userId are provided
     if (sessionId && userId) {
