@@ -10,10 +10,7 @@ const ExamScheduler = () => {
     const [exams, setExams] = useState([]);
     const [courses, setCourses] = useState([]);
     const [universities, setUniversities] = useState([]);
-    const [documents, setDocuments] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [showUploadModal, setShowUploadModal] = useState(false);
-    const [linkingExam, setLinkingExam] = useState(null); // exam being linked to a paper
     const { showToast } = useToast();
 
     const [formData, setFormData] = useState({
@@ -29,9 +26,6 @@ const ExamScheduler = () => {
         isPublished: false,
     });
 
-    const [uploadData, setUploadData] = useState({ title: '', type: 'exam_paper', course: '' });
-    const [uploadFile, setUploadFile] = useState(null);
-    const [uploading, setUploading] = useState(false);
 
     const getAuthConfig = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -65,20 +59,11 @@ const ExamScheduler = () => {
         }
     };
 
-    const fetchDocuments = async () => {
-        try {
-            const { data } = await axios.get('/api/documents?type=exam_paper', getAuthConfig());
-            setDocuments(data.filter(d => d.type === 'exam_paper'));
-        } catch (error) {
-            console.error('Error fetching documents:', error);
-        }
-    };
 
     useEffect(() => {
         fetchExams();
         fetchCourses();
         fetchUniversities();
-        fetchDocuments();
     }, []);
 
     const handleSubmit = async (e) => {
@@ -106,47 +91,6 @@ const ExamScheduler = () => {
         }
     };
 
-    const handleUploadPaper = async (e) => {
-        e.preventDefault();
-        if (!uploadFile) return showToast('Please select a file', 'error');
-        setUploading(true);
-        try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const formData = new FormData();
-            formData.append('document', uploadFile);
-            formData.append('title', uploadData.title);
-            formData.append('type', uploadData.type);
-            formData.append('course', uploadData.course);
-
-            await axios.post('/api/documents/upload', formData, {
-                headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-
-            showToast('Question paper uploaded!', 'success');
-            setShowUploadModal(false);
-            setUploadData({ title: '', type: 'exam_paper', course: '' });
-            setUploadFile(null);
-            fetchDocuments();
-        } catch (err) {
-            showToast(err.response?.data?.message || 'Upload failed', 'error');
-        } finally {
-            setUploading(false);
-        }
-    };
-
-    const handleLinkPaper = async (examId, paperId) => {
-        try {
-            await axios.put(`/api/exams/${examId}`, { linkedPaper: paperId, examMode: 'paper-based', isPublished: true }, getAuthConfig());
-            showToast('Question paper linked to exam! Students can now access it during exam window.', 'success');
-            setLinkingExam(null);
-            fetchExams();
-        } catch (err) {
-            showToast(err.response?.data?.message || 'Failed to link paper', 'error');
-        }
-    };
 
     return (
         <>
@@ -156,9 +100,6 @@ const ExamScheduler = () => {
                         <DashboardHeading title="Exam Scheduler" />
                     </div>
                     <div className="flex gap-2">
-                        <ModernButton variant="secondary" onClick={() => setShowUploadModal(true)} className="!px-4 !py-2 text-sm">
-                            <Upload size={16} className="mr-1.5" /> Upload Paper
-                        </ModernButton>
                         <ModernButton onClick={() => setShowModal(true)} className="!px-4 !py-2 text-sm">
                             <Plus size={16} className="mr-1.5" /> Schedule Exam
                         </ModernButton>
@@ -209,42 +150,13 @@ const ExamScheduler = () => {
                                 <FileText size={24} />
                             </div>
                             <div>
-                                <p className="text-white/50 text-xs font-semibold uppercase">Papers Uploaded</p>
-                                <p className="text-lg font-semibold text-white font-inter">{documents.length}</p>
+                                <p className="text-white/50 text-xs font-semibold uppercase">Published slots</p>
+                                <p className="text-lg font-semibold text-white font-inter">{exams.filter(e => e.isPublished).length}</p>
                             </div>
                         </div>
                     </GlassCard>
                 </div>
 
-                {/* Uploaded Question Papers */}
-                {documents.length > 0 && (
-                    <GlassCard>
-                        <h3 className="text-sm font-semibold text-white/70 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <FileText size={16} className="text-indigo-400" /> Uploaded Question Papers
-                        </h3>
-                        <div className="space-y-2">
-                            {documents.map(doc => (
-                                <div key={doc._id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                                    <div>
-                                        <p className="text-white text-sm font-semibold">{doc.title}</p>
-                                        <p className="text-white/40 text-xs">{doc.format} • {new Date(doc.createdAt).toLocaleDateString()}</p>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <a
-                                            href={doc.fileUrl?.startsWith('http') ? doc.fileUrl : `/${doc.fileUrl}`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="p-2 text-white/40 hover:text-white transition-colors"
-                                            title="Preview"
-                                        >
-                                            <Eye size={16} />
-                                        </a>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </GlassCard>
-                )}
 
                 {/* Exams Table */}
                 <GlassCard className="!p-0">
@@ -258,7 +170,6 @@ const ExamScheduler = () => {
                                     <th className="px-6 py-4">Scheduled Date</th>
                                     <th className="px-6 py-4">Duration</th>
                                     <th className="px-6 py-4">Mode</th>
-                                    <th className="px-6 py-4">Paper Linked</th>
                                     <th className="px-6 py-4">Status</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
@@ -286,47 +197,19 @@ const ExamScheduler = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {hasPaper ? (
-                                                    <span className="flex items-center gap-1 text-emerald-400 text-xs font-semibold">
-                                                        <FileText size={12} /> {exam.linkedPaper?.title || 'Linked'}
-                                                    </span>
-                                                ) : (
-                                                    <button
-                                                        onClick={() => setLinkingExam(exam._id)}
-                                                        className="flex items-center gap-1 px-3 py-1 bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-lg text-xs font-semibold transition-all"
-                                                    >
-                                                        <Link size={12} /> Link Paper
-                                                    </button>
-                                                )}
-                                                {linkingExam === exam._id && (
-                                                    <div className="mt-2 flex flex-col gap-1">
-                                                        {documents.length === 0 ? (
-                                                            <p className="text-white/30 text-xs">No papers uploaded yet.</p>
-                                                        ) : (
-                                                            documents.map(doc => (
-                                                                <button
-                                                                    key={doc._id}
-                                                                    onClick={() => handleLinkPaper(exam._id, doc._id)}
-                                                                    className="text-left px-3 py-1.5 bg-white/5 hover:bg-indigo-500/20 text-white/70 hover:text-white rounded-lg text-xs transition-all"
-                                                                >
-                                                                    {doc.title}
-                                                                </button>
-                                                            ))
-                                                        )}
-                                                        <button
-                                                            onClick={() => setLinkingExam(null)}
-                                                            className="text-white/30 text-xs hover:text-white/60 text-left px-2"
-                                                        >Cancel</button>
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${isUpcoming
-                                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                                    : 'bg-white/10 text-white/50'
-                                                    }`}>
-                                                    {isUpcoming ? 'Upcoming' : 'Completed'}
-                                                </span>
+                                                {(() => {
+                                                    const now = new Date();
+                                                    const start = new Date(exam.scheduledDate);
+                                                    const end = exam.deadline ? new Date(exam.deadline) : new Date(start.getTime() + exam.duration * 60000);
+
+                                                    if (now >= start && now <= end) {
+                                                        return <span className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] font-black animate-pulse">LIVE NOW</span>;
+                                                    }
+                                                    if (now < start) {
+                                                        return <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded text-[10px] font-black">UPCOMING</span>;
+                                                    }
+                                                    return <span className="bg-white/5 text-white/40 px-2 py-0.5 rounded text-[10px] font-black">COMPLETED</span>;
+                                                })()}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <button
@@ -450,6 +333,7 @@ const ExamScheduler = () => {
                                     />
                                 </div>
                             </div>
+
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className="block text-white/70 text-xs mb-1.5">Duration (min)</label>
@@ -500,76 +384,6 @@ const ExamScheduler = () => {
                 </div>
             )}
 
-            {/* Upload Question Paper Modal */}
-            {showUploadModal && (
-                <div
-                    className="fixed inset-0 bg-black/90 backdrop-blur-md z-[99999] flex items-start justify-center p-4 overflow-y-auto"
-                    onClick={(e) => { if (e.target === e.currentTarget) setShowUploadModal(false); }}
-                >
-                    <GlassCard className="w-full max-w-md relative z-[100000] my-8 bg-black/95 border-white/20" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-base font-semibold text-white mb-4 font-inter">Upload Question Paper</h3>
-                        <form onSubmit={handleUploadPaper} className="space-y-4">
-                            <div>
-                                <label className="block text-white/70 text-xs mb-1.5">Paper Title</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white"
-                                    value={uploadData.title}
-                                    onChange={e => setUploadData({ ...uploadData, title: e.target.value })}
-                                    placeholder="e.g. Midterm - Advanced Mathematics 2025"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-white/70 text-xs mb-1.5">Type</label>
-                                <select
-                                    className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm text-white"
-                                    value={uploadData.type}
-                                    onChange={e => setUploadData({ ...uploadData, type: e.target.value })}
-                                >
-                                    <option value="exam_paper">Question Paper</option>
-                                    <option value="answer_sheet">Answer Sheet / Key</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-white/70 text-xs mb-1.5">Related Course (optional)</label>
-                                <select
-                                    className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-sm text-white"
-                                    value={uploadData.course}
-                                    onChange={e => setUploadData({ ...uploadData, course: e.target.value })}
-                                >
-                                    <option value="">Select Course</option>
-                                    {courses.map(c => (
-                                        <option key={c._id} value={c._id} className="bg-[#0B0F1A]">{c.title}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-white/70 text-xs mb-1.5">File (PDF, DOC, DOCX, JPG, PNG)</label>
-                                <input
-                                    type="file"
-                                    required
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                    onChange={e => setUploadFile(e.target.files[0])}
-                                    className="w-full text-sm text-white/50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/80"
-                                />
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowUploadModal(false)}
-                                    className="flex-1 py-2 text-sm text-white/70 hover:bg-white/5 rounded-lg transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <ModernButton type="submit" disabled={uploading} className="flex-1 !py-2 text-sm">
-                                    {uploading ? 'Uploading...' : 'Upload Paper'}
-                                </ModernButton>
-                            </div>
-                        </form>
-                    </GlassCard>
-                </div>
-            )}
         </>
     );
 };

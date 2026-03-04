@@ -13,7 +13,7 @@ const documentSchema = mongoose.Schema({
     },
     format: {
         type: String,
-        enum: ['PDF', 'DOC', 'DOCX', 'JPG', 'PNG', 'ZIP'],
+        enum: ['PDF', 'DOC', 'DOCX', 'JPG', 'JPEG', 'PNG', 'ZIP', 'RAR', 'TXT'],
         required: true,
     },
     maxSize: {
@@ -40,6 +40,10 @@ const documentSchema = mongoose.Schema({
     recipientUniversity: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', // University accounts are Users with role 'university'
+    },
+    university: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // The university that "owns" or is associated with this exam document
     },
     fileUrl: String,
     fileName: String,

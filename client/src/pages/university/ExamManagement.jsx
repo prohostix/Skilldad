@@ -46,7 +46,9 @@ const ExamManagement = () => {
         maxAttempts: 1,
         isPublished: true,
         examMode: 'paper-based',
-        mandatedSlotId: ''
+        mandatedSlotId: '',
+        linkedPaper: '',
+        answerKey: ''
     });
 
     const [showUploadModal, setShowUploadModal] = useState(false);
@@ -97,25 +99,31 @@ const ExamManagement = () => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const formData = new FormData();
             formData.append('document', uploadFile);
-            formData.append('title', uploadData.title);
-            formData.append('description', uploadData.description);
+            formData.append('title', uploadData.title || uploadFile.name);
+            formData.append('description', uploadData.description || 'Exam vault material');
             formData.append('type', uploadData.type);
-            formData.append('course', uploadData.course);
+            formData.append('course', uploadData.course || '');
 
-            await axios.post('/api/documents/upload', formData, {
+            const config = {
                 headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
                 }
-            });
+            };
 
-            showToast('Asset uploaded successfully!', 'success');
+            console.log('[Vault] Starting upload of:', uploadFile.name);
+            const response = await axios.post('/api/documents/upload', formData, config);
+            console.log('[Vault] Upload success:', response.data);
+
+            showToast('Document securely uploaded to Vault.', 'success');
             setShowUploadModal(false);
             setUploadData({ title: '', description: '', type: 'exam_paper', course: '' });
             setUploadFile(null);
             fetchData();
         } catch (err) {
-            showToast(err.response?.data?.message || 'Upload failed', 'error');
+            console.error('[Vault Upload Trace]', err);
+            const errMsg = err.response?.data?.message || err.response?.data?.error || 'Upload rejected by server';
+            showToast(errMsg, 'error');
         } finally {
             setUploading(false);
         }
@@ -129,12 +137,11 @@ const ExamManagement = () => {
 
             const payload = {
                 ...examData,
-                linkedPaper: selectedDoc._id,
-                description: `Official Institutional Exam based on: ${selectedDoc.title}`
+                description: `Institutional Deployment: ${examData.title}`
             };
 
             await axios.post('/api/exams', payload, config);
-            showToast('✓ Exam Scheduled & Paper Linked. Students notified.', 'success');
+            showToast('✓ Session Materials Deployed. System Active.', 'success');
             setOpenSchedule(false);
             setExamData({
                 title: '',
@@ -146,7 +153,9 @@ const ExamManagement = () => {
                 maxAttempts: 1,
                 isPublished: true,
                 examMode: 'paper-based',
-                mandatedSlotId: ''
+                mandatedSlotId: '',
+                linkedPaper: '',
+                answerKey: ''
             });
             fetchData();
         } catch (err) {
@@ -205,9 +214,10 @@ const ExamManagement = () => {
 
             <div className="flex space-x-1 bg-white/5 p-1 rounded-xl w-fit backdrop-blur-md border border-white/10">
                 {[
-                    { id: 'questions', label: 'Question Papers', icon: FileText },
-                    { id: 'answers', label: 'Answer Sheets', icon: CheckCircle },
-                    { id: 'schedule', label: 'Active Schedule', icon: Calendar }
+                    { id: 'conduct', label: 'Conduct Exams', icon: Calendar },
+                    { id: 'questions', label: 'Question Bank', icon: FileText },
+                    { id: 'answers', label: 'Solution Vault', icon: CheckCircle },
+                    { id: 'schedule', label: 'Schedule History', icon: ShieldCheck }
                 ].map(tab => (
                     <button
                         key={tab.id}
@@ -258,12 +268,12 @@ const ExamManagement = () => {
                                     <button
                                         onClick={() => {
                                             setSelectedDoc(paper);
-                                            setExamData(prev => ({ ...prev, title: paper.title }));
+                                            setExamData(prev => ({ ...prev, title: paper.title, linkedPaper: paper._id }));
                                             setOpenSchedule(true);
                                         }}
                                         className="flex items-center gap-2 px-4 py-2 bg-indigo-500/20 text-indigo-400 rounded-xl hover:bg-indigo-500 text-white transition-all duration-300 text-xs font-black uppercase tracking-widest"
                                     >
-                                        <Clock size={16} /> Schedule Exam
+                                        <Plus size={16} /> Deploy Question
                                     </button>
                                     <div className="flex items-center bg-white/5 rounded-xl p-1 ml-2">
                                         <button onClick={() => handleView(paper)} className="p-2 text-white/40 hover:text-white transition-colors" title="View"><Eye size={18} /></button>
@@ -294,10 +304,22 @@ const ExamManagement = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center bg-white/5 rounded-xl p-1 ml-2">
-                                    <button onClick={() => handleView(key)} className="p-2 text-white/40 hover:text-white transition-colors" title="View"><Eye size={18} /></button>
-                                    <button onClick={() => handleDownload(key)} className="p-2 text-white/40 hover:text-white transition-colors" title="Download"><Download size={18} /></button>
-                                    <button onClick={() => handleDelete(key._id)} className="p-2 text-white/40 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={18} /></button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedDoc(key);
+                                            setExamData(prev => ({ ...prev, title: key.title, answerKey: key._id }));
+                                            setOpenSchedule(true);
+                                        }}
+                                        className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500 text-white transition-all duration-300 text-xs font-black uppercase tracking-widest"
+                                    >
+                                        <Plus size={16} /> Deploy Solution
+                                    </button>
+                                    <div className="flex items-center bg-white/5 rounded-xl p-1 ml-2">
+                                        <button onClick={() => handleView(key)} className="p-2 text-white/40 hover:text-white transition-colors" title="View"><Eye size={18} /></button>
+                                        <button onClick={() => handleDownload(key)} className="p-2 text-white/40 hover:text-white transition-colors" title="Download"><Download size={18} /></button>
+                                        <button onClick={() => handleDelete(key._id)} className="p-2 text-white/40 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={18} /></button>
+                                    </div>
                                 </div>
                             </div>
                         )) : (
@@ -306,8 +328,91 @@ const ExamManagement = () => {
                                 <p className="font-bold uppercase tracking-widest text-sm">No Answer Sheets Received</p>
                             </div>
                         )
+                    ) : activeTab === 'conduct' ? (
+                        <div className="space-y-6">
+                            {(() => {
+                                const mandatedSlots = exams.filter(ex => ex.instructor?.role === 'admin' || (ex.instructor?._role === 'admin'));
+                                const now = new Date();
+                                const liveExams = exams.filter(ex => {
+                                    const start = new Date(ex.scheduledDate);
+                                    const end = ex.deadline ? new Date(ex.deadline) : new Date(start.getTime() + ex.duration * 60000);
+                                    return now >= start && now <= end;
+                                });
+
+                                return (
+                                    <>
+                                        {liveExams.length > 0 && (
+                                            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl animate-pulse">
+                                                <p className="flex items-center gap-2 text-emerald-400 font-black text-xs uppercase tracking-widest mb-4">
+                                                    <span className="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span> Ongoing Live Assessments
+                                                </p>
+                                                {liveExams.map(ex => (
+                                                    <div key={ex._id} className="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5 mb-2">
+                                                        <div>
+                                                            <p className="text-white text-sm font-bold">{ex.title}</p>
+                                                            <p className="text-white/40 text-[10px]">{ex.course?.title}</p>
+                                                        </div>
+                                                        <span className="px-3 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg">LIVE NOW</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Mandated Admin Slots - Deployment Required</h5>
+                                        {mandatedSlots.length > 0 ? mandatedSlots.map(slot => {
+                                            const isDeployed = exams.some(ex => ex.mandatedSlotId === slot._id || (ex.scheduledDate === slot.scheduledDate && ex.instructor?.role === 'university'));
+                                            return (
+                                                <div key={slot._id} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/10 rounded-2xl relative overflow-hidden group">
+                                                    {!isDeployed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>}
+                                                    <div className="flex items-center gap-5">
+                                                        <div className={`p-4 rounded-2xl ${isDeployed ? 'bg-indigo-500/10 text-indigo-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                            {isDeployed ? <CheckCircle size={28} /> : <AlertCircle size={28} />}
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-white text-lg">{new Date(slot.scheduledDate).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })} • Session</h4>
+                                                            <div className="flex items-center gap-4 text-[10px] mt-2 font-bold uppercase tracking-wider">
+                                                                <span className="text-white/60">Module: {slot.course?.title || 'Unknown'}</span>
+                                                                <span className="text-indigo-400 flex items-center gap-1"><Clock size={12} /> {new Date(slot.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                {isDeployed ? (
+                                                                    <span className="text-emerald-400 flex items-center gap-1 uppercase tracking-tighter"><ShieldCheck size={10} /> Material Deployed</span>
+                                                                ) : (
+                                                                    <span className="text-amber-500 flex items-center gap-1 animate-pulse">Action Required • No Material</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <ModernButton
+                                                        size="sm"
+                                                        variant={isDeployed ? "secondary" : "primary"}
+                                                        onClick={() => {
+                                                            setActiveTab('questions');
+                                                            setExamData(prev => ({
+                                                                ...prev,
+                                                                mandatedSlotId: slot._id,
+                                                                course: slot.course?._id || slot.course,
+                                                                scheduledDate: slot.scheduledDate ? new Date(slot.scheduledDate).toISOString().slice(0, 16) : '',
+                                                                deadline: slot.deadline ? new Date(slot.deadline).toISOString().slice(0, 16) : '',
+                                                                duration: slot.duration,
+                                                                totalPoints: slot.totalPoints || 100
+                                                            }));
+                                                            showToast("Pick a question paper for this slot", "info");
+                                                        }}
+                                                    >
+                                                        {isDeployed ? "Manage Deploy" : "Assign Paper"}
+                                                    </ModernButton>
+                                                </div>
+                                            );
+                                        }) : (
+                                            <div className="py-20 text-center text-white/20">
+                                                <p className="font-bold uppercase tracking-widest text-sm">No Upcoming Mandated Slots from Admin</p>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
+                        </div>
                     ) : (
-                        exams.length > 0 ? exams.map((exam) => (
+                        exams.filter(ex => ex.instructor?.role === 'university').length > 0 ? exams.filter(ex => ex.instructor?.role === 'university').map((exam) => (
                             <div key={exam._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl">
                                 <div className="flex items-center gap-5">
                                     <div className="p-4 bg-primary/10 rounded-2xl text-primary">
@@ -320,35 +425,23 @@ const ExamManagement = () => {
                                             <span className="text-emerald-400 flex items-center gap-1"><Clock size={12} /> {new Date(exam.scheduledDate).toLocaleString()}</span>
                                             <span className="text-white/30">•</span>
                                             <span className="text-white/30">{exam.duration} Minutes</span>
-                                            {exam.instructor.role === 'admin' && (
-                                                <span className="ml-2 px-2 py-0.5 bg-amber-500/20 text-amber-500 rounded">Admin Mandated</span>
-                                            )}
+                                            <span className={`px-2 py-0.5 rounded ${exam.linkedPaper ? 'bg-indigo-500/20 text-indigo-400' : 'bg-red-500/20 text-red-400'}`}>
+                                                {exam.linkedPaper ? 'Paper Attached' : 'MISSING PAPER'}
+                                            </span>
+                                            <span className={`px-2 py-0.5 rounded ${exam.answerKey ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-500/70'}`}>
+                                                {exam.answerKey ? 'Solution Attached' : 'MISSING SOLUTION'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div>
-                                    {exam.instructor.role === 'admin' ? (
-                                        <div className="flex gap-2">
-                                            <ModernButton
-                                                size="sm"
-                                                variant="primary"
-                                                onClick={() => {
-                                                    setActiveTab('questions');
-                                                    showToast(`Pick a paper to deploy for ${exam.title}`, 'info');
-                                                }}
-                                            >
-                                                Deploy Paper
-                                            </ModernButton>
-                                            <ModernButton size="sm" variant="secondary" onClick={() => navigate('/university/exams')}>Details</ModernButton>
-                                        </div>
-                                    ) : (
-                                        <ModernButton size="sm" variant="secondary" onClick={() => navigate('/university/exams')}>Details</ModernButton>
-                                    )}
+                                <div className="flex gap-2">
+                                    <ModernButton size="sm" variant="secondary" onClick={() => navigate('/university/exams')}>View Report</ModernButton>
+                                    <button onClick={() => handleDelete(exam._id)} className="p-2 text-white/20 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
                                 </div>
                             </div>
                         )) : (
                             <div className="py-20 text-center text-white/20">
-                                <p className="font-bold uppercase tracking-widest text-sm">No Active Schedule</p>
+                                <p className="font-bold uppercase tracking-widest text-sm">No University-scheduled History</p>
                             </div>
                         )
                     )}
@@ -419,11 +512,32 @@ const ExamManagement = () => {
                                                 <p className="text-[9px] text-amber-500 mt-2 font-black uppercase tracking-tighter">Note: SkillDad Policy enforces matching Admin-defined slots.</p>
                                             </div>
                                             <div>
+                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Attached Material</label>
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    <select
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white text-xs"
+                                                        value={examData.linkedPaper}
+                                                        onChange={e => setExamData({ ...examData, linkedPaper: e.target.value })}
+                                                    >
+                                                        <option value="">Select Question Paper</option>
+                                                        {questionPapers.map(p => <option key={p._id} value={p._id}>{p.title}</option>)}
+                                                    </select>
+                                                    <select
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white text-xs"
+                                                        value={examData.answerKey}
+                                                        onChange={e => setExamData({ ...examData, answerKey: e.target.value })}
+                                                    >
+                                                        <option value="">Select Answer Key (Optional)</option>
+                                                        {answerKeys.map(k => <option key={k._id} value={k._id}>{k.title}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
                                                 <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Target Course (Inherited)</label>
                                                 <select
                                                     required
                                                     disabled
-                                                    className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white opacity-50 cursor-not-allowed"
+                                                    className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white opacity-50 cursor-not-allowed text-xs"
                                                     value={examData.course}
                                                 >
                                                     <option value="">Select Course</option>
