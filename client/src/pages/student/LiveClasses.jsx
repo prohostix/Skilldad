@@ -109,6 +109,8 @@ const LiveClasses = () => {
 
     const renderSessionCard = (session, index) => {
         const { day, time } = formatDate(session.startTime);
+        const isCompleted = session.status === 'ended' || session.status === 'archived';
+        
         return (
             <motion.div
                 key={session._id}
@@ -116,10 +118,10 @@ const LiveClasses = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
             >
-                <GlassCard className="h-full flex flex-col group hover:border-primary/50 transition-all duration-500 overflow-hidden">
+                <GlassCard className={`h-full flex flex-col group hover:border-primary/50 transition-all duration-500 overflow-hidden ${isCompleted ? 'grayscale-[0.5] opacity-80' : ''}`}>
                     <div className="p-4 pb-0 flex justify-between items-start">
-                        <div className="bg-primary/10 border-primary/20 border px-3 py-1 rounded-full">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                        <div className={`px-3 py-1 rounded-full ${isCompleted ? 'bg-white/5 border-white/10' : 'bg-primary/10 border-primary/20'} border`}>
+                            <span className={`text-[10px] font-bold uppercase tracking-widest ${isCompleted ? 'text-white/40' : 'text-primary'}`}>
                                 {session.category || 'General'}
                             </span>
                         </div>
@@ -129,46 +131,53 @@ const LiveClasses = () => {
                         </div>
                     </div>
 
-                    <div className="p-4 flex-1">
-                        <h3 className="text-lg font-bold text-white mb-1 transition-colors group-hover:text-primary">{session.topic}</h3>
-                        {session.course && (
-                            <p className="text-primary/80 text-xs font-semibold mb-2">
-                                {session.course.title}
+                    <div className="p-4 pt-3 flex-1">
+                        <h3 className={`text-lg font-bold text-white mb-1 leading-tight transition-colors ${!isCompleted && 'group-hover:text-primary'}`}>{session.topic}</h3>
+                        {session.course?.title && (
+                            <p className="text-primary/90 text-xs font-semibold mb-2">
+                                📚 {session.course.title}
                             </p>
                         )}
-                        <p className="text-white/50 text-sm line-clamp-2 mb-4">{session.description}</p>
+                        <p className="text-white/50 text-xs line-clamp-2 mb-3">{session.description}</p>
 
                         <div className="space-y-2">
-                            <div className="flex items-center gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5">
-                                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary/20 text-primary">
-                                    <Calendar size={18} />
+                            <div className="flex items-center gap-2.5 p-2 bg-white/5 rounded-lg border border-white/5">
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-primary/20 text-primary'}`}>
+                                    <Calendar size={16} />
                                 </div>
-                                <div>
-                                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Date & Time</p>
-                                    <p className="text-sm text-white font-semibold">{day} @ {time}</p>
+                                <div className="min-w-0">
+                                    <p className="text-[9px] text-white/40 uppercase font-bold tracking-wider">Date & Time</p>
+                                    <p className="text-xs text-white font-semibold truncate">{day} @ {time}</p>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-3 p-2.5 bg-white/5 rounded-xl border border-white/5">
-                                <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-500/20 text-emerald-400">
-                                    <Users size={18} />
+                            <div className="flex items-center gap-2.5 p-2 bg-white/5 rounded-lg border border-white/5">
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                    <Users size={16} />
                                 </div>
-                                <div>
-                                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Instructor</p>
-                                    <p className="text-sm text-white font-semibold leading-tight">{session.instructor?.name}</p>
+                                <div className="min-w-0">
+                                    <p className="text-[9px] text-white/40 uppercase font-bold tracking-wider">Instructor</p>
+                                    <p className="text-xs text-white font-semibold leading-tight truncate">{session.instructor?.name}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="p-4 pt-0 mt-auto">
+                    <div className="p-4 pt-0">
                         <ModernButton
                             onClick={() => handleJoin(session)}
-                            className="w-full justify-center group/btn"
+                            className="w-full !flex !items-center !justify-center group/btn"
                             variant={session.status === 'live' ? 'primary' : 'secondary'}
+                            disabled={isCompleted}
                         >
-                            <Play size={18} className="mr-2 fill-white group-hover/btn:scale-110 transition-transform" />
-                            {session.status === 'live' ? 'Watch Live Stream' : 'Join Session'}
+                            {isCompleted ? (
+                                <span>Completed</span>
+                            ) : (
+                                <>
+                                    <Play size={16} className="fill-white group-hover/btn:scale-110 transition-transform" />
+                                    <span className="ml-2">{session.status === 'live' ? 'Watch Live Stream' : 'Join Session'}</span>
+                                </>
+                            )}
                         </ModernButton>
                     </div>
                 </GlassCard>
