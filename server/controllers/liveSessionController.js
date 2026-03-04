@@ -1144,4 +1144,44 @@ module.exports = {
     getZoomSDKConfig,
     trackSessionJoin,
     trackSessionLeave,
+    getCourseLiveSessions,
 };
+
+// @desc    Get live sessions for a specific course
+// @route   GET /api/live-sessions/course/:courseId
+// @access  Private (Student, University, Admin)
+const getCourseLiveSessions = asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+    const user = req.user;
+
+    try {
+        // Build query based on user role
+        let query = { course: courseId };
+
+        // Students can only see sessions they're enrolled in
+        if (user.role === 'student') {
+            query.enrolledStudents = user._id;
+        }
+
+        // Fetch upcoming and recent live sessions (within last 7 days or future)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const sessions = await LiveSession.find({
+            ...query,
+            startTime: { $gte: sevenDaysAgo },
+            status: { $in: ['scheduled', 'live', 'ended'] }
+        })
+            .populate('instructor', 'name email')
+            .populate('university', 'name')
+            .sort({ startTime: 1 })
+            .limit(10)
+            .lean();
+
+        res.json(sessions);
+    } catch (error) {
+        console.error('Error fetching course live sessions:', error);
+        res.status(500).json({ message: 'Failed to fetch live sessions' });
+    }
+});
+

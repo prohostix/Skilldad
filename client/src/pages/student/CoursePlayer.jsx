@@ -10,7 +10,9 @@ import {
     Layout,
     ArrowLeft,
     Clock,
-    Unlock
+    Unlock,
+    Video,
+    Calendar
 } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
@@ -28,6 +30,7 @@ const CoursePlayer = () => {
     const [exerciseFeedback, setExerciseFeedback] = useState(null);
     const [userProgress, setUserProgress] = useState({ completedVideos: [], completedExercises: [] });
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [liveSessions, setLiveSessions] = useState([]);
 
     useEffect(() => {
         const fetchCourseAndProgress = async () => {
@@ -41,6 +44,15 @@ const CoursePlayer = () => {
                 const { data: progData } = await axios.get('/api/enrollment/my-courses', config);
                 const currentProg = progData.find(p => p.course._id === courseId);
                 if (currentProg) setUserProgress(currentProg);
+
+                // Fetch live sessions for this course
+                try {
+                    const { data: sessionsData } = await axios.get(`/api/live-sessions/course/${courseId}`, config);
+                    setLiveSessions(sessionsData);
+                } catch (sessionError) {
+                    console.error('Error loading live sessions:', sessionError);
+                    // Don't fail the whole page if live sessions fail to load
+                }
             } catch (error) {
                 console.error('Error loading course/progress:', error);
             }
@@ -166,6 +178,63 @@ const CoursePlayer = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Live Sessions Section */}
+                {liveSessions.length > 0 && (
+                    <div className="px-6 py-4 bg-primary/5 border-b border-primary/20">
+                        <div className="flex items-center space-x-2 mb-3">
+                            <Video size={16} className="text-primary" />
+                            <h3 className="text-sm font-bold text-primary uppercase tracking-wide">Upcoming Live Sessions</h3>
+                        </div>
+                        <div className="space-y-2">
+                            {liveSessions.slice(0, 3).map((session) => {
+                                const sessionDate = new Date(session.startTime);
+                                const isLive = session.status === 'live';
+                                const isUpcoming = session.status === 'scheduled' && sessionDate > new Date();
+                                
+                                return (
+                                    <div
+                                        key={session._id}
+                                        className="p-3 bg-black/40 rounded-lg border border-white/10 hover:border-primary/30 transition-all cursor-pointer"
+                                        onClick={() => navigate(`/dashboard/live-classes`)}
+                                    >
+                                        <div className="flex items-start justify-between mb-2">
+                                            <p className="text-sm font-bold text-white line-clamp-1">{session.topic}</p>
+                                            {isLive && (
+                                                <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
+                                                    LIVE
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center space-x-3 text-[10px] text-slate-400">
+                                            <div className="flex items-center">
+                                                <Calendar size={10} className="mr-1" />
+                                                {sessionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                            </div>
+                                            <div className="flex items-center">
+                                                <Clock size={10} className="mr-1" />
+                                                {sessionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </div>
+                                        {session.instructor && (
+                                            <p className="text-[10px] text-primary mt-1 font-bold">
+                                                by {session.instructor.name}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {liveSessions.length > 3 && (
+                            <button
+                                onClick={() => navigate(`/dashboard/live-classes`)}
+                                className="w-full mt-2 text-xs text-primary hover:text-primary/80 font-bold transition-colors"
+                            >
+                                View all {liveSessions.length} sessions →
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 <div className="flex-1 overflow-y-auto">
                     {course.modules.map((module, mIndex) => (
