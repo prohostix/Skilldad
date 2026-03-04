@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import {
     GraduationCap,
     Users,
@@ -19,8 +20,24 @@ import GlassCard from '../components/ui/GlassCard';
 
 const Platform = () => {
     const navigate = useNavigate();
+    const [dynamicUnis, setDynamicUnis] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
 
-    const universities = [
+    React.useEffect(() => {
+        const fetchUnis = async () => {
+            try {
+                const { data } = await axios.get('/api/public/universities');
+                setDynamicUnis(data);
+            } catch (error) {
+                console.error('Failed to fetch universities:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUnis();
+    }, []);
+
+    const staticUniversities = [
         {
             id: 1,
             name: "Harvard University",
@@ -94,6 +111,21 @@ const Platform = () => {
             description: "Europe's premier science and technology university, known for cutting-edge research."
         }
     ];
+
+    const universities = dynamicUnis.length > 0
+        ? dynamicUnis.map(u => ({
+            id: u._id,
+            name: u.name,
+            location: u.profile?.location || 'Global',
+            students: u.studentCount > 0 ? `${u.studentCount}+` : '100+',
+            programs: u.courseCount > 0 ? `${u.courseCount}+` : '10+',
+            established: u.profile?.established || '2020',
+            rating: 4.8,
+            image: u.profileImage || `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`,
+            specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
+            description: u.bio || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
+        }))
+        : staticUniversities;
 
     const platformStats = [
         { label: "Partner Universities", value: "150+", icon: Building, color: "purple" },

@@ -41,14 +41,16 @@ const LandingPage = () => {
     const [dynamicDirectors, setDynamicDirectors] = useState([]);
     const [dynamicLogos, setDynamicLogos] = useState([]);
     const [featuredCourses, setFeaturedCourses] = useState([]);
+    const [dynamicUniversities, setDynamicUniversities] = useState([]);
 
     useEffect(() => {
         const fetchPublicData = async () => {
             try {
-                const [directorsRes, logosRes, coursesRes] = await Promise.all([
+                const [directorsRes, logosRes, coursesRes, universitiesRes] = await Promise.all([
                     axios.get('/api/public/directors'),
                     axios.get('/api/public/partner-logos'),
-                    axios.get('/api/courses')
+                    axios.get('/api/courses'),
+                    axios.get('/api/public/universities')
                 ]);
 
                 if (directorsRes.data && directorsRes.data.length > 0) {
@@ -61,6 +63,10 @@ const LandingPage = () => {
 
                 if (coursesRes.data && coursesRes.data.length > 0) {
                     setFeaturedCourses(coursesRes.data.slice(0, 3));
+                }
+
+                if (universitiesRes.data && universitiesRes.data.length > 0) {
+                    setDynamicUniversities(universitiesRes.data);
                 }
             } catch (error) {
                 console.error('Failed to fetch public data:', error);
@@ -177,7 +183,15 @@ const LandingPage = () => {
         { name: 'ETH Zurich', location: 'Switzerland', students: '10K+', programs: '38+' }
     ];
 
-    const universities = universityPartners.length > 0 ? universityPartners : staticUnis;
+    const universities = dynamicUniversities.length > 0
+        ? dynamicUniversities.map(u => ({
+            name: u.name,
+            location: u.profile?.location || 'Global',
+            students: u.studentCount > 0 ? `${u.studentCount}+` : '100+',
+            programs: u.courseCount > 0 ? `${u.courseCount}+` : '10+',
+            logo: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`
+        }))
+        : universityPartners.length > 0 ? universityPartners : staticUnis;
 
     let marqueeRow1 = [];
     let marqueeRow2 = [];
@@ -605,7 +619,10 @@ const LandingPage = () => {
                                 whileHover={{ y: -5 }}
                                 className="h-full"
                             >
-                                <GlassCard className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple">
+                                <GlassCard
+                                    className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"
+                                    onClick={() => navigate(`/university-profile/${encodeURIComponent(uni.name)}`, { state: { university: uni } })}
+                                >
                                     {/* University Icon + Tag row */}
                                     <div className="flex items-center gap-3 mb-3 w-full">
                                         <div className="w-9 h-9 rounded-[14px] bg-primary/20 text-primary flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 border border-primary/30 group-hover:border-primary/50 overflow-hidden p-1.5">
@@ -637,7 +654,7 @@ const LandingPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="mt-auto pt-3 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer">
+                                    <div className="mt-auto pt-3 border-t border-white/10 w-full flex items-center justify-between group/link">
                                         <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Expand Logic</span>
                                         <ArrowRight size={14} className="text-text-muted group-hover/link:text-primary transition-all group-hover/link:translate-x-1" />
                                     </div>

@@ -775,6 +775,7 @@ const LiveSessionsTab = ({ students }) => {
     const [loading, setLoading] = useState(true); // Indicate loading initially
     const [loadingId, setLoadingId] = useState(null);
     const [filterStatus, setFilterStatus] = useState('all');
+    const [filterCourse, setFilterCourse] = useState('all');
     const [showModal, setShowModal] = useState(false);
     const [hostLinkData, setHostLinkData] = useState(null);
     const [toast, setToast] = useState(null);
@@ -920,9 +921,17 @@ const LiveSessionsTab = ({ students }) => {
     };
 
     /* ── Derived ── */
-    const filtered = filterStatus === 'all'
-        ? sessions
-        : sessions.filter(s => s.status === filterStatus);
+    // Get unique courses
+    const uniqueCourses = [...new Set(sessions.map(s => s.course?.title).filter(Boolean))];
+    
+    // Apply both status and course filters
+    let filtered = sessions;
+    if (filterStatus !== 'all') {
+        filtered = filtered.filter(s => s.status === filterStatus);
+    }
+    if (filterCourse !== 'all') {
+        filtered = filtered.filter(s => s.course?.title === filterCourse);
+    }
 
     const liveCount = sessions.filter(s => s.status === 'live').length;
     const scheduledCount = sessions.filter(s => s.status === 'scheduled').length;
@@ -984,19 +993,37 @@ const LiveSessionsTab = ({ students }) => {
             </GlassCard>
 
             {/* Filter tabs */}
-            <div className="flex gap-2 flex-wrap">
-                {['all', 'live', 'scheduled', 'ended', 'cancelled'].map(s => (
-                    <button
-                        key={s}
-                        onClick={() => setFilterStatus(s)}
-                        className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${filterStatus === s
-                            ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                            : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
-                            }`}
+            <div className="flex gap-4 flex-wrap items-center">
+                <div className="flex gap-2 flex-wrap">
+                    {['all', 'live', 'scheduled', 'ended', 'cancelled'].map(s => (
+                        <button
+                            key={s}
+                            onClick={() => setFilterStatus(s)}
+                            className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${filterStatus === s
+                                ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                                : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white'
+                                }`}
+                        >
+                            {s === 'all' ? `All (${sessions.length})` : s}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Course Filter */}
+                {uniqueCourses.length > 0 && (
+                    <select
+                        value={filterCourse}
+                        onChange={(e) => setFilterCourse(e.target.value)}
+                        className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white hover:border-primary/50 transition-all focus:outline-none focus:border-primary uppercase tracking-wider"
                     >
-                        {s === 'all' ? `All (${sessions.length})` : s}
-                    </button>
-                ))}
+                        <option value="all" className="bg-[#0a0a0a]">All Courses</option>
+                        {uniqueCourses.map((course, index) => (
+                            <option key={index} value={course} className="bg-[#0a0a0a]">
+                                {course}
+                            </option>
+                        ))}
+                    </select>
+                )}
             </div>
 
             {/* Sessions list */}
