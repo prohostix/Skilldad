@@ -20,6 +20,23 @@ const authHeader = () => {
     return { Authorization: `Bearer ${userInfo.token}` };
 };
 
+const parseSafeDate = (dateish) => {
+    if (!dateish) return new Date();
+    // If it's already an ISO string with Z or an offset, new Date() is safe
+    if (typeof dateish === 'string' && (dateish.includes('Z') || /[\+\-]\d{2}:\d{2}$/.test(dateish))) {
+        return new Date(dateish);
+    }
+    // If it's a T-string without timezone (e.g. 2026-03-04T10:02), parse manually as LOCAL
+    if (typeof dateish === 'string' && dateish.includes('T')) {
+        const [d, t] = dateish.split('T');
+        const [y, m, day] = d.split('-').map(Number);
+        const [h, min] = t.split(':').map(Number);
+        const ld = new Date(y, m - 1, day, h, min);
+        return isNaN(ld.getTime()) ? new Date(dateish) : ld;
+    }
+    return new Date(dateish);
+};
+
 /* ── Status badge ─────────────────────────────────────────── */
 const StatusBadge = ({ status }) => {
     const map = {
@@ -227,10 +244,26 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
         const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
         try {
+            // Robust local-to-ISO parser
+            const getISO = () => {
+                if (!form.startTime) return '';
+                const [d, t] = form.startTime.split('T');
+                if (!d || !t) return '';
+                const [y, m, day] = d.split('-').map(Number);
+                const [h, min] = t.split(':').map(Number);
+                const localDate = new Date(y, m - 1, day, h, min);
+                return isNaN(localDate.getTime()) ? '' : localDate.toISOString();
+            };
+            const isoStartTime = getISO();
+
             // ─── Save to backend (blocking — we wait for real confirmation) ───
             const { data: savedSession } = await axios.post(
                 API(''),
-                { ...form, duration: Number(form.duration) },
+                {
+                    ...form,
+                    startTime: isoStartTime,
+                    duration: Number(form.duration)
+                },
                 { headers, timeout: 20000 }
             );
 
@@ -484,16 +517,16 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
 };
 
 /* ── Session Card ────────────────────────────────────────── */
-const SessionCard = ({ 
-    session, 
-    onStart, 
-    onEnd, 
-    onNotify, 
-    onDelete, 
-    onJoinHost = () => {}, 
-    onJoinStudent = () => {}, 
-    onGetUrl = () => {},
-    loadingId 
+const SessionCard = ({
+    session,
+    onStart,
+    onEnd,
+    onNotify,
+    onDelete,
+    onJoinHost = () => { },
+    onJoinStudent = () => { },
+    onGetUrl = () => { },
+    loadingId
 }) => {
     const isLoading = loadingId === session._id;
 
@@ -519,13 +552,15 @@ const SessionCard = ({
                         <div className="flex flex-wrap gap-3 text-[11px] text-white/40">
                             <span className="flex items-center gap-1"><Calendar size={11} className="text-primary" />
                                 {(() => {
-                                    const date = new Date(session.startTime);
-                                    const year = date.getFullYear();
-                                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                                    const day = String(date.getDate()).padStart(2, '0');
-                                    const hours = String(date.getHours()).padStart(2, '0');
-                                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                                    return `${day}/${month}/${year} ${hours}:${minutes}`;
+                                    const date = parseSafeDate(session.startTime);
+                                    return date.toLocaleString('en-IN', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }).replace(',', '');
                                 })()}
                             </span>
                             <span className="flex items-center gap-1"><Clock size={11} className="text-primary" /> {session.duration} min</span>

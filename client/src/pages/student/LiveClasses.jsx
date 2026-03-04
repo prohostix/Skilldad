@@ -7,6 +7,23 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 
+const parseSafeDate = (dateish) => {
+    if (!dateish) return new Date();
+    // If it's already an ISO string with Z or an offset, new Date() is safe
+    if (typeof dateish === 'string' && (dateish.includes('Z') || /[\+\-]\d{2}:\d{2}$/.test(dateish))) {
+        return new Date(dateish);
+    }
+    // If it's a T-string without timezone (e.g. 2026-03-04T10:02), parse manually as LOCAL
+    if (typeof dateish === 'string' && dateish.includes('T')) {
+        const [d, t] = dateish.split('T');
+        const [y, m, day] = d.split('-').map(Number);
+        const [h, min] = t.split(':').map(Number);
+        const ld = new Date(y, m - 1, day, h, min);
+        return isNaN(ld.getTime()) ? new Date(dateish) : ld;
+    }
+    return new Date(dateish);
+};
+
 const LiveClasses = () => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -83,7 +100,7 @@ const LiveClasses = () => {
     };
 
     const formatDate = (dateString) => {
-        const date = new Date(dateString);
+        const date = parseSafeDate(dateString);
         return {
             day: date.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' }),
             time: date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
