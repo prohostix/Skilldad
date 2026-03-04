@@ -7,38 +7,30 @@ import './ZoomMeeting.css';
 /**
  * ZoomMeeting Component
  * Embeds Zoom Meeting SDK for joining live sessions
- * 
- * @param {string} sessionId - The session ID to join
- * @param {boolean} isHost - Whether the user is the host (instructor/university)
- * @param {string} token - Authentication token (optional, will use localStorage if not provided)
- * @param {function} onLeave - Callback when user leaves the meeting
- * @param {function} onError - Callback when an error occurs
  */
 const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onError }) => {
-  // Check if we should use mock mode (when SDK config returns mock data)
-  const [useMockMode, setUseMockMode] = useState(false);
+  // refs to track initialization status and client to avoid re-render loops
+  const initializationInProgress = useRef(false);
+  const isInitializedRef = useRef(false); // Renamed to avoid any potential shadowing/naming collision
+  const zoomClient = useRef(null);
   const meetingSDKElement = useRef(null);
+
+  const [useMockMode, setUseMockMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Use refs to track initialization status and client to avoid re-render loops
-  const initializationInProgress = useRef(false);
-  const isInitialized = useRef(false);
-  const zoomClient = useRef(null);
 
   useEffect(() => {
     let mounted = true;
 
     const initializeZoom = async () => {
       // Prevent multiple initialization attempts
-      if (initializationInProgress.current || isInitialized.current) return;
+      if (initializationInProgress.current || isInitializedRef.current) return;
       initializationInProgress.current = true;
 
       try {
         if (!mounted) return;
 
         console.log('[Zoom] Starting initialization...');
-        // ... (config fetching and wait for element)
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
         const token = propToken || localStorage.getItem('token') || userInfo.token;
 
@@ -64,8 +56,9 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
           return;
         }
 
+        // Wait for the DOM element to be ready
         let retryCount = 0;
-        const maxRetries = 20;
+        const maxRetries = 30;
         while (!meetingSDKElement.current && retryCount < maxRetries && mounted) {
           retryCount++;
           await new Promise(resolve => setTimeout(resolve, 100));
@@ -86,9 +79,9 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         await client.init({
           zoomAppRoot: meetingSDKElement.current,
           language: 'en-US',
-          patchJsMedia: false, // Changed from true to false to resolve 'caps' error
+          patchJsMedia: false, // REQUIRED: Keep false to resolve 'caps' error
           leaveOnPageUnload: true,
-          sdkKey: sdkConfig.sdkKey // Adding it back to init for older version compatibility
+          sdkKey: sdkConfig.sdkKey // Re-added for explicit support
         });
 
         console.log('[Zoom] SDK initialized, joining meeting...');
@@ -96,7 +89,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         if (!mounted) return;
 
         await client.join({
-          sdkKey: sdkConfig.sdkKey, // Added sdkKey back for compatibility
+          sdkKey: sdkConfig.sdkKey,
           signature: sdkConfig.signature,
           meetingNumber: sdkConfig.meetingNumber,
           password: sdkConfig.passWord,
@@ -107,9 +100,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         console.log('[Zoom] Successfully joined meeting');
 
         if (mounted) {
-          setLoading(false);
-          isInitialized.current = true;
-          // Trigger one final re-render to show leave button
+          isInitializedRef.current = true;
           setLoading(false);
         }
 
@@ -130,16 +121,16 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
       }
     };
 
-    if (sessionId && !isInitialized.current) {
+    if (sessionId && !isInitializedRef.current) {
       initializeZoom();
     }
 
     return () => {
       mounted = false;
-      // Only leave meeting if we are fully unmounting, not just re-rendering
-      // Zoom SDK cleanup can be sensitive to rapid leave/join calls
+      // Note: We don't automatically leave here to prevent re-render flickers, 
+      // the leaveMeeting() is handled by the manual Leave button or page unload.
     };
-  }, [sessionId, isHost]);
+  }, [sessionId, propToken, onError]); // isHost removed from deps as it doesn't change init logic
 
   const handleLeave = () => {
     if (zoomClient.current) {
@@ -154,7 +145,6 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
     }
   };
 
-  // Use mock component if in mock mode
   if (useMockMode) {
     return <MockZoomMeeting sessionId={sessionId} isHost={isHost} onLeave={onLeave} onError={onError} />;
   }
@@ -183,39 +173,31 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
   return (
     <div className="relative w-full h-full">
-      {/* Zoom Meeting Container - Always rendered so ref is available */}
       <div
         ref={meetingSDKElement}
         className="w-full h-full zoom-meeting-container"
-        style={{
-          width: '100%',
-          height: '100%',
-          minHeight: '100%',
-          position: 'relative'
-        }}
+        style={{ width: '100%', height: '100%', position: 'relative' }}
       />
 
-      {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
-            <p className="text-white/60 text-sm">Connecting to meeting...</p>
+            <p className="text-white/80 font-bold tracking-wide">Connecting to Live Studio...</p>
           </div>
         </div>
       )}
 
-      {/* Leave Meeting Button */}
-      {isInitialized.current && (
-        <div className="absolute top-4 right-4 z-50">
+      {isInitializedRef.current && (
+        <div className="absolute top-4 right-4 z-[1000]">
           <button
             onClick={handleLeave}
-            className="px-4 py-2 bg-red-500/90 hover:bg-red-600 text-white text-sm font-medium rounded-lg shadow-lg transition-colors flex items-center gap-2"
+            className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-black rounded-xl shadow-2xl transition-all flex items-center gap-2 transform hover:scale-105"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Leave Meeting
+            LEAVE SESSION
           </button>
         </div>
       )}
