@@ -135,6 +135,7 @@ const Exams = () => {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [downloadingPaper, setDownloadingPaper] = useState(null);
     const navigate = useNavigate();
     const { showToast } = useToast();
     const socket = useSocket();
@@ -245,6 +246,33 @@ const Exams = () => {
             ...prev,
             [questionId]: answerIndex
         }));
+    };
+
+    const downloadQuestionPaper = async (exam) => {
+        setDownloadingPaper(exam._id);
+        try {
+            const rawInfo = localStorage.getItem('userInfo');
+            const userInfo = JSON.parse(rawInfo);
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+
+            const { data } = await axios.get(`/api/exams/${exam._id}/question-paper`, config);
+
+            // Open the file in a new tab for download/view
+            const fileUrl = `${data.paper.fileUrl.startsWith('http') ? '' : '/'}${data.paper.fileUrl}`;
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            link.download = data.paper.fileName || `${data.examTitle}-question-paper`;
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Question paper downloaded!', 'success');
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Could not access question paper';
+            showToast(msg, 'error');
+        } finally {
+            setDownloadingPaper(null);
+        }
     };
 
     const handleSubmitExam = async () => {
@@ -512,19 +540,15 @@ const Exams = () => {
                             {exam.status === 'available' && exam.attemptsUsed < exam.maxAttempts && (
                                 <>
                                     {exam.examMode === 'paper-based' ? (
-                                        <div className="flex gap-2 w-full">
-                                            <a
-                                                href={exam.linkedPaper ? `/${exam.linkedPaper.fileUrl}` : '#'}
-                                                download
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex-1"
+                                        <div className="flex gap-2 w-full flex-wrap">
+                                            <ModernButton
+                                                className="flex-1 text-xs py-2 bg-indigo-600"
+                                                disabled={downloadingPaper === exam._id}
+                                                onClick={() => downloadQuestionPaper(exam)}
                                             >
-                                                <ModernButton className="w-full text-xs py-2 bg-indigo-600">
-                                                    <Download size={14} className="mr-1" />
-                                                    Download Question Paper
-                                                </ModernButton>
-                                            </a>
+                                                <Download size={14} className="mr-1" />
+                                                {downloadingPaper === exam._id ? 'Fetching...' : 'Download Question Paper'}
+                                            </ModernButton>
                                             <ModernButton
                                                 variant="secondary"
                                                 className="flex-1 text-xs py-2"
@@ -541,6 +565,13 @@ const Exams = () => {
                                         </ModernButton>
                                     )}
                                 </>
+                            )}
+
+                            {exam.status === 'scheduled' && exam.examMode === 'paper-based' && (
+                                <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs text-white/40 font-medium w-fit">
+                                    <Clock size={14} className="text-amber-500" />
+                                    <span>Question paper unlocks when exam starts · <span className="text-amber-400">{new Date(exam.scheduledDate).toLocaleString()}</span></span>
+                                </div>
                             )}
 
                             {exam.status === 'failed' && exam.attemptsUsed < exam.maxAttempts && (

@@ -155,14 +155,19 @@ const ExamManagement = () => {
     };
 
     const handleView = (item) => {
-        window.open(`/${item.fileUrl}`, '_blank');
+        const url = item.fileUrl?.startsWith('http') ? item.fileUrl : `${import.meta.env.VITE_API_URL || ''}/${item.fileUrl}`;
+        window.open(url, '_blank');
     };
 
     const handleDownload = (item) => {
+        const url = item.fileUrl?.startsWith('http') ? item.fileUrl : `${import.meta.env.VITE_API_URL || ''}/${item.fileUrl}`;
         const link = document.createElement('a');
-        link.href = `/${item.fileUrl}`;
-        link.download = item.fileName;
+        link.href = url;
+        link.download = item.fileName || item.title;
+        link.target = '_blank';
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
     };
 
     const handleDelete = async (id) => {
