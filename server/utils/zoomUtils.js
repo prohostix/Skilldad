@@ -423,7 +423,7 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
 
   // Check Redis cache if sessionId and userId are provided
   if (sessionId && userId) {
-    const cacheKey = `zoom:sig:v4:${sessionId}:${userId}:${role}`;
+    const cacheKey = `zoom:sig:v6:${sessionId}:${userId}:${role}`;
     try {
       const r = redisCache.getRedis();
       if (r) {
@@ -442,9 +442,14 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
   const iat = Math.floor(Date.now() / 1000) - 30; // 30 seconds buffer for clock skew
   const exp = iat + (2 * 60 * 60); // 2 hours from now
 
+  if (!ZOOM_SDK_KEY || !ZOOM_SDK_SECRET) {
+    console.error('[Zoom Signature] CRITICAL: ZOOM_SDK_KEY or ZOOM_SDK_SECRET is missing from environment variables');
+  }
+
   const payload = {
+    sdkKey: ZOOM_SDK_KEY,
     appKey: ZOOM_SDK_KEY,
-    sdkKey: ZOOM_SDK_KEY, // Keep for legacy
+    clientId: ZOOM_SDK_KEY, // Added back for maximum compatibility with all SDK warnings
     mn: meetingNumber.toString(),
     role: role,
     iat: iat,
@@ -463,7 +468,7 @@ const generateZoomSignature = async (meetingNumber, role, sessionId = null, user
 
     // Cache signature for 1 hour if sessionId and userId are provided
     if (sessionId && userId) {
-      const cacheKey = `zoom:sig:v4:${sessionId}:${userId}:${role}`;
+      const cacheKey = `zoom:sig:v6:${sessionId}:${userId}:${role}`;
       const cacheTTL = 60 * 60; // 1 hour in seconds
       try {
         const r = redisCache.getRedis();

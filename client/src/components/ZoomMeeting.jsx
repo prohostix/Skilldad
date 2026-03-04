@@ -79,22 +79,38 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         await client.init({
           zoomAppRoot: meetingSDKElement.current,
           language: 'en-US',
-          patchJsMedia: false, // REQUIRED: Keep false to resolve 'caps' error
+          patchJsMedia: false,
           leaveOnPageUnload: true,
-          sdkKey: sdkConfig.sdkKey // Re-added for explicit support
+          sdkKey: sdkConfig.sdkKey,
+          appKey: sdkConfig.sdkKey // Re-added to init for newer SDK compliance
         });
 
         console.log('[Zoom] SDK initialized, joining meeting...');
 
         if (!mounted) return;
 
-        await client.join({
-          signature: sdkConfig.signature,
-          meetingNumber: sdkConfig.meetingNumber,
-          password: sdkConfig.passWord,
-          userName: sdkConfig.userName,
-          userEmail: sdkConfig.userEmail,
-        });
+        // Try joining with modern parameters first
+        try {
+          await client.join({
+            signature: sdkConfig.signature,
+            meetingNumber: sdkConfig.meetingNumber,
+            password: sdkConfig.passWord,
+            userName: sdkConfig.userName,
+            userEmail: sdkConfig.userEmail,
+            sdkKey: sdkConfig.sdkKey, // Even if warned, some v4/v5 transitions need it
+            appKey: sdkConfig.sdkKey
+          });
+        } catch (joinErr) {
+          console.warn('[Zoom] Initial join attempt failed, retrying without appKey/sdkKey in join parameters...', joinErr);
+          // Fallback to minimal join if the above fails
+          await client.join({
+            signature: sdkConfig.signature,
+            meetingNumber: sdkConfig.meetingNumber,
+            password: sdkConfig.passWord,
+            userName: sdkConfig.userName,
+            userEmail: sdkConfig.userEmail,
+          });
+        }
 
         console.log('[Zoom] Successfully joined meeting');
 
@@ -104,12 +120,15 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         }
 
       } catch (err) {
-        console.error('[Zoom] Error details:', {
-          method: err?.method,
-          errorCode: err?.errorCode,
-          errorMessage: err?.errorMessage || err?.reason,
-          error: err
-        });
+        // Advanced error serialization for better diagnostics
+        const errorDetails = {};
+        if (err) {
+          Object.getOwnPropertyNames(err).forEach(key => {
+            errorDetails[key] = err[key];
+          });
+        }
+        console.error('[Zoom] Error details:', errorDetails);
+
         initializationInProgress.current = false;
         if (!mounted) return;
 
