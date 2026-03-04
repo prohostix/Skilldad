@@ -267,7 +267,7 @@ const decryptPasscode = (encryptedPasscode) => {
  * @param {string} hostEmail - Host email address
  * @returns {Promise<Object>} ZoomMeetingData object
  */
-const createZoomMeeting = async (topic, startTime, duration, hostEmail) => {
+const createZoomMeeting = async (topic, startTime, duration, hostEmail, timezone = 'Asia/Kolkata') => {
   const sessionId = 'pending'; // Session not created yet
   const operation = 'create_meeting';
 
@@ -306,7 +306,7 @@ const createZoomMeeting = async (topic, startTime, duration, hostEmail) => {
         type: 2, // Scheduled meeting
         start_time: startTime.toISOString(),
         duration: duration,
-        timezone: 'UTC',
+        timezone: timezone,
         settings: {
           host_video: true,
           participant_video: true,

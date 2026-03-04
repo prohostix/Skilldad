@@ -76,7 +76,16 @@ const ScheduleClass = () => {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
         try {
-            await axios.post('/api/sessions', formData, config);
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const dataToPost = {
+                ...formData,
+                timezone,
+                // Convert local datetime-local value to ISO string so backend doesn't guess timezone
+                startTime: formData.startTime ? new Date(formData.startTime).toISOString() : ''
+            };
+
+            console.log('[ScheduleClass] Submitting session data:', { ...dataToPost, topic: dataToPost.topic });
+            await axios.post('/api/sessions', dataToPost, config);
             alert('Class Scheduled Successfully!');
             if (userInfo.role === 'admin') navigate('/admin/dashboard');
             else if (userInfo.role === 'university') navigate('/university/dashboard');

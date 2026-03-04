@@ -195,7 +195,16 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
                 timeout: 15000,
             };
-            const payload = { ...form, duration: Number(form.duration) };
+
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const payload = {
+                ...form,
+                duration: Number(form.duration),
+                timezone,
+                // Convert simple concat d+h to real ISO UTC
+                startTime: form.startTime ? new Date(form.startTime).toISOString() : ''
+            };
+
             axios.post('/api/sessions', payload, config)
                 .then(({ data }) => {
                     // Replace the local optimistic session with the real DB entry

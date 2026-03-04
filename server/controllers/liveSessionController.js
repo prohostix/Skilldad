@@ -156,7 +156,8 @@ const createSession = asyncHandler(async (req, res) => {
             topic,
             startDateTime,
             duration,
-            instructorUser.email
+            instructorUser.email,
+            timezone || 'Asia/Kolkata'
         );
 
         console.log(`[Zoom] Meeting created successfully: ${zoomData.meetingId}`);
