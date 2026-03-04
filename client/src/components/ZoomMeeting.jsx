@@ -23,17 +23,21 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
     let mounted = true;
 
     const initializeZoom = async () => {
+      // Small pre-flight delay to ensure DOM and libraries are fully ready
+      await new Promise(r => setTimeout(r, 500));
+
       // Prevent multiple initialization attempts
       if (!sessionId || initializationInProgress.current || isInitializedRef.current) {
         console.log('[Zoom] Skipping initialization - already in progress or initialized');
         return;
       }
+
+      console.log('[Zoom] Starting initialization...');
       initializationInProgress.current = true;
 
       try {
         if (!mounted) return;
 
-        console.log('[Zoom] Starting initialization...');
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
         const token = propToken || localStorage.getItem('token') || userInfo.token;
 
@@ -56,6 +60,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         if (sdkConfig.sdkKey && sdkConfig.sdkKey.startsWith('MOCK_')) {
           setUseMockMode(true);
           setLoading(false);
+          initializationInProgress.current = false;
           return;
         }
 
@@ -82,20 +87,19 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         await client.init({
           zoomAppRoot: meetingSDKElement.current,
           language: 'en-US',
-          patchJsMedia: false,
+          patchJsMedia: false, // Essential for 'caps' error prevention
           leaveOnPageUnload: true,
           sdkKey: sdkConfig.sdkKey,
-          appKey: sdkConfig.sdkKey // Re-added to init for newer SDK compliance
+          appKey: sdkConfig.sdkKey
         });
 
         // CRITICAL: Wait for SDK to stabilize media caps before joining
-        console.log('[Zoom] SDK initialized. Stabilization delay (2s)...');
+        // Increased to 3s to handle slower first-time loads
+        console.log('[Zoom] SDK initialized. Stabilization delay (3s)...');
         if (!mounted) return;
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 3000));
 
         console.log('[Zoom] Joining meeting...');
-
-        if (!mounted) return;
 
         // Try joining with modern parameters first
         try {
@@ -105,12 +109,12 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
             password: sdkConfig.passWord,
             userName: sdkConfig.userName,
             userEmail: sdkConfig.userEmail,
-            sdkKey: sdkConfig.sdkKey, // Even if warned, some v4/v5 transitions need it
+            sdkKey: sdkConfig.sdkKey,
             appKey: sdkConfig.sdkKey
           });
         } catch (joinErr) {
-          console.warn('[Zoom] Initial join attempt failed, retrying without appKey/sdkKey in join parameters...', joinErr);
-          // Fallback to minimal join if the above fails
+          console.warn('[Zoom] Initial join failed, retrying legacy...', joinErr);
+          if (!mounted) return;
           await client.join({
             signature: sdkConfig.signature,
             meetingNumber: sdkConfig.meetingNumber,
@@ -124,7 +128,6 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         if (mounted) {
           isInitializedRef.current = true;
-          initializationInProgress.current = false; // Successfully joined
           setLoading(false);
         }
 
@@ -138,12 +141,15 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         }
         console.error('[Zoom] Error details:', errorDetails);
 
-        initializationInProgress.current = false;
         if (!mounted) return;
 
         const errorMessage = err.response?.data?.message || err.message || 'Failed to join meeting';
         setError(errorMessage);
         setLoading(false);
+
+        // Reset flags so user can try again without refresh
+        isInitializedRef.current = false;
+        initializationInProgress.current = false;
 
         if (onError) {
           onError(errorMessage);

@@ -173,6 +173,7 @@ const SessionDetail = () => {
       <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0b2e] to-[#0a0118] p-4">
         <div className="max-w-7xl mx-auto relative z-20 overflow-visible">
           <ZoomMeeting
+            key={sessionId}
             sessionId={sessionId}
             isHost={isHost}
             onLeave={handleLeaveMeeting}
