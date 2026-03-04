@@ -41,6 +41,7 @@ const StudentDashboard = () => {
     const [recentProjects, setRecentProjects] = useState([]);
     const [upcomingExams, setUpcomingExams] = useState([]);
     const [documents, setDocuments] = useState([]);
+    const [enrolledUniversities, setEnrolledUniversities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         completionRate: 0,
@@ -91,6 +92,35 @@ const StudentDashboard = () => {
                 setRecentProjects(projects.slice(0, 3));
                 setUpcomingExams(exams.filter(e => e.status === 'not-started').slice(0, 3));
                 setDocuments(docs.slice(0, 5));
+
+                // Extract unique universities from enrolled courses
+                const universities = new Map();
+                courses.forEach(enrollment => {
+                    const course = enrollment.course;
+                    if (course) {
+                        // Try to get university info from different sources
+                        const uniName = course.universityName || 
+                                       course.instructor?.profile?.universityName || 
+                                       (course.instructor?.role === 'university' && course.instructor?.name);
+                        
+                        const uniId = course.instructor?._id || course.instructor;
+                        
+                        if (uniName && uniId) {
+                            if (!universities.has(uniId.toString())) {
+                                universities.set(uniId.toString(), {
+                                    id: uniId,
+                                    name: uniName,
+                                    courseCount: 1,
+                                    logo: course.instructor?.profileImage || null
+                                });
+                            } else {
+                                const existing = universities.get(uniId.toString());
+                                existing.courseCount += 1;
+                            }
+                        }
+                    }
+                });
+                setEnrolledUniversities(Array.from(universities.values()));
 
                 // Calculate stats from real data
                 const totalProgress = courses.reduce((sum, c) => sum + (c.progress || 0), 0);
@@ -162,6 +192,63 @@ const StudentDashboard = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Enrolled Universities Section */}
+            {enrolledUniversities.length > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                >
+                    <GlassCard className="p-6 bg-gradient-to-r from-primary/5 via-purple-500/5 to-blue-500/5 border-primary/20">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/20 rounded-xl">
+                                    <Users size={18} className="text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-white">Enrolled Universities</h3>
+                                    <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">
+                                        Learning from {enrolledUniversities.length} {enrolledUniversities.length === 1 ? 'Institution' : 'Institutions'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {enrolledUniversities.map((university) => (
+                                <div
+                                    key={university.id}
+                                    className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 hover:border-primary/30 hover:bg-white/10 transition-all group cursor-pointer"
+                                >
+                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 border-2 border-primary/30 flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-110 transition-transform">
+                                        {university.logo ? (
+                                            <img 
+                                                src={university.logo} 
+                                                alt={university.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-lg font-black text-primary">
+                                                {university.name.charAt(0)}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-sm font-bold text-white group-hover:text-primary transition-colors truncate">
+                                            {university.name}
+                                        </h4>
+                                        <p className="text-[10px] text-white/40 font-semibold uppercase tracking-wider mt-0.5">
+                                            {university.courseCount} {university.courseCount === 1 ? 'Course' : 'Courses'} Enrolled
+                                        </p>
+                                    </div>
+                                    <ChevronRight size={16} className="text-white/20 group-hover:text-primary transition-colors" />
+                                </div>
+                            ))}
+                        </div>
+                    </GlassCard>
+                </motion.div>
+            )}
 
             {/* 2. Stats Grid - University Style with CountingNumber */}
 
