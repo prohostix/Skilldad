@@ -95,19 +95,38 @@ const DEMO_SESSIONS = [
     },
 ];
 
-const formatSession = (s) => ({
-    id: s._id,
-    title: s.topic,
-    course: s.course?.title || s.category || 'General',
-    instructor: s.instructor?.profile?.universityName || s.instructor?.name || 'Institution Faculty',
-    date: new Date(s.startTime).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
-    time: new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    duration: `${s.duration} min`,
-    enrolledStudents: typeof s.enrolledStudents === 'number' ? s.enrolledStudents : (s.enrolledStudents?.length || 0),
-    status: s.status || (new Date(s.startTime) > new Date() ? 'scheduled' : 'completed'),
-    description: s.description,
-    meetingLink: s.meetingLink,
-});
+const parseSafeDate = (dateish) => {
+    if (!dateish) return new Date();
+    // If it's already an ISO string with Z or an offset, new Date() is safe
+    if (typeof dateish === 'string' && (dateish.includes('Z') || /[\+\-]\d{2}:\d{2}$/.test(dateish))) {
+        return new Date(dateish);
+    }
+    // If it's a T-string without timezone (e.g. 2026-03-04T10:02), parse manually as LOCAL
+    if (typeof dateish === 'string' && dateish.includes('T')) {
+        const [d, t] = dateish.split('T');
+        const [y, m, day] = d.split('-').map(Number);
+        const [h, min] = t.split(':').map(Number);
+        return new Date(y, m - 1, day, h, min);
+    }
+    return new Date(dateish);
+};
+
+const formatSession = (s) => {
+    const startObj = parseSafeDate(s.startTime);
+    return {
+        id: s._id,
+        title: s.topic,
+        course: s.course?.title || s.category || 'General',
+        instructor: s.instructor?.profile?.universityName || s.instructor?.name || 'Institution Faculty',
+        date: startObj.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
+        time: startObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        duration: `${s.duration} min`,
+        enrolledStudents: typeof s.enrolledStudents === 'number' ? s.enrolledStudents : (s.enrolledStudents?.length || 0),
+        status: s.status || (startObj > new Date() ? 'scheduled' : 'completed'),
+        description: s.description,
+        meetingLink: s.meetingLink,
+    };
+};
 
 /* ═══════════════════════════════════════════════════════════════
    Schedule Session Modal
@@ -168,12 +187,23 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
             return;
         }
 
+        // Robust local-to-ISO parser
+        const getISO = () => {
+            if (!form.startTime) return '';
+            const [d, t] = form.startTime.split('T');
+            const [y, m, day] = d.split('-').map(Number);
+            const [hour, minute] = t.split(':').map(Number);
+            const localDate = new Date(y, m - 1, day, hour, minute);
+            return isNaN(localDate.getTime()) ? '' : localDate.toISOString();
+        };
+        const isoStartTime = getISO();
+
         // ── Optimistic: create locally IMMEDIATELY so the button always works ──
         const localSession = {
             _id: `local_${Date.now()}`,
             topic: form.topic.trim(),
             category: form.category,
-            startTime: form.startTime,
+            startTime: isoStartTime, // Use ISO instead of T-string
             duration: Number(form.duration),
             meetingLink: form.meetingLink,
             description: form.description,
@@ -201,16 +231,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                 ...form,
                 duration: Number(form.duration),
                 timezone,
-                // Robust local-to-UTC conversion: parse T-string manually to ensure local-first interpretation
-                startTime: (() => {
-                    if (!form.startTime) return '';
-                    const [d, t] = form.startTime.split('T');
-                    const [y, m, day] = d.split('-').map(Number);
-                    const [hour, minute] = t.split(':').map(Number);
-                    // new Date(y, m-1, d, h, m) is always LOCAL
-                    const localDate = new Date(y, m - 1, day, hour, minute);
-                    return isNaN(localDate.getTime()) ? '' : localDate.toISOString();
-                })()
+                startTime: isoStartTime
             };
 
             axios.post('/api/sessions', payload, config)
@@ -351,9 +372,13 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                             {form.startDate && form.startHour && (
                                 <p className="text-[11px] text-emerald-400 mt-1.5 ml-1 flex items-center gap-1">
                                     <CheckCircle2 size={11} /> Scheduled for{' '}
-                                    {new Date(`${form.startDate}T${form.startHour}`).toLocaleString('en-IN', {
-                                        dateStyle: 'medium', timeStyle: 'short'
-                                    })}
+                                    {(() => {
+                                        const [y, m, day] = form.startDate.split('-').map(Number);
+                                        const [h, min] = form.startHour.split(':').map(Number);
+                                        return new Date(y, m - 1, day, h, min).toLocaleString('en-IN', {
+                                            dateStyle: 'medium', timeStyle: 'short'
+                                        });
+                                    })()}
                                 </p>
                             )}
                         </div>
