@@ -201,8 +201,16 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                 ...form,
                 duration: Number(form.duration),
                 timezone,
-                // Convert simple concat d+h to real ISO UTC
-                startTime: form.startTime ? new Date(form.startTime).toISOString() : ''
+                // Robust local-to-UTC conversion: parse T-string manually to ensure local-first interpretation
+                startTime: (() => {
+                    if (!form.startTime) return '';
+                    const [d, t] = form.startTime.split('T');
+                    const [y, m, day] = d.split('-').map(Number);
+                    const [hour, minute] = t.split(':').map(Number);
+                    // new Date(y, m-1, d, h, m) is always LOCAL
+                    const localDate = new Date(y, m - 1, day, hour, minute);
+                    return isNaN(localDate.getTime()) ? '' : localDate.toISOString();
+                })()
             };
 
             axios.post('/api/sessions', payload, config)

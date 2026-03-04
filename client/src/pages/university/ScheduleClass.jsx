@@ -80,8 +80,16 @@ const ScheduleClass = () => {
             const dataToPost = {
                 ...formData,
                 timezone,
-                // Convert local datetime-local value to ISO string so backend doesn't guess timezone
-                startTime: formData.startTime ? new Date(formData.startTime).toISOString() : ''
+                // Robust local-to-UTC conversion: parse T-string manually to ensure local-first interpretation
+                startTime: (() => {
+                    if (!formData.startTime) return '';
+                    const [d, t] = formData.startTime.split('T');
+                    const [y, m, day] = d.split('-').map(Number);
+                    const [hour, minute] = t.split(':').map(Number);
+                    // new Date(y, m-1, d, h, m) is always LOCAL
+                    const localDate = new Date(y, m - 1, day, hour, minute);
+                    return isNaN(localDate.getTime()) ? '' : localDate.toISOString();
+                })()
             };
 
             console.log('[ScheduleClass] Submitting session data:', { ...dataToPost, topic: dataToPost.topic });
