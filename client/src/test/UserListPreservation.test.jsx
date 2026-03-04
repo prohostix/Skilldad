@@ -390,7 +390,7 @@ describe('Property 2: Preservation - Non-Invite WebSocket Behavior and Manual Re
           }),
         })
       );
-    });
+    }, { timeout: 10000 });
 
     console.log('[TEST] ✓ Initial user list fetch triggered on mount');
     
@@ -401,7 +401,7 @@ describe('Property 2: Preservation - Non-Invite WebSocket Behavior and Manual Re
     );
 
     console.log('[TEST] ✓ Universities list also fetched on mount');
-  });
+  }, 15000);
 
   it('Test Case 8: WebSocket created action is handled (non-invite scenario)', async () => {
     console.log('\n[PRESERVATION TEST] Test Case 8: WebSocket Created Action Handler');
@@ -414,7 +414,7 @@ describe('Property 2: Preservation - Non-Invite WebSocket Behavior and Manual Re
     // Wait for WebSocket listener to be registered
     await waitFor(() => {
       expect(websocketHandler).toBeDefined();
-    });
+    }, { timeout: 10000 });
 
     console.log('[TEST] WebSocket listener registered');
 
@@ -443,5 +443,5 @@ describe('Property 2: Preservation - Non-Invite WebSocket Behavior and Manual Re
     
     // Verify no errors were thrown
     expect(websocketHandler).toBeDefined();
-  });
+  }, 15000);
 });

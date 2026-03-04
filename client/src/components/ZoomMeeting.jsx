@@ -29,7 +29,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
     const initializeZoom = async () => {
       try {
         if (!mounted) return;
-        
+
         console.log('[Zoom] Starting initialization...');
         console.log('[Zoom] Session ID:', sessionId);
         console.log('[Zoom] Is Host:', isHost);
@@ -65,11 +65,11 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         }
 
         console.log('[Zoom] SDK config received, waiting for DOM element...');
-        
+
         // Wait for DOM element to be ready (it's rendered now that we're not in loading state)
         let retryCount = 0;
         const maxRetries = 20;
-        
+
         while (!meetingSDKElement.current && retryCount < maxRetries && mounted) {
           retryCount++;
           console.log(`[Zoom] Waiting for element... retry ${retryCount}/${maxRetries}`);
@@ -86,7 +86,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         // Initialize Zoom SDK
         const client = ZoomMtgEmbedded.createClient();
-        
+
         if (!mounted) return;
         setSdkClient(client);
 
@@ -103,22 +103,20 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         if (!mounted) return;
 
         // Join the meeting
+        // Note: sdkKey is now passed in the signature payload for v4.0.0+
         await client.join({
-          sdkKey: sdkConfig.sdkKey,
           signature: sdkConfig.signature,
           meetingNumber: sdkConfig.meetingNumber,
           password: sdkConfig.passWord,
           userName: sdkConfig.userName,
           userEmail: sdkConfig.userEmail,
-          tk: '', // Registration token (not used)
-          zak: '' // Zoom access token (not used for SDK)
         });
 
         console.log('[Zoom] Successfully joined meeting');
-        
+
         // The Zoom SDK handles video rendering automatically
         // No manual optimization needed
-        
+
         if (mounted) {
           setLoading(false);
           setInitialized(true);
@@ -127,7 +125,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
       } catch (err) {
         console.error('[Zoom] Error initializing Zoom:', err);
         if (!mounted) return;
-        
+
         const errorMessage = err.response?.data?.message || err.message || 'Failed to join meeting';
         setError(errorMessage);
         setLoading(false);
@@ -204,9 +202,9 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
       <div
         ref={meetingSDKElement}
         className="w-full h-full zoom-meeting-container"
-        style={{ 
-          width: '100%', 
-          height: '100%', 
+        style={{
+          width: '100%',
+          height: '100%',
           minHeight: '100%',
           position: 'relative'
         }}
