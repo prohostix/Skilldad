@@ -24,7 +24,10 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
     const initializeZoom = async () => {
       // Prevent multiple initialization attempts
-      if (initializationInProgress.current || isInitializedRef.current) return;
+      if (!sessionId || initializationInProgress.current || isInitializedRef.current) {
+        console.log('[Zoom] Skipping initialization - already in progress or initialized');
+        return;
+      }
       initializationInProgress.current = true;
 
       try {
@@ -85,7 +88,12 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
           appKey: sdkConfig.sdkKey // Re-added to init for newer SDK compliance
         });
 
-        console.log('[Zoom] SDK initialized, joining meeting...');
+        // CRITICAL: Wait for SDK to stabilize media caps before joining
+        console.log('[Zoom] SDK initialized. Stabilization delay (2s)...');
+        if (!mounted) return;
+        await new Promise(r => setTimeout(r, 2000));
+
+        console.log('[Zoom] Joining meeting...');
 
         if (!mounted) return;
 
@@ -116,6 +124,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         if (mounted) {
           isInitializedRef.current = true;
+          initializationInProgress.current = false; // Successfully joined
           setLoading(false);
         }
 

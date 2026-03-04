@@ -11,6 +11,22 @@ import { ArrowLeft, Users, Clock, Calendar, Video } from 'lucide-react';
  * SessionDetail Page
  * Displays session information and embeds Zoom meeting for live sessions
  */
+
+const parseSafeDate = (dateish) => {
+  if (!dateish) return new Date();
+  if (typeof dateish === 'string' && (dateish.includes('Z') || /[\+\-]\d{2}:\d{2}$/.test(dateish))) {
+    return new Date(dateish);
+  }
+  if (typeof dateish === 'string' && dateish.includes('T')) {
+    const [d, t] = dateish.split('T');
+    const [y, m, day] = d.split('-').map(Number);
+    const [h, min] = t.split(':').map(Number);
+    const ld = new Date(y, m - 1, day, h, min);
+    return isNaN(ld.getTime()) ? new Date(dateish) : ld;
+  }
+  return new Date(dateish);
+};
+
 const SessionDetail = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
@@ -41,9 +57,13 @@ const SessionDetail = () => {
       setSession(data);
 
       // Determine if user is host (instructor or university owner)
-      const isInstructor = data.instructor?._id === userInfo._id || data.instructor === userInfo._id;
-      const isUniversity = data.university?._id === userInfo._id || data.university === userInfo._id;
-      setIsHost(isInstructor || isUniversity);
+      const uId = userInfo._id || userInfo.id;
+      const instId = data.instructor?._id || data.instructor;
+      const uniId = data.university?._id || data.university;
+
+      const isInstructor = instId && uId && instId.toString() === uId.toString();
+      const isUniversity = uniId && uId && uniId.toString() === uId.toString();
+      setIsHost(!!(isInstructor || isUniversity));
 
       setLoading(false);
     } catch (err) {
@@ -68,8 +88,8 @@ const SessionDetail = () => {
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const date = parseSafeDate(dateString);
+    return date.toLocaleDateString('en-IN', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -78,10 +98,11 @@ const SessionDetail = () => {
   };
 
   const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
+    const date = parseSafeDate(dateString);
+    return date.toLocaleTimeString('en-IN', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true
     });
   };
 

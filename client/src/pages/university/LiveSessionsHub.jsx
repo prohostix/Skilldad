@@ -106,20 +106,23 @@ const parseSafeDate = (dateish) => {
         const [d, t] = dateish.split('T');
         const [y, m, day] = d.split('-').map(Number);
         const [h, min] = t.split(':').map(Number);
-        return new Date(y, m - 1, day, h, min);
+        const ld = new Date(y, m - 1, day, h, min);
+        return isNaN(ld.getTime()) ? new Date(dateish) : ld;
     }
     return new Date(dateish);
 };
 
 const formatSession = (s) => {
     const startObj = parseSafeDate(s.startTime);
+    // Use en-IN for Indian users, but keep it robust
+    const locale = 'en-IN';
     return {
         id: s._id,
         title: s.topic,
         course: s.course?.title || s.category || 'General',
         instructor: s.instructor?.profile?.universityName || s.instructor?.name || 'Institution Faculty',
-        date: startObj.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }),
-        time: startObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: startObj.toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' }),
+        time: startObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true }),
         duration: `${s.duration} min`,
         enrolledStudents: typeof s.enrolledStudents === 'number' ? s.enrolledStudents : (s.enrolledStudents?.length || 0),
         status: s.status || (startObj > new Date() ? 'scheduled' : 'completed'),
