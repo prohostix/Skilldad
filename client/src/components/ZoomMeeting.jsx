@@ -89,7 +89,6 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         if (!mounted) return;
 
         await client.join({
-          sdkKey: sdkConfig.sdkKey,
           signature: sdkConfig.signature,
           meetingNumber: sdkConfig.meetingNumber,
           password: sdkConfig.passWord,
@@ -105,7 +104,12 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         }
 
       } catch (err) {
-        console.error('[Zoom] Error initializing Zoom:', err);
+        console.error('[Zoom] Error details:', {
+          method: err?.method,
+          errorCode: err?.errorCode,
+          errorMessage: err?.errorMessage || err?.reason,
+          error: err
+        });
         initializationInProgress.current = false;
         if (!mounted) return;
 
