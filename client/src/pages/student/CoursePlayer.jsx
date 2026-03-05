@@ -191,7 +191,7 @@ const CoursePlayer = () => {
                                 const sessionDate = new Date(session.startTime);
                                 const isLive = session.status === 'live';
                                 const isUpcoming = session.status === 'scheduled' && sessionDate > new Date();
-                                
+
                                 return (
                                     <div
                                         key={session._id}
@@ -310,6 +310,7 @@ const CoursePlayer = () => {
                             {currentVideo.videoType === 'zoom-recording' && currentVideo.zoomRecording?.playUrl ? (
                                 <ZoomRecordingPlayer
                                     recordingUrl={currentVideo.zoomRecording.playUrl}
+                                    sessionId={currentVideo.zoomSession}
                                     title={currentVideo.title}
                                     onEnded={handleVideoEnd}
                                     onError={(error) => console.error('Zoom recording error:', error)}
