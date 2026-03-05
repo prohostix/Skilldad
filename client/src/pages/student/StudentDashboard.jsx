@@ -99,12 +99,12 @@ const StudentDashboard = () => {
                     const course = enrollment.course;
                     if (course) {
                         // Try to get university info from different sources
-                        const uniName = course.universityName || 
-                                       course.instructor?.profile?.universityName || 
-                                       (course.instructor?.role === 'university' && course.instructor?.name);
-                        
+                        const uniName = course.universityName ||
+                            course.instructor?.profile?.universityName ||
+                            (course.instructor?.role === 'university' && course.instructor?.name);
+
                         const uniId = course.instructor?._id || course.instructor;
-                        
+
                         if (uniName && uniId) {
                             if (!universities.has(uniId.toString())) {
                                 universities.set(uniId.toString(), {
@@ -223,8 +223,8 @@ const StudentDashboard = () => {
                                 >
                                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-purple-500/20 border-2 border-primary/30 flex items-center justify-center shrink-0 overflow-hidden group-hover:scale-110 transition-transform">
                                         {university.logo ? (
-                                            <img 
-                                                src={university.logo} 
+                                            <img
+                                                src={university.logo}
                                                 alt={university.name}
                                                 className="w-full h-full object-cover"
                                             />

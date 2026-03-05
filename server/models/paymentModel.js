@@ -22,7 +22,7 @@ const paymentSchema = mongoose.Schema(
         },
         paymentMethod: {
             type: String,
-            enum: ['bank_transfer', 'credit_card', 'paypal', 'cryptocurrency', 'cash', 'other'],
+            enum: ['bank_transfer', 'credit_card', 'paypal', 'cryptocurrency', 'cash', 'other', 'admin_enrolled'],
             default: 'bank_transfer',
         },
         transactionId: {
@@ -63,4 +63,4 @@ const paymentSchema = mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model('Payment', paymentSchema);
+module.exports = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);

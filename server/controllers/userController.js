@@ -5,6 +5,7 @@ const User = require('../models/userModel');
 const sendEmail = require('../utils/sendEmail');
 const emailTemplates = require('../utils/emailTemplates');
 const socketService = require('../services/SocketService');
+const Enrollment = require('../models/enrollmentModel');
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -124,27 +125,33 @@ const registerUser = async (req, res) => {
 // @access  Public
 const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        let { email, password } = req.body;
 
-        console.log('Login attempt received:', { email });
+        if (email) email = email.trim().toLowerCase();
+
+        console.log('--- DEBUG LOGIN START ---');
+        console.log('Received Email:', email);
+        console.log('Received Password Length:', password?.length);
 
         if (!email || !password) {
-            console.log('Login failed: Missing email or password');
+            console.log('DEBUG: Missing email or password');
             return res.status(400).json({ message: 'Please provide email and password' });
         }
 
         // Check for user email
-        console.log('Searching for user...');
         const user = await User.findOne({ email });
 
         if (!user) {
-            console.log('Login failed: User not found -', email);
+            console.log('DEBUG: User NOT found in DB:', email);
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        console.log('User found, matching password...');
+        console.log('DEBUG: User found in DB. Role:', user.role);
+        console.log('DEBUG: Hashed password in DB type:', typeof user.password);
+
         const isMatch = await user.matchPassword(password);
-        console.log('Password match result:', isMatch);
+        console.log('DEBUG: Password match result:', isMatch);
+        console.log('--- DEBUG LOGIN END ---');
 
         if (isMatch) {
             console.log('Login successful for:', email);
@@ -300,22 +307,36 @@ const getUsers = async (req, res) => {
 
         const users = await User.find(query).select('-password');
 
-        // Populate additional enrollment info for students
-        const usersWithData = await Promise.all(users.map(async (user) => {
+        // Efficiently fetch all enrollments for students in one go
+        const studentIds = users.filter(u => u.role === 'student').map(u => u._id);
+        const allEnrollments = studentIds.length > 0
+            ? await Enrollment.find({ student: { $in: studentIds } })
+                .populate('course', 'title')
+                .lean()
+            : [];
+
+        // Map enrollments to students
+        const enrollmentMap = allEnrollments.reduce((acc, curr) => {
+            const userId = curr.student.toString();
+            if (!acc[userId]) acc[userId] = [];
+            acc[userId].push(curr);
+            return acc;
+        }, {});
+
+        const usersWithData = users.map((user) => {
             if (user.role === 'student') {
-                const Enrollment = require('../models/enrollmentModel');
-                const enrollments = await Enrollment.find({ student: user._id })
-                    .populate('course', 'title')
-                    .sort('-createdAt');
+                const enrollments = enrollmentMap[user._id.toString()] || [];
+                // Sort by date (already lean objects)
+                enrollments.sort((a, b) => b.createdAt - a.createdAt);
 
                 return {
                     ...user.toObject(),
                     enrollmentCount: enrollments.length,
-                    course: enrollments.length > 0 ? enrollments[0].course?.title : 'Enrolled Student'
+                    course: enrollments.length > 0 ? (enrollments[0].course?.title || 'Enrolled') : 'No Courses'
                 };
             }
             return user;
-        }));
+        });
 
         res.json(usersWithData);
     } catch (error) {

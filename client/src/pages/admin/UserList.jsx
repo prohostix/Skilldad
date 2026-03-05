@@ -11,7 +11,8 @@ import {
     CheckCircle,
     XCircle,
     AlertCircle,
-    Loader2
+    Loader2,
+    Trash2
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -53,10 +54,16 @@ const UserList = () => {
             console.log('[fetchUsers] Fetching users from server');
             const rawInfo = localStorage.getItem('userInfo');
             if (!rawInfo) {
-                console.warn('[fetchUsers] No user info found');
+                console.warn('[fetchUsers] No user info found - redirecting to login');
+                window.location.href = '/login?session=expired';
                 return;
             }
             const userInfo = JSON.parse(rawInfo);
+            if (!userInfo.token) {
+                console.warn('[fetchUsers] No token found - redirecting to login');
+                window.location.href = '/login?session=expired';
+                return;
+            }
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.get('/api/admin/users', config);
             console.log('[fetchUsers] Received users:', data.users?.length, 'users');
@@ -64,19 +71,35 @@ const UserList = () => {
             console.log('[fetchUsers] State updated with users');
         } catch (error) {
             console.error('[fetchUsers] Error:', error);
+            if (error.response?.status === 401) {
+                console.warn('[fetchUsers] Unauthorized - redirecting to login');
+                localStorage.removeItem('userInfo');
+                localStorage.removeItem('token');
+                window.location.href = '/login?session=expired';
+            }
         }
     };
 
     const fetchUniversities = async () => {
         try {
             const rawInfo = localStorage.getItem('userInfo');
-            if (!rawInfo) return;
+            if (!rawInfo) {
+                console.warn('[fetchUniversities] No user info found');
+                return;
+            }
             const userInfo = JSON.parse(rawInfo);
+            if (!userInfo.token) {
+                console.warn('[fetchUniversities] No token found');
+                return;
+            }
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.get('/api/admin/universities', config);
             setUniversities(data);
         } catch (error) {
             console.error('Error fetching universities:', error);
+            if (error.response?.status === 401) {
+                console.warn('[fetchUniversities] Unauthorized');
+            }
         }
     };
 
@@ -217,6 +240,30 @@ const UserList = () => {
         }
     };
 
+    const handleDeleteUser = async (user) => {
+        if (!window.confirm(`Are you sure you want to delete ${user.name} (${user.email})? This action cannot be undone.`)) return;
+
+        try {
+            const rawInfo = localStorage.getItem('userInfo');
+            if (!rawInfo) return;
+            const userInfo = JSON.parse(rawInfo);
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`,
+                }
+            };
+
+            await axios.delete(`/api/admin/users/${user._id}`, config);
+
+            showToast('success', `User ${user.name} deleted successfully`);
+            // The WebSocket will handle updating the list, but we can also fetch manually
+            fetchUsers();
+        } catch (error) {
+            console.error('Delete user error:', error);
+            showToast('error', `Failed to delete user: ${error.response?.data?.message || error.message}`);
+        }
+    };
     const isSubmitting = useRef(false);
 
     const handleInviteUser = async (e) => {
@@ -477,6 +524,14 @@ const UserList = () => {
                                                     Revoke
                                                 </button>
                                             )}
+                                            <button
+                                                onClick={() => handleDeleteUser(user)}
+                                                className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all flex items-center gap-1"
+                                                title="Delete User"
+                                            >
+                                                <Trash2 size={14} />
+                                                Delete
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

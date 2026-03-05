@@ -3,6 +3,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const path = require('path');
+const compression = require('compression');
 
 // Load env vars from the correct path regardless of where it's run from
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -53,11 +54,21 @@ global.BASE_UPLOAD_PATH = uploads.ROOT;
 global.STORAGE_STATUS = { succeeded: uploadsSucceeded, failed: uploadsFailed };
 
 const app = express();
+app.use(compression());
 app.use(cookieParser());
 const server = http.createServer(app);
 
 // Initialize Socket.io
 socketService.init(server);
+
+// Initialize Exam WebSocket Service
+const examWebSocketService = require('./services/examWebSocketService');
+examWebSocketService.init();
+
+// Start timers for ongoing exams (after DB connection)
+setTimeout(() => {
+  examWebSocketService.startTimersForOngoingExams();
+}, 2000); // Wait 2 seconds for DB connection to be ready
 
 // Middleware
 app.use(express.json({
@@ -106,13 +117,17 @@ app.use('/api/enrollment', require('./routes/enrollmentRoutes'));
 app.use('/api/university', require('./routes/universityRoutes'));
 app.use('/api/partner', require('./routes/partnerRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/admin/skilldad-universities', require('./routes/skillDadUniversityRoutes'));
 app.use('/api/sessions', require('./routes/liveSessionRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
 app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/exams', require('./routes/examRoutes'));
+app.use('/api/results', require('./routes/resultRoutes'));
+app.use('/api', require('./routes/questionRoutes'));
 app.use('/api/documents', require('./routes/documentRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/support', require('./routes/supportRoutes'));
+app.use('/api/faqs', require('./routes/faqRoutes'));
 app.use('/api/public', require('./routes/publicRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/webhooks', require('./routes/webhookRoutes'));
@@ -128,10 +143,14 @@ app.get('/', (req, res) => {
   res.send('API is running...');
 });
 
-// Health check endpoint with storage status
-app.get('/health', (req, res) => {
+// Health check endpoint with storage and DB status
+app.get('/health', async (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+
   res.status(200).json({
-    status: 'ok-v3',
+    status: 'ok-v4',
+    database: dbStatus,
     timestamp: new Date().toISOString(),
     storage: global.STORAGE_STATUS || 'UNKNOWN'
   });
@@ -224,4 +243,22 @@ server.listen(PORT, '0.0.0.0', () => {
       });
     }, 14 * 60 * 1000); // every 14 minutes
   }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  examWebSocketService.cleanup();
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT signal received: closing HTTP server');
+  examWebSocketService.cleanup();
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
 });

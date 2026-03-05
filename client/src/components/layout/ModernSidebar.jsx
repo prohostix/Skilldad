@@ -19,7 +19,10 @@ import {
     Image,
     Bell,
     Ticket,
-    Wallet
+    Wallet,
+    MessageCircle,
+    ChevronDown,
+    ChevronRight
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
@@ -29,6 +32,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { logout } = useUser();
+    const [universitiesDropdownOpen, setUniversitiesDropdownOpen] = useState(false);
 
     // Get user info from localStorage
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -44,14 +48,23 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                 { name: 'Exams', icon: Trophy, path: '/admin/exams' },
                 { name: 'Users', icon: Users, path: '/admin/users' },
                 { name: 'Students', icon: GraduationCap, path: '/admin/students' },
-                { name: 'Universities', icon: Building2, path: '/admin/university' },
+                { 
+                    name: 'Universities', 
+                    icon: Building2, 
+                    hasDropdown: true,
+                    subItems: [
+                        { name: 'Universities', path: '/admin/university' },
+                        { name: 'SkillDad Universities', path: '/admin/skilldad-universities' }
+                    ]
+                },
                 { name: 'B2B Partners', icon: Briefcase, path: '/admin/b2b' },
                 { name: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
                 { name: 'Coupons', icon: Ticket, path: '/admin/coupons' },
                 { name: 'Payouts', icon: DollarSign, path: '/admin/payouts' },
                 { name: 'Communications', icon: Bell, path: '/admin/communications' },
                 { name: 'Landing Assets', icon: Image, path: '/admin/partner-logos' },
-                { name: 'Support', icon: LifeBuoy, path: '/admin/support' },
+                { name: 'Support Tickets', icon: LifeBuoy, path: '/admin/support' },
+                { name: 'FAQ Manager', icon: MessageCircle, path: '/admin/faqs' },
                 { name: 'Settings', icon: Settings, path: '/admin/settings' },
             ];
         } else if (userRole === 'university') {
@@ -143,8 +156,69 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
 
                 <nav className="flex-1 space-y-1.5">
                     {menuItems.map((item) => {
-                        const isActive = location.pathname === item.path;
                         const Icon = item.icon;
+
+                        // Handle dropdown items
+                        if (item.hasDropdown) {
+                            const isAnySubItemActive = item.subItems.some(sub => location.pathname === sub.path);
+                            const isDropdownOpen = universitiesDropdownOpen;
+
+                            return (
+                                <div key={item.name}>
+                                    <button
+                                        onClick={() => setUniversitiesDropdownOpen(!universitiesDropdownOpen)}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group ${isAnySubItemActive
+                                            ? 'bg-primary/20 text-white'
+                                            : 'text-white/50 hover:bg-white/10 hover:text-white'
+                                            }`}
+                                    >
+                                        <div className="flex items-center space-x-2.5">
+                                            <Icon size={16} className={`flex-shrink-0 ${isAnySubItemActive ? 'text-primary' : 'group-hover:text-primary transition-colors'}`} />
+                                            <span className="font-medium font-inter text-xs whitespace-nowrap">{item.name}</span>
+                                        </div>
+                                        {isDropdownOpen ? (
+                                            <ChevronDown size={14} className="flex-shrink-0" />
+                                        ) : (
+                                            <ChevronRight size={14} className="flex-shrink-0" />
+                                        )}
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {isDropdownOpen && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="overflow-hidden ml-4 mt-1 space-y-1"
+                                            >
+                                                {item.subItems.map((subItem) => {
+                                                    const isSubActive = location.pathname === subItem.path;
+                                                    return (
+                                                        <button
+                                                            key={subItem.name}
+                                                            onClick={() => {
+                                                                navigate(subItem.path);
+                                                                if (window.innerWidth < 1024) setIsOpen(false);
+                                                            }}
+                                                            className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg transition-all duration-200 text-xs ${isSubActive
+                                                                ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                                                : 'text-white/50 hover:bg-white/10 hover:text-white'
+                                                                }`}
+                                                        >
+                                                            <span className="font-medium font-inter whitespace-nowrap">{subItem.name}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            );
+                        }
+
+                        // Handle regular items
+                        const isActive = location.pathname === item.path;
 
                         return (
                             <button

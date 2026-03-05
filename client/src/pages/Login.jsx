@@ -29,11 +29,20 @@ const Login = () => {
     const location = useLocation();
     const from = location.state?.from;
 
+    // Check if session expired
+    const searchParams = new URLSearchParams(location.search);
+    const sessionExpired = searchParams.get('session') === 'expired';
+
     useEffect(() => {
         if (user && user.token) {
             navigate('/');
         }
-    }, [user, navigate]);
+        
+        // Show session expired message
+        if (sessionExpired) {
+            setError('Your session has expired. Please log in again.');
+        }
+    }, [user, navigate, sessionExpired]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

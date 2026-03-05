@@ -10,8 +10,7 @@ import {
     Layout,
     PlayCircle,
     CheckCircle2,
-    ChevronDown,
-    ChevronUp,
+
     Send,
     MessageSquare,
     Sparkles,
@@ -23,31 +22,7 @@ import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 
-const FAQItem = ({ question, answer }) => {
-    const [isOpen, setIsOpen] = useState(false);
 
-    return (
-        <div className="border-b border-white/10 last:border-0">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-full py-5 flex items-center justify-between text-left focus:outline-none group"
-            >
-                <span className="text-white font-medium group-hover:text-primary transition-colors pr-8">{question}</span>
-                {isOpen ? <ChevronUp size={20} className="text-primary flex-shrink-0" /> : <ChevronDown size={20} className="text-white/30 flex-shrink-0" />}
-            </button>
-            <motion.div
-                initial={false}
-                animate={{ height: isOpen ? 'auto' : 0, opacity: isOpen ? 1 : 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
-            >
-                <p className="pb-5 text-text-secondary text-sm leading-relaxed">
-                    {answer}
-                </p>
-            </motion.div>
-        </div>
-    );
-};
 
 const CourseDetail = () => {
     const { courseId } = useParams();
@@ -363,30 +338,7 @@ const CourseDetail = () => {
                 </div>
             </section>
 
-            {/* FAQs */}
-            <section className="py-24 px-6 bg-[#030014]">
-                <div className="max-w-3xl mx-auto">
-                    <h2 className="text-2xl font-black mb-12 text-center tracking-tight">Course Intelligence (FAQ)</h2>
-                    <div className="space-y-2">
-                        <FAQItem
-                            question="Is this course suitable for complete beginners?"
-                            answer="While we cover fundamental concepts, this course is designed for those with a basic understanding of logic. We provide a 'Bootstrap' module for absolute beginners."
-                        />
-                        <FAQItem
-                            question="Will I receive a certification upon completion?"
-                            answer="Yes, you will receive a verifiable digital certificate backed by our SkillDad Global Accreditation."
-                        />
-                        <FAQItem
-                            question="Are the projects reviewed by instructors?"
-                            answer="Absolutely. Every project submission receives granular feedback from our technical mentors."
-                        />
-                        <FAQItem
-                            question="How long do I have access to the materials?"
-                            answer="Life-time access. All updates and new sessions added to this version are included."
-                        />
-                    </div>
-                </div>
-            </section>
+
 
             <Footer />
         </div>

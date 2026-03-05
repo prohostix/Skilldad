@@ -22,6 +22,8 @@
     "@zoom/meetingsdk": "^5.1.2",
     "axios": "^1.13.5",
     "chart.js": "^4.5.1",
+    "docx": "^9.6.0",
+    "file-saver": "^2.0.5",
     "framer-motion": "^12.34.0",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
@@ -35,7 +37,8 @@
     "react-router-dom": "^7.13.0",
     "recharts": "^3.7.0",
     "socket.io-client": "^4.8.3",
-    "three": "^0.182.0"
+    "three": "^0.182.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

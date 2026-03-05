@@ -150,11 +150,12 @@ const Exams = () => {
             const userInfo = JSON.parse(rawInfo);
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.get('/api/exams/my-exams', config);
-            setExams(data);
+            setExams(Array.isArray(data) ? data : []);
             setLoading(false);
         } catch (err) {
             console.error('Error fetching exams:', err);
             setError('Failed to sync with the academic grid. Please refresh.');
+            setExams([]);
             setLoading(false);
         }
     };

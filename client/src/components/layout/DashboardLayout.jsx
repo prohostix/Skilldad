@@ -4,6 +4,7 @@ import ModernSidebar from './ModernSidebar';
 import DashboardNavbar from './DashboardNavbar';
 import BottomNav from '../ui/BottomNav';
 import Footer from '../ui/Footer';
+import FloatingHelpWidget from '../ui/FloatingHelpWidget';
 
 const DashboardLayout = () => {
     // Only open the sidebar by default on large screens
@@ -37,6 +38,7 @@ const DashboardLayout = () => {
 
             <Footer />
             <BottomNav />
+            <FloatingHelpWidget />
         </div>
     );
 };

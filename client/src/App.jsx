@@ -5,6 +5,8 @@ import theme from './theme';
 import { UserProvider } from './context/UserContext';
 import { SocketProvider } from './context/SocketContext';
 import { Toaster } from 'react-hot-toast';
+import ErrorBoundary from './components/ErrorBoundary';
+import './utils/axiosConfig'; // Setup axios interceptors for 401 handling
 
 // Layouts
 const DashboardLayout = lazy(() => import('./components/layout/DashboardLayout'));
@@ -44,6 +46,9 @@ const LiveClasses = lazy(() => import('./pages/student/LiveClasses'));
 const ProjectView = lazy(() => import('./pages/student/ProjectView'));
 const Documents = lazy(() => import('./pages/student/Documents'));
 const Exams = lazy(() => import('./pages/student/Exams'));
+const ExamTaker = lazy(() => import('./components/ExamTaker'));
+const ExamSubmitted = lazy(() => import('./pages/student/ExamSubmitted'));
+const ExamResult = lazy(() => import('./pages/student/ExamResult'));
 const CourseEnrollment = lazy(() => import('./pages/student/CourseEnrollment'));
 const WatchStream = lazy(() => import('./pages/student/WatchStream'));
 const PaymentInitiation = lazy(() => import('./pages/student/PaymentInitiation'));
@@ -77,6 +82,7 @@ const CourseEditor = lazy(() => import('./pages/admin/CourseEditor'));
 const UserList = lazy(() => import('./pages/admin/UserList'));
 const StudentManagement = lazy(() => import('./pages/admin/StudentManagement'));
 const UniversityManagement = lazy(() => import('./pages/admin/UniversityManagement'));
+const SkillDadUniversities = lazy(() => import('./pages/admin/SkillDadUniversities'));
 const B2BManagement = lazy(() => import('./pages/admin/B2BManagement'));
 const PartnerDetail = lazy(() => import('./pages/admin/PartnerDetail'));
 const PlatformAnalytics = lazy(() => import('./pages/admin/PlatformAnalytics'));
@@ -84,6 +90,7 @@ const ProjectManager = lazy(() => import('./pages/admin/ProjectManager'));
 const ExamScheduler = lazy(() => import('./pages/admin/ExamScheduler'));
 const PayoutManager = lazy(() => import('./pages/admin/PayoutManager'));
 const SupportManagement = lazy(() => import('./pages/admin/SupportManagement'));
+const FAQManagement = lazy(() => import('./pages/admin/FAQManagement'));
 const PartnerLogoManager = lazy(() => import('./pages/admin/PartnerLogoManager'));
 const AdminRefundPanel = lazy(() => import('./pages/admin/AdminRefundPanel'));
 const GatewayConfigPanel = lazy(() => import('./pages/admin/GatewayConfigPanel'));
@@ -104,15 +111,16 @@ const LoadingFallback = () => (
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <UserProvider>
-        <SocketProvider>
-          <Toaster />
-          <Router>
-            <ScrollToTop />
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
+    <ErrorBoundary>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <UserProvider>
+          <SocketProvider>
+            <Toaster />
+            <Router>
+              <ScrollToTop />
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
                 {/* ... routes ... */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/courses" element={<CourseCatalog />} />
@@ -149,6 +157,9 @@ function App() {
                     <Route path="watch/:id" element={<WatchStream />} />
                     <Route path="documents" element={<Documents />} />
                     <Route path="exams" element={<Exams />} />
+                    <Route path="exam/:examId/take" element={<ExamTaker />} />
+                    <Route path="exam/:examId/submitted" element={<ExamSubmitted />} />
+                    <Route path="exam/:examId/result" element={<ExamResult />} />
                     <Route path="course/:courseId" element={<CoursePlayer />} />
                     <Route path="courses/:courseId/content/:contentId" element={<InteractiveContentPage />} />
                     <Route path="course/:courseId/projects" element={<ProjectView />} />
@@ -206,6 +217,7 @@ function App() {
                     <Route path="students" element={<StudentManagement />} />
                     <Route path="university" element={<UniversityManagement />} />
                     <Route path="university/:id" element={<UniversityDetail />} />
+                    <Route path="skilldad-universities" element={<SkillDadUniversities />} />
                     <Route path="b2b" element={<B2BManagement />} />
                     <Route path="b2b/:partnerId" element={<PartnerDetail />} />
                     <Route path="analytics" element={<PlatformAnalytics />} />
@@ -218,6 +230,7 @@ function App() {
                     <Route path="monitoring" element={<PaymentMonitoringDashboard />} />
                     <Route path="communications" element={<CommunicationHub />} />
                     <Route path="support" element={<SupportManagement />} />
+                    <Route path="faqs" element={<FAQManagement />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
                 </Route>
@@ -237,6 +250,7 @@ function App() {
         </SocketProvider>
       </UserProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

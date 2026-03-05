@@ -4,12 +4,42 @@ const { validationResult } = require('express-validator');
 
 // Import payment controller
 const {
+  csrfProtection,
+  generateCsrfToken,
+  paymentCsrfProtection,
+} = require('../middleware/csrfProtection');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for payment proof uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const dest = path.join(path.resolve(__dirname, '..'), 'uploads', 'payments');
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest, { recursive: true });
+    }
+    cb(null, dest);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `proof-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+const {
   initiatePayment,
   handleCallback,
   handleWebhook,
   checkPaymentStatus,
   getPaymentHistory,
   retryPayment,
+  createManualPayment
 } = require('../controllers/paymentController');
 
 // Import authentication middleware
@@ -33,11 +63,6 @@ const {
 } = require('../middleware/rateLimiting');
 
 // Import CSRF protection
-const {
-  csrfProtection,
-  generateCsrfToken,
-  paymentCsrfProtection,
-} = require('../middleware/csrfProtection');
 
 /**
  * Validation error handler middleware
@@ -138,6 +163,19 @@ router.get(
   paymentHistoryValidation,
   handleValidationErrors,
   getPaymentHistory
+);
+
+/**
+ * @route   POST /api/payment/manual
+ * @desc    Submit manual payment proof
+ * @access  Private (Student)
+ */
+router.post(
+  '/manual',
+  protect,
+  authorize('student'),
+  upload.single('screenshot'),
+  createManualPayment
 );
 
 /**

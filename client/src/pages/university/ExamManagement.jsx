@@ -14,7 +14,8 @@ import {
     BookOpen,
     ShieldCheck,
     Calendar,
-    AlertCircle
+    AlertCircle,
+    RefreshCw
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -65,6 +66,7 @@ const ExamManagement = () => {
 
     const fetchData = async () => {
         try {
+            setLoading(true);
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
@@ -74,14 +76,17 @@ const ExamManagement = () => {
                 axios.get('/api/exams', config)
             ]);
 
+            console.log('[University Exams] Fetched exams:', examsRes.data);
             setQuestionPapers(docsRes.data.filter(d => d.type === 'exam_paper'));
             setAnswerKeys(docsRes.data.filter(d => d.type === 'answer_sheet'));
-            setExams(examsRes.data);
+            setExams(Array.isArray(examsRes.data) ? examsRes.data : []);
             setCourses(coursesRes.data);
             setLoading(false);
+            showToast('Exam list refreshed', 'success');
         } catch (err) {
             console.error('Fetch error:', err);
             showToast('Failed to sync Exam Vault', 'error');
+            setExams([]);
             setLoading(false);
         }
     };
@@ -201,9 +206,13 @@ const ExamManagement = () => {
                     <p className="text-white/50 mt-1">Manage official assessments and secure materials from SkillDad Admin.</p>
                 </div>
                 <div className="flex gap-3">
-                    <ModernButton variant="secondary" onClick={fetchData}>
-                        <Clock size={18} className="mr-2" />
-                        Sync Vault
+                    <ModernButton 
+                        variant="secondary" 
+                        onClick={fetchData}
+                        disabled={loading}
+                    >
+                        <RefreshCw size={18} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+                        {loading ? 'Refreshing...' : 'Refresh Exams'}
                     </ModernButton>
                     <ModernButton onClick={() => setShowUploadModal(true)}>
                         <Upload size={18} className="mr-2" />

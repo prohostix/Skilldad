@@ -22,7 +22,11 @@ import {
     CheckCircle,
     XCircle,
     Clock,
-    Plus
+    Plus,
+    UserPlus,
+    UserMinus,
+    GraduationCap,
+    Loader2
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -46,6 +50,13 @@ const StudentManagement = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const urlUniversityId = searchParams.get('universityId') || 'all';
     const [selectedUniversityId, setSelectedUniversityId] = useState(urlUniversityId);
+
+    // Enroll modal state
+    const [enrollModalOpen, setEnrollModalOpen] = useState(false);
+    const [enrollCourseId, setEnrollCourseId] = useState('');
+    const [enrollNote, setEnrollNote] = useState('');
+    const [enrolling, setEnrolling] = useState(false);
+    const [enrollError, setEnrollError] = useState('');
 
     useEffect(() => {
         fetchStudents();
@@ -270,7 +281,7 @@ const StudentManagement = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            await axios.post('/api/users', newStudentData, config); // Assuming standard user creation
+            await axios.post('/api/users', newStudentData, config);
             showToast?.('Student added successfully', 'success');
             setAddStudentOpen(false);
             setNewStudentData({ name: '', email: '', password: '', role: 'student', universityId: '' });
@@ -278,6 +289,51 @@ const StudentManagement = () => {
         } catch (error) {
             console.error('Error adding student:', error);
             showToast?.('Failed to add student', 'error');
+        }
+    };
+
+    const handleAdminEnroll = async () => {
+        if (!enrollCourseId) {
+            setEnrollError('Please select a course');
+            return;
+        }
+        if (!selectedStudent) return;
+
+        setEnrolling(true);
+        setEnrollError('');
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.post(
+                `/api/admin/students/${selectedStudent._id}/enroll`,
+                { courseId: enrollCourseId, note: enrollNote },
+                config
+            );
+            showToast?.(`✅ ${data.message}`, 'success');
+            setEnrollModalOpen(false);
+            setEnrollCourseId('');
+            setEnrollNote('');
+            // Refresh enrollments in detail view
+            await fetchStudentDetails(selectedStudent._id);
+            fetchStudents();
+        } catch (error) {
+            setEnrollError(error.response?.data?.message || 'Failed to enroll student');
+        } finally {
+            setEnrolling(false);
+        }
+    };
+
+    const handleAdminUnenroll = async (courseId, courseTitle) => {
+        if (!window.confirm(`Remove ${selectedStudent?.name} from "${courseTitle}"?`)) return;
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            await axios.delete(`/api/admin/students/${selectedStudent._id}/enroll/${courseId}`, config);
+            showToast?.('Student unenrolled successfully', 'success');
+            await fetchStudentDetails(selectedStudent._id);
+            fetchStudents();
+        } catch (error) {
+            showToast?.(error.response?.data?.message || 'Failed to unenroll student', 'error');
         }
     };
 
@@ -615,13 +671,27 @@ const StudentManagement = () => {
 
                             {/* Enrollments */}
                             <div>
-                                <h3 className="text-lg font-semibold text-white mb-4">Enrollments ({enrollments.length})</h3>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-semibold text-white">Enrollments ({enrollments.length})</h3>
+                                    <button
+                                        onClick={() => {
+                                            setEnrollModalOpen(true);
+                                            setEnrollError('');
+                                            setEnrollCourseId('');
+                                            setEnrollNote('');
+                                        }}
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500/30 transition-colors"
+                                    >
+                                        <GraduationCap size={14} />
+                                        Enroll in Course
+                                    </button>
+                                </div>
                                 <div className="space-y-2">
                                     {enrollments.map((enrollment) => (
                                         <div key={enrollment._id} className="p-3 bg-white/5 rounded-lg border border-white/10">
-                                            <div className="flex justify-between items-center">
-                                                <div>
-                                                    <p className="text-white font-medium">{enrollment.course?.title || 'Unknown Course'}</p>
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-white font-medium truncate">{enrollment.course?.title || 'Unknown Course'}</p>
                                                     {(enrollment.course?.universityName || enrollment.course?.instructor?.profile?.universityName || enrollment.course?.instructor?.name) && (
                                                         <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mt-1">
                                                             {enrollment.course.universityName || enrollment.course.instructor?.profile?.universityName || enrollment.course.instructor?.name}
@@ -629,17 +699,35 @@ const StudentManagement = () => {
                                                     )}
                                                     <p className="text-xs text-gray-400 mt-1">Progress: {enrollment.progress || 0}%</p>
                                                 </div>
-                                                <span className={`px-2 py-1 text-xs font-bold rounded-full ${enrollment.status === 'active'
-                                                    ? 'bg-emerald-500/20 text-emerald-400'
-                                                    : 'bg-gray-500/20 text-gray-400'
-                                                    }`}>
-                                                    {enrollment.status}
-                                                </span>
+                                                <div className="flex items-center gap-2 ml-3">
+                                                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${enrollment.status === 'active'
+                                                        ? 'bg-emerald-500/20 text-emerald-400'
+                                                        : 'bg-gray-500/20 text-gray-400'
+                                                        }`}>
+                                                        {enrollment.status}
+                                                    </span>
+                                                    <button
+                                                        onClick={() => handleAdminUnenroll(enrollment.course?._id, enrollment.course?.title)}
+                                                        title="Unenroll"
+                                                        className="p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-xs"
+                                                    >
+                                                        <UserMinus size={12} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
                                     {enrollments.length === 0 && (
-                                        <p className="text-gray-400 text-sm">No enrollments yet</p>
+                                        <div className="text-center py-6 border border-dashed border-white/10 rounded-xl">
+                                            <GraduationCap className="text-gray-600 mx-auto mb-2" size={28} />
+                                            <p className="text-gray-400 text-sm">No enrollments yet</p>
+                                            <button
+                                                onClick={() => setEnrollModalOpen(true)}
+                                                className="mt-2 text-xs text-emerald-400 hover:underline"
+                                            >
+                                                + Enroll in a course
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -694,6 +782,92 @@ const StudentManagement = () => {
                             )}
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Enroll in Course Modal */}
+            {enrollModalOpen && selectedStudent && (
+                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[200000] p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-slate-900 rounded-2xl p-6 max-w-lg w-full border border-emerald-500/30 shadow-2xl"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-emerald-500/20 rounded-xl">
+                                    <GraduationCap className="text-emerald-400" size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-white">Enroll in Course</h2>
+                                    <p className="text-xs text-gray-400">Free enrollment for <span className="text-emerald-400 font-semibold">{selectedStudent.name}</span></p>
+                                </div>
+                            </div>
+                            <button onClick={() => setEnrollModalOpen(false)} className="text-gray-400 hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Select Course *</label>
+                                <select
+                                    value={enrollCourseId}
+                                    onChange={(e) => { setEnrollCourseId(e.target.value); setEnrollError(''); }}
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="" className="bg-slate-900">-- Choose a course --</option>
+                                    {courses
+                                        .filter(c => !enrollments.find(e => e.course?._id === c._id))
+                                        .map(c => (
+                                            <option key={c._id} value={c._id} className="bg-slate-900">{c.title}</option>
+                                        ))
+                                    }
+                                </select>
+                                {courses.filter(c => !enrollments.find(e => e.course?._id === c._id)).length === 0 && (
+                                    <p className="text-xs text-amber-400 mt-1">Student is already enrolled in all available courses.</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Note (optional)</label>
+                                <textarea
+                                    value={enrollNote}
+                                    onChange={(e) => setEnrollNote(e.target.value)}
+                                    rows={2}
+                                    placeholder="e.g. Sponsored by admin, scholarship, etc."
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-emerald-500/50 focus:outline-none text-sm resize-none"
+                                />
+                            </div>
+                            <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                                <p className="text-xs text-emerald-400">
+                                    <span className="font-bold">ℹ️ Free Enrollment:</span> No payment required. A ₹0 record will appear in the Finance Dashboard with status <span className="font-bold">Approved</span>. Student gets full course access immediately.
+                                </p>
+                            </div>
+                            {enrollError && (
+                                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                    <p className="text-sm text-red-400">{enrollError}</p>
+                                </div>
+                            )}
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={() => setEnrollModalOpen(false)}
+                                    className="flex-1 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-sm font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleAdminEnroll}
+                                    disabled={enrolling || !enrollCourseId}
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm transition-colors"
+                                >
+                                    {enrolling ? (
+                                        <><Loader2 size={16} className="animate-spin" /> Enrolling...</>
+                                    ) : (
+                                        <><GraduationCap size={16} /> Enroll Now</>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             )}
         </div>

@@ -6,6 +6,7 @@ import {
     AlertCircle,
     Loader2,
     ShieldCheck,
+    Upload,
 } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
@@ -28,6 +29,8 @@ const PaymentInitiation = () => {
 
     // Razorpay State
     const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('online'); // 'online' or 'manual'
+    const [screenshot, setScreenshot] = useState(null);
 
     const GST_RATE = 0.18;
     const SERVICE_CHARGE_RATE = 0.02;
@@ -198,6 +201,40 @@ const PaymentInitiation = () => {
         }
     };
 
+    const handleManualPayment = async () => {
+        if (!screenshot) {
+            setError('Please upload a screenshot of your payment');
+            return;
+        }
+
+        setProcessing(true);
+        setError('');
+
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const formData = new FormData();
+            formData.append('courseId', courseId);
+            formData.append('amount', pricing.total);
+            formData.append('screenshot', screenshot);
+            formData.append('paymentMethod', 'bank_transfer'); // Default for manual
+
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
+            await axios.post('/api/payment/manual', formData, config);
+
+            // Success - redirect to history
+            navigate('/dashboard/payment-history');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to submit manual payment proof');
+            setProcessing(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -320,13 +357,69 @@ const PaymentInitiation = () => {
                             </div>
                         </div>
 
-                        <ModernButton 
-                            onClick={handleProceedToPayment} 
-                            disabled={processing || !razorpayLoaded} 
-                            className="w-full !py-4"
-                        >
-                            {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Payment"}
-                        </ModernButton>
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-2 p-1 bg-white/5 rounded-xl">
+                                <button
+                                    onClick={() => setPaymentMethod('online')}
+                                    className={`py-2 text-xs font-bold rounded-lg transition-all ${paymentMethod === 'online' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}
+                                >
+                                    Online Payment
+                                </button>
+                                <button
+                                    onClick={() => setPaymentMethod('manual')}
+                                    className={`py-2 text-xs font-bold rounded-lg transition-all ${paymentMethod === 'manual' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'}`}
+                                >
+                                    Manual Proof
+                                </button>
+                            </div>
+
+                            {paymentMethod === 'online' ? (
+                                <ModernButton
+                                    onClick={handleProceedToPayment}
+                                    disabled={processing || !razorpayLoaded}
+                                    className="w-full !py-4"
+                                >
+                                    {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Complete Online Payment"}
+                                </ModernButton>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div
+                                        onClick={() => document.getElementById('screenshot-upload').click()}
+                                        className="border-2 border-dashed border-white/10 rounded-xl p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                                    >
+                                        <input
+                                            type="file"
+                                            id="screenshot-upload"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={(e) => setScreenshot(e.target.files[0])}
+                                        />
+                                        {screenshot ? (
+                                            <div className="flex items-center gap-2 justify-center text-emerald-400">
+                                                <CheckCircle size={16} />
+                                                <span className="text-xs font-bold truncate max-w-[150px]">{screenshot.name}</span>
+                                            </div>
+                                        ) : (
+                                            <div className="text-gray-400">
+                                                <Upload size={24} className="mx-auto mb-2" />
+                                                <p className="text-xs font-bold">Upload Payment Screenshot</p>
+                                                <p className="text-[10px]">JPG, PNG supported</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <ModernButton
+                                        onClick={handleManualPayment}
+                                        disabled={processing || !screenshot}
+                                        className="w-full !py-4 bg-emerald-500 hover:bg-emerald-600"
+                                    >
+                                        {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : "Submit Payment Proof"}
+                                    </ModernButton>
+                                    <p className="text-[10px] text-gray-500 text-center italic">
+                                        Manual payments are verified within 24-48 business hours.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
 
                         <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-center gap-2 text-[10px] text-white/20 font-black uppercase tracking-widest">
                             <ShieldCheck size={12} /> Secure Payment Gateway

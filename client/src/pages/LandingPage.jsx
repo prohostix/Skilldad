@@ -28,6 +28,7 @@ import ModernButton from '../components/ui/ModernButton';
 import GlassCard from '../components/ui/GlassCard';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
+import FloatingHelpWidget from '../components/ui/FloatingHelpWidget';
 import HeroSection from '../components/landing/HeroSection';
 import AnimatedLogoSection from '../components/landing/AnimatedLogoSection';
 import CapabilitiesSection from '../components/landing/CapabilitiesSection';
@@ -730,6 +731,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
+            <FloatingHelpWidget />
             <Footer />
         </div>
     );

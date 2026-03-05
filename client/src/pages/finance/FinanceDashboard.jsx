@@ -59,6 +59,7 @@ const FinanceDashboard = () => {
     const [studentPayments, setStudentPayments] = useState([]);
     const [enrollmentSummaries, setEnrollmentSummaries] = useState([]);
     const [payoutHistory, setPayoutHistory] = useState([]);
+    const [allPartners, setAllPartners] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
 
     // Set active tab based on path
@@ -126,9 +127,21 @@ const FinanceDashboard = () => {
         }
     };
 
+    const fetchAllPartners = async () => {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        try {
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.get('/api/finance/partners', config);
+            setAllPartners(data || []);
+        } catch (error) {
+            console.error('Error fetching partners:', error);
+        }
+    };
+
     useEffect(() => {
         fetchStats();
         fetchEnrollmentSummaries();
+        fetchAllPartners();
     }, []);
 
     useEffect(() => {
@@ -234,14 +247,14 @@ const FinanceDashboard = () => {
 
             if (frontendType === 'revenue-report') {
                 tableHead = [['Date', 'Total Revenue', 'Transaction Count']];
-                tableData = data.data.map(row => [row._id, `$${row.totalRevenue}`, row.count]);
+                tableData = data.data.map(row => [row._id, `₹${row.totalRevenue}`, row.count]);
             } else if (frontendType === 'payment-summary') {
                 tableHead = [['Student', 'Email', 'Course', 'Amount', 'Status', 'Date']];
                 tableData = data.data.map(p => [
                     p.student?.name || 'N/A',
                     p.student?.email || 'N/A',
                     p.course?.title || 'N/A',
-                    `$${p.amount}`,
+                    `₹${p.amount}`,
                     p.status.toUpperCase(),
                     new Date(p.createdAt).toLocaleDateString()
                 ]);
@@ -250,7 +263,7 @@ const FinanceDashboard = () => {
                 tableData = data.data.map(p => [
                     p.partner?.name || 'N/A',
                     p.partner?.email || 'N/A',
-                    `$${p.amount}`,
+                    `₹${p.amount}`,
                     p.status.toUpperCase(),
                     new Date(p.createdAt).toLocaleDateString()
                 ]);
@@ -259,7 +272,7 @@ const FinanceDashboard = () => {
                 tableData = data.data.map(row => [
                     row._id || 'Direct',
                     row.totalEnrollments,
-                    `$${row.totalAmount}`,
+                    `₹${row.totalAmount}`,
                     row.pendingCount,
                     row.approvedCount
                 ]);
@@ -345,9 +358,9 @@ const FinanceDashboard = () => {
             {/* Compact Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: 'Total Revenue', val: `$${stats.totalRevenue?.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: '+22.5%' },
+                    { label: 'Total Revenue', val: `₹${stats.totalRevenue?.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: '+22.5%' },
                     { label: 'Pending Payments', val: stats.pendingPaymentsCount, icon: Clock, color: 'amber', trend: 'Active' },
-                    { label: 'Partner Payouts', val: `$${stats.totalPayoutsAmount?.toLocaleString()}`, icon: Wallet, color: 'primary', trend: '+12.1%' },
+                    { label: 'Partner Payouts', val: `₹${stats.totalPayoutsAmount?.toLocaleString()}`, icon: Wallet, color: 'primary', trend: '+12.1%' },
                     { label: 'Total Enrollments', val: stats.totalEnrollments || 0, icon: Users, color: 'purple', trend: '+8.3%' },
                 ].map((stat, i) => (
                     <motion.div
@@ -429,9 +442,16 @@ const FinanceDashboard = () => {
                                     onChange={(e) => setFilterPartner(e.target.value)}
                                 >
                                     <option value="all" className="text-black">All Partners</option>
-                                    {[...new Set(studentPayments.map(p => p.partner?.name).filter(Boolean))].map(partner => (
-                                        <option key={partner} value={partner} className="text-black">{partner}</option>
-                                    ))}
+                                    {allPartners.map(partner => {
+                                        const name = partner.role === 'university'
+                                            ? (partner.profile?.universityName || partner.name)
+                                            : partner.name;
+                                        return (
+                                            <option key={partner._id} value={partner._id} className="text-black">
+                                                {name} ({partner.role})
+                                            </option>
+                                        );
+                                    })}
                                 </select>
                             </div>
                         </GlassCard>
@@ -447,6 +467,7 @@ const FinanceDashboard = () => {
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider hidden md:table-cell">Partner</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Center</th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">Proof</th>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
                                         </tr>
@@ -461,7 +482,7 @@ const FinanceDashboard = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-white truncate max-w-[150px]">{payment.course?.title || 'N/A'}</td>
-                                                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-emerald-400">${payment.amount}</td>
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-emerald-400">₹{payment.amount}</td>
                                                 <td className="px-3 sm:px-6 py-3 sm:py-4">
                                                     <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${payment.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
                                                         payment.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
@@ -471,6 +492,7 @@ const FinanceDashboard = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-300 hidden md:table-cell truncate max-w-[120px]">{payment.partner?.name || 'Direct'}</td>
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-300 hidden sm:table-cell truncate max-w-[120px]">{payment.center || 'Online'}</td>
                                                 <td className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
                                                     <button
                                                         onClick={() => setSelectedPayment(payment)}
@@ -532,7 +554,7 @@ const FinanceDashboard = () => {
                                         </div>
                                         <div className="flex justify-between items-center bg-emerald-500/5 p-3 rounded-lg">
                                             <span className="text-sm text-gray-400 font-medium">Total Amount</span>
-                                            <span className="text-lg text-emerald-400 font-black">${summary.totalAmount.toLocaleString()}</span>
+                                            <span className="text-lg text-emerald-400 font-black">₹{summary.totalAmount.toLocaleString()}</span>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 mt-4">
                                             <div className="bg-amber-500/5 p-3 rounded-lg text-center">
@@ -589,7 +611,7 @@ const FinanceDashboard = () => {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-emerald-400">${payout.amount.toLocaleString()}</td>
+                                                <td className="px-6 py-4 text-sm font-bold text-emerald-400">₹{payout.amount.toLocaleString()}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-300 max-w-[200px] truncate" title={payout.notes || 'No notes'}>
                                                     {payout.notes || 'N/A'}
                                                 </td>
@@ -641,7 +663,7 @@ const FinanceDashboard = () => {
                                         {stats.approvedPayouts.map((payout) => (
                                             <tr key={payout._id} className="hover:bg-white/5 transition-colors">
                                                 <td className="px-6 py-4 text-sm font-medium text-white">{payout.partner?.name}</td>
-                                                <td className="px-6 py-4 text-sm font-bold text-emerald-400">${payout.amount.toLocaleString()}</td>
+                                                <td className="px-6 py-4 text-sm font-bold text-emerald-400">₹{payout.amount.toLocaleString()}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-300 max-w-[200px] truncate" title={payout.notes || 'No notes'}>
                                                     {payout.notes || 'N/A'}
                                                 </td>
@@ -719,12 +741,16 @@ const FinanceDashboard = () => {
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
+                                    <span className="text-gray-400">Transaction ID:</span>
+                                    <span className="text-white ml-2 text-xs font-mono">{selectedPayment.transactionId || 'N/A'}</span>
+                                </div>
+                                <div>
                                     <span className="text-gray-400">Course:</span>
                                     <span className="text-white ml-2">{selectedPayment.course?.title || 'Course'}</span>
                                 </div>
                                 <div>
                                     <span className="text-gray-400">Amount:</span>
-                                    <span className="text-emerald-400 ml-2 font-bold">${selectedPayment.amount}</span>
+                                    <span className="text-emerald-400 ml-2 font-bold">₹{selectedPayment.amount}</span>
                                 </div>
                                 <div>
                                     <span className="text-gray-400">Date:</span>
