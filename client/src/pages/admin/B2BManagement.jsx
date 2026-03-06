@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useSocket } from '../../context/SocketContext';
 import {
     Building2,
     Users,
@@ -17,7 +18,8 @@ import {
     Upload,
     Eye,
     Wallet,
-    Ticket
+    Ticket,
+    Activity
 } from 'lucide-react';
 import {
     ResponsiveContainer,
@@ -35,6 +37,7 @@ import { useToast } from '../../context/ToastContext';
 
 const B2BManagement = () => {
     const navigate = useNavigate();
+    const socket = useSocket();
     const [partners, setPartners] = useState([]);
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [openDiscount, setOpenDiscount] = useState(false);
@@ -68,6 +71,12 @@ const B2BManagement = () => {
         title: '',
         type: 'exam_paper',
         file: null
+    });
+    const [openGenerateCode, setOpenGenerateCode] = useState(false);
+    const [codeData, setCodeData] = useState({
+        code: '',
+        type: 'percentage',
+        value: 0
     });
     const { showToast } = useToast();
 
@@ -115,6 +124,50 @@ const B2BManagement = () => {
 
         return () => clearInterval(interval);
     }, []);
+
+    // Listen for real-time partner updates via WebSocket
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleUserListUpdate = (data) => {
+            console.log('[B2B] Received userListUpdate:', data);
+            
+            // Only handle partner role updates
+            if (data.user?.role?.toLowerCase() === 'partner') {
+                if (data.action === 'created') {
+                    // Add new partner to the list
+                    setPartners(prev => {
+                        // Check if partner already exists
+                        const exists = prev.some(p => p._id === data.user._id);
+                        if (exists) {
+                            console.log('[B2B] Partner already exists, skipping duplicate');
+                            return prev;
+                        }
+                        console.log('[B2B] Adding new partner to list:', data.user.name);
+                        return [data.user, ...prev];
+                    });
+                    showToast(`New partner added: ${data.user.name}`, 'success');
+                } else if (data.action === 'updated') {
+                    // Update existing partner
+                    console.log('[B2B] Updating partner:', data.user.name);
+                    setPartners(prev => prev.map(p => 
+                        p._id === data.user._id ? { ...p, ...data.user } : p
+                    ));
+                } else if (data.action === 'deleted') {
+                    // Remove partner from list
+                    console.log('[B2B] Removing partner:', data.user.name);
+                    setPartners(prev => prev.filter(p => p._id !== data.user._id));
+                    showToast(`Partner removed: ${data.user.name}`, 'info');
+                }
+            }
+        };
+
+        socket.on('userListUpdate', handleUserListUpdate);
+
+        return () => {
+            socket.off('userListUpdate', handleUserListUpdate);
+        };
+    }, [socket, showToast]);
 
     const handleUpdatePartner = async () => {
         if (!selectedPartner?._id) {
@@ -191,7 +244,8 @@ const B2BManagement = () => {
             showToast(`Successfully onboarded ${newEntity.name}`, 'success');
             setOpenOnboard(false);
             setNewEntity({ name: '', email: '', password: '', phone: '', role: 'partner', discountRate: 0 });
-            fetchPartners();
+            // Immediately refresh the partners list
+            await fetchPartners();
         } catch (error) {
             showToast(`Failed to onboard entity: ${error.response?.data?.message || error.message}`, 'error');
         }
@@ -262,6 +316,40 @@ const B2BManagement = () => {
         }
     };
 
+    const handleGenerateCode = async (e) => {
+        e.preventDefault();
+        if (!codeData.code || !codeData.value) {
+            showToast('Please provide code and discount value', 'warning');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            await axios.post('/api/discount', {
+                code: codeData.code.toUpperCase(),
+                type: codeData.type,
+                value: Number(codeData.value),
+                partner: selectedPartner._id
+            }, config);
+
+            showToast(`Discount code ${codeData.code.toUpperCase()} created for ${selectedPartner.name}`, 'success');
+            setOpenGenerateCode(false);
+            setCodeData({ code: '', type: 'percentage', value: 0 });
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to create discount code', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -269,6 +357,9 @@ const B2BManagement = () => {
                     <DashboardHeading title="B2B Partners" />
                 </div>
                 <div className="flex items-center space-x-3">
+                    <ModernButton variant="secondary" onClick={fetchPartners}>
+                        <Activity size={18} className="mr-2" /> Refresh
+                    </ModernButton>
                     <ModernButton onClick={() => setOpenOnboard(true)}>
                         <Plus size={18} className="mr-2" /> Add B2B Partner
                     </ModernButton>
@@ -501,6 +592,18 @@ const B2BManagement = () => {
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 text-right space-x-2">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedPartner(partner);
+                                                setCodeData({ code: '', type: 'percentage', value: partner.discountRate || 15 });
+                                                setOpenGenerateCode(true);
+                                            }}
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-pink-400"
+                                            title="Generate Discount Code"
+                                        >
+                                            <Ticket size={18} />
+                                        </button>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -954,6 +1057,89 @@ const B2BManagement = () => {
                                         disabled={uploading}
                                     >
                                         {uploading ? 'Transmitting...' : 'Send Securely'}
+                                    </ModernButton>
+                                </div>
+                            </form>
+                        </GlassCard>
+                    </div>
+                )
+            }
+
+            {/* Generate Discount Code Modal */}
+            {
+                openGenerateCode && (
+                    <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenGenerateCode(false)}>
+                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+                            <h3 className="text-lg font-semibold text-white font-inter mb-2">Generate Discount Code</h3>
+                            <p className="text-sm text-white/60 mb-6 font-inter">Create a discount code for: <span className="text-pink-400 font-bold">{selectedPartner?.name}</span></p>
+
+                            <form onSubmit={handleGenerateCode} className="space-y-5">
+                                <div>
+                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Discount Code</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-pink-500 font-inter uppercase"
+                                        placeholder="e.g. PARTNER2024"
+                                        value={codeData.code}
+                                        onChange={e => setCodeData({ ...codeData, code: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Discount Type</label>
+                                    <select
+                                        className="w-full px-4 py-3 bg-slate-900 border border-white/20 rounded-xl text-white focus:outline-none focus:border-pink-500 font-inter"
+                                        value={codeData.type}
+                                        onChange={e => setCodeData({ ...codeData, type: e.target.value })}
+                                    >
+                                        <option value="percentage">Percentage (%)</option>
+                                        <option value="fixed">Fixed Amount (₹)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">
+                                        Discount Value {codeData.type === 'percentage' ? '(%)' : '(₹)'}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        max={codeData.type === 'percentage' ? '100' : undefined}
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-pink-500 font-inter"
+                                        placeholder={codeData.type === 'percentage' ? 'e.g. 15' : 'e.g. 500'}
+                                        value={codeData.value}
+                                        onChange={e => setCodeData({ ...codeData, value: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="p-4 bg-pink-500/10 border border-pink-500/20 rounded-xl">
+                                    <p className="text-pink-400 text-xs font-bold flex items-center">
+                                        <Ticket size={14} className="mr-2" /> Preview
+                                    </p>
+                                    <p className="text-white text-sm mt-2">
+                                        Code: <span className="font-bold text-pink-400">{codeData.code || 'PARTNER2024'}</span>
+                                    </p>
+                                    <p className="text-white/70 text-xs mt-1">
+                                        Discount: {codeData.type === 'percentage' ? `${codeData.value}%` : `₹${codeData.value}`} off
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpenGenerateCode(false)}
+                                        className="flex-1 py-3 text-sm font-bold text-white/40 hover:text-white transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <ModernButton
+                                        type="submit"
+                                        className="flex-1 !py-3 tracking-widest font-black uppercase text-xs"
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Creating...' : 'Generate Code'}
                                     </ModernButton>
                                 </div>
                             </form>

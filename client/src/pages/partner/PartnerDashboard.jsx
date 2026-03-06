@@ -494,17 +494,15 @@ const PartnerDashboard = () => {
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-1.5 font-inter">Discount Code (Partner Code)</label>
-                                            <select
+                                            <input
+                                                type="text"
                                                 required
-                                                className="w-full px-4 py-2.5 bg-black border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary cursor-pointer appearance-none"
+                                                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary uppercase"
+                                                placeholder="Enter your discount code"
                                                 value={registerData.partnerCode}
-                                                onChange={(e) => setRegisterData({ ...registerData, partnerCode: e.target.value })}
-                                            >
-                                                <option value="" className="bg-[#0B0F1A]">Select a code</option>
-                                                {discountCodes.map((code, i) => (
-                                                    <option key={i} value={code.code} className="bg-[#0B0F1A]">{code.code} ({code.type === 'percentage' ? `${code.value || code.discount}%` : `$${code.value || code.discount}`})</option>
-                                                ))}
-                                            </select>
+                                                onChange={(e) => setRegisterData({ ...registerData, partnerCode: e.target.value.toUpperCase() })}
+                                            />
+                                            <p className="text-[10px] text-white/30 mt-1.5">Enter the discount code provided by admin</p>
                                         </div>
 
                                         <div className="pt-4 flex space-x-3">
@@ -844,3 +842,4 @@ const PartnerDashboard = () => {
 };
 
 export default PartnerDashboard;
+

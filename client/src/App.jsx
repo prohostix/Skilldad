@@ -64,6 +64,7 @@ const LiveSessionsHub = lazy(() => import('./pages/university/LiveSessionsHub'))
 const SessionDetail = lazy(() => import('./pages/university/SessionDetail'));
 const ScheduleClass = lazy(() => import('./pages/university/ScheduleClass'));
 const ExamManagement = lazy(() => import('./pages/university/ExamManagement'));
+const ExamQuestionManager = lazy(() => import('./pages/university/ExamQuestionManager'));
 const CourseContentManagement = lazy(() => import('./pages/university/CourseContentManagement'));
 const GradingQueue = lazy(() => import('./pages/university/GradingQueue'));
 const CreateInteractiveContent = lazy(() => import('./pages/university/CreateInteractiveContent'));
@@ -187,6 +188,7 @@ function App() {
                     <Route path="session/:sessionId" element={<SessionDetail />} />
                     <Route path="schedule" element={<ScheduleClass />} />
                     <Route path="exams" element={<ExamManagement />} />
+                    <Route path="exams/:examId/questions" element={<ExamQuestionManager />} />
                     <Route path="analytics" element={<UniversityDashboard />} />
                     <Route path="support" element={<Support />} />
                     <Route path="settings" element={<Settings />} />

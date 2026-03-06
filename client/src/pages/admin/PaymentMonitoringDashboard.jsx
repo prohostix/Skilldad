@@ -15,15 +15,21 @@ import {
     Zap,
     Database,
     Server,
-    Bell
+    Bell,
+    Eye,
+    Check,
+    X as XIcon,
+    FileText
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import { useSocket } from '../../context/SocketContext';
 
 const PaymentMonitoringDashboard = () => {
     const { showToast } = useToast();
+    const socket = useSocket();
     const [timeRange, setTimeRange] = useState('24h');
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -31,15 +37,37 @@ const PaymentMonitoringDashboard = () => {
     const [health, setHealth] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [alerts, setAlerts] = useState([]);
+    const [pendingProofs, setPendingProofs] = useState([]);
+    const [showProofModal, setShowProofModal] = useState(false);
+    const [selectedProof, setSelectedProof] = useState(null);
+    const [rejectReason, setRejectReason] = useState('');
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         fetchData();
+        fetchPendingProofs();
+        
         // Auto-refresh every 30 seconds
         const interval = setInterval(() => {
             fetchData(true);
+            fetchPendingProofs(true);
         }, 30000);
-        return () => clearInterval(interval);
-    }, [timeRange]);
+
+        // Socket listener for new payment proofs
+        if (socket) {
+            socket.on('payment_proof_uploaded', (data) => {
+                showToast(`New payment proof from ${data.studentName}`, 'info');
+                fetchPendingProofs(true);
+            });
+        }
+
+        return () => {
+            clearInterval(interval);
+            if (socket) {
+                socket.off('payment_proof_uploaded');
+            }
+        };
+    }, [timeRange, socket]);
 
     const fetchData = async (silent = false) => {
         if (!silent) setLoading(true);
@@ -75,6 +103,71 @@ const PaymentMonitoringDashboard = () => {
         } finally {
             setLoading(false);
             setRefreshing(false);
+        }
+    };
+
+    const fetchPendingProofs = async (silent = false) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.get('/api/payment/pending-proofs', config);
+            
+            if (data.success) {
+                setPendingProofs(data.payments);
+            }
+        } catch (error) {
+            console.error('Error fetching pending proofs:', error);
+            if (!silent) {
+                showToast('Failed to fetch pending payment proofs', 'error');
+            }
+        }
+    };
+
+    const handleApproveProof = async (paymentId) => {
+        setProcessing(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.put(`/api/payment/${paymentId}/approve`, {}, config);
+            
+            if (data.success) {
+                showToast('Payment approved and enrollment activated', 'success');
+                setShowProofModal(false);
+                setSelectedProof(null);
+                fetchPendingProofs();
+            }
+        } catch (error) {
+            console.error('Error approving payment:', error);
+            showToast(error.response?.data?.message || 'Failed to approve payment', 'error');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const handleRejectProof = async (paymentId) => {
+        if (!rejectReason.trim()) {
+            showToast('Please provide a rejection reason', 'error');
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.put(`/api/payment/${paymentId}/reject`, { reason: rejectReason }, config);
+            
+            if (data.success) {
+                showToast('Payment rejected', 'success');
+                setShowProofModal(false);
+                setSelectedProof(null);
+                setRejectReason('');
+                fetchPendingProofs();
+            }
+        } catch (error) {
+            console.error('Error rejecting payment:', error);
+            showToast(error.response?.data?.message || 'Failed to reject payment', 'error');
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -190,6 +283,212 @@ const PaymentMonitoringDashboard = () => {
                         </div>
                     </GlassCard>
                 </motion.div>
+            )}
+
+            {/* Pending Payment Proofs */}
+            {pendingProofs.length > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                >
+                    <GlassCard className="!p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center">
+                                <FileText className="text-primary mr-3" size={24} />
+                                <h2 className="text-lg font-bold text-white font-poppins">
+                                    Pending Payment Proofs ({pendingProofs.length})
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            {pendingProofs.map((proof, index) => (
+                                <motion.div
+                                    key={proof._id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="bg-white/5 rounded-xl p-4 border border-white/10 flex items-center justify-between"
+                                >
+                                    <div className="flex items-center space-x-4 flex-1">
+                                        <img
+                                            src={proof.course?.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                            alt={proof.course?.title}
+                                            className="w-16 h-12 object-cover rounded-lg"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
+                                        />
+                                        <div className="flex-1">
+                                            <p className="text-white font-semibold text-sm">
+                                                {proof.student?.name}
+                                            </p>
+                                            <p className="text-xs text-white/50">
+                                                {proof.course?.title}
+                                            </p>
+                                            <p className="text-xs text-white/50 mt-1">
+                                                {new Date(proof.createdAt).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <div className="text-right mr-4">
+                                            <p className="text-white font-bold">₹{proof.amount}</p>
+                                            <p className="text-xs text-white/50 capitalize">
+                                                {proof.paymentMethod?.replace(/_/g, ' ')}
+                                            </p>
+                                        </div>
+                                        <ModernButton
+                                            variant="secondary"
+                                            onClick={() => {
+                                                setSelectedProof(proof);
+                                                setShowProofModal(true);
+                                            }}
+                                        >
+                                            <Eye size={16} className="mr-2" />
+                                            Review
+                                        </ModernButton>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </GlassCard>
+                </motion.div>
+            )}
+
+            {/* Proof Review Modal */}
+            {showProofModal && selectedProof && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 max-w-2xl w-full border border-white/10 max-h-[90vh] overflow-y-auto"
+                    >
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-white">Review Payment Proof</h3>
+                            <button
+                                onClick={() => {
+                                    setShowProofModal(false);
+                                    setSelectedProof(null);
+                                    setRejectReason('');
+                                }}
+                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            >
+                                <XIcon size={20} className="text-gray-400" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Student Info */}
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <h4 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-3">
+                                    Student Information
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-xs text-white/50">Name</p>
+                                        <p className="text-white font-semibold">{selectedProof.student?.name}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-white/50">Email</p>
+                                        <p className="text-white font-semibold">{selectedProof.student?.email}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Payment Details */}
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <h4 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-3">
+                                    Payment Details
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-xs text-white/50">Course</p>
+                                        <p className="text-white font-semibold">{selectedProof.course?.title}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-white/50">Amount</p>
+                                        <p className="text-white font-semibold">₹{selectedProof.amount}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-white/50">Payment Method</p>
+                                        <p className="text-white font-semibold capitalize">
+                                            {selectedProof.paymentMethod?.replace(/_/g, ' ')}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-white/50">Transaction ID</p>
+                                        <p className="text-white font-semibold font-mono text-xs">
+                                            {selectedProof.transactionId}
+                                        </p>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <p className="text-xs text-white/50">Submitted</p>
+                                        <p className="text-white font-semibold">
+                                            {new Date(selectedProof.createdAt).toLocaleString()}
+                                        </p>
+                                    </div>
+                                    {selectedProof.notes && (
+                                        <div className="col-span-2">
+                                            <p className="text-xs text-white/50">Notes</p>
+                                            <p className="text-white">{selectedProof.notes}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Payment Screenshot */}
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <h4 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-3">
+                                    Payment Screenshot
+                                </h4>
+                                <img
+                                    src={`/${selectedProof.screenshotUrl}`}
+                                    alt="Payment Proof"
+                                    className="w-full rounded-lg border border-white/10"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'https://via.placeholder.com/800x600?text=Image+Not+Found';
+                                    }}
+                                />
+                            </div>
+
+                            {/* Rejection Reason Input */}
+                            <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                                <label className="block text-sm font-bold text-white/50 uppercase tracking-wider mb-2">
+                                    Rejection Reason (if rejecting)
+                                </label>
+                                <textarea
+                                    value={rejectReason}
+                                    onChange={(e) => setRejectReason(e.target.value)}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                                    rows="3"
+                                    placeholder="Enter reason for rejection..."
+                                />
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-4">
+                                <ModernButton
+                                    variant="secondary"
+                                    onClick={() => handleRejectProof(selectedProof._id)}
+                                    disabled={processing}
+                                    className="flex-1"
+                                >
+                                    <XIcon size={16} className="mr-2" />
+                                    {processing ? 'Processing...' : 'Reject'}
+                                </ModernButton>
+                                <ModernButton
+                                    onClick={() => handleApproveProof(selectedProof._id)}
+                                    disabled={processing}
+                                    className="flex-1"
+                                >
+                                    <Check size={16} className="mr-2" />
+                                    {processing ? 'Processing...' : 'Approve & Enroll'}
+                                </ModernButton>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
             )}
 
             {/* Key Metrics */}

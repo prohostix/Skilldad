@@ -54,6 +54,7 @@ const StudentManagement = () => {
     // Enroll modal state
     const [enrollModalOpen, setEnrollModalOpen] = useState(false);
     const [enrollCourseId, setEnrollCourseId] = useState('');
+    const [enrollUniversityId, setEnrollUniversityId] = useState('');
     const [enrollNote, setEnrollNote] = useState('');
     const [enrolling, setEnrolling] = useState(false);
     const [enrollError, setEnrollError] = useState('');
@@ -306,12 +307,17 @@ const StudentManagement = () => {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.post(
                 `/api/admin/students/${selectedStudent._id}/enroll`,
-                { courseId: enrollCourseId, note: enrollNote },
+                { 
+                    courseId: enrollCourseId, 
+                    universityId: enrollUniversityId || undefined,
+                    note: enrollNote 
+                },
                 config
             );
             showToast?.(`✅ ${data.message}`, 'success');
             setEnrollModalOpen(false);
             setEnrollCourseId('');
+            setEnrollUniversityId('');
             setEnrollNote('');
             // Refresh enrollments in detail view
             await fetchStudentDetails(selectedStudent._id);
@@ -826,6 +832,22 @@ const StudentManagement = () => {
                                 {courses.filter(c => !enrollments.find(e => e.course?._id === c._id)).length === 0 && (
                                     <p className="text-xs text-amber-400 mt-1">Student is already enrolled in all available courses.</p>
                                 )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Assign to University (optional)</label>
+                                <select
+                                    value={enrollUniversityId}
+                                    onChange={(e) => setEnrollUniversityId(e.target.value)}
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="" className="bg-slate-900">-- No University (Independent) --</option>
+                                    {universities.map(u => (
+                                        <option key={u._id} value={u._id} className="bg-slate-900">
+                                            {u.profile?.universityName || u.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-gray-500 mt-1">If selected, student will be linked to this university</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">Note (optional)</label>

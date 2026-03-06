@@ -421,7 +421,7 @@ const getAllExams = async (req, res) => {
     // Execute query with pagination and selective population
     const exams = await Exam.find(filter)
       .populate('course', 'title') // Only populate title for course
-      .populate('university', 'name email') // Only populate name and email for university
+      .populate('university', 'name email profile') // Populate name, email, and profile for university
       .populate('createdBy', 'name email') // Only populate name and email for creator
       .sort(sort)
       .skip(skip)

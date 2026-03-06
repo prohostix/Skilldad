@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType, AlignmentType, HeadingLevel } from 'docx';
+import { saveAs } from 'file-saver';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     DollarSign,
@@ -30,7 +33,9 @@ import {
     BarChart3,
     PieChart,
     TrendingDown,
-    RefreshCw
+    RefreshCw,
+    FileSpreadsheet,
+    FileType
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -61,6 +66,8 @@ const FinanceDashboard = () => {
     const [payoutHistory, setPayoutHistory] = useState([]);
     const [allPartners, setAllPartners] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [selectedReportType, setSelectedReportType] = useState(null);
 
     // Set active tab based on path
     useEffect(() => {
@@ -209,7 +216,7 @@ const FinanceDashboard = () => {
         }
     };
 
-    const exportReport = async (reportTitle) => {
+    const exportReport = async (reportTitle, format = 'pdf') => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         if (!userInfo || !userInfo.token) {
             showToast?.('Authentication required', 'error');
@@ -223,89 +230,298 @@ const FinanceDashboard = () => {
                 'payment-summary': 'payments',
                 'partner-payouts': 'payouts',
                 'enrollment-analytics': 'enrollments',
-                'financial-summary': 'revenue' // Fallback for the header button
+                'financial-summary': 'revenue'
             };
 
             const frontendType = reportTitle.toLowerCase().replace(/ /g, '-');
             const backendType = reportTypeMap[frontendType] || 'revenue';
 
-            console.log(`Exporting report: ${reportTitle} -> ${backendType}`);
-            console.log(`Using token: ${userInfo.token?.substring(0, 10)}...`);
+            console.log(`Exporting report: ${reportTitle} -> ${backendType} as ${format.toUpperCase()}`);
 
             const { data } = await axios.get(`/api/finance/export/${backendType}`, config);
 
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.text(reportTitle.toUpperCase(), 14, 20);
-            doc.setFontSize(10);
-            doc.setTextColor(100);
-            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
-            doc.text(`System: SkillDad Finance Architecture`, 14, 34);
+            const fileName = `${frontendType}-${new Date().toISOString().split('T')[0]}`;
 
-            let tableHead = [];
-            let tableData = [];
-
-            if (frontendType === 'revenue-report') {
-                tableHead = [['Date', 'Total Revenue', 'Transaction Count']];
-                tableData = data.data.map(row => [row._id, `₹${row.totalRevenue}`, row.count]);
-            } else if (frontendType === 'payment-summary') {
-                tableHead = [['Student', 'Email', 'Course', 'Amount', 'Status', 'Date']];
-                tableData = data.data.map(p => [
-                    p.student?.name || 'N/A',
-                    p.student?.email || 'N/A',
-                    p.course?.title || 'N/A',
-                    `₹${p.amount}`,
-                    p.status.toUpperCase(),
-                    new Date(p.createdAt).toLocaleDateString()
-                ]);
-            } else if (frontendType === 'partner-payouts') {
-                tableHead = [['Partner', 'Email', 'Amount', 'Status', 'Date']];
-                tableData = data.data.map(p => [
-                    p.partner?.name || 'N/A',
-                    p.partner?.email || 'N/A',
-                    `₹${p.amount}`,
-                    p.status.toUpperCase(),
-                    new Date(p.createdAt).toLocaleDateString()
-                ]);
-            } else if (frontendType === 'enrollment-analytics') {
-                tableHead = [['Center', 'Total Enrollments', 'Amount', 'Pending', 'Approved']];
-                tableData = data.data.map(row => [
-                    row._id || 'Direct',
-                    row.totalEnrollments,
-                    `₹${row.totalAmount}`,
-                    row.pendingCount,
-                    row.approvedCount
-                ]);
-            } else {
-                showToast?.('Exporting specific JSON...', 'info');
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${frontendType}.json`;
-                a.click();
-                return;
+            if (format === 'pdf') {
+                exportAsPDF(reportTitle, frontendType, data, fileName);
+            } else if (format === 'excel') {
+                exportAsExcel(reportTitle, frontendType, data, fileName);
+            } else if (format === 'word') {
+                exportAsWord(reportTitle, frontendType, data, fileName);
             }
 
-            autoTable(doc, {
-                startY: 45,
-                head: tableHead,
-                body: tableData,
-                theme: 'grid',
-                headStyles: { fillStyle: 'fill', fillColor: [108, 99, 255] }, // SkillDad Primary Purple
-                styles: { fontSize: 8, cellPadding: 3 }
-            });
-
-            doc.save(`${frontendType}-${new Date().toISOString().split('T')[0]}.pdf`);
-            showToast?.(`${reportTitle} PDF exported successfully`, 'success');
+            showToast?.(`${reportTitle} exported as ${format.toUpperCase()} successfully`, 'success');
         } catch (error) {
             console.error('Error exporting report:', error);
-            if (error.response?.data) {
-                console.error('Detailed error data:', error.response.data);
-            }
             const errorMsg = error.response?.data?.message || 'Failed to generate report';
             showToast?.(`Export Error: ${errorMsg}`, 'error');
         }
+    };
+
+    const exportAsPDF = (reportTitle, frontendType, data, fileName) => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text(reportTitle.toUpperCase(), 14, 20);
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+        doc.text(`System: SkillDad Finance Architecture`, 14, 34);
+
+        let tableHead = [];
+        let tableData = [];
+
+        if (frontendType === 'revenue-report') {
+            tableHead = [['Date', 'Total Revenue', 'Transaction Count']];
+            tableData = data.data.map(row => [row._id, `₹${row.totalRevenue}`, row.count]);
+        } else if (frontendType === 'payment-summary') {
+            tableHead = [['Student', 'Email', 'Course', 'Amount', 'Status', 'Date']];
+            tableData = data.data.map(p => [
+                p.student?.name || 'N/A',
+                p.student?.email || 'N/A',
+                p.course?.title || 'N/A',
+                `₹${p.amount}`,
+                p.status.toUpperCase(),
+                new Date(p.createdAt).toLocaleDateString()
+            ]);
+        } else if (frontendType === 'partner-payouts') {
+            tableHead = [['Partner', 'Email', 'Amount', 'Status', 'Date']];
+            tableData = data.data.map(p => [
+                p.partner?.name || 'N/A',
+                p.partner?.email || 'N/A',
+                `₹${p.amount}`,
+                p.status.toUpperCase(),
+                new Date(p.createdAt).toLocaleDateString()
+            ]);
+        } else if (frontendType === 'enrollment-analytics') {
+            tableHead = [['Center', 'Total Enrollments', 'Amount', 'Pending', 'Approved']];
+            tableData = data.data.map(row => [
+                row._id || 'Direct',
+                row.totalEnrollments,
+                `₹${row.totalAmount}`,
+                row.pendingCount,
+                row.approvedCount
+            ]);
+        }
+
+        autoTable(doc, {
+            startY: 45,
+            head: tableHead,
+            body: tableData,
+            theme: 'grid',
+            headStyles: { fillColor: [108, 99, 255] },
+            styles: { fontSize: 8, cellPadding: 3 }
+        });
+
+        doc.save(`${fileName}.pdf`);
+    };
+
+    const exportAsExcel = (reportTitle, frontendType, data, fileName) => {
+        let worksheetData = [];
+
+        // Add header rows
+        worksheetData.push([reportTitle.toUpperCase()]);
+        worksheetData.push([`Generated on: ${new Date().toLocaleString()}`]);
+        worksheetData.push([`System: SkillDad Finance Architecture`]);
+        worksheetData.push([]); // Empty row
+
+        if (frontendType === 'revenue-report') {
+            worksheetData.push(['Date', 'Total Revenue', 'Transaction Count']);
+            data.data.forEach(row => {
+                worksheetData.push([row._id, row.totalRevenue, row.count]);
+            });
+        } else if (frontendType === 'payment-summary') {
+            worksheetData.push(['Student', 'Email', 'Course', 'Amount', 'Status', 'Date']);
+            data.data.forEach(p => {
+                worksheetData.push([
+                    p.student?.name || 'N/A',
+                    p.student?.email || 'N/A',
+                    p.course?.title || 'N/A',
+                    p.amount,
+                    p.status.toUpperCase(),
+                    new Date(p.createdAt).toLocaleDateString()
+                ]);
+            });
+        } else if (frontendType === 'partner-payouts') {
+            worksheetData.push(['Partner', 'Email', 'Amount', 'Status', 'Date']);
+            data.data.forEach(p => {
+                worksheetData.push([
+                    p.partner?.name || 'N/A',
+                    p.partner?.email || 'N/A',
+                    p.amount,
+                    p.status.toUpperCase(),
+                    new Date(p.createdAt).toLocaleDateString()
+                ]);
+            });
+        } else if (frontendType === 'enrollment-analytics') {
+            worksheetData.push(['Center', 'Total Enrollments', 'Amount', 'Pending', 'Approved']);
+            data.data.forEach(row => {
+                worksheetData.push([
+                    row._id || 'Direct',
+                    row.totalEnrollments,
+                    row.totalAmount,
+                    row.pendingCount,
+                    row.approvedCount
+                ]);
+            });
+        }
+
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+
+        // Auto-size columns
+        const maxWidth = worksheetData.reduce((w, r) => Math.max(w, r.length), 10);
+        worksheet['!cols'] = Array(maxWidth).fill({ wch: 20 });
+
+        XLSX.writeFile(workbook, `${fileName}.xlsx`);
+    };
+
+    const exportAsWord = async (reportTitle, frontendType, data, fileName) => {
+        const children = [
+            new Paragraph({
+                text: reportTitle.toUpperCase(),
+                heading: HeadingLevel.HEADING_1,
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 200 }
+            }),
+            new Paragraph({
+                children: [
+                    new TextRun({
+                        text: `Generated on: ${new Date().toLocaleString()}`,
+                        size: 20
+                    })
+                ],
+                spacing: { after: 100 }
+            }),
+            new Paragraph({
+                children: [
+                    new TextRun({
+                        text: `System: SkillDad Finance Architecture`,
+                        size: 20
+                    })
+                ],
+                spacing: { after: 300 }
+            })
+        ];
+
+        let tableRows = [];
+
+        if (frontendType === 'revenue-report') {
+            tableRows.push(
+                new TableRow({
+                    children: [
+                        new TableCell({ children: [new Paragraph({ text: 'Date', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Total Revenue', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Transaction Count', bold: true })] })
+                    ]
+                })
+            );
+            data.data.forEach(row => {
+                tableRows.push(
+                    new TableRow({
+                        children: [
+                            new TableCell({ children: [new Paragraph(row._id)] }),
+                            new TableCell({ children: [new Paragraph(`₹${row.totalRevenue}`)] }),
+                            new TableCell({ children: [new Paragraph(row.count.toString())] })
+                        ]
+                    })
+                );
+            });
+        } else if (frontendType === 'payment-summary') {
+            tableRows.push(
+                new TableRow({
+                    children: [
+                        new TableCell({ children: [new Paragraph({ text: 'Student', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Email', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Course', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Amount', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Status', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Date', bold: true })] })
+                    ]
+                })
+            );
+            data.data.forEach(p => {
+                tableRows.push(
+                    new TableRow({
+                        children: [
+                            new TableCell({ children: [new Paragraph(p.student?.name || 'N/A')] }),
+                            new TableCell({ children: [new Paragraph(p.student?.email || 'N/A')] }),
+                            new TableCell({ children: [new Paragraph(p.course?.title || 'N/A')] }),
+                            new TableCell({ children: [new Paragraph(`₹${p.amount}`)] }),
+                            new TableCell({ children: [new Paragraph(p.status.toUpperCase())] }),
+                            new TableCell({ children: [new Paragraph(new Date(p.createdAt).toLocaleDateString())] })
+                        ]
+                    })
+                );
+            });
+        } else if (frontendType === 'partner-payouts') {
+            tableRows.push(
+                new TableRow({
+                    children: [
+                        new TableCell({ children: [new Paragraph({ text: 'Partner', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Email', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Amount', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Status', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Date', bold: true })] })
+                    ]
+                })
+            );
+            data.data.forEach(p => {
+                tableRows.push(
+                    new TableRow({
+                        children: [
+                            new TableCell({ children: [new Paragraph(p.partner?.name || 'N/A')] }),
+                            new TableCell({ children: [new Paragraph(p.partner?.email || 'N/A')] }),
+                            new TableCell({ children: [new Paragraph(`₹${p.amount}`)] }),
+                            new TableCell({ children: [new Paragraph(p.status.toUpperCase())] }),
+                            new TableCell({ children: [new Paragraph(new Date(p.createdAt).toLocaleDateString())] })
+                        ]
+                    })
+                );
+            });
+        } else if (frontendType === 'enrollment-analytics') {
+            tableRows.push(
+                new TableRow({
+                    children: [
+                        new TableCell({ children: [new Paragraph({ text: 'Center', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Total Enrollments', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Amount', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Pending', bold: true })] }),
+                        new TableCell({ children: [new Paragraph({ text: 'Approved', bold: true })] })
+                    ]
+                })
+            );
+            data.data.forEach(row => {
+                tableRows.push(
+                    new TableRow({
+                        children: [
+                            new TableCell({ children: [new Paragraph(row._id || 'Direct')] }),
+                            new TableCell({ children: [new Paragraph(row.totalEnrollments.toString())] }),
+                            new TableCell({ children: [new Paragraph(`₹${row.totalAmount}`)] }),
+                            new TableCell({ children: [new Paragraph(row.pendingCount.toString())] }),
+                            new TableCell({ children: [new Paragraph(row.approvedCount.toString())] })
+                        ]
+                    })
+                );
+            });
+        }
+
+        const table = new Table({
+            rows: tableRows,
+            width: { size: 100, type: WidthType.PERCENTAGE }
+        });
+
+        children.push(table);
+
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: children
+            }]
+        });
+
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `${fileName}.docx`);
     };
 
     const filteredPayments = studentPayments.filter(payment => {
@@ -349,7 +565,10 @@ const FinanceDashboard = () => {
                     </motion.h1>
                 </div>
                 <div className="flex items-center space-x-3">
-                    <ModernButton variant="secondary" onClick={() => exportReport('Financial Summary')}>
+                    <ModernButton variant="secondary" onClick={() => {
+                        setSelectedReportType('Financial Summary');
+                        setShowExportModal(true);
+                    }}>
                         <Download size={18} className="mr-2" /> Export Reports
                     </ModernButton>
                 </div>
@@ -713,10 +932,13 @@ const FinanceDashboard = () => {
                                     </div>
                                     <ModernButton
                                         className="w-full text-sm py-3.5 font-bold tracking-wide"
-                                        onClick={() => exportReport(report.title)}
+                                        onClick={() => {
+                                            setSelectedReportType(report.title);
+                                            setShowExportModal(true);
+                                        }}
                                     >
                                         <Download size={18} className="mr-2" />
-                                        Generate {report.title} PDF
+                                        Export {report.title}
                                     </ModernButton>
                                 </GlassCard>
                             ))}
@@ -796,6 +1018,106 @@ const FinanceDashboard = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Export Format Selection Modal */}
+            {showExportModal && selectedReportType && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 max-w-md w-full border border-white/10"
+                    >
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-2xl font-bold text-white">Export Format</h3>
+                            <button
+                                onClick={() => {
+                                    setShowExportModal(false);
+                                    setSelectedReportType(null);
+                                }}
+                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            >
+                                <XCircle size={24} className="text-gray-400" />
+                            </button>
+                        </div>
+
+                        <p className="text-gray-400 mb-6">
+                            Select the format to export <span className="text-primary font-semibold">{selectedReportType}</span>
+                        </p>
+
+                        <div className="space-y-3">
+                            {/* PDF Option */}
+                            <button
+                                onClick={() => {
+                                    exportReport(selectedReportType, 'pdf');
+                                    setShowExportModal(false);
+                                    setSelectedReportType(null);
+                                }}
+                                className="w-full flex items-center space-x-4 p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/50 rounded-xl transition-all group"
+                            >
+                                <div className="p-3 bg-red-500/20 text-red-400 rounded-lg group-hover:scale-110 transition-transform">
+                                    <FileText size={28} />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <h4 className="text-white font-bold text-lg">PDF Document</h4>
+                                    <p className="text-gray-400 text-sm">Portable Document Format</p>
+                                </div>
+                                <ChevronRight className="text-gray-400 group-hover:text-primary transition-colors" size={20} />
+                            </button>
+
+                            {/* Excel Option */}
+                            <button
+                                onClick={() => {
+                                    exportReport(selectedReportType, 'excel');
+                                    setShowExportModal(false);
+                                    setSelectedReportType(null);
+                                }}
+                                className="w-full flex items-center space-x-4 p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/50 rounded-xl transition-all group"
+                            >
+                                <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-lg group-hover:scale-110 transition-transform">
+                                    <FileSpreadsheet size={28} />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <h4 className="text-white font-bold text-lg">Excel Spreadsheet</h4>
+                                    <p className="text-gray-400 text-sm">Microsoft Excel Format (.xlsx)</p>
+                                </div>
+                                <ChevronRight className="text-gray-400 group-hover:text-primary transition-colors" size={20} />
+                            </button>
+
+                            {/* Word Option */}
+                            <button
+                                onClick={() => {
+                                    exportReport(selectedReportType, 'word');
+                                    setShowExportModal(false);
+                                    setSelectedReportType(null);
+                                }}
+                                className="w-full flex items-center space-x-4 p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-primary/50 rounded-xl transition-all group"
+                            >
+                                <div className="p-3 bg-blue-500/20 text-blue-400 rounded-lg group-hover:scale-110 transition-transform">
+                                    <FileType size={28} />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <h4 className="text-white font-bold text-lg">Word Document</h4>
+                                    <p className="text-gray-400 text-sm">Microsoft Word Format (.docx)</p>
+                                </div>
+                                <ChevronRight className="text-gray-400 group-hover:text-primary transition-colors" size={20} />
+                            </button>
+                        </div>
+
+                        <div className="mt-6 pt-6 border-t border-white/10">
+                            <ModernButton
+                                variant="secondary"
+                                className="w-full"
+                                onClick={() => {
+                                    setShowExportModal(false);
+                                    setSelectedReportType(null);
+                                }}
+                            >
+                                Cancel
+                            </ModernButton>
+                        </div>
+                    </motion.div>
                 </div>
             )}
         </div>

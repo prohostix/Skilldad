@@ -39,7 +39,10 @@ const {
   checkPaymentStatus,
   getPaymentHistory,
   retryPayment,
-  createManualPayment
+  createManualPayment,
+  approvePayment,
+  rejectPayment,
+  getPendingProofs
 } = require('../controllers/paymentController');
 
 // Import authentication middleware
@@ -176,6 +179,42 @@ router.post(
   authorize('student'),
   upload.single('screenshot'),
   createManualPayment
+);
+
+/**
+ * @route   GET /api/payment/pending-proofs
+ * @desc    Get pending payment proofs for review
+ * @access  Private (Admin, Finance)
+ */
+router.get(
+  '/pending-proofs',
+  protect,
+  authorize('admin', 'finance'),
+  getPendingProofs
+);
+
+/**
+ * @route   PUT /api/payment/:id/approve
+ * @desc    Approve manual payment proof
+ * @access  Private (Admin, Finance)
+ */
+router.put(
+  '/:id/approve',
+  protect,
+  authorize('admin', 'finance'),
+  approvePayment
+);
+
+/**
+ * @route   PUT /api/payment/:id/reject
+ * @desc    Reject manual payment proof
+ * @access  Private (Admin, Finance)
+ */
+router.put(
+  '/:id/reject',
+  protect,
+  authorize('admin', 'finance'),
+  rejectPayment
 );
 
 /**

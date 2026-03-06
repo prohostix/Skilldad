@@ -184,6 +184,7 @@ class SocketService {
                     email: user.email,
                     role: user.role,
                     isVerified: user.isVerified,
+                    discountRate: user.discountRate || 0,
                     createdAt: user.createdAt
                 },
                 timestamp: new Date()

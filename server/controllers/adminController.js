@@ -983,7 +983,7 @@ async function getUniversityDetail(req, res) {
 // @access  Private (Admin)
 const adminEnrollStudent = async (req, res) => {
     try {
-        const { courseId, note } = req.body;
+        const { courseId, universityId, note } = req.body;
         const studentId = req.params.id;
 
         if (!courseId) {
@@ -1006,6 +1006,16 @@ const adminEnrollStudent = async (req, res) => {
             return res.status(400).json({ message: `${student.name} is already enrolled in ${course.title}` });
         }
 
+        // If universityId is provided, update student's universityId
+        if (universityId) {
+            const university = await User.findById(universityId);
+            if (!university || university.role !== 'university') {
+                return res.status(400).json({ message: 'Invalid university ID' });
+            }
+            student.universityId = universityId;
+            await student.save();
+        }
+
         // Create enrollment
         const enrollment = await Enrollment.create({
             student: studentId,
@@ -1019,10 +1029,18 @@ const adminEnrollStudent = async (req, res) => {
         const Payment = require('../models/paymentModel');
         const txnId = `ADM-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
-        // Determine partner/center from student
+        // Determine partner/center from student or provided universityId
         let partnerId = null;
         let centerName = 'Admin Enrolled';
-        if (student.registeredBy) {
+        
+        if (universityId) {
+            // Use the provided university
+            partnerId = universityId;
+            const uniUser = await User.findById(universityId).select('name profile');
+            if (uniUser) {
+                centerName = uniUser.profile?.universityName || uniUser.name;
+            }
+        } else if (student.registeredBy) {
             partnerId = student.registeredBy;
             const partnerUser = await User.findById(partnerId).select('name profile');
             if (partnerUser) {
@@ -1060,7 +1078,7 @@ const adminEnrollStudent = async (req, res) => {
         } catch (e) { /* socket optional */ }
 
         res.status(201).json({
-            message: `${student.name} successfully enrolled in ${course.title}`,
+            message: `${student.name} successfully enrolled in ${course.title}${universityId ? ' and assigned to university' : ''}`,
             enrollment,
             transactionId: txnId
         });

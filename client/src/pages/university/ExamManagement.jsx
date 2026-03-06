@@ -41,15 +41,16 @@ const ExamManagement = () => {
         course: '',
         duration: 60,
         passingScore: 70,
-        totalPoints: 100,
-        scheduledDate: '',
-        deadline: '',
+        totalMarks: 100,
+        scheduledStartTime: '',
+        scheduledEndTime: '',
         maxAttempts: 1,
         isPublished: true,
         examMode: 'paper-based',
         mandatedSlotId: '',
         linkedPaper: '',
-        answerKey: ''
+        answerKey: '',
+        examType: 'pdf-based'
     });
 
     const [showUploadModal, setShowUploadModal] = useState(false);
@@ -64,7 +65,7 @@ const ExamManagement = () => {
 
     const [exams, setExams] = useState([]);
 
-    const fetchData = async () => {
+    const fetchData = async (showSuccessToast = false) => {
         try {
             setLoading(true);
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -82,7 +83,9 @@ const ExamManagement = () => {
             setExams(Array.isArray(examsRes.data) ? examsRes.data : []);
             setCourses(coursesRes.data);
             setLoading(false);
-            showToast('Exam list refreshed', 'success');
+            if (showSuccessToast) {
+                showToast('Exam list refreshed', 'success');
+            }
         } catch (err) {
             console.error('Fetch error:', err);
             showToast('Failed to sync Exam Vault', 'error');
@@ -153,14 +156,16 @@ const ExamManagement = () => {
                 course: '',
                 duration: 60,
                 passingScore: 40,
-                scheduledDate: '',
-                deadline: '',
+                totalMarks: 100,
+                scheduledStartTime: '',
+                scheduledEndTime: '',
                 maxAttempts: 1,
                 isPublished: true,
                 examMode: 'paper-based',
                 mandatedSlotId: '',
                 linkedPaper: '',
-                answerKey: ''
+                answerKey: '',
+                examType: 'pdf-based'
             });
             fetchData();
         } catch (err) {
@@ -208,7 +213,7 @@ const ExamManagement = () => {
                 <div className="flex gap-3">
                     <ModernButton 
                         variant="secondary" 
-                        onClick={fetchData}
+                        onClick={() => fetchData(true)}
                         disabled={loading}
                     >
                         <RefreshCw size={18} className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
@@ -340,11 +345,11 @@ const ExamManagement = () => {
                     ) : activeTab === 'conduct' ? (
                         <div className="space-y-6">
                             {(() => {
-                                const mandatedSlots = exams.filter(ex => ex.instructor?.role === 'admin' || (ex.instructor?._role === 'admin'));
+                                const mandatedSlots = exams.filter(ex => ex.createdBy?.role === 'admin');
                                 const now = new Date();
                                 const liveExams = exams.filter(ex => {
-                                    const start = new Date(ex.scheduledDate);
-                                    const end = ex.deadline ? new Date(ex.deadline) : new Date(start.getTime() + ex.duration * 60000);
+                                    const start = new Date(ex.scheduledStartTime);
+                                    const end = new Date(ex.scheduledEndTime);
                                     return now >= start && now <= end;
                                 });
 
@@ -369,7 +374,7 @@ const ExamManagement = () => {
 
                                         <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Mandated Admin Slots - Deployment Required</h5>
                                         {mandatedSlots.length > 0 ? mandatedSlots.map(slot => {
-                                            const isDeployed = exams.some(ex => ex.mandatedSlotId === slot._id || (ex.scheduledDate === slot.scheduledDate && ex.instructor?.role === 'university'));
+                                            const isDeployed = exams.some(ex => ex.mandatedSlotId === slot._id || (ex.scheduledStartTime === slot.scheduledStartTime && ex.createdBy?.role === 'university'));
                                             return (
                                                 <div key={slot._id} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/10 rounded-2xl relative overflow-hidden group">
                                                     {!isDeployed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>}
@@ -378,10 +383,18 @@ const ExamManagement = () => {
                                                             {isDeployed ? <CheckCircle size={28} /> : <AlertCircle size={28} />}
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-bold text-white text-lg">{new Date(slot.scheduledDate).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })} • Session</h4>
+                                                            <h4 className="font-bold text-white text-lg">{new Date(slot.scheduledStartTime).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })} • Session</h4>
                                                             <div className="flex items-center gap-4 text-[10px] mt-2 font-bold uppercase tracking-wider">
                                                                 <span className="text-white/60">Module: {slot.course?.title || 'Unknown'}</span>
-                                                                <span className="text-indigo-400 flex items-center gap-1"><Clock size={12} /> {new Date(slot.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                <span className="text-indigo-400 flex items-center gap-1"><Clock size={12} /> {new Date(slot.scheduledStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                                                                    slot.examType === 'online-mcq' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                                    slot.examType === 'pdf-based' ? 'bg-purple-500/20 text-purple-400' :
+                                                                    slot.examType === 'online-descriptive' ? 'bg-blue-500/20 text-blue-400' :
+                                                                    'bg-indigo-500/20 text-indigo-400'
+                                                                }`}>
+                                                                    {slot.examType?.replace('-', ' ').toUpperCase() || 'EXAM'}
+                                                                </span>
                                                                 {isDeployed ? (
                                                                     <span className="text-emerald-400 flex items-center gap-1 uppercase tracking-tighter"><ShieldCheck size={10} /> Material Deployed</span>
                                                                 ) : (
@@ -390,25 +403,40 @@ const ExamManagement = () => {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <ModernButton
-                                                        size="sm"
-                                                        variant={isDeployed ? "secondary" : "primary"}
-                                                        onClick={() => {
-                                                            setActiveTab('questions');
-                                                            setExamData(prev => ({
-                                                                ...prev,
-                                                                mandatedSlotId: slot._id,
-                                                                course: slot.course?._id || slot.course,
-                                                                scheduledDate: slot.scheduledDate ? new Date(slot.scheduledDate).toISOString().slice(0, 16) : '',
-                                                                deadline: slot.deadline ? new Date(slot.deadline).toISOString().slice(0, 16) : '',
-                                                                duration: slot.duration,
-                                                                totalPoints: slot.totalPoints || 100
-                                                            }));
-                                                            showToast("Pick a question paper for this slot", "info");
-                                                        }}
-                                                    >
-                                                        {isDeployed ? "Manage Deploy" : "Assign Paper"}
-                                                    </ModernButton>
+                                                    <div className="flex gap-2">
+                                                        {(slot.examType === 'online-mcq' || slot.examType === 'online-descriptive' || slot.examType === 'mixed') && (
+                                                            <ModernButton
+                                                                size="sm"
+                                                                variant="primary"
+                                                                onClick={() => navigate(`/university/exams/${slot._id}/questions`)}
+                                                            >
+                                                                <FileText size={16} className="mr-1" />
+                                                                Manage Questions
+                                                            </ModernButton>
+                                                        )}
+                                                        {slot.examType === 'pdf-based' && (
+                                                            <ModernButton
+                                                                size="sm"
+                                                                variant={isDeployed ? "secondary" : "primary"}
+                                                                onClick={() => {
+                                                                    setActiveTab('questions');
+                                                                    setExamData(prev => ({
+                                                                        ...prev,
+                                                                        mandatedSlotId: slot._id,
+                                                                        course: slot.course?._id || slot.course,
+                                                                        scheduledStartTime: slot.scheduledStartTime ? new Date(slot.scheduledStartTime).toISOString().slice(0, 16) : '',
+                                                                        scheduledEndTime: slot.scheduledEndTime ? new Date(slot.scheduledEndTime).toISOString().slice(0, 16) : '',
+                                                                        duration: slot.duration,
+                                                                        totalMarks: slot.totalMarks || 100,
+                                                                        examType: slot.examType || 'pdf-based'
+                                                                    }));
+                                                                    showToast("Pick a question paper for this slot", "info");
+                                                                }}
+                                                            >
+                                                                {isDeployed ? "Manage Deploy" : "Assign Paper"}
+                                                            </ModernButton>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             );
                                         }) : (
@@ -421,7 +449,7 @@ const ExamManagement = () => {
                             })()}
                         </div>
                     ) : (
-                        exams.filter(ex => ex.instructor?.role === 'university').length > 0 ? exams.filter(ex => ex.instructor?.role === 'university').map((exam) => (
+                        exams.filter(ex => ex.createdBy?.role === 'university').length > 0 ? exams.filter(ex => ex.createdBy?.role === 'university').map((exam) => (
                             <div key={exam._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl">
                                 <div className="flex items-center gap-5">
                                     <div className="p-4 bg-primary/10 rounded-2xl text-primary">
@@ -431,7 +459,7 @@ const ExamManagement = () => {
                                         <h4 className="font-bold text-white text-lg">{exam.title}</h4>
                                         <p className="text-xs text-white/40">{exam.course?.title}</p>
                                         <div className="flex items-center gap-4 text-[10px] mt-2 font-bold uppercase tracking-wider">
-                                            <span className="text-emerald-400 flex items-center gap-1"><Clock size={12} /> {new Date(exam.scheduledDate).toLocaleString()}</span>
+                                            <span className="text-emerald-400 flex items-center gap-1"><Clock size={12} /> {new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleString()}</span>
                                             <span className="text-white/30">•</span>
                                             <span className="text-white/30">{exam.duration} Minutes</span>
                                             <span className={`px-2 py-0.5 rounded ${exam.linkedPaper ? 'bg-indigo-500/20 text-indigo-400' : 'bg-red-500/20 text-red-400'}`}>
@@ -500,21 +528,22 @@ const ExamManagement = () => {
                                                             setExamData({
                                                                 ...examData,
                                                                 course: slot.course?._id || slot.course,
-                                                                scheduledDate: slot.scheduledDate ? new Date(slot.scheduledDate).toISOString().slice(0, 16) : '',
-                                                                deadline: slot.deadline ? new Date(slot.deadline).toISOString().slice(0, 16) : '',
+                                                                scheduledStartTime: slot.scheduledStartTime ? new Date(slot.scheduledStartTime).toISOString().slice(0, 16) : '',
+                                                                scheduledEndTime: slot.scheduledEndTime ? new Date(slot.scheduledEndTime).toISOString().slice(0, 16) : '',
                                                                 duration: slot.duration,
                                                                 passingScore: slot.passingScore || 70,
                                                                 maxAttempts: slot.maxAttempts || 1,
-                                                                totalPoints: slot.totalPoints || 100,
-                                                                mandatedSlotId: slot._id
+                                                                totalMarks: slot.totalMarks || 100,
+                                                                mandatedSlotId: slot._id,
+                                                                examType: slot.examType || 'pdf-based'
                                                             });
                                                         }
                                                     }}
                                                 >
                                                     <option value="">Select Mandated Slot</option>
-                                                    {exams.filter(ex => ex.instructor?.role === 'admin').map(slot => (
+                                                    {exams.filter(ex => ex.createdBy?.role === 'admin').map(slot => (
                                                         <option key={slot._id} value={slot._id}>
-                                                            {new Date(slot.scheduledDate).toLocaleDateString()} - {slot.course?.title || 'Course Details'}
+                                                            {new Date(slot.scheduledStartTime).toLocaleDateString()} - {slot.course?.title || 'Course Details'}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -570,7 +599,7 @@ const ExamManagement = () => {
                                                     required
                                                     readOnly
                                                     className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 font-inter text-sm"
-                                                    value={examData.totalPoints}
+                                                    value={examData.totalMarks}
                                                 />
                                             </div>
                                             <div>
@@ -603,17 +632,17 @@ const ExamManagement = () => {
                                                     required
                                                     readOnly
                                                     className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 [color-scheme:dark]"
-                                                    value={examData.scheduledDate}
+                                                    value={examData.scheduledStartTime}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Deadline (Inherited)</label>
+                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">End Time (Inherited)</label>
                                                 <input
                                                     type="datetime-local"
                                                     required
                                                     readOnly
                                                     className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 [color-scheme:dark]"
-                                                    value={examData.deadline}
+                                                    value={examData.scheduledEndTime}
                                                 />
                                             </div>
                                         </div>

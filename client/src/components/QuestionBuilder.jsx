@@ -29,9 +29,13 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const response = await axios.get(`/api/exams/${examId}/questions`, config);
-            setQuestions(response.data);
+            // API returns { questions: [...] }, extract the questions array
+            const questionsData = response.data.questions || response.data;
+            setQuestions(Array.isArray(questionsData) ? questionsData : []);
         } catch (err) {
             console.error('Failed to fetch questions:', err);
+            // Ensure questions remains an array even on error
+            setQuestions([]);
         }
     };
 
@@ -61,8 +65,11 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
             }
         }
 
+        // Ensure questions is always an array
+        const currentQuestions = Array.isArray(questions) ? questions : [];
+
         if (editingIndex !== null) {
-            const updatedQuestions = [...questions];
+            const updatedQuestions = [...currentQuestions];
             updatedQuestions[editingIndex] = {
                 ...currentQuestion,
                 order: editingIndex + 1
@@ -70,9 +77,9 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
             setQuestions(updatedQuestions);
             showToast('Question updated', 'success');
         } else {
-            setQuestions([...questions, {
+            setQuestions([...currentQuestions, {
                 ...currentQuestion,
-                order: questions.length + 1
+                order: currentQuestions.length + 1
             }]);
             showToast('Question added', 'success');
         }
@@ -279,8 +286,11 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
                                 type="number"
                                 min="0.5"
                                 step="0.5"
-                                value={currentQuestion.marks}
-                                onChange={(e) => setCurrentQuestion({ ...currentQuestion, marks: parseFloat(e.target.value) })}
+                                value={currentQuestion.marks || 1}
+                                onChange={(e) => {
+                                    const value = parseFloat(e.target.value);
+                                    setCurrentQuestion({ ...currentQuestion, marks: isNaN(value) ? 1 : value });
+                                }}
                                 className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
                             />
                         </div>
@@ -293,8 +303,11 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
                                     type="number"
                                     min="0"
                                     step="0.25"
-                                    value={currentQuestion.negativeMarks}
-                                    onChange={(e) => setCurrentQuestion({ ...currentQuestion, negativeMarks: parseFloat(e.target.value) })}
+                                    value={currentQuestion.negativeMarks || 0}
+                                    onChange={(e) => {
+                                        const value = parseFloat(e.target.value);
+                                        setCurrentQuestion({ ...currentQuestion, negativeMarks: isNaN(value) ? 0 : value });
+                                    }}
                                     className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
                                 />
                             </div>
