@@ -17,6 +17,7 @@ import {
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 import { useSocket } from '../../context/SocketContext';
 
@@ -169,7 +170,9 @@ const PaymentCallback = () => {
                             <CheckCircle className="w-12 h-12 text-emerald-400" />
                         </motion.div>
 
-                        <h1 className="text-3xl font-black text-white mb-3">Payment Successful!</h1>
+                        <div className="flex flex-col items-center mb-3">
+                            <DashboardHeading title="Payment Successful!" />
+                        </div>
                         <p className="text-gray-400 mb-8">
                             Your enrollment has been confirmed. You can now access the course.
                         </p>

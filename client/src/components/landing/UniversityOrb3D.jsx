@@ -66,8 +66,19 @@ const PARTICLE_DATA = [
 ];
 
 /* ── Main component ──────────────────────────────────────── */
-const UniversityOrb3D = () => {
+const UniversityOrb3D = ({ universities = [] }) => {
     injectStyles();
+
+    // Use dynamic universities or fallback to static badges
+    const displayBadges = universities.length > 0
+        ? universities.slice(0, 5).map((u, i) => ({
+            label: u.name.split(' ')[0], // Kurz name for badge
+            fullName: u.name,
+            angle: i * (360 / Math.min(5, universities.length)),
+            color: ['#7C3AED', '#C026D3', '#4F46E5', '#9333EA', '#7C3AED'][i % 5],
+            dur: `${2.5 + (i * 0.3)}s`
+        }))
+        : BADGES;
 
     return (
         <div
@@ -163,7 +174,7 @@ const UniversityOrb3D = () => {
                 </div>
 
                 {/* Orbiting badges — CSS float animation, no backdrop-blur */}
-                {BADGES.map((b) => {
+                {displayBadges.map((b) => {
                     const rad = (b.angle * Math.PI) / 180;
                     const bx = Math.cos(rad) * RADIUS;
                     const by = Math.sin(rad) * RADIUS;
@@ -235,5 +246,6 @@ const UniversityOrb3D = () => {
         </div>
     );
 };
+
 
 export default UniversityOrb3D;

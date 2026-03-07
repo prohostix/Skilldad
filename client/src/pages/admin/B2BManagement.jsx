@@ -107,7 +107,7 @@ const B2BManagement = () => {
             const { data } = await axios.get('/api/admin/users/all', config);
             const institutional = (data.users || []).filter(u => {
                 const role = u.role?.toLowerCase();
-                return role === 'partner';
+                return role === 'partner' || role === 'b2b' || role === 'university';
             });
             setPartners(institutional);
         } catch (error) {
@@ -131,9 +131,10 @@ const B2BManagement = () => {
 
         const handleUserListUpdate = (data) => {
             console.log('[B2B] Received userListUpdate:', data);
-            
-            // Only handle partner role updates
-            if (data.user?.role?.toLowerCase() === 'partner') {
+
+            // Handle real-time updates for partners, b2b and universities
+            const role = data.user?.role?.toLowerCase();
+            if (role === 'partner' || role === 'university' || role === 'b2b') {
                 if (data.action === 'created') {
                     // Add new partner to the list
                     setPartners(prev => {
@@ -150,9 +151,14 @@ const B2BManagement = () => {
                 } else if (data.action === 'updated') {
                     // Update existing partner
                     console.log('[B2B] Updating partner:', data.user.name);
-                    setPartners(prev => prev.map(p => 
-                        p._id === data.user._id ? { ...p, ...data.user } : p
-                    ));
+                    setPartners(prev => {
+                        const exists = prev.some(p => p._id === data.user._id);
+                        if (exists) {
+                            return prev.map(p => p._id === data.user._id ? { ...p, ...data.user } : p);
+                        } else {
+                            return [data.user, ...prev];
+                        }
+                    });
                 } else if (data.action === 'deleted') {
                     // Remove partner from list
                     console.log('[B2B] Removing partner:', data.user.name);

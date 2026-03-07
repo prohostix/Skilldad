@@ -20,41 +20,41 @@ const { uploadQuestionPaper, uploadAnswerSheet, handleUploadError } = require('.
 
 // @desc    Schedule a new exam
 // @route   POST /api/exams/admin/schedule
-// @access  Private (Admin)
+// @access  Private (Admin/University)
 router.post(
     '/admin/schedule',
     protect,
-    authorize('admin'),
+    authorize('admin', 'university'),
     examController.scheduleExam
 );
 
 // @desc    Update exam details
 // @route   PUT /api/exams/admin/:examId
-// @access  Private (Admin)
+// @access  Private (Admin/University)
 router.put(
     '/admin/:examId',
     protect,
-    authorize('admin'),
+    authorize('admin', 'university'),
     examController.updateExam
 );
 
 // @desc    Delete exam and all associated resources
 // @route   DELETE /api/exams/admin/:examId
-// @access  Private (Admin)
+// @access  Private (Admin/University)
 router.delete(
     '/admin/:examId',
     protect,
-    authorize('admin'),
+    authorize('admin', 'university'),
     examController.deleteExam
 );
 
 // @desc    Get all exams with filtering and pagination
 // @route   GET /api/exams/admin/all
-// @access  Private (Admin)
+// @access  Private (Admin/University)
 router.get(
     '/admin/all',
     protect,
-    authorize('admin'),
+    authorize('admin', 'university'),
     examController.getAllExams
 );
 
@@ -192,6 +192,16 @@ router.get(
     protect,
     authorize('student'),
     examSubmissionController.getMySubmission
+);
+
+// @desc    Get submission details for grading
+// @route   GET /api/exam-submissions/:submissionId
+// @access  Private (University/Admin)
+router.get(
+    '/exam-submissions/:submissionId',
+    protect,
+    authorize('university', 'admin'),
+    examSubmissionController.getSubmissionForGrading
 );
 
 // ============================================
@@ -378,24 +388,24 @@ router.get('/:id/question-paper', protect, async (req, res) => {
         }
 
         const now = new Date();
-        const scheduledDate = new Date(exam.scheduledDate);
-        const deadline = exam.deadline ? new Date(exam.deadline) : null;
+        const scheduledStart = new Date(exam.scheduledStartTime);
+        const scheduledEnd = new Date(exam.scheduledEndTime);
 
         // Allow university/admin to always access
         const role = req.user.role?.toLowerCase();
         if (role !== 'admin' && role !== 'university') {
             // Students: strict time gate
-            if (now < scheduledDate) {
-                const minutesLeft = Math.round((scheduledDate - now) / 60000);
+            if (now < scheduledStart) {
+                const minutesLeft = Math.round((scheduledStart - now) / 60000);
                 return res.status(403).json({
                     message: `Exam has not started yet. Starts in ${minutesLeft} minute(s).`,
-                    availableAt: exam.scheduledDate
+                    availableAt: exam.scheduledStartTime
                 });
             }
-            if (deadline && now > deadline) {
+            if (now > scheduledEnd) {
                 return res.status(403).json({
                     message: 'Exam deadline has passed. Question paper is no longer accessible.',
-                    expiredAt: exam.deadline
+                    expiredAt: exam.scheduledEndTime
                 });
             }
 
@@ -530,15 +540,35 @@ router.post('/', protect, authorize('admin', 'university'), async (req, res) => 
         let savedExam = await exam.save();
         console.log('[EXAM CREATE] Saved Success. targetUniversity in DB:', savedExam.targetUniversity);
 
-        savedExam = await savedExam.populate([
-            { path: 'course', select: 'title' },
-            { path: 'targetUniversity', select: 'name profile' },
-            { path: 'createdBy', select: 'name email profile' }
-        ]);
+        // Send response immediately without waiting for populate
+        res.status(201).json({
+            _id: savedExam._id,
+            title: savedExam.title,
+            course: savedExam.course,
+            createdBy: savedExam.createdBy,
+            university: savedExam.university,
+            targetUniversity: savedExam.targetUniversity,
+            scheduledStartTime: savedExam.scheduledStartTime,
+            scheduledEndTime: savedExam.scheduledEndTime,
+            duration: savedExam.duration,
+            totalPoints: savedExam.totalPoints,
+            passingScore: savedExam.passingScore,
+            isPublished: savedExam.isPublished,
+            examMode: savedExam.examMode,
+            examType: savedExam.examType,
+            maxAttempts: savedExam.maxAttempts
+        });
 
-        // Background: Notify students and university
+        // Background: Populate and notify students and university
         setImmediate(async () => {
             try {
+                // Populate after response is sent
+                savedExam = await savedExam.populate([
+                    { path: 'course', select: 'title' },
+                    { path: 'targetUniversity', select: 'name profile' },
+                    { path: 'createdBy', select: 'name email profile' }
+                ]);
+
                 const course = await Course.findById(exam.course).populate('instructor');
 
                 // 1. Notify University (if admin created)
@@ -595,8 +625,6 @@ router.post('/', protect, authorize('admin', 'university'), async (req, res) => 
                 console.error('[Create Exam] Background notification error:', bgErr.message);
             }
         });
-
-        res.status(201).json(savedExam);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -696,11 +724,28 @@ router.put('/:id/submit', protect, async (req, res) => {
 
         const savedSubmission = await submission.save();
 
-        // Background: Notify student of result
+        // Notify university of new submission
         setImmediate(async () => {
             try {
+                const exam = await Exam.findById(req.params.id).populate('university');
                 const student = await User.findById(req.user._id).select('name email profile');
-                const exam = await Exam.findById(req.params.id);
+                
+                // Notify university about new submission
+                if (exam.university) {
+                    socketService.sendToUser(
+                        exam.university._id || exam.university,
+                        'EXAM_SUBMISSION_RECEIVED',
+                        {
+                            examId: exam._id,
+                            examTitle: exam.title,
+                            studentName: student.name,
+                            studentEmail: student.email,
+                            submissionId: savedSubmission._id,
+                            score: savedSubmission.score,
+                            percentage: savedSubmission.percentage
+                        }
+                    );
+                }
 
                 // Centralized Industrial Notification for Exam Results
                 notificationService.send(

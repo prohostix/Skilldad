@@ -15,13 +15,18 @@ import {
     ShieldCheck,
     Calendar,
     AlertCircle,
-    RefreshCw
+    RefreshCw,
+    Edit,
+    Users,
+    Award,
+    Plus
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import axios from 'axios';
 import { useToast } from '../../context/ToastContext';
+import { useSocket } from '../../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
 
 const ExamManagement = () => {
@@ -34,6 +39,7 @@ const ExamManagement = () => {
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [courses, setCourses] = useState([]);
     const { showToast } = useToast();
+    const socket = useSocket();
     const navigate = useNavigate();
 
     const [examData, setExamData] = useState({
@@ -64,6 +70,10 @@ const ExamManagement = () => {
     const [uploading, setUploading] = useState(false);
 
     const [exams, setExams] = useState([]);
+    const [submissions, setSubmissions] = useState([]);
+    const [selectedExamForGrading, setSelectedExamForGrading] = useState(null);
+    const [selectedSubmission, setSelectedSubmission] = useState(null);
+    const [gradingData, setGradingData] = useState({});
 
     const fetchData = async (showSuccessToast = false) => {
         try {
@@ -91,6 +101,106 @@ const ExamManagement = () => {
             showToast('Failed to sync Exam Vault', 'error');
             setExams([]);
             setLoading(false);
+        }
+    };
+
+    const fetchSubmissions = async (examId) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            const { data } = await axios.get(`/api/submissions/exam/${examId}`, config);
+            console.log('[Submissions] Fetched:', data);
+            setSubmissions(data.submissions || []);
+            setSelectedExamForGrading(examId);
+        } catch (err) {
+            console.error('Error fetching submissions:', err);
+            showToast('Failed to fetch submissions', 'error');
+            setSubmissions([]);
+        }
+    };
+
+    // Add socket listener for new submissions
+    useEffect(() => {
+        if (socket && selectedExamForGrading) {
+            const handleNewSubmission = (data) => {
+                console.log('[ExamManagement] New submission received:', data);
+                showToast(`New submission from ${data.studentName}`, 'info');
+                // Refresh submissions for the current exam
+                fetchSubmissions(selectedExamForGrading);
+            };
+
+            socket.on('EXAM_SUBMISSION_RECEIVED', handleNewSubmission);
+
+            return () => {
+                socket.off('EXAM_SUBMISSION_RECEIVED', handleNewSubmission);
+            };
+        }
+    }, [socket, selectedExamForGrading]);
+
+    const handleGradeSubmission = async (submissionId) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            // Format answers for grading
+            const answers = Object.keys(gradingData).map(questionId => ({
+                questionId,
+                marksAwarded: Number(gradingData[questionId].marks || 0),
+                feedback: gradingData[questionId].feedback || ''
+            }));
+
+            await axios.post(`/api/submissions/${submissionId}/grade`, { answers }, config);
+            showToast('Submission graded successfully', 'success');
+            setSelectedSubmission(null);
+            setGradingData({});
+            
+            // Refresh submissions
+            if (selectedExamForGrading) {
+                fetchSubmissions(selectedExamForGrading);
+            }
+        } catch (err) {
+            console.error('Error grading submission:', err);
+            showToast(err.response?.data?.message || 'Failed to grade submission', 'error');
+        }
+    };
+
+    const viewSubmissionForGrading = async (submission) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            // Fetch full submission details with answers
+            const { data } = await axios.get(`/api/exams/exam-submissions/${submission._id}`, config);
+            console.log('[Grading] Full submission data:', data);
+            
+            const fullSubmission = data.submission || data;
+            setSelectedSubmission(fullSubmission);
+            
+            // Initialize grading data
+            const initialGrading = {};
+            (fullSubmission.answers || []).forEach(answer => {
+                const questionId = answer.question?._id || answer.questionId;
+                initialGrading[questionId] = {
+                    marks: answer.marksAwarded || 0,
+                    feedback: answer.feedback || ''
+                };
+            });
+            setGradingData(initialGrading);
+        } catch (err) {
+            console.error('Error fetching submission details:', err);
+            showToast('Failed to load submission details', 'error');
+            // Fallback: use the submission data we have
+            setSelectedSubmission(submission);
+            const initialGrading = {};
+            (submission.answers || []).forEach(answer => {
+                const questionId = answer.question?._id || answer.questionId;
+                initialGrading[questionId] = {
+                    marks: answer.marksAwarded || 0,
+                    feedback: answer.feedback || ''
+                };
+            });
+            setGradingData(initialGrading);
         }
     };
 
@@ -229,6 +339,7 @@ const ExamManagement = () => {
             <div className="flex space-x-1 bg-white/5 p-1 rounded-xl w-fit backdrop-blur-md border border-white/10">
                 {[
                     { id: 'conduct', label: 'Conduct Exams', icon: Calendar },
+                    { id: 'grading', label: 'Grade Submissions', icon: Edit },
                     { id: 'questions', label: 'Question Bank', icon: FileText },
                     { id: 'answers', label: 'Solution Vault', icon: CheckCircle },
                     { id: 'schedule', label: 'Schedule History', icon: ShieldCheck }
@@ -262,7 +373,243 @@ const ExamManagement = () => {
                 </div>
 
                 <div className="grid gap-4">
-                    {activeTab === 'questions' ? (
+                    {activeTab === 'grading' ? (
+                        !selectedSubmission ? (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <h5 className="text-sm font-black text-white/60 uppercase tracking-widest">Select Exam to Grade</h5>
+                                    {selectedExamForGrading && (
+                                        <ModernButton
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={() => {
+                                                setSelectedExamForGrading(null);
+                                                setSubmissions([]);
+                                            }}
+                                        >
+                                            Back to Exams
+                                        </ModernButton>
+                                    )}
+                                </div>
+
+                                {!selectedExamForGrading ? (
+                                    // Show list of exams
+                                    exams.length > 0 ? exams.map((exam) => (
+                                        <div key={exam._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all">
+                                            <div className="flex items-center gap-5">
+                                                <div className="p-4 bg-purple-500/10 rounded-2xl text-purple-400">
+                                                    <FileText size={28} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-white text-lg">{exam.title}</h4>
+                                                    <p className="text-xs text-white/40 mt-1">{exam.course?.title}</p>
+                                                    <div className="flex items-center gap-3 text-[10px] mt-2 font-bold uppercase tracking-wider text-white/30">
+                                                        <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleDateString()}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <ModernButton
+                                                size="sm"
+                                                onClick={() => fetchSubmissions(exam._id)}
+                                            >
+                                                <Users size={16} className="mr-2" />
+                                                View Submissions
+                                            </ModernButton>
+                                        </div>
+                                    )) : (
+                                        <div className="py-20 text-center text-white/20">
+                                            <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
+                                            <p className="font-bold uppercase tracking-widest text-sm">No Exams Found</p>
+                                        </div>
+                                    )
+                                ) : (
+                                    // Show submissions for selected exam
+                                    submissions.length > 0 ? submissions.map((submission) => (
+                                        <div key={submission._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all">
+                                            <div className="flex items-center gap-5">
+                                                <div className={`p-4 rounded-2xl ${
+                                                    submission.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400' :
+                                                    'bg-amber-500/10 text-amber-500'
+                                                }`}>
+                                                    {submission.status === 'graded' ? <CheckCircle size={28} /> : <Clock size={28} />}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-white text-lg">{submission.student?.name || 'Student'}</h4>
+                                                    <p className="text-xs text-white/40 mt-1">{submission.student?.email}</p>
+                                                    <div className="flex items-center gap-3 text-[10px] mt-2 font-bold uppercase tracking-wider">
+                                                        <span className={`px-2 py-0.5 rounded ${
+                                                            submission.status === 'graded' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                            'bg-amber-500/20 text-amber-500'
+                                                        }`}>
+                                                            {submission.status}
+                                                        </span>
+                                                        {submission.status === 'graded' && (
+                                                            <span className="text-white/60">
+                                                                Score: {submission.obtainedMarks}/{submission.totalMarks} ({submission.percentage?.toFixed(1)}%)
+                                                            </span>
+                                                        )}
+                                                        <span className="text-white/30">
+                                                            Submitted: {new Date(submission.submittedAt).toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <ModernButton
+                                                size="sm"
+                                                variant={submission.status === 'graded' ? 'secondary' : 'primary'}
+                                                onClick={() => viewSubmissionForGrading(submission)}
+                                            >
+                                                <Edit size={16} className="mr-2" />
+                                                {submission.status === 'graded' ? 'Review' : 'Grade Now'}
+                                            </ModernButton>
+                                        </div>
+                                    )) : (
+                                        <div className="py-20 text-center text-white/20">
+                                            <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
+                                            <p className="font-bold uppercase tracking-widest text-sm">No Submissions Yet</p>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        ) : (
+                            // Grading interface
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h5 className="text-lg font-black text-white">Grading: {selectedSubmission.student?.name}</h5>
+                                        <p className="text-xs text-white/40 mt-1">{selectedSubmission.student?.email}</p>
+                                    </div>
+                                    <ModernButton
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => {
+                                            setSelectedSubmission(null);
+                                            setGradingData({});
+                                        }}
+                                    >
+                                        Back to Submissions
+                                    </ModernButton>
+                                </div>
+
+                                {/* Answers to grade */}
+                                <div className="space-y-4">
+                                    {console.log('[Grading UI] Selected submission:', selectedSubmission)}
+                                    {console.log('[Grading UI] Answers:', selectedSubmission.answers)}
+                                    {(!selectedSubmission.answers || selectedSubmission.answers.length === 0) ? (
+                                        <div className="p-8 bg-white/[0.02] border border-white/5 rounded-2xl text-center">
+                                            <p className="text-white/40 text-sm">No answers found in this submission</p>
+                                            <p className="text-white/20 text-xs mt-2">This might be a PDF-based exam or the submission is incomplete</p>
+                                        </div>
+                                    ) : (
+                                        selectedSubmission.answers.map((answer, idx) => {
+                                            const questionId = answer.question?._id || answer.questionId;
+                                            const question = answer.question;
+                                            
+                                            console.log(`[Grading UI] Question ${idx + 1}:`, {
+                                                questionId,
+                                                question,
+                                                answer,
+                                                questionType: answer.questionType,
+                                                selectedOption: answer.selectedOption,
+                                                textAnswer: answer.textAnswer
+                                            });
+                                            
+                                            return (
+                                                <div key={questionId || idx} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
+                                                    <div>
+                                                        <div className="flex items-start justify-between mb-3">
+                                                            <h6 className="text-sm font-bold text-white">Question {idx + 1}</h6>
+                                                            <span className="text-xs text-white/40">Max: {question?.marks || 0} marks</span>
+                                                        </div>
+                                                        <p className="text-white/80 text-sm mb-4">{question?.questionText || 'Question text not available'}</p>
+                                                    </div>
+
+                                                    <div className="p-4 bg-white/[0.03] rounded-xl">
+                                                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Student's Answer</p>
+                                                        {answer.questionType === 'mcq' ? (
+                                                            <p className="text-white text-sm">
+                                                                Selected: {question?.options?.[answer.selectedOption]?.text || `Option ${answer.selectedOption + 1}`}
+                                                                {answer.marksAwarded !== undefined && (
+                                                                    <span className={`ml-3 px-2 py-0.5 rounded text-xs ${
+                                                                        answer.marksAwarded > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                                                                    }`}>
+                                                                        {answer.marksAwarded > 0 ? 'Correct' : 'Incorrect'}
+                                                                    </span>
+                                                                )}
+                                                            </p>
+                                                        ) : (
+                                                            <p className="text-white text-sm whitespace-pre-wrap">{answer.textAnswer || 'No answer provided'}</p>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Grading inputs */}
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">
+                                                                Marks Awarded
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max={question?.marks || 100}
+                                                                value={gradingData[questionId]?.marks || 0}
+                                                                onChange={(e) => setGradingData({
+                                                                    ...gradingData,
+                                                                    [questionId]: {
+                                                                        ...gradingData[questionId],
+                                                                        marks: e.target.value
+                                                                    }
+                                                                })}
+                                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                                                disabled={answer.questionType === 'mcq' && answer.marksAwarded !== undefined}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">
+                                                                Feedback (Optional)
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                value={gradingData[questionId]?.feedback || ''}
+                                                                onChange={(e) => setGradingData({
+                                                                    ...gradingData,
+                                                                    [questionId]: {
+                                                                        ...gradingData[questionId],
+                                                                        feedback: e.target.value
+                                                                    }
+                                                                })}
+                                                                placeholder="Add feedback..."
+                                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-primary transition-all"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+
+                                {/* Submit grading */}
+                                <div className="flex justify-end gap-4 pt-4">
+                                    <ModernButton
+                                        variant="secondary"
+                                        onClick={() => {
+                                            setSelectedSubmission(null);
+                                            setGradingData({});
+                                        }}
+                                    >
+                                        Cancel
+                                    </ModernButton>
+                                    <ModernButton
+                                        onClick={() => handleGradeSubmission(selectedSubmission._id)}
+                                    >
+                                        <Award size={16} className="mr-2" />
+                                        Submit Grades & Publish
+                                    </ModernButton>
+                                </div>
+                            </div>
+                        )
+                    ) : activeTab === 'questions' ? (
                         questionPapers.length > 0 ? questionPapers.map((paper) => (
                             <div key={paper._id} className="group relative flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
                                 <div className="flex items-center gap-5">

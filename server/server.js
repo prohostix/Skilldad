@@ -118,6 +118,7 @@ app.use('/api/university', require('./routes/universityRoutes'));
 app.use('/api/partner', require('./routes/partnerRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/skilldad-universities', require('./routes/skillDadUniversityRoutes'));
+app.use('/api/admin/migrations', require('./routes/migrationRoutes'));
 app.use('/api/sessions', require('./routes/liveSessionRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
 app.use('/api/enquiries', require('./routes/enquiryRoutes'));

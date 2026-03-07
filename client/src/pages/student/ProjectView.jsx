@@ -15,6 +15,7 @@ import {
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const ProjectView = () => {
     const { courseId } = useParams();
@@ -145,9 +146,9 @@ const ProjectView = () => {
 
     return (
         <div className="space-y-8">
-            <div className="space-y-2">
-                <h1 className="text-base font-semibold text-white font-inter">Projects for {course.title}</h1>
-                <p className="text-white/70 text-sm">Apply your knowledge by completing these hands-on projects.</p>
+            <div className="space-y-4">
+                <DashboardHeading title={`Projects for ${course.title}`} />
+                <p className="text-white/40 font-inter text-sm max-w-2xl">Apply your theoretical knowledge by completing these industry-aligned hands-on projects.</p>
             </div>
 
             {mockProjects.length > 0 ? (

@@ -88,7 +88,42 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
     };
 
     const handleEditQuestion = (index) => {
-        setCurrentQuestion(questions[index]);
+        const question = questions[index];
+        
+        if (!question) {
+            console.error('Question not found at index:', index);
+            return;
+        }
+        
+        // Convert database format to local format if needed
+        let options = ['', '', '', ''];
+        let correctAnswer = 0;
+        
+        // Handle options - could be strings (local) or objects (from DB)
+        if (question.options && Array.isArray(question.options) && question.options.length > 0) {
+            if (typeof question.options[0] === 'object' && question.options[0] !== null) {
+                // Database format: [{text: "...", isCorrect: true}, ...]
+                const correctIndex = question.options.findIndex(opt => opt.isCorrect === true);
+                options = question.options.map(opt => opt.text || '');
+                correctAnswer = correctIndex >= 0 ? correctIndex : 0;
+            } else {
+                // Local format: ["option1", "option2", ...]
+                options = [...question.options];
+                correctAnswer = question.correctAnswer || 0;
+            }
+        } else if (question.correctAnswer !== undefined) {
+            // Fallback if options is missing but correctAnswer exists
+            correctAnswer = question.correctAnswer;
+        }
+        
+        setCurrentQuestion({
+            questionText: question.questionText || '',
+            questionType: question.questionType || 'mcq',
+            options: options,
+            correctAnswer: correctAnswer,
+            marks: question.marks || 1,
+            negativeMarks: question.negativeMarks || 0
+        });
         setEditingIndex(index);
     };
 
@@ -116,18 +151,60 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-            // Prepare questions for API
-            const questionsToSave = questions.map(q => ({
-                questionText: q.questionText,
-                questionType: q.questionType,
-                options: q.questionType === 'mcq' ? q.options.filter(opt => opt.trim()).map((text, idx) => ({
-                    text,
-                    isCorrect: idx === q.correctAnswer
-                })) : [],
-                marks: q.marks,
-                negativeMarks: q.negativeMarks || 0,
-                order: q.order
-            }));
+            // Get existing questions
+            const existingResponse = await axios.get(`/api/exams/${examId}/questions`, config);
+            const existingQuestions = existingResponse.data.questions || [];
+            
+            // Separate new questions (no _id) from existing ones (has _id)
+            const newQuestions = questions.filter(q => !q._id);
+            const existingQuestionsToUpdate = questions.filter(q => q._id);
+            
+            // Delete all existing questions first to avoid order conflicts
+            if (existingQuestions.length > 0) {
+                await Promise.all(
+                    existingQuestions.map(q => 
+                        axios.delete(`/api/questions/${q._id}`, config).catch(err => {
+                            console.warn('Failed to delete question:', q._id, err);
+                        })
+                    )
+                );
+            }
+
+            // Prepare all questions for saving (both new and updated)
+            const questionsToSave = questions.map((q, index) => {
+                let options = [];
+                let correctAnswerIndex = q.correctAnswer || 0;
+                
+                // Handle options - could be strings (local) or objects (from DB)
+                if (q.questionType === 'mcq' && q.options && Array.isArray(q.options)) {
+                    if (typeof q.options[0] === 'object' && q.options[0] !== null) {
+                        // Database format: [{text: "...", isCorrect: true}, ...]
+                        options = q.options.map(opt => ({
+                            text: opt.text,
+                            isCorrect: opt.isCorrect
+                        }));
+                    } else {
+                        // Local format: ["option1", "option2", ...]
+                        options = q.options
+                            .filter(opt => typeof opt === 'string' && opt.trim())
+                            .map((text, idx) => ({
+                                text: text.trim(),
+                                isCorrect: idx === correctAnswerIndex
+                            }));
+                    }
+                }
+                
+                return {
+                    questionText: q.questionText,
+                    questionType: q.questionType,
+                    options: options,
+                    marks: Number(q.marks) || 1,
+                    negativeMarks: Number(q.negativeMarks) || 0,
+                    order: index + 1  // Reassign order sequentially
+                };
+            });
+
+            console.log('Saving questions:', questionsToSave);
 
             const response = await axios.post(
                 `/api/exams/${examId}/questions`,
@@ -136,10 +213,28 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
             );
 
             showToast('All questions saved successfully', 'success');
-            if (onSuccess) onSuccess(response.data);
+            // Don't call onSuccess to avoid navigation issues
+            // if (onSuccess) onSuccess(response.data);
             fetchQuestions();
         } catch (err) {
-            const errorMsg = err.response?.data?.message || 'Failed to save questions';
+            console.error('Save questions error:', err);
+            console.error('Error response:', err.response?.data);
+            
+            // Extract detailed error message
+            let errorMsg = 'Failed to save questions';
+            if (err.response?.data) {
+                const data = err.response.data;
+                if (data.errors && Array.isArray(data.errors)) {
+                    // Show validation errors for each question
+                    errorMsg = 'Validation errors:\n' + data.errors.map(e => 
+                        `Question ${e.questionIndex + 1}: ${e.errors.join(', ')}`
+                    ).join('\n');
+                } else if (data.message) {
+                    errorMsg = data.message;
+                }
+            }
+            
+            console.error('Formatted error:', errorMsg);
             showToast(errorMsg, 'error');
         } finally {
             setSaving(false);
@@ -366,7 +461,7 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
                         <AnimatePresence>
                             {questions.map((question, index) => (
                                 <motion.div
-                                    key={index}
+                                    key={question._id || `question-${index}-${question.questionText?.substring(0, 20)}`}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
@@ -395,29 +490,37 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
                                                 )}
                                             </div>
                                             <p className="text-white mb-3">{question.questionText}</p>
-                                            {question.questionType === 'mcq' && (
+                                            {question.questionType === 'mcq' && question.options && (
                                                 <div className="space-y-2">
-                                                    {question.options.map((option, optIndex) => (
-                                                        <div
-                                                            key={optIndex}
-                                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                                                                optIndex === question.correctAnswer
-                                                                    ? 'bg-green-500/10 border border-green-500/20'
-                                                                    : 'bg-white/5'
-                                                            }`}
-                                                        >
-                                                            {optIndex === question.correctAnswer && (
-                                                                <CheckCircle size={16} className="text-green-400" />
-                                                            )}
-                                                            <span className={`text-sm ${
-                                                                optIndex === question.correctAnswer
-                                                                    ? 'text-green-400 font-semibold'
-                                                                    : 'text-white/70'
-                                                            }`}>
-                                                                {option}
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                                    {question.options.map((option, optIndex) => {
+                                                        // Handle both string options (local) and object options (from DB)
+                                                        const optionText = typeof option === 'string' ? option : option.text;
+                                                        const isCorrect = typeof option === 'string' 
+                                                            ? optIndex === question.correctAnswer 
+                                                            : option.isCorrect;
+                                                        
+                                                        return (
+                                                            <div
+                                                                key={optIndex}
+                                                                className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                                                                    isCorrect
+                                                                        ? 'bg-green-500/10 border border-green-500/20'
+                                                                        : 'bg-white/5'
+                                                                }`}
+                                                            >
+                                                                {isCorrect && (
+                                                                    <CheckCircle size={16} className="text-green-400" />
+                                                                )}
+                                                                <span className={`text-sm ${
+                                                                    isCorrect
+                                                                        ? 'text-green-400 font-semibold'
+                                                                        : 'text-white/70'
+                                                                }`}>
+                                                                    {optionText}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                             )}
                                         </div>

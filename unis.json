@@ -1,0 +1,23 @@
+[
+  {
+    "_id": "69a9b075a5c0af1b8f9b9de0",
+    "name": "Test University",
+    "email": "university@test.com",
+    "bio": "",
+    "profileImage": "",
+    "studentCount": 0,
+    "courseCount": 0
+  },
+  {
+    "profile": {
+      "universityName": "Tech University"
+    },
+    "_id": "69a9b04a3e10e5c21e470277",
+    "name": "Dr. Sarah Wilson",
+    "email": "sarah.wilson@university.edu",
+    "bio": "",
+    "profileImage": "",
+    "studentCount": 0,
+    "courseCount": 3
+  }
+]

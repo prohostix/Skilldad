@@ -186,13 +186,27 @@ const LandingPage = () => {
 
     const universities = dynamicUniversities.length > 0
         ? dynamicUniversities.map(u => ({
+            _id: u._id,
             name: u.name,
             location: u.profile?.location || 'Global',
-            students: u.studentCount > 0 ? `${u.studentCount}+` : '100+',
-            programs: u.courseCount > 0 ? `${u.courseCount}+` : '10+',
-            logo: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`
+            students: u.studentCount > 0 ? `${u.studentCount}+` : '1,200+',
+            programs: u.courseCount > 0 ? `${u.courseCount}+` : '24+',
+            logo: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+            image: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+            description: u.bio || 'World-class institution providing excellence in global education through SkillDad.',
+            established: u.createdAt ? new Date(u.createdAt).getFullYear() : '2023',
+            rating: (4.8 + (Math.random() * 0.15)).toFixed(1), // Dynamic-ish rating
+            specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
         }))
-        : universityPartners.length > 0 ? universityPartners : staticUnis;
+        : universityPartners.length > 0 ? universityPartners.map(p => ({
+            ...p,
+            image: p.logo, // Compatibility
+            description: 'Strategic academic partner integrated within the SkillDad learning ecosystem.',
+            established: '2020',
+            rating: 4.9,
+            specialties: ['Digital Transformation', 'Enterprise Learning']
+        })) : staticUnis;
+
 
     let marqueeRow1 = [];
     let marqueeRow2 = [];
@@ -603,7 +617,7 @@ const LandingPage = () => {
                             transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
                             className="hidden lg:block w-[320px] h-[320px] shrink-0 -ml-48 mr-[8%] gpu-accelerated"
                         >
-                            <UniversityOrb3D />
+                            <UniversityOrb3D universities={universities} />
                         </motion.div>
 
                     </div>

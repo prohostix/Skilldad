@@ -32,9 +32,11 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import { useSocket } from '../../context/SocketContext';
 
 const StudentManagement = () => {
     const { showToast } = useToast();
+    const socket = useSocket();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -62,13 +64,41 @@ const StudentManagement = () => {
     useEffect(() => {
         fetchStudents();
         fetchCourses();
+
+        // Socket Listener for Real-time Updates
+        const handleUserListUpdate = (data) => {
+            if (data.action === 'created' && data.user?.role?.toLowerCase() === 'student') {
+                setStudents(prev => {
+                    if (prev.some(s => s._id === data.user._id)) return prev;
+                    const newStudent = {
+                        ...data.user,
+                        enrollmentCount: 0,
+                        course: 'New/Pending'
+                    };
+                    return [newStudent, ...prev];
+                });
+                showToast?.(`New student registered: ${data.user.name}`, 'info');
+            } else if (data.action === 'deleted') {
+                setStudents(prev => prev.filter(s => s._id !== data.user._id));
+            } else if (data.action === 'updated' && data.user?.role?.toLowerCase() === 'student') {
+                setStudents(prev => prev.map(s => s._id === data.user._id ? { ...s, ...data.user } : s));
+            }
+        };
+
+        if (socket) {
+            socket.on('userListUpdate', handleUserListUpdate);
+        }
+
         // Auto-refresh every 30 seconds to get latest updates
         const interval = setInterval(() => {
             fetchStudents();
         }, 30000);
 
-        return () => clearInterval(interval);
-    }, [selectedCourseId, selectedUniversityId]);
+        return () => {
+            if (socket) socket.off('userListUpdate', handleUserListUpdate);
+            clearInterval(interval);
+        };
+    }, [selectedCourseId, selectedUniversityId, socket]);
 
     // Update state when URL changes
     useEffect(() => {
@@ -307,10 +337,10 @@ const StudentManagement = () => {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.post(
                 `/api/admin/students/${selectedStudent._id}/enroll`,
-                { 
-                    courseId: enrollCourseId, 
+                {
+                    courseId: enrollCourseId,
                     universityId: enrollUniversityId || undefined,
-                    note: enrollNote 
+                    note: enrollNote
                 },
                 config
             );

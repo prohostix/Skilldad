@@ -124,6 +124,37 @@ const scheduleExam = async (req, res) => {
     try {
       await ExamNotificationService.notifyExamScheduled(exam);
       console.log(`Sent exam scheduled notifications for exam: ${exam.title}`);
+      
+      // Send real-time socket notifications to enrolled students
+      const socketService = require('../services/SocketService');
+      const enrollments = await Enrollment.find({
+        course: exam.course._id || exam.course,
+        status: 'active'
+      }).select('student').lean();
+      
+      const studentIds = enrollments.map(e => e.student.toString());
+      
+      // Send socket notification to each enrolled student
+      for (const studentId of studentIds) {
+        try {
+          socketService.emitToUser(studentId, 'EXAM_SCHEDULED', {
+            examId: exam._id,
+            examTitle: exam.title,
+            courseId: exam.course._id || exam.course,
+            courseTitle: exam.course.title,
+            scheduledStartTime: exam.scheduledStartTime,
+            scheduledEndTime: exam.scheduledEndTime,
+            duration: exam.duration,
+            totalMarks: exam.totalMarks,
+            examType: exam.examType,
+            message: `New exam scheduled: ${exam.title}`
+          });
+        } catch (socketError) {
+          console.error(`Failed to send socket notification to student ${studentId}:`, socketError.message);
+        }
+      }
+      
+      console.log(`Sent socket notifications to ${studentIds.length} students for exam: ${exam.title}`);
     } catch (notificationError) {
       console.error('Error sending notifications:', notificationError);
       // Don't fail the request if notifications fail
@@ -856,25 +887,60 @@ const getStudentExams = async (req, res) => {
       .sort({ scheduledStartTime: -1 })
       .lean(); // Use lean() for better performance
 
+    // Get questions for all exams
+    const Question = require('../models/questionModel');
+    const examIds = exams.map(e => e._id);
+    const questions = await Question.find({
+      exam: { $in: examIds }
+    }).sort({ order: 1 }).lean();
+
+    // Map questions to include 'question' field for frontend compatibility
+    const mappedQuestions = questions.map(q => ({
+      ...q,
+      question: q.questionText || q.question || 'Question text not available' // Map questionText to question for frontend
+    }));
+
+    // Group questions by exam
+    const questionsByExam = {};
+    mappedQuestions.forEach(q => {
+      const examId = q.exam.toString();
+      if (!questionsByExam[examId]) {
+        questionsByExam[examId] = [];
+      }
+      questionsByExam[examId].push(q);
+    });
+
+    console.log('[getStudentExams] Total questions found:', questions.length);
+    console.log('[getStudentExams] Questions grouped by exam:', Object.keys(questionsByExam).map(id => `${id}: ${questionsByExam[id].length} questions`));
+
     // Get student's submissions for these exams with minimal fields
     const submissions = await ExamSubmissionNew.find({
-      exam: { $in: exams.map((e) => e._id) },
+      exam: { $in: examIds },
       student: studentId,
     })
-      .select('exam status submittedAt obtainedMarks totalMarks percentage') // Only select needed fields
+      .select('exam status submittedAt obtainedMarks totalMarks percentage timeSpent passed endTime score') // Only select needed fields
       .lean();
 
-    // Combine exam data with submission status
+    // Combine exam data with submission status and questions
     const examsWithStatus = exams.map((exam) => {
       const submission = submissions.find(
         (s) => s.exam.toString() === exam._id.toString()
       );
 
+      const examQuestions = questionsByExam[exam._id.toString()] || [];
+
       return {
         ...exam, // Already a plain object from lean()
+        questions: examQuestions, // Add questions array
+        totalQuestions: examQuestions.length, // Add total count
         submission: submission || null,
         hasSubmitted: submission && submission.status !== 'in-progress',
       };
+    });
+
+    console.log('[getStudentExams] Returning', examsWithStatus.length, 'exams');
+    examsWithStatus.forEach((e, idx) => {
+      console.log(`[getStudentExams] Exam ${idx + 1}: ${e.title} - ${e.questions?.length || 0} questions`);
     });
 
     res.status(200).json({
@@ -930,11 +996,15 @@ const startExam = async (req, res) => {
     const { examId } = req.params;
     const studentId = req.user._id;
 
+    console.log('[startExam] Student', studentId, 'attempting to start exam', examId);
+
     // Check exam access
     const accessResult = await examAccessService.checkExamAccess(
       examId,
       studentId
     );
+
+    console.log('[startExam] Access check result:', accessResult.canAccess, '-', accessResult.reason);
 
     // Log exam access attempt
     try {

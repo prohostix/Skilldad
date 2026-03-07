@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const MyCourses = () => {
     const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -72,10 +73,8 @@ const MyCourses = () => {
         <div className="space-y-2 animate-in fade-in duration-700 pb-20">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="text-left">
-                    <h1 className="text-sm font-semibold text-white font-inter mb-1">
-                        My Learning Hub
-                    </h1>
-                    <p className="text-white/70 font-inter text-sm">Pick up exactly where you left off.</p>
+                    <DashboardHeading title="My Learning Hub" />
+                    <p className="text-white/40 font-inter text-sm mt-2">Pick up exactly where you left off.</p>
                 </div>
                 <div className="flex items-center space-x-3">
                     <ModernButton variant="secondary">

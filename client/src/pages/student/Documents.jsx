@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const Documents = () => {
     const [documents, setDocuments] = useState([]);
@@ -183,8 +184,9 @@ const Documents = () => {
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="space-y-2">
-                <h1 className="text-base font-semibold text-white font-inter">Document Management</h1>
+            <div className="space-y-4">
+                <DashboardHeading title="Document Management" />
+                <p className="text-white/40 font-inter text-sm max-w-2xl">Securely manage and track your academic credentials and verification files.</p>
             </div>
 
             {/* Filters and Search */}
@@ -208,8 +210,8 @@ const Documents = () => {
                             key={option.value}
                             onClick={() => setFilter(option.value)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filter === option.value
-                                    ? 'bg-primary text-white'
-                                    : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'
+                                ? 'bg-primary text-white'
+                                : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'
                                 }`}
                         >
                             {option.label} ({option.count})

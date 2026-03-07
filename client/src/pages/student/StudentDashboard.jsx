@@ -76,7 +76,7 @@ const StudentDashboard = () => {
                     axios.get('/api/enrollment/my-courses', config),
                     axios.get('/api/sessions', config),
                     axios.get('/api/projects/my-projects', config),
-                    axios.get('/api/exams/my-exams', config),
+                    axios.get('/api/exams/student/my-exams', config),
                     axios.get('/api/documents/my-documents', config)
                 ]);
 
@@ -84,13 +84,19 @@ const StudentDashboard = () => {
                 const courses = coursesRes.status === 'fulfilled' ? coursesRes.value.data : [];
                 const sessions = sessionsRes.status === 'fulfilled' ? sessionsRes.value.data : [];
                 const projects = projectsRes.status === 'fulfilled' ? projectsRes.value.data : [];
-                const exams = examsRes.status === 'fulfilled' ? examsRes.value.data : [];
+                // New API returns { success: true, data: [...] }
+                const exams = examsRes.status === 'fulfilled' ? (examsRes.value.data.data || examsRes.value.data || []) : [];
                 const docs = docsRes.status === 'fulfilled' ? docsRes.value.data : [];
 
                 setEnrolledCourses(courses.slice(0, 3)); // Show top 3 active
                 setUpcomingSessions(sessions.filter(s => s.status === 'scheduled' || s.status === 'live').slice(0, 3));
                 setRecentProjects(projects.slice(0, 3));
-                setUpcomingExams(exams.filter(e => e.status === 'not-started').slice(0, 3));
+                // Filter upcoming exams (scheduled status, not yet started)
+                const now = new Date();
+                setUpcomingExams(exams.filter(e => {
+                    const startTime = new Date(e.scheduledStartTime);
+                    return e.status === 'scheduled' && startTime > now;
+                }).slice(0, 3));
                 setDocuments(docs.slice(0, 5));
 
                 // Extract unique universities from enrolled courses
@@ -512,7 +518,7 @@ const StudentDashboard = () => {
                         <div className="space-y-3">
                             {upcomingExams.map((exam) => (
                                 <GlassCard
-                                    key={exam.id}
+                                    key={exam._id}
                                     className="!p-4 border-white/15 border-2 hover:border-amber-500/50 transition-all cursor-pointer group bg-white/[0.01]"
                                     onClick={() => navigate('/dashboard/exams')}
                                 >
@@ -529,7 +535,7 @@ const StudentDashboard = () => {
                                     <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
                                         <div className="flex items-center gap-2">
                                             <Calendar size={12} className="text-gray-500" />
-                                            <span className="text-[10px] font-bold text-white/60">{new Date(exam.scheduledDate).toLocaleDateString()}</span>
+                                            <span className="text-[10px] font-bold text-white/60">{new Date(exam.scheduledStartTime).toLocaleDateString()}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Clock size={12} className="text-gray-500" />

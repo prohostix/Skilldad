@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ZoomMeeting from '../../components/ZoomMeeting';
 import axios from 'axios';
 import { useUser } from '../../context/UserContext';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const WatchStream = () => {
     const { id } = useParams();
@@ -26,7 +27,7 @@ const WatchStream = () => {
                 };
 
                 const { data } = await axios.get(`/api/sessions/${id}`, config);
-                
+
                 if (data.status !== 'live') {
                     setError('This session is not currently live');
                 } else {
@@ -90,8 +91,8 @@ const WatchStream = () => {
         <div className="min-h-screen bg-black">
             <div className="container mx-auto px-4 py-6">
                 <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <h1 className="text-2xl font-bold text-white">{session.topic}</h1>
+                    <div className="flex items-center justify-between mb-4">
+                        <DashboardHeading title={session.topic} />
                         <span className="px-3 py-1 bg-red-500/20 border border-red-500/40 text-red-400 rounded-full text-xs font-bold uppercase flex items-center gap-2">
                             <span className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></span>
                             LIVE

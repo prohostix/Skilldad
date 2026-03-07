@@ -149,7 +149,7 @@ const UniversityPublicDetail = () => {
             {/* Header Section */}
             <div className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
                 <div className="absolute inset-0 z-0">
-                    <img src={university.image} alt={university.name} className="w-full h-full object-cover opacity-20" />
+                    <img src={university.image || university.logo} alt={university.name} className="w-full h-full object-cover opacity-20" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#080512] via-[#080512]/80 to-transparent" />
                 </div>
 
@@ -168,7 +168,7 @@ const UniversityPublicDetail = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             className="w-full md:w-1/3 aspect-video md:aspect-square max-w-sm rounded-[30px] overflow-hidden border-2 border-white/10 shadow-2xl shadow-primary/20 relative"
                         >
-                            <img src={university.image} alt={university.name} className="w-full h-full object-cover" />
+                            <img src={university.image || university.logo} alt={university.name} className="w-full h-full object-cover" />
                             <div className="absolute top-4 right-4 flex items-center bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
                                 <Star className="text-yellow-400 mr-2" fill="currentColor" size={14} />
                                 <span className="text-white font-bold text-sm">{university.rating}</span>
@@ -230,7 +230,7 @@ const UniversityPublicDetail = () => {
                             >
                                 <h4 className="text-sm text-white/40 font-black uppercase tracking-widest mb-3">Specialties</h4>
                                 <div className="flex flex-wrap gap-2">
-                                    {university.specialties.map(spec => (
+                                    {(university.specialties || []).map(spec => (
                                         <span key={spec} className="px-4 py-2 bg-primary/10 border border-primary/20 text-primary text-sm font-bold rounded-xl">
                                             {spec}
                                         </span>

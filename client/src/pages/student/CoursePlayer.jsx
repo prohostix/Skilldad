@@ -17,6 +17,7 @@ import {
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 import ZoomRecordingPlayer from '../../components/ZoomRecordingPlayer';
 
 const CoursePlayer = () => {
@@ -164,7 +165,10 @@ const CoursePlayer = () => {
                     >
                         <ArrowLeft size={16} className="mr-2" /> Back to Dashboard
                     </button>
-                    <h2 className="text-lg font-extrabold text-white font-poppins">{course.title}</h2>
+                    <DashboardHeading
+                        title={course.title}
+                        className="!text-lg font-extrabold"
+                    />
                     <div className="mt-6">
                         <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
                             <span className="uppercase tracking-wider">Overall Completion</span>

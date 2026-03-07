@@ -65,7 +65,7 @@ const getDiscounts = async (req, res) => {
             ],
             isActive: true // Only return active codes
         }).sort('-createdAt');
-        
+
         res.json(discounts);
     } catch (error) {
         console.error('Error fetching partner discounts:', error);
@@ -173,6 +173,9 @@ const registerStudent = async (req, res) => {
             student.assignedCourses.push(course);
             await student.save();
         }
+
+        // Populate registeredBy to show who registered this student in real-time
+        await student.populate('registeredBy', 'name email role');
 
         // Notify all admins via WebSocket that a new user was created
         socketService.notifyUserListUpdate('created', student);

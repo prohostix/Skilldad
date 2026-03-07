@@ -5,12 +5,14 @@ import { Clock, Calendar, FileText, AlertCircle, CheckCircle, PlayCircle, Eye } 
 import GlassCard from './ui/GlassCard';
 import ModernButton from './ui/ModernButton';
 import { useToast } from '../context/ToastContext';
+import { useSocket } from '../context/SocketContext';
 
 const StudentExamList = () => {
     const [exams, setExams] = useState([]);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
     const navigate = useNavigate();
+    const socket = useSocket();
 
     const getAuthConfig = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -21,14 +23,43 @@ const StudentExamList = () => {
         fetchExams();
     }, []);
 
+    useEffect(() => {
+        if (!socket) return;
+
+        // Listen for real-time exam scheduled notifications
+        const handleExamScheduled = (data) => {
+            console.log('[StudentExamList] Received EXAM_SCHEDULED event:', data);
+            showToast(`New exam scheduled: ${data.examTitle}`, 'success');
+            // Refresh exam list
+            fetchExams();
+        };
+
+        socket.on('EXAM_SCHEDULED', handleExamScheduled);
+
+        // Cleanup listener on unmount
+        return () => {
+            socket.off('EXAM_SCHEDULED', handleExamScheduled);
+        };
+    }, [socket]);
+
     const fetchExams = async () => {
         setLoading(true);
         try {
+            console.log('[StudentExamList] Fetching exams...');
             const response = await axios.get('/api/exams/student/my-exams', getAuthConfig());
-            setExams(response.data || []);
+            console.log('[StudentExamList] API Response:', response.data);
+            
+            // API returns { success: true, count: X, data: [...] }
+            const examData = response.data.data || response.data || [];
+            console.log('[StudentExamList] Parsed exam data:', examData);
+            console.log('[StudentExamList] Number of exams:', examData.length);
+            
+            setExams(examData);
         } catch (error) {
-            console.error('Error fetching exams:', error);
-            showToast('Error loading exams', 'error');
+            console.error('[StudentExamList] Error fetching exams:', error);
+            console.error('[StudentExamList] Error response:', error.response?.data);
+            console.error('[StudentExamList] Error status:', error.response?.status);
+            showToast(error.response?.data?.message || 'Error loading exams', 'error');
         } finally {
             setLoading(false);
         }

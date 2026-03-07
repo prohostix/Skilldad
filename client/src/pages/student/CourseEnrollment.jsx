@@ -21,6 +21,7 @@ import {
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const CourseEnrollment = () => {
     const { courseId } = useParams();
@@ -231,9 +232,10 @@ const CourseEnrollment = () => {
                                     <span className="text-slate-400">Updated {new Date(course.lastUpdated).toLocaleDateString()}</span>
                                 </div>
 
-                                <h1 className="text-2xl lg:text-3xl font-bold text-white leading-tight">
-                                    {course.title}
-                                </h1>
+                                <DashboardHeading
+                                    title={course.title}
+                                    className="!text-2xl lg:!text-3xl"
+                                />
 
                                 <p className="text-xl text-slate-300 leading-relaxed">
                                     {course.description}

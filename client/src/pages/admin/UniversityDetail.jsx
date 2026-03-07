@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -10,7 +10,14 @@ import {
     Calendar,
     CheckCircle,
     XCircle,
-    Download
+    Download,
+    Edit3,
+    Camera,
+    Save,
+    X,
+    Globe,
+    Phone,
+    MapPin
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -25,24 +32,88 @@ const UniversityDetail = () => {
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchDetails = async () => {
-            try {
-                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                const { data } = await axios.get(`/api/admin/universities/${id}`, config);
-                setUniversity(data.university);
-                setStudents(data.students);
-            } catch (error) {
-                console.error('Error fetching university details:', error);
-                showToast('Failed to load university details', 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Editing state
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({
+        bio: '',
+        location: '',
+        website: '',
+        phone: ''
+    });
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef(null);
 
+    const fetchDetails = async () => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.get(`/api/admin/universities/${id}`, config);
+            setUniversity(data.university);
+            setStudents(data.students);
+
+            // Set initial edit data
+            setEditData({
+                bio: data.university.bio || '',
+                location: data.university.profile?.location || '',
+                website: data.university.profile?.website || '',
+                phone: data.university.profile?.phone || ''
+            });
+        } catch (error) {
+            console.error('Error fetching university details:', error);
+            showToast('Failed to load university details', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchDetails();
     }, [id]);
+
+    const handleSaveProfile = async () => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+
+            await axios.put(`/api/admin/universities/${id}/profile`, editData, config);
+
+            showToast('Profile updated successfully', 'success');
+            setIsEditing(false);
+            fetchDetails();
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            showToast(error.response?.data?.message || 'Failed to update profile', 'error');
+        }
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('profileImage', file);
+
+        setUploading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            await axios.post(`/api/admin/universities/${id}/upload-image`, formData, config);
+
+            showToast('Image uploaded successfully', 'success');
+            fetchDetails();
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            showToast(error.response?.data?.message || 'Failed to upload image', 'error');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -80,41 +151,148 @@ const UniversityDetail = () => {
                     </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                    <ModernButton variant="secondary" onClick={() => window.print()}>
-                        Generate Audit Report
+                    <ModernButton
+                        variant={isEditing ? "danger" : "secondary"}
+                        onClick={() => isEditing ? setIsEditing(false) : setIsEditing(true)}
+                    >
+                        {isEditing ? <><X size={18} className="mr-2" /> Cancel</> : <><Edit3 size={18} className="mr-2" /> Edit Profile</>}
                     </ModernButton>
+                    {isEditing && (
+                        <ModernButton onClick={handleSaveProfile}>
+                            <Save size={18} className="mr-2" /> Save Changes
+                        </ModernButton>
+                    )}
                 </div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Info Card */}
                 <GlassCard className="lg:col-span-1 space-y-6">
-                    <div className="flex flex-col items-center py-6 border-b border-white/10">
-                        <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-2xl shadow-primary/20">
-                            <Building2 size={48} />
+                    <div className="flex flex-col items-center py-6 border-b border-white/10 relative group">
+                        <div
+                            className="w-32 h-32 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mb-4 shadow-2xl shadow-primary/20 overflow-hidden relative cursor-pointer"
+                            onClick={() => fileInputRef.current.click()}
+                        >
+                            {university.profileImage ? (
+                                <img
+                                    src={university.profileImage}
+                                    alt={university.name}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        e.target.src = 'https://via.placeholder.com/128?text=UNI';
+                                    }}
+                                />
+                            ) : (
+                                <Building2 size={48} />
+                            )}
+
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Camera size={24} className="text-white" />
+                            </div>
+
+                            {uploading && (
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                    <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                </div>
+                            )}
                         </div>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                        />
+
                         <h3 className="text-xl font-bold text-white text-center">{university.name}</h3>
                         <p className="text-primary text-xs font-black uppercase tracking-widest mt-1">Primary Partner</p>
                     </div>
 
                     <div className="space-y-4 pt-2">
-                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Email</span>
-                            <span className="text-white text-sm font-semibold">{university.email}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Discount Rate</span>
-                            <span className="text-emerald-400 text-sm font-bold">{university.discountRate || 0}%</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Status</span>
-                            <div className="flex items-center space-x-1.5">
-                                <span className={`w-2 h-2 rounded-full ${university.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                                <span className={`text-xs font-bold ${university.isVerified ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                    {university.isVerified ? 'VERIFIED' : 'PENDING'}
-                                </span>
+                        {isEditing ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">About / Bio</label>
+                                    <textarea
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-primary transition-all resize-none"
+                                        rows="4"
+                                        placeholder="Enter university description..."
+                                        value={editData.bio}
+                                        onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                                    ></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Location</label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-2.5 text-white/30" size={14} />
+                                        <input
+                                            type="text"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="City, Country"
+                                            value={editData.location}
+                                            onChange={(e) => setEditData({ ...editData, location: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Website</label>
+                                    <div className="relative">
+                                        <Globe className="absolute left-3 top-2.5 text-white/30" size={14} />
+                                        <input
+                                            type="url"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="https://university.edu"
+                                            value={editData.website}
+                                            onChange={(e) => setEditData({ ...editData, website: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Phone</label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-3 top-2.5 text-white/30" size={14} />
+                                        <input
+                                            type="tel"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="+1 234 567 890"
+                                            value={editData.phone}
+                                            onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                {university.bio && (
+                                    <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                                        <p className="text-white/60 text-xs leading-relaxed">{university.bio}</p>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                                    <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Email</span>
+                                    <span className="text-white text-sm font-semibold">{university.email}</span>
+                                </div>
+                                {university.profile?.location && (
+                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                                        <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Location</span>
+                                        <span className="text-white text-sm font-semibold">{university.profile.location}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                                    <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Discount Rate</span>
+                                    <span className="text-emerald-400 text-sm font-bold">{university.discountRate || 0}%</span>
+                                </div>
+                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                                    <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Status</span>
+                                    <div className="flex items-center space-x-1.5">
+                                        <span className={`w-2 h-2 rounded-full ${university.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                                        <span className={`text-xs font-bold ${university.isVerified ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                            {university.isVerified ? 'VERIFIED' : 'PENDING'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="pt-4">

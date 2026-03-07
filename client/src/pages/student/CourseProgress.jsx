@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import ProgressDashboard from '../../components/ProgressDashboard';
 import { useUser } from '../../context/UserContext';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const CourseProgress = () => {
     const { courseId } = useParams();
@@ -29,10 +30,8 @@ const CourseProgress = () => {
                     >
                         <ArrowLeft size={16} className="mr-2" /> Back to Course
                     </button>
-                    <h1 className="text-3xl font-extrabold text-white font-poppins">
-                        Course Progress
-                    </h1>
-                    <p className="text-slate-400 font-bold mt-2">
+                    <DashboardHeading title="Course Progress" />
+                    <p className="text-white/40 font-bold mt-2">
                         Track your learning journey and achievements
                     </p>
                 </div>

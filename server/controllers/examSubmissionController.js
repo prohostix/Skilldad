@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
-const ExamSubmissionNew = require('../models/examSubmissionNewModel');
+const ExamSubmissionNew = require('../models/examSubmissionNewModel'); // Current model for all exam submissions
+// Note: ExamSubmission (old model) is no longer used - all submissions now use ExamSubmissionNew
 const Question = require('../models/questionModel');
 const Exam = require('../models/examModel');
 const FileUploadService = require('../services/FileUploadService');
@@ -305,12 +306,12 @@ const getSubmissionsForExam = asyncHandler(async (req, res) => {
   }
   
   const userRole = req.user.role?.toLowerCase();
-  if (userRole !== 'admin' && exam.university.toString() !== req.user._id.toString()) {
+  if (userRole !== 'admin' && exam.university && exam.university.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to view submissions for this exam');
   }
   
-  // 2. Build query filter
+  // 2. Build query filter - Use ExamSubmissionNew model
   const filter = { exam: examId };
   
   // Filter by status if provided
@@ -328,22 +329,35 @@ const getSubmissionsForExam = asyncHandler(async (req, res) => {
   // 3. Calculate pagination
   const skip = (parseInt(page) - 1) * parseInt(limit);
   
-  // 4. Fetch submissions with pagination and selective population
+  // 4. Fetch submissions with pagination - Use ExamSubmissionNew model
   const submissions = await ExamSubmissionNew.find(filter)
-    .populate('student', 'name email') // Only populate name and email
-    .select('student exam status submittedAt obtainedMarks totalMarks percentage isAutoSubmitted gradedAt') // Select only needed fields
-    .sort({ [sortBy]: -1 })
+    .populate('student', 'name email')
+    .select('student exam status submittedAt obtainedMarks percentage isAutoSubmitted attemptNumber gradedAt gradedBy')
+    .sort({ submittedAt: -1 })
     .skip(skip)
     .limit(parseInt(limit))
-    .lean(); // Use lean() for better performance
+    .lean();
   
   // 5. Get total count for pagination metadata
   const totalCount = await ExamSubmissionNew.countDocuments(filter);
   
-  // 6. Return submissions with metadata
+  // 6. Return submissions with metadata - ExamSubmissionNew already has correct field names
+  const formattedSubmissions = submissions.map(sub => ({
+    _id: sub._id,
+    student: sub.student,
+    exam: sub.exam,
+    status: sub.status,
+    submittedAt: sub.submittedAt,
+    obtainedMarks: sub.obtainedMarks,
+    totalMarks: exam.totalPoints || exam.totalMarks,
+    percentage: sub.percentage,
+    isAutoSubmitted: sub.isAutoSubmitted || false,
+    gradedAt: sub.gradedAt
+  }));
+  
   res.json({
     success: true,
-    submissions,
+    submissions: formattedSubmissions,
     pagination: {
       currentPage: parseInt(page),
       totalPages: Math.ceil(totalCount / parseInt(limit)),
@@ -514,11 +528,100 @@ const getMySubmission = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Get submission details for grading
+ * @route   GET /api/exam-submissions/:submissionId
+ * @access  Private (University/Admin)
+ */
+const getSubmissionForGrading = asyncHandler(async (req, res) => {
+  const { submissionId } = req.params;
+  
+  console.log('[getSubmissionForGrading] Fetching submission:', submissionId);
+  
+  // 1. Find submission using ExamSubmissionNew model and populate all necessary fields
+  const submission = await ExamSubmissionNew.findById(submissionId)
+    .populate('exam', 'title examType totalMarks duration university questions')
+    .populate('student', 'name email')
+    .populate('answers.question');
+  
+  if (!submission) {
+    res.status(404);
+    throw new Error('Submission not found');
+  }
+  
+  console.log('[getSubmissionForGrading] Found submission:', {
+    id: submission._id,
+    student: submission.student?.name,
+    answersCount: submission.answers?.length || 0,
+    examQuestionsCount: submission.exam?.questions?.length || 0
+  });
+  
+  // 2. Check authorization
+  const userRole = req.user.role?.toLowerCase();
+  if (userRole !== 'admin' && submission.exam.university && submission.exam.university.toString() !== req.user._id.toString()) {
+    res.status(403);
+    throw new Error('Not authorized to view this submission');
+  }
+  
+  // 3. Format answers - ExamSubmissionNew already has correct structure
+  const formattedAnswers = (submission.answers || []).map((answer, index) => {
+    const question = answer.question;
+    
+    console.log(`[getSubmissionForGrading] Processing answer ${index + 1}:`, {
+      questionId: question?._id,
+      questionType: answer.questionType,
+      selectedOption: answer.selectedOption,
+      textAnswer: answer.textAnswer,
+      textAnswerLength: answer.textAnswer?.length || 0,
+      rawAnswer: JSON.stringify(answer)
+    });
+    
+    return {
+      question: question ? {
+        _id: question._id,
+        questionText: question.questionText,
+        questionType: question.questionType,
+        options: question.options || [],
+        marks: question.marks || 0
+      } : null,
+      questionId: question?._id,
+      questionType: answer.questionType,
+      selectedOption: answer.selectedOption,
+      textAnswer: answer.textAnswer,
+      marksAwarded: answer.marksAwarded || 0,
+      feedback: answer.feedback || ''
+    };
+  });
+  
+  console.log('[getSubmissionForGrading] Formatted answers:', formattedAnswers.length);
+  
+  // 4. Return formatted submission
+  res.json({
+    success: true,
+    submission: {
+      _id: submission._id,
+      exam: {
+        _id: submission.exam._id,
+        title: submission.exam.title,
+        totalMarks: submission.exam.totalMarks
+      },
+      student: submission.student,
+      answers: formattedAnswers,
+      status: submission.status,
+      submittedAt: submission.submittedAt,
+      score: submission.obtainedMarks,
+      percentage: submission.percentage,
+      passed: submission.percentage >= (submission.exam.passingScore || 40)
+    }
+  });
+});
+
 module.exports = {
   submitAnswer,
   uploadAnswerSheet,
   submitExam,
   getSubmissionsForExam,
   gradeSubmission,
-  getMySubmission
+  getMySubmission,
+  getSubmissionForGrading
 };
