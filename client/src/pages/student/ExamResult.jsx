@@ -36,9 +36,9 @@ const ExamResult = () => {
                 axios.get(`/api/exams/exam-submissions/exam/${examId}/my-submission`, getAuthConfig()),
                 axios.get(`/api/exams/${examId}`, getAuthConfig())
             ]);
-            setResult(resultRes.data);
-            setSubmission(submissionRes.data);
-            setExam(examRes.data);
+            setResult(resultRes.data.result || resultRes.data);
+            setSubmission(submissionRes.data.submission || submissionRes.data);
+            setExam(examRes.data.exam || examRes.data);
         } catch (error) {
             if (error.response?.status === 403) {
                 showToast('Results have not been published yet', 'error');

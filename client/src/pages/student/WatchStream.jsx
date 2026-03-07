@@ -103,11 +103,10 @@ const WatchStream = () => {
                     </p>
                 </div>
 
-                <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10">
+                <div className="bg-white/5 rounded-xl overflow-hidden border border-white/10 aspect-video min-h-[500px] lg:min-h-[750px]">
                     <ZoomMeeting
                         sessionId={id}
                         meetingNumber={session.zoomMeetingId}
-                        role={0} // 0 = Participant
                         userName={user?.name || 'Student'}
                     />
                 </div>

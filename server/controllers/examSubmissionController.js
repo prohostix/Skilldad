@@ -196,7 +196,7 @@ const uploadAnswerSheet = asyncHandler(async (req, res) => {
  */
 const submitExam = asyncHandler(async (req, res) => {
   const { submissionId } = req.params;
-  const { isAutoSubmit = false } = req.body;
+  const { isAutoSubmit = false, answers } = req.body;
   const studentId = req.user._id;
 
   // 1. Find submission and validate ownership
@@ -219,36 +219,66 @@ const submitExam = asyncHandler(async (req, res) => {
     throw new Error('Exam already submitted');
   }
 
-  // 3. Set submittedAt to current timestamp
+  // 3. Save answers if provided (for exams that submit all answers at once)
+  if (answers && Array.isArray(answers) && answers.length > 0) {
+    console.log('[submitExam] Saving answers:', answers.length);
+    
+    // Get all questions for this exam
+    const Question = require('../models/questionModel');
+    const questionIds = answers.map(a => a.questionId);
+    const questions = await Question.find({ _id: { $in: questionIds } });
+    
+    // Format answers for ExamSubmissionNew schema
+    submission.answers = answers.map(answer => {
+      const question = questions.find(q => q._id.toString() === answer.questionId);
+      
+      if (!question) {
+        console.warn(`[submitExam] Question not found: ${answer.questionId}`);
+        return null;
+      }
+      
+      return {
+        question: answer.questionId,
+        questionType: question.questionType,
+        selectedOption: question.questionType === 'mcq' && typeof answer.answer === 'number' ? answer.answer : undefined,
+        textAnswer: question.questionType === 'descriptive' || typeof answer.answer === 'string' ? answer.answer : undefined,
+        marksAwarded: 0,
+        isCorrect: false
+      };
+    }).filter(a => a !== null);
+    
+    console.log('[submitExam] Formatted answers:', submission.answers.length);
+  }
+
+  // 4. Set submittedAt to current timestamp
   submission.submittedAt = new Date();
 
-  // 4. Calculate timeSpent (submittedAt - startedAt) in seconds
+  // 5. Calculate timeSpent (submittedAt - startedAt) in seconds
   submission.timeSpent = Math.floor(
     (submission.submittedAt - submission.startedAt) / 1000
   );
 
-  // 5. Set isAutoSubmitted
+  // 6. Set isAutoSubmitted
   submission.isAutoSubmitted = isAutoSubmit;
 
-  // 6. Change status to 'submitted'
+  // 7. Change status to 'submitted'
   submission.status = 'submitted';
 
   await submission.save();
 
-  // 7. Trigger auto-grading if exam is online-mcq type
+  // 8. Trigger auto-grading for MCQ questions (works for all exam types with MCQ)
   let autoGradedMarks = null;
-  if (submission.exam.examType === 'online-mcq') {
-    // Call auto-grading service
-    const autoGradingService = require('../services/autoGradingService');
-    try {
-      autoGradedMarks = await autoGradingService.autoGradeMCQSubmission(submission._id);
-    } catch (error) {
-      console.error('Error auto-grading submission:', error);
-      // Don't fail the submission if auto-grading fails
-    }
+  const autoGradingService = require('../services/autoGradingService');
+  try {
+    console.log('[submitExam] Triggering auto-grading for submission:', submission._id);
+    autoGradedMarks = await autoGradingService.autoGradeMCQSubmission(submission._id);
+    console.log('[submitExam] Auto-grading result:', autoGradedMarks);
+  } catch (error) {
+    console.error('[submitExam] Error auto-grading submission:', error);
+    // Don't fail the submission if auto-grading fails
   }
 
-  // 8. Send confirmation notification to student
+  // 9. Send confirmation notification to student
   // Use existing notification service
   // await NotificationService.notifySubmissionReceived(submission, studentId);
 
@@ -263,7 +293,8 @@ const submitExam = asyncHandler(async (req, res) => {
         examId: submission.exam._id,
         examTitle: submission.exam.title,
         timeSpent: submission.timeSpent,
-        isAutoSubmitted: isAutoSubmit
+        isAutoSubmitted: isAutoSubmit,
+        answersCount: submission.answers?.length || 0
       },
       ipAddress: req.ip || req.connection.remoteAddress,
       userAgent: req.get('user-agent') || 'unknown'
@@ -272,7 +303,7 @@ const submitExam = asyncHandler(async (req, res) => {
     console.error('Error logging audit event:', auditError);
   }
 
-  // 9. Return updated submission
+  // 10. Return updated submission
   res.json({
     success: true,
     message: isAutoSubmit ? 'Exam auto-submitted' : 'Exam submitted successfully',

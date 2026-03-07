@@ -351,18 +351,17 @@ const Exams = () => {
                 const answer = answers[qId];
 
                 // Handle descriptive questions (answer is a string)
-                if (q.questionType === 'descriptive' || typeof answer === 'string') {
+                if (q.questionType === 'descriptive') {
                     return {
                         questionId: qId,
-                        answer: answer
+                        answer: answer  // String answer for descriptive
                     };
                 }
 
-                // Handle MCQ questions (answer is an index)
-                const opt = q.options[answer];
+                // Handle MCQ questions (answer is the option index)
                 return {
                     questionId: qId,
-                    answer: typeof opt === 'object' ? opt.text : opt
+                    answer: answer  // Send the index directly for MCQ
                 };
             });
 

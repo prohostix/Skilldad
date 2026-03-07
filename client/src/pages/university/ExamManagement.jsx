@@ -165,6 +165,27 @@ const ExamManagement = () => {
         }
     };
 
+    const handlePublishResults = async (examId) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            // Confirm before publishing
+            if (!window.confirm('Are you sure you want to publish results? Students will be able to view their scores.')) {
+                return;
+            }
+            
+            const { data } = await axios.post(`/api/results/exams/${examId}/publish-results`, {}, config);
+            showToast(`Results published successfully! ${data.publishedCount} students notified.`, 'success');
+            
+            // Refresh submissions to update UI
+            fetchSubmissions(examId);
+        } catch (err) {
+            console.error('Error publishing results:', err);
+            showToast(err.response?.data?.message || 'Failed to publish results', 'error');
+        }
+    };
+
     const viewSubmissionForGrading = async (submission) => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -177,12 +198,12 @@ const ExamManagement = () => {
             const fullSubmission = data.submission || data;
             setSelectedSubmission(fullSubmission);
             
-            // Initialize grading data
+            // Initialize grading data with marksAwarded from backend
             const initialGrading = {};
             (fullSubmission.answers || []).forEach(answer => {
                 const questionId = answer.question?._id || answer.questionId;
                 initialGrading[questionId] = {
-                    marks: answer.marksAwarded || 0,
+                    marks: answer.marksAwarded || 0,  // Use marksAwarded from backend
                     feedback: answer.feedback || ''
                 };
             });
@@ -196,7 +217,7 @@ const ExamManagement = () => {
             (submission.answers || []).forEach(answer => {
                 const questionId = answer.question?._id || answer.questionId;
                 initialGrading[questionId] = {
-                    marks: answer.marksAwarded || 0,
+                    marks: answer.marksAwarded || 0,  // Use marksAwarded from backend
                     feedback: answer.feedback || ''
                 };
             });
@@ -379,16 +400,45 @@ const ExamManagement = () => {
                                 <div className="flex items-center justify-between">
                                     <h5 className="text-sm font-black text-white/60 uppercase tracking-widest">Select Exam to Grade</h5>
                                     {selectedExamForGrading && (
-                                        <ModernButton
-                                            size="sm"
-                                            variant="secondary"
-                                            onClick={() => {
-                                                setSelectedExamForGrading(null);
-                                                setSubmissions([]);
-                                            }}
-                                        >
-                                            Back to Exams
-                                        </ModernButton>
+                                        <div className="flex gap-3">
+                                            {(() => {
+                                                const allGraded = submissions.every(s => s.status === 'graded');
+                                                const hasSubmissions = submissions.length > 0;
+                                                const currentExam = exams.find(e => e._id === selectedExamForGrading);
+                                                const resultsPublished = currentExam?.resultsPublished;
+                                                
+                                                return (
+                                                    <>
+                                                        {hasSubmissions && allGraded && !resultsPublished && (
+                                                            <ModernButton
+                                                                size="sm"
+                                                                onClick={() => handlePublishResults(selectedExamForGrading)}
+                                                                className="!bg-emerald-500 !text-white hover:!bg-emerald-600"
+                                                            >
+                                                                <CheckCircle size={16} className="mr-2" />
+                                                                Publish Results
+                                                            </ModernButton>
+                                                        )}
+                                                        {resultsPublished && (
+                                                            <span className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-bold uppercase tracking-wider border border-emerald-500/30">
+                                                                <CheckCircle size={14} className="inline mr-2" />
+                                                                Results Published
+                                                            </span>
+                                                        )}
+                                                        <ModernButton
+                                                            size="sm"
+                                                            variant="secondary"
+                                                            onClick={() => {
+                                                                setSelectedExamForGrading(null);
+                                                                setSubmissions([]);
+                                                            }}
+                                                        >
+                                                            Back to Exams
+                                                        </ModernButton>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
                                     )}
                                 </div>
 
@@ -424,7 +474,46 @@ const ExamManagement = () => {
                                     )
                                 ) : (
                                     // Show submissions for selected exam
-                                    submissions.length > 0 ? submissions.map((submission) => (
+                                    <>
+                                        {/* Grading Progress Indicator */}
+                                        {submissions.length > 0 && (() => {
+                                            const gradedCount = submissions.filter(s => s.status === 'graded').length;
+                                            const totalCount = submissions.length;
+                                            const allGraded = gradedCount === totalCount;
+                                            const percentage = (gradedCount / totalCount) * 100;
+                                            
+                                            return (
+                                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl mb-4">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div>
+                                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest">Grading Progress</p>
+                                                            <p className="text-2xl font-black text-white mt-1">
+                                                                {gradedCount} / {totalCount} <span className="text-sm text-white/40">Graded</span>
+                                                            </p>
+                                                        </div>
+                                                        {allGraded ? (
+                                                            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
+                                                                <CheckCircle size={20} />
+                                                                <span className="text-xs font-black uppercase tracking-wider">Ready to Publish</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-500 rounded-xl border border-amber-500/30">
+                                                                <Clock size={20} />
+                                                                <span className="text-xs font-black uppercase tracking-wider">{totalCount - gradedCount} Pending</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                                                        <div 
+                                                            className={`h-full transition-all duration-500 ${allGraded ? 'bg-emerald-500' : 'bg-primary'}`}
+                                                            style={{ width: `${percentage}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+                                        
+                                        {submissions.map((submission) => (
                                         <div key={submission._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all">
                                             <div className="flex items-center gap-5">
                                                 <div className={`p-4 rounded-2xl ${
@@ -463,12 +552,15 @@ const ExamManagement = () => {
                                                 {submission.status === 'graded' ? 'Review' : 'Grade Now'}
                                             </ModernButton>
                                         </div>
-                                    )) : (
+                                    ))}
+                                    
+                                    {submissions.length === 0 && (
                                         <div className="py-20 text-center text-white/20">
                                             <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
                                             <p className="font-bold uppercase tracking-widest text-sm">No Submissions Yet</p>
                                         </div>
-                                    )
+                                    )}
+                                    </>
                                 )}
                             </div>
                         ) : (
@@ -490,6 +582,30 @@ const ExamManagement = () => {
                                         Back to Submissions
                                     </ModernButton>
                                 </div>
+
+                                {/* Auto-grading Summary */}
+                                {(() => {
+                                    const mcqCount = selectedSubmission.answers?.filter(a => a.questionType === 'mcq').length || 0;
+                                    const descriptiveCount = selectedSubmission.answers?.filter(a => a.questionType === 'descriptive').length || 0;
+                                    const autoGradedCount = selectedSubmission.answers?.filter(a => a.questionType === 'mcq' && a.marksAwarded !== undefined).length || 0;
+                                    
+                                    return (
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Auto-Graded (MCQ)</p>
+                                                <p className="text-2xl font-black text-white">{autoGradedCount} / {mcqCount}</p>
+                                            </div>
+                                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                                                <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Manual Grading Needed</p>
+                                                <p className="text-2xl font-black text-white">{descriptiveCount}</p>
+                                            </div>
+                                            <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl">
+                                                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Total Questions</p>
+                                                <p className="text-2xl font-black text-white">{selectedSubmission.answers?.length || 0}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* Answers to grade */}
                                 <div className="space-y-4">
@@ -546,21 +662,24 @@ const ExamManagement = () => {
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
                                                             <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">
-                                                                Marks Awarded
+                                                                Marks Awarded {answer.questionType === 'mcq' && answer.marksAwarded !== undefined && (
+                                                                    <span className="text-emerald-400">(Auto-graded)</span>
+                                                                )}
                                                             </label>
                                                             <input
                                                                 type="number"
                                                                 min="0"
                                                                 max={question?.marks || 100}
-                                                                value={gradingData[questionId]?.marks || 0}
+                                                                step="0.5"
+                                                                value={gradingData[questionId]?.marks ?? answer.marksAwarded ?? 0}
                                                                 onChange={(e) => setGradingData({
                                                                     ...gradingData,
                                                                     [questionId]: {
                                                                         ...gradingData[questionId],
-                                                                        marks: e.target.value
+                                                                        marks: parseFloat(e.target.value) || 0
                                                                     }
                                                                 })}
-                                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                                 disabled={answer.questionType === 'mcq' && answer.marksAwarded !== undefined}
                                                             />
                                                         </div>

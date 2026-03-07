@@ -202,11 +202,13 @@ const getStudentResult = asyncHandler(async (req, res) => {
     throw new Error('Results have not been published yet');
   }
   
-  // University users can only view results for their exams
-  if (userRole === 'university' && result.exam.university.toString() !== req.user._id.toString()) {
+  // University users can only view results for their exams (if exam has university field)
+  if (userRole === 'university' && result.exam.university && result.exam.university.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error('Not authorized to view results for this exam');
   }
+  
+  // Admin can view all results (no additional check needed)
   
   // 3. Mark result as viewed if student viewing for first time
   if (isStudent && isOwnResult && !result.viewedByStudent) {

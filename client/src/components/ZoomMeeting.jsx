@@ -91,11 +91,17 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
           leaveOnPageUnload: true,
           sdkKey: sdkConfig.sdkKey,
           appKey: sdkConfig.sdkKey,
-          video: {
-            isResizable: true,
-            viewSizes: {
-              default: { width: '100%', height: '100%' },
-              ribbon: { width: 300, height: 700 }
+          customize: {
+            video: {
+              isResizable: true,
+              viewSizes: {
+                default: { width: '100%', height: '100%' },
+                ribbon: { width: 300, height: 700 }
+              }
+            },
+            chat: {
+              isResizable: true,
+              anchorElement: meetingSDKElement.current
             }
           }
         });

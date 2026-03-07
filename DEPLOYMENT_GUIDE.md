@@ -1,337 +1,275 @@
-# Deployment Guide - Course Interactive Content Feature
+# Deployment Guide - GitHub, Render & Vercel
 
-**Date**: March 3, 2026  
-**Feature**: Course Interactive Content (Complete)
+## Recent Changes Summary
 
----
+### Fixed Issues:
+1. ✅ QuestionBuilder "Add Question" button crash
+2. ✅ Exam submission route (404 error)
+3. ✅ University grading workflow
+4. ✅ Exam submission model mismatch
+5. ✅ MCQ auto-grading
+6. ✅ Result publishing system
+7. ✅ Student result viewing (fixed TypeError)
+8. ✅ Result model pre-save hook error
 
-## 📋 Pre-Deployment Checklist
+### Key Files Modified:
+- `server/models/resultModel.js` - Fixed pre-save hook
+- `client/src/pages/student/ExamResult.jsx` - Fixed result data extraction
+- `client/src/pages/university/ExamManagement.jsx` - Added publish results button
+- `server/controllers/resultController.js` - Result publishing logic
+- `server/controllers/examSubmissionController.js` - Auto-grading integration
 
-### Files Created/Modified
+## Step 1: Commit and Push to GitHub
 
-#### New Frontend Components
-- ✅ `client/src/components/InteractiveContentBuilder.jsx`
-- ✅ `client/src/components/InteractiveContentManager.jsx`
-- ✅ `client/src/components/InteractiveContentPlayer.jsx`
-- ✅ `client/src/components/ManualGradingQueue.jsx`
-- ✅ `client/src/components/ProgressDashboard.jsx`
-- ✅ `client/src/components/AnalyticsDashboard.jsx`
-
-#### New Frontend Pages
-- ✅ `client/src/pages/university/CreateInteractiveContent.jsx`
-- ✅ `client/src/pages/university/ManageInteractiveContent.jsx`
-- ✅ `client/src/pages/university/EditInteractiveContent.jsx`
-- ✅ `client/src/pages/university/GradingQueue.jsx`
-- ✅ `client/src/pages/student/InteractiveContentPage.jsx`
-
-#### Modified Files
-- ✅ `client/src/App.jsx` (6 new routes added)
-
-#### Documentation Files
-- ✅ 18 comprehensive documentation files
-- ✅ Task completion summaries
-- ✅ Implementation guides
-
----
-
-## 🚀 Deployment Steps
-
-### Step 1: Commit to Git
-
+### Check Git Status
 ```bash
-# Check current status
 git status
-
-# Add all new and modified files
-git add .
-
-# Commit with descriptive message
-git commit -m "feat: Complete Course Interactive Content feature
-
-- Add InteractiveContentBuilder component with all question types
-- Add InteractiveContentManager for viewing/editing/deleting content
-- Add InteractiveContentPlayer for students
-- Add ManualGradingQueue for instructors
-- Add ProgressDashboard and AnalyticsDashboard
-- Add 6 new routes for content management
-- Complete all 24 required tasks
-- 100% backend and frontend implementation
-- Production-ready deployment"
-
-# Push to GitHub
-git push origin main
 ```
 
-### Step 2: Verify GitHub Push
+### Stage All Changes
+```bash
+git add .
+```
 
-1. Go to your GitHub repository
-2. Verify all new files are present
-3. Check that the commit appears in the history
-4. Confirm all changes are reflected
+### Commit Changes
+```bash
+git commit -m "Fix: Exam results system - student viewing, auto-grading, and publishing
 
-### Step 3: Deploy Backend to Render
+- Fixed result model pre-save hook error (removed next callback)
+- Fixed student result viewing TypeError (extract result from API response)
+- Added publish results button in university panel
+- Fixed MCQ auto-grading on submission
+- Updated exam submission to use ExamSubmissionNew model
+- Added grading progress indicator
+- Fixed result authorization for students
+- Added Razorpay setup guide"
+```
 
-**Render will automatically deploy when you push to GitHub** (if auto-deploy is enabled)
+### Push to GitHub
+```bash
+# Push to main branch
+git push origin main
 
-#### Manual Deployment (if needed):
-1. Go to https://dashboard.render.com
-2. Select your backend service
-3. Click "Manual Deploy" → "Deploy latest commit"
-4. Wait for deployment to complete
+# Or if you're on a different branch
+git push origin <your-branch-name>
+```
+
+## Step 2: Deploy Backend to Render
+
+### Option A: Automatic Deployment (Recommended)
+If you have Render connected to your GitHub repo:
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Find your backend service
+3. Render will automatically detect the push and start deploying
+4. Wait for deployment to complete (usually 2-5 minutes)
 5. Check logs for any errors
 
-#### Verify Backend Deployment:
-```bash
-# Test API endpoint
-curl https://your-backend-url.onrender.com/api/health
+### Option B: Manual Deployment
+If automatic deployment is not set up:
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Click on your backend service
+3. Click "Manual Deploy" → "Deploy latest commit"
+4. Wait for deployment to complete
 
-# Test new interactive content endpoint
-curl https://your-backend-url.onrender.com/api/courses/test/modules/test/content
+### Verify Backend Deployment
+```bash
+# Test health endpoint
+curl https://your-backend-url.onrender.com/health
+
+# Should return:
+# {"status":"ok","database":"connected","timestamp":"..."}
 ```
 
-### Step 4: Deploy Frontend to Vercel
+### Important: Update Environment Variables on Render
+Make sure these are set in Render dashboard:
+1. Go to your service → Environment
+2. Add/Update:
+   ```
+   RAZORPAY_KEY_ID=your_key_here
+   RAZORPAY_KEY_SECRET=your_secret_here
+   RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_here
+   ```
+3. Click "Save Changes"
+4. Render will automatically redeploy
 
-**Vercel will automatically deploy when you push to GitHub** (if auto-deploy is enabled)
+## Step 3: Deploy Frontend to Vercel
 
-#### Manual Deployment (if needed):
+### Option A: Automatic Deployment (Recommended)
+If you have Vercel connected to your GitHub repo:
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Find your frontend project
+3. Vercel will automatically detect the push and start deploying
+4. Wait for deployment to complete (usually 1-3 minutes)
+5. Check deployment logs for any errors
+
+### Option B: Manual Deployment via CLI
 ```bash
+# Install Vercel CLI if not installed
+npm install -g vercel
+
 # Navigate to client directory
 cd client
 
-# Deploy to Vercel
+# Deploy
 vercel --prod
-
-# Or use Vercel dashboard
-# 1. Go to https://vercel.com/dashboard
-# 2. Select your project
-# 3. Click "Deployments"
-# 4. Click "Redeploy" on latest deployment
 ```
 
-#### Verify Frontend Deployment:
-1. Visit your Vercel URL
-2. Test new routes:
-   - `/university/courses/:courseId/modules/:moduleId/content/create`
-   - `/university/courses/:courseId/modules/:moduleId/content/manage`
-   - `/dashboard/courses/:courseId/content/:contentId`
-   - `/university/courses/:courseId/grading`
+### Option C: Manual Deployment via Dashboard
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click on your frontend project
+3. Go to "Deployments" tab
+4. Click "Redeploy" on the latest deployment
+5. Select "Use existing Build Cache" (optional)
+6. Click "Redeploy"
 
----
+### Verify Frontend Deployment
+1. Visit your Vercel URL: `https://your-app.vercel.app`
+2. Test the exam results flow:
+   - Login as student
+   - Go to exams
+   - Try to view results
+3. Check browser console for errors
 
-## 🔍 Post-Deployment Verification
+## Step 4: Post-Deployment Verification
 
-### Backend Verification
-
-1. **API Endpoints Test**
-   ```bash
-   # Content Management
-   GET /api/courses/:courseId/modules/:moduleId/content
-   POST /api/courses/:courseId/modules/:moduleId/content
-   PUT /api/courses/:courseId/modules/:moduleId/content/:contentId
-   DELETE /api/courses/:courseId/modules/:moduleId/content/:contentId
-   PUT /api/courses/:courseId/modules/:moduleId/content/reorder
-   
-   # Submissions
-   POST /api/submissions
-   GET /api/submissions/:submissionId
-   GET /api/submissions/course/:courseId
-   POST /api/submissions/:submissionId/retry
-   
-   # Grading
-   GET /api/grading/pending/:courseId
-   POST /api/grading/grade/:submissionId
-   POST /api/grading/feedback/:submissionId
-   GET /api/grading/stats/:courseId
-   
-   # Progress & Analytics
-   GET /api/progress/:userId/:courseId
-   GET /api/analytics/:courseId
-   ```
-
-2. **Database Verification**
-   - Check that InteractiveContent collection exists
-   - Check that Submission collection exists
-   - Verify Module model has interactiveContent field
-   - Verify Progress model has new fields
-
-### Frontend Verification
-
-1. **University Routes**
-   - ✅ Create interactive content page loads
-   - ✅ Manage content page loads
-   - ✅ Edit content page loads
-   - ✅ Grading queue page loads
-   - ✅ Analytics dashboard loads
-
-2. **Student Routes**
-   - ✅ Interactive content player loads
-   - ✅ Progress dashboard loads
-
-3. **Component Functionality**
-   - ✅ Can create new content
-   - ✅ Can edit existing content
-   - ✅ Can delete content
-   - ✅ Can reorder content
-   - ✅ Can submit answers
-   - ✅ Can grade submissions
-   - ✅ Can view progress
-   - ✅ Can view analytics
-
----
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-#### 1. Build Fails on Vercel
-**Symptom**: Build error during deployment  
-**Solution**: 
-```bash
-# Test build locally first
-cd client
-npm run build
-
-# Check for errors
-# Fix any TypeScript/ESLint errors
-# Push fixes and redeploy
-```
-
-#### 2. API Routes Not Working
-**Symptom**: 404 errors on new endpoints  
-**Solution**:
-- Verify backend routes are registered in server
-- Check that controllers are properly imported
-- Verify middleware is applied correctly
-- Check Render logs for errors
-
-#### 3. Components Not Loading
-**Symptom**: Blank pages or errors in console  
-**Solution**:
-- Check browser console for errors
-- Verify all imports are correct
-- Check that routes are properly configured in App.jsx
-- Verify lazy loading is working
-
-#### 4. Database Connection Issues
-**Symptom**: Cannot save/retrieve data  
-**Solution**:
-- Verify MongoDB connection string in Render
-- Check that database is accessible
-- Verify environment variables are set
-- Check Render logs for connection errors
-
----
-
-## 🌐 Environment Variables
-
-### Backend (Render)
-
-Ensure these are set in Render dashboard:
-
-```env
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-NODE_ENV=production
-PORT=5000
-FRONTEND_URL=https://your-vercel-url.vercel.app
-EMAIL_SERVICE=your_email_service
-EMAIL_USER=your_email
-EMAIL_PASSWORD=your_email_password
-```
-
-### Frontend (Vercel)
-
-Ensure these are set in Vercel dashboard:
-
-```env
-VITE_API_URL=https://your-backend-url.onrender.com
-VITE_SOCKET_URL=https://your-backend-url.onrender.com
-```
-
----
-
-## 📊 Deployment Status Tracking
-
-### GitHub
-- [ ] All files committed
-- [ ] Changes pushed to main branch
-- [ ] Commit appears in history
-- [ ] All files visible in repository
-
-### Render (Backend)
-- [ ] Auto-deploy triggered (or manual deploy initiated)
-- [ ] Build completed successfully
-- [ ] Service is running
-- [ ] Health check passes
-- [ ] API endpoints responding
+### Backend Checks
+- [ ] Health endpoint responds: `/health`
+- [ ] API routes work: `/api/exams`, `/api/results`
+- [ ] Database connection successful
+- [ ] Environment variables loaded correctly
 - [ ] Logs show no errors
 
-### Vercel (Frontend)
-- [ ] Auto-deploy triggered (or manual deploy initiated)
-- [ ] Build completed successfully
-- [ ] Site is live
-- [ ] All routes accessible
-- [ ] Components loading correctly
+### Frontend Checks
+- [ ] Application loads without errors
+- [ ] Student can view exam results
+- [ ] University can publish results
+- [ ] MCQ auto-grading works
 - [ ] No console errors
 
+### Test Critical Flows
+1. **Student Exam Submission**
+   - Submit an exam
+   - Check if submission is saved
+   - Verify MCQ auto-grading
+
+2. **University Grading**
+   - View submissions
+   - Grade descriptive questions
+   - Publish results
+
+3. **Student Result Viewing**
+   - View published results
+   - Check all data displays correctly
+   - No TypeError errors
+
+## Step 5: Monitor Deployments
+
+### Render Monitoring
+```bash
+# View logs
+# Go to Render Dashboard → Your Service → Logs
+
+# Or use Render CLI
+render logs -s your-service-name --tail
+```
+
+### Vercel Monitoring
+```bash
+# View logs
+# Go to Vercel Dashboard → Your Project → Deployments → Click deployment → View Function Logs
+
+# Or use Vercel CLI
+vercel logs your-deployment-url
+```
+
+## Troubleshooting
+
+### Issue: Deployment Failed on Render
+**Solution:**
+1. Check build logs in Render dashboard
+2. Verify all dependencies are in `package.json`
+3. Check Node version compatibility
+4. Ensure environment variables are set
+
+### Issue: Deployment Failed on Vercel
+**Solution:**
+1. Check build logs in Vercel dashboard
+2. Verify `vite.config.js` is correct
+3. Check for build errors in local environment first
+4. Ensure all imports are correct
+
+### Issue: API Calls Failing After Deployment
+**Solution:**
+1. Check CORS settings in backend
+2. Verify `CLIENT_URL` environment variable on Render
+3. Check API base URL in frontend
+4. Verify Render service is running
+
+### Issue: Environment Variables Not Working
+**Solution:**
+1. Verify variables are set in Render/Vercel dashboard
+2. Restart the service after adding variables
+3. Check variable names match exactly (case-sensitive)
+4. Don't use quotes around values in dashboard
+
+## Rollback Plan
+
+### If Backend Deployment Fails
+```bash
+# On Render Dashboard
+1. Go to your service
+2. Click "Rollback" button
+3. Select previous working deployment
+4. Confirm rollback
+```
+
+### If Frontend Deployment Fails
+```bash
+# On Vercel Dashboard
+1. Go to your project
+2. Go to "Deployments" tab
+3. Find previous working deployment
+4. Click "..." → "Promote to Production"
+```
+
+## Quick Commands Reference
+
+```bash
+# Git Commands
+git status                          # Check changes
+git add .                          # Stage all changes
+git commit -m "message"            # Commit changes
+git push origin main               # Push to GitHub
+
+# Render CLI (optional)
+render services list               # List services
+render logs -s service-name        # View logs
+render deploy -s service-name      # Manual deploy
+
+# Vercel CLI (optional)
+vercel                            # Deploy to preview
+vercel --prod                     # Deploy to production
+vercel logs                       # View logs
+vercel ls                         # List deployments
+```
+
+## Post-Deployment Checklist
+
+- [ ] Code pushed to GitHub successfully
+- [ ] Backend deployed to Render
+- [ ] Frontend deployed to Vercel
+- [ ] Environment variables updated
+- [ ] Health checks passing
+- [ ] Critical flows tested
+- [ ] No errors in logs
+- [ ] Team notified of deployment
+
+## Support Links
+
+- **Render Docs**: https://render.com/docs
+- **Vercel Docs**: https://vercel.com/docs
+- **GitHub Docs**: https://docs.github.com
+
 ---
 
-## 🎯 Success Criteria
-
-✅ **GitHub**: All changes committed and pushed  
-✅ **Render**: Backend deployed and API responding  
-✅ **Vercel**: Frontend deployed and accessible  
-✅ **Functionality**: All features working in production  
-✅ **Performance**: Response times acceptable  
-✅ **Security**: All endpoints protected  
-✅ **Monitoring**: No errors in logs  
-
----
-
-## 📞 Support
-
-### If Deployment Fails
-
-1. **Check Logs**
-   - Render: Dashboard → Service → Logs
-   - Vercel: Dashboard → Project → Deployments → View Logs
-   - GitHub: Actions tab (if using GitHub Actions)
-
-2. **Rollback if Needed**
-   - Render: Deploy previous successful commit
-   - Vercel: Deployments → Previous deployment → Promote to Production
-   - GitHub: Revert commit if necessary
-
-3. **Common Fixes**
-   - Clear build cache
-   - Restart services
-   - Verify environment variables
-   - Check for dependency issues
-
----
-
-## 🎉 Post-Deployment
-
-### Announce to Team
-- Feature is live in production
-- All 24 tasks completed
-- 19/20 requirements satisfied
-- Full documentation available
-
-### Monitor
-- Watch error logs for first 24 hours
-- Monitor API response times
-- Check user feedback
-- Track usage metrics
-
-### Next Steps
-- Gather user feedback
-- Plan for optional test implementation
-- Consider future enhancements
-- Schedule code review if needed
-
----
-
-*Deployment Guide Generated: March 3, 2026*  
-*Feature: Course Interactive Content*  
-*Status: Ready for Deployment* 🚀
+**Deployment completed successfully! 🚀**
