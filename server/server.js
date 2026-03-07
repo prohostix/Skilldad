@@ -9,6 +9,7 @@ const compression = require('compression');
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const connectDB = require('./config/db');
+const { connectPostgres } = require('./config/postgres');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const jobScheduler = require('./jobs');
 const http = require('http');
@@ -17,6 +18,7 @@ const socketService = require('./services/SocketService');
 const fs = require('fs');
 
 connectDB();
+connectPostgres();
 
 // Registry of upload paths
 const uploads = {
@@ -107,6 +109,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/db-status', require('./routes/dbStatusRoutes'));
 app.use('/api/courses', require('./routes/courseRoutes'));
 app.use('/api/courses', require('./routes/interactiveContentRoutes'));
 app.use('/api/submissions', require('./routes/submissionRoutes'));
