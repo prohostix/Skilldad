@@ -405,8 +405,8 @@ const UniversityDetail = () => {
                                         </tr>
                                     ))}
                                     {students.length === 0 && (
-                                        <tr>
-                                            <td colSpan="3" className="px-6 py-12 text-center text-white/20 text-xs font-black uppercase tracking-[0.3em]">
+                                        <tr key="no-students-row">
+                                            <td colSpan="4" className="px-6 py-12 text-center text-white/20 text-xs font-black uppercase tracking-[0.3em]">
                                                 No Students Found
                                             </td>
                                         </tr>

@@ -81,7 +81,7 @@ const CapabilitiesSection = () => {
     ];
 
     return (
-        <section ref={sectionRef} id="capabilities" className="py-8 md:py-16 px-6 bg-transparent relative overflow-hidden">
+        <div ref={sectionRef} id="capabilities" style={{ position: 'relative' }} className="py-8 md:py-16 px-6 bg-transparent relative overflow-hidden block">
             <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
 
                 {/* Left Side: Content */}
@@ -183,7 +183,7 @@ const CapabilitiesSection = () => {
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 

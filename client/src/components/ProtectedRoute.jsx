@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import { useNavigate, Outlet, Navigate } from 'react-router-dom';
+import React from 'react';
+import { Outlet, Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ allowedRoles }) => {
     const rawUserInfo = localStorage.getItem('userInfo');
     let userInfo = null;
     try {
         userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : null;
-    } catch (e) {
+    } catch {
         // corrupt data — force re-login
     }
 

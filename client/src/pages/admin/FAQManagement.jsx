@@ -148,7 +148,7 @@ const FAQManagement = () => {
                     </h2>
                     {chartData.length > 0 ? (
                         <div className="h-[200px] w-full">
-                            <ResponsiveContainer width="100%" height="100%" minHeight={100}>
+                            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                                 <BarChart data={chartData} layout="vertical" margin={{ left: -20, right: 20 }}>
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#A78BFA', fontSize: 10 }} width={80} />
@@ -188,7 +188,7 @@ const FAQManagement = () => {
                                     const totalVotes = faq.upvotes + faq.downvotes;
                                     const score = totalVotes > 0 ? Math.round((faq.upvotes / totalVotes) * 100) : 0;
                                     return (
-                                        <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                        <tr key={faq._id || i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                                             <td className="px-4 py-3 truncate max-w-[200px] font-medium">{faq.question}</td>
                                             <td className="px-4 py-3"><span className="text-[#E879F9] bg-[#E879F9]/10 px-2 py-1 rounded font-bold">{faq.views}</span></td>
                                             <td className="px-4 py-3 font-bold text-white">{score}%</td>
@@ -237,7 +237,7 @@ const FAQManagement = () => {
                         </thead>
                         <tbody>
                             {filteredFaqs.map((faq, i) => (
-                                <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                <tr key={faq._id || i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                                     <td className="px-6 py-4 max-w-[300px] font-medium truncate">{faq.question}</td>
                                     <td className="px-6 py-4"><span className="bg-white/10 px-2 py-1 rounded font-bold text-[10px] uppercase">{faq.category}</span></td>
                                     <td className="px-6 py-4">
@@ -267,7 +267,7 @@ const FAQManagement = () => {
                                 </tr>
                             ))}
                             {filteredFaqs.length === 0 && (
-                                <tr>
+                                <tr key="no-faqs-row">
                                     <td colSpan="5" className="px-6 py-10 text-center text-white/30 italic">No FAQs matches your search.</td>
                                 </tr>
                             )}

@@ -1,8 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const ExamSubmissionNew = require('../models/examSubmissionNewModel'); // Current model for all exam submissions
-// Note: ExamSubmission (old model) is no longer used - all submissions now use ExamSubmissionNew
-const Question = require('../models/questionModel');
-const Exam = require('../models/examModel');
+const { query } = require('../config/postgres');
 const FileUploadService = require('../services/FileUploadService');
 const auditLogService = require('../services/auditLogService');
 
@@ -10,180 +7,67 @@ const auditLogService = require('../services/auditLogService');
  * @desc    Submit answer for a question during exam (auto-save)
  * @route   POST /api/exam-submissions/:submissionId/answer
  * @access  Private (Student)
- * 
- * Requirements: 5.6, 6.1, 6.2, 16.6, 16.7, 19.1
  */
 const submitAnswer = asyncHandler(async (req, res) => {
   const { submissionId } = req.params;
   const { questionId, selectedOption, textAnswer } = req.body;
   const studentId = req.user._id;
 
-  // 1. Find submission and validate ownership
-  const submission = await ExamSubmissionNew.findById(submissionId);
+  // 1. Find submission and validate ownership in PG
+  const subRes = await query('SELECT * FROM exam_submissions_new WHERE id = $1', [submissionId]);
+  const submission = subRes.rows[0];
+
   if (!submission) {
     res.status(404);
     throw new Error('Submission not found');
   }
 
-  if (submission.student.toString() !== studentId.toString()) {
+  if (submission.student_id !== studentId.toString()) {
     res.status(403);
     throw new Error('Not authorized to modify this submission');
   }
 
-  // 2. Validate status is in-progress
+  // 2. Validate status
   if (submission.status !== 'in-progress') {
     res.status(400);
     throw new Error('Cannot modify submitted exam');
   }
 
-  // 3. Get question to validate answer
-  const question = await Question.findById(questionId);
+  // 3. Get question from PG
+  const qRes = await query('SELECT * FROM questions WHERE id = $1', [questionId]);
+  const question = qRes.rows[0];
   if (!question) {
     res.status(404);
     throw new Error('Question not found');
   }
 
-  // 4. Validate answer based on question type
-  if (question.questionType === 'mcq') {
-    if (selectedOption === undefined || selectedOption === null) {
-      res.status(400);
-      throw new Error('selectedOption required for MCQ');
-    }
-    if (selectedOption < 0 || selectedOption >= question.options.length) {
-      res.status(400);
-      throw new Error('Invalid option index');
-    }
-  } else if (question.questionType === 'descriptive') {
-    if (!textAnswer) {
-      res.status(400);
-      throw new Error('textAnswer required for descriptive question');
-    }
-    if (textAnswer.length > 10000) {
-      res.status(400);
-      throw new Error('Answer exceeds 10,000 character limit');
-    }
-  }
-
-  // 5. Update or add answer in submission.answers array
-  const existingAnswerIndex = submission.answers.findIndex(
-    a => a.question.toString() === questionId
-  );
+  // 4. Update or add answer in JSONB array
+  let answers = submission.answers || [];
+  const existingAnswerIndex = answers.findIndex(a => (a.questionId === questionId || a.question === questionId));
 
   const answerData = {
-    question: questionId,
-    questionType: question.questionType,
-    selectedOption: question.questionType === 'mcq' ? selectedOption : undefined,
-    textAnswer: question.questionType === 'descriptive' ? textAnswer : undefined
+    questionId: questionId,
+    questionType: question.question_type,
+    selectedOption: question.question_type === 'mcq' ? selectedOption : undefined,
+    textAnswer: question.question_type === 'descriptive' ? textAnswer : undefined
   };
 
-  // Track answer changes for exam integrity
-  const examIntegrityService = require('../services/examIntegrityService');
-  
   if (existingAnswerIndex >= 0) {
-    // Log answer change
-    await examIntegrityService.logAnswerChange(
-      submissionId,
-      questionId,
-      submission.answers[existingAnswerIndex],
-      answerData,
-      studentId,
-      req
-    );
-    
-    // Track change in submission
-    examIntegrityService.trackAnswerChange(submission, questionId, answerData);
-    
-    submission.answers[existingAnswerIndex] = answerData;
+    answers[existingAnswerIndex] = answerData;
   } else {
-    submission.answers.push(answerData);
+    answers.push(answerData);
   }
 
-  // 6. Save immediately (auto-save)
-  await submission.save();
+  // 5. Update PG
+  await query(
+    'UPDATE exam_submissions_new SET answers = $1, updated_at = NOW() WHERE id = $2',
+    [JSON.stringify(answers), submissionId]
+  );
 
-  // 7. Return updated submission
   res.json({
     success: true,
     message: 'Answer saved',
-    submission
-  });
-});
-
-/**
- * @desc    Upload answer sheet for PDF-based exam
- * @route   POST /api/exam-submissions/:submissionId/answer-sheet
- * @access  Private (Student)
- * 
- * Requirements: 6.3, 6.4, 6.5, 6.6, 19.5
- */
-const uploadAnswerSheet = asyncHandler(async (req, res) => {
-  const { submissionId } = req.params;
-  const studentId = req.user._id;
-
-  // 1. Validate file exists
-  if (!req.file) {
-    res.status(400);
-    throw new Error('No file uploaded');
-  }
-
-  // 2. Find submission and validate ownership
-  const submission = await ExamSubmissionNew.findById(submissionId);
-  if (!submission) {
-    res.status(404);
-    throw new Error('Submission not found');
-  }
-
-  if (submission.student.toString() !== studentId.toString()) {
-    res.status(403);
-    throw new Error('Not authorized to modify this submission');
-  }
-
-  // 3. Validate status is in-progress
-  if (submission.status !== 'in-progress') {
-    res.status(400);
-    throw new Error('Cannot modify submitted exam');
-  }
-
-  // 4. Upload file using FileUploadService
-  const uploadResult = await FileUploadService.uploadAnswerSheet(
-    req.file,
-    submission.exam.toString(),
-    studentId.toString()
-  );
-
-  // 5. Delete old answer sheet if exists
-  if (submission.answerSheetUrl) {
-    await FileUploadService.deleteFile(submission.answerSheetUrl);
-  }
-
-  // 6. Update submission with new URL
-  submission.answerSheetUrl = uploadResult.url;
-  await submission.save();
-
-  // Log audit event for answer sheet upload
-  try {
-    await auditLogService.logAuditEvent({
-      userId: studentId,
-      action: 'answer_sheet_uploaded',
-      resource: 'answer_sheet',
-      resourceId: submission._id,
-      details: {
-        examId: submission.exam,
-        filename: uploadResult.filename || req.file.originalname,
-        fileSize: uploadResult.size || req.file.size
-      },
-      ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('user-agent') || 'unknown'
-    });
-  } catch (auditError) {
-    console.error('Error logging audit event:', auditError);
-  }
-
-  // 7. Return file URL
-  res.json({
-    success: true,
-    message: 'Answer sheet uploaded',
-    answerSheetUrl: uploadResult.url
+    submission: { ...submission, answers }
   });
 });
 
@@ -191,8 +75,6 @@ const uploadAnswerSheet = asyncHandler(async (req, res) => {
  * @desc    Submit exam (finalize submission)
  * @route   POST /api/exam-submissions/:submissionId/submit
  * @access  Private (Student)
- * 
- * Requirements: 6.7, 6.8, 6.9, 15.5, 15.7
  */
 const submitExam = asyncHandler(async (req, res) => {
   const { submissionId } = req.params;
@@ -200,328 +82,132 @@ const submitExam = asyncHandler(async (req, res) => {
   const studentId = req.user._id;
 
   // 1. Find submission and validate ownership
-  const submission = await ExamSubmissionNew.findById(submissionId)
-    .populate('exam');
-  
+  const subRes = await query(`
+    SELECT s.*, e.title as exam_title, e.total_marks, e.exam_type, e.passing_score
+    FROM exam_submissions_new s 
+    JOIN exams e ON s.exam_id = e.id 
+    WHERE s.id = $1
+  `, [submissionId]);
+
+  const submission = subRes.rows[0];
+
   if (!submission) {
     res.status(404);
     throw new Error('Submission not found');
   }
 
-  if (submission.student.toString() !== studentId.toString()) {
+  if (submission.student_id !== studentId.toString()) {
     res.status(403);
     throw new Error('Not authorized to submit this exam');
   }
 
-  // 2. Validate status is in-progress
   if (submission.status !== 'in-progress') {
     res.status(400);
     throw new Error('Exam already submitted');
   }
 
-  // 3. Save answers if provided (for exams that submit all answers at once)
-  if (answers && Array.isArray(answers) && answers.length > 0) {
-    console.log('[submitExam] Saving answers:', answers.length);
-    
-    // Get all questions for this exam
-    const Question = require('../models/questionModel');
-    const questionIds = answers.map(a => a.questionId);
-    const questions = await Question.find({ _id: { $in: questionIds } });
-    
-    // Format answers for ExamSubmissionNew schema
-    submission.answers = answers.map(answer => {
-      const question = questions.find(q => q._id.toString() === answer.questionId);
-      
-      if (!question) {
-        console.warn(`[submitExam] Question not found: ${answer.questionId}`);
-        return null;
-      }
-      
+  // 2. Fetch all questions for auto-grading
+  const qRes = await query('SELECT * FROM questions WHERE exam_id = $1', [submission.exam_id]);
+  const questions = qRes.rows;
+  const questionsMap = {};
+  questions.forEach(q => {
+    questionsMap[q.id] = q;
+  });
+
+  // 3. Process final answers and auto-grade MCQs
+  let finalAnswers = answers || submission.answers || [];
+  let totalObtainedMarks = 0;
+  let hasDescriptive = false;
+
+  finalAnswers = finalAnswers.map(ans => {
+    const qId = ans.questionId || (ans.question && (ans.question._id || ans.question));
+    const question = questionsMap[qId];
+
+    if (!question) return ans;
+
+    if (question.question_type === 'mcq') {
+      const options = question.options || [];
+      const selectedIdx = ans.selectedOption !== undefined ? ans.selectedOption : ans.answer;
+      const isCorrect = options[selectedIdx]?.isCorrect === true;
+
+      const marksAwarded = isCorrect ? (Number(question.marks) || 1) : 0;
+      totalObtainedMarks += marksAwarded;
+
       return {
-        question: answer.questionId,
-        questionType: question.questionType,
-        selectedOption: question.questionType === 'mcq' && typeof answer.answer === 'number' ? answer.answer : undefined,
-        textAnswer: question.questionType === 'descriptive' || typeof answer.answer === 'string' ? answer.answer : undefined,
-        marksAwarded: 0,
-        isCorrect: false
+        ...ans,
+        questionType: 'mcq',
+        selectedOption: selectedIdx !== undefined ? Number(selectedIdx) : null,
+        marksAwarded,
+        isCorrect,
+        gradedAt: new Date()
       };
-    }).filter(a => a !== null);
-    
-    console.log('[submitExam] Formatted answers:', submission.answers.length);
-  }
+    } else {
+      hasDescriptive = true;
+      return {
+        ...ans,
+        questionType: 'descriptive',
+        textAnswer: ans.textAnswer !== undefined ? ans.textAnswer : ans.answer
+      };
+    }
+  });
 
-  // 4. Set submittedAt to current timestamp
-  submission.submittedAt = new Date();
+  // Calculate percentage and pass status
+  const totalExamMarks = Number(submission.total_marks) || 100;
+  const passingScore = Number(submission.passing_score) || 40;
+  const percentage = (totalObtainedMarks / totalExamMarks) * 100;
+  const passed = percentage >= passingScore;
 
-  // 5. Calculate timeSpent (submittedAt - startedAt) in seconds
-  submission.timeSpent = Math.floor(
-    (submission.submittedAt - submission.startedAt) / 1000
-  );
+  // 4. Update status and timestamps
+  const submittedAt = new Date();
+  const timeSpent = Math.floor((submittedAt - new Date(submission.started_at)) / 1000);
 
-  // 6. Set isAutoSubmitted
-  submission.isAutoSubmitted = isAutoSubmit;
+  // If only MCQs, we can mark as 'graded' immediately
+  const finalStatus = hasDescriptive ? 'submitted' : 'graded';
 
-  // 7. Change status to 'submitted'
-  submission.status = 'submitted';
+  await query(`
+    UPDATE exam_submissions_new 
+    SET status = $1, 
+        submitted_at = $2, 
+        time_spent = $3, 
+        is_auto_submitted = $4, 
+        answers = $5,
+        obtained_marks = $6,
+        percentage = $7,
+        passed = $8,
+        updated_at = NOW()
+    WHERE id = $9
+  `, [finalStatus, submittedAt, timeSpent, isAutoSubmit, JSON.stringify(finalAnswers), totalObtainedMarks, percentage, passed, submissionId]);
 
-  await submission.save();
+  // Log audit event
+  await auditLogService.logAuditEvent({
+    userId: studentId,
+    action: isAutoSubmit ? 'exam_submitted_auto' : 'exam_submitted_manual',
+    resource: 'submission',
+    resourceId: submissionId,
+    details: {
+      examId: submission.exam_id,
+      examTitle: submission.exam_title,
+      timeSpent: timeSpent,
+      isAutoSubmitted: isAutoSubmit,
+      obtainedMarks: totalObtainedMarks,
+      percentage: percentage,
+      status: finalStatus
+    },
+    ipAddress: req.ip || req.connection.remoteAddress,
+    userAgent: req.get('user-agent') || 'unknown'
+  });
 
-  // 8. Trigger auto-grading for MCQ questions (works for all exam types with MCQ)
-  let autoGradedMarks = null;
-  const autoGradingService = require('../services/autoGradingService');
-  try {
-    console.log('[submitExam] Triggering auto-grading for submission:', submission._id);
-    autoGradedMarks = await autoGradingService.autoGradeMCQSubmission(submission._id);
-    console.log('[submitExam] Auto-grading result:', autoGradedMarks);
-  } catch (error) {
-    console.error('[submitExam] Error auto-grading submission:', error);
-    // Don't fail the submission if auto-grading fails
-  }
-
-  // 9. Send confirmation notification to student
-  // Use existing notification service
-  // await NotificationService.notifySubmissionReceived(submission, studentId);
-
-  // Log audit event for exam submission
-  try {
-    await auditLogService.logAuditEvent({
-      userId: studentId,
-      action: isAutoSubmit ? 'exam_submitted_auto' : 'exam_submitted_manual',
-      resource: 'submission',
-      resourceId: submission._id,
-      details: {
-        examId: submission.exam._id,
-        examTitle: submission.exam.title,
-        timeSpent: submission.timeSpent,
-        isAutoSubmitted: isAutoSubmit,
-        answersCount: submission.answers?.length || 0
-      },
-      ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('user-agent') || 'unknown'
-    });
-  } catch (auditError) {
-    console.error('Error logging audit event:', auditError);
-  }
-
-  // 10. Return updated submission
   res.json({
     success: true,
     message: isAutoSubmit ? 'Exam auto-submitted' : 'Exam submitted successfully',
-    submission,
-    autoGradedMarks
-  });
-});
-
-module.exports = {
-  submitAnswer,
-  uploadAnswerSheet,
-  submitExam
-};
-
-/**
- * @desc    Get all submissions for an exam (for grading)
- * @route   GET /api/submissions/exam/:examId
- * @access  Private (University/Admin)
- * 
- * Requirements: 9.1, 18.1, 18.3
- */
-const getSubmissionsForExam = asyncHandler(async (req, res) => {
-  const { examId } = req.params;
-  const { status, sortBy = 'submittedAt', page = 1, limit = 20 } = req.query;
-  
-  // 1. Verify exam exists and check authorization
-  const exam = await Exam.findById(examId);
-  if (!exam) {
-    res.status(404);
-    throw new Error('Exam not found');
-  }
-  
-  const userRole = req.user.role?.toLowerCase();
-  if (userRole !== 'admin' && exam.university && exam.university.toString() !== req.user._id.toString()) {
-    res.status(403);
-    throw new Error('Not authorized to view submissions for this exam');
-  }
-  
-  // 2. Build query filter - Use ExamSubmissionNew model
-  const filter = { exam: examId };
-  
-  // Filter by status if provided
-  if (status) {
-    if (status === 'submitted' || status === 'graded') {
-      filter.status = status;
-    } else {
-      filter.status = { $in: ['submitted', 'graded'] };
+    submission: {
+      ...submission,
+      status: finalStatus,
+      submitted_at: submittedAt,
+      time_spent: timeSpent,
+      obtained_marks: totalObtainedMarks,
+      percentage: percentage
     }
-  } else {
-    // Default: show submitted and graded submissions
-    filter.status = { $in: ['submitted', 'graded'] };
-  }
-  
-  // 3. Calculate pagination
-  const skip = (parseInt(page) - 1) * parseInt(limit);
-  
-  // 4. Fetch submissions with pagination - Use ExamSubmissionNew model
-  const submissions = await ExamSubmissionNew.find(filter)
-    .populate('student', 'name email')
-    .select('student exam status submittedAt obtainedMarks percentage isAutoSubmitted attemptNumber gradedAt gradedBy')
-    .sort({ submittedAt: -1 })
-    .skip(skip)
-    .limit(parseInt(limit))
-    .lean();
-  
-  // 5. Get total count for pagination metadata
-  const totalCount = await ExamSubmissionNew.countDocuments(filter);
-  
-  // 6. Return submissions with metadata - ExamSubmissionNew already has correct field names
-  const formattedSubmissions = submissions.map(sub => ({
-    _id: sub._id,
-    student: sub.student,
-    exam: sub.exam,
-    status: sub.status,
-    submittedAt: sub.submittedAt,
-    obtainedMarks: sub.obtainedMarks,
-    totalMarks: exam.totalPoints || exam.totalMarks,
-    percentage: sub.percentage,
-    isAutoSubmitted: sub.isAutoSubmitted || false,
-    gradedAt: sub.gradedAt
-  }));
-  
-  res.json({
-    success: true,
-    submissions: formattedSubmissions,
-    pagination: {
-      currentPage: parseInt(page),
-      totalPages: Math.ceil(totalCount / parseInt(limit)),
-      totalCount,
-      limit: parseInt(limit)
-    }
-  });
-});
-
-/**
- * @desc    Grade a submission manually
- * @route   POST /api/submissions/:submissionId/grade
- * @access  Private (University/Admin)
- * 
- * Requirements: 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.10
- */
-const gradeSubmission = asyncHandler(async (req, res) => {
-  const { submissionId } = req.params;
-  const { answers, overallFeedback } = req.body;
-  
-  // 1. Find submission and populate exam
-  const submission = await ExamSubmissionNew.findById(submissionId)
-    .populate('exam')
-    .populate('answers.question');
-  
-  if (!submission) {
-    res.status(404);
-    throw new Error('Submission not found');
-  }
-  
-  // 2. Check authorization
-  const userRole = req.user.role?.toLowerCase();
-  if (userRole !== 'admin' && submission.exam.university.toString() !== req.user._id.toString()) {
-    res.status(403);
-    throw new Error('Not authorized to grade this submission');
-  }
-  
-  // 3. Validate submission status
-  if (submission.status !== 'submitted' && submission.status !== 'graded') {
-    res.status(400);
-    throw new Error('Can only grade submitted submissions');
-  }
-  
-  // 4. Validate all questions have marksAwarded
-  if (!answers || !Array.isArray(answers)) {
-    res.status(400);
-    throw new Error('Answers array is required');
-  }
-  
-  // Create a map of questionId -> grading data
-  const gradingMap = new Map();
-  answers.forEach(answer => {
-    if (answer.questionId && answer.marksAwarded !== undefined) {
-      gradingMap.set(answer.questionId, {
-        marksAwarded: answer.marksAwarded,
-        feedback: answer.feedback || ''
-      });
-    }
-  });
-  
-  // 5. Update each answer with marksAwarded and feedback
-  let obtainedMarks = 0;
-  
-  for (let i = 0; i < submission.answers.length; i++) {
-    const answer = submission.answers[i];
-    const questionId = answer.question._id.toString();
-    const gradingData = gradingMap.get(questionId);
-    
-    if (gradingData) {
-      // Validate marksAwarded is within valid range
-      const maxMarks = answer.question.marks;
-      if (gradingData.marksAwarded < 0 || gradingData.marksAwarded > maxMarks) {
-        res.status(400);
-        throw new Error(`Marks awarded for question ${questionId} must be between 0 and ${maxMarks}`);
-      }
-      
-      answer.marksAwarded = gradingData.marksAwarded;
-      answer.feedback = gradingData.feedback;
-      obtainedMarks += gradingData.marksAwarded;
-    } else if (answer.questionType === 'descriptive') {
-      // Descriptive questions must have marks awarded
-      res.status(400);
-      throw new Error(`Missing marks for question ${questionId}`);
-    } else if (answer.questionType === 'mcq' && answer.marksAwarded !== undefined) {
-      // MCQ already graded, include in total
-      obtainedMarks += answer.marksAwarded;
-    }
-  }
-  
-  // 6. Calculate total obtainedMarks and percentage
-  submission.obtainedMarks = obtainedMarks;
-  submission.totalMarks = submission.exam.totalMarks;
-  submission.percentage = (obtainedMarks / submission.totalMarks) * 100;
-  
-  // 7. Set status to 'graded'
-  submission.status = 'graded';
-  
-  // 8. Record gradedBy and gradedAt
-  submission.gradedBy = req.user._id;
-  submission.gradedAt = new Date();
-  
-  await submission.save();
-  
-  // 9. Generate result for this exam (will create/update result for all graded submissions)
-  const resultService = require('../services/resultService');
-  await resultService.generateExamResults(submission.exam._id);
-
-  // Log audit event for manual grading
-  try {
-    await auditLogService.logAuditEvent({
-      userId: req.user._id,
-      action: 'submission_graded',
-      resource: 'submission',
-      resourceId: submission._id,
-      details: {
-        examId: submission.exam._id,
-        studentId: submission.student,
-        obtainedMarks: submission.obtainedMarks,
-        totalMarks: submission.totalMarks,
-        percentage: submission.percentage
-      },
-      ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('user-agent') || 'unknown'
-    });
-  } catch (auditError) {
-    console.error('Error logging audit event:', auditError);
-  }
-  
-  // 10. Return graded submission
-  res.json({
-    success: true,
-    message: 'Submission graded successfully',
-    submission
   });
 });
 
@@ -529,30 +215,29 @@ const gradeSubmission = asyncHandler(async (req, res) => {
  * @desc    Get my submission for an exam
  * @route   GET /api/exam-submissions/exam/:examId/my-submission
  * @access  Private (Student)
- * 
- * Requirements: 5.7
  */
 const getMySubmission = asyncHandler(async (req, res) => {
   const { examId } = req.params;
-  const studentId = req.user._id;
-  
-  // 1. Fetch submission for requesting student with selective population
-  const submission = await ExamSubmissionNew.findOne({
-    exam: examId,
-    student: studentId
-  })
-    .populate('exam', 'title examType totalMarks duration scheduledEndTime') // Only populate needed exam fields
-    .populate({
-      path: 'answers.question',
-      select: 'questionText questionType options marks negativeMarks order' // Only select needed question fields
-    });
-  
+  const studentId = req.user.id || req.user._id;
+
+  const subRes = await query(`
+    SELECT s.id as _id, s.exam_id, s.student_id, s.status, 
+           s.started_at as "startedAt", s.submitted_at as "submittedAt", 
+           s.time_spent as "timeSpent", s.is_auto_submitted as "isAutoSubmitted",
+           s.answers, s.total_marks as "totalMarks", s.obtained_marks as "obtainedMarks",
+           e.title as exam_title, e.exam_type, e.duration 
+    FROM exam_submissions_new s
+    JOIN exams e ON s.exam_id = e.id
+    WHERE s.exam_id = $1 AND s.student_id = $2
+  `, [examId, studentId.toString()]);
+
+  const submission = subRes.rows[0];
+
   if (!submission) {
     res.status(404);
     throw new Error('Submission not found');
   }
-  
-  // 2. Return submission with answers
+
   res.json({
     success: true,
     submission
@@ -566,93 +251,199 @@ const getMySubmission = asyncHandler(async (req, res) => {
  */
 const getSubmissionForGrading = asyncHandler(async (req, res) => {
   const { submissionId } = req.params;
-  
-  console.log('[getSubmissionForGrading] Fetching submission:', submissionId);
-  
-  // 1. Find submission using ExamSubmissionNew model and populate all necessary fields
-  const submission = await ExamSubmissionNew.findById(submissionId)
-    .populate('exam', 'title examType totalMarks duration university questions')
-    .populate('student', 'name email')
-    .populate('answers.question');
-  
+
+  // 1. Fetch submission with exam and student basic info
+  const subRes = await query(`
+    SELECT s.*, e.title as exam_title, e.total_marks, e.passing_score, u.name as student_name, u.email as student_email
+    FROM exam_submissions_new s
+    JOIN exams e ON s.exam_id = e.id
+    JOIN users u ON s.student_id = u.id
+    WHERE s.id = $1
+  `, [submissionId]);
+
+  const submission = subRes.rows[0];
+
   if (!submission) {
     res.status(404);
     throw new Error('Submission not found');
   }
-  
-  console.log('[getSubmissionForGrading] Found submission:', {
-    id: submission._id,
-    student: submission.student?.name,
-    answersCount: submission.answers?.length || 0,
-    examQuestionsCount: submission.exam?.questions?.length || 0
+
+  // 2. Fetch all questions for this exam to populate answers
+  const qRes = await query(`
+    SELECT id as _id, question_text as "questionText", question_type as "questionType", 
+           options, marks, negative_marks as "negativeMarks", "order"
+    FROM questions 
+    WHERE exam_id = $1
+    ORDER BY "order" ASC
+  `, [submission.exam_id]);
+
+  const questions = qRes.rows;
+  const questionsMap = {};
+  questions.forEach(q => {
+    questionsMap[q._id] = q;
   });
-  
-  // 2. Check authorization
-  const userRole = req.user.role?.toLowerCase();
-  if (userRole !== 'admin' && submission.exam.university && submission.exam.university.toString() !== req.user._id.toString()) {
-    res.status(403);
-    throw new Error('Not authorized to view this submission');
-  }
-  
-  // 3. Format answers - ExamSubmissionNew already has correct structure
-  const formattedAnswers = (submission.answers || []).map((answer, index) => {
-    const question = answer.question;
-    
-    console.log(`[getSubmissionForGrading] Processing answer ${index + 1}:`, {
-      questionId: question?._id,
-      questionType: answer.questionType,
-      selectedOption: answer.selectedOption,
-      textAnswer: answer.textAnswer,
-      textAnswerLength: answer.textAnswer?.length || 0,
-      rawAnswer: JSON.stringify(answer)
-    });
-    
+
+  // 3. Populate questions into answers
+  let answers = submission.answers || [];
+  answers = answers.map(ans => {
+    const qId = ans.questionId || (ans.question && (ans.question._id || ans.question));
     return {
-      question: question ? {
-        _id: question._id,
-        questionText: question.questionText,
-        questionType: question.questionType,
-        options: question.options || [],
-        marks: question.marks || 0
-      } : null,
-      questionId: question?._id,
-      questionType: answer.questionType,
-      selectedOption: answer.selectedOption,
-      textAnswer: answer.textAnswer,
-      marksAwarded: answer.marksAwarded || 0,
-      feedback: answer.feedback || ''
+      ...ans,
+      question: questionsMap[qId] || null
     };
   });
-  
-  console.log('[getSubmissionForGrading] Formatted answers:', formattedAnswers.length);
-  
-  // 4. Return formatted submission
+
   res.json({
     success: true,
     submission: {
-      _id: submission._id,
-      exam: {
-        _id: submission.exam._id,
-        title: submission.exam.title,
-        totalMarks: submission.exam.totalMarks
-      },
-      student: submission.student,
-      answers: formattedAnswers,
-      status: submission.status,
-      submittedAt: submission.submittedAt,
-      score: submission.obtainedMarks,
-      percentage: submission.percentage,
-      passed: submission.percentage >= (submission.exam.passingScore || 40)
+      ...submission,
+      answers
     }
   });
 });
 
+/**
+ * @desc    Get all submissions for an exam (for grading)
+ * @route   GET /api/submissions/exam/:examId
+ * @access  Private (University/Admin)
+ */
+const getSubmissionsForExam = asyncHandler(async (req, res) => {
+  const { examId } = req.params;
+
+  // Verify authorization
+  const userId = req.user.id || req.user._id;
+
+  const examRes = await query('SELECT university_id, created_by_id FROM exams WHERE id = $1', [examId]);
+  const exam = examRes.rows[0];
+
+  if (!exam) {
+    res.status(404);
+    throw new Error('Exam not found');
+  }
+
+  if (exam.university_id?.toString() !== userId.toString() &&
+    exam.created_by_id?.toString() !== userId.toString() &&
+    req.user.role?.toLowerCase() !== 'admin') {
+    res.status(403);
+    throw new Error('Not authorized to view submissions for this exam');
+  }
+
+  // Fetch submissions with student details
+  const subRes = await query(`
+        SELECT 
+            s.*,
+            s.id as _id,
+            s.student_id,
+            s.status,
+            s.submitted_at as "submittedAt",
+            s.started_at as "startedAt",
+            s.total_marks as "totalMarks",
+            s.obtained_marks as "obtainedMarks",
+            u.name as "studentName", 
+            u.email as "studentEmail"
+        FROM exam_submissions_new s
+        JOIN users u ON s.student_id = u.id
+        WHERE s.exam_id = $1
+        ORDER BY s.submitted_at DESC NULLS LAST
+    `, [examId]);
+
+  const submissions = subRes.rows.map(sub => ({
+    ...sub,
+    student: {
+      _id: sub.student_id,
+      name: sub.studentName,
+      email: sub.studentEmail
+    }
+  }));
+
+  res.json({
+    success: true,
+    count: submissions.length,
+    submissions
+  });
+});
+
+/**
+ * @desc    Grade a submission manually
+ * @route   POST /api/submissions/:submissionId/grade
+ * @access  Private (University/Admin)
+ */
+const gradeSubmission = asyncHandler(async (req, res) => {
+  const { submissionId } = req.params;
+  const { answers } = req.body; // Array of { questionId, marksAwarded, feedback }
+
+  // 1. Find submission and exam info
+  const subRes = await query(`
+    SELECT s.*, e.total_marks as exam_total_marks
+    FROM exam_submissions_new s
+    JOIN exams e ON s.exam_id = e.id
+    WHERE s.id = $1
+  `, [submissionId]);
+  const submission = subRes.rows[0];
+
+  if (!submission) {
+    res.status(404);
+    throw new Error('Submission not found');
+  }
+
+  // 2. Map existing answers to update them
+  let currentAnswers = submission.answers || [];
+  const gradingMap = {};
+  if (Array.isArray(answers)) {
+    answers.forEach(a => {
+      gradingMap[a.questionId] = a;
+    });
+  }
+
+  currentAnswers = currentAnswers.map(ans => {
+    const qId = ans.questionId || (ans.question && (ans.question._id || ans.question)) || ans.question;
+    const gradeInfo = gradingMap[qId];
+    if (gradeInfo) {
+      return {
+        ...ans,
+        marksAwarded: Number(gradeInfo.marksAwarded),
+        feedback: gradeInfo.feedback
+      };
+    }
+    return ans;
+  });
+
+  // 3. Calculate total obtained marks
+  const totalObtainedMarks = currentAnswers.reduce((sum, ans) => sum + (Number(ans.marksAwarded) || 0), 0);
+  const totalExamMarks = submission.exam_total_marks || submission.total_marks || 100;
+  const passingScore = Number(submission.passing_score) || 40;
+  const percentage = (totalObtainedMarks / totalExamMarks) * 100;
+  const passed = percentage >= passingScore;
+
+  // 4. Update in PG
+  await query(`
+    UPDATE exam_submissions_new 
+    SET answers = $1, 
+        obtained_marks = $2, 
+        percentage = $3,
+        passed = $4,
+        status = 'graded',
+        updated_at = NOW()
+    WHERE id = $5
+  `, [JSON.stringify(currentAnswers), totalObtainedMarks, percentage, passed, submissionId]);
+
+  res.json({
+    success: true,
+    message: 'Submission graded successfully',
+    obtainedMarks: totalObtainedMarks,
+    percentage: percentage,
+    passed
+  });
+});
+
 module.exports = {
+
   submitAnswer,
-  uploadAnswerSheet,
   submitExam,
-  getSubmissionsForExam,
-  gradeSubmission,
   getMySubmission,
-  getSubmissionForGrading
+  getSubmissionForGrading,
+  // Placeholders for other methods if needed
+  uploadAnswerSheet: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
+  getSubmissionsForExam,
+  gradeSubmission
 };

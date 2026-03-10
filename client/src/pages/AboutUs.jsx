@@ -12,7 +12,7 @@ const AboutUs = () => {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="pt-24 md:pt-40 pb-16 md:pb-24 px-6">
+            <section className="pt-24 md:pt-40 pb-0 px-6">
                 <div className="max-w-7xl mx-auto text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
@@ -23,7 +23,7 @@ const AboutUs = () => {
                             <span className="text-gray-400">Our</span>{' '}
                             <span className="text-white">Story</span>
                         </h1>
-                        <p className="text-lg md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto font-inter px-4 leading-relaxed">
+                        <p className="text-lg md:text-2xl text-gray-300 mb-6 max-w-4xl mx-auto font-inter px-4 leading-relaxed">
                             We are on a mission to revolutionize the educational landscape by bridging the gap between talent, institutions, and industry leaders through high-fidelity digital learning experiences.
                         </p>
                     </motion.div>
@@ -31,7 +31,7 @@ const AboutUs = () => {
             </section>
 
             {/* Core Values Section */}
-            <section className="py-20 px-6 relative overflow-hidden">
+            <section className="py-12 px-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full -z-10"></div>
                 <div className="max-w-7xl mx-auto">
                     <div className="grid md:grid-cols-3 gap-8 mb-20">

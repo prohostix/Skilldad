@@ -23,8 +23,6 @@ router.get('/course/:courseId', getUserSubmissions);
 // Retry a submission (create new attempt)
 router.post('/:submissionId/retry', retrySubmission);
 
-module.exports = router;
-
 // Import exam submission controller functions
 const {
     getSubmissionsForExam,
@@ -33,8 +31,10 @@ const {
 
 // Get all submissions for an exam (for grading)
 // GET /api/submissions/exam/:examId
-router.get('/exam/:examId', protect, authorize('university', 'admin'), getSubmissionsForExam);
+router.get('/exam/:examId', authorize('university', 'admin'), getSubmissionsForExam);
 
 // Grade a submission manually
 // POST /api/submissions/:submissionId/grade
-router.post('/:submissionId/grade', protect, authorize('university', 'admin'), gradeSubmission);
+router.post('/:submissionId/grade', authorize('university', 'admin'), gradeSubmission);
+
+module.exports = router;

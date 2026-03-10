@@ -269,14 +269,18 @@ const Exams = () => {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
             // Register attempt on backend
-            const { data: submission } = await axios.post(`/api/exams/${exam._id}/start`, {}, config);
+            const { data: response } = await axios.post(`/api/exams/${exam._id}/start`, {}, config);
 
-            console.log('[startExam] Submission response:', submission);
-            console.log('[startExam] Submission ID:', submission?.data?.submission?._id || submission?._id);
+            console.log('[startExam] Submission response:', response);
 
-            const submissionId = submission?.data?.submission?._id || submission?._id;
+            const submissionData = response.submission || response.data?.submission;
+            const submissionId = submissionData?._id || submissionData?.id;
 
-            setActiveExam({ ...exam, currentSubmissionId: submissionId });
+            console.log('[startExam] Submission ID:', submissionId);
+
+            const finalSubmissionId = submissionId;
+
+            setActiveExam({ ...exam, currentSubmissionId: finalSubmissionId });
             setCurrentQuestion(0);
             setAnswers({});
             setTimeRemaining(exam.duration * 60);
@@ -365,11 +369,11 @@ const Exams = () => {
                 };
             });
 
-            console.log('[handleSubmitExam] Submitting to:', `/api/exams/exam-submissions/${activeExam.currentSubmissionId}/submit`);
+            console.log('[handleSubmitExam] Submitting to:', `/api/exams/${activeExam.currentSubmissionId}/submit`);
             console.log('[handleSubmitExam] Answers:', formattedAnswers);
 
             const { data } = await axios.post(
-                `/api/exams/exam-submissions/${activeExam.currentSubmissionId}/submit`,
+                `/api/exams/${activeExam.currentSubmissionId}/submit`,
                 { answers: formattedAnswers },
                 config
             );
@@ -815,7 +819,7 @@ const Exams = () => {
                                 {status === 'completed' && exam.submission && (
                                     <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 48 }}>
                                         <p style={{ fontSize: 16, fontWeight: 800, color: exam.submission.passed ? '#22c55e' : '#ef4444', margin: 0, lineHeight: 1 }}>
-                                            {exam.submission.percentage?.toFixed(0)}%
+                                            {(Number(exam.submission.percentage) || 0).toFixed(0)}%
                                         </p>
                                         <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', marginTop: 2 }}>
                                             {exam.submission.passed ? 'Passed' : 'Failed'}

@@ -22,22 +22,6 @@
   z-index: 9999 !important;
 }
 
-/* Ensure the SDK has enough space to render its internal UI */
-.zoom-meeting-container {
-  min-height: 500px;
-}
-
-/* Force toolbar icons display if Zoom tries to hide them on smaller heights */
-.zoom-meeting-container .meeting-app {
-  min-height: inherit;
-}
-
-/* Ensure the chat panel inside Zoom has proper background and contrast */
-.zoom-meeting-container .chat-panel {
-  background: rgba(15, 12, 28, 0.95) !important;
-  color: white !important;
-}
-
 /* Make video canvas fill available space */
 .zoom-meeting-container canvas {
   max-width: 100%;

@@ -39,37 +39,34 @@ router.get('/directors', async (req, res) => {
 // @access  Public
 router.get('/universities', async (req, res) => {
     try {
-        const Course = require('../models/courseModel');
-        const universities = await User.find({
-            role: 'university',
-            isVerified: true  // Only fetch admin-approved universities
-        })
-            .select('name email profile profileImage bio')
-            .sort({ 'profile.universityName': 1, name: 1 });
+        const { query } = require('../config/postgres');
 
-        // Enrich with counts
-        const enrichedUnis = await Promise.all(universities.map(async (uni) => {
-            const studentCount = await User.countDocuments({
-                $or: [
-                    { universityId: uni._id },
-                    { registeredBy: uni._id }
-                ]
-            });
+        // Fetch verified universities and join with student/course counts
+        // studentCount: students registered by this university or having this universityId
+        // courseCount: courses where this university is the instructor
+        const universitiesRes = await query(`
+            SELECT 
+                u.id, u.name, u.email, u.profile, u.profile_image, u.bio,
+                (SELECT COUNT(*) FROM enrollments e WHERE e.student_id IN (
+                    SELECT s.id FROM users s WHERE s.university_id = u.id OR s.registered_by = u.id
+                )) as "studentCount",
+                (SELECT COUNT(*) FROM courses c WHERE c.instructor_id = u.id) as "courseCount"
+            FROM users u
+            WHERE u.role = 'university' AND u.is_verified = true
+            ORDER BY u.name ASC
+        `);
 
-            const courseCount = await Course.countDocuments({
-                instructor: uni._id
-            });
-
-            return {
-                ...uni.toObject(),
-                studentCount,
-                courseCount
-            };
+        // Map results to match expected frontend structure (aliasing id as _id)
+        const enrichedUnis = universitiesRes.rows.map(uni => ({
+            ...uni,
+            _id: uni.id,
+            profile: typeof uni.profile === 'string' ? JSON.parse(uni.profile) : uni.profile,
+            profileImage: uni.profile_image
         }));
 
         res.json(enrichedUnis || []);
     } catch (error) {
-        console.error('Error fetching universities:', error.message);
+        console.error('Error fetching universities (PG):', error.message);
         res.status(500).json({ message: error.message });
     }
 });

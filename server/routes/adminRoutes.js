@@ -63,13 +63,6 @@ const checkAdmin = (req, res, next) => {
 
 router.get('/stats', protect, checkAdmin, getGlobalStats);
 router.get('/analytics', protect, checkAdmin, getPlatformAnalytics);
-router.get('/users', protect, checkAdmin, getAllUsers);
-router.get('/users/:id', protect, checkAdmin, getUserById);
-router.get('/universities', protect, checkAdmin, getUniversities);
-router.get('/universities/:id', protect, checkAdmin, getUniversityDetail);
-router.put('/universities/:id/courses', protect, checkAdmin, assignCoursesToUniversity);
-router.put('/universities/:id/profile', protect, checkAdmin, updateUniversityProfile);
-router.post('/universities/:id/upload-image', protect, checkAdmin, upload.single('profileImage'), uploadUniversityProfileImage);
 // All users without pagination — used by B2B management
 router.get('/users/all', protect, checkAdmin, async (req, res) => {
     try {
@@ -80,6 +73,14 @@ router.get('/users/all', protect, checkAdmin, async (req, res) => {
         res.status(500).json({ message: e.message });
     }
 });
+router.get('/users', protect, checkAdmin, getAllUsers);
+router.get('/users/:id', protect, checkAdmin, getUserById);
+router.get('/universities', protect, checkAdmin, getUniversities);
+router.get('/universities/:id', protect, checkAdmin, getUniversityDetail);
+router.put('/universities/:id/courses', protect, checkAdmin, assignCoursesToUniversity);
+router.put('/universities/:id/profile', protect, checkAdmin, updateUniversityProfile);
+router.post('/universities/:id/upload-image', protect, checkAdmin, upload.single('profileImage'), uploadUniversityProfileImage);
+// Moved up
 router.put('/entities/:id', protect, checkAdmin, updateEntity);
 router.get('/partners/:id', protect, checkAdmin, getPartnerDetails);
 router.get('/partners/:id/discounts', protect, checkAdmin, getPartnerDiscounts);

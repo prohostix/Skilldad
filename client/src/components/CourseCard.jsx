@@ -1,12 +1,8 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import axios from 'axios';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Users,
     Star,
     Clock,
-    ChevronRight,
     PlayCircle,
     ArrowRight
 } from 'lucide-react';
@@ -16,7 +12,6 @@ import ModernButton from './ui/ModernButton';
 
 const CourseCard = ({ course }) => {
     const navigate = useNavigate();
-    const [enrolling, setEnrolling] = useState(false);
 
     const handleEnroll = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));

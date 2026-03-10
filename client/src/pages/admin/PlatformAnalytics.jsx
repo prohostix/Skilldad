@@ -161,7 +161,7 @@ const PlatformAnalytics = () => {
 
                 <GlassCard title="User Demographics" icon={PieChartIcon} className="!p-4">
                     <div className="h-[280px] w-full" style={{ minWidth: 0, minHeight: 0 }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={50}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
                             <PieChart>
                                 <Pie
                                     data={roleData}
@@ -191,7 +191,7 @@ const PlatformAnalytics = () => {
             {/* Comparative Analysis (Placeholder/Extended) */}
             <GlassCard title="Strategic Growth Map" icon={BarChart3} className="!p-4">
                 <div className="h-[300px] mt-4" style={{ minWidth: 0, minHeight: 0 }}>
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={50}>
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
                         <BarChart data={enrollmentData}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#A78BFA', fontSize: 12 }} />

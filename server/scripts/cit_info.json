@@ -1,0 +1,22 @@
+{
+  "profile": {
+    "website": "",
+    "location": "",
+    "phone": "",
+    "contactPerson": "",
+    "universityName": "CIT"
+  },
+  "_id": "699822710014ff89a69285c2",
+  "name": "CIT",
+  "email": "Uni@gmail.com",
+  "password": "$2b$08$ok4mUF4jKg2KJ4CxJJKQ.uaMEBc5I5IzgWAXOZCH6rUSr/IDKkFnq",
+  "role": "university",
+  "bio": "",
+  "profileImage": "/uploads/profileImage-1771578045643.png",
+  "isVerified": true,
+  "discountRate": 25,
+  "createdAt": "2026-02-20T08:59:29.695Z",
+  "updatedAt": "2026-03-05T17:21:28.525Z",
+  "__v": 1,
+  "assignedCourses": []
+}

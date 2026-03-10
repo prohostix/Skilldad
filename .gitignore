@@ -1,47 +1,32 @@
-node_modules
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables
 .env
-dist
-build
-.DS_Store
-.mongodb_data
+server/.env
+client/.env
+
+# Build outputs
+dist/
+build/
+client/dist/
+client/build/
+
+# Database
+.mongodb_data/
+
 # Logs and temporary files
 *.log
 *.txt
-server/*.txt
-server/*.json
-server/debug_*.js
-server/test_*.js
-server/check_*.js
-server/find_*.js
-server/fix_*.js
-server/list_*.js
-server/seed*.js
-server/delete*.js
-server/force_*.js
-server/sara_*.js
-server/addDemoCourses.js
-server/convert_utf8.js
-server/create_course.js
-server/init-prod.js
-server/print_json.js
-server/trigger_login.js
-server/link_test_students.js
-server/final_check.js
-server/diag.js
-diag.js
-!server/package.json
-!server/package-lock.json
-!server/server.js
-!server/jest.config.js
-!server/.env.example
 
-# Build and node_modules
-node_modules
-.env
-dist
-build
+# Uploads
+server/uploads/
+
+# OS files
 .DS_Store
-.mongodb_data
-client/dist
-client/build
-uploads/
+
+# IDE
+.vscode/
+.idea/

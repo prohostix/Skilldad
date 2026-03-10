@@ -48,7 +48,7 @@ const CoursePlayer = () => {
 
                 // Fetch live sessions for this course
                 try {
-                    const { data: sessionsData } = await axios.get(`/api/live-sessions/course/${courseId}`, config);
+                    const { data: sessionsData } = await axios.get(`/api/sessions/course/${courseId}`, config);
                     setLiveSessions(sessionsData);
                 } catch (sessionError) {
                     console.error('Error loading live sessions:', sessionError);

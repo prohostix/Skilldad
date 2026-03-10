@@ -39,7 +39,7 @@ const ExamQuestionManager = () => {
 
     const handleSuccess = () => {
         showToast('Questions saved successfully!', 'success');
-        navigate('/university/exam-management');
+        navigate('/university/exams');
     };
 
     if (loading) {
@@ -53,7 +53,7 @@ const ExamQuestionManager = () => {
     if (error || !exam) {
         return (
             <div className="space-y-6">
-                <ModernButton onClick={() => navigate('/university/exam-management')} variant="secondary">
+                <ModernButton onClick={() => navigate('/university/exams')} variant="secondary">
                     <ArrowLeft size={18} className="mr-2" />
                     Back to Exam Management
                 </ModernButton>
@@ -72,7 +72,7 @@ const ExamQuestionManager = () => {
         <div className="space-y-6 pb-20">
             <div className="flex items-center justify-between">
                 <div>
-                    <ModernButton onClick={() => navigate('/university/exam-management')} variant="secondary" className="mb-4">
+                    <ModernButton onClick={() => navigate('/university/exams')} variant="secondary" className="mb-4">
                         <ArrowLeft size={18} className="mr-2" />
                         Back to Exam Management
                     </ModernButton>

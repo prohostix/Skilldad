@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, Save, X, CheckCircle, AlertCircle } from 'lucide-react';
 import GlassCard from './ui/GlassCard';
@@ -6,7 +6,7 @@ import ModernButton from './ui/ModernButton';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
 
-const QuestionBuilder = ({ examId, examType, onSuccess }) => {
+const QuestionBuilder = ({ examId, onSuccess }) => {
     const [questions, setQuestions] = useState([]);
     const [currentQuestion, setCurrentQuestion] = useState({
         questionText: '',
@@ -20,11 +20,7 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
     const [saving, setSaving] = useState(false);
     const { showToast } = useToast();
 
-    useEffect(() => {
-        fetchQuestions();
-    }, [examId]);
-
-    const fetchQuestions = async () => {
+    const fetchQuestions = useCallback(async () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -37,7 +33,11 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
             // Ensure questions remains an array even on error
             setQuestions([]);
         }
-    };
+    }, [examId]);
+
+    useEffect(() => {
+        fetchQuestions();
+    }, [fetchQuestions]);
 
     const resetForm = () => {
         setCurrentQuestion({
@@ -155,10 +155,6 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
             const existingResponse = await axios.get(`/api/exams/${examId}/questions`, config);
             const existingQuestions = existingResponse.data.questions || [];
             
-            // Separate new questions (no _id) from existing ones (has _id)
-            const newQuestions = questions.filter(q => !q._id);
-            const existingQuestionsToUpdate = questions.filter(q => q._id);
-            
             // Delete all existing questions first to avoid order conflicts
             if (existingQuestions.length > 0) {
                 await Promise.all(
@@ -206,16 +202,15 @@ const QuestionBuilder = ({ examId, examType, onSuccess }) => {
 
             console.log('Saving questions:', questionsToSave);
 
-            const response = await axios.post(
+            await axios.post(
                 `/api/exams/${examId}/questions`,
                 { questions: questionsToSave },
                 config
             );
 
             showToast('All questions saved successfully', 'success');
-            // Don't call onSuccess to avoid navigation issues
-            // if (onSuccess) onSuccess(response.data);
-            fetchQuestions();
+            await fetchQuestions();
+            if (onSuccess) onSuccess();
         } catch (err) {
             console.error('Save questions error:', err);
             console.error('Error response:', err.response?.data);

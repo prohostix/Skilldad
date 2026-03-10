@@ -1,0 +1,169 @@
+[dotenv@17.3.1] injecting env (46) from .env -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+[4m[36mPostgreSQL Connected: skilldad.cj0mo4q44gde.ap-south-1.rds.amazonaws.com[39m[24m
+[PG] Executed query {
+  text: '\n' +
+    '      SELECT column_name, data_type \n' +
+    '      FROM information_schema.columns \n' +
+    "      WHERE table_name = 'transactions'\n" +
+    '    ',
+  duration: 43,
+  rows: 39
+}
+[
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "original_amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "discount_amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "final_amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "gst_amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "discount_percentage",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "session_expires_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "callback_signature_verified",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "webhook_signature_verified",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "retry_count",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "last_retry_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "refund_amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "refund_initiated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "refund_completed_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "receipt_generated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "initiated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "webhook_data",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "user_agent",
+    "data_type": "text"
+  },
+  {
+    "column_name": "refund_reason",
+    "data_type": "text"
+  },
+  {
+    "column_name": "transaction_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "student_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "course_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "enrollment_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "receipt_number",
+    "data_type": "text"
+  },
+  {
+    "column_name": "receipt_url",
+    "data_type": "text"
+  },
+  {
+    "column_name": "id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "refund_transaction_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "currency",
+    "data_type": "text"
+  },
+  {
+    "column_name": "discount_code",
+    "data_type": "text"
+  },
+  {
+    "column_name": "refund_initiated_by",
+    "data_type": "text"
+  },
+  {
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "column_name": "gateway_transaction_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "razorpay_payment_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "razorpay_signature",
+    "data_type": "text"
+  },
+  {
+    "column_name": "payment_method",
+    "data_type": "text"
+  },
+  {
+    "column_name": "session_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "ip_address",
+    "data_type": "text"
+  }
+]

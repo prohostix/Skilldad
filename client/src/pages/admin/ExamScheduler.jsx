@@ -121,7 +121,12 @@ const ExamScheduler = () => {
         }
 
         try {
-            await axios.post('/api/exams/admin/schedule', formData, getAuthConfig());
+            const payload = {
+                ...formData,
+                scheduledStartTime: formData.scheduledStartTime ? new Date(formData.scheduledStartTime).toISOString() : null,
+                scheduledEndTime: formData.scheduledEndTime ? new Date(formData.scheduledEndTime).toISOString() : null
+            };
+            await axios.post('/api/exams/admin/schedule', payload, getAuthConfig());
             setShowModal(false);
             setFormData({
                 title: '',
@@ -277,9 +282,9 @@ const ExamScheduler = () => {
                                             <td className="px-6 py-4 text-white/70">{exam.course?.title || 'N/A'}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${exam.examType === 'pdf-based' ? 'bg-purple-500/20 text-purple-400' :
-                                                        exam.examType === 'online-mcq' ? 'bg-emerald-500/20 text-emerald-400' :
-                                                            exam.examType === 'online-descriptive' ? 'bg-blue-500/20 text-blue-400' :
-                                                                'bg-indigo-500/20 text-indigo-400'
+                                                    exam.examType === 'online-mcq' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                        exam.examType === 'online-descriptive' ? 'bg-blue-500/20 text-blue-400' :
+                                                            'bg-indigo-500/20 text-indigo-400'
                                                     }`}>
                                                     {exam.examType?.replace('-', ' ') || 'N/A'}
                                                 </span>
@@ -302,7 +307,7 @@ const ExamScheduler = () => {
                                     );
                                 })}
                                 {exams.length === 0 && (
-                                    <tr>
+                                    <tr key="no-exams-row">
                                         <td colSpan={8} className="px-6 py-12 text-center text-white/30 text-sm">
                                             No exams scheduled yet.
                                         </td>

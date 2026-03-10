@@ -80,7 +80,7 @@ const ExamTaker = () => {
         socketRef.current.on('connect', () => {
             setIsConnected(true);
             reconnectAttemptsRef.current = 0;
-            socketRef.current.emit('join-exam', { examId: exam._id, studentId: userInfo._id });
+            socketRef.current.emit('join-exam', { examId: exam._id, studentId: userInfo.id || userInfo._id });
         });
         socketRef.current.on('disconnect', () => {
             setIsConnected(false);
@@ -118,7 +118,8 @@ const ExamTaker = () => {
                 return;
             }
             const startResponse = await axios.post(`/api/exams/${examId}/start`, {}, getAuthConfig());
-            const { submission: newSubmission, questions: examQuestions, exam: examData, questionPaperUrl } = startResponse.data.data;
+            const startData = startResponse.data.data || startResponse.data;
+            const { submission: newSubmission, questions: examQuestions, exam: examData, questionPaperUrl } = startData;
             setExam(examData);
             setSubmission(newSubmission);
             setTimeRemaining(accessResponse.data.data.timeRemaining);
@@ -156,7 +157,7 @@ const ExamTaker = () => {
     const saveAnswer = async (questionId, answer) => {
         setIsSaving(true);
         try {
-            await axios.post(`/api/exams/exam-submissions/${submission._id}/answer`, { questionId, ...answer }, getAuthConfig());
+            await axios.post(`/api/exams/${submission._id}/answer`, { questionId, ...answer }, getAuthConfig());
             setLastSaved(new Date());
         } catch (_) { /* silent */ } finally {
             setIsSaving(false);
@@ -174,7 +175,7 @@ const ExamTaker = () => {
         try {
             const formData = new FormData();
             formData.append('answerSheet', file);
-            await axios.post(`/api/exams/exam-submissions/${submission._id}/answer-sheet`, formData, {
+            await axios.post(`/api/exams/${submission._id}/answer-sheet`, formData, {
                 ...getAuthConfig(),
                 headers: { ...getAuthConfig().headers, 'Content-Type': 'multipart/form-data' },
                 timeout: 60000
@@ -192,7 +193,7 @@ const ExamTaker = () => {
     const handleSubmit = async () => {
         setIsSubmitting(true);
         try {
-            await axios.post(`/api/exams/exam-submissions/${submission._id}/submit`, { isAutoSubmit: false }, getAuthConfig());
+            await axios.post(`/api/exams/${submission._id}/submit`, { isAutoSubmit: false }, getAuthConfig());
             showToast('Exam submitted successfully!', 'success');
             if (socketRef.current) socketRef.current.disconnect();
             navigate(`/dashboard/exam/${examId}/submitted`);
@@ -207,7 +208,7 @@ const ExamTaker = () => {
 
     const handleAutoSubmit = async () => {
         try {
-            await axios.post(`/api/exams/exam-submissions/${submission._id}/submit`, { isAutoSubmit: true }, getAuthConfig());
+            await axios.post(`/api/exams/${submission._id}/submit`, { isAutoSubmit: true }, getAuthConfig());
             if (socketRef.current) socketRef.current.disconnect();
             navigate(`/dashboard/exam/${examId}/submitted`);
         } catch (e) { console.error(e); }

@@ -32,8 +32,8 @@ const ExamResult = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const [resultRes, submissionRes, examRes] = await Promise.all([
-                axios.get(`/api/results/exam/${examId}/student/${userInfo._id}`, getAuthConfig()),
-                axios.get(`/api/exams/exam-submissions/exam/${examId}/my-submission`, getAuthConfig()),
+                axios.get(`/api/results/exam/${examId}/student/${userInfo.id || userInfo._id}`, getAuthConfig()),
+                axios.get(`/api/exams/exam/${examId}/my-submission`, getAuthConfig()),
                 axios.get(`/api/exams/${examId}`, getAuthConfig())
             ]);
             setResult(resultRes.data.result || resultRes.data);
@@ -162,7 +162,7 @@ const ExamResult = () => {
                         {/* Percentage */}
                         <div className="bg-[#0a0a0a] p-6 text-center space-y-2">
                             <p className="text-4xl font-black text-primary">
-                                {result.percentage.toFixed(1)}
+                                {(Number(result.percentage) || 0).toFixed(1)}
                                 <span className="text-2xl">%</span>
                             </p>
                             <p className="text-[9px] font-black text-white/25 uppercase tracking-widest">Percentage</p>

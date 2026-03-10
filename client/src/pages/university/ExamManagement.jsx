@@ -30,6 +30,14 @@ import { useSocket } from '../../context/SocketContext';
 import { useNavigate } from 'react-router-dom';
 
 const ExamManagement = () => {
+    const toLocalDateTimeString = (date) => {
+        if (!date) return '';
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+        const offset = d.getTimezoneOffset() * 60000;
+        return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+    };
+
     const [activeTab, setActiveTab] = useState('questions');
     const [searchTerm, setSearchTerm] = useState('');
     const [questionPapers, setQuestionPapers] = useState([]);
@@ -108,7 +116,7 @@ const ExamManagement = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            
+
             const { data } = await axios.get(`/api/submissions/exam/${examId}`, config);
             console.log('[Submissions] Fetched:', data);
             setSubmissions(data.submissions || []);
@@ -142,7 +150,7 @@ const ExamManagement = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            
+
             // Format answers for grading
             const answers = Object.keys(gradingData).map(questionId => ({
                 questionId,
@@ -154,7 +162,7 @@ const ExamManagement = () => {
             showToast('Submission graded successfully', 'success');
             setSelectedSubmission(null);
             setGradingData({});
-            
+
             // Refresh submissions
             if (selectedExamForGrading) {
                 fetchSubmissions(selectedExamForGrading);
@@ -169,15 +177,15 @@ const ExamManagement = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            
+
             // Confirm before publishing
             if (!window.confirm('Are you sure you want to publish results? Students will be able to view their scores.')) {
                 return;
             }
-            
+
             const { data } = await axios.post(`/api/results/exams/${examId}/publish-results`, {}, config);
             showToast(`Results published successfully! ${data.publishedCount} students notified.`, 'success');
-            
+
             // Refresh submissions to update UI
             fetchSubmissions(examId);
         } catch (err) {
@@ -190,14 +198,14 @@ const ExamManagement = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            
+
             // Fetch full submission details with answers
-            const { data } = await axios.get(`/api/exams/exam-submissions/${submission._id}`, config);
+            const { data } = await axios.get(`/api/exams/${submission._id}/for-grading`, config);
             console.log('[Grading] Full submission data:', data);
-            
+
             const fullSubmission = data.submission || data;
             setSelectedSubmission(fullSubmission);
-            
+
             // Initialize grading data with marksAwarded from backend
             const initialGrading = {};
             (fullSubmission.answers || []).forEach(answer => {
@@ -276,6 +284,8 @@ const ExamManagement = () => {
 
             const payload = {
                 ...examData,
+                scheduledStartTime: examData.scheduledStartTime ? new Date(examData.scheduledStartTime).toISOString() : null,
+                scheduledEndTime: examData.scheduledEndTime ? new Date(examData.scheduledEndTime).toISOString() : null,
                 description: `Institutional Deployment: ${examData.title}`
             };
 
@@ -342,8 +352,8 @@ const ExamManagement = () => {
                     <p className="text-white/50 mt-1">Manage official assessments and secure materials from SkillDad Admin.</p>
                 </div>
                 <div className="flex gap-3">
-                    <ModernButton 
-                        variant="secondary" 
+                    <ModernButton
+                        variant="secondary"
                         onClick={() => fetchData(true)}
                         disabled={loading}
                     >
@@ -406,7 +416,7 @@ const ExamManagement = () => {
                                                 const hasSubmissions = submissions.length > 0;
                                                 const currentExam = exams.find(e => e._id === selectedExamForGrading);
                                                 const resultsPublished = currentExam?.resultsPublished;
-                                                
+
                                                 return (
                                                     <>
                                                         {hasSubmissions && allGraded && !resultsPublished && (
@@ -481,7 +491,7 @@ const ExamManagement = () => {
                                             const totalCount = submissions.length;
                                             const allGraded = gradedCount === totalCount;
                                             const percentage = (gradedCount / totalCount) * 100;
-                                            
+
                                             return (
                                                 <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl mb-4">
                                                     <div className="flex items-center justify-between mb-3">
@@ -504,7 +514,7 @@ const ExamManagement = () => {
                                                         )}
                                                     </div>
                                                     <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                                        <div 
+                                                        <div
                                                             className={`h-full transition-all duration-500 ${allGraded ? 'bg-emerald-500' : 'bg-primary'}`}
                                                             style={{ width: `${percentage}%` }}
                                                         />
@@ -512,54 +522,52 @@ const ExamManagement = () => {
                                                 </div>
                                             );
                                         })()}
-                                        
+
                                         {submissions.map((submission) => (
-                                        <div key={submission._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all">
-                                            <div className="flex items-center gap-5">
-                                                <div className={`p-4 rounded-2xl ${
-                                                    submission.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400' :
-                                                    'bg-amber-500/10 text-amber-500'
-                                                }`}>
-                                                    {submission.status === 'graded' ? <CheckCircle size={28} /> : <Clock size={28} />}
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-white text-lg">{submission.student?.name || 'Student'}</h4>
-                                                    <p className="text-xs text-white/40 mt-1">{submission.student?.email}</p>
-                                                    <div className="flex items-center gap-3 text-[10px] mt-2 font-bold uppercase tracking-wider">
-                                                        <span className={`px-2 py-0.5 rounded ${
-                                                            submission.status === 'graded' ? 'bg-emerald-500/20 text-emerald-400' :
-                                                            'bg-amber-500/20 text-amber-500'
+                                            <div key={submission._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all">
+                                                <div className="flex items-center gap-5">
+                                                    <div className={`p-4 rounded-2xl ${submission.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400' :
+                                                        'bg-amber-500/10 text-amber-500'
                                                         }`}>
-                                                            {submission.status}
-                                                        </span>
-                                                        {submission.status === 'graded' && (
-                                                            <span className="text-white/60">
-                                                                Score: {submission.obtainedMarks}/{submission.totalMarks} ({submission.percentage?.toFixed(1)}%)
+                                                        {submission.status === 'graded' ? <CheckCircle size={28} /> : <Clock size={28} />}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-white text-lg">{submission.student?.name || 'Student'}</h4>
+                                                        <p className="text-xs text-white/40 mt-1">{submission.student?.email}</p>
+                                                        <div className="flex items-center gap-3 text-[10px] mt-2 font-bold uppercase tracking-wider">
+                                                            <span className={`px-2 py-0.5 rounded ${submission.status === 'graded' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                                'bg-amber-500/20 text-amber-500'
+                                                                }`}>
+                                                                {submission.status}
                                                             </span>
-                                                        )}
-                                                        <span className="text-white/30">
-                                                            Submitted: {new Date(submission.submittedAt).toLocaleString()}
-                                                        </span>
+                                                            {submission.status === 'graded' && (
+                                                                <span className="text-white/60">
+                                                                    Score: {submission.obtainedMarks}/{submission.totalMarks} ({(Number(submission.percentage) || 0).toFixed(1)}%)
+                                                                </span>
+                                                            )}
+                                                            <span className="text-white/30">
+                                                                Submitted: {new Date(submission.submittedAt).toLocaleString()}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <ModernButton
+                                                    size="sm"
+                                                    variant={submission.status === 'graded' ? 'secondary' : 'primary'}
+                                                    onClick={() => viewSubmissionForGrading(submission)}
+                                                >
+                                                    <Edit size={16} className="mr-2" />
+                                                    {submission.status === 'graded' ? 'Review' : 'Grade Now'}
+                                                </ModernButton>
                                             </div>
-                                            <ModernButton
-                                                size="sm"
-                                                variant={submission.status === 'graded' ? 'secondary' : 'primary'}
-                                                onClick={() => viewSubmissionForGrading(submission)}
-                                            >
-                                                <Edit size={16} className="mr-2" />
-                                                {submission.status === 'graded' ? 'Review' : 'Grade Now'}
-                                            </ModernButton>
-                                        </div>
-                                    ))}
-                                    
-                                    {submissions.length === 0 && (
-                                        <div className="py-20 text-center text-white/20">
-                                            <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                            <p className="font-bold uppercase tracking-widest text-sm">No Submissions Yet</p>
-                                        </div>
-                                    )}
+                                        ))}
+
+                                        {submissions.length === 0 && (
+                                            <div className="py-20 text-center text-white/20">
+                                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
+                                                <p className="font-bold uppercase tracking-widest text-sm">No Submissions Yet</p>
+                                            </div>
+                                        )}
                                     </>
                                 )}
                             </div>
@@ -588,7 +596,7 @@ const ExamManagement = () => {
                                     const mcqCount = selectedSubmission.answers?.filter(a => a.questionType === 'mcq').length || 0;
                                     const descriptiveCount = selectedSubmission.answers?.filter(a => a.questionType === 'descriptive').length || 0;
                                     const autoGradedCount = selectedSubmission.answers?.filter(a => a.questionType === 'mcq' && a.marksAwarded !== undefined).length || 0;
-                                    
+
                                     return (
                                         <div className="grid grid-cols-3 gap-4">
                                             <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
@@ -620,7 +628,7 @@ const ExamManagement = () => {
                                         selectedSubmission.answers.map((answer, idx) => {
                                             const questionId = answer.question?._id || answer.questionId;
                                             const question = answer.question;
-                                            
+
                                             console.log(`[Grading UI] Question ${idx + 1}:`, {
                                                 questionId,
                                                 question,
@@ -629,7 +637,7 @@ const ExamManagement = () => {
                                                 selectedOption: answer.selectedOption,
                                                 textAnswer: answer.textAnswer
                                             });
-                                            
+
                                             return (
                                                 <div key={questionId || idx} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
                                                     <div>
@@ -646,9 +654,8 @@ const ExamManagement = () => {
                                                             <p className="text-white text-sm">
                                                                 Selected: {question?.options?.[answer.selectedOption]?.text || `Option ${answer.selectedOption + 1}`}
                                                                 {answer.marksAwarded !== undefined && (
-                                                                    <span className={`ml-3 px-2 py-0.5 rounded text-xs ${
-                                                                        answer.marksAwarded > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                                                                    }`}>
+                                                                    <span className={`ml-3 px-2 py-0.5 rounded text-xs ${answer.marksAwarded > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+                                                                        }`}>
                                                                         {answer.marksAwarded > 0 ? 'Correct' : 'Incorrect'}
                                                                     </span>
                                                                 )}
@@ -720,7 +727,7 @@ const ExamManagement = () => {
                                         Cancel
                                     </ModernButton>
                                     <ModernButton
-                                        onClick={() => handleGradeSubmission(selectedSubmission._id)}
+                                        onClick={() => handleGradeSubmission(selectedSubmission.id || selectedSubmission._id)}
                                     >
                                         <Award size={16} className="mr-2" />
                                         Submit Grades & Publish
@@ -853,12 +860,11 @@ const ExamManagement = () => {
                                                             <div className="flex items-center gap-4 text-[10px] mt-2 font-bold uppercase tracking-wider">
                                                                 <span className="text-white/60">Module: {slot.course?.title || 'Unknown'}</span>
                                                                 <span className="text-indigo-400 flex items-center gap-1"><Clock size={12} /> {new Date(slot.scheduledStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
-                                                                    slot.examType === 'online-mcq' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-black ${slot.examType === 'online-mcq' ? 'bg-emerald-500/20 text-emerald-400' :
                                                                     slot.examType === 'pdf-based' ? 'bg-purple-500/20 text-purple-400' :
-                                                                    slot.examType === 'online-descriptive' ? 'bg-blue-500/20 text-blue-400' :
-                                                                    'bg-indigo-500/20 text-indigo-400'
-                                                                }`}>
+                                                                        slot.examType === 'online-descriptive' ? 'bg-blue-500/20 text-blue-400' :
+                                                                            'bg-indigo-500/20 text-indigo-400'
+                                                                    }`}>
                                                                     {slot.examType?.replace('-', ' ').toUpperCase() || 'EXAM'}
                                                                 </span>
                                                                 {isDeployed ? (
@@ -994,8 +1000,8 @@ const ExamManagement = () => {
                                                             setExamData({
                                                                 ...examData,
                                                                 course: slot.course?._id || slot.course,
-                                                                scheduledStartTime: slot.scheduledStartTime ? new Date(slot.scheduledStartTime).toISOString().slice(0, 16) : '',
-                                                                scheduledEndTime: slot.scheduledEndTime ? new Date(slot.scheduledEndTime).toISOString().slice(0, 16) : '',
+                                                                scheduledStartTime: toLocalDateTimeString(slot.scheduledStartTime),
+                                                                scheduledEndTime: toLocalDateTimeString(slot.scheduledEndTime),
                                                                 duration: slot.duration,
                                                                 passingScore: slot.passingScore || 70,
                                                                 maxAttempts: slot.maxAttempts || 1,

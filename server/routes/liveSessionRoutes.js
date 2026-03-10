@@ -13,11 +13,8 @@ const {
     getSessionStatusRoute,
     getRecordingStatus,
     getRecordingPlaybackUrl,
-    generateHostLink,
-    getZoomSDKConfig,
-    trackSessionJoin,
-    trackSessionLeave,
     getCourseLiveSessions,
+    getZoomSDKConfig,
 } = require('../controllers/liveSessionController');
 
 const { protect, authorize } = require('../middleware/authMiddleware');
@@ -116,12 +113,12 @@ router.post(
 );
 
 /* ── Host session link (university + admin only) ──────────────*/
-router.get(
-    '/:id/host-link',
-    protect,
-    authorize('university', 'admin', 'student'),
-    generateHostLink
-);
+// router.get(
+//     '/:id/host-link',
+//     protect,
+//     authorize('university', 'admin', 'student'),
+//     generateHostLink
+// );
 
 /* ── Recording status ──────────────────────────────────────── */
 router.get(
@@ -148,20 +145,20 @@ router.get(
 );
 
 /* ── Track session join (metrics) ──────────────────────────── */
-router.post(
-    '/:id/join',
-    protect,
-    authorize('university', 'admin', 'student'),
-    trackSessionJoin
-);
+// router.post(
+//     '/:id/join',
+//     protect,
+//     authorize('university', 'admin', 'student'),
+//     trackSessionJoin
+// );
 
 /* ── Track session leave (metrics) ─────────────────────────── */
-router.post(
-    '/:id/leave',
-    protect,
-    authorize('university', 'admin', 'student'),
-    trackSessionLeave
-);
+// router.post(
+//     '/:id/leave',
+//     protect,
+//     authorize('university', 'admin', 'student'),
+//     trackSessionLeave
+// );
 
 /* ── Get live sessions for a course ────────────────────────── */
 router.get(

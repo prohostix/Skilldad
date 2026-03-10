@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Upload, FileText, Plus, X, AlertCircle, CheckCircle } from 'lucide-react';
 import GlassCard from './ui/GlassCard';
 import ModernButton from './ui/ModernButton';

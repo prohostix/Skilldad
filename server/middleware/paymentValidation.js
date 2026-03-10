@@ -15,8 +15,11 @@ const initiatePaymentValidation = [
   body('courseId')
     .notEmpty()
     .withMessage('Course ID is required')
-    .isMongoId()
-    .withMessage('Invalid course ID format'),
+    .isString()
+    .withMessage('Invalid course ID format')
+    .trim()
+    .isLength({ min: 10, max: 64 })
+    .withMessage('Course ID length is invalid'),
 
   body('discountCode')
     .optional()
@@ -42,8 +45,8 @@ const checkStatusValidation = [
   param('transactionId')
     .notEmpty()
     .withMessage('Transaction ID is required')
-    .matches(/^TXN_[A-Z0-9_]{10,30}$/)
-    .withMessage('Invalid transaction ID format. Expected format: TXN_XXXXXXXXXX'),
+    .matches(/^(TXN_|MAN-)[A-Z0-9_-]{10,40}$/)
+    .withMessage('Invalid transaction ID format'),
 ];
 
 /**
@@ -54,7 +57,7 @@ const processRefundValidation = [
   body('transactionId')
     .notEmpty()
     .withMessage('Transaction ID is required')
-    .matches(/^TXN_[A-Z0-9_]{10,30}$/)
+    .matches(/^(TXN_|MAN-)[A-Z0-9_-]{10,40}$/)
     .withMessage('Invalid transaction ID format'),
 
   body('amount')
@@ -92,7 +95,7 @@ const retryPaymentValidation = [
   param('transactionId')
     .notEmpty()
     .withMessage('Transaction ID is required')
-    .matches(/^TXN_[A-Z0-9_]{10,30}$/)
+    .matches(/^(TXN_|MAN-)[A-Z0-9_-]{10,40}$/)
     .withMessage('Invalid transaction ID format'),
 ];
 
@@ -159,7 +162,7 @@ const resolveDiscrepancyValidation = [
   body('transactionId')
     .notEmpty()
     .withMessage('Transaction ID is required')
-    .matches(/^TXN_[A-Z0-9_]{10,30}$/)
+    .matches(/^(TXN_|MAN-)[A-Z0-9_-]{10,40}$/)
     .withMessage('Invalid transaction ID format'),
 
   body('notes')
@@ -220,7 +223,7 @@ const receiptValidation = [
   param('transactionId')
     .notEmpty()
     .withMessage('Transaction ID is required')
-    .matches(/^TXN_[A-Z0-9_]{10,30}$/)
+    .matches(/^(TXN_|MAN-)[A-Z0-9_-]{10,40}$/)
     .withMessage('Invalid transaction ID format'),
 ];
 

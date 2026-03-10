@@ -168,7 +168,7 @@ const CourseDetail = () => {
                                     }
                                 }}
                             >
-                                Enroll for ${course.price?.toFixed(2) || '0.00'}
+                                Enroll for ${Number(course.price)?.toFixed(2) || '0.00'}
                             </ModernButton>
                         </motion.div>
 

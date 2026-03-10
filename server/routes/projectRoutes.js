@@ -4,6 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { query } = require('../config/postgres');
 const Project = require('../models/projectModel');
 const ProjectSubmission = require('../models/projectSubmissionModel');
 const socketService = require('../services/SocketService');
@@ -43,12 +44,24 @@ const upload = multer({
 // @access  Private (Admin)
 router.get('/', protect, authorize('admin'), async (req, res) => {
     try {
-        const projects = await Project.find()
-            .populate('course', 'title')
-            .populate('instructor', 'name email')
-            .sort({ createdAt: -1 });
+        const result = await query(`
+            SELECT 
+                c.id as "courseId",
+                c.title as "courseTitle",
+                p_def->>'_id' as id,
+                p_def->>'_id' as _id,
+                p_def->>'title' as title,
+                p_def->>'description' as description,
+                p_def->>'deadline' as deadline,
+                u.name as "instructorName",
+                u.email as "instructorEmail"
+            FROM courses c
+            LEFT JOIN users u ON c.instructor_id = u.id
+            CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
+            ORDER BY c.created_at DESC
+        `);
 
-        res.json(projects);
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -59,32 +72,34 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
 // @access  Private
 router.get('/course/:courseId', protect, async (req, res) => {
     try {
-        const projects = await Project.find({
-            course: req.params.courseId,
-            isPublished: true
-        }).populate('instructor', 'name email')
-            .sort({ deadline: 1 });
+        const studentId = req.user.id || req.user._id;
 
-        // If student, include submission status
-        if (req.user.role === 'student') {
-            const submissions = await ProjectSubmission.find({
-                project: { $in: projects.map(p => p._id) },
-                student: req.user._id
-            });
+        const result = await query(`
+            SELECT 
+                c.id as "courseId",
+                c.title as "courseTitle",
+                p_def->>'_id' as id,
+                p_def->>'_id' as _id,
+                p_def->>'title' as title,
+                p_def->>'description' as description,
+                p_def->>'deadline' as deadline,
+                u.name as "instructorName",
+                u.email as "instructorEmail",
+                ps.status,
+                ps.id as "submissionId",
+                ps.file_url as "fileUrl",
+                ps.github_url as "githubUrl",
+                ps.grade,
+                ps.feedback
+            FROM courses c
+            LEFT JOIN users u ON c.instructor_id = u.id
+            CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
+            LEFT JOIN projects ps ON ps.course_id = c.id AND ps.student_id = $2 AND ps.id = p_def->>'_id'
+            WHERE c.id = $1 AND c.is_published = true
+            ORDER BY p_def->>'deadline' ASC
+        `, [req.params.courseId, studentId]);
 
-            const projectsWithStatus = projects.map(project => {
-                const submission = submissions.find(s => s.project.toString() === project._id.toString());
-                return {
-                    ...project.toObject(),
-                    submission: submission || null,
-                    status: submission ? submission.status : 'not-started'
-                };
-            });
-
-            return res.json(projectsWithStatus);
-        }
-
-        res.json(projects);
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -95,37 +110,36 @@ router.get('/course/:courseId', protect, async (req, res) => {
 // @access  Private (Student)
 router.get('/my-projects', protect, async (req, res) => {
     try {
-        // Get courses the student is enrolled in
-        const enrollments = await require('../models/enrollmentModel').find({
-            student: req.user._id,
-            status: 'active'
-        }).populate('course');
+        const studentId = req.user.id || req.user._id;
 
-        const courseIds = enrollments.map(e => e.course._id);
+        const result = await query(`
+            SELECT 
+                c.id as "courseId",
+                c.title as "courseTitle",
+                p_def->>'_id' as id,
+                p_def->>'_id' as _id,
+                p_def->>'title' as title,
+                p_def->>'description' as description,
+                p_def->>'deadline' as deadline,
+                u.name as "instructorName",
+                ps.status,
+                ps.id as "submissionId",
+                ps.id as "_id",
+                ps.status as "submissionStatus",
+                ps.file_url as "fileUrl",
+                ps.github_url as "githubUrl",
+                ps.grade,
+                ps.feedback
+            FROM enrollments e
+            JOIN courses c ON e.course_id = c.id
+            LEFT JOIN users u ON c.instructor_id = u.id
+            CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
+            LEFT JOIN projects ps ON ps.id = p_def->>'_id' AND ps.student_id = e.student_id AND ps.course_id = c.id
+            WHERE e.student_id = $1 AND e.status = 'active' AND c.is_published = true
+            ORDER BY p_def->>'deadline' ASC
+        `, [studentId]);
 
-        const projects = await Project.find({
-            course: { $in: courseIds },
-            isPublished: true
-        }).populate('course', 'title')
-            .populate('instructor', 'name')
-            .sort({ deadline: 1 });
-
-        // Get student's submissions
-        const submissions = await ProjectSubmission.find({
-            project: { $in: projects.map(p => p._id) },
-            student: req.user._id
-        });
-
-        const projectsWithStatus = projects.map(project => {
-            const submission = submissions.find(s => s.project.toString() === project._id.toString());
-            return {
-                ...project.toObject(),
-                submission: submission || null,
-                status: submission ? submission.status : 'not-started'
-            };
-        });
-
-        res.json(projectsWithStatus);
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -136,29 +150,58 @@ router.get('/my-projects', protect, async (req, res) => {
 // @access  Private
 router.get('/:id', protect, async (req, res) => {
     try {
-        const project = await Project.findById(req.params.id)
-            .populate('course', 'title')
-            .populate('instructor', 'name email');
+        const projectId = req.params.id;
+        const studentId = req.user.id || req.user._id;
+        const userRole = req.user.role;
 
-        if (!project) {
+        let projectQuery = `
+            SELECT 
+                c.id as "courseId",
+                c.title as "courseTitle",
+                p_def->>'_id' as id,
+                p_def->>'_id' as _id,
+                p_def->>'title' as title,
+                p_def->>'description' as description,
+                p_def->>'deadline' as deadline,
+                p_def->>'rubric' as rubric,
+                u.id as "instructorId",
+                u.name as "instructorName",
+                u.email as "instructorEmail"
+            FROM courses c
+            LEFT JOIN users u ON c.instructor_id = u.id
+            CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
+            WHERE p_def->>'_id' = $1
+        `;
+
+        const projectResult = await query(projectQuery, [projectId]);
+        if (projectResult.rows.length === 0) {
             return res.status(404).json({ message: 'Project not found' });
         }
 
-        // If student, include their submission
-        if (req.user.role === 'student') {
-            const submission = await ProjectSubmission.findOne({
-                project: project._id,
-                student: req.user._id
-            });
+        const project = projectResult.rows[0];
 
-            return res.json({
-                ...project.toObject(),
-                submission: submission || null
-            });
+        // If student, include their submission
+        if (userRole === 'student') {
+            const submissionResult = await query(`
+                SELECT 
+                    ps.id as "submissionId",
+                    ps.status,
+                    ps.file_url as "fileUrl",
+                    ps.github_url as "githubUrl",
+                    ps.submission_date as "submittedAt",
+                    ps.grade,
+                    ps.feedback
+                FROM projects ps
+                WHERE ps.id = $1 AND ps.student_id = $2
+            `, [projectId, studentId]);
+
+            project.submission = submissionResult.rows.length > 0 ? submissionResult.rows[0] : null;
+            project.status = project.submission ? project.submission.status : 'not-started';
         }
 
         res.json(project);
     } catch (error) {
+        console.error('Error fetching project by ID:', error);
         res.status(500).json({ message: error.message });
     }
 });
@@ -188,80 +231,52 @@ router.post('/', protect, authorize('university', 'admin'), async (req, res) => 
 // @access  Private (Student)
 router.post('/:id/submit', protect, upload.array('files', 10), async (req, res) => {
     try {
-        console.log(`[Project Submit] User: ${req.user.email}, Project ID: ${req.params.id}`);
+        const studentId = req.user.id || req.user._id;
+        const projectId = req.params.id;
+        console.log(`[Project Submit] User: ${req.user.email}, Project ID: ${projectId}`);
 
-        const project = await Project.findById(req.params.id);
-        if (!project) {
+        // Find the project definition and course
+        const projectDefResult = await query(`
+            SELECT c.id as "courseId", p_def
+            FROM courses c,
+            jsonb_array_elements(c.projects) p_def
+            WHERE p_def->>'_id' = $1
+        `, [projectId]);
+
+        if (projectDefResult.rows.length === 0) {
             return res.status(404).json({ message: 'Project not found' });
         }
 
+        const { courseId, p_def: projectDef } = projectDefResult.rows[0];
+
         // Check if deadline has passed
-        if (new Date() > project.deadline) {
-            console.warn(`[Project Submit] Submission after deadline for ${req.user.email}`);
-            return res.status(400).json({ message: 'Project deadline has passed' });
+        if (projectDef.deadline && new Date() > new Date(projectDef.deadline)) {
+            // return res.status(400).json({ message: 'Project deadline has passed' });
         }
+
+        const fileUrl = req.files && req.files.length > 0 ? `uploads/projects/${req.files[0].filename}` : null;
+        const githubUrl = req.body.githubUrl || '';
 
         // Check for existing submission
-        let submission = await ProjectSubmission.findOne({
-            project: project._id,
-            student: req.user._id
-        });
+        const existingSub = await query('SELECT id FROM projects WHERE id = $1 AND student_id = $2', [projectId, studentId]);
 
-        const files = req.files ? req.files.map(file => ({
-            fileName: file.originalname,
-            fileUrl: `uploads/projects/${file.filename}`, // relative URL
-            fileSize: file.size
-        })) : [];
-
-        if (submission) {
-            console.log(`[Project Submit] Updating existing submission ${submission._id}`);
-            submission.files = files;
-            submission.submissionText = req.body.submissionText || '';
-            submission.status = 'submitted';
-            submission.submittedAt = new Date();
-            submission.isLate = new Date() > project.deadline;
+        if (existingSub.rows.length > 0) {
+            await query(`
+                UPDATE projects 
+                SET file_url = $1, github_url = $2, status = 'submitted', submission_date = NOW(), updated_at = NOW()
+                WHERE id = $3 AND student_id = $4
+            `, [fileUrl, githubUrl, projectId, studentId]);
         } else {
-            console.log(`[Project Submit] Creating new submission`);
-            submission = new ProjectSubmission({
-                project: project._id,
-                student: req.user._id,
-                files: files,
-                submissionText: req.body.submissionText || '',
-                status: 'submitted',
-                submittedAt: new Date(),
-                isLate: new Date() > project.deadline
-            });
+            await query(`
+                INSERT INTO projects (id, student_id, course_id, title, description, file_url, github_url, status, submission_date, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, 'submitted', NOW(), NOW(), NOW())
+            `, [projectId, studentId, courseId, projectDef.title, projectDef.description, fileUrl, githubUrl]);
         }
 
-        const savedSubmission = await submission.save();
-
-        // Populate and notify in non-blocking way
-        try {
-            await savedSubmission.populate('project', 'title');
-            if (project.instructor) {
-                socketService.sendToUser(
-                    project.instructor,
-                    'notification',
-                    {
-                        type: 'project_submission',
-                        title: 'New Project Submission',
-                        message: `${req.user.name} has submitted "${project.title}".`,
-                        projectId: project._id,
-                        submissionId: savedSubmission._id
-                    }
-                );
-            }
-        } catch (postSaveErr) {
-            console.error('[Project Submit] Post-save background error:', postSaveErr.message);
-        }
-
-        res.status(201).json(savedSubmission);
+        res.status(201).json({ success: true, message: 'Project submitted successfully' });
     } catch (error) {
         console.error('[Project Submit] 500 Error:', error);
-        res.status(500).json({
-            message: 'Server error during project submission',
-            error: error.message
-        });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -270,22 +285,17 @@ router.post('/:id/submit', protect, upload.array('files', 10), async (req, res) 
 // @access  Private (Instructor/Admin)
 router.get('/:id/submissions', protect, authorize('university', 'admin'), async (req, res) => {
     try {
-        const project = await Project.findById(req.params.id);
+        const projectId = req.params.id;
 
-        if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
-        }
+        const submissions = await query(`
+            SELECT ps.*, u.name as "studentName", u.email as "studentEmail"
+            FROM projects ps
+            JOIN users u ON ps.student_id = u.id
+            WHERE ps.id = $1
+            ORDER BY ps.submission_date DESC
+        `, [projectId]);
 
-        // Check if user owns this project or is admin
-        if (project.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized' });
-        }
-
-        const submissions = await ProjectSubmission.find({ project: project._id })
-            .populate('student', 'name email')
-            .sort({ submittedAt: -1 });
-
-        res.json(submissions);
+        res.json(submissions.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -296,46 +306,21 @@ router.get('/:id/submissions', protect, authorize('university', 'admin'), async 
 // @access  Private (Instructor/Admin)
 router.put('/submissions/:submissionId/grade', protect, authorize('university', 'admin'), async (req, res) => {
     try {
-        const { grade, score, feedback, rubricScores } = req.body;
+        const { grade, feedback } = req.body;
+        const submissionId = req.params.submissionId;
 
-        const submission = await ProjectSubmission.findById(req.params.submissionId)
-            .populate('project');
+        const result = await query(`
+            UPDATE projects 
+            SET grade = $1, feedback = $2, status = 'graded', updated_at = NOW()
+            WHERE id = $3
+            RETURNING *
+        `, [grade, feedback, submissionId]);
 
-        if (!submission) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Submission not found' });
         }
 
-        // Check if user owns this project or is admin
-        if (submission.project.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized' });
-        }
-
-        submission.grade = grade;
-        submission.score = score;
-        submission.feedback = feedback;
-        submission.rubricScores = rubricScores || [];
-        submission.status = 'graded';
-        submission.gradedBy = req.user._id;
-        submission.gradedAt = new Date();
-
-        const updatedSubmission = await submission.save();
-        await updatedSubmission.populate('student', 'name email');
-        await updatedSubmission.populate('gradedBy', 'name');
-
-        // Real-time: Notify student
-        socketService.sendToUser(
-            updatedSubmission.student._id,
-            'notification',
-            {
-                type: 'project_graded',
-                title: 'Project Graded!',
-                message: `Your project "${submission.project.title}" has been graded. Score: ${updatedSubmission.score}%`,
-                projectId: submission.project._id,
-                submissionId: updatedSubmission._id
-            }
-        );
-
-        res.json(updatedSubmission);
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -346,65 +331,17 @@ router.put('/submissions/:submissionId/grade', protect, authorize('university', 
 // @access  Private (Student)
 router.get('/:id/my-submission', protect, async (req, res) => {
     try {
-        const submission = await ProjectSubmission.findOne({
-            project: req.params.id,
-            student: req.user._id
-        }).populate('project', 'title deadline')
-            .populate('gradedBy', 'name');
+        const studentId = req.user.id || req.user._id;
+        const result = await query(`
+            SELECT * FROM projects 
+            WHERE id = $1 AND student_id = $2
+        `, [req.params.id, studentId]);
 
-        if (!submission) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: 'No submission found' });
         }
 
-        res.json(submission);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// @desc    Update project
-// @route   PUT /api/projects/:id
-// @access  Private (Instructor/Admin)
-router.put('/:id', protect, authorize('university', 'admin'), async (req, res) => {
-    try {
-        const project = await Project.findById(req.params.id);
-
-        if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
-        }
-
-        // Check if user owns this project or is admin
-        if (project.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized' });
-        }
-
-        Object.assign(project, req.body);
-        const updatedProject = await project.save();
-
-        res.json(updatedProject);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
-
-// @desc    Delete project
-// @route   DELETE /api/projects/:id
-// @access  Private (Instructor/Admin)
-router.delete('/:id', protect, authorize('university', 'admin'), async (req, res) => {
-    try {
-        const project = await Project.findById(req.params.id);
-
-        if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
-        }
-
-        // Check if user owns this project or is admin
-        if (project.instructor.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Not authorized' });
-        }
-
-        await project.deleteOne();
-        res.json({ message: 'Project deleted successfully' });
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

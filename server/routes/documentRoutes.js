@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { query } = require('../config/postgres');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const Document = require('../models/documentModel');
 
@@ -62,16 +63,17 @@ const upload = multer({
 // @access  Private (Student)
 router.get('/my-documents', protect, async (req, res) => {
     try {
-        const documents = await Document.find({
-            $or: [
-                { student: req.user._id },
-                { uploadedBy: req.user._id }
-            ]
-        }).populate('course', 'title')
-            .populate('reviewedBy', 'name')
-            .sort({ createdAt: -1 });
+        const userId = req.user.id || req.user._id;
+        const result = await query(`
+            SELECT d.*, d.id as _id, c.title as "courseTitle", u.name as "reviewedByName"
+            FROM documents d
+            LEFT JOIN courses c ON d.course_id = c.id
+            LEFT JOIN users u ON d.reviewed_by_id = u.id
+            WHERE d.student_id = $1 OR d.uploaded_by_id = $1
+            ORDER BY d.created_at DESC
+        `, [userId]);
 
-        res.json(documents);
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -82,39 +84,51 @@ router.get('/my-documents', protect, async (req, res) => {
 // @access  Private (Admin/University)
 router.get('/', protect, authorize('admin', 'university'), async (req, res) => {
     try {
-        const { status, type, student, recipientUniversity } = req.query;
-        let filter = {};
+        const { status, type, student, university_id } = req.query;
+        let whereClauses = [];
+        let params = [];
 
-        if (status) filter.status = status;
-        if (type) filter.type = type;
-        if (student) filter.student = student;
-        if (recipientUniversity) filter.recipientUniversity = recipientUniversity;
-
-        // Restriction for university role: Only see relevant documents
-        if (req.user.role === 'university') {
-            filter = {
-                $and: [
-                    filter,
-                    {
-                        $or: [
-                            { recipientUniversity: req.user._id },
-                            { uploadedBy: req.user._id },
-                            { reviewedBy: req.user._id }
-                        ]
-                    }
-                ]
-            };
+        if (status) {
+            params.push(status);
+            whereClauses.push(`d.status = $${params.length}`);
+        }
+        if (type) {
+            params.push(type);
+            whereClauses.push(`d.type = $${params.length}`);
+        }
+        if (student) {
+            params.push(student);
+            whereClauses.push(`d.student_id = $${params.length}`);
+        }
+        if (university_id) {
+            params.push(university_id);
+            whereClauses.push(`d.university_id = $${params.length}`);
         }
 
-        const documents = await Document.find(filter)
-            .populate('student', 'name email')
-            .populate('course', 'title')
-            .populate('uploadedBy', 'name')
-            .populate('reviewedBy', 'name')
-            .populate('recipientUniversity', 'name')
-            .sort({ createdAt: -1 });
+        // Restriction for university role
+        if (req.user.role === 'university') {
+            const uId = req.user.id || req.user._id;
+            params.push(uId);
+            whereClauses.push(`(d.university_id = $${params.length} OR d.uploaded_by_id = $${params.length} OR d.reviewed_by_id = $${params.length})`);
+        }
 
-        res.json(documents);
+        const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+        const result = await query(`
+            SELECT d.*, d.id as _id, s.name as "studentName", s.email as "studentEmail", 
+                   c.title as "courseTitle", up.name as "uploadedByName", 
+                   rv.name as "reviewedByName", un.name as "universityName"
+            FROM documents d
+            LEFT JOIN users s ON d.student_id = s.id
+            LEFT JOIN courses c ON d.course_id = c.id
+            LEFT JOIN users up ON d.uploaded_by_id = up.id
+            LEFT JOIN users rv ON d.reviewed_by_id = rv.id
+            LEFT JOIN users un ON d.university_id = un.id
+            ${whereSql}
+            ORDER BY d.created_at DESC
+        `, params);
+
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -125,20 +139,29 @@ router.get('/', protect, authorize('admin', 'university'), async (req, res) => {
 // @access  Private
 router.get('/:id', protect, async (req, res) => {
     try {
-        const document = await Document.findById(req.params.id)
-            .populate('student', 'name email')
-            .populate('course', 'title')
-            .populate('uploadedBy', 'name')
-            .populate('reviewedBy', 'name');
+        const docId = req.params.id;
+        const result = await query(`
+            SELECT d.*, d.id as _id, s.name as "studentName", s.email as "studentEmail", 
+                   c.title as "courseTitle", up.name as "uploadedByName", 
+                   rv.name as "reviewedByName"
+            FROM documents d
+            LEFT JOIN users s ON d.student_id = s.id
+            LEFT JOIN courses c ON d.course_id = c.id
+            LEFT JOIN users up ON d.uploaded_by_id = up.id
+            LEFT JOIN users rv ON d.reviewed_by_id = rv.id
+            WHERE d.id = $1
+        `, [docId]);
 
+        const document = result.rows[0];
         if (!document) {
             return res.status(404).json({ message: 'Document not found' });
         }
 
         // Check if user has access to this document
+        const userId = req.user.id || req.user._id;
         if (req.user.role === 'student' &&
-            document.student.toString() !== req.user._id.toString() &&
-            document.uploadedBy.toString() !== req.user._id.toString()) {
+            document.student_id !== userId &&
+            document.uploaded_by_id !== userId) {
             return res.status(403).json({ message: 'Not authorized' });
         }
 
@@ -153,86 +176,46 @@ router.get('/:id', protect, async (req, res) => {
 // @access  Private
 router.post('/upload', protect, upload.single('document'), async (req, res) => {
     try {
-        console.log(`[Document Upload] Hit by ${req.user.email} (${req.user.role})`);
-
         if (!req.file) {
-            console.warn('[Document Upload] No file in request');
-            return res.status(400).json({ message: 'No file uploaded or file filter rejected it' });
+            return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const { title, description, type, course, student, recipientUniversity } = req.body;
-        console.log('[Document Upload] Body data:', { title, type, course, student });
+        const userId = req.user.id || req.user._id;
+        const { title, description, type, course, student, university_id } = req.body;
 
-        // Build the document object
-        const docData = {
-            title: title || req.file.originalname,
-            description: description || 'No description provided',
-            type: type || 'other',
-            uploadedBy: req.user._id,
-            fileName: req.file.originalname,
-            fileUrl: `uploads/documents/${req.file.filename}`,
-            fileSize: req.file.size,
-            status: 'submitted'
-        };
+        const fileName = req.file.originalname;
+        const fileUrl = `uploads/documents/${req.file.filename}`;
+        const fileSize = req.file.size.toString();
+        const format = path.extname(fileName).substring(1).toUpperCase();
+        const newId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
-        // Handle optional and role-based fields
-        if (course && course !== '' && course !== 'undefined') {
-            docData.course = course;
-        }
+        const insertResult = await query(`
+            INSERT INTO documents (
+                id, title, description, type, format, file_name, file_url, file_size, 
+                status, uploaded_by_id, student_id, course_id, university_id, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+            RETURNING *, id as _id
+        `, [
+            newId,
+            title || fileName,
+            description || '',
+            type || 'other',
+            format,
+            fileName,
+            fileUrl,
+            fileSize,
+            'submitted',
+            userId,
+            student || (req.user.role === 'student' ? userId : null),
+            course || null,
+            university_id || (req.user.role === 'university' ? userId : null)
+        ]);
 
-        if (student && student !== '' && student !== 'undefined') {
-            docData.student = student;
-        } else if (req.user.role === 'student') {
-            docData.student = req.user._id;
-        }
 
-        if (recipientUniversity && recipientUniversity !== '' && recipientUniversity !== 'undefined') {
-            docData.recipientUniversity = recipientUniversity;
-        }
-
-        // Set university field for university role uploads
-        if (req.user.role === 'university') {
-            docData.university = req.user._id;
-        } else if (req.user.role === 'admin' && (recipientUniversity || course)) {
-            // Admin can assign it to a university or keep it general
-            if (recipientUniversity) docData.university = recipientUniversity;
-        }
-
-        // Set format safely based on model enum
-        const rawExt = path.extname(req.file.originalname);
-        let format = 'PDF'; // Default fallback
-        if (rawExt) {
-            const ext = rawExt.substring(1).toUpperCase();
-            // Match the enum: ['PDF', 'DOC', 'DOCX', 'JPG', 'JPEG', 'PNG', 'ZIP', 'RAR', 'TXT']
-            const modelEnum = ['PDF', 'DOC', 'DOCX', 'JPG', 'JPEG', 'PNG', 'ZIP', 'RAR', 'TXT'];
-            if (modelEnum.includes(ext)) {
-                format = ext;
-            } else if (ext === 'JPG') {
-                format = 'JPG';
-            }
-        }
-        docData.format = format;
-
-        const document = new Document(docData);
-        const savedDocument = await document.save();
-        console.log('[Document Upload] Saved successfully:', savedDocument._id);
-
-        // Populate details for response if possible (non-blocking for UI success)
-        try {
-            if (savedDocument.student) await savedDocument.populate('student', 'name email');
-            if (savedDocument.course) await savedDocument.populate('course', 'title');
-        } catch (popError) {
-            console.error('[Document Upload] Population failed (ignoring):', popError.message);
-        }
-
-        res.status(201).json(savedDocument);
+        res.status(201).json(insertResult.rows[0]);
     } catch (error) {
-        console.error('[Document Upload] 500 CRITICAL Error:', error);
-        res.status(500).json({
-            message: 'Server failed to process document upload',
-            error: error.message,
-            stack: process.env.NODE_ENV === 'production' ? null : error.stack
-        });
+        console.error('[Document Upload] Error:', error);
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -242,30 +225,24 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
 router.put('/:id/review', protect, authorize('admin', 'university'), async (req, res) => {
     try {
         const { status, rejectionReason } = req.body;
+        const userId = req.user.id || req.user._id;
 
         if (!['approved', 'rejected'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
         }
 
-        const document = await Document.findById(req.params.id);
+        const result = await query(`
+            UPDATE documents 
+            SET status = $1, rejection_reason = $2, reviewed_by_id = $3, reviewed_at = NOW(), updated_at = NOW()
+            WHERE id = $4
+            RETURNING *, id as _id
+        `, [status, rejectionReason || null, userId, req.params.id]);
 
-        if (!document) {
+        if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Document not found' });
         }
 
-        document.status = status;
-        document.reviewedBy = req.user._id;
-        document.reviewedAt = new Date();
-
-        if (status === 'rejected' && rejectionReason) {
-            document.rejectionReason = rejectionReason;
-        }
-
-        const updatedDocument = await document.save();
-        await updatedDocument.populate('student', 'name email');
-        await updatedDocument.populate('reviewedBy', 'name');
-
-        res.json(updatedDocument);
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -276,14 +253,21 @@ router.put('/:id/review', protect, authorize('admin', 'university'), async (req,
 // @access  Private (Admin/University)
 router.post('/requirements', protect, authorize('admin', 'university'), async (req, res) => {
     try {
-        const document = new Document({
-            ...req.body,
-            uploadedBy: req.user._id,
-            status: 'pending'
-        });
+        const userId = req.user.id || req.user._id;
+        const { title, description, type, course_id, university_id, is_required, deadline } = req.body;
 
-        const savedDocument = await document.save();
-        res.status(201).json(savedDocument);
+        const result = await query(`
+            INSERT INTO documents (
+                title, description, type, status, is_required, deadline, 
+                course_id, university_id, uploaded_by_id, created_at, updated_at
+            ) VALUES ($1, $2, $3, 'pending', $4, $5, $6, $7, $8, NOW(), NOW())
+            RETURNING *, id as _id
+        `, [
+            title, description, type || 'other', is_required || false,
+            deadline || null, course_id || null, university_id || null, userId
+        ]);
+
+        res.status(201).json(result.rows[0]);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -294,22 +278,25 @@ router.post('/requirements', protect, authorize('admin', 'university'), async (r
 // @access  Private
 router.put('/:id', protect, async (req, res) => {
     try {
-        const document = await Document.findById(req.params.id);
+        const docId = req.params.id;
+        const userId = req.user.id || req.user._id;
+        const { title, description, status } = req.body;
 
-        if (!document) {
-            return res.status(404).json({ message: 'Document not found' });
+        const result = await query(`
+            UPDATE documents 
+            SET title = COALESCE($1, title), 
+                description = COALESCE($2, description), 
+                status = COALESCE($3, status),
+                updated_at = NOW()
+            WHERE id = $4 AND (uploaded_by_id = $5 OR $6 = 'admin')
+            RETURNING *, id as _id
+        `, [title, description, status, docId, userId, req.user.role]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Document not found or unauthorized' });
         }
 
-        // Check authorization
-        if (req.user.role === 'student' &&
-            document.uploadedBy.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: 'Not authorized' });
-        }
-
-        Object.assign(document, req.body);
-        const updatedDocument = await document.save();
-
-        res.json(updatedDocument);
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -320,19 +307,19 @@ router.put('/:id', protect, async (req, res) => {
 // @access  Private
 router.delete('/:id', protect, async (req, res) => {
     try {
-        const document = await Document.findById(req.params.id);
+        const docId = req.params.id;
+        const userId = req.user.id || req.user._id;
 
-        if (!document) {
-            return res.status(404).json({ message: 'Document not found' });
+        const result = await query(`
+            DELETE FROM documents 
+            WHERE id = $1 AND (uploaded_by_id = $2 OR $3 = 'admin')
+            RETURNING id
+        `, [docId, userId, req.user.role]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Document not found or unauthorized' });
         }
 
-        // Check authorization
-        if (req.user.role === 'student' &&
-            document.uploadedBy.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: 'Not authorized' });
-        }
-
-        await document.deleteOne();
         res.json({ message: 'Document deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -344,27 +331,19 @@ router.delete('/:id', protect, async (req, res) => {
 // @access  Private (Admin/University)
 router.get('/stats', protect, authorize('admin', 'university'), async (req, res) => {
     try {
-        const stats = await Document.aggregate([
-            {
-                $group: {
-                    _id: '$status',
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
+        const statusStats = await query(`
+            SELECT status as _id, count(*) as count 
+            FROM documents GROUP BY status
+        `);
 
-        const typeStats = await Document.aggregate([
-            {
-                $group: {
-                    _id: '$type',
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
+        const typeStats = await query(`
+            SELECT type as _id, count(*) as count 
+            FROM documents GROUP BY type
+        `);
 
         res.json({
-            statusStats: stats,
-            typeStats: typeStats
+            statusStats: statusStats.rows,
+            typeStats: typeStats.rows
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
