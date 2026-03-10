@@ -1,0 +1,41 @@
+name: Backend Deployment
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'server/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install Dependencies
+        run: cd server && npm ci
+
+      - name: Run Tests
+        run: cd server && npm test
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+
+      # Note: Actual deployment step depends on the specific AWS service (EC2, App Runner, etc.)
+      # This is a placeholder for AWS App Runner deployment
+      - name: Deploy to AWS App Runner
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Deploying to AWS App Runner..."
+          # aws apprunner start-deployment --service-arn ${{ secrets.AWS_APP_RUNNER_SERVICE_ARN }}
