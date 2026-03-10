@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { syncZoomRecordings } = require('../utils/zoomUtils');
-const LiveSession = require('../models/liveSessionModel');
+const { query } = require('../config/postgres');
 
 /**
  * Get webhook secret from environment
@@ -160,7 +160,8 @@ const handleZoomWebhook = async (req, res) => {
       console.log(`[Zoom Webhook] Processing recording for meeting: ${meetingId}`);
 
       // Find session by meeting ID
-      const session = await LiveSession.findOne({ 'zoom.meetingId': meetingId.toString() });
+      const sessionRes = await query('SELECT id FROM live_sessions WHERE zoom_id = $1', [meetingId.toString()]);
+      const session = sessionRes.rows[0];
       
       if (!session) {
         console.warn(`[Zoom Webhook] No session found for meeting ID: ${meetingId}`);
@@ -171,15 +172,15 @@ const handleZoomWebhook = async (req, res) => {
         });
       }
 
-      console.log(`[Zoom Webhook] Found session: ${session._id}, syncing recordings...`);
+      console.log(`[Zoom Webhook] Found session: ${session.id}, syncing recordings...`);
 
       // Trigger recording sync in background (don't block webhook response)
-      syncZoomRecordings(session._id.toString(), 0)
+      syncZoomRecordings(session.id.toString(), 0)
         .then(() => {
-          console.log(`[Zoom Webhook] Successfully synced recordings for session: ${session._id}`);
+          console.log(`[Zoom Webhook] Successfully synced recordings for session: ${session.id}`);
         })
         .catch((error) => {
-          console.error(`[Zoom Webhook] Error syncing recordings for session: ${session._id}, Error: ${error.message}`);
+          console.error(`[Zoom Webhook] Error syncing recordings for session: ${session.id}, Error: ${error.message}`);
         });
 
       // Respond immediately to acknowledge webhook

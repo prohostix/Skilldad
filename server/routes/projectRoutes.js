@@ -5,8 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { query } = require('../config/postgres');
-const Project = require('../models/projectModel');
-const ProjectSubmission = require('../models/projectSubmissionModel');
 const socketService = require('../services/SocketService');
 
 // Configure multer for project file uploads with absolute path resolution
@@ -211,16 +209,33 @@ router.get('/:id', protect, async (req, res) => {
 // @access  Private (Instructor/Admin)
 router.post('/', protect, authorize('university', 'admin'), async (req, res) => {
     try {
-        const project = new Project({
-            ...req.body,
-            instructor: req.user._id
+        const { title, description, deadline, rubric, courseId } = req.body;
+        
+        const newProject = {
+            _id: 'proj_' + Date.now(),
+            title,
+            description,
+            deadline,
+            rubric
+        };
+
+        const userId = req.user.id || req.user._id;
+
+        const result = await query(`
+            UPDATE courses 
+            SET projects = COALESCE(projects, '[]'::jsonb) || $1::jsonb, updated_at = NOW()
+            WHERE id = $2 AND (instructor_id = $3 OR $4 = 'admin')
+            RETURNING id, title, instructor_id
+        `, [JSON.stringify([newProject]), courseId, userId, req.user.role]);
+
+        if (result.rows.length === 0) {
+            return res.status(403).json({ message: 'Course not found or unauthorized' });
+        }
+
+        res.status(201).json({
+            ...newProject,
+            course: { _id: result.rows[0].id, title: result.rows[0].title }
         });
-
-        const savedProject = await project.save();
-        await savedProject.populate('course', 'title');
-        await savedProject.populate('instructor', 'name email');
-
-        res.status(201).json(savedProject);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

@@ -1,6 +1,5 @@
 const cron = require('node-cron');
-const Transaction = require('../models/payment/Transaction');
-const PaymentSession = require('../models/payment/PaymentSession');
+const { query } = require('../config/postgres');
 
 /**
  * Session Cleanup Cron Job
@@ -43,10 +42,11 @@ class SessionCleanupJob {
       };
 
       // Find all active sessions that have expired
-      const expiredSessions = await PaymentSession.find({
-        status: 'active',
-        expiresAt: { $lt: new Date() }
-      });
+      const expiredSessionsRes = await query(`
+        SELECT * FROM payment_sessions 
+        WHERE status = 'active' AND expires_at < NOW()
+      `);
+      const expiredSessions = expiredSessionsRes.rows;
 
       console.log(`[Session Cleanup Job] Found ${expiredSessions.length} expired sessions`);
 
@@ -54,26 +54,28 @@ class SessionCleanupJob {
       for (const session of expiredSessions) {
         try {
           // Mark session as expired
-          await session.markExpired();
+          await query("UPDATE payment_sessions SET status = 'expired', updated_at = NOW() WHERE id = $1", [session.id]);
           stats.expiredSessions++;
 
           // Find associated transaction
-          const transaction = await Transaction.findOne({
-            transactionId: session.transactionId,
-            status: 'pending' // Only update if still pending
-          });
+          const transactionRes = await query(`
+            SELECT * FROM payments 
+            WHERE transaction_id = $1 AND status = 'pending'
+          `, [session.transaction_id || session.session_id]);
+          const transaction = transactionRes.rows[0];
 
           if (transaction) {
             // Update transaction status to failed with expired error category
-            transaction.status = 'failed';
-            transaction.errorCategory = 'expired';
-            transaction.errorMessage = 'Payment session expired';
-            transaction.completedAt = new Date();
+            await query(`
+                UPDATE payments SET 
+                status = 'failed', error_message = 'Payment session expired',
+                updated_at = NOW()
+                WHERE id = $1
+            `, [transaction.id]);
             
-            await transaction.save();
             stats.updatedTransactions++;
 
-            console.log(`[Session Cleanup Job] Updated transaction ${transaction.transactionId} to failed status (expired)`);
+            console.log(`[Session Cleanup Job] Updated transaction ${transaction.transaction_id} to failed status (expired)`);
           }
 
         } catch (error) {

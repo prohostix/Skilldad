@@ -1,6 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const Course = require('../models/courseModel');
-const LiveSession = require('../models/liveSessionModel');
+const { query } = require('../config/postgres');
 const redisCache = require('../utils/redisCache');
 
 /**
@@ -18,15 +17,14 @@ const linkZoomRecordingToVideo = asyncHandler(async (req, res) => {
     const { sessionId } = req.body;
 
     // Verify user is instructor, admin, or university owner
-    const course = await Course.findById(courseId);
+    const courseRes = await query('SELECT * FROM courses WHERE id = $1', [courseId]);
+    const course = courseRes.rows[0];
     if (!course) {
         res.status(404);
         throw new Error('Course not found');
     }
 
-    // Authorization check: admin can modify any course, others must be the course instructor
-    // For university users, they must be the instructor (course creator)
-    const isInstructor = course.instructor.toString() === req.user._id.toString();
+    const isInstructor = course.instructor_id === req.user._id.toString();
     const isAdmin = req.user.role === 'admin';
 
     if (!isInstructor && !isAdmin) {
@@ -34,8 +32,8 @@ const linkZoomRecordingToVideo = asyncHandler(async (req, res) => {
         throw new Error('Not authorized to modify this course');
     }
 
-    // Fetch the live session and its recording
-    const session = await LiveSession.findById(sessionId);
+    const sessionRes = await query('SELECT * FROM live_sessions WHERE id = $1', [sessionId]);
+    const session = sessionRes.rows[0];
     if (!session) {
         res.status(404);
         throw new Error('Live session not found');
@@ -48,7 +46,8 @@ const linkZoomRecordingToVideo = asyncHandler(async (req, res) => {
     }
 
     // Update the video in the course
-    const module = course.modules[parseInt(moduleIndex)];
+    const modules = course.modules || [];
+    const module = modules[parseInt(moduleIndex)];
     if (!module) {
         res.status(404);
         throw new Error('Module not found');
@@ -69,7 +68,7 @@ const linkZoomRecordingToVideo = asyncHandler(async (req, res) => {
         downloadUrl: session.recording.downloadUrl,
         durationMs: session.recording.durationMs,
         fileSizeBytes: session.recording.fileSizeBytes,
-        recordedAt: session.endTime || session.startTime,
+        recordedAt: session.end_time || session.start_time,
     };
     video.zoomSession = sessionId;
 
@@ -82,7 +81,7 @@ const linkZoomRecordingToVideo = asyncHandler(async (req, res) => {
 
     // Save course with error handling for database failures
     try {
-        await course.save();
+        await query('UPDATE courses SET modules = $1 WHERE id = $2', [JSON.stringify(modules), courseId]);
     } catch (error) {
         console.error('[Zoom Recording Link] Database error saving course:', {
             courseId,
@@ -135,31 +134,28 @@ const getAvailableZoomRecordings = asyncHandler(async (req, res) => {
     // Cache miss - query database
     console.log(`[Cache MISS] Querying available recordings for user ${req.user._id}`);
     
-    // Build filter for ended sessions with completed recordings
-    const filter = {
-        status: 'ended',
-        'recording.status': 'completed',
-        'recording.playUrl': { $exists: true, $ne: null },
-    };
+    let filterQuery = "status = 'ended' AND recording->>'status' = 'completed' AND recording->>'playUrl' IS NOT NULL";
+    const queryParams = [];
+    let paramCount = 1;
 
-    // Filter by user role (Requirement 2.3, 2.4, 7.5)
     if (req.user.role === 'university') {
-        // University users only see their own sessions
-        filter.university = req.user._id;
+        filterQuery += ` AND university_id = $${paramCount++}`;
+        queryParams.push(req.user._id);
     } else if (req.user.role === 'instructor') {
-        // Instructors only see sessions they created
-        filter.instructor = req.user._id;
+        filterQuery += ` AND instructor_id = $${paramCount++}`;
+        queryParams.push(req.user._id);
     }
-    // Admin users see all recordings (no filter applied)
 
-    // Query with optimizations (Requirement 11.5)
     let sessions;
     try {
-        sessions = await LiveSession.find(filter)
-            .select('topic startTime endTime recording zoom') // Project only necessary fields
-            .sort({ endTime: -1 }) // Sort by endTime descending (Requirement 2.5)
-            .limit(50) // Limit to 50 results (Requirement 2.6)
-            .lean(); // Use lean() for read-only queries (faster)
+        const sessionsRes = await query(`
+            SELECT id as _id, topic, start_time, end_time, recording 
+            FROM live_sessions 
+            WHERE ${filterQuery}
+            ORDER BY end_time DESC 
+            LIMIT 50
+        `, queryParams);
+        sessions = sessionsRes.rows;
     } catch (error) {
         console.error('[Zoom Recordings] Database error querying sessions:', {
             userId: req.user._id,
@@ -175,7 +171,7 @@ const getAvailableZoomRecordings = asyncHandler(async (req, res) => {
     const recordings = sessions.map(session => ({
         sessionId: session._id,
         title: session.topic,
-        recordedAt: session.endTime || session.startTime,
+        recordedAt: session.end_time || session.start_time,
         duration: session.recording.durationMs 
             ? `${Math.floor(session.recording.durationMs / 60000)}:${Math.floor((session.recording.durationMs % 60000) / 1000).toString().padStart(2, '0')}`
             : 'Unknown',
@@ -212,25 +208,24 @@ const getAvailableZoomRecordings = asyncHandler(async (req, res) => {
 const unlinkZoomRecordingFromVideo = asyncHandler(async (req, res) => {
     const { courseId, moduleIndex, videoIndex } = req.params;
 
-    // Verify user is instructor, admin, or university owner
-    const course = await Course.findById(courseId);
+    const courseRes = await query('SELECT * FROM courses WHERE id = $1', [courseId]);
+    const course = courseRes.rows[0];
     if (!course) {
         res.status(404);
         throw new Error('Course not found');
     }
 
-    // Authorization check: admin can modify any course, university users must own the course, instructors must be the course instructor
-    const isInstructor = course.instructor.toString() === req.user._id.toString();
+    const isInstructor = course.instructor_id === req.user._id.toString();
     const isAdmin = req.user.role === 'admin';
-    const isUniversityOwner = req.user.role === 'university' && course.instructor.toString() === req.user._id.toString();
+    const isUniversityOwner = req.user.role === 'university' && course.instructor_id === req.user._id.toString();
 
     if (!isInstructor && !isAdmin && !isUniversityOwner) {
         res.status(403);
         throw new Error('Not authorized to modify this course');
     }
 
-    // Update the video in the course
-    const module = course.modules[parseInt(moduleIndex)];
+    const modules = course.modules || [];
+    const module = modules[parseInt(moduleIndex)];
     if (!module) {
         res.status(404);
         throw new Error('Module not found');
@@ -242,14 +237,12 @@ const unlinkZoomRecordingFromVideo = asyncHandler(async (req, res) => {
         throw new Error('Video not found');
     }
 
-    // Unlink the Zoom recording
     video.videoType = 'external';
     video.zoomRecording = undefined;
     video.zoomSession = undefined;
 
-    // Save course with error handling for database failures
     try {
-        await course.save();
+        await query('UPDATE courses SET modules = $1 WHERE id = $2', [JSON.stringify(modules), courseId]);
     } catch (error) {
         console.error('[Zoom Recording Unlink] Database error saving course:', {
             courseId,

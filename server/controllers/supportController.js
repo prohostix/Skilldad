@@ -1,4 +1,4 @@
-const Support = require('../models/supportModel');
+const { query } = require('../config/postgres');
 const sendEmail = require('../utils/sendEmail');
 const emailTemplates = require('../utils/emailTemplates');
 const socketService = require('../services/SocketService');
@@ -14,13 +14,12 @@ const createTicket = async (req, res) => {
             return res.status(400).json({ message: 'Please fill in all fields' });
         }
 
-        const ticket = await Support.create({
-            user: req.user ? req.user.id : null,
-            name,
-            email,
-            subject,
-            message,
-        });
+        const ticketResult = await query(
+            'INSERT INTO support_tickets (user_id, name, email, subject, message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [req.user ? req.user.id : null, name, email, subject, message]
+        );
+        const ticket = ticketResult.rows[0];
+        ticket._id = ticket.id; // Optional: retain backward compatibility for frontend/socket expecting _id
 
         // Real-time: Notify Admins of new ticket
         socketService.broadcast('admin_notification', {
@@ -42,8 +41,8 @@ const createTicket = async (req, res) => {
 // @access  Private (Admin)
 const getTickets = async (req, res) => {
     try {
-        const tickets = await Support.find().sort({ createdAt: -1 });
-        res.json(tickets);
+        const ticketsResult = await query('SELECT * FROM support_tickets ORDER BY created_at DESC');
+        res.json(ticketsResult.rows);
     } catch (error) {
         console.error('Get tickets error:', error);
         res.status(500).json({ message: 'Server error fetching tickets' });
@@ -55,17 +54,23 @@ const getTickets = async (req, res) => {
 // @access  Private (Admin)
 const updateTicketStatus = async (req, res) => {
     try {
-        const ticket = await Support.findById(req.params.id);
+        const ticketResult = await query('SELECT * FROM support_tickets WHERE id = $1', [req.params.id]);
+        let ticket = ticketResult.rows[0];
 
         if (!ticket) {
             return res.status(404).json({ message: 'Ticket not found' });
         }
 
-        const oldResponse = ticket.adminResponse;
+        const oldResponse = ticket.admin_response;
         ticket.status = req.body.status || ticket.status;
-        ticket.adminResponse = req.body.adminResponse || ticket.adminResponse;
+        ticket.admin_response = req.body.adminResponse || ticket.admin_response;
 
-        const updatedTicket = await ticket.save();
+        const updateResult = await query(
+            'UPDATE support_tickets SET status = $1, admin_response = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+            [ticket.status, ticket.admin_response, ticket.id]
+        );
+        const updatedTicket = updateResult.rows[0];
+        ticket._id = ticket.id; // Mongoose backwards compatibility
 
         // Send email if a new response is added or updated
         if (req.body.adminResponse && req.body.adminResponse !== oldResponse) {

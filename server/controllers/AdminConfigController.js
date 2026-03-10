@@ -1,6 +1,4 @@
-const Transaction = require('../models/payment/Transaction');
-const Course = require('../models/courseModel');
-const User = require('../models/userModel');
+const { query } = require('../config/postgres');
 
 /**
  * AdminConfigController - Handles admin configuration and transaction management
@@ -88,31 +86,43 @@ class AdminConfigController {
       const skip = (page - 1) * limit;
 
       // Build filter
-      const filter = {};
+      let filterQuery = '1=1';
+      const queryParams = [];
+      let paramCount = 1;
+
       if (req.query.status) {
-        filter.status = req.query.status;
+        filterQuery += ` AND t.status = $${paramCount++}`;
+        queryParams.push(req.query.status);
       }
-      if (req.query.startDate || req.query.endDate) {
-        filter.initiatedAt = {};
-        if (req.query.startDate) {
-          filter.initiatedAt.$gte = new Date(req.query.startDate);
-        }
-        if (req.query.endDate) {
-          filter.initiatedAt.$lte = new Date(req.query.endDate);
-        }
+      if (req.query.startDate) {
+        filterQuery += ` AND t.initiated_at >= $${paramCount++}`;
+        queryParams.push(new Date(req.query.startDate));
+      }
+      if (req.query.endDate) {
+        filterQuery += ` AND t.initiated_at <= $${paramCount++}`;
+        queryParams.push(new Date(req.query.endDate));
       }
 
       // Fetch transactions with pagination
-      const [transactions, total] = await Promise.all([
-        Transaction.find(filter)
-          .populate('student', 'name email')
-          .populate('course', 'title price')
-          .sort({ initiatedAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean(),
-        Transaction.countDocuments(filter),
+      const transactionsRes = await Promise.all([
+        query(`
+          SELECT t.*, u.name as student_name, u.email as student_email, c.title as course_title, c.price as course_price
+          FROM transactions t
+          LEFT JOIN users u ON t.student_id = u.id
+          LEFT JOIN courses c ON t.course_id = c.id
+          WHERE ${filterQuery}
+          ORDER BY t.initiated_at DESC
+          LIMIT $${paramCount} OFFSET $${paramCount + 1}
+        `, [...queryParams, limit, skip]),
+        query(`SELECT COUNT(*) FROM transactions t WHERE ${filterQuery}`, queryParams)
       ]);
+
+      const total = parseInt(transactionsRes[1].rows[0].count);
+      const transactions = transactionsRes[0].rows.map(t => ({
+          ...t,
+          student: { name: t.student_name, email: t.student_email },
+          course: { title: t.course_title, price: t.course_price }
+      }));
 
       res.json({
         success: true,

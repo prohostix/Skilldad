@@ -1,5 +1,5 @@
 const notificationService = require('../services/NotificationService');
-const NotificationLog = require('../models/notificationLogModel');
+const { query } = require('../config/postgres');
 
 /**
  * @desc    Send demo notifications (Email & WhatsApp)
@@ -55,8 +55,8 @@ const sendDemoNotification = async (req, res) => {
  */
 const getNotificationLogs = async (req, res) => {
     try {
-        const logs = await NotificationLog.find().sort({ createdAt: -1 }).limit(10);
-        res.json(logs);
+        const result = await query('SELECT * FROM notification_logs ORDER BY created_at DESC LIMIT 10');
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

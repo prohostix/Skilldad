@@ -1,5 +1,4 @@
-const FAQ = require('../models/faqModel');
-const FAQSearchAnalytics = require('../models/faqSearchAnalyticsModel');
+const { query } = require('../config/postgres');
 
 // @desc    Get all FAQs (public, with optional search)
 // @route   GET /api/faqs
@@ -7,31 +6,23 @@ const FAQSearchAnalytics = require('../models/faqSearchAnalyticsModel');
 const getFAQs = async (req, res) => {
     try {
         const { search, category } = req.query;
-        let query = {};
-
-        if (search) {
-            query.$text = { $search: search };
-            // Track search analytics using $inc and upsert for maximum performance
-            await FAQSearchAnalytics.findOneAndUpdate(
-                { query: search.toLowerCase() },
-                { $inc: { count: 1 } },
-                { upsert: true, new: true }
-            );
-        }
-
-        if (category) {
-            query.category = category;
-        }
-
         let faqs;
+
         if (search) {
-            // Sort by text score if searching
-            faqs = await FAQ.find(query, { score: { $meta: 'textScore' } }).sort({ score: { $meta: 'textScore' } });
+            await query(`
+                INSERT INTO faq_search_analytics (query, count) 
+                VALUES ($1, 1) 
+                ON CONFLICT (query) DO UPDATE SET count = faq_search_analytics.count + 1, updated_at = NOW()
+            `, [search.toLowerCase()]);
+            
+            faqs = await query('SELECT * FROM faqs WHERE question ILIKE $1 OR answer ILIKE $1 ORDER BY views DESC, created_at DESC', [`%${search}%`]);
+        } else if (category) {
+            faqs = await query('SELECT * FROM faqs WHERE category = $1 ORDER BY views DESC, created_at DESC', [category]);
         } else {
-            faqs = await FAQ.find(query).sort({ views: -1, createdAt: -1 });
+            faqs = await query('SELECT * FROM faqs ORDER BY views DESC, created_at DESC');
         }
 
-        res.status(200).json(faqs);
+        res.status(200).json(faqs.rows);
     } catch (error) {
         res.status(500).json({ message: 'Server Error fetching FAQs' });
     }
@@ -42,7 +33,8 @@ const getFAQs = async (req, res) => {
 // @access  Public
 const getFAQById = async (req, res) => {
     try {
-        const faq = await FAQ.findById(req.params.id);
+        const faqRes = await query('SELECT * FROM faqs WHERE id = $1', [req.params.id]);
+        const faq = faqRes.rows[0];
         if (!faq) {
             return res.status(404).json({ message: 'FAQ not found' });
         }
@@ -57,8 +49,12 @@ const getFAQById = async (req, res) => {
 // @access  Private/Admin
 const createFAQ = async (req, res) => {
     try {
-        const faq = await FAQ.create(req.body);
-        res.status(201).json(faq);
+        const { question, answer, category } = req.body;
+        const faqRes = await query(
+            'INSERT INTO faqs (question, answer, category) VALUES ($1, $2, $3) RETURNING *',
+            [question, answer, category || 'general']
+        );
+        res.status(201).json(faqRes.rows[0]);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -69,7 +65,12 @@ const createFAQ = async (req, res) => {
 // @access  Private/Admin
 const updateFAQ = async (req, res) => {
     try {
-        const faq = await FAQ.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { question, answer, category } = req.body;
+        const faqRes = await query(
+            'UPDATE faqs SET question = COALESCE($1, question), answer = COALESCE($2, answer), category = COALESCE($3, category), updated_at = NOW() WHERE id = $4 RETURNING *',
+            [question, answer, category, req.params.id]
+        );
+        const faq = faqRes.rows[0];
         if (!faq) return res.status(404).json({ message: 'FAQ not found' });
         res.status(200).json(faq);
     } catch (error) {
@@ -82,8 +83,8 @@ const updateFAQ = async (req, res) => {
 // @access  Private/Admin
 const deleteFAQ = async (req, res) => {
     try {
-        const faq = await FAQ.findByIdAndDelete(req.params.id);
-        if (!faq) return res.status(404).json({ message: 'FAQ not found' });
+        const faqRes = await query('DELETE FROM faqs WHERE id = $1 RETURNING id', [req.params.id]);
+        if (faqRes.rowCount === 0) return res.status(404).json({ message: 'FAQ not found' });
         res.status(200).json({ message: 'FAQ deleted' });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -96,10 +97,14 @@ const deleteFAQ = async (req, res) => {
 const submitFeedback = async (req, res) => {
     try {
         const { isHelpful } = req.body;
-        const update = isHelpful ? { $inc: { upvotes: 1 } } : { $inc: { downvotes: 1 } };
+        const column = isHelpful === true ? 'upvotes' : 'downvotes';
+        
+        const faqRes = await query(
+            `UPDATE faqs SET ${column} = ${column} + 1, updated_at = NOW() WHERE id = $1 RETURNING *`,
+            [req.params.id]
+        );
 
-        const faq = await FAQ.findByIdAndUpdate(req.params.id, update, { new: true });
-
+        const faq = faqRes.rows[0];
         if (!faq) return res.status(404).json({ message: 'FAQ not found' });
         res.status(200).json(faq);
     } catch (error) {
@@ -112,13 +117,11 @@ const submitFeedback = async (req, res) => {
 // @access  Private/Admin
 const getAnalytics = async (req, res) => {
     try {
-        const mostViewed = await FAQ.find().sort({ views: -1 }).limit(10);
+        const mostViewedRes = await query('SELECT * FROM faqs ORDER BY views DESC LIMIT 10');
+        const mostViewed = mostViewedRes.rows;
 
-        const topSearches = await FAQSearchAnalytics.aggregate([
-            { $sort: { count: -1 } },
-            { $limit: 10 },
-            { $project: { _id: "$query", count: 1 } }
-        ]);
+        const topSearchesRes = await query('SELECT query as _id, count FROM faq_search_analytics ORDER BY count DESC LIMIT 10');
+        const topSearches = topSearchesRes.rows;
 
         res.status(200).json({ mostViewed, topSearches });
     } catch (error) {
@@ -131,12 +134,12 @@ const getAnalytics = async (req, res) => {
 // @access  Public
 const incrementView = async (req, res) => {
     try {
-        const faq = await FAQ.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { views: 1 } },
-            { new: true }
+        const faqRes = await query(
+            'UPDATE faqs SET views = views + 1, updated_at = NOW() WHERE id = $1 RETURNING *',
+            [req.params.id]
         );
 
+        const faq = faqRes.rows[0];
         if (!faq) return res.status(404).json({ message: 'FAQ not found' });
         res.status(200).json(faq);
     } catch (error) {
@@ -149,7 +152,7 @@ const incrementView = async (req, res) => {
 // @access  Private/Admin
 const clearAnalytics = async (req, res) => {
     try {
-        await FAQSearchAnalytics.deleteMany({});
+        await query('TRUNCATE faq_search_analytics RESTART IDENTITY');
         res.status(200).json({ message: 'Search analytics cleared' });
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const Exam = require('../models/examModel');
+const { query } = require('../config/postgres');
 const ExamNotificationService = require('../services/ExamNotificationService');
 
 /**
@@ -22,13 +22,16 @@ async function checkAndSendReminders() {
 
         // Find exams starting between 25-30 minutes from now
         // This 5-minute window ensures we catch exams even if the job runs slightly off schedule
-        const upcomingExams = await Exam.find({
-            scheduledStartTime: {
-                $gte: twentyFiveMinutesFromNow,
-                $lte: thirtyMinutesFromNow
-            },
-            status: 'scheduled'
-        }).populate('course', 'title');
+        const examsRes = await query(`
+            SELECT e.*, c.title as course_title 
+            FROM exams e
+            LEFT JOIN courses c ON e.course_id = c.id
+            WHERE e.scheduled_start_time >= $1 
+            AND e.scheduled_start_time <= $2
+            AND e.status = 'scheduled'
+        `, [twentyFiveMinutesFromNow, thirtyMinutesFromNow]);
+
+        const upcomingExams = examsRes.rows;
 
         if (upcomingExams.length === 0) {
             console.log('[ExamReminderJob] No exams starting in 30 minutes');
@@ -39,7 +42,8 @@ async function checkAndSendReminders() {
 
         // Send reminders for each exam
         for (const exam of upcomingExams) {
-            const reminderKey = `${exam._id}-${exam.scheduledStartTime.getTime()}`;
+            const scheduledStart = new Date(exam.scheduled_start_time || exam.scheduledStartTime);
+            const reminderKey = `${exam.id}-${scheduledStart.getTime()}`;
             
             // Skip if reminder already sent for this exam
             if (sentReminders.has(reminderKey)) {

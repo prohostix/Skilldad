@@ -1,4 +1,4 @@
-const Transaction = require('../../models/payment/Transaction');
+const { query } = require('../../config/postgres');
 
 /**
  * MonitoringService for Payment Integration
@@ -117,9 +117,12 @@ class MonitoringService {
     }
 
     // Query transactions from database for accurate metrics
-    const transactions = await Transaction.find({
-      initiatedAt: { $gte: startDate }
-    }).select('status initiatedAt completedAt errorCategory paymentMethod');
+    const transactionsRes = await query(`
+        SELECT status, created_at as "initiatedAt", updated_at as "completedAt", error_message as "errorCategory", payment_method as "paymentMethod"
+        FROM payments
+        WHERE created_at >= $1
+    `, [startDate]);
+    const transactions = transactionsRes.rows;
 
     // Calculate success rate
     const totalAttempts = transactions.length;
@@ -257,7 +260,7 @@ class MonitoringService {
   async _checkDatabaseConnectivity() {
     try {
       // Try to count transactions (lightweight query)
-      await Transaction.countDocuments().limit(1);
+      await query('SELECT 1 FROM payments LIMIT 1');
       return {
         status: 'pass',
         message: 'Database is connected and responsive'
@@ -313,23 +316,26 @@ class MonitoringService {
    */
   async getRecentTransactions(limit = 50) {
     try {
-      const transactions = await Transaction.find()
-        .sort({ initiatedAt: -1 })
-        .limit(limit)
-        .populate('student', 'name email')
-        .populate('course', 'title')
-        .select('transactionId status finalAmount paymentMethod initiatedAt completedAt errorMessage');
+      const transactionsRes = await query(`
+        SELECT p.*, u.name as student_name, u.email as student_email
+        FROM payments p
+        LEFT JOIN users u ON p.user_id = u.id
+        ORDER BY p.created_at DESC
+        LIMIT $1
+      `, [limit]);
+
+      const transactions = transactionsRes.rows;
 
       return transactions.map(t => ({
-        transactionId: t.transactionId,
-        student: t.student ? { name: t.student.name, email: t.student.email } : null,
-        course: t.course ? { title: t.course.title } : null,
+        transactionId: t.transaction_id || t.order_id,
+        student: t.student_name ? { name: t.student_name, email: t.student_email } : null,
+        course: null,
         status: t.status,
-        amount: t.finalAmountFormatted,
-        paymentMethod: t.paymentMethod,
-        initiatedAt: t.initiatedAt,
-        completedAt: t.completedAt,
-        errorMessage: t.errorMessage
+        amount: t.amount,
+        paymentMethod: t.payment_method,
+        initiatedAt: t.created_at,
+        completedAt: t.updated_at,
+        errorMessage: t.error_message
       }));
     } catch (error) {
       console.error('[MonitoringService] Error fetching recent transactions:', error);

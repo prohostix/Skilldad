@@ -1,7 +1,5 @@
-const Transaction = require('../../models/payment/Transaction');
-const Reconciliation = require('../../models/payment/Reconciliation');
+const { query } = require('../../config/postgres');
 const HDFCGatewayService = require('./HDFCGatewayService');
-const mongoose = require('mongoose');
 
 /**
  * ReconciliationService - Handles reconciliation between SkillDad and Payment Gateway
@@ -40,25 +38,23 @@ class ReconciliationService {
    */
   async reconcileTransactions(startDate, endDate, userId) {
     try {
-      // Create reconciliation record
-      const reconciliation = new Reconciliation({
-        reconciliationDate: new Date(),
-        startDate,
-        endDate,
-        performedBy: userId,
-        status: 'in_progress',
-      });
+      const reconciliationId = `rec_${Date.now()}`;
+      const recRes = await query(`
+        INSERT INTO payment_reconciliations 
+        (id, reconciliation_date, start_date, end_date, performed_by, status, created_at, updated_at)
+        VALUES ($1, NOW(), $2, $3, $4, 'in_progress', NOW(), NOW())
+        RETURNING *
+      `, [reconciliationId, startDate, endDate, userId]);
 
-      await reconciliation.save();
+      let reconciliation = recRes.rows[0];
 
       try {
         // 1. Fetch local transactions for date range
-        const localTransactions = await Transaction.find({
-          initiatedAt: {
-            $gte: startDate,
-            $lte: endDate,
-          }
-        }).lean();
+        const localTransactionsRes = await query(`
+          SELECT * FROM payments 
+          WHERE created_at >= $1 AND created_at <= $2
+        `, [startDate, endDate]);
+        const localTransactions = localTransactionsRes.rows;
 
         // 2. Fetch settlement reports from gateway
         const settlementRecords = await this.gatewayService.fetchSettlementReport(startDate, endDate);
@@ -79,20 +75,20 @@ class ReconciliationService {
 
         // Check local transactions against gateway
         localTransactions.forEach(txn => {
-          const sysAmount = parseFloat(txn.finalAmount.toString());
+          const sysAmount = parseFloat(txn.amount);
           totalSystemAmount += sysAmount;
 
-          const gatewayRec = settlementMap.get(txn.transactionId);
+          const gatewayRec = settlementMap.get(txn.transaction_id || txn.order_id);
 
           if (!gatewayRec) {
             // Missing in gateway (if it was successful in our system)
             if (txn.status === 'success') {
               discrepancies.push({
-                transactionId: txn.transactionId,
+                transactionId: txn.transaction_id || txn.order_id,
                 type: 'missing_in_gateway',
-                systemAmount: txn.finalAmount,
+                systemAmount: txn.amount,
                 systemStatus: txn.status,
-                description: `Transaction ${txn.transactionId} marked as success in system but missing in gateway report.`
+                description: `Transaction ${txn.transaction_id || txn.order_id} marked as success in system but missing in gateway report.`
               });
             }
           } else {
@@ -105,16 +101,16 @@ class ReconciliationService {
             const amountDiff = Math.abs(sysAmount - gtwAmount);
             if (amountDiff > 0.01) {
               discrepancies.push({
-                transactionId: txn.transactionId,
+                transactionId: txn.transaction_id || txn.order_id,
                 type: 'amount_mismatch',
-                systemAmount: txn.finalAmount,
-                gatewayAmount: mongoose.Types.Decimal128.fromString(gtwAmount.toFixed(2)),
+                systemAmount: txn.amount,
+                gatewayAmount: gtwAmount,
                 description: `Amount mismatch: System ₹${sysAmount.toFixed(2)}, Gateway ₹${gtwAmount.toFixed(2)}`
               });
             } else if (txn.status !== gtwStatus) {
               // Status mismatch
               discrepancies.push({
-                transactionId: txn.transactionId,
+                transactionId: txn.transaction_id || txn.order_id,
                 type: 'status_mismatch',
                 systemStatus: txn.status,
                 gatewayStatus: gtwStatus,
@@ -128,7 +124,7 @@ class ReconciliationService {
             }
 
             // Remove from map to track "gateway only" transactions
-            settlementMap.delete(txn.transactionId);
+            settlementMap.delete(txn.transaction_id || txn.order_id);
           }
         });
 
@@ -137,31 +133,34 @@ class ReconciliationService {
           discrepancies.push({
             transactionId: txnId,
             type: 'missing_in_system',
-            gatewayAmount: mongoose.Types.Decimal128.fromString(parseFloat(rec.amount).toFixed(2)),
+            gatewayAmount: parseFloat(rec.amount),
             gatewayStatus: this.normalizeStatus(rec.status),
             description: `Transaction ${txnId} found in gateway report but missing in SkillDad database.`
           });
         });
 
         // 5. Finalize reconciliation record
-        reconciliation.totalTransactions = localTransactions.length;
-        reconciliation.matchedTransactions = matchedCount;
-        reconciliation.unmatchedTransactions = discrepancies.length;
-        reconciliation.totalAmount = mongoose.Types.Decimal128.fromString(totalSystemAmount.toFixed(2));
-        reconciliation.settledAmount = mongoose.Types.Decimal128.fromString(settledAmount.toFixed(2));
-        reconciliation.refundedAmount = mongoose.Types.Decimal128.fromString(refundedAmount.toFixed(2));
-        reconciliation.netSettlementAmount = mongoose.Types.Decimal128.fromString((settledAmount - refundedAmount).toFixed(2));
-        reconciliation.discrepancies = discrepancies;
-        reconciliation.status = discrepancies.length > 0 ? 'resolved' : 'completed'; // 'resolved' here means 'has discrepancies that may need resolution'
-        reconciliation.completedAt = new Date();
+        const status = discrepancies.length > 0 ? 'resolved' : 'completed';
+        const netSettlement = settledAmount - refundedAmount;
 
-        await reconciliation.save();
+        const updateRes = await query(`
+          UPDATE payment_reconciliations SET
+            total_transactions = $1, matched_transactions = $2, unmatched_transactions = $3,
+            total_amount = $4, settled_amount = $5, refunded_amount = $6, net_settlement_amount = $7,
+            discrepancies = $8, status = $9, completed_at = NOW(), updated_at = NOW()
+          WHERE id = $10 RETURNING *
+        `, [
+          localTransactions.length, matchedCount, discrepancies.length,
+          totalSystemAmount, settledAmount, refundedAmount, netSettlement,
+          JSON.stringify(discrepancies), status, reconciliationId
+        ]);
 
-        return reconciliation;
+        return updateRes.rows[0];
       } catch (error) {
-        reconciliation.status = 'failed';
-        reconciliation.errorMessage = error.message;
-        await reconciliation.save();
+        await query(`
+          UPDATE payment_reconciliations SET status = 'failed', error_message = $1, updated_at = NOW()
+          WHERE id = $2
+        `, [error.message, reconciliationId]);
         throw error;
       }
     } catch (error) {

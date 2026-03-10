@@ -1,7 +1,7 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-const Transaction = require('../../models/payment/Transaction');
+const { query } = require('../../config/postgres');
 const sendEmail = require('../../utils/sendEmail');
 
 /**
@@ -65,13 +65,43 @@ class ReceiptGeneratorService {
   async generateReceipt(transactionId) {
     try {
       // Fetch transaction with populated references
-      const transaction = await Transaction.findOne({ transactionId })
-        .populate('student', 'name email phone')
-        .populate('course', 'title price');
+      const transactionRes = await query(`
+        SELECT t.*, 
+               u.name as "studentName", u.email as "studentEmail", u.phone as "studentPhone",
+               c.title as "courseTitle", c.price as "coursePrice"
+        FROM transactions t
+        LEFT JOIN users u ON t.user_id = u.id
+        LEFT JOIN enrollments e ON e.student_id = u.id -- simplified join for course
+        LEFT JOIN courses c ON e.course_id = c.id
+        WHERE t.id = $1 OR t.provider_order_id = $1 OR t.provider_payment_id = $1
+        LIMIT 1
+      `, [transactionId]);
 
-      if (!transaction) {
+      if (transactionRes.rows.length === 0) {
         throw new Error('Transaction not found');
       }
+
+      const tData = transactionRes.rows[0];
+      const transaction = {
+        transactionId: tData.id,
+        gatewayTransactionId: tData.provider_payment_id,
+        completedAt: tData.updated_at,
+        createdAt: tData.created_at,
+        status: tData.status,
+        receiptNumber: tData.receipt_number,
+        paymentMethod: tData.provider,
+        originalAmount: tData.amount,
+        finalAmount: tData.amount,
+        student: {
+            name: tData.studentName,
+            email: tData.studentEmail,
+            phone: tData.studentPhone
+        },
+        course: {
+            title: tData.courseTitle,
+            price: tData.coursePrice
+        }
+      };
 
       if (transaction.status !== 'success') {
         throw new Error('Cannot generate receipt for non-successful transaction');
@@ -80,7 +110,7 @@ class ReceiptGeneratorService {
       // Generate receipt number if not exists
       if (!transaction.receiptNumber) {
         transaction.receiptNumber = this.generateReceiptNumber();
-        await transaction.save();
+        await query('UPDATE transactions SET receipt_number = $1 WHERE id = $2', [transaction.receiptNumber, transaction.transactionId]);
       }
 
       // Generate PDF
@@ -93,7 +123,7 @@ class ReceiptGeneratorService {
       // Update transaction with receipt URL
       transaction.receiptUrl = receiptUrl;
       transaction.receiptGeneratedAt = new Date();
-      await transaction.save();
+      await query('UPDATE transactions SET receipt_url = $1, receipt_generated_at = NOW(), updated_at = NOW() WHERE id = $2', [receiptUrl, transaction.transactionId]);
 
       return {
         receiptNumber: transaction.receiptNumber,
@@ -420,9 +450,35 @@ class ReceiptGeneratorService {
       const receiptData = await this.generateReceipt(transactionId);
 
       // Fetch transaction for email details
-      const transaction = await Transaction.findOne({ transactionId })
-        .populate('student', 'name email')
-        .populate('course', 'title');
+      const transactionRes = await query(`
+        SELECT t.*, 
+               u.name as "studentName", u.email as "studentEmail",
+               c.title as "courseTitle"
+        FROM transactions t
+        LEFT JOIN users u ON t.user_id = u.id
+        LEFT JOIN enrollments e ON e.student_id = u.id
+        LEFT JOIN courses c ON e.course_id = c.id
+        WHERE t.id = $1 OR t.provider_order_id = $1 OR t.provider_payment_id = $1
+        LIMIT 1
+      `, [transactionId]);
+
+      if (transactionRes.rows.length === 0) {
+        throw new Error('Transaction not found');
+      }
+
+      const tData = transactionRes.rows[0];
+      const transaction = {
+        receiptNumber: tData.receipt_number,
+        transactionId: tData.id,
+        finalAmount: tData.amount,
+        student: {
+            name: tData.studentName,
+            email: tData.studentEmail
+        },
+        course: {
+            title: tData.courseTitle
+        }
+      };
 
       const recipientEmail = studentEmail || transaction.student?.email;
 

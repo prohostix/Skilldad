@@ -8,7 +8,7 @@ const compression = require('compression');
 // Load env vars from the correct path regardless of where it's run from
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-const connectDB = require('./config/db');
+
 const { connectPostgres } = require('./config/postgres');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const jobScheduler = require('./jobs');
@@ -17,7 +17,7 @@ const socketService = require('./services/SocketService');
 
 const fs = require('fs');
 
-connectDB();
+
 connectPostgres();
 
 // Registry of upload paths
@@ -149,8 +149,14 @@ app.get('/', (req, res) => {
 
 // Health check endpoint with storage and DB status
 app.get('/health', async (req, res) => {
-  const mongoose = require('mongoose');
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  let dbStatus = 'disconnected';
+  try {
+    const { query } = require('./config/postgres');
+    await query('SELECT 1');
+    dbStatus = 'connected';
+  } catch (error) {
+    console.error('Database health check failed:', error.message);
+  }
 
   res.status(200).json({
     status: 'ok-v4',

@@ -1,7 +1,7 @@
 const sendEmail = require('../utils/sendEmail');
 const whatsAppService = require('./WhatsAppService');
 const emailTemplates = require('../utils/emailTemplates');
-const NotificationLog = require('../models/notificationLogModel');
+const { query } = require('../config/postgres');
 
 /**
  * Notification Service (Production Grade)
@@ -21,22 +21,30 @@ class NotificationService {
         const email = user.email;
         const phone = user.phone || user.profile?.phone;
 
-        // Initialize Log Entry
-        const log = await NotificationLog.create({
-            userId: _id || null,
-            recipientName: name,
-            recipientEmail: email,
-            recipientPhone: phone,
-            type,
-            channel: (options.email && options.whatsapp) ? 'both' : (options.email ? 'email' : 'whatsapp'),
-            status: {
-                email: { state: options.email && email ? 'pending' : 'skipped' },
-                whatsapp: { state: options.whatsapp && phone ? 'pending' : 'skipped' }
-            },
-            metadata: data
-        });
+        const newLogId = `nl_${Date.now()}`;
+        const deliveryStatus = {
+            email: { state: options.email && email ? 'pending' : 'skipped' },
+            whatsapp: { state: options.whatsapp && phone ? 'pending' : 'skipped' }
+        };
 
-        console.log(`[NotificationService] Processing ID: ${log._id} for ${name}`);
+        const logRes = await query(`
+            INSERT INTO notification_logs (id, user_id, recipient_name, recipient_email, recipient_phone, type, channel, delivery_status, metadata, message, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()) RETURNING *
+        `, [
+            newLogId, 
+            _id || null, 
+            name, email, phone, 
+            type, 
+            (options.email && options.whatsapp) ? 'both' : (options.email ? 'email' : 'whatsapp'), 
+            deliveryStatus, 
+            data,
+            'Sending notification'
+        ]);
+
+        const log = logRes.rows[0];
+        log.status = log.delivery_status; // alias for internal logic
+
+        console.log(`[NotificationService] Processing ID: ${log.id} for ${name}`);
 
         const tasks = [];
 
@@ -54,7 +62,8 @@ class NotificationService {
         await Promise.allSettled(tasks);
 
         // Refresh and return the final log status
-        return await NotificationLog.findById(log._id);
+        const finalLogRes = await query('SELECT * FROM notification_logs WHERE id = $1', [log.id]);
+        return finalLogRes.rows[0];
     }
 
     async _executeEmail(log, user, type, data) {
@@ -98,7 +107,7 @@ class NotificationService {
                 timestamp: new Date()
             };
         }
-        await log.save();
+        await query('UPDATE notification_logs SET delivery_status = $1, updated_at = NOW() WHERE id = $2', [log.status, log.id]);
     }
 
     async _execEmail(user, subject, html) {
@@ -166,7 +175,7 @@ class NotificationService {
                 timestamp: new Date()
             };
         }
-        await log.save();
+        await query('UPDATE notification_logs SET delivery_status = $1, updated_at = NOW() WHERE id = $2', [log.status, log.id]);
     }
 }
 

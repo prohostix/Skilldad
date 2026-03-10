@@ -1,5 +1,4 @@
-const User = require('../../models/userModel');
-
+const { query } = require('../../config/postgres');
 /**
  * PCIComplianceService - Ensures PCI-DSS compliance for payment operations
  * 
@@ -126,7 +125,8 @@ class PCIComplianceService {
     }
     
     // Fetch user from database
-    const user = await User.findById(userId).select('role');
+    const userRes = await query('SELECT role FROM users WHERE id = $1', [userId]);
+    const user = userRes.rows[0];
     
     if (!user) {
       throw new Error('User not found');

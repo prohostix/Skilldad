@@ -4,15 +4,6 @@ const emailTemplates = require('../utils/emailTemplates');
 const socketService = require('../services/SocketService');
 const bcrypt = require('bcryptjs');
 
-// Load Mongoose models
-const User = require('../models/userModel');
-const PartnerLogo = require('../models/partnerLogoModel');
-const Director = require('../models/directorModel');
-const Enrollment = require('../models/enrollmentModel');
-const Document = require('../models/documentModel');
-const Discount = require('../models/discountModel');
-const Course = require('../models/courseModel');
-const Payment = require('../models/paymentModel');
 
 // @desc    Update entity (partner/university) details + discount rate
 // @route   PUT /api/admin/entities/:id
@@ -71,21 +62,15 @@ const updateEntity = async (req, res) => {
             const newCode = (saved.name.replace(/\s+/g, '').substring(0, 6) + saved.discount_rate).toUpperCase();
 
             // Look for existing discount code for this partner
-            let discountDoc = await Discount.findOne({ partner: saved.id });
-            if (discountDoc) {
-                discountDoc.value = saved.discount_rate;
-                discountDoc.code = newCode;
-                await discountDoc.save();
+            let discountRes = await query('SELECT id FROM discounts WHERE partner_id = $1', [saved.id]);
+            if (discountRes.rows.length > 0) {
+                await query('UPDATE discounts SET value = $1, code = $2, updated_at = NOW() WHERE partner_id = $3', [saved.discount_rate, newCode, saved.id]);
             } else {
-                await Discount.create({
-                    code: newCode,
-                    value: saved.discount_rate,
-                    type: 'percentage',
-                    partner: saved.id,
-                    active: true,
-                    uses: 0,
-                    maxUses: 9999
-                });
+                const newDiscountId = `disc_${Date.now()}`;
+                await query(`
+                    INSERT INTO discounts (id, code, value, type, partner_id, active, uses, max_uses)
+                    VALUES ($1, $2, $3, 'percentage', $4, true, 0, 9999)
+                `, [newDiscountId, newCode, saved.discount_rate, saved.id]);
             }
         }
 
@@ -297,21 +282,24 @@ const getPartnerDetails = async (req, res) => {
         const userRes = await query('SELECT id as _id, name, email, role, profile, discount_rate FROM users WHERE id = $1', [req.params.id]);
         const partner = userRes.rows[0];
         if (partner) {
-            const discounts = await Discount.find({ partner: partner._id });
-            const codes = discounts.map(d => d.code);
+            const discountsRes = await query('SELECT code FROM discounts WHERE partner_id = $1', [partner._id]);
+            const codes = discountsRes.rows.map(d => d.code);
 
-            const studentsCountRes = await query('SELECT COUNT(*) FROM users WHERE partner_code = ANY($1) AND role = \'student\'', [codes]);
-            const studentsCount = parseInt(studentsCountRes.rows[0].count);
+            let studentsCount = 0;
+            if (codes.length > 0) {
+                const studentsCountRes = await query('SELECT COUNT(*) FROM users WHERE partner_code = ANY($1) AND role = \'student\'', [codes]);
+                studentsCount = parseInt(studentsCountRes.rows[0].count);
+            }
 
-            const Payout = require('../models/payoutModel');
-            const payouts = await Payout.find({ partner: partner._id });
+            const payoutsRes = await query('SELECT amount, status FROM payouts WHERE partner_id = $1', [partner._id]);
+            const payouts = payoutsRes.rows;
             const pendingPayouts = payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0);
             const approvedPayouts = payouts.filter(p => p.status === 'approved').reduce((sum, p) => sum + p.amount, 0);
 
             res.json({
                 ...partner,
                 stats: {
-                    totalCodes: discounts.length,
+                    totalCodes: codes.length,
                     studentsCount,
                     pendingPayouts,
                     totalEarnings: approvedPayouts
@@ -347,9 +335,8 @@ const getUserById = async (req, res) => {
 // @access  Private (Admin)
 const getPartnerDiscounts = async (req, res) => {
     try {
-        const Discount = require('../models/discountModel');
-        const discounts = await Discount.find({ partner: req.params.id });
-        res.json(discounts);
+        const discountsRes = await query('SELECT * FROM discounts WHERE partner_id = $1', [req.params.id]);
+        res.json(discountsRes.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -628,8 +615,8 @@ const deleteUser = async (req, res) => {
 // @access  Private (Admin)
 async function getPartnerLogos(req, res) {
     try {
-        const logos = await PartnerLogo.find().sort({ order: 1, createdAt: 1 });
-        res.json(logos);
+        const logosRes = await query('SELECT * FROM partner_logos ORDER BY "order" ASC, created_at ASC');
+        res.json(logosRes.rows.map(l => ({ ...l, _id: l.id })));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -641,19 +628,14 @@ async function getPartnerLogos(req, res) {
 async function createPartnerLogo(req, res) {
     try {
         const { name, order, type, logo: logoUrl, location, students, programs } = req.body;
+        const newId = `pl_${Date.now()}`;
+        const result = await query(`
+            INSERT INTO partner_logos (id, name, logo, type, location, students, programs, "order", is_active)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
+            RETURNING *
+        `, [newId, name, logoUrl, type || 'corporate', location, students || 0, programs || 0, order || 0]);
 
-        const logo = await PartnerLogo.create({
-            name,
-            logo: logoUrl,
-            type: type || 'corporate',
-            location,
-            students,
-            programs,
-            order: order || 0,
-            isActive: true
-        });
-
-        res.status(201).json(logo);
+        res.status(201).json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -665,24 +647,18 @@ async function createPartnerLogo(req, res) {
 async function updatePartnerLogo(req, res) {
     try {
         const { name, order, isActive, type, logo: logoUrl, location, students, programs } = req.body;
+        const result = await query(`
+            UPDATE partner_logos 
+            SET name = COALESCE($1, name), logo = COALESCE($2, logo), type = COALESCE($3, type), 
+                location = COALESCE($4, location), students = COALESCE($5, students), programs = COALESCE($6, programs), 
+                "order" = COALESCE($7, "order"), is_active = COALESCE($8, is_active), updated_at = NOW()
+            WHERE id = $9 RETURNING *
+        `, [name, logoUrl, type, location, students, programs, order, isActive, req.params.id]);
 
-        const logo = await PartnerLogo.findById(req.params.id);
-
-        if (!logo) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Partner logo not found' });
         }
-
-        logo.name = name || logo.name;
-        logo.logo = logoUrl !== undefined ? logoUrl : logo.logo;
-        logo.type = type || logo.type;
-        logo.location = location !== undefined ? location : logo.location;
-        logo.students = students !== undefined ? students : logo.students;
-        logo.programs = programs !== undefined ? programs : logo.programs;
-        logo.order = order !== undefined ? order : logo.order;
-        logo.isActive = isActive !== undefined ? isActive : logo.isActive;
-
-        const updatedLogo = await logo.save();
-        res.json(updatedLogo);
+        res.json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -693,13 +669,10 @@ async function updatePartnerLogo(req, res) {
 // @access  Private (Admin)
 async function deletePartnerLogo(req, res) {
     try {
-        const logo = await PartnerLogo.findById(req.params.id);
-
-        if (!logo) {
+        const result = await query('DELETE FROM partner_logos WHERE id = $1 RETURNING id', [req.params.id]);
+        if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Partner logo not found' });
         }
-
-        await logo.deleteOne();
         res.json({ message: 'Partner logo removed' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -713,8 +686,8 @@ async function deletePartnerLogo(req, res) {
 // @access  Private (Admin)
 async function getDirectors(req, res) {
     try {
-        const directors = await Director.find().sort({ order: 1, createdAt: 1 });
-        res.json(directors);
+        const directorsRes = await query('SELECT * FROM directors ORDER BY "order" ASC, created_at ASC');
+        res.json(directorsRes.rows.map(d => ({ ...d, _id: d.id })));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -726,16 +699,13 @@ async function getDirectors(req, res) {
 async function createDirector(req, res) {
     try {
         const { name, title, image, order } = req.body;
+        const newId = `dir_${Date.now()}`;
+        const result = await query(`
+            INSERT INTO directors (id, name, title, image, "order", is_active)
+            VALUES ($1, $2, $3, $4, $5, true) RETURNING *
+        `, [newId, name, title, image, order || 0]);
 
-        const director = await Director.create({
-            name,
-            title,
-            image,
-            order: order || 0,
-            isActive: true
-        });
-
-        res.status(201).json(director);
+        res.status(201).json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -747,21 +717,17 @@ async function createDirector(req, res) {
 async function updateDirector(req, res) {
     try {
         const { name, title, image, order, isActive } = req.body;
+        const result = await query(`
+            UPDATE directors 
+            SET name = COALESCE($1, name), title = COALESCE($2, title), image = COALESCE($3, image), 
+                "order" = COALESCE($4, "order"), is_active = COALESCE($5, is_active), updated_at = NOW()
+            WHERE id = $6 RETURNING *
+        `, [name, title, image, order, isActive, req.params.id]);
 
-        const director = await Director.findById(req.params.id);
-
-        if (!director) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Director not found' });
         }
-
-        director.name = name || director.name;
-        director.title = title || director.title;
-        director.image = image || director.image;
-        director.order = order !== undefined ? order : director.order;
-        director.isActive = isActive !== undefined ? isActive : director.isActive;
-
-        const updatedDirector = await director.save();
-        res.json(updatedDirector);
+        res.json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -772,13 +738,10 @@ async function updateDirector(req, res) {
 // @access  Private (Admin)
 async function deleteDirector(req, res) {
     try {
-        const director = await Director.findById(req.params.id);
-
-        if (!director) {
+        const result = await query('DELETE FROM directors WHERE id = $1 RETURNING id', [req.params.id]);
+        if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Director not found' });
         }
-
-        await director.deleteOne();
         res.json({ message: 'Director removed' });
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -884,9 +847,8 @@ async function getUniversityDetail(req, res) {
         }
 
         // Fetch courses where this university is the instructor (Provider University)
-        const Course = require('../models/courseModel');
-        const providedCourses = await Course.find({ instructor: university._id }).select('_id');
-        const providedIds = providedCourses.map(p => p._id.toString());
+        const providedCoursesRes = await query('SELECT id FROM courses WHERE instructor_id = $1', [university._id]);
+        const providedIds = providedCoursesRes.rows.map(p => p.id.toString());
 
         // Manual assigned IDs
         const assignedIds = university.assigned_courses || [];
@@ -895,18 +857,27 @@ async function getUniversityDetail(req, res) {
         const finalIds = Array.from(new Set([...providedIds, ...assignedIds]));
 
         // Fetch full course data for all identified IDs
-        const uniqueCourses = await Course.find({ _id: { $in: finalIds } });
+        let uniqueCourses = [];
+        if (finalIds.length > 0) {
+            const uniqueCoursesRes = await query('SELECT * FROM courses WHERE id = ANY($1)', [finalIds]);
+            uniqueCourses = uniqueCoursesRes.rows;
+        }
 
         const rawStudentsRes = await query('SELECT id as _id, name, email, is_verified as "isVerified", created_at as "createdAt" FROM users WHERE "universityId" = $1 AND role = \'student\'', [university._id]);
         const rawStudents = rawStudentsRes.rows;
 
         const students = await Promise.all(rawStudents.map(async (student) => {
-            const latestEnrollment = await Enrollment.findOne({ student: student._id })
-                .populate('course', 'title')
-                .sort('-createdAt');
+            const enrollmentRes = await query(`
+                SELECT c.title as course_title 
+                FROM enrollments e 
+                LEFT JOIN courses c ON e.course_id = c.id 
+                WHERE e.student_id = $1 
+                ORDER BY e.created_at DESC LIMIT 1
+            `, [student._id]);
+            const latestEnrollment = enrollmentRes.rows[0];
             return {
                 ...student,
-                course: latestEnrollment ? latestEnrollment.course?.title : 'Enrolled'
+                course: latestEnrollment && latestEnrollment.course_title ? latestEnrollment.course_title : 'Enrolled'
             };
         }));
 
@@ -940,14 +911,15 @@ const adminEnrollStudent = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        const course = await Course.findById(courseId);
+        const courseRes = await query('SELECT * FROM courses WHERE id = $1', [courseId]);
+        const course = courseRes.rows[0];
         if (!course) {
             return res.status(404).json({ message: 'Course not found' });
         }
 
         // Check if already enrolled
-        const existingEnrollment = await Enrollment.findOne({ student: studentId, course: courseId });
-        if (existingEnrollment) {
+        const existingEnrollmentRes = await query('SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2', [studentId, courseId]);
+        if (existingEnrollmentRes.rows.length > 0) {
             return res.status(400).json({ message: `${student.name} is already enrolled in ${course.title}` });
         }
 
@@ -961,8 +933,8 @@ const adminEnrollStudent = async (req, res) => {
                 return res.status(400).json({ message: 'Invalid university ID' });
             }
             assignedUniversityId = universityId;
-        } else if (course.instructor) {
-            const instructorRes = await query('SELECT id, role FROM users WHERE id = $1', [course.instructor.toString()]);
+        } else if (course.instructor_id) {
+            const instructorRes = await query('SELECT id, role FROM users WHERE id = $1', [course.instructor_id]);
             const instructor = instructorRes.rows[0];
             if (instructor && instructor.role === 'university') {
                 assignedUniversityId = instructor.id;
@@ -976,26 +948,21 @@ const adminEnrollStudent = async (req, res) => {
         }
 
         // Create enrollment
-        const enrollment = await Enrollment.create({
-            student: studentId,
-            course: courseId,
-            status: 'active',
-            progress: 0,
-            enrollmentDate: new Date()
-        });
+        const newEnrollmentId = `enr_${Date.now()}`;
+        const enrollmentRes = await query(`
+            INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
+            VALUES ($1, $2, $3, 'active', 0, NOW(), NOW()) RETURNING *
+        `, [newEnrollmentId, studentId, courseId]);
+        const enrollment = enrollmentRes.rows[0];
 
-        const Progress = require('../models/progressModel');
         try {
-            const existingProgress = await Progress.findOne({ user: studentId, course: courseId });
-            if (!existingProgress) {
-                await Progress.create({
-                    user: studentId,
-                    course: courseId,
-                    completedVideos: [],
-                    completedExercises: [],
-                    projectSubmissions: [],
-                    isCompleted: false
-                });
+            const existingProgressRes = await query('SELECT id FROM progress WHERE user_id = $1 AND course_id = $2', [studentId, courseId]);
+            if (existingProgressRes.rows.length === 0) {
+                const newProgressId = `prog_${Date.now()}`;
+                await query(`
+                    INSERT INTO progress (id, user_id, course_id, completed_videos, completed_exercises, project_submissions, is_completed)
+                    VALUES ($1, $2, $3, '[]', '[]', '[]', false)
+                `, [newProgressId, studentId, courseId]);
             }
         } catch (progressError) {
             console.error('[adminEnrollStudent] Error creating Progress record:', progressError.message);
@@ -1029,19 +996,10 @@ const adminEnrollStudent = async (req, res) => {
             }
         }
 
-        await Payment.create({
-            student: studentId,
-            course: courseId,
-            amount: 0,
-            paymentMethod: 'admin_enrolled',
-            transactionId: txnId,
-            status: 'approved',
-            partner: partnerId || undefined,
-            center: centerName,
-            notes: note || `Admin free enrollment by ${req.user?.name || 'Admin'}`,
-            reviewedBy: req.user?.id,
-            reviewedAt: new Date()
-        });
+        await query(`
+            INSERT INTO payments (id, student_id, course_id, amount, payment_method, transaction_id, status, partner_id, center_name, notes, reviewed_by_id, reviewed_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+        `, [`pay_${Date.now()}`, studentId, courseId, 0, 'admin_enrolled', txnId, 'approved', partnerId || null, centerName, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
 
         try {
             socketService.emitToUser(studentId, 'ENROLLMENT_CREATED', {
@@ -1059,7 +1017,7 @@ const adminEnrollStudent = async (req, res) => {
                     studentEmail: student.email,
                     courseId,
                     courseTitle: course.title,
-                    enrollmentId: enrollment._id,
+                    enrollmentId: enrollment.id,
                     message: `${student.name} has been enrolled in ${course.title}`
                 });
             } catch (e) {
@@ -1113,15 +1071,16 @@ const adminUnenrollStudent = async (req, res) => {
     try {
         const { id: studentId, courseId } = req.params;
 
-        const enrollment = await Enrollment.findOneAndDelete({ student: studentId, course: courseId });
-        if (!enrollment) {
+        const enrollmentRes = await query('DELETE FROM enrollments WHERE student_id = $1 AND course_id = $2 RETURNING id', [studentId, courseId]);
+        if (enrollmentRes.rowCount === 0) {
             return res.status(404).json({ message: 'Enrollment not found' });
         }
 
-        await Payment.findOneAndUpdate(
-            { student: studentId, course: courseId, paymentMethod: 'admin_enrolled' },
-            { status: 'rejected', notes: 'Unenrolled by admin' }
-        );
+        await query(`
+            UPDATE payments 
+            SET status = 'rejected', notes = 'Unenrolled by admin', updated_at = NOW() 
+            WHERE student_id = $1 AND course_id = $2 AND payment_method = 'admin_enrolled'
+        `, [studentId, courseId]);
 
         res.json({ message: 'Student unenrolled successfully' });
     } catch (error) {

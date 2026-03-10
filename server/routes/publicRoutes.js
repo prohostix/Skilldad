@@ -1,17 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const PartnerLogo = require('../models/partnerLogoModel');
-const Director = require('../models/directorModel');
-const User = require('../models/userModel');
+const { query } = require('../config/postgres');
 
 // @desc    Get active partner logos for landing page
 // @route   GET /api/public/partner-logos
 // @access  Public
 router.get('/partner-logos', async (req, res) => {
     try {
-        const logos = await PartnerLogo.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
-        // Handle null/undefined results by returning empty array
-        res.json(logos || []);
+        const logosRes = await query(`SELECT id as _id, name, image_url as "imageUrl", "order", is_active as "isActive" FROM partner_logos WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        res.json(logosRes.rows || []);
     } catch (error) {
         // Log error for debugging database connection issues
         console.error('Error fetching partner logos:', error.message);
@@ -24,9 +21,8 @@ router.get('/partner-logos', async (req, res) => {
 // @access  Public
 router.get('/directors', async (req, res) => {
     try {
-        const directors = await Director.find({ isActive: true }).sort({ order: 1, createdAt: 1 });
-        // Handle null/undefined results by returning empty array
-        res.json(directors || []);
+        const directorsRes = await query(`SELECT id as _id, name, role, bio, image_url as "imageUrl", linkedin_url as "linkedinUrl", twitter_url as "twitterUrl", "order", is_active as "isActive" FROM directors WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        res.json(directorsRes.rows || []);
     } catch (error) {
         // Log error for debugging database connection issues
         console.error('Error fetching directors:', error.message);
@@ -39,7 +35,6 @@ router.get('/directors', async (req, res) => {
 // @access  Public
 router.get('/universities', async (req, res) => {
     try {
-        const { query } = require('../config/postgres');
 
         // Fetch verified universities and join with student/course counts
         // studentCount: students registered by this university or having this universityId

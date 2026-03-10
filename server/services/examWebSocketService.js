@@ -1,6 +1,5 @@
 const socketService = require('./SocketService');
-const Exam = require('../models/examModel');
-const ExamSubmissionNew = require('../models/examSubmissionNewModel');
+const { query } = require('../config/postgres');
 const examAccessService = require('./examAccessService');
 
 /**
@@ -175,11 +174,12 @@ class ExamWebSocketService {
     console.log(`[ExamWebSocket] Student ${studentId} reconnecting to exam ${examId}`);
 
     // Check if student has an in-progress submission
-    const submission = await ExamSubmissionNew.findOne({
-      exam: examId,
-      student: studentId,
-      status: 'in-progress'
-    });
+    const submissionRes = await query(`
+      SELECT * FROM exam_submissions_new 
+      WHERE exam_id = $1 AND student_id = $2 AND status = 'in-progress'
+    `, [examId, studentId]);
+
+    const submission = submissionRes.rows[0];
 
     if (!submission) {
       socket.emit('exam-error', {
@@ -191,8 +191,8 @@ class ExamWebSocketService {
     // Rejoin exam room
     await this.joinExam(socket, examId, studentId);
 
-    // Sync timer state
-    const exam = await Exam.findById(examId);
+    const examRes = await query('SELECT * FROM exams WHERE id = $1', [examId]);
+    const exam = examRes.rows[0];
     if (exam) {
       const timeRemaining = examAccessService.calculateTimeRemaining(exam);
       
@@ -213,7 +213,8 @@ class ExamWebSocketService {
    * @param {string} examId - Exam ID to start timer for
    */
   async startExamTimer(examId) {
-    const exam = await Exam.findById(examId);
+    const examRes = await query('SELECT * FROM exams WHERE id = $1', [examId]);
+    const exam = examRes.rows[0];
     
     if (!exam) {
       console.error(`[ExamWebSocket] Exam ${examId} not found`);
@@ -232,7 +233,8 @@ class ExamWebSocketService {
     // Set up interval for timer broadcasts
     const timerInterval = setInterval(async () => {
       try {
-        const currentExam = await Exam.findById(examId);
+        const currentExamRes = await query('SELECT * FROM exams WHERE id = $1', [examId]);
+        const currentExam = currentExamRes.rows[0];
         
         if (!currentExam) {
           console.error(`[ExamWebSocket] Exam ${examId} not found, stopping timer`);
@@ -332,35 +334,39 @@ class ExamWebSocketService {
 
     try {
       // Find all in-progress submissions
-      const inProgressSubmissions = await ExamSubmissionNew.find({
-        exam: examId,
-        status: 'in-progress'
-      });
+      const inProgressSubmissionsRes = await query(`
+        SELECT * FROM exam_submissions_new 
+        WHERE exam_id = $1 AND status = 'in-progress'
+      `, [examId]);
+      
+      const inProgressSubmissions = inProgressSubmissionsRes.rows;
 
       console.log(`[ExamWebSocket] Found ${inProgressSubmissions.length} in-progress submissions`);
 
       // Auto-submit each submission
       for (const submission of inProgressSubmissions) {
-        submission.submittedAt = new Date();
-        submission.timeSpent = Math.floor(
-          (submission.submittedAt - submission.startedAt) / 1000
+        const submittedAt = new Date();
+        const timeSpent = Math.floor(
+          (submittedAt - new Date(submission.started_at)) / 1000
         );
-        submission.isAutoSubmitted = true;
-        submission.status = 'submitted';
-        
-        await submission.save();
+
+        await query(`
+            UPDATE exam_submissions_new 
+            SET submitted_at = $1, time_spent = $2, is_auto_submitted = true, status = 'submitted', updated_at = NOW()
+            WHERE id = $3
+        `, [submittedAt, timeSpent, submission.id]);
 
         // Notify specific student of auto-submission
         if (socketService.io) {
-          socketService.io.to(`student-${submission.student}`).emit('auto-submit', {
+          socketService.io.to(`student-${submission.student_id}`).emit('auto-submit', {
             examId,
-            submissionId: submission._id,
+            submissionId: submission.id,
             message: 'Exam time expired. Your answers have been submitted automatically.',
             timestamp: new Date()
           });
         }
 
-        console.log(`[ExamWebSocket] Auto-submitted submission ${submission._id} for student ${submission.student}`);
+        console.log(`[ExamWebSocket] Auto-submitted submission ${submission.id} for student ${submission.student_id}`);
       }
 
       // Update exam status to completed
@@ -438,24 +444,26 @@ class ExamWebSocketService {
       const now = new Date();
       
       // Find all exams that are ongoing or scheduled but have started
-      const ongoingExams = await Exam.find({
-        status: { $in: ['scheduled', 'ongoing'] },
-        scheduledStartTime: { $lte: now },
-        scheduledEndTime: { $gt: now }
-      });
+      const ongoingExamsRes = await query(`
+        SELECT * FROM exams 
+        WHERE status IN ('scheduled', 'ongoing') 
+        AND scheduled_start_time <= $1 AND scheduled_end_time > $1
+      `, [now]);
+      const ongoingExams = ongoingExamsRes.rows;
 
       console.log(`[ExamWebSocket] Found ${ongoingExams.length} ongoing exams to start timers for`);
 
       for (const exam of ongoingExams) {
         // Check if exam has any in-progress submissions
-        const hasActiveSubmissions = await ExamSubmissionNew.exists({
-          exam: exam._id,
-          status: 'in-progress'
-        });
+        const activeSubmissionsRes = await query(`
+          SELECT 1 FROM exam_submissions_new 
+          WHERE exam_id = $1 AND status = 'in-progress' LIMIT 1
+        `, [exam.id]);
+        const hasActiveSubmissions = activeSubmissionsRes.rowCount > 0;
 
         if (hasActiveSubmissions) {
-          await this.startExamTimer(exam._id.toString());
-          console.log(`[ExamWebSocket] Started timer for exam ${exam._id}`);
+          await this.startExamTimer(exam.id);
+          console.log(`[ExamWebSocket] Started timer for exam ${exam.id}`);
         }
       }
     } catch (error) {

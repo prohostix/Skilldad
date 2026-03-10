@@ -1,4 +1,4 @@
-const Discount = require('../models/discountModel');
+const { query } = require('../config/postgres');
 
 // @desc    Validate a discount code
 // @route   POST /api/discount/validate
@@ -11,15 +11,13 @@ const validateDiscount = async (req, res) => {
             return res.status(400).json({ message: 'Discount code is required' });
         }
 
-        const discount = await Discount.findOne({
-            code: code.toUpperCase(),
-            isActive: true,
-            $or: [
-                { expiryDate: { $gt: new Date() } },
-                { expiryDate: null },
-                { expiryDate: { $exists: false } }
-            ]
-        });
+        const result = await query(`
+            SELECT * FROM discounts 
+            WHERE code = $1 AND active = true 
+            /* AND (expiry_date > NOW() OR expiry_date IS NULL) */
+        `, [code.toUpperCase()]);
+
+        const discount = result.rows[0];
 
         if (!discount) {
             return res.status(404).json({ message: 'Invalid or expired discount code' });
@@ -39,21 +37,20 @@ const createDiscount = async (req, res) => {
     try {
         const { code, type, value, expiryDate, partner } = req.body;
 
-        const discountExists = await Discount.findOne({ code: code.toUpperCase() });
+        const checkResult = await query('SELECT * FROM discounts WHERE code = $1', [code.toUpperCase()]);
 
-        if (discountExists) {
+        if (checkResult.rows.length > 0) {
             return res.status(400).json({ message: 'Discount code already exists' });
         }
 
-        const discount = await Discount.create({
-            code: code.toUpperCase(),
-            type: type || 'percentage',
-            value,
-            expiryDate: expiryDate || null,
-            partner: partner || null, // Assign to specific partner or leave as global
-        });
+        const id = `disc_${Date.now()}`;
+        const result = await query(`
+            INSERT INTO discounts (id, code, type, value, partner_id) 
+            VALUES ($1, $2, $3, $4, $5) 
+            RETURNING *
+        `, [id, code.toUpperCase(), type || 'percentage', value, partner || null]);
 
-        res.status(201).json(discount);
+        res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Create discount error:', error);
         res.status(500).json({ message: 'Server error creating discount code' });
@@ -65,8 +62,8 @@ const createDiscount = async (req, res) => {
 // @access  Protected/Admin
 const getDiscounts = async (req, res) => {
     try {
-        const discounts = await Discount.find({}).sort({ createdAt: -1 });
-        res.json(discounts);
+        const result = await query('SELECT * FROM discounts ORDER BY created_at DESC');
+        res.json(result.rows);
     } catch (error) {
         console.error('Get discounts error:', error);
         res.status(500).json({ message: 'Server error fetching discounts' });

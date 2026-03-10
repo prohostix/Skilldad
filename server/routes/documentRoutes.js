@@ -5,8 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const { query } = require('../config/postgres');
 const { protect, authorize } = require('../middleware/authMiddleware');
-const Document = require('../models/documentModel');
-
 // Configure multer for file uploads
 // Configure multer for file uploads with robust path handling
 const storage = multer.diskStorage({

@@ -1,8 +1,6 @@
 const notificationService = require('./NotificationService');
 const emailTemplates = require('../utils/emailTemplates');
-const Enrollment = require('../models/enrollmentModel');
-const User = require('../models/userModel');
-const Course = require('../models/courseModel');
+const { query } = require('../config/postgres');
 
 /**
  * Exam Notification Service
@@ -17,22 +15,24 @@ class ExamNotificationService {
      */
     async notifyExamScheduled(exam, students = null) {
         try {
-            // Fetch students if not provided
             if (!students) {
-                const enrollments = await Enrollment.find({
-                    course: exam.course._id || exam.course,
-                    status: 'active'
-                }).populate('student', '_id name email profile phone');
-
-                students = enrollments
-                    .map(e => e.student)
-                    .filter(s => !!s);
+                const courseId = exam.course_id || exam.course?._id || exam.course;
+                const enrollmentsRes = await query(`
+                    SELECT u.id as _id, u.name, u.email, u.profile, u.phone 
+                    FROM enrollments e
+                    JOIN users u ON e.student_id = u.id
+                    WHERE e.course_id = $1 AND e.status = 'active'
+                `, [courseId]);
+                
+                students = enrollmentsRes.rows;
             }
 
             // Get course details
-            const course = exam.course.title 
-                ? exam.course 
-                : await Course.findById(exam.course).select('title');
+            let courseTitle = exam.course?.title || exam.course_title;
+            if (!courseTitle) {
+                const courseRes = await query('SELECT title FROM courses WHERE id = $1', [exam.course_id || exam.course]);
+                courseTitle = courseRes.rows[0]?.title || 'Course';
+            }
 
             console.log(`[ExamNotificationService] Notifying ${students.length} students about exam: ${exam.title}`);
 
@@ -48,8 +48,8 @@ class ExamNotificationService {
                     'exam',
                     {
                         examTitle: exam.title,
-                        courseTitle: course.title,
-                        scheduledDate: exam.scheduledStartTime
+                        courseTitle: courseTitle,
+                        scheduledDate: exam.scheduled_start_time || exam.scheduledStartTime
                     },
                     { email: true, whatsapp: true }
                 ).catch(err => {
@@ -81,28 +81,29 @@ class ExamNotificationService {
      */
     async notifyExamReminder(exam, students = null) {
         try {
-            // Fetch students if not provided
             if (!students) {
-                const enrollments = await Enrollment.find({
-                    course: exam.course._id || exam.course,
-                    status: 'active'
-                }).populate('student', '_id name email profile phone');
-
-                students = enrollments
-                    .map(e => e.student)
-                    .filter(s => !!s);
+                const courseId = exam.course_id || exam.course?._id || exam.course;
+                const enrollmentsRes = await query(`
+                    SELECT u.id as _id, u.name, u.email, u.profile, u.phone 
+                    FROM enrollments e
+                    JOIN users u ON e.student_id = u.id
+                    WHERE e.course_id = $1 AND e.status = 'active'
+                `, [courseId]);
+                
+                students = enrollmentsRes.rows;
             }
 
             // Get course details
-            const course = exam.course.title 
-                ? exam.course 
-                : await Course.findById(exam.course).select('title');
+            let courseTitle = exam.course?.title || exam.course_title;
+            if (!courseTitle) {
+                const courseRes = await query('SELECT title FROM courses WHERE id = $1', [exam.course_id || exam.course]);
+                courseTitle = courseRes.rows[0]?.title || 'Course';
+            }
 
             console.log(`[ExamNotificationService] Sending exam reminder to ${students.length} students for: ${exam.title}`);
 
-            // Send reminder notifications
             const notificationPromises = students.map(student => 
-                this._sendExamReminder(student, exam, course)
+                this._sendExamReminder(student, exam, courseTitle)
                     .catch(err => {
                         console.error(`[ExamNotificationService] Failed to send reminder to ${student.email}:`, err.message);
                         return null;
@@ -141,8 +142,8 @@ class ExamNotificationService {
             'examReminder',
             {
                 examTitle: exam.title,
-                courseTitle: course.title,
-                startTime: exam.scheduledStartTime,
+                courseTitle: courseTitle,
+                startTime: exam.scheduled_start_time || exam.scheduledStartTime,
                 duration: exam.duration
             },
             { email: true, whatsapp: false } // Email only for reminders
@@ -169,9 +170,9 @@ class ExamNotificationService {
                 'examResult',
                 {
                     examTitle: exam.title,
-                    score: `${result.obtainedMarks}/${result.totalMarks}`,
+                    score: `${result.score || result.obtainedMarks}/${result.total_marks || result.totalMarks}`,
                     percentage: result.percentage,
-                    passed: result.isPassed
+                    passed: result.passed || result.isPassed
                 },
                 { email: true, whatsapp: true }
             );
@@ -191,28 +192,29 @@ class ExamNotificationService {
      */
     async notifyExamCancelled(exam, students = null, reason = '') {
         try {
-            // Fetch students if not provided
             if (!students) {
-                const enrollments = await Enrollment.find({
-                    course: exam.course._id || exam.course,
-                    status: 'active'
-                }).populate('student', '_id name email profile phone');
-
-                students = enrollments
-                    .map(e => e.student)
-                    .filter(s => !!s);
+                const courseId = exam.course_id || exam.course?._id || exam.course;
+                const enrollmentsRes = await query(`
+                    SELECT u.id as _id, u.name, u.email, u.profile, u.phone 
+                    FROM enrollments e
+                    JOIN users u ON e.student_id = u.id
+                    WHERE e.course_id = $1 AND e.status = 'active'
+                `, [courseId]);
+                
+                students = enrollmentsRes.rows;
             }
 
             // Get course details
-            const course = exam.course.title 
-                ? exam.course 
-                : await Course.findById(exam.course).select('title');
+            let courseTitle = exam.course?.title || exam.course_title;
+            if (!courseTitle) {
+                const courseRes = await query('SELECT title FROM courses WHERE id = $1', [exam.course_id || exam.course]);
+                courseTitle = courseRes.rows[0]?.title || 'Course';
+            }
 
             console.log(`[ExamNotificationService] Notifying ${students.length} students about exam cancellation: ${exam.title}`);
 
-            // Send cancellation notifications
             const notificationPromises = students.map(student => 
-                this._sendExamCancellation(student, exam, course, reason)
+                this._sendExamCancellation(student, exam, courseTitle, reason)
                     .catch(err => {
                         console.error(`[ExamNotificationService] Failed to notify ${student.email}:`, err.message);
                         return null;
@@ -251,7 +253,7 @@ class ExamNotificationService {
             'examCancelled',
             {
                 examTitle: exam.title,
-                courseTitle: course.title,
+                courseTitle: courseTitle,
                 reason: reason
             },
             { email: true, whatsapp: false }
@@ -292,8 +294,8 @@ class ExamNotificationService {
             'submissionConfirmation',
             {
                 examTitle: exam.title,
-                submittedAt: submission.submittedAt,
-                isAutoSubmitted: submission.isAutoSubmitted
+                submittedAt: submission.submitted_at || submission.submittedAt,
+                isAutoSubmitted: submission.is_auto_submitted || submission.isAutoSubmitted
             },
             { email: true, whatsapp: false }
         );
@@ -307,9 +309,12 @@ class ExamNotificationService {
      */
     async sendBulkNotification(userIds, type, data) {
         try {
-            const users = await User.find({
-                _id: { $in: userIds }
-            }).select('_id name email profile phone');
+            const usersRes = await query(`
+                SELECT id as _id, name, email, profile, phone 
+                FROM users 
+                WHERE id = ANY($1)
+            `, [userIds]);
+            const users = usersRes.rows;
 
             console.log(`[ExamNotificationService] Sending bulk notification (${type}) to ${users.length} users`);
 

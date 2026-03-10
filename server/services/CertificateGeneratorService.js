@@ -1,7 +1,7 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-const Enrollment = require('../models/enrollmentModel');
+const { query } = require('../config/postgres');
 
 /**
  * Certificate Generator Service
@@ -29,9 +29,16 @@ class CertificateGeneratorService {
      */
     async generateCertificate(enrollmentId) {
         try {
-            const enrollment = await Enrollment.findById(enrollmentId)
-                .populate('student', 'name email')
-                .populate('course', 'title instructorName');
+            const enrollmentRes = await query(`
+                SELECT e.*, 
+                       u.name as student_name, u.email as student_email,
+                       c.title as course_title, c.instructor_name as instructor_name
+                FROM enrollments e
+                JOIN users u ON e.student_id = u.id
+                JOIN courses c ON e.course_id = c.id
+                WHERE e.id = $1
+            `, [enrollmentId]);
+            const enrollment = enrollmentRes.rows[0];
 
             if (!enrollment) throw new Error('Enrollment not found');
 
@@ -83,7 +90,7 @@ class CertificateGeneratorService {
             doc.font('Helvetica-Bold')
                 .fontSize(32)
                 .fillColor('#7C3AED')
-                .text(enrollment.student.name.toUpperCase(), 0, 310, { align: 'center' });
+                .text(enrollment.student_name.toUpperCase(), 0, 310, { align: 'center' });
 
             doc.font('Helvetica')
                 .fontSize(16)
@@ -93,7 +100,7 @@ class CertificateGeneratorService {
             doc.font('Helvetica-Bold')
                 .fontSize(24)
                 .fillColor('#111827')
-                .text(enrollment.course.title, 0, 390, { align: 'center' });
+                .text(enrollment.course_title, 0, 390, { align: 'center' });
 
             // --- FOOTER DETAILS ---
             const date = new Date().toLocaleDateString('en-US', {
@@ -106,7 +113,7 @@ class CertificateGeneratorService {
                 .text(`Issued on: ${date}`, 100, 480);
 
             // Instructor
-            doc.text(`Instructor: ${enrollment.course.instructorName || 'SkillDad Academic Board'}`, 0, 480, { align: 'right', indent: 100 });
+            doc.text(`Instructor: ${enrollment.instructor_name || 'SkillDad Academic Board'}`, 0, 480, { align: 'right', indent: 100 });
 
             // Certificate ID
             doc.fontSize(10)
@@ -127,9 +134,7 @@ class CertificateGeneratorService {
 
             return new Promise((resolve, reject) => {
                 stream.on('finish', async () => {
-                    enrollment.certificateIssued = true;
-                    enrollment.certificateUrl = publicUrl;
-                    await enrollment.save();
+                    await query('UPDATE enrollments SET certificate_issued = true, certificate_url = $1, updated_at = NOW() WHERE id = $2', [publicUrl, enrollmentId]);
                     resolve({ filepath, publicUrl, certId });
                 });
                 stream.on('error', reject);

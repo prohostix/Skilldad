@@ -1,7 +1,6 @@
 const cron = require('node-cron');
 const MonitoringService = require('../services/payment/MonitoringService');
-const User = require('../models/userModel');
-
+const { query } = require('../config/postgres');
 /**
  * Monitoring Alert Cron Job
  * 
@@ -133,7 +132,8 @@ class MonitoringAlertJob {
   async sendSuccessRateAlert(checkResult) {
     try {
       // Find all admin users
-      const admins = await User.find({ role: 'admin' }).select('email name');
+      const adminsRes = await query("SELECT email, name FROM users WHERE role = 'admin'");
+      const admins = adminsRes.rows;
 
       if (admins.length === 0) {
         console.warn('[Monitoring Alert Job] No admin users found to send alert');
@@ -192,7 +192,8 @@ class MonitoringAlertJob {
   async sendApiResponseTimeAlert(checkResult) {
     try {
       // Find all admin users
-      const admins = await User.find({ role: 'admin' }).select('email name');
+      const adminsRes = await query("SELECT email, name FROM users WHERE role = 'admin'");
+      const admins = adminsRes.rows;
 
       if (admins.length === 0) {
         console.warn('[Monitoring Alert Job] No admin users found to send alert');

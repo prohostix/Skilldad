@@ -96,8 +96,27 @@ module.exports = {
   // Other methods if needed can be added here or kept as stubs
   isExamActive: (exam) => {
     const now = new Date();
-    const startTime = new Date(exam.scheduled_start);
-    const endTime = new Date(exam.scheduled_end);
+    const startTime = new Date(exam.scheduled_start_time || exam.scheduled_start);
+    const endTime = new Date(exam.scheduled_end_time || exam.scheduled_end);
     return now >= startTime && now <= endTime;
+  },
+  calculateTimeRemaining: (exam) => {
+    const now = new Date();
+    const endTime = new Date(exam.scheduled_end_time || exam.scheduled_end);
+    const effectiveEndTime = exam.allow_late_submission && exam.late_submission_deadline
+      ? new Date(exam.late_submission_deadline)
+      : endTime;
+    return Math.floor(Math.max(0, effectiveEndTime - now) / 1000);
+  },
+  hasExamEnded: (exam) => {
+    const now = new Date();
+    const endTime = new Date(exam.scheduled_end_time || exam.scheduled_end);
+    const effectiveEndTime = exam.allow_late_submission && exam.late_submission_deadline
+      ? new Date(exam.late_submission_deadline)
+      : endTime;
+    return now > effectiveEndTime;
+  },
+  completeExam: async (examId) => {
+    await query("UPDATE exams SET status = 'completed', updated_at = NOW() WHERE id = $1", [examId]);
   }
 };

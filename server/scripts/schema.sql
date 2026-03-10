@@ -269,3 +269,213 @@ CREATE TABLE IF NOT EXISTS discounts (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- 17. Enquiries Table
+CREATE TABLE IF NOT EXISTS enquiries (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    message TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 18. FAQs Table
+CREATE TABLE IF NOT EXISTS faqs (
+    id SERIAL PRIMARY KEY,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    category TEXT DEFAULT 'general',
+    views INTEGER DEFAULT 0,
+    upvotes INTEGER DEFAULT 0,
+    downvotes INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 19. FAQ Search Analytics Table
+CREATE TABLE IF NOT EXISTS faq_search_analytics (
+    id SERIAL PRIMARY KEY,
+    query TEXT UNIQUE NOT NULL,
+    count INTEGER DEFAULT 1,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 20. Support Tickets Table
+CREATE TABLE IF NOT EXISTS support_tickets (
+    id SERIAL PRIMARY KEY,
+    user_id TEXT REFERENCES users(id),
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    message TEXT NOT NULL,
+    status TEXT DEFAULT 'open',
+    admin_response TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 21. Notification Logs Table
+CREATE TABLE IF NOT EXISTS notification_logs (
+    id SERIAL PRIMARY KEY,
+    recipient_name TEXT,
+    recipient_email TEXT,
+    recipient_phone TEXT,
+    type TEXT NOT NULL,
+    channel TEXT, -- 'email', 'whatsapp', 'both'
+    status TEXT DEFAULT 'pending',
+    provider_response JSONB,
+    error_details TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 22. SkillDad Universities Table
+CREATE TABLE IF NOT EXISTS skill_dad_universities (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    location TEXT,
+    website TEXT,
+    phone TEXT,
+    email TEXT,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 25. progress
+CREATE TABLE IF NOT EXISTS progress (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    course_id TEXT,
+    completed_videos JSONB DEFAULT '[]',
+    completed_exercises JSONB DEFAULT '[]',
+    completed_practices JSONB DEFAULT '[]',
+    completed_quizzes JSONB DEFAULT '[]',
+    project_submissions JSONB DEFAULT '[]',
+    is_completed BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 26. interactive_contents
+CREATE TABLE IF NOT EXISTS interactive_contents (
+    id TEXT PRIMARY KEY,
+    title TEXT,
+    type TEXT,
+    course_id TEXT,
+    module_id TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 27. live_sessions
+CREATE TABLE IF NOT EXISTS live_sessions (
+    id TEXT PRIMARY KEY,
+    topic TEXT NOT NULL,
+    description TEXT,
+    category TEXT DEFAULT 'General',
+    meeting_link TEXT,
+    university_id TEXT,
+    instructor_id TEXT,
+    course_id TEXT,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE,
+    duration INTEGER NOT NULL,
+    status TEXT DEFAULT 'scheduled',
+    zoom JSONB DEFAULT '{}',
+    recording JSONB DEFAULT '{}',
+    metrics JSONB DEFAULT '{}',
+    notifications JSONB DEFAULT '[]',
+    is_deleted BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 28. exams
+CREATE TABLE IF NOT EXISTS exams (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    course_id TEXT NOT NULL,
+    university_id TEXT NOT NULL,
+    created_by_id TEXT NOT NULL,
+    exam_type TEXT NOT NULL,
+    is_mock_exam BOOLEAN DEFAULT false,
+    scheduled_start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    scheduled_end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    duration INTEGER NOT NULL,
+    question_paper_url TEXT,
+    allow_late_submission BOOLEAN DEFAULT false,
+    late_submission_deadline TIMESTAMP WITH TIME ZONE,
+    status TEXT DEFAULT 'scheduled',
+    results_published BOOLEAN DEFAULT false,
+    published_at TIMESTAMP WITH TIME ZONE,
+    shuffle_questions BOOLEAN DEFAULT false,
+    show_results_immediately BOOLEAN DEFAULT false,
+    passing_score INTEGER DEFAULT 40,
+    total_marks INTEGER NOT NULL,
+    instructions TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 29. exam_submissions_new
+CREATE TABLE IF NOT EXISTS exam_submissions_new (
+    id TEXT PRIMARY KEY,
+    exam_id TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    status TEXT DEFAULT 'in-progress',
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    submitted_at TIMESTAMP WITH TIME ZONE,
+    time_spent INTEGER,
+    is_auto_submitted BOOLEAN DEFAULT false,
+    score INTEGER,
+    percentage DECIMAL,
+    passed BOOLEAN,
+    answers JSONB DEFAULT '[]',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 30. payment_reconciliations
+CREATE TABLE IF NOT EXISTS payment_reconciliations (
+    id TEXT PRIMARY KEY,
+    reconciliation_date TIMESTAMP WITH TIME ZONE,
+    start_date TIMESTAMP WITH TIME ZONE,
+    end_date TIMESTAMP WITH TIME ZONE,
+    performed_by TEXT,
+    total_transactions INTEGER DEFAULT 0,
+    matched_transactions INTEGER DEFAULT 0,
+    unmatched_transactions INTEGER DEFAULT 0,
+    total_amount DECIMAL(15, 2) DEFAULT 0,
+    settled_amount DECIMAL(15, 2) DEFAULT 0,
+    refunded_amount DECIMAL(15, 2) DEFAULT 0,
+    net_settlement_amount DECIMAL(15, 2) DEFAULT 0,
+    discrepancies JSONB DEFAULT '[]',
+    status TEXT,
+    error_message TEXT,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 31. payment_sessions
+CREATE TABLE IF NOT EXISTS payment_sessions (
+    id TEXT PRIMARY KEY,
+    session_id TEXT,
+    transaction_id TEXT,
+    user_id TEXT,
+    amount DECIMAL(15, 2),
+    status TEXT DEFAULT 'active',
+    expires_at TIMESTAMP WITH TIME ZONE,
+    qr_code TEXT,
+    payment_data JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+

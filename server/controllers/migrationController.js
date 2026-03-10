@@ -3,8 +3,7 @@
  * Handles one-time data migration tasks
  */
 
-const Enrollment = require('../models/enrollmentModel');
-const Progress = require('../models/progressModel');
+const { query } = require('../config/postgres');
 
 /**
  * @desc    Fix admin enrollments by creating missing Progress records
@@ -16,10 +15,14 @@ const fixAdminEnrollments = async (req, res) => {
         console.log('[Migration] Starting admin enrollment fix...');
 
         // Find all active enrollments
-        const enrollments = await Enrollment.find({ status: 'active' })
-            .populate('student', 'name email')
-            .populate('course', 'title')
-            .lean();
+        const enrollmentsRes = await query(`
+            SELECT e.*, u.id as student_id, u.name as student_name, u.email as student_email, c.id as course_id, c.title as course_title
+            FROM enrollments e
+            LEFT JOIN users u ON e.student_id = u.id
+            LEFT JOIN courses c ON e.course_id = c.id
+            WHERE e.status = 'active'
+        `);
+        const enrollments = enrollmentsRes.rows;
 
         console.log(`[Migration] Found ${enrollments.length} active enrollments`);
 
@@ -31,46 +34,40 @@ const fixAdminEnrollments = async (req, res) => {
         // Process each enrollment
         for (const enrollment of enrollments) {
             try {
-                if (!enrollment.student || !enrollment.course) {
-                    console.log(`[Migration] Skipping enrollment ${enrollment._id} - missing student or course`);
+                if (!enrollment.student_id || !enrollment.course_id) {
+                    console.log(`[Migration] Skipping enrollment ${enrollment.id} - missing student or course`);
                     skippedCount++;
                     continue;
                 }
 
                 // Check if Progress record exists
-                const existingProgress = await Progress.findOne({
-                    user: enrollment.student._id,
-                    course: enrollment.course._id
-                });
+                const existingProgressRes = await query('SELECT id FROM progress WHERE user_id = $1 AND course_id = $2', [enrollment.student_id, enrollment.course_id]);
 
-                if (existingProgress) {
+                if (existingProgressRes.rows.length > 0) {
                     // Progress record already exists, skip
                     skippedCount++;
                     continue;
                 }
 
                 // Create missing Progress record
-                await Progress.create({
-                    user: enrollment.student._id,
-                    course: enrollment.course._id,
-                    completedVideos: [],
-                    completedExercises: [],
-                    projectSubmissions: [],
-                    isCompleted: false
-                });
+                const newId = `prog_${Date.now()}`;
+                await query(`
+                    INSERT INTO progress (id, user_id, course_id, completed_videos, completed_exercises, project_submissions, is_completed)
+                    VALUES ($1, $2, $3, '[]', '[]', '[]', false)
+                `, [newId, enrollment.student_id, enrollment.course_id]);
 
                 fixedCount++;
                 fixedEnrollments.push({
-                    studentName: enrollment.student.name,
-                    studentEmail: enrollment.student.email,
-                    courseTitle: enrollment.course.title
+                    studentName: enrollment.student_name,
+                    studentEmail: enrollment.student_email,
+                    courseTitle: enrollment.course_title
                 });
 
-                console.log(`[Migration] Fixed: ${enrollment.student.name} → ${enrollment.course.title}`);
+                console.log(`[Migration] Fixed: ${enrollment.student_name} → ${enrollment.course_title}`);
 
             } catch (error) {
                 errorCount++;
-                console.error(`[Migration] Error processing enrollment ${enrollment._id}:`, error.message);
+                console.error(`[Migration] Error processing enrollment ${enrollment.id}:`, error.message);
             }
         }
 

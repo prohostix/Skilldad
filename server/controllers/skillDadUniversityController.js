@@ -1,12 +1,12 @@
-const SkillDadUniversity = require('../models/skillDadUniversityModel');
+const { query } = require('../config/postgres');
 
 // @desc    Get all SkillDad universities
 // @route   GET /api/admin/skilldad-universities
 // @access  Private (Admin)
 const getSkillDadUniversities = async (req, res) => {
     try {
-        const universities = await SkillDadUniversity.find().sort({ createdAt: -1 });
-        res.json(universities);
+        const result = await query('SELECT * FROM skill_dad_universities ORDER BY created_at DESC');
+        res.json(result.rows);
     } catch (error) {
         console.error('Error fetching SkillDad universities:', error);
         res.status(500).json({ message: error.message });
@@ -24,16 +24,12 @@ const createSkillDadUniversity = async (req, res) => {
             return res.status(400).json({ message: 'University name is required' });
         }
 
-        const university = await SkillDadUniversity.create({
-            name,
-            location,
-            website,
-            phone,
-            email,
-            description,
-        });
+        const result = await query(
+            'INSERT INTO skill_dad_universities (name, location, website, phone, email, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [name, location, website, phone, email, description]
+        );
 
-        res.status(201).json(university);
+        res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Error creating SkillDad university:', error);
         res.status(400).json({ message: error.message });
@@ -45,24 +41,17 @@ const createSkillDadUniversity = async (req, res) => {
 // @access  Private (Admin)
 const updateSkillDadUniversity = async (req, res) => {
     try {
-        const university = await SkillDadUniversity.findById(req.params.id);
-
-        if (!university) {
-            return res.status(404).json({ message: 'University not found' });
-        }
-
         const { name, location, website, phone, email, description, isActive } = req.body;
+        const result = await query(`
+            UPDATE skill_dad_universities 
+            SET name = COALESCE($1, name), location = COALESCE($2, location), website = COALESCE($3, website), 
+                phone = COALESCE($4, phone), email = COALESCE($5, email), description = COALESCE($6, description), 
+                is_active = COALESCE($7, is_active), updated_at = NOW()
+            WHERE id = $8 RETURNING *
+        `, [name, location, website, phone, email, description, isActive, req.params.id]);
 
-        university.name = name || university.name;
-        university.location = location !== undefined ? location : university.location;
-        university.website = website !== undefined ? website : university.website;
-        university.phone = phone !== undefined ? phone : university.phone;
-        university.email = email !== undefined ? email : university.email;
-        university.description = description !== undefined ? description : university.description;
-        university.isActive = isActive !== undefined ? isActive : university.isActive;
-
-        const updatedUniversity = await university.save();
-        res.json(updatedUniversity);
+        if (result.rowCount === 0) return res.status(404).json({ message: 'University not found' });
+        res.json(result.rows[0]);
     } catch (error) {
         console.error('Error updating SkillDad university:', error);
         res.status(400).json({ message: error.message });
@@ -74,13 +63,8 @@ const updateSkillDadUniversity = async (req, res) => {
 // @access  Private (Admin)
 const deleteSkillDadUniversity = async (req, res) => {
     try {
-        const university = await SkillDadUniversity.findById(req.params.id);
-
-        if (!university) {
-            return res.status(404).json({ message: 'University not found' });
-        }
-
-        await SkillDadUniversity.findByIdAndDelete(req.params.id);
+        const result = await query('DELETE FROM skill_dad_universities WHERE id = $1 RETURNING id', [req.params.id]);
+        if (result.rowCount === 0) return res.status(404).json({ message: 'University not found' });
         res.json({ message: 'University deleted successfully' });
     } catch (error) {
         console.error('Error deleting SkillDad university:', error);

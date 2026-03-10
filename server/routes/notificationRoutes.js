@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
-const NotificationLog = require('../models/notificationLogModel');
+const { query } = require('../config/postgres');
 const whatsAppService = require('../services/WhatsAppService');
 const notificationService = require('../services/NotificationService');
 
@@ -10,10 +10,12 @@ const notificationService = require('../services/NotificationService');
 // @access  Private (Admin)
 router.get('/logs', protect, authorize('admin'), async (req, res) => {
     try {
-        const logs = await NotificationLog.find()
-            .sort({ createdAt: -1 })
-            .limit(100);
-        res.json(logs);
+        const logsRes = await query(`
+            SELECT * FROM notification_logs
+            ORDER BY created_at DESC
+            LIMIT 100
+        `);
+        res.json(logsRes.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -1,6 +1,4 @@
-const Progress = require('../models/progressModel');
-const Course = require('../models/courseModel');
-const InteractiveContent = require('../models/interactiveContentModel');
+const { query } = require('../config/postgres');
 
 /**
  * ProgressTracker Service
@@ -18,39 +16,43 @@ class ProgressTrackerService {
      */
     async recordCompletion(submission) {
         try {
-            // Find or create progress record
-            let progress = await Progress.findOne({
-                user: submission.user,
-                course: submission.course
-            });
+            const progressRes = await query('SELECT * FROM progress WHERE user_id = $1 AND course_id = $2', [submission.user, submission.course]);
+            let progress = progressRes.rows[0];
 
             if (!progress) {
-                progress = await Progress.create({
-                    user: submission.user,
-                    course: submission.course,
-                    completedVideos: [],
-                    completedExercises: [],
-                    completedPractices: [],
-                    completedQuizzes: [],
-                    projectSubmissions: []
-                });
+                const newId = `prog_${Date.now()}`;
+                const res = await query(`
+                    INSERT INTO progress (id, user_id, course_id, completed_videos, completed_exercises, completed_practices, completed_quizzes, project_submissions, is_completed, created_at, updated_at)
+                    VALUES ($1, $2, $3, '[]', '[]', '[]', '[]', '[]', false, NOW(), NOW()) RETURNING *
+                `, [newId, submission.user, submission.course]);
+                progress = res.rows[0];
             }
 
             const contentId = submission.content._id || submission.content;
 
             // Update progress based on content type
             if (submission.contentType === 'exercise') {
-                // Requirement 9.2: Track exercises with attempts, best score, completion
                 await this._updateExerciseProgress(progress, contentId, submission);
             } else if (submission.contentType === 'practice') {
-                // Requirement 9.3: Track practices - record completion when submitted
                 await this._updatePracticeProgress(progress, contentId);
             } else if (submission.contentType === 'quiz') {
-                // Requirement 9.4: Track quizzes with attempts, best score, passing status
                 await this._updateQuizProgress(progress, contentId, submission);
             }
 
-            await progress.save();
+            await query(`
+                UPDATE progress SET 
+                completed_exercises = $1, 
+                completed_practices = $2, 
+                completed_quizzes = $3, 
+                updated_at = NOW() 
+                WHERE id = $4
+            `, [
+                JSON.stringify(progress.completed_exercises), 
+                JSON.stringify(progress.completed_practices), 
+                JSON.stringify(progress.completed_quizzes), 
+                progress.id
+            ]);
+
             return progress;
         } catch (error) {
             console.error('Error recording completion:', error);
@@ -63,23 +65,20 @@ class ProgressTrackerService {
      * Requirement 9.2: Track best scores and completion status
      */
     async _updateExerciseProgress(progress, contentId, submission) {
-        const existingIndex = progress.completedExercises.findIndex(
-            ex => ex.content.toString() === contentId.toString()
+        progress.completed_exercises = progress.completed_exercises || [];
+        const existingIndex = progress.completed_exercises.findIndex(
+            ex => ex.content === contentId.toString()
         );
 
         if (existingIndex >= 0) {
-            // Update existing exercise progress
-            const existing = progress.completedExercises[existingIndex];
+            const existing = progress.completed_exercises[existingIndex];
             existing.attempts += 1;
-            // Requirement 9.2: Track best score across multiple attempts
             existing.bestScore = Math.max(existing.bestScore, submission.score);
             existing.lastAttemptAt = submission.submittedAt;
-            // Requirement 9.2: Update completion flag (70% threshold)
             existing.isCompleted = existing.bestScore >= 70;
         } else {
-            // Add new exercise progress
-            progress.completedExercises.push({
-                content: contentId,
+            progress.completed_exercises.push({
+                content: contentId.toString(),
                 attempts: submission.attemptNumber,
                 bestScore: submission.score,
                 lastAttemptAt: submission.submittedAt,
@@ -88,38 +87,28 @@ class ProgressTrackerService {
         }
     }
 
-    /**
-     * Update practice progress (internal helper)
-     * Requirement 9.3: Record completion when submitted
-     */
     async _updatePracticeProgress(progress, contentId) {
-        if (!progress.completedPractices.some(id => id.toString() === contentId.toString())) {
-            progress.completedPractices.push(contentId);
+        progress.completed_practices = progress.completed_practices || [];
+        if (!progress.completed_practices.some(id => id === contentId.toString())) {
+            progress.completed_practices.push(contentId.toString());
         }
     }
 
-    /**
-     * Update quiz progress (internal helper)
-     * Requirement 9.4: Track best scores and passing status
-     */
     async _updateQuizProgress(progress, contentId, submission) {
-        const existingIndex = progress.completedQuizzes.findIndex(
-            qz => qz.content.toString() === contentId.toString()
+        progress.completed_quizzes = progress.completed_quizzes || [];
+        const existingIndex = progress.completed_quizzes.findIndex(
+            qz => qz.content === contentId.toString()
         );
 
         if (existingIndex >= 0) {
-            // Update existing quiz progress
-            const existing = progress.completedQuizzes[existingIndex];
+            const existing = progress.completed_quizzes[existingIndex];
             existing.attempts += 1;
-            // Requirement 9.4: Track best score across multiple attempts
             existing.bestScore = Math.max(existing.bestScore, submission.score);
-            // Requirement 9.4: Update passing status (once passed, stays passed)
             existing.isPassing = existing.isPassing || submission.isPassing;
             existing.lastAttemptAt = submission.submittedAt;
         } else {
-            // Add new quiz progress
-            progress.completedQuizzes.push({
-                content: contentId,
+            progress.completed_quizzes.push({
+                content: contentId.toString(),
                 attempts: submission.attemptNumber,
                 bestScore: submission.score,
                 isPassing: submission.isPassing,
@@ -138,14 +127,8 @@ class ProgressTrackerService {
      */
     async getProgress(userId, courseId) {
         try {
-            // Find progress record
-            const progress = await Progress.findOne({
-                user: userId,
-                course: courseId
-            })
-                .populate('completedExercises.content', 'title type')
-                .populate('completedPractices', 'title type')
-                .populate('completedQuizzes.content', 'title type');
+            const progressRes = await query('SELECT * FROM progress WHERE user_id = $1 AND course_id = $2', [userId, courseId]);
+            const progress = progressRes.rows[0];
 
             if (!progress) {
                 // Return empty progress if not found
@@ -167,18 +150,18 @@ class ProgressTrackerService {
             const courseProgress = await this.calculateCourseProgress(userId, courseId);
 
             return {
-                user: progress.user,
-                course: progress.course,
-                completedVideos: progress.completedVideos,
-                completedExercises: progress.completedExercises,
-                completedPractices: progress.completedPractices,
-                completedQuizzes: progress.completedQuizzes,
-                projectSubmissions: progress.projectSubmissions,
+                user: progress.user_id,
+                course: progress.course_id,
+                completedVideos: progress.completed_videos || [],
+                completedExercises: progress.completed_exercises || [],
+                completedPractices: progress.completed_practices || [],
+                completedQuizzes: progress.completed_quizzes || [],
+                projectSubmissions: progress.project_submissions || [],
                 moduleProgress,
                 courseProgress,
-                isCompleted: progress.isCompleted,
-                createdAt: progress.createdAt,
-                updatedAt: progress.updatedAt
+                isCompleted: progress.is_completed,
+                createdAt: progress.created_at,
+                updatedAt: progress.updated_at
             };
         } catch (error) {
             console.error('Error getting progress:', error);
@@ -196,75 +179,60 @@ class ProgressTrackerService {
      */
     async calculateModuleProgress(userId, courseId) {
         try {
-            const course = await Course.findById(courseId).populate('modules.interactiveContent');
-            if (!course) {
-                throw new Error('Course not found');
-            }
+            const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [courseId]);
+            const courseRow = courseRes.rows[0];
+            if (!courseRow) throw new Error('Course not found');
+            
+            const modules = typeof courseRow.modules === 'string' ? JSON.parse(courseRow.modules) : (courseRow.modules || []);
 
-            const progress = await Progress.findOne({
-                user: userId,
-                course: courseId
-            });
+            const progressRes = await query('SELECT * FROM progress WHERE user_id = $1 AND course_id = $2', [userId, courseId]);
+            const progress = progressRes.rows[0];
 
             if (!progress) {
-                // Return 0% for all modules if no progress
-                return course.modules.map(module => ({
-                    moduleId: module._id,
+                return modules.map(module => ({
+                    moduleId: module._id || module.id,
                     moduleTitle: module.title,
                     completionPercentage: 0,
                     completedItems: 0,
-                    totalItems: module.videos.length + (module.interactiveContent?.length || 0)
+                    totalItems: (module.videos?.length || 0) + (module.interactiveContent?.length || 0)
                 }));
             }
 
-            // Calculate progress for each module
-            const moduleProgressArray = course.modules.map(module => {
+            const moduleProgressArray = modules.map(module => {
                 let completedItems = 0;
                 let totalItems = 0;
 
-                // Count videos
-                totalItems += module.videos.length;
-                const completedVideosInModule = module.videos.filter(video =>
-                    progress.completedVideos.some(id => id.toString() === video._id.toString())
-                ).length;
-                completedItems += completedVideosInModule;
+                totalItems += (module.videos?.length || 0);
+                if (module.videos) {
+                    const completedVideosInModule = module.videos.filter(video =>
+                        (progress.completed_videos || []).some(id => id.toString() === (video._id || video.id).toString())
+                    ).length;
+                    completedItems += completedVideosInModule;
+                }
 
-                // Count interactive content
                 if (module.interactiveContent && module.interactiveContent.length > 0) {
                     module.interactiveContent.forEach(content => {
                         totalItems += 1;
-                        const contentId = content._id || content;
+                        const contentId = (content._id || content.id || content).toString();
 
-                        // Check if content is completed based on type
                         if (content.type === 'exercise') {
-                            const exerciseProgress = progress.completedExercises.find(
-                                ex => ex.content.toString() === contentId.toString()
-                            );
-                            if (exerciseProgress && exerciseProgress.isCompleted) {
-                                completedItems += 1;
-                            }
+                            const exerciseProgress = (progress.completed_exercises || []).find(ex => ex.content === contentId);
+                            if (exerciseProgress && exerciseProgress.isCompleted) completedItems += 1;
                         } else if (content.type === 'practice') {
-                            if (progress.completedPractices.some(id => id.toString() === contentId.toString())) {
-                                completedItems += 1;
-                            }
+                            if ((progress.completed_practices || []).some(id => id === contentId)) completedItems += 1;
                         } else if (content.type === 'quiz') {
-                            const quizProgress = progress.completedQuizzes.find(
-                                qz => qz.content.toString() === contentId.toString()
-                            );
-                            if (quizProgress && quizProgress.isPassing) {
-                                completedItems += 1;
-                            }
+                            const quizProgress = (progress.completed_quizzes || []).find(qz => qz.content === contentId);
+                            if (quizProgress && quizProgress.isPassing) completedItems += 1;
                         }
                     });
                 }
 
-                // Requirement 9.5: Calculate percentage of completed items
                 const completionPercentage = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
                 return {
-                    moduleId: module._id,
+                    moduleId: module._id || module.id,
                     moduleTitle: module.title,
-                    completionPercentage: Math.round(completionPercentage * 100) / 100, // Round to 2 decimals
+                    completionPercentage: Math.round(completionPercentage * 100) / 100,
                     completedItems,
                     totalItems
                 };
@@ -289,73 +257,43 @@ class ProgressTrackerService {
      */
     async calculateCourseProgress(userId, courseId) {
         try {
-            const course = await Course.findById(courseId).populate('modules.interactiveContent');
-            if (!course) {
-                throw new Error('Course not found');
-            }
+            const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [courseId]);
+            const courseRow = courseRes.rows[0];
+            if (!courseRow) throw new Error('Course not found');
+            
+            const modules = typeof courseRow.modules === 'string' ? JSON.parse(courseRow.modules) : (courseRow.modules || []);
 
-            const progress = await Progress.findOne({
-                user: userId,
-                course: courseId
-            });
+            const progressRes = await query('SELECT * FROM progress WHERE user_id = $1 AND course_id = $2', [userId, courseId]);
+            const progress = progressRes.rows[0];
 
-            if (!progress) {
-                return 0;
-            }
+            if (!progress) return 0;
 
-            // Count total items by type
             let totalVideos = 0;
             let totalExercises = 0;
             let totalPractices = 0;
             let totalQuizzes = 0;
 
-            course.modules.forEach(module => {
-                totalVideos += module.videos.length;
+            modules.forEach(module => {
+                totalVideos += (module.videos?.length || 0);
 
                 if (module.interactiveContent && module.interactiveContent.length > 0) {
                     module.interactiveContent.forEach(content => {
-                        if (content.type === 'exercise') {
-                            totalExercises += 1;
-                        } else if (content.type === 'practice') {
-                            totalPractices += 1;
-                        } else if (content.type === 'quiz') {
-                            totalQuizzes += 1;
-                        }
+                        if (content.type === 'exercise') totalExercises += 1;
+                        else if (content.type === 'practice') totalPractices += 1;
+                        else if (content.type === 'quiz') totalQuizzes += 1;
                     });
                 }
             });
 
-            // Calculate completion percentages for each type
-            // Requirement 9.6: Calculate completion percentage for each content type
-            const videoProgress = totalVideos > 0
-                ? (progress.completedVideos.length / totalVideos) * 100
-                : 0;
+            const videoProgress = totalVideos > 0 ? ((progress.completed_videos || []).length / totalVideos) * 100 : 0;
+            const completedExercisesCount = (progress.completed_exercises || []).filter(ex => ex.isCompleted).length;
+            const exerciseProgress = totalExercises > 0 ? (completedExercisesCount / totalExercises) * 100 : 0;
+            const practiceProgress = totalPractices > 0 ? ((progress.completed_practices || []).length / totalPractices) * 100 : 0;
+            const passedQuizzesCount = (progress.completed_quizzes || []).filter(qz => qz.isPassing).length;
+            const quizProgress = totalQuizzes > 0 ? (passedQuizzesCount / totalQuizzes) * 100 : 0;
 
-            const completedExercisesCount = progress.completedExercises.filter(ex => ex.isCompleted).length;
-            const exerciseProgress = totalExercises > 0
-                ? (completedExercisesCount / totalExercises) * 100
-                : 0;
-
-            const practiceProgress = totalPractices > 0
-                ? (progress.completedPractices.length / totalPractices) * 100
-                : 0;
-
-            const passedQuizzesCount = progress.completedQuizzes.filter(qz => qz.isPassing).length;
-            const quizProgress = totalQuizzes > 0
-                ? (passedQuizzesCount / totalQuizzes) * 100
-                : 0;
-
-            // Requirement 9.7: Calculate weighted average
-            // Videos: 40%, Exercises: 20%, Practices: 15%, Quizzes: 25%
-            const overallProgress = (videoProgress * 0.4) +
-                (exerciseProgress * 0.2) +
-                (practiceProgress * 0.15) +
-                (quizProgress * 0.25);
-
-            // Requirement 9.8: Ensure progress is between 0 and 100
-            const clampedProgress = Math.max(0, Math.min(100, overallProgress));
-
-            return Math.round(clampedProgress * 100) / 100; // Round to 2 decimals
+            const overallProgress = (videoProgress * 0.4) + (exerciseProgress * 0.2) + (practiceProgress * 0.15) + (quizProgress * 0.25);
+            return Math.round(Math.max(0, Math.min(100, overallProgress)) * 100) / 100;
         } catch (error) {
             console.error('Error calculating course progress:', error);
             throw error;
