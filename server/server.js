@@ -74,12 +74,14 @@ setTimeout(() => {
 
 // Middleware
 app.use(express.json({
+  limit: '50mb',
   verify: (req, res, buf) => {
     if (req.originalUrl.startsWith('/api/payment/webhook')) {
       req.rawBody = buf;
     }
   }
 }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // CORS — allow Vercel frontend + localhost dev
 const allowedOrigins = [
   'https://skill-dad-client.vercel.app',
