@@ -23,7 +23,12 @@
 .zoom-meeting-container .settings-dialog,
 .zoom-meeting-container .zm-modal-container,
 .zoom-meeting-container .zm-context-menu,
-.zoom-meeting-container .zm-box {
+.zoom-meeting-container .zm-box,
+.zoom-meeting-container .zm-whiteboard,
+.zoom-meeting-container .zm-notation,
+.zoom-meeting-container .zm-tooltip,
+.zoom-meeting-container .zm-popover,
+.zoom-meeting-container .ax-tooltip {
   z-index: 20001 !important;
 }
 
