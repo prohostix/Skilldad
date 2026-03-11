@@ -194,7 +194,7 @@ const PartnerDetail = () => {
                         </div>
                         <div>
                             <p className="text-xs text-white/50 uppercase tracking-wider font-bold">Pending Payouts</p>
-                            <p className="text-2xl font-bold text-amber-400">${stats?.pendingPayouts?.toLocaleString() || 0}</p>
+                            <p className="text-2xl font-bold text-amber-400">₹{stats?.pendingPayouts?.toLocaleString() || 0}</p>
                         </div>
                     </div>
                 </GlassCard>
@@ -206,7 +206,7 @@ const PartnerDetail = () => {
                         </div>
                         <div>
                             <p className="text-xs text-white/50 uppercase tracking-wider font-bold">Total Earnings</p>
-                            <p className="text-2xl font-bold text-emerald-400">${stats?.totalEarnings?.toLocaleString() || 0}</p>
+                            <p className="text-2xl font-bold text-emerald-400">₹{stats?.totalEarnings?.toLocaleString() || 0}</p>
                         </div>
                     </div>
                 </GlassCard>
@@ -280,7 +280,7 @@ const PartnerDetail = () => {
                                     </span>
                                 </div>
                                 <p className="text-sm text-white/70">
-                                    {discount.type === 'percentage' ? `${discount.value}% off` : `$${discount.value} off`}
+                                    {discount.type === 'percentage' ? `${discount.value}% off` : `₹${discount.value} off`}
                                 </p>
                                 <p className="text-xs text-white/40 mt-2">
                                     Used: {discount.usageCount || 0} times

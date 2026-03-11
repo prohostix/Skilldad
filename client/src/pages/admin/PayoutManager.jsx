@@ -135,7 +135,7 @@ const PayoutManager = () => {
                                         {payout.partner?.name || 'N/A'}
                                     </td>
                                     <td className="px-6 py-4 text-white/70">
-                                        ${payout.amount?.toLocaleString() || '0'}
+                                        ₹{payout.amount?.toLocaleString() || '0'}
                                     </td>
                                     <td className="px-6 py-4 text-white/70">
                                         {new Date(payout.createdAt).toLocaleDateString()}
@@ -221,7 +221,7 @@ const PayoutManager = () => {
                                 </div>
                                 <div>
                                     <p className="text-white/50">Amount</p>
-                                    <p className="text-white font-bold">${selectedPayout.amount?.toLocaleString()}</p>
+                                    <p className="text-white font-bold">₹{selectedPayout.amount?.toLocaleString()}</p>
                                 </div>
                                 <div>
                                     <p className="text-white/50">Date</p>

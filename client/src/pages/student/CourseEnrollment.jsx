@@ -320,8 +320,8 @@ const CourseEnrollment = () => {
                                     {/* Pricing */}
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-3">
-                                            <span className="text-3xl font-bold text-white">${course.price}</span>
-                                            <span className="text-lg text-slate-400 line-through">${course.originalPrice}</span>
+                                            <span className="text-3xl font-bold text-white">₹{course.price}</span>
+                                            <span className="text-lg text-slate-400 line-through">₹{course.originalPrice}</span>
                                             <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-sm font-medium rounded">
                                                 {course.discount}% off
                                             </span>

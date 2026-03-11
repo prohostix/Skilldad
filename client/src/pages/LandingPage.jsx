@@ -531,7 +531,7 @@ const LandingPage = () => {
                                     <div className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-between group/link">
                                         <div className="flex flex-col">
                                             <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Enrollment Fee</span>
-                                            <span className="text-sm font-black text-white">${c.price || '199'}</span>
+                                            <span className="text-sm font-black text-white">₹{c.price || '199'}</span>
                                         </div>
                                         <ModernButton
                                             onClick={(e) => {

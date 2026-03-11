@@ -364,7 +364,7 @@ const UniversityManagement = () => {
                         </div>
                         <div className="text-left">
                             <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">B2B Revenue</p>
-                            <p className="text-base font-semibold text-white font-inter">$84.2k</p>
+                            <p className="text-base font-semibold text-white font-inter">₹84.2k</p>
                         </div>
                     </div>
                 </GlassCard>

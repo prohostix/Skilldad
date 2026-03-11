@@ -318,7 +318,7 @@ const PartnerDashboard = () => {
                                 </div>
                                 <div className="text-left">
                                     <h3 className="text-white text-xs font-bold uppercase tracking-widest font-inter mb-1">Total Revenue</h3>
-                                    <p className="text-xl font-semibold text-white font-space">${totalRevenue.toLocaleString()}</p>
+                                    <p className="text-xl font-semibold text-white font-space">₹{totalRevenue.toLocaleString()}</p>
                                 </div>
                             </GlassCard>
 
@@ -342,7 +342,7 @@ const PartnerDashboard = () => {
                                     </div>
                                     <h3 className="text-white text-xs font-bold uppercase tracking-widest font-inter mb-1">Discount Savings</h3>
                                     <div className="flex items-baseline space-x-2">
-                                        <p className="text-xl font-semibold font-poppins">${totalDiscountSavings.toLocaleString()}</p>
+                                        <p className="text-xl font-semibold font-poppins">₹{totalDiscountSavings.toLocaleString()}</p>
                                         <span className="text-emerald-400 text-[10px] font-bold flex items-center uppercase tracking-widest">Saved <ArrowUpRight size={14} className="ml-1" /></span>
                                     </div>
                                 </div>
@@ -550,8 +550,8 @@ const PartnerDashboard = () => {
                                             <div className="flex items-center gap-6">
                                                 <div className="text-right">
                                                     <p className="text-sm font-bold text-white">{student.progress || 0}% Complete</p>
-                                                    <p className="text-xs text-white">${student.totalSpent || 0} spent</p>
-                                                    <p className="text-xs text-emerald-400">${student.discountSaved || 0} saved</p>
+                                                    <p className="text-xs text-white">₹{student.totalSpent || 0} spent</p>
+                                                    <p className="text-xs text-emerald-400">₹{student.discountSaved || 0} saved</p>
                                                 </div>
                                                 <button
                                                     onClick={() => setSelectedStudent(student)}
@@ -589,7 +589,7 @@ const PartnerDashboard = () => {
                                             <div>
                                                 <h3 className="font-bold text-white text-lg">{code.code}</h3>
                                                 <p className="text-sm text-text-muted">
-                                                    {code.type === 'percentage' ? `${code.value || code.discount}% off` : `$${code.value || code.discount} off`}
+                                                    {code.type === 'percentage' ? `${code.value || code.discount}% off` : `₹${code.value || code.discount} off`}
                                                 </p>
                                             </div>
                                             <div className="text-right">
@@ -630,7 +630,7 @@ const PartnerDashboard = () => {
                                 <div>
                                     <label className="block text-sm font-bold text-white mb-2">Available Balance</label>
                                     <div className="p-4 bg-emerald-500/20 rounded-xl border border-emerald-500/30">
-                                        <p className="text-lg font-semibold text-emerald-400">${stats.totalEarnings?.toLocaleString() || '1,250'}</p>
+                                        <p className="text-lg font-semibold text-emerald-400">₹{stats.totalEarnings?.toLocaleString() || '1,250'}</p>
                                     </div>
                                 </div>
                                 <div>
@@ -667,7 +667,7 @@ const PartnerDashboard = () => {
                                     <div key={payout.id} className="p-4 bg-white/5 rounded-xl border border-white/10">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <h3 className="font-bold text-white">${payout.amount}</h3>
+                                                <h3 className="font-bold text-white">₹{payout.amount}</h3>
                                                 <p className="text-sm text-white">{payout.method} • {payout.date}</p>
                                             </div>
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${payout.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400' :
@@ -707,7 +707,7 @@ const PartnerDashboard = () => {
                                 </div>
                                 <div className="p-4 bg-white/5 rounded-xl">
                                     <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Avg. Order Value</h3>
-                                    <p className="text-lg font-semibold text-white">$1,156</p>
+                                    <p className="text-lg font-semibold text-white">₹1,156</p>
                                     <p className="text-xs text-emerald-400 flex items-center mt-1">
                                         <TrendingUp size={12} className="mr-1" /> +8.1% from last month
                                     </p>

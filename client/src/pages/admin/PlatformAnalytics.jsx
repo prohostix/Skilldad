@@ -136,7 +136,7 @@ const PlatformAnalytics = () => {
                                 {key} Impact
                             </p>
                             <p className="text-xl font-semibold text-white font-inter">
-                                ${val.toLocaleString()}
+                                ₹{val.toLocaleString()}
                             </p>
                             <div className="mt-2 flex items-center space-x-2 text-[#E879F9] text-xs font-semibold">
                                 <TrendingUp size={12} />
@@ -330,7 +330,7 @@ const PlatformAnalytics = () => {
                                 <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
                                     <div className="h-full bg-gradient-to-r from-primary to-primary-light rounded-full" style={{ width: '60%' }}></div>
                                 </div>
-                                <p className="text-xs text-white/50 mt-2 font-inter">Target: $100k | Current: $60k</p>
+                                <p className="text-xs text-white/50 mt-2 font-inter">Target: ₹100k | Current: ₹60k</p>
                             </div>
 
                             <div className="p-4 bg-white/5 border border-white/10 rounded-xl">

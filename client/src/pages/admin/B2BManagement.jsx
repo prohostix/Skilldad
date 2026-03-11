@@ -405,7 +405,7 @@ const B2BManagement = () => {
                         </div>
                         <div className="text-left">
                             <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">B2B Revenue</p>
-                            <p className="text-base font-semibold text-white font-inter">$84.2k</p>
+                            <p className="text-base font-semibold text-white font-inter">₹84.2k</p>
                         </div>
                     </div>
                 </GlassCard>
@@ -695,12 +695,12 @@ const B2BManagement = () => {
                             <div className="p-4 bg-white/5 border border-amber-500/20 rounded-xl relative overflow-hidden group">
                                 <Wallet size={24} className="text-amber-400 mb-2" />
                                 <p className="text-xs font-bold text-amber-500/50 uppercase tracking-widest mb-1">Pending Payouts</p>
-                                <p className="text-2xl font-black text-amber-400">${partnerStats?.pendingPayouts?.toLocaleString() || 0}</p>
+                                <p className="text-2xl font-black text-amber-400">₹{partnerStats?.pendingPayouts?.toLocaleString() || 0}</p>
                             </div>
                             <div className="p-4 bg-white/5 border border-emerald-500/20 rounded-xl relative overflow-hidden group">
                                 <DollarSign size={24} className="text-emerald-400 mb-2" />
                                 <p className="text-xs font-bold text-emerald-500/50 uppercase tracking-widest mb-1">Total Earned (Approved)</p>
-                                <p className="text-2xl font-black text-emerald-400">${partnerStats?.totalEarnings?.toLocaleString() || 0}</p>
+                                <p className="text-2xl font-black text-emerald-400">₹{partnerStats?.totalEarnings?.toLocaleString() || 0}</p>
                             </div>
                         </div>
                     </div>

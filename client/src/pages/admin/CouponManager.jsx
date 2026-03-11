@@ -146,7 +146,7 @@ const CouponManager = () => {
                         </div>
                         <div className="text-left">
                             <p className="text-white/50 text-xs font-bold uppercase tracking-wider">Revenue Impact</p>
-                            <p className="text-2xl font-bold text-white tracking-tight">$12.5k</p>
+                            <p className="text-2xl font-bold text-white tracking-tight">₹12.5k</p>
                         </div>
                     </div>
                 </GlassCard>
@@ -212,7 +212,7 @@ const CouponManager = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="text-sm font-bold text-white">
-                                                {coupon.type === 'percentage' ? `${coupon.value}%` : `$${coupon.value}`}
+                                                {coupon.type === 'percentage' ? `${coupon.value}%` : `₹${coupon.value}`}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
@@ -283,7 +283,7 @@ const CouponManager = () => {
                                         onChange={(e) => setNewCoupon({ ...newCoupon, type: e.target.value })}
                                     >
                                         <option value="percentage">Percentage (%)</option>
-                                        <option value="fixed">Fixed Amount ($)</option>
+                                        <option value="fixed">Fixed Amount (₹)</option>
                                     </select>
                                 </div>
                                 <div>

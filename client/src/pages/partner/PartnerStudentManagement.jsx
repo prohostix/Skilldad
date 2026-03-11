@@ -405,7 +405,7 @@ const PartnerStudentManagement = () => {
                                 >
                                     <option value="" disabled>Select an affiliation code</option>
                                     {partnerCodes.map(c => (
-                                        <option key={c._id} value={c.code}>{c.code} ({c.type === 'percentage' ? `${c.value}%` : `$${c.value}`} off)</option>
+                                        <option key={c._id} value={c.code}>{c.code} ({c.type === 'percentage' ? `${c.value}%` : `₹${c.value}`} off)</option>
                                     ))}
                                     <option value="custom">Custom Code</option>
                                 </select>

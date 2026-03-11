@@ -88,7 +88,7 @@ const AdminDashboard = () => {
                     [''],
                     ['Revenue Impact'],
                     ['Source', 'Amount'],
-                    ...Object.entries(data.revenueImpact).map(([key, value]) => [key, `$${value}`]),
+                    ...Object.entries(data.revenueImpact).map(([key, value]) => [key, `₹${value}`]),
                     [''],
                     ['User Statistics'],
                     ['Role', 'Count'],
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
                 pdfContent += 'Revenue Impact\n';
                 pdfContent += '-'.repeat(50) + '\n';
                 Object.entries(data.revenueImpact).forEach(([key, value]) => {
-                    pdfContent += `${key}: $${value}\n`;
+                    pdfContent += `${key}: ₹${value}\n`;
                 });
 
                 pdfContent += '\n\nUser Statistics\n';
@@ -156,7 +156,7 @@ const AdminDashboard = () => {
         { title: 'Total Students', value: stats.totalStudents || '1.2k', icon: GraduationCap, color: '#5B5CFF', trend: '+12.5%' },
         { title: 'Active Courses', value: stats.totalCourses || '48', icon: BookOpen, color: '#7A5CFF', trend: '+5.2%' },
         { title: 'Partner Network', value: stats.totalPartners || '12', icon: Globe, color: '#B05CFF', trend: '+8.1%' },
-        { title: 'Total Revenue', value: stats.totalRevenue ? `$${stats.totalRevenue.toLocaleString()}` : '$24.5k', icon: DollarSign, color: '#5B5CFF', trend: '+15.3%' },
+        { title: 'Total Revenue', value: stats.totalRevenue ? `₹${stats.totalRevenue.toLocaleString()}` : '₹24.5k', icon: DollarSign, color: '#5B5CFF', trend: '+15.3%' },
         { title: 'Open Tickets', value: stats.totalTickets || '0', icon: FileText, color: '#FF5C5C', trend: 'Active' },
     ];
 

@@ -233,7 +233,7 @@ const CourseManager = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="text-sm font-semibold text-white">${course.price}</span>
+                                        <span className="text-sm font-semibold text-white">₹{course.price}</span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-1.5">
@@ -333,7 +333,7 @@ const CourseManager = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
-                                        Price ($)
+                                        Price (₹)
                                     </label>
                                     <input
                                         type="number"

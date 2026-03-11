@@ -47,7 +47,7 @@ const CommissionWallet = () => {
 
         const payoutDetails = {
             amount: estimatedCommission,
-            notes: `Commission requested for ${studentCount} students. Fee: $${feePerStudent} each. Rate: ${commissionRate}%`
+            notes: `Commission requested for ${studentCount} students. Fee: ₹${feePerStudent} each. Rate: ${commissionRate}%`
         };
 
         try {
@@ -95,7 +95,7 @@ const CommissionWallet = () => {
                                 Pending Payouts (To Get)
                             </p>
                             <p className="text-3xl font-black text-amber-400">
-                                ${pendingTotal.toLocaleString()}
+                                ₹{pendingTotal.toLocaleString()}
                             </p>
                         </div>
                         <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
@@ -103,7 +103,7 @@ const CommissionWallet = () => {
                                 Total Earned (Approved)
                             </p>
                             <p className="text-2xl font-black text-emerald-400">
-                                ${approvedTotal.toLocaleString()}
+                                ₹{approvedTotal.toLocaleString()}
                             </p>
                         </div>
                     </div>
@@ -136,7 +136,7 @@ const CommissionWallet = () => {
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                    Average Fee per Student ($)
+                                    Average Fee per Student (₹)
                                 </label>
                                 <div className="relative">
                                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
@@ -156,7 +156,7 @@ const CommissionWallet = () => {
                         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
                                 <p className="text-xs text-primary-light mb-1">Estimated Commission ({commissionRate}%)</p>
-                                <p className="text-2xl font-bold text-white">${estimatedCommission.toLocaleString()}</p>
+                                <p className="text-2xl font-bold text-white">₹{estimatedCommission.toLocaleString()}</p>
                             </div>
                             <ModernButton type="submit" disabled={estimatedCommission <= 0} className="w-full md:w-auto p-4 flex items-center justify-center">
                                 <Plus size={18} className="mr-2" />
@@ -208,7 +208,7 @@ const CommissionWallet = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <p className="text-sm font-bold text-emerald-400 whitespace-nowrap">
-                                            ${payout.amount.toLocaleString()}
+                                            ₹{payout.amount.toLocaleString()}
                                         </p>
                                         <p className="text-xs text-gray-500 md:hidden mt-0.5">
                                             {new Date(payout.createdAt).toLocaleDateString()}
