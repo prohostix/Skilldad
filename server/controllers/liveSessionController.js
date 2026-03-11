@@ -47,7 +47,10 @@ const getSessions = asyncHandler(async (req, res) => {
     const params = [];
 
     if (req.user.role === 'student') {
-        sql += ` AND s.course_id IN (SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active')`;
+        sql += ` AND (
+            s.course_id IN (SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active')
+            OR (s.course_id IS NULL AND s.university_id = (SELECT university_id FROM users WHERE id = $1))
+        )`;
         params.push(req.user.id);
     } else if (req.user.role === 'university') {
         sql += ` AND s.university_id = $1`;
