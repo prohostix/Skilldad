@@ -445,15 +445,32 @@ const Exams = () => {
         if (!activeExam.questions || activeExam.questions.length === 0) {
             return (
                 <div className="min-h-screen bg-[#050505] p-6 flex items-center justify-center">
-                    <GlassCard className="p-12 text-center max-w-md border-red-500/20">
-                        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <AlertCircle size={40} className="text-red-500" />
+                    <GlassCard className="p-12 text-center max-w-md border-primary/20">
+                        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                            {activeExam.examType === 'pdf-based' ? (
+                                <Download size={40} className="text-primary" />
+                            ) : (
+                                <AlertCircle size={40} className="text-red-500" />
+                            )}
                         </div>
-                        <h2 className="text-2xl font-black text-white mb-2">ACCESS DENIED</h2>
-                        <p className="text-white/50 mb-8 font-medium">This assessment module contains no valid data payloads. Please contact system administration.</p>
-                        <ModernButton onClick={() => { setActiveExam(null); setExamStarted(false); }} className="w-full">
-                            Terminate Session
-                        </ModernButton>
+                        <h2 className="text-2xl font-black text-white mb-2">
+                            {activeExam.examType === 'pdf-based' ? 'PDF ASSESSMENT READY' : 'ACCESS DENIED'}
+                        </h2>
+                        <p className="text-white/50 mb-8 font-medium">
+                            {activeExam.examType === 'pdf-based' 
+                                ? 'This assessment is paper-based. Please download the question paper and submit your answers.' 
+                                : 'This assessment module contains no valid data payloads. Please contact system administration.'}
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            {activeExam.examType === 'pdf-based' && (
+                                <ModernButton onClick={() => downloadQuestionPaper(activeExam)} className="w-full">
+                                    Download Question Paper
+                                </ModernButton>
+                            )}
+                            <ModernButton variant="secondary" onClick={() => { setActiveExam(null); setExamStarted(false); }} className="w-full">
+                                Terminate Session
+                            </ModernButton>
+                        </div>
                     </GlassCard>
                 </div>
             );
@@ -843,11 +860,11 @@ const Exams = () => {
                                 <div style={{ flexShrink: 0 }}>
                                     {status === 'available' && (
                                         <button
-                                            onClick={() => exam.examMode === 'paper-based' ? downloadQuestionPaper(exam) : startExam(exam)}
+                                            onClick={() => exam.examType === 'pdf-based' ? downloadQuestionPaper(exam) : startExam(exam)}
                                             style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 18px', background: '#7C6FF7', border: 'none', borderRadius: 10, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(124,111,247,0.35)', whiteSpace: 'nowrap' }}
                                         >
-                                            {exam.examMode === 'paper-based' ? <Download size={14} /> : <Play size={14} />}
-                                            {exam.examMode === 'paper-based' ? 'Download' : 'Start Exam'}
+                                            {exam.examType === 'pdf-based' ? <Download size={14} /> : <Play size={14} />}
+                                            {exam.examType === 'pdf-based' ? 'Download' : 'Start Exam'}
                                         </button>
                                     )}
                                     {status === 'completed' && (
