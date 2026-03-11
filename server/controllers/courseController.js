@@ -276,22 +276,36 @@ module.exports = {
         try {
             await query('BEGIN');
             
-            // Delete related simple dependencies
-            await query('DELETE FROM progress WHERE course_id = $1', [id]).catch(e => null);
-            await query('DELETE FROM submissions WHERE course_id = $1', [id]).catch(e => null);
-            await query('DELETE FROM projects WHERE course_id = $1', [id]).catch(e => null);
-            await query('DELETE FROM interactive_contents WHERE course_id = $1', [id]).catch(e => null);
-            await query('DELETE FROM enrollments WHERE course_id = $1', [id]).catch(e => null);
-            await query('DELETE FROM live_sessions WHERE course_id = $1', [id]).catch(e => null);
+            // Delete related simple dependencies safely using savepoints
+            const dependentTables = [
+                'progress', 'submissions', 'projects', 'interactive_contents', 
+                'enrollments', 'live_sessions', 'payments', 'transactions', 'reviews'
+            ];
+            
+            for (const table of dependentTables) {
+                try {
+                    await query(`SAVEPOINT before_${table}`);
+                    await query(`DELETE FROM ${table} WHERE course_id = $1`, [id]);
+                    await query(`RELEASE SAVEPOINT before_${table}`);
+                } catch (e) {
+                    await query(`ROLLBACK TO SAVEPOINT before_${table}`);
+                }
+            }
 
             // Delete Exams and their related dependencies
-            const examsRes = await query('SELECT id FROM exams WHERE course_id = $1', [id]).catch(e => ({ rows: [] }));
-            for (const exam of examsRes.rows) {
-                await query('DELETE FROM questions WHERE exam_id = $1', [exam.id]).catch(e => null);
-                await query('DELETE FROM exam_submissions_new WHERE exam_id = $1', [exam.id]).catch(e => null);
-                await query('DELETE FROM results WHERE exam_id = $1', [exam.id]).catch(e => null);
+            try {
+                await query('SAVEPOINT before_exams');
+                const examsRes = await query('SELECT id FROM exams WHERE course_id = $1', [id]);
+                for (const exam of examsRes.rows) {
+                    await query('DELETE FROM questions WHERE exam_id = $1', [exam.id]).catch(e => null);
+                    await query('DELETE FROM exam_submissions_new WHERE exam_id = $1', [exam.id]).catch(e => null);
+                    await query('DELETE FROM results WHERE exam_id = $1', [exam.id]).catch(e => null);
+                }
+                await query('DELETE FROM exams WHERE course_id = $1', [id]);
+                await query('RELEASE SAVEPOINT before_exams');
+            } catch (e) {
+                await query('ROLLBACK TO SAVEPOINT before_exams');
             }
-            await query('DELETE FROM exams WHERE course_id = $1', [id]).catch(e => null);
 
             // Finally, delete the course
             await query('DELETE FROM courses WHERE id = $1', [id]);
