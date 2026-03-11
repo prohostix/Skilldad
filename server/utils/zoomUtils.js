@@ -605,7 +605,7 @@ if (ZOOM_MOCK_MODE) {
    * @returns {Promise<Object>} Updated session with recording data
    */
   const syncZoomRecordings = async (sessionId, retryAttempt = 0) => {
-    const LiveSession = require('../models/liveSessionModel');
+    const { query } = require('../config/postgres');
     const operation = 'sync_recordings';
 
     if (!sessionId) {
@@ -617,50 +617,40 @@ if (ZOOM_MOCK_MODE) {
       console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Attempt: ${retryAttempt + 1}`);
 
       // Step 1: Fetch session from database
-      const session = await LiveSession.findById(sessionId);
+      const resSet = await query("SELECT * FROM live_sessions WHERE id = $1", [sessionId]);
+      const session = resSet.rows[0];
 
       if (!session) {
         console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Error: Session not found`);
         throw new Error(`Session not found: ${sessionId}`);
       }
 
-      // Verify session has ended
-      if (session.status !== 'ended') {
-        console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Error: Session must be ended, Current status: ${session.status}`);
-        throw new Error(`Session must be ended to sync recordings. Current status: ${session.status}`);
-      }
-
       // Verify Zoom meeting data exists
-      if (!session.zoom || !session.zoom.meetingId) {
+      const zoom = typeof session.zoom === 'string' ? JSON.parse(session.zoom || '{}') : (session.zoom || {});
+      if (!zoom || !zoom.meetingId) {
         console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Error: Session does not have Zoom meeting data`);
         throw new Error('Session does not have Zoom meeting data');
       }
 
-      console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Meeting: ${session.zoom.meetingId}, Attempt: ${retryAttempt + 1}`);
+      console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Meeting: ${zoom.meetingId}, Attempt: ${retryAttempt + 1}`);
 
       // Step 2: Call getZoomRecordings with meeting ID
-      const recordings = await getZoomRecordings(session.zoom.meetingId, sessionId);
+      const recordings = await getZoomRecordings(zoom.meetingId, sessionId);
 
       // Step 3: Handle different scenarios
       if (recordings.length === 0) {
         // No recordings found - implement retry logic
         console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Result: No recordings found`);
 
-        // Check if we should retry (24 hours = 288 attempts at 5-minute intervals)
         const maxRetries = 288;
         const retryIntervalMs = 5 * 60 * 1000; // 5 minutes
 
         if (retryAttempt < maxRetries) {
-          // Update recording status to 'failed' temporarily
-          session.recording = {
-            status: 'failed',
-            createdAt: new Date()
-          };
-          await session.save();
+          const recordingStatus = JSON.stringify({ status: 'failed', createdAt: new Date() });
+          await query("UPDATE live_sessions SET recording = $1, updated_at = NOW() WHERE id = $2", [recordingStatus, sessionId]);
 
           console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Scheduling retry ${retryAttempt + 1}/${maxRetries} in 5 minutes`);
 
-          // Schedule retry using setTimeout
           setTimeout(async () => {
             try {
               await syncZoomRecordings(sessionId, retryAttempt + 1);
@@ -669,112 +659,73 @@ if (ZOOM_MOCK_MODE) {
             }
           }, retryIntervalMs);
 
-          return session;
+          return { status: 'retry_scheduled' };
         } else {
-          // Give up after 24 hours
-          console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Fatal: No recordings found after 24 hours (${maxRetries} attempts). Marking as permanently unavailable.`);
-          session.recording = {
-            status: 'failed',
-            createdAt: new Date()
-          };
-          await session.save();
-          return session;
+          console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Fatal: No recordings found after 24 hours. Marking as permanently unavailable.`);
+          const recordingStatus = JSON.stringify({ status: 'failed', createdAt: new Date() });
+          await query("UPDATE live_sessions SET recording = $1, updated_at = NOW() WHERE id = $2", [recordingStatus, sessionId]);
+          return { status: 'failed' };
         }
       }
 
       // Step 4: Process recordings
-      const primaryRecording = recordings[0]; // Use first recording as primary
+      const primaryRecording = recordings[0];
 
-      // Check if recording is still processing
-      if (primaryRecording.status === 'processing') {
-        console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Result: Recording still processing`);
-
-        // Implement retry logic for processing status
-        const maxRetries = 288; // 24 hours at 5-minute intervals
-        const retryIntervalMs = 5 * 60 * 1000; // 5 minutes
-
-        if (retryAttempt < maxRetries) {
-          // Update recording status to 'processing'
-          session.recording = {
-            recordingId: primaryRecording.recordingId,
-            downloadUrl: primaryRecording.downloadUrl,
-            playUrl: primaryRecording.playUrl,
-            recordingType: primaryRecording.recordingType,
-            durationMs: primaryRecording.durationMs,
-            fileSizeBytes: primaryRecording.fileSizeBytes,
-            status: 'processing',
-            createdAt: primaryRecording.createdAt
-          };
-          await session.save();
-
-          console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Scheduling retry ${retryAttempt + 1}/${maxRetries} in 5 minutes for processing recording`);
-
-          // Schedule retry using setTimeout
-          setTimeout(async () => {
-            try {
-              await syncZoomRecordings(sessionId, retryAttempt + 1);
-            } catch (error) {
-              console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Retry ${retryAttempt + 1} failed: ${error.message}`);
-            }
-          }, retryIntervalMs);
-
-          return session;
-        } else {
-          // Give up after 24 hours
-          console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Fatal: Recording still processing after 24 hours (${maxRetries} attempts). Marking as failed.`);
-          session.recording = {
-            recordingId: primaryRecording.recordingId,
-            downloadUrl: primaryRecording.downloadUrl,
-            playUrl: primaryRecording.playUrl,
-            recordingType: primaryRecording.recordingType,
-            durationMs: primaryRecording.durationMs,
-            fileSizeBytes: primaryRecording.fileSizeBytes,
-            status: 'failed',
-            createdAt: primaryRecording.createdAt
-          };
-          await session.save();
-          return session;
-        }
-      }
-
-      // Step 5: Recording is completed - update session
-      console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Success: Recording completed`);
-      session.recording = {
+      // Update format for JSONB storage
+      const recordingData = {
         recordingId: primaryRecording.recordingId,
         downloadUrl: primaryRecording.downloadUrl,
         playUrl: primaryRecording.playUrl,
         recordingType: primaryRecording.recordingType,
         durationMs: primaryRecording.durationMs,
         fileSizeBytes: primaryRecording.fileSizeBytes,
-        status: 'completed',
+        status: primaryRecording.status,
         createdAt: primaryRecording.createdAt
       };
 
-      await session.save();
+      if (primaryRecording.status === 'processing') {
+        console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Result: Recording still processing`);
+
+        const maxRetries = 288;
+        const retryIntervalMs = 5 * 60 * 1000;
+
+        if (retryAttempt < maxRetries) {
+          await query("UPDATE live_sessions SET recording = $1, updated_at = NOW() WHERE id = $2", [JSON.stringify(recordingData), sessionId]);
+          console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Scheduling retry ${retryAttempt + 1}/${maxRetries} in 5 minutes for processing recording`);
+
+          setTimeout(async () => {
+            try {
+              await syncZoomRecordings(sessionId, retryAttempt + 1);
+            } catch (error) {
+              console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Retry ${retryAttempt + 1} failed: ${error.message}`);
+            }
+          }, retryIntervalMs);
+
+          return { status: 'processing_retry_scheduled' };
+        } else {
+          recordingData.status = 'failed';
+          await query("UPDATE live_sessions SET recording = $1, updated_at = NOW() WHERE id = $2", [JSON.stringify(recordingData), sessionId]);
+          return { status: 'failed' };
+        }
+      }
+
+      // Step 5: Recording is completed - update session
+      console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Success: Recording completed`);
+      await query("UPDATE live_sessions SET recording = $1, updated_at = NOW() WHERE id = $2", [JSON.stringify(recordingData), sessionId]);
       console.log(`[Zoom] Session: ${sessionId}, Operation: ${operation}, Success: Successfully synced recording`);
 
-      return session;
+      return { status: 'completed' };
 
     } catch (error) {
-      // Handle rate limit errors - queue the request
       if (error.isRateLimitError) {
         console.log(`[Zoom Rate Limit] Session: ${sessionId}, Operation: ${operation}, Queueing request for retry after ${error.retryAfter}s`);
-
         return queueRateLimitedRequest(
           () => syncZoomRecordings(sessionId, retryAttempt),
           sessionId,
           operation
         );
       }
-
-      // Handle credential errors
-      if (error.isCredentialError) {
-        console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Fatal: Credential error`);
-        throw error;
-      }
-
-      // Log all other errors
-      console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Error: ${error.message}, Status: ${error.statusCode || 'N/A'}`);
+      console.error(`[Zoom Error] Session: ${sessionId}, Operation: ${operation}, Error: ${error.message}`);
       throw error;
     }
   };

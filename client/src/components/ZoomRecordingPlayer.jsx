@@ -127,21 +127,32 @@ const ZoomRecordingPlayer = ({ recordingUrl, sessionId, title, onEnded, onError 
     );
   }
 
+  const isZoomPlayUrl = url && (url.includes('zoom.us/rec/play') || url.includes('zoom.us/rec/share'));
+
   return (
     <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
-      <video
-        ref={playerRef}
-        className="w-full h-full"
-        controls
-        controlsList="nodownload"
-        onError={handleVideoError}
-        onEnded={handleVideoEnded}
-        poster={`https://via.placeholder.com/1280x720/1a1a1a/ffffff?text=${encodeURIComponent(title || 'Zoom Recording')}`}
-        autoPlay
-      >
-        <source src={url} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      {isZoomPlayUrl ? (
+        <iframe
+          src={url}
+          className="w-full h-full border-0"
+          allow="autoplay; fullscreen"
+          allowFullScreen
+        ></iframe>
+      ) : (
+        <video
+          ref={playerRef}
+          className="w-full h-full"
+          controls
+          controlsList="nodownload"
+          onError={handleVideoError}
+          onEnded={handleVideoEnded}
+          poster={`https://via.placeholder.com/1280x720/1a1a1a/ffffff?text=${encodeURIComponent(title || 'Recording')}`}
+          autoPlay
+        >
+          <source src={url} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      )}
 
       {/* Custom overlay */}
       <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg">

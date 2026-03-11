@@ -18,8 +18,21 @@
 .zoom-meeting-container .zm-modal,
 .zoom-meeting-container .zm-dialog,
 .zoom-meeting-container .chat-container,
-.zoom-meeting-container .settings-dialog {
-  z-index: 9999 !important;
+.zoom-meeting-container .settings-dialog,
+.zoom-meeting-container .zm-modal-container,
+.zoom-meeting-container .zm-context-menu {
+  z-index: 10001 !important;
+}
+
+/* Ensure the zoom root itself has a clean stacking context */
+.zoom-meeting-container > div {
+  z-index: 10;
+  position: relative;
+}
+
+/* Prevent any parent from clipping Zoom's absolute positioned modals */
+[class*="zoom-meeting-container"] {
+  overflow: visible !important;
 }
 
 /* Make video canvas fill available space */

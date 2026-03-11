@@ -83,6 +83,14 @@ const getSession = asyncHandler(async (req, res) => {
         throw new Error('Session not found');
     }
 
+    // Ensure JSON fields are parsed
+    if (session.zoom && typeof session.zoom === 'string') {
+        try { session.zoom = JSON.parse(session.zoom); } catch (e) {}
+    }
+    if (session.recording && typeof session.recording === 'string') {
+        try { session.recording = JSON.parse(session.recording); } catch (e) {}
+    }
+
     res.json({ ...session, _id: session.id });
 });
 
@@ -97,6 +105,18 @@ const startSession = asyncHandler(async (req, res) => {
 const endSession = asyncHandler(async (req, res) => {
     const { id } = req.params;
     await query("UPDATE live_sessions SET status = 'ended', end_time = NOW() WHERE id = $1", [id]);
+    
+    // Trigger recording sync from Zoom
+    try {
+        const { syncZoomRecordings } = require('../utils/zoomUtils');
+        // Run in background, don't await
+        syncZoomRecordings(id).catch(err => {
+            console.error(`[Session] Async recording sync failed for ${id}:`, err.message);
+        });
+    } catch (err) {
+        console.error(`[Session] Error initiating recording sync:`, err.message);
+    }
+
     res.json({ success: true, message: 'Session ended' });
 });
 
@@ -170,13 +190,14 @@ module.exports = {
     }),
     getRecordingPlaybackUrl: asyncHandler(async (req, res) => {
         const { id } = req.params;
-        const resSet = await query("SELECT zoom FROM live_sessions WHERE id = $1", [id]);
+        const resSet = await query("SELECT recording FROM live_sessions WHERE id = $1", [id]);
         if (resSet.rows.length === 0) {
             return res.status(404).json({ error: 'Not found' });
         }
-        const zoom = typeof resSet.rows[0].zoom === 'string' ? JSON.parse(resSet.rows[0].zoom || '{}') : (resSet.rows[0].zoom || {});
+        
+        const recording = typeof resSet.rows[0].recording === 'string' ? JSON.parse(resSet.rows[0].recording || '{}') : (resSet.rows[0].recording || {});
 
-        let playUrl = zoom.play_url || zoom.recording_play_url;
+        let playUrl = recording.playUrl || recording.play_url;
 
         // Fallback to a mock video for development/testing if URL is not present
         if (!playUrl) {

@@ -235,7 +235,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
       )}
 
       {isInitializedRef.current && (
-        <div className="absolute top-4 right-4 z-[1000]">
+        <div className="absolute top-4 right-4 z-[10002]">
           <button
             onClick={handleLeave}
             className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-black rounded-xl shadow-2xl transition-all flex items-center gap-2 transform hover:scale-105"
