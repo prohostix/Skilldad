@@ -42,7 +42,7 @@ const getSessions = asyncHandler(async (req, res) => {
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
         LEFT JOIN courses c ON s.course_id = c.id
-        WHERE 1=1
+        WHERE (s.is_deleted IS NULL OR s.is_deleted = false)
     `;
     const params = [];
 
@@ -71,7 +71,7 @@ const getSession = asyncHandler(async (req, res) => {
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
         JOIN users uni ON s.university_id = uni.id
-        WHERE s.id = $1
+        WHERE s.id = $1 AND (s.is_deleted IS NULL OR s.is_deleted = false)
     `, [req.params.id]);
 
     const session = resSet.rows[0];
@@ -117,7 +117,7 @@ const getCourseLiveSessions = asyncHandler(async (req, res) => {
         SELECT s.*, u.name as instructor_name, u.profile as instructor_profile
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
-        WHERE s.course_id = $1
+        WHERE s.course_id = $1 AND (s.is_deleted IS NULL OR s.is_deleted = false)
         ORDER BY s.start_time ASC
     `, [courseId]);
 
@@ -150,7 +150,7 @@ module.exports = {
     sendNotification: asyncHandler(async (req, res) => res.json({ success: true })),
     getSessionStatusRoute: asyncHandler(async (req, res) => {
         const { id } = req.params;
-        const resSet = await query("SELECT status FROM live_sessions WHERE id = $1", [id]);
+        const resSet = await query("SELECT status FROM live_sessions WHERE id = $1 AND (is_deleted IS NULL OR is_deleted = false)", [id]);
         if (resSet.rows.length === 0) {
             return res.status(404).json({ error: 'Not found' });
         }
@@ -184,7 +184,7 @@ module.exports = {
     }),
     getZoomSDKConfig: asyncHandler(async (req, res) => {
         const { id } = req.params;
-        const resSet = await query("SELECT zoom, instructor_id FROM live_sessions WHERE id = $1", [id]);
+        const resSet = await query("SELECT zoom, instructor_id FROM live_sessions WHERE id = $1 AND (is_deleted IS NULL OR is_deleted = false)", [id]);
 
         if (resSet.rows.length === 0) {
             return res.status(404).json({ message: 'Session not found' });
