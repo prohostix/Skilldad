@@ -28,6 +28,11 @@ class SocketService {
                         return callback(null, true);
                     }
 
+                    // Allow production domain
+                    if (origin.includes('skilldad.com') || origin === 'http://13.127.134.120') {
+                        return callback(null, true);
+                    }
+
                     // Allow configured CLIENT_URL
                     if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) {
                         return callback(null, true);
