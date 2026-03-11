@@ -13,6 +13,7 @@ import {
     Layers,
     BarChart3,
     Edit3,
+    Camera,
     FileText,
     Upload,
     BookOpen
