@@ -347,6 +347,7 @@ if (ZOOM_MOCK_MODE) {
 
         // Return structured ZoomMeetingData object with encrypted passcode
         return {
+          uuid: meetingData.uuid,
           meetingId: meetingData.id.toString(),
           meetingNumber: meetingData.id,
           passcode: encryptedPasscode,
@@ -526,9 +527,13 @@ if (ZOOM_MOCK_MODE) {
       // Get OAuth access token
       const accessToken = await getZoomAccessToken(sessionId, operation);
 
+      // Use UUID if available, otherwise meeting ID.
+      // Important: UUIDs containing slashes must be double-encoded.
+      const encodedId = encodeURIComponent(encodeURIComponent(meetingId));
+
       // Call Zoom API to fetch cloud recordings
       const response = await axios.get(
-        `${ZOOM_API_BASE_URL}/meetings/${meetingId}/recordings`,
+        `${ZOOM_API_BASE_URL}/meetings/${encodedId}/recordings`,
         {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
