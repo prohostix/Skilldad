@@ -1,5 +1,5 @@
 const asyncHandler = require('express-async-handler');
-const { query } = require('../config/postgres');
+const { query, getPool } = require('../config/postgres');
 
 // @desc    Get all courses (optionally filtered by university)
 // @route   GET /api/courses?university=<userId>
@@ -273,8 +273,9 @@ module.exports = {
             return res.status(404).json({ message: 'Course not found' });
         }
         
+        const client = await getPool().connect();
         try {
-            await query('BEGIN');
+            await client.query('BEGIN');
             
             // Delete related simple dependencies safely using savepoints
             const dependentTables = [
@@ -284,38 +285,40 @@ module.exports = {
             
             for (const table of dependentTables) {
                 try {
-                    await query(`SAVEPOINT before_${table}`);
-                    await query(`DELETE FROM ${table} WHERE course_id = $1`, [id]);
-                    await query(`RELEASE SAVEPOINT before_${table}`);
+                    await client.query(`SAVEPOINT before_${table}`);
+                    await client.query(`DELETE FROM ${table} WHERE course_id = $1`, [id]);
+                    await client.query(`RELEASE SAVEPOINT before_${table}`);
                 } catch (e) {
-                    await query(`ROLLBACK TO SAVEPOINT before_${table}`);
+                    await client.query(`ROLLBACK TO SAVEPOINT before_${table}`);
                 }
             }
 
             // Delete Exams and their related dependencies
             try {
-                await query('SAVEPOINT before_exams');
-                const examsRes = await query('SELECT id FROM exams WHERE course_id = $1', [id]);
+                await client.query('SAVEPOINT before_exams');
+                const examsRes = await client.query('SELECT id FROM exams WHERE course_id = $1', [id]);
                 for (const exam of examsRes.rows) {
-                    await query('DELETE FROM questions WHERE exam_id = $1', [exam.id]).catch(e => null);
-                    await query('DELETE FROM exam_submissions_new WHERE exam_id = $1', [exam.id]).catch(e => null);
-                    await query('DELETE FROM results WHERE exam_id = $1', [exam.id]).catch(e => null);
+                    await client.query('DELETE FROM questions WHERE exam_id = $1', [exam.id]).catch(e => null);
+                    await client.query('DELETE FROM exam_submissions_new WHERE exam_id = $1', [exam.id]).catch(e => null);
+                    await client.query('DELETE FROM results WHERE exam_id = $1', [exam.id]).catch(e => null);
                 }
-                await query('DELETE FROM exams WHERE course_id = $1', [id]);
-                await query('RELEASE SAVEPOINT before_exams');
+                await client.query('DELETE FROM exams WHERE course_id = $1', [id]);
+                await client.query('RELEASE SAVEPOINT before_exams');
             } catch (e) {
-                await query('ROLLBACK TO SAVEPOINT before_exams');
+                await client.query('ROLLBACK TO SAVEPOINT before_exams');
             }
 
             // Finally, delete the course
-            await query('DELETE FROM courses WHERE id = $1', [id]);
+            await client.query('DELETE FROM courses WHERE id = $1', [id]);
             
-            await query('COMMIT');
+            await client.query('COMMIT');
             res.json({ message: 'Course and all related data removed successfully' });
         } catch (error) {
-            await query('ROLLBACK');
+            await client.query('ROLLBACK');
             console.error('Cascade Delete Error:', error);
             res.status(500).json({ message: 'Failed to delete course due to referential constraints', error: error.message });
+        } finally {
+            client.release();
         }
     }),
     addModule,
