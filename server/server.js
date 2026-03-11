@@ -84,6 +84,11 @@ app.use(express.json({
 const allowedOrigins = [
   'https://skill-dad-client.vercel.app',
   'https://skilldad.vercel.app',
+  'http://skilldad.com',
+  'https://skilldad.com',
+  'http://www.skilldad.com',
+  'https://www.skilldad.com',
+  'http://13.127.134.120',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:5174',
