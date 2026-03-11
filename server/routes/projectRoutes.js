@@ -241,6 +241,94 @@ router.post('/', protect, authorize('university', 'admin'), async (req, res) => 
     }
 });
 
+// @desc    Update a project
+// @route   PUT /api/projects/:id
+// @access  Private (Instructor/Admin)
+router.put('/:id', protect, authorize('university', 'admin'), async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        const { title, description, deadline, rubric, courseId } = req.body;
+        const userId = req.user.id || req.user._id;
+
+        const result = await query(`
+            UPDATE courses 
+            SET projects = (
+                SELECT jsonb_agg(
+                    CASE 
+                        WHEN p->>'_id' = $1 THEN p || $2::jsonb
+                        ELSE p
+                    END
+                ) FROM jsonb_array_elements(projects) p
+            ), updated_at = NOW()
+            WHERE id = $3 AND (instructor_id = $4 OR $5 = 'admin') AND EXISTS (
+                SELECT 1 FROM jsonb_array_elements(projects) p WHERE p->>'_id' = $1
+            )
+            RETURNING id, title
+        `, [
+            projectId, 
+            JSON.stringify({ title, description, deadline, rubric }), 
+            courseId, 
+            userId, 
+            req.user.role
+        ]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Project not found or unauthorized' });
+        }
+
+        res.json({ message: 'Project updated successfully' });
+    } catch (error) {
+        console.error('Update project error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @desc    Delete a project
+// @route   DELETE /api/projects/:id
+// @access  Private (Instructor/Admin)
+router.delete('/:id', protect, authorize('university', 'admin'), async (req, res) => {
+    try {
+        const projectId = req.params.id;
+        
+        // Find which course owns this project to verify ownership
+        const courseSearch = await query(`
+            SELECT id FROM courses 
+            CROSS JOIN LATERAL jsonb_array_elements(projects) p
+            WHERE p->>'_id' = $1
+        `, [projectId]);
+        
+        if (courseSearch.rows.length === 0) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+        
+        const courseId = courseSearch.rows[0].id;
+        const userId = req.user.id || req.user._id;
+
+        const result = await query(`
+            UPDATE courses 
+            SET projects = (
+                SELECT COALESCE(jsonb_agg(p), '[]'::jsonb)
+                FROM jsonb_array_elements(projects) p
+                WHERE p->>'_id' != $1
+            ), updated_at = NOW()
+            WHERE id = $2 AND (instructor_id = $3 OR $4 = 'admin')
+            RETURNING id
+        `, [projectId, courseId, userId, req.user.role]);
+
+        if (result.rows.length === 0) {
+            return res.status(403).json({ message: 'Unauthorized to delete this project' });
+        }
+        
+        // Also delete any submitted files attached to this project
+        await query('DELETE FROM projects WHERE id = $1', [projectId]);
+
+        res.json({ message: 'Project deleted successfully' });
+    } catch (error) {
+        console.error('Delete project error:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // @desc    Submit project
 // @route   POST /api/projects/:id/submit
 // @access  Private (Student)
