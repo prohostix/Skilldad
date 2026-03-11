@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 const updateEntity = async (req, res) => {
     try {
         console.log('[updateEntity] body:', req.body, 'id:', req.params.id);
-        const { name, email, role, discountRate } = req.body;
+        const { name, email, role, discountRate, bio } = req.body;
 
         const userRes = await query('SELECT * FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
@@ -21,6 +21,7 @@ const updateEntity = async (req, res) => {
 
         let updatedName = user.name;
         let updatedProfile = user.profile || {};
+        let updatedBio = bio !== undefined ? bio : user.bio;
 
         if (name && name.trim()) {
             updatedName = name.trim();
@@ -47,10 +48,10 @@ const updateEntity = async (req, res) => {
 
         const result = await query(`
             UPDATE users 
-            SET name = $1, email = $2, role = $3, discount_rate = $4, profile = $5, updated_at = NOW()
-            WHERE id = $6
-            RETURNING id, name, email, role, discount_rate, is_verified
-        `, [updatedName, updatedEmail, updatedRole, updatedDiscountRate, JSON.stringify(updatedProfile), req.params.id]);
+            SET name = $1, email = $2, role = $3, discount_rate = $4, profile = $5, bio = $6, updated_at = NOW()
+            WHERE id = $7
+            RETURNING id, name, email, role, discount_rate, bio, is_verified
+        `, [updatedName, updatedEmail, updatedRole, updatedDiscountRate, JSON.stringify(updatedProfile), updatedBio, req.params.id]);
 
         const saved = result.rows[0];
         console.log('[updateEntity] saved:', saved.id, saved.discount_rate);
@@ -791,7 +792,7 @@ async function inviteUser(req, res) {
 // @desc    Get all universities
 async function getUniversities(req, res) {
     try {
-        const resSet = await query("SELECT id as _id, name, profile FROM users WHERE role = 'university'");
+        const resSet = await query("SELECT id as _id, name, bio, profile FROM users WHERE role = 'university'");
         res.json(resSet.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -839,7 +840,7 @@ async function assignCoursesToUniversity(req, res) {
 // @access  Private (Admin)
 async function getUniversityDetail(req, res) {
     try {
-        const universityRes = await query('SELECT id as _id, name, email, role, profile, assigned_courses FROM users WHERE id = $1', [req.params.id]);
+        const universityRes = await query('SELECT id as _id, name, email, role, bio, profile_image as "profileImage", profile, assigned_courses FROM users WHERE id = $1', [req.params.id]);
         const university = universityRes.rows[0];
 
         if (!university || university.role !== 'university') {

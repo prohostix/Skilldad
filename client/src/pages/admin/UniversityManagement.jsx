@@ -41,7 +41,8 @@ const UniversityManagement = () => {
     const [editData, setEditData] = useState({
         name: '',
         email: '',
-        role: ''
+        role: '',
+        bio: ''
     });
     const [newEntity, setNewEntity] = useState({
         name: '',
@@ -147,7 +148,8 @@ const UniversityManagement = () => {
                 name: (editData.name || selectedPartner.name || '').trim(),
                 email: (editData.email || selectedPartner.email || '').trim(),
                 role: (editData.role || selectedPartner.role || 'partner'),
-                discountRate: Number(newRate) || 0
+                discountRate: Number(newRate) || 0,
+                bio: (editData.bio || selectedPartner.bio || '').trim()
             };
 
             console.log('[B2B] Updating entity', selectedPartner._id, payload);
@@ -187,7 +189,8 @@ const UniversityManagement = () => {
         setEditData({
             name: partner.name,
             email: partner.email,
-            role: partner.role
+            role: partner.role,
+            bio: partner.bio || ''
         });
         setOpenEdit(true);
     };
@@ -665,6 +668,15 @@ const UniversityManagement = () => {
                                     <option value="finance">Finance</option>
                                     <option value="student">Student</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Description</label>
+                                <textarea
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary resize-none h-24 text-sm"
+                                    value={editData.bio}
+                                    placeholder="University description..."
+                                    onChange={e => setEditData(prev => ({ ...prev, bio: e.target.value }))}
+                                />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-1.5">Applied Discount (%)</label>
