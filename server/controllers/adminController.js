@@ -816,18 +816,21 @@ async function assignCoursesToUniversity(req, res) {
             return res.status(400).json({ message: 'Target entity is not a university' });
         }
 
-        let updatedAssignedCourses = university.assigned_courses || [];
+        let updatedAssignedCourses = university.profile?.assigned_courses || [];
         if (Array.isArray(courses)) {
             updatedAssignedCourses = courses;
         }
 
-        const result = await query('UPDATE users SET assigned_courses = $1, updated_at = NOW() WHERE id = $2 RETURNING id, name, assigned_courses', [updatedAssignedCourses, req.params.id]);
+        const updatedProfile = university.profile || {};
+        updatedProfile.assigned_courses = updatedAssignedCourses;
+
+        const result = await query('UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2 RETURNING id, name, profile', [JSON.stringify(updatedProfile), req.params.id]);
         const updatedUniversity = result.rows[0];
 
         res.json({
             _id: updatedUniversity.id,
             name: updatedUniversity.name,
-            assignedCourses: updatedUniversity.assigned_courses,
+            assignedCourses: updatedUniversity.profile.assigned_courses,
             message: 'Courses assigned successfully'
         });
     } catch (error) {
@@ -840,7 +843,7 @@ async function assignCoursesToUniversity(req, res) {
 // @access  Private (Admin)
 async function getUniversityDetail(req, res) {
     try {
-        const universityRes = await query('SELECT id as _id, name, email, role, bio, profile_image as "profileImage", profile, assigned_courses FROM users WHERE id = $1', [req.params.id]);
+        const universityRes = await query('SELECT id as _id, name, email, role, bio, profile_image as "profileImage", profile FROM users WHERE id = $1', [req.params.id]);
         const university = universityRes.rows[0];
 
         if (!university || university.role !== 'university') {
@@ -852,7 +855,7 @@ async function getUniversityDetail(req, res) {
         const providedIds = providedCoursesRes.rows.map(p => p.id.toString());
 
         // Manual assigned IDs
-        const assignedIds = university.assigned_courses || [];
+        const assignedIds = university.profile?.assigned_courses || [];
 
         // Combine unique IDs
         const finalIds = Array.from(new Set([...providedIds, ...assignedIds]));
