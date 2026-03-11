@@ -128,15 +128,24 @@ const submitExam = asyncHandler(async (req, res) => {
     if (question.question_type === 'mcq') {
       const options = question.options || [];
       const selectedIdx = ans.selectedOption !== undefined ? ans.selectedOption : ans.answer;
-      const isCorrect = options[selectedIdx]?.isCorrect === true;
+      
+      const correctOptionIndex = options.findIndex(opt => opt.isCorrect === true);
+      const studentSelectedIndex = (selectedIdx !== undefined && selectedIdx !== null) ? Number(selectedIdx) : -1;
+      const isCorrect = studentSelectedIndex !== -1 && studentSelectedIndex === correctOptionIndex;
 
-      const marksAwarded = isCorrect ? (Number(question.marks) || 1) : 0;
+      let marksAwarded = 0;
+      if (isCorrect) {
+        marksAwarded = Number(question.marks) || 1;
+      } else if (studentSelectedIndex !== -1) {
+        marksAwarded = - Math.abs(Number(question.negative_marks) || 0);
+      }
+      
       totalObtainedMarks += marksAwarded;
 
       return {
         ...ans,
         questionType: 'mcq',
-        selectedOption: selectedIdx !== undefined ? Number(selectedIdx) : null,
+        selectedOption: studentSelectedIndex !== -1 ? studentSelectedIndex : null,
         marksAwarded,
         isCorrect,
         gradedAt: new Date()

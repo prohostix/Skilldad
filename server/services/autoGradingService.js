@@ -39,13 +39,13 @@ async function autoGradeMCQSubmission(submissionId) {
 
       if (answer.selectedOption === correctOptionIndex) {
         answer.isCorrect = true;
-        answer.marksAwarded = parseFloat(question.marks);
-        obtainedMarks += parseFloat(question.marks);
+        answer.marksAwarded = Math.abs(parseFloat(question.marks) || 1);
+        obtainedMarks += answer.marksAwarded;
         correctCount++;
-      } else {
+      } else if (answer.selectedOption !== undefined && answer.selectedOption !== null) {
         answer.isCorrect = false;
-        answer.marksAwarded = -parseFloat(question.negative_marks || 0);
-        obtainedMarks -= parseFloat(question.negative_marks || 0);
+        answer.marksAwarded = - Math.abs(parseFloat(question.negative_marks) || 0);
+        obtainedMarks += answer.marksAwarded; // Adding a negative number
       }
     }
   }
