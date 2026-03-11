@@ -135,6 +135,131 @@ const updateCourse = asyncHandler(async (req, res) => {
     res.json({ ...updated.rows[0], _id: id });
 });
 
+const addModule = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { title } = req.body;
+    
+    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    const modules = courseRes.rows[0].modules || [];
+    const newModule = {
+        _id: `module_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        title,
+        videos: []
+    };
+    
+    modules.push(newModule);
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+    
+    res.status(201).json(newModule);
+});
+
+const updateModule = asyncHandler(async (req, res) => {
+    const { id, moduleId } = req.params;
+    const { title } = req.body;
+    
+    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    let modules = courseRes.rows[0].modules || [];
+    const moduleIndex = modules.findIndex(m => m._id === moduleId);
+    if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+    
+    modules[moduleIndex].title = title;
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+    
+    res.json(modules[moduleIndex]);
+});
+
+const deleteModule = asyncHandler(async (req, res) => {
+    const { id, moduleId } = req.params;
+    
+    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    let modules = courseRes.rows[0].modules || [];
+    modules = modules.filter(m => m._id !== moduleId);
+    
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+    
+    res.json({ message: 'Module deleted' });
+});
+
+const addVideo = asyncHandler(async (req, res) => {
+    const { id, moduleId } = req.params;
+    const { title, url } = req.body;
+    
+    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    let modules = courseRes.rows[0].modules || [];
+    const moduleIndex = modules.findIndex(m => m._id === moduleId);
+    if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+    
+    const newVideo = {
+        _id: `video_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        title,
+        url
+    };
+    
+    modules[moduleIndex].videos = modules[moduleIndex].videos || [];
+    modules[moduleIndex].videos.push(newVideo);
+    
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+    
+    res.status(201).json(newVideo);
+});
+
+const updateVideo = asyncHandler(async (req, res) => {
+    const { id, moduleId, videoId } = req.params;
+    const { title, url } = req.body;
+    
+    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    let modules = courseRes.rows[0].modules || [];
+    const moduleIndex = modules.findIndex(m => m._id === moduleId);
+    if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+    
+    const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
+    if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
+    
+    modules[moduleIndex].videos[videoIndex].title = title || modules[moduleIndex].videos[videoIndex].title;
+    modules[moduleIndex].videos[videoIndex].url = url || modules[moduleIndex].videos[videoIndex].url;
+    
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+    
+    res.json(modules[moduleIndex].videos[videoIndex]);
+});
+
+const deleteVideo = asyncHandler(async (req, res) => {
+    const { id, moduleId, videoId } = req.params;
+    
+    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    let modules = courseRes.rows[0].modules || [];
+    const moduleIndex = modules.findIndex(m => m._id === moduleId);
+    if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+    
+    modules[moduleIndex].videos = modules[moduleIndex].videos.filter(v => v._id !== videoId);
+    
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+    
+    res.json({ message: 'Video deleted' });
+});
+
+const uploadThumbnail = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!req.file) return res.status(400).json({ message: 'Please upload an image' });
+    
+    const imagePath = `/uploads/${req.file.filename}`;
+    await query('UPDATE courses SET thumbnail = $1, updated_at = NOW() WHERE id = $2', [imagePath, id]);
+    
+    res.json({ message: 'Thumbnail uploaded', thumbnail: imagePath });
+});
+
 module.exports = {
     getCourses,
     getCourse,
@@ -142,11 +267,12 @@ module.exports = {
     updateCourse,
     getAdminCourses,
     deleteCourse: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
-    addModule: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
-    updateModule: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
-    deleteModule: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
-    addVideo: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
-    updateVideo: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
-    deleteVideo: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
+    addModule,
+    updateModule,
+    deleteModule,
+    addVideo,
+    updateVideo,
+    deleteVideo,
+    uploadThumbnail,
     addExercise: async (req, res) => res.status(501).json({ message: 'Not implemented' })
 };

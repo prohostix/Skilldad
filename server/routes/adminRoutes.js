@@ -34,6 +34,7 @@ const {
     adminEnrollStudent,
     adminUnenrollStudent,
     uploadUniversityProfileImage,
+    uploadUniversityCoverImage,
     updateUniversityProfile
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
@@ -84,6 +85,7 @@ router.get('/universities/:id', protect, checkAdmin, getUniversityDetail);
 router.put('/universities/:id/courses', protect, checkAdmin, assignCoursesToUniversity);
 router.put('/universities/:id/profile', protect, checkAdmin, updateUniversityProfile);
 router.post('/universities/:id/upload-image', protect, checkAdmin, upload.single('profileImage'), uploadUniversityProfileImage);
+router.post('/universities/:id/upload-cover', protect, checkAdmin, upload.single('coverImage'), uploadUniversityCoverImage);
 // Moved up
 router.put('/entities/:id', protect, checkAdmin, updateEntity);
 router.get('/partners/:id', protect, checkAdmin, getPartnerDetails);

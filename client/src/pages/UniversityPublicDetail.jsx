@@ -110,18 +110,9 @@ const UniversityPublicDetail = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                // Fetch all public courses
-                const { data } = await axios.get('/api/courses');
-                if (data && Array.isArray(data)) {
-                    // Filter courses that map to this university
-                    // Based on our catalog logic, a course's university can be in course.universityName, 
-                    // course.instructor.profile.universityName, or instructor name
-                    const uniCourses = data.filter(course => {
-                        const cUniv = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad';
-                        return cUniv === universityName;
-                    });
-                    setCourses(uniCourses);
-                }
+                // Fetch courses for this specific university
+                const { data } = await axios.get(`/api/public/universities/${encodeURIComponent(universityName)}/courses`);
+                setCourses(data || []);
             } catch (error) {
                 console.error("Error fetching university courses:", error);
             } finally {
@@ -149,7 +140,7 @@ const UniversityPublicDetail = () => {
             {/* Header Section */}
             <div className="relative pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
                 <div className="absolute inset-0 z-0">
-                    <img src={university.image || university.logo} alt={university.name} className="w-full h-full object-cover opacity-20" />
+                    <img src={university.profile?.coverImage || university.profileImage || university.image || university.logo} alt={university.name} className="w-full h-full object-cover opacity-20" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#080512] via-[#080512]/80 to-transparent" />
                 </div>
 
@@ -168,7 +159,7 @@ const UniversityPublicDetail = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             className="w-full md:w-1/3 aspect-video md:aspect-square max-w-sm rounded-[30px] overflow-hidden border-2 border-white/10 shadow-2xl shadow-primary/20 relative"
                         >
-                            <img src={university.image || university.logo} alt={university.name} className="w-full h-full object-cover" />
+                            <img src={university.profileImage || university.image || university.logo} alt={university.name} className="w-full h-full object-cover" />
                             <div className="absolute top-4 right-4 flex items-center bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
                                 <Star className="text-yellow-400 mr-2" fill="currentColor" size={14} />
                                 <span className="text-white font-bold text-sm">{university.rating}</span>
@@ -237,6 +228,37 @@ const UniversityPublicDetail = () => {
                                     ))}
                                 </div>
                             </motion.div>
+
+                            {/* Key Personnel Section */}
+                            {university.profile?.personnel?.length > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                    className="pt-6 border-t border-white/10"
+                                >
+                                    <h4 className="text-sm text-white/40 font-black uppercase tracking-widest mb-4">Key Personnel</h4>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {university.profile.personnel.map((person, idx) => (
+                                            <div key={idx} className="flex items-center space-x-3 bg-white/5 p-3 rounded-2xl border border-white/10">
+                                                <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
+                                                    {person.image ? (
+                                                        <img src={person.image} alt={person.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-white/50 text-xs font-bold uppercase">
+                                                            {person.name?.charAt(0) || '?'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="text-white text-sm font-bold">{person.name}</p>
+                                                    <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-0.5">{person.role}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </div>

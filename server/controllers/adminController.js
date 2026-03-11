@@ -1122,12 +1122,44 @@ const uploadUniversityProfileImage = async (req, res) => {
     }
 };
 
+// @desc    Upload university cover image
+// @route   POST /api/admin/universities/:id/upload-cover
+// @access  Private (Admin)
+const uploadUniversityCoverImage = async (req, res) => {
+    try {
+        const userRes = await query('SELECT role, profile FROM users WHERE id = $1', [req.params.id]);
+        const user = userRes.rows[0];
+
+        if (!user || user.role !== 'university') {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'Please upload an image' });
+        }
+
+        const imagePath = `/uploads/${req.file.filename}`;
+        const updatedProfile = user.profile || {};
+        updatedProfile.coverImage = imagePath;
+
+        await query('UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2', [JSON.stringify(updatedProfile), req.params.id]);
+
+        res.json({
+            message: 'University cover image updated',
+            coverImage: imagePath
+        });
+    } catch (error) {
+        console.error('[uploadUniversityCoverImage] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error uploading cover image' });
+    }
+};
+
 // @desc    Admin updates university profile data (bio, location, etc.)
 // @route   PUT /api/admin/universities/:id/profile
 // @access  Private (Admin)
 const updateUniversityProfile = async (req, res) => {
     try {
-        const { bio, location, website, phone } = req.body;
+        const { bio, location, website, phone, personnel } = req.body;
         const userRes = await query('SELECT role, bio, profile FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
 
@@ -1140,6 +1172,8 @@ const updateUniversityProfile = async (req, res) => {
         updatedProfile.location = location !== undefined ? location : updatedProfile.location;
         updatedProfile.website = website !== undefined ? website : updatedProfile.website;
         updatedProfile.phone = phone !== undefined ? phone : updatedProfile.phone;
+        if (personnel !== undefined) updatedProfile.personnel = personnel;
+
 
         const result = await query(`
             UPDATE users SET bio = $1, profile = $2, updated_at = NOW() WHERE id = $3
@@ -1195,5 +1229,6 @@ module.exports = {
     adminEnrollStudent,
     adminUnenrollStudent,
     uploadUniversityProfileImage,
+    uploadUniversityCoverImage,
     updateUniversityProfile
 };

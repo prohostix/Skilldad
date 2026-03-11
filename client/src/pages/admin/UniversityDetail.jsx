@@ -38,10 +38,13 @@ const UniversityDetail = () => {
         bio: '',
         location: '',
         website: '',
-        phone: ''
+        phone: '',
+        personnel: []
     });
     const [uploading, setUploading] = useState(false);
+    const [uploadingCover, setUploadingCover] = useState(false);
     const fileInputRef = useRef(null);
+    const coverInputRef = useRef(null);
 
     const fetchDetails = async () => {
         try {
@@ -51,12 +54,12 @@ const UniversityDetail = () => {
             setUniversity(data.university);
             setStudents(data.students);
 
-            // Set initial edit data
             setEditData({
                 bio: data.university.bio || '',
                 location: data.university.profile?.location || '',
                 website: data.university.profile?.website || '',
-                phone: data.university.profile?.phone || ''
+                phone: data.university.profile?.phone || '',
+                personnel: data.university.profile?.personnel || []
             });
         } catch (error) {
             console.error('Error fetching university details:', error);
@@ -113,6 +116,53 @@ const UniversityDetail = () => {
         } finally {
             setUploading(false);
         }
+    };
+
+    const handleCoverUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('coverImage', file);
+
+        setUploadingCover(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            await axios.post(`/api/admin/universities/${id}/upload-cover`, formData, config);
+
+            showToast('Cover image uploaded successfully', 'success');
+            fetchDetails();
+        } catch (error) {
+            console.error('Error uploading cover image:', error);
+            showToast(error.response?.data?.message || 'Failed to upload cover image', 'error');
+        } finally {
+            setUploadingCover(false);
+        }
+    };
+
+    const handleAddPersonnel = () => {
+        setEditData({
+            ...editData,
+            personnel: [...editData.personnel, { name: '', role: '', image: '' }]
+        });
+    };
+
+    const handleUpdatePersonnel = (index, field, value) => {
+        const updated = [...editData.personnel];
+        updated[index][field] = value;
+        setEditData({ ...editData, personnel: updated });
+    };
+
+    const handleRemovePersonnel = (index) => {
+        const updated = editData.personnel.filter((_, i) => i !== index);
+        setEditData({ ...editData, personnel: updated });
     };
 
     if (loading) {
@@ -204,8 +254,8 @@ const UniversityDetail = () => {
                             onChange={handleImageUpload}
                         />
 
-                        <h3 className="text-xl font-bold text-white text-center">{university.name}</h3>
-                        <p className="text-primary text-xs font-black uppercase tracking-widest mt-1">Primary Partner</p>
+                        <h3 className="text-xl font-bold text-white text-center mt-3">{university.name}</h3>
+                        <p className="text-primary text-xs font-black uppercase tracking-widest mt-1">University Logo</p>
                     </div>
 
                     <div className="space-y-4 pt-2">
@@ -308,6 +358,48 @@ const UniversityDetail = () => {
                             </div>
                         </div>
                     </div>
+                </GlassCard>
+
+                {/* Cover Image Card */}
+                <GlassCard className="lg:col-span-1 space-y-4">
+                    <h3 className="text-sm font-semibold text-white font-inter flex items-center">
+                        <Camera size={16} className="mr-2 text-primary" /> Cover Image
+                    </h3>
+                    <div 
+                        className="w-full h-32 rounded-2xl bg-white/5 border-2 border-dashed border-white/20 flex items-center justify-center relative overflow-hidden group cursor-pointer hover:border-primary/50 transition-all"
+                        onClick={() => coverInputRef.current.click()}
+                    >
+                        {university.profile?.coverImage ? (
+                            <img 
+                                src={university.profile.coverImage} 
+                                alt="Cover" 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                onError={(e) => { e.target.src = 'https://via.placeholder.com/400x200?text=COVER'; }}
+                            />
+                        ) : (
+                            <div className="text-center text-white/40 group-hover:text-primary transition-colors">
+                                <Camera size={24} className="mx-auto mb-2" />
+                                <p className="text-xs font-bold uppercase tracking-widest">Upload Cover</p>
+                            </div>
+                        )}
+
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <p className="text-white text-xs font-bold uppercase tracking-widest">Change Cover</p>
+                        </div>
+
+                        {uploadingCover && (
+                            <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-10">
+                                <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                            </div>
+                        )}
+                    </div>
+                    <input
+                        type="file"
+                        ref={coverInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleCoverUpload}
+                    />
                 </GlassCard>
 
                 {/* Right Content */}
@@ -413,6 +505,92 @@ const UniversityDetail = () => {
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+                    </GlassCard>
+
+                    {/* Personnel Manager */}
+                    <GlassCard className="!p-0 border-white/10 overflow-hidden">
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                            <h3 className="text-base font-semibold text-white font-inter flex items-center">
+                                <Users size={18} className="mr-2 text-purple-400" /> Key Personnel & Directors
+                            </h3>
+                            {isEditing && (
+                                <button 
+                                    onClick={handleAddPersonnel}
+                                    className="px-3 py-1.5 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg text-xs font-bold uppercase transition-colors"
+                                >
+                                    + Add Person
+                                </button>
+                            )}
+                        </div>
+                        <div className="p-6">
+                            {!isEditing ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {university.profile?.personnel?.length > 0 ? (
+                                        university.profile.personnel.map((person, idx) => (
+                                            <div key={idx} className="flex items-center space-x-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 border border-white/20">
+                                                    {person.image ? (
+                                                        <img src={person.image} alt={person.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-white/50 text-sm font-bold uppercase">
+                                                            {person.name?.charAt(0) || '?'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="text-white font-bold text-sm">{person.name}</p>
+                                                    <p className="text-purple-400 text-[10px] font-black uppercase tracking-widest mt-0.5">{person.role}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full py-6 text-center text-white/30 text-xs font-black uppercase tracking-widest border border-dashed border-white/10 rounded-xl">
+                                            No personnel added
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {editData.personnel.map((person, idx) => (
+                                        <div key={idx} className="flex flex-col sm:flex-row gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative group">
+                                            <div className="flex-1 space-y-3">
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Full Name" 
+                                                    value={person.name}
+                                                    onChange={(e) => handleUpdatePersonnel(idx, 'name', e.target.value)}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Role / Title" 
+                                                    value={person.role}
+                                                    onChange={(e) => handleUpdatePersonnel(idx, 'role', e.target.value)}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                />
+                                                <input 
+                                                    type="url" 
+                                                    placeholder="Image URL (Optional)" 
+                                                    value={person.image}
+                                                    onChange={(e) => handleUpdatePersonnel(idx, 'image', e.target.value)}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={() => handleRemovePersonnel(idx)}
+                                                className="self-start sm:self-center p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+                                                title="Remove"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {editData.personnel.length === 0 && (
+                                        <div className="text-center py-6 text-white/30 text-xs font-black uppercase">Click 'Add Person' to build directory</div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </GlassCard>
                 </div>

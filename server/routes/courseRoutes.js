@@ -13,7 +13,8 @@ const {
     updateVideo,
     deleteVideo,
     addExercise,
-    getAdminCourses
+    getAdminCourses,
+    uploadThumbnail
 } = require('../controllers/courseController');
 const {
     linkZoomRecordingToVideo,
@@ -21,11 +22,13 @@ const {
     unlinkZoomRecordingFromVideo,
 } = require('../controllers/courseZoomController');
 const { protect } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 router.route('/').get(getCourses).post(protect, createCourse);
 router.route('/admin').get(protect, getAdminCourses);
 router.route('/zoom-recordings/available').get(protect, getAvailableZoomRecordings);
 router.route('/:id').get(getCourse).put(protect, updateCourse).delete(protect, deleteCourse);
+router.route('/:id/upload-thumbnail').post(protect, upload.single('thumbnail'), uploadThumbnail);
 router.route('/:id/modules').post(protect, addModule);
 router.route('/:id/modules/:moduleId').put(protect, updateModule).delete(protect, deleteModule);
 router.route('/:id/modules/:moduleId/videos').post(protect, addVideo);

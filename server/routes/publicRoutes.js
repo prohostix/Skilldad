@@ -66,6 +66,60 @@ router.get('/universities', async (req, res) => {
     }
 });
 
+// @desc    Get courses for a specific university by name
+// @route   GET /api/public/universities/:name/courses
+// @access  Public
+router.get('/universities/:name/courses', async (req, res) => {
+    try {
+        const uniName = req.params.name;
+        
+        // 1. Find the university by name
+        const uniRes = await query('SELECT id, profile FROM users WHERE role = $1 AND name = $2 AND is_verified = $3', ['university', uniName, true]);
+        
+        if (uniRes.rows.length === 0) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+        
+        const uni = uniRes.rows[0];
+        const profile = typeof uni.profile === 'string' ? JSON.parse(uni.profile) : (uni.profile || {});
+        const assignedCourseIds = profile.assigned_courses || [];
+        
+        // 2. Fetch courses where instructor is the university OR course ID is in assigned_courses
+        let coursesQuery = `
+            SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
+            FROM courses c
+            LEFT JOIN users u ON c.instructor_id = u.id
+            WHERE c.is_published = true AND (c.instructor_id = $1
+        `;
+        const queryParams = [uni.id];
+        
+        if (assignedCourseIds.length > 0) {
+            coursesQuery += ` OR c.id = ANY($2::text[])`;
+            queryParams.push(assignedCourseIds);
+        }
+        
+        coursesQuery += `)`;
+        
+        const coursesRes = await query(coursesQuery, queryParams);
+        
+        const enrichedCourses = coursesRes.rows.map(course => ({
+            ...course,
+            _id: course.id,
+            instructor: {
+                name: course.instructor_name,
+                profile: typeof course.instructor_profile === 'string' ? JSON.parse(course.instructor_profile) : course.instructor_profile,
+                role: 'university'
+            }
+        }));
+        
+        res.json(enrichedCourses);
+    } catch (error) {
+        console.error('Error fetching university courses:', error.message);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
 // @desc    Send demo notifications
 // @route   POST /api/public/demo-notification
 // @access  Public
