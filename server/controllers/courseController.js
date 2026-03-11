@@ -272,8 +272,37 @@ module.exports = {
         if (courseRes.rows.length === 0) {
             return res.status(404).json({ message: 'Course not found' });
         }
-        await query('DELETE FROM courses WHERE id = $1', [id]);
-        res.json({ message: 'Course removed' });
+        
+        try {
+            await query('BEGIN');
+            
+            // Delete related simple dependencies
+            await query('DELETE FROM progress WHERE course_id = $1', [id]).catch(e => null);
+            await query('DELETE FROM submissions WHERE course_id = $1', [id]).catch(e => null);
+            await query('DELETE FROM projects WHERE course_id = $1', [id]).catch(e => null);
+            await query('DELETE FROM interactive_contents WHERE course_id = $1', [id]).catch(e => null);
+            await query('DELETE FROM enrollments WHERE course_id = $1', [id]).catch(e => null);
+            await query('DELETE FROM live_sessions WHERE course_id = $1', [id]).catch(e => null);
+
+            // Delete Exams and their related dependencies
+            const examsRes = await query('SELECT id FROM exams WHERE course_id = $1', [id]).catch(e => ({ rows: [] }));
+            for (const exam of examsRes.rows) {
+                await query('DELETE FROM questions WHERE exam_id = $1', [exam.id]).catch(e => null);
+                await query('DELETE FROM exam_submissions_new WHERE exam_id = $1', [exam.id]).catch(e => null);
+                await query('DELETE FROM results WHERE exam_id = $1', [exam.id]).catch(e => null);
+            }
+            await query('DELETE FROM exams WHERE course_id = $1', [id]).catch(e => null);
+
+            // Finally, delete the course
+            await query('DELETE FROM courses WHERE id = $1', [id]);
+            
+            await query('COMMIT');
+            res.json({ message: 'Course and all related data removed successfully' });
+        } catch (error) {
+            await query('ROLLBACK');
+            console.error('Cascade Delete Error:', error);
+            res.status(500).json({ message: 'Failed to delete course due to referential constraints', error: error.message });
+        }
     }),
     addModule,
     updateModule,
