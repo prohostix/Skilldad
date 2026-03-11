@@ -1,10 +1,12 @@
-/* Zoom Meeting Container - Let Zoom SDK handle internal sizing */
+/* Zoom Meeting Container - Studio Mode */
 .zoom-meeting-container {
   width: 100%;
   height: 100%;
   position: relative;
   overflow: visible !important;
   z-index: 10;
+  background: #000;
+  box-shadow: inset 0 0 100px rgba(79, 70, 229, 0.1);
 }
 
 /* Ensure Zoom's root container fills the space and doesn't hide overlays */
@@ -20,14 +22,19 @@
 .zoom-meeting-container .chat-container,
 .zoom-meeting-container .settings-dialog,
 .zoom-meeting-container .zm-modal-container,
-.zoom-meeting-container .zm-context-menu {
-  z-index: 10001 !important;
+.zoom-meeting-container .zm-context-menu,
+.zoom-meeting-container .zm-box {
+  z-index: 20001 !important;
 }
 
 /* Ensure the zoom root itself has a clean stacking context */
-.zoom-meeting-container > div {
+.zoom-meeting-container > div#zmmtg-root {
   z-index: 10;
-  position: relative;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Prevent any parent from clipping Zoom's absolute positioned modals */

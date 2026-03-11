@@ -235,17 +235,31 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
       )}
 
       {isInitializedRef.current && (
-        <div className="absolute top-4 right-4 z-[10002]">
-          <button
-            onClick={handleLeave}
-            className="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-black rounded-xl shadow-2xl transition-all flex items-center gap-2 transform hover:scale-105"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            LEAVE SESSION
-          </button>
-        </div>
+        <>
+          {/* Top Bar Indicator */}
+          <div className="absolute top-4 left-6 z-[10003] pointer-events-none">
+            <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 shadow-2xl">
+              <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
+              <span className="text-white text-xs font-bold uppercase tracking-[0.2em]">Live Studio</span>
+              <div className="w-px h-3 bg-white/20 mx-1"></div>
+              <span className="text-white/60 text-[10px] font-medium uppercase tracking-wider">{sessionId}</span>
+            </div>
+          </div>
+
+          {/* Premium Leave Button */}
+          <div className="absolute top-4 right-6 z-[10003]">
+            <button
+              onClick={handleLeave}
+              className="group relative px-6 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-xs font-bold rounded-2xl border border-red-500/30 hover:border-red-500 transition-all duration-300 flex items-center gap-2 overflow-hidden shadow-2xl"
+            >
+              <div className="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="tracking-widest">LEAVE STUDIO</span>
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
