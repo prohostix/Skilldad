@@ -156,6 +156,7 @@ app.use('/api/public', require('./routes/publicRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/webhooks', require('./routes/webhookRoutes'));
 app.use('/api/discount', require('./routes/discountRoutes'));
+app.use('/api/services', require('./routes/serviceRoutes'));
 
 // Payment Routes
 app.use('/api/payment', require('./routes/paymentRoutes'));
