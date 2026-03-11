@@ -893,7 +893,11 @@ async function getUniversityDetail(req, res) {
             students
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[getUniversityDetail] Internal Error:', error);
+        res.status(500).json({ 
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        });
     }
 }
 
