@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, User } from 'lucide-react';
+import { Search, Bell, User, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
 
 const Navbar = ({ onToggleSidebar }) => {
     const navigate = useNavigate();
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState(false);
     // Get user info from context
     const { user } = useUser();
     const userInfo = user || JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -32,7 +34,43 @@ const Navbar = ({ onToggleSidebar }) => {
                         className="w-full pl-12 pr-4 py-2 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all text-white placeholder:text-white/20 text-sm"
                     />
                 </div>
+
+                {/* Mobile Search Toggle */}
+                <button 
+                    onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+                    className="sm:hidden p-2 text-slate-400 hover:bg-white/5 rounded-xl transition-all"
+                >
+                    <Search size={20} />
+                </button>
             </div>
+
+            {/* Expandable Mobile Search Bar */}
+            <AnimatePresence>
+                {isMobileSearchOpen && (
+                    <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="absolute top-16 left-0 w-full bg-black/95 backdrop-blur-2xl border-b border-white/10 px-4 py-3 sm:hidden z-50 overflow-hidden"
+                    >
+                        <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                            <input
+                                autoFocus
+                                type="text"
+                                placeholder="Search..."
+                                className="w-full pl-11 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-white text-sm"
+                            />
+                            <button 
+                                onClick={() => setIsMobileSearchOpen(false)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="flex items-center space-x-3 sm:space-x-5">
                 <button className="relative p-2.5 text-slate-400 hover:bg-white/5 rounded-xl transition-all hover:text-primary">

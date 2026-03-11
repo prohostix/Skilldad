@@ -216,7 +216,7 @@ const PaymentMonitoringDashboard = () => {
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <DashboardHeading title="Payment Monitoring Dashboard" />
                 <div className="flex items-center space-x-3">
                     <ModernButton
@@ -236,12 +236,14 @@ const PaymentMonitoringDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <GlassCard className="!p-4">
-                    <div className="flex items-center space-x-3">
-                        <Clock className="text-primary" size={20} />
-                        <span className="text-xs font-bold text-white/50 uppercase tracking-widest">
-                            Time Range
-                        </span>
-                        <div className="flex space-x-2 ml-auto">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex items-center space-x-3">
+                            <Clock className="text-primary" size={20} />
+                            <span className="text-xs font-bold text-white/50 uppercase tracking-widest">
+                                Time Range
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2 sm:ml-auto">
                             {['24h', '7d', '30d'].map((range) => (
                                 <button
                                     key={range}
@@ -306,10 +308,10 @@ const PaymentMonitoringDashboard = () => {
                             {pendingProofs.map((proof, index) => (
                                 <motion.div
                                     key={proof._id}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="bg-white/5 rounded-xl p-4 border border-white/10 flex items-center justify-between"
+                                    className="bg-white/5 rounded-xl p-4 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                                 >
                                     <div className="flex items-center space-x-4 flex-1">
                                         <img

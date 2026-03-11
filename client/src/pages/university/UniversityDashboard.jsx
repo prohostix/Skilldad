@@ -323,10 +323,10 @@ const UniversityDashboard = () => {
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
             {/* Header */}
-            <div className="flex flex-row items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <DashboardHeading title="University Dashboard" />
-                    <p className="text-white/50 mt-1">Manage your institution, students, and sessions.</p>
+                    <p className="text-white/50 mt-1 text-sm">Manage your institution, students, and sessions.</p>
                 </div>
                 <div className="flex gap-3">
                     <ModernButton variant="secondary" onClick={() => { }}>
@@ -349,7 +349,7 @@ const UniversityDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                     >
-                        <GlassCard className={`p-6 border-b-2 ${stat.border} group hover:scale-[1.02] transition-all duration-300`}>
+                        <GlassCard className={`p-4 sm:p-6 border-b-2 ${stat.border} group hover:scale-[1.02] transition-all duration-300`}>
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-1">{stat.label}</p>

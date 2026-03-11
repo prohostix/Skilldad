@@ -62,7 +62,9 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                 { name: 'Coupons', icon: Ticket, path: '/admin/coupons' },
                 { name: 'Payouts', icon: DollarSign, path: '/admin/payouts' },
                 { name: 'Communications', icon: Bell, path: '/admin/communications' },
+                { name: 'Services Management', icon: LayoutDashboard, path: '/admin/services' },
                 { name: 'Landing Assets', icon: Image, path: '/admin/partner-logos' },
+
                 { name: 'Support Tickets', icon: LifeBuoy, path: '/admin/support' },
                 { name: 'FAQ Manager', icon: MessageCircle, path: '/admin/faqs' },
                 { name: 'Settings', icon: Settings, path: '/admin/settings' },

@@ -156,7 +156,7 @@ const CoursePlayer = () => {
     const progressPercent = Math.round((completedCount / totalVideos) * 100) || 0;
 
     return (
-        <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-100px)] h-[calc(100vh-80px)] bg-[#050505] rounded-none lg:rounded-2xl border-0 lg:border border-white/10 overflow-hidden font-inter -mx-4 sm:-mx-6 lg:-mx-8 -mb-28 shadow-2xl">
+        <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-100px)] min-h-[calc(100vh-200px)] bg-[#050505] rounded-none lg:rounded-2xl border-0 lg:border border-white/10 overflow-hidden font-inter -mx-4 sm:-mx-6 lg:-mx-8 shadow-2xl">
             {/* Sidebar - Course Content */}
             <div className={`${isSidebarOpen ? 'w-full lg:w-96' : 'w-0 lg:hidden'} transition-all duration-500 bg-[#0a0a0a] border-r border-white/10 flex flex-col z-20`}>
                 <div className="p-6 border-b border-white/10">
@@ -346,12 +346,13 @@ const CoursePlayer = () => {
                     <div className="flex flex-col lg:flex-row gap-8">
                         {/* Control Panel & Exercise */}
                         <div className="flex-1 space-y-8">
-                            <div className="flex space-x-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
                                 <ModernButton onClick={handleVideoEnd} className="flex-1 !py-4 shadow-xl shadow-primary/20">
                                     Mark as Completed
                                 </ModernButton>
-                                <ModernButton variant="secondary" className="px-6 border-white/10">
-                                    <FileText size={20} className="text-slate-500" />
+                                <ModernButton variant="secondary" className="px-6 py-4 sm:py-2 border-white/10 flex items-center justify-center">
+                                    <FileText size={20} className="text-slate-500 mr-2 sm:mr-0" />
+                                    <span className="sm:hidden font-bold text-sm text-slate-500">Resources</span>
                                 </ModernButton>
                             </div>
 

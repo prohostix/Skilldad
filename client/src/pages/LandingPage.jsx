@@ -304,7 +304,7 @@ const LandingPage = () => {
             {/* Institutional Pulse - Real-time Stats Visualization */}
             <section className="relative pb-4 pt-4 px-6 section-optimize">
                 <div className="max-w-7xl mx-auto px-0 md:px-6 relative z-10 w-full overflow-hidden">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                         {[
                             { label: 'Neural Scholars', value: '1.2M+', icon: Users },
                             { label: 'Global Intuition', value: '99.4%', icon: Globe },

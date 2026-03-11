@@ -30,7 +30,7 @@ const DashboardLayout = () => {
                 <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
                     <DashboardNavbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-                    <main className={`flex-1 ${location.pathname.includes('/session/') ? 'p-0 sm:p-0 lg:px-0 max-w-none' : 'p-4 sm:p-6 lg:px-8 max-w-[1600px] mx-auto'} pt-0 lg:pt-0 pb-28 w-full`}>
+                    <main className={`flex-1 ${location.pathname.includes('/session/') ? 'p-0 sm:p-0 lg:px-0 max-w-none' : 'p-4 sm:p-6 lg:px-8 max-w-[1600px] mx-auto'} pt-0 lg:pt-0 pb-20 w-full`}>
                         <Outlet />
                     </main>
                 </div>

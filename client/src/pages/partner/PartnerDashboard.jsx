@@ -238,7 +238,7 @@ const PartnerDashboard = () => {
         <div className="space-y-10 animate-in fade-in duration-700 pb-20">
             {/* Header with Navigation Tabs */}
             <div className="flex flex-col gap-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                     <div>
                         <motion.h1
                             initial={{ opacity: 0, x: -20 }}

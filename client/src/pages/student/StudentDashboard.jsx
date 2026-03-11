@@ -306,14 +306,14 @@ const StudentDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="dashboard-section-title flex-1">
+                        <div className="flex flex-wrap items-center justify-between gap-y-4 mb-6">
+                            <div className="dashboard-section-title flex-1 min-w-[150px]">
                                 <BookOpen size={14} className="text-primary" />
                                 Active Learning
                             </div>
                             <button
                                 onClick={() => navigate('/dashboard/my-courses')}
-                                className="text-[10px] font-extrabold text-white/30 hover:text-primary transition-colors flex items-center uppercase tracking-[0.2em] ml-4"
+                                className="text-[10px] font-extrabold text-white/30 hover:text-primary transition-colors flex items-center uppercase tracking-[0.2em]"
                             >
                                 Explorer <ChevronRight size={12} className="ml-1" />
                             </button>
@@ -396,14 +396,14 @@ const StudentDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
                     >
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="dashboard-section-title flex-1">
+                        <div className="flex flex-wrap items-center justify-between gap-y-4 mb-6">
+                            <div className="dashboard-section-title flex-1 min-w-[150px]">
                                 <FileText size={14} className="text-emerald-400" />
                                 Project Pipeline
                             </div>
                             <button
                                 onClick={() => navigate('/dashboard/course/1/projects')}
-                                className="text-[10px] font-extrabold text-white/30 hover:text-emerald-400 transition-colors flex items-center uppercase tracking-[0.2em] ml-4"
+                                className="text-[10px] font-extrabold text-white/30 hover:text-emerald-400 transition-colors flex items-center uppercase tracking-[0.2em]"
                             >
                                 All Work <ChevronRight size={12} className="ml-1" />
                             </button>

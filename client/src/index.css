@@ -89,6 +89,8 @@ html {
   overflow-x: hidden;
   text-rendering: optimizeSpeed;
   /* Optimize for speed over legibility on complex pages */
+  width: 100vw;
+  position: relative;
 }
 
 body {
@@ -102,6 +104,10 @@ body {
 
   /* Better scroll performance */
   -webkit-overflow-scrolling: touch;
+  
+  /* Mobile Optimization: Snappier taps and safe areas */
+  touch-action: manipulation;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* Global Branded Background - Removed */
@@ -140,6 +146,7 @@ h6 {
 .premium-gradient-text {
   background: linear-gradient(to right, #FFFFFF 0%, #A78BFA 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

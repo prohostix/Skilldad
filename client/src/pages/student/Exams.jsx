@@ -771,25 +771,10 @@ const Exams = () => {
                                 initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.04 }}
-                                style={{
-                                    background: '#1a1a1f',
-                                    border: '1px solid rgba(255,255,255,0.06)',
-                                    borderRadius: 20,
-                                    padding: '14px 20px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 16,
-                                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    cursor: 'default',
-                                }}
-                                whileHover={{
-                                    borderColor: 'rgba(124,111,247,0.3)',
-                                    backgroundColor: '#202026',
-                                    transform: 'translateX(4px)'
-                                }}
+                                className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-4 p-5 md:px-5 md:py-3.5 bg-[#1a1a1f] border border-white/[0.06] rounded-[20px] transition-all duration-200 hover:border-primary/30 hover:bg-[#202026] hover:translate-x-1"
                             >
-                                {/* Status stripe */}
-                                <div style={{ width: 4, height: 44, borderRadius: 99, background: sc.text, flexShrink: 0, opacity: 0.7 }} />
+                                {/* Status stripe - hidden on mobile for better space */}
+                                <div className="hidden md:block w-1 h-11 rounded-full bg-primary opacity-70 shrink-0" style={{ background: sc.text }} />
 
                                 {/* Title + Course + Description */}
                                 <div style={{ flex: '1 1 0', minWidth: 0 }}>
@@ -827,68 +812,72 @@ const Exams = () => {
                                     ))}
                                 </div>
 
-                                {/* Status badge */}
-                                <div style={{ padding: '4px 12px', background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 99, fontSize: 10, fontWeight: 800, color: sc.text, textTransform: 'uppercase', letterSpacing: '0.08em', flexShrink: 0 }}>
-                                    {status}
-                                </div>
-
-                                {/* Score (if completed) */}
-                                {status === 'completed' && exam.submission && (
-                                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 48 }}>
-                                        <p style={{ fontSize: 16, fontWeight: 800, color: exam.submission.passed ? '#22c55e' : '#ef4444', margin: 0, lineHeight: 1 }}>
-                                            {(Number(exam.submission.percentage) || 0).toFixed(0)}%
-                                        </p>
-                                        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', marginTop: 2 }}>
-                                            {exam.submission.passed ? 'Passed' : 'Failed'}
-                                        </p>
+                                {/* Meta & Status Group */}
+                                <div className="flex flex-wrap md:flex-nowrap items-center gap-3 md:gap-4 w-full md:w-auto mt-2 md:mt-0">
+                                    {/* Status badge */}
+                                    <div className="px-3 py-1 bg-sc-bg border border-sc-border rounded-full text-[10px] font-extrabold text-sc-text uppercase tracking-wider" 
+                                         style={{ backgroundColor: sc.bg, borderColor: sc.border, color: sc.text }}>
+                                        {status}
                                     </div>
-                                )}
 
-                                {/* Scheduled unlock time */}
-                                {status === 'scheduled' && (
-                                    <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 90 }}>
-                                        <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', marginBottom: 2 }}>Unlocks</p>
-                                        <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', margin: 0 }}>
-                                            {exam.scheduledStartTime && !isNaN(new Date(exam.scheduledStartTime))
-                                                ? new Date(exam.scheduledStartTime).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-                                                : 'TBD'}
-                                        </p>
-                                    </div>
-                                )}
+                                    {/* Score (if completed) */}
+                                    {status === 'completed' && exam.submission && (
+                                        <div className="flex flex-col items-start md:items-end min-w-[60px]">
+                                            <p className="text-lg font-black leading-none" style={{ color: exam.submission.passed ? '#22c55e' : '#ef4444' }}>
+                                                {(Number(exam.submission.percentage) || 0).toFixed(0)}%
+                                            </p>
+                                            <p className="text-[9px] text-white/30 font-bold uppercase mt-1">
+                                                {exam.submission.passed ? 'Passed' : 'Failed'}
+                                            </p>
+                                        </div>
+                                    )}
 
-                                {/* Action button */}
-                                <div style={{ flexShrink: 0 }}>
-                                    {status === 'available' && (
-                                        <button
-                                            onClick={() => exam.examType === 'pdf-based' ? downloadQuestionPaper(exam) : startExam(exam)}
-                                            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 18px', background: '#7C6FF7', border: 'none', borderRadius: 10, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(124,111,247,0.35)', whiteSpace: 'nowrap' }}
-                                        >
-                                            {exam.examType === 'pdf-based' ? <Download size={14} /> : <Play size={14} />}
-                                            {exam.examType === 'pdf-based' ? 'Download' : 'Start Exam'}
-                                        </button>
-                                    )}
-                                    {status === 'completed' && (
-                                        <button
-                                            onClick={() => navigate(`/dashboard/exam/${exam._id}/result`)}
-                                            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 18px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 10, color: '#22c55e', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                                        >
-                                            <Eye size={14} /> View Results
-                                        </button>
-                                    )}
-                                    {status === 'failed' && (exam.attemptsUsed || 0) < (exam.maxAttempts || 1) && (
-                                        <button
-                                            onClick={() => startExam(exam)}
-                                            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 18px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                                        >
-                                            <RotateCcw size={14} /> Retry
-                                        </button>
-                                    )}
-                                    {status === 'failed' && (exam.attemptsUsed || 0) >= (exam.maxAttempts || 1) && (
-                                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>No attempts left</span>
-                                    )}
+                                    {/* Scheduled unlock time */}
                                     {status === 'scheduled' && (
-                                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Upcoming</span>
+                                        <div className="flex flex-col items-start md:items-end min-w-[90px]">
+                                            <p className="text-[9px] text-white/30 font-bold uppercase mb-0.5">Unlocks</p>
+                                            <p className="text-[11px] font-bold text-white/60">
+                                                {exam.scheduledStartTime && !isNaN(new Date(exam.scheduledStartTime))
+                                                    ? new Date(exam.scheduledStartTime).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                                    : 'TBD'}
+                                            </p>
+                                        </div>
                                     )}
+
+                                    {/* Action button */}
+                                    <div className="ml-0 md:ml-auto w-full md:w-auto pt-3 md:pt-0 border-t border-white/5 md:border-0">
+                                        {status === 'available' && (
+                                            <button
+                                                onClick={() => exam.examType === 'pdf-based' ? downloadQuestionPaper(exam) : startExam(exam)}
+                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/30 transition-transform active:scale-95"
+                                            >
+                                                {exam.examType === 'pdf-based' ? <Download size={14} /> : <Play size={14} />}
+                                                {exam.examType === 'pdf-based' ? 'Download' : 'Start Exam'}
+                                            </button>
+                                        )}
+                                        {status === 'completed' && (
+                                            <button
+                                                onClick={() => navigate(`/dashboard/exam/${exam._id}/result`)}
+                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/25 text-emerald-500 text-xs font-bold rounded-xl"
+                                            >
+                                                <Eye size={14} /> View Results
+                                            </button>
+                                        )}
+                                        {status === 'failed' && (exam.attemptsUsed || 0) < (exam.maxAttempts || 1) && (
+                                            <button
+                                                onClick={() => startExam(exam)}
+                                                className="w-full md:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-red-500/10 border border-red-500/25 text-red-500 text-xs font-bold rounded-xl"
+                                            >
+                                                <RotateCcw size={14} /> Retry
+                                            </button>
+                                        )}
+                                        {status === 'failed' && (exam.attemptsUsed || 0) >= (exam.maxAttempts || 1) && (
+                                            <span className="text-[10px] text-white/20 font-bold uppercase tracking-wide px-2">No attempts left</span>
+                                        )}
+                                        {status === 'scheduled' && (
+                                            <span className="text-[10px] text-white/20 font-bold uppercase tracking-wide px-2">Upcoming</span>
+                                        )}
+                                    </div>
                                 </div>
                             </motion.div>
                         );

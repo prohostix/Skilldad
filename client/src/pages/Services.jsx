@@ -1,166 +1,46 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import {
-    BookOpen,
-    Users,
-    Video,
-    Award,
-    Brain,
-    Zap,
-    Shield,
-    Globe,
-    Clock,
-    Target,
-    TrendingUp,
-    Headphones,
-    Code,
-    Database,
-    Smartphone,
-    Cloud,
-    Lock,
-    CheckCircle,
-    Briefcase,
-    ClipboardCheck
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import * as LucideIcons from 'lucide-react';
+
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 
 const Services = () => {
-    const [expandedId, setExpandedId] = React.useState(null);
+    const [expandedId, setExpandedId] = useState(null);
+    const [mainServices, setMainServices] = useState([]);
+    const [additionalFeatures, setAdditionalFeatures] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const mainServices = [
-        {
-            id: 1,
-            title: "Online Learning Platform",
-            description: "Comprehensive e-learning solution with interactive courses, assessments, and progress tracking.",
-            icon: BookOpen,
-            features: ["Interactive Courses", "Progress Tracking", "Assessments", "Certificates"],
-            color: "text-purple-500",
-            bg: "bg-purple-500/10",
-            details: "Our flagship Online Learning Platform transforms traditional education into a digital-first, universally accessible experience for modern learners.",
-            subServices: [
-                { title: "Custom Course Builder", desc: "Drag-and-drop structure for educators." },
-                { title: "Automated Grading", desc: "Instant feedback on assignments and quizzes." },
-                { title: "Discussion Forums", desc: "Built-in community engagement tools." }
-            ]
-        },
-        {
-            id: 2,
-            title: "Live Virtual Classes",
-            description: "Real-time interactive sessions with expert instructors and collaborative learning environments.",
-            icon: Video,
-            features: ["HD Video Streaming", "Interactive Whiteboard", "Screen Sharing", "Recording"],
-            color: "text-emerald-500",
-            bg: "bg-emerald-500/10",
-            details: "Bridging the gap between online flexibility and in-person engagement, our Live Virtual Classes provide an immersive 'Studio Mode' experience.",
-            subServices: [
-                { title: "Studio Interface", desc: "Premium layout with integrated chat & Q&A." },
-                { title: "Cloud Recording", desc: "Auto-syncs recordings to the student dashboard." },
-                { title: "Breakout Rooms", desc: "Facilitate small group discussions instantly." }
-            ]
-        },
-        {
-            id: 3,
-            title: "Corporate Training",
-            description: "Customized training programs for businesses to upskill their workforce effectively.",
-            icon: Users,
-            features: ["Custom Curriculum", "Team Management", "Analytics", "Bulk Enrollment"],
-            color: "text-amber-500",
-            bg: "bg-amber-500/10",
-            details: "Empower your workforce with tailored curriculums designed to close skill gaps and align with your strategic business objectives.",
-            subServices: [
-                { title: "B2B Dashboards", desc: "Track employee KPI and learning metrics." },
-                { title: "Compliance Pathways", desc: "Mandatory training tracking and certification." },
-                { title: "White-labeling", desc: "Train your team on a fully branded portal." }
-            ]
-        },
-        {
-            id: 4,
-            title: "AI-Powered Learning",
-            description: "Personalized learning paths powered by artificial intelligence and machine learning.",
-            icon: Brain,
-            features: ["Adaptive Learning", "Smart Recommendations", "Performance Analytics", "Skill Assessment"],
-            color: "text-blue-500",
-            bg: "bg-blue-500/10",
-            details: "Leverage machine learning to create adaptive, highly personalized learning journeys that evolve with the student's pacing and proficiency.",
-            subServices: [
-                { title: "Smart Tutor", desc: "24/7 AI chatbot assistance for course material." },
-                { title: "Content Generation", desc: "AI-assisted quiz and assignment creation." },
-                { title: "Predictive Analytics", desc: "Identify at-risk students before they fall behind." }
-            ]
-        },
-        {
-            id: 5,
-            title: "Internship Programs",
-            description: "Connect students with real-world internship opportunities and hands-on industry experience.",
-            icon: Briefcase,
-            features: ["Industry Partnerships", "Project-Based Learning", "Mentorship Support", "Experience Certificates"],
-            color: "text-rose-500",
-            bg: "bg-rose-500/10",
-            details: "Bridge the gap between academia and industry. We guarantee practical exposure through structured, mentor-led virtual internship programs.",
-            subServices: [
-                { title: "Live Projects", desc: "Work on real-world industry challenges." },
-                { title: "Mentor Tracking", desc: "1-on-1 guidance from seasoned professionals." },
-                { title: "Verified Credentials", desc: "Blockchain-backed experience letters." }
-            ]
-        },
-        {
-            id: 6,
-            title: "Placement Assessments",
-            description: "Comprehensive evaluation and preparation for campus placements and job interviews.",
-            icon: ClipboardCheck,
-            features: ["Mock Interviews", "Aptitude Tests", "Technical Assessments", "Career Guidance"],
-            color: "text-teal-500",
-            bg: "bg-teal-500/10",
-            details: "Ensure your students are career-ready with rigorous, standard-aligned assessments mirroring tier-1 company recruitment drives.",
-            subServices: [
-                { title: "Code Sandboxes", desc: "Live coding environments for technical tests." },
-                { title: "AI Interviewer", desc: "Automated behavioral and technical mock interviews." },
-                { title: "Detailed Scorecards", desc: "Granular feedback on specific competency areas." }
-            ]
-        }
-    ];
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const { data } = await axios.get('/api/services');
+                setMainServices(data.filter(s => s.category === 'main'));
+                setAdditionalFeatures(data.filter(s => s.category === 'additional'));
+                setLoading(false);
+            } catch (error) {
+                console.error('Failed to fetch services:', error);
+                setLoading(false);
+            }
+        };
+        fetchServices();
+    }, []);
 
-    const additionalFeatures = [
-        {
-            title: "24/7 Support",
-            description: "Round-the-clock technical and academic support for all users.",
-            icon: Headphones,
-            color: "rose"
-        },
-        {
-            title: "Mobile Learning",
-            description: "Learn on-the-go with our mobile-optimized platform and native apps.",
-            icon: Smartphone,
-            color: "blue"
-        },
-        {
-            title: "Cloud Infrastructure",
-            description: "Scalable and reliable cloud-based infrastructure for seamless learning.",
-            icon: Cloud,
-            color: "indigo"
-        },
-        {
-            title: "Advanced Security",
-            description: "Enterprise-grade security with data encryption and privacy protection.",
-            icon: Shield,
-            color: "green"
-        },
-        {
-            title: "API Integration",
-            description: "Seamless integration with existing systems through robust APIs.",
-            icon: Code,
-            color: "orange"
-        },
-        {
-            title: "Analytics Dashboard",
-            description: "Comprehensive analytics and reporting for insights and decision-making.",
-            icon: Database,
-            color: "cyan"
-        }
-    ];
+    const DynamicIcon = ({ name, ...props }) => {
+        const Icon = LucideIcons[name] || LucideIcons.HelpCircle;
+        return <Icon {...props} />;
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#05030B] flex items-center justify-center">
+                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A]">
@@ -200,18 +80,14 @@ const Services = () => {
                                 <GlassCard className={`h-full transition-all duration-500 overflow-hidden ${expandedId === service.id ? 'ring-2 ring-primary/50 shadow-glow-purple bg-white/10' : 'hover:shadow-2xl hover:shadow-primary/10'} p-0`}>
                                     <div className="p-6 md:p-8 cursor-pointer" onClick={() => setExpandedId(expandedId === service.id ? null : service.id)}>
                                         <div className="flex items-start justify-between">
-                                            <div className={`w-16 h-16 mb-6 rounded-2xl ${service.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                                <service.icon className={service.color} size={32} />
+                                            <div className={`w-16 h-16 mb-6 rounded-2xl ${service.bg_class || 'bg-primary/10'} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                                <DynamicIcon name={service.icon_name} className={service.color_class || 'text-primary'} size={32} />
                                             </div>
                                             <div className={`p-2 rounded-full border border-white/10 ${expandedId === service.id ? 'bg-primary/20 text-primary border-primary/30' : 'bg-white/5 text-white/40'}`}>
                                                 {expandedId === service.id ? (
-                                                    <svg className="w-5 h-5 rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                    </svg>
+                                                    <DynamicIcon name="ChevronDown" className="w-5 h-5 rotate-180 transition-transform" />
                                                 ) : (
-                                                    <svg className="w-5 h-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                    </svg>
+                                                    <DynamicIcon name="ChevronDown" className="w-5 h-5 transition-transform" />
                                                 )}
                                             </div>
                                         </div>
@@ -227,9 +103,9 @@ const Services = () => {
                                         <div className="space-y-3">
                                             <h4 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider">Key Features</h4>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                {service.features.map((feature, idx) => (
+                                                {(service.features || []).map((feature, idx) => (
                                                     <div key={idx} className="flex items-center space-x-2">
-                                                        <CheckCircle className="text-emerald-400 flex-shrink-0" size={16} />
+                                                        <LucideIcons.CheckCircle className="text-emerald-400 flex-shrink-0" size={16} />
                                                         <span className="text-xs md:text-sm text-gray-300">{feature}</span>
                                                     </div>
                                                 ))}
@@ -242,7 +118,7 @@ const Services = () => {
                                         <p className="text-white/80 leading-relaxed mb-6 italic border-l-2 border-primary pl-4">"{service.details}"</p>
                                         <h4 className="text-sm font-black text-white uppercase tracking-widest mb-4">Included Sub-Services</h4>
                                         <div className="space-y-4">
-                                            {service.subServices?.map((sub, idx) => (
+                                            {(service.sub_services || []).map((sub, idx) => (
                                                 <div key={idx} className="flex items-start space-x-3">
                                                     <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"></div>
                                                     <div>
@@ -289,7 +165,7 @@ const Services = () => {
                             >
                                 <GlassCard className="text-center hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 p-6">
                                     <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                                        <feature.icon className="text-purple-400" size={24} />
+                                        <DynamicIcon name={feature.icon_name} className="text-purple-400" size={24} />
                                     </div>
                                     <h3 className="text-base md:text-lg font-bold text-white mb-3">{feature.title}</h3>
                                     <p className="text-gray-400 text-sm leading-relaxed">{feature.description}</p>

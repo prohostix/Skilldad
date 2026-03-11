@@ -176,10 +176,10 @@ const ReconciliationDashboard = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <DashboardHeading title="Reconciliation Dashboard" />
                 {reconciliation && (
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <ModernButton variant="secondary" onClick={() => handleExportReport('csv')}>
                             <FileSpreadsheet size={18} className="mr-2" />
                             Export CSV

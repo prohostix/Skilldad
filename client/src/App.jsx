@@ -100,6 +100,8 @@ const PaymentMonitoringDashboard = lazy(() => import('./pages/admin/PaymentMonit
 const CommunicationHub = lazy(() => import('./pages/admin/CommunicationHub'));
 const CouponManager = lazy(() => import('./pages/admin/CouponManager'));
 const UniversityDetail = lazy(() => import('./pages/admin/UniversityDetail'));
+const ServicesManagement = lazy(() => import('./pages/admin/ServicesManagement'));
+
 
 // Finance Pages
 const FinanceDashboard = lazy(() => import('./pages/finance/FinanceDashboard'));
@@ -233,7 +235,9 @@ function App() {
                     <Route path="communications" element={<CommunicationHub />} />
                     <Route path="support" element={<SupportManagement />} />
                     <Route path="faqs" element={<FAQManagement />} />
+                    <Route path="services" element={<ServicesManagement />} />
                     <Route path="settings" element={<Settings />} />
+
                   </Route>
                 </Route>
 

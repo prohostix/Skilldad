@@ -493,8 +493,8 @@ const UniversityManagement = () => {
                         </div>
                     </div>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left font-inter border-collapse">
+                <div className="overflow-x-auto pb-2">
+                    <table className="w-full text-left font-inter border-collapse min-w-[800px]">
                         <thead>
                             <tr className="bg-white/5 border-b border-white/10">
                                 <th className="px-6 py-4 text-xs font-bold text-white/50 uppercase tracking-widest">Entity Name</th>

@@ -282,7 +282,7 @@ const HeroSection = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <div role="heading" aria-level="1" className="text-[28px] xs:text-[36px] sm:text-[48px] md:text-[62px] lg:text-[76px] font-bold leading-[1.05] tracking-[-0.03em] mb-6 md:mb-10 font-space">
+                        <div role="heading" aria-level="1" className="text-[26px] xs:text-[32px] sm:text-[42px] md:text-[62px] lg:text-[76px] font-bold leading-[1.1] tracking-[-0.03em] mb-6 md:mb-10 font-space">
                             <span className="text-white/30 block mb-2">Transform Your</span>
                             <span className="text-white block">
                                 Skills with{' '}
@@ -329,8 +329,8 @@ const HeroSection = () => {
             <div className="absolute bottom-4 left-0 right-0 py-5 overflow-hidden whitespace-nowrap z-20">
                 <div className="flex animate-scroll hover:pause will-change-transform" style={{ animationDuration: '150s' }}>
                     {[...partners, ...partners, ...partners].map((partner, i) => (
-                        <div key={i} className="mx-16 md:mx-28 flex items-center transition-all hover:scale-110 cursor-default">
-                            <span className="text-[16px] md:text-[22px] font-black uppercase tracking-[0.3em] text-white hover:text-white font-inter">{partner}</span>
+                        <div key={i} className="mx-8 sm:mx-16 md:mx-28 flex items-center transition-all hover:scale-110 cursor-default">
+                            <span className="text-[14px] xs:text-[16px] md:text-[22px] font-black uppercase tracking-[0.3em] text-white hover:text-white font-inter">{partner}</span>
                         </div>
                     ))}
                 </div>

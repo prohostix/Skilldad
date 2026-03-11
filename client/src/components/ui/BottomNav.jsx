@@ -12,11 +12,25 @@ const BottomNav = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Get user role from localStorage/context
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    const userRole = (userInfo.role || 'student').toLowerCase();
+
+    const getHomePath = () => {
+        switch (userRole) {
+            case 'admin': return '/admin/dashboard';
+            case 'university': return '/university/dashboard';
+            case 'partner': return '/partner/dashboard';
+            case 'finance': return '/finance/dashboard';
+            default: return '/dashboard';
+        }
+    };
+
     const navItems = [
-        { icon: Home, label: 'Home', path: '/dashboard/admin' }, // Dynamic path based on role could be added
-        { icon: BookOpen, label: 'Courses', path: '/dashboard/my-courses' },
+        { icon: Home, label: 'Home', path: getHomePath() },
+        { icon: BookOpen, label: 'Courses', path: userRole === 'admin' ? '/admin/courses' : '/dashboard/my-courses' },
         { icon: Search, label: 'Discover', path: '/courses' },
-        { icon: User, label: 'Profile', path: '/dashboard/profile' },
+        { icon: User, label: 'Profile', path: userRole === 'student' ? '/dashboard/settings' : `/${userRole}/settings` },
     ];
 
     return (
