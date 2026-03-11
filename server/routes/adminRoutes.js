@@ -66,7 +66,7 @@ router.get('/analytics', protect, checkAdmin, getPlatformAnalytics);
 // All users without pagination — used by B2B management
 router.get('/users/all', protect, checkAdmin, async (req, res) => {
     try {
-        const { query } = require('../config/db');
+        const { query } = require('../config/postgres');
         const result = await query(
             `SELECT id as _id, name, email, role, phone, is_verified as "isVerified",
                     profile_image as "profileImage", created_at as "createdAt"
@@ -109,7 +109,7 @@ router.get('/partner-logos', protect, checkAdmin, getPartnerLogos);
 router.post('/partner-logos', protect, checkAdmin, createPartnerLogo);
 router.post('/partner-logos/seed', protect, checkAdmin, async (req, res) => {
     try {
-        const { query: dbQuery } = require('../config/db');
+        const { query: dbQuery } = require('../config/postgres');
 
         const samplePartners = [
             { name: 'TechCorp Solutions', logo: '/assets/logos/techcorp.png', type: 'corporate', order: 1 },
