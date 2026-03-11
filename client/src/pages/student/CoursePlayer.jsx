@@ -151,8 +151,9 @@ const CoursePlayer = () => {
         }
     };
 
-    const totalVideos = course.modules?.reduce((acc, m) => acc + m.videos.length, 0) || 1;
-    const progressPercent = Math.round((userProgress.completedVideos?.length / totalVideos) * 100);
+    const totalVideos = course.modules?.reduce((acc, m) => acc + (m.videos?.length || 0), 0) || 1;
+    const completedCount = userProgress.completedVideos?.length || 0;
+    const progressPercent = Math.round((completedCount / totalVideos) * 100) || 0;
 
     return (
         <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-100px)] h-[calc(100vh-80px)] bg-[#050505] rounded-none lg:rounded-2xl border-0 lg:border border-white/10 overflow-hidden font-inter -mx-4 sm:-mx-6 lg:-mx-8 -mb-28 shadow-2xl">
@@ -323,7 +324,15 @@ const CoursePlayer = () => {
                                 <iframe
                                     width="100%"
                                     height="100%"
-                                    src={currentVideo.url}
+                                    src={(() => {
+                                        let url = currentVideo.url || '';
+                                        // Convert YouTube watch URLs to embed format
+                                        const watchMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+                                        if (watchMatch) {
+                                            url = `https://www.youtube-nocookie.com/embed/${watchMatch[1]}`;
+                                        }
+                                        return url;
+                                    })()}
                                     title={currentVideo.title}
                                     frameBorder="0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
