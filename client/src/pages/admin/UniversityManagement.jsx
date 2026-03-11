@@ -60,6 +60,8 @@ const UniversityManagement = () => {
     const [loading, setLoading] = useState(false);
     const [openSendDoc, setOpenSendDoc] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [logoUploading, setLogoUploading] = useState(false);
+    const logoInputRef = useRef(null);
     const [docData, setDocData] = useState({
         title: '',
         type: 'exam_paper',
@@ -193,6 +195,35 @@ const UniversityManagement = () => {
             bio: partner.bio || ''
         });
         setOpenEdit(true);
+    };
+
+    const handleLogoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !selectedPartner) return;
+
+        const formData = new FormData();
+        formData.append('profileImage', file);
+
+        setLogoUploading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            await axios.post(`/api/admin/universities/${selectedPartner._id}/upload-image`, formData, config);
+
+            showToast('Logo updated successfully', 'success');
+            fetchPartners(); // Refresh list to show new logo
+        } catch (error) {
+            console.error('Error uploading logo:', error);
+            showToast(error.response?.data?.message || 'Failed to upload logo', 'error');
+        } finally {
+            setLogoUploading(false);
+        }
     };
 
     const handleOnboardEntity = async () => {
@@ -635,6 +666,39 @@ const UniversityManagement = () => {
                         onClick={e => e.stopPropagation()}
                     >
                         <h3 className="text-base font-semibold text-white font-inter mb-4">Edit Entity Details</h3>
+
+                        <div className="flex flex-col items-center mb-6 p-4 bg-white/5 rounded-2xl border border-white/10 relative group">
+                            <div
+                                className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-2 shadow-lg overflow-hidden relative cursor-pointer"
+                                onClick={() => logoInputRef.current?.click()}
+                            >
+                                {selectedPartner.profileImage ? (
+                                    <img
+                                        src={selectedPartner.profileImage}
+                                        alt={selectedPartner.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <Building2 size={32} />
+                                )}
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Camera size={16} className="text-white" />
+                                </div>
+                                {logoUploading && (
+                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                            </div>
+                            <input
+                                type="file"
+                                ref={logoInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleLogoUpload}
+                            />
+                            <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Update Institution Logo</p>
+                        </div>
 
                         <div className="space-y-3 mb-6">
                             <div>
