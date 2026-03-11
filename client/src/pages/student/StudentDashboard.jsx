@@ -129,21 +129,24 @@ const StudentDashboard = () => {
                 setEnrolledUniversities(Array.from(universities.values()));
 
                 // Calculate stats from real data
-                const totalProgress = courses.reduce((sum, c) => sum + (c.progress || 0), 0);
+                const totalProgress = courses.reduce((sum, c) => sum + (Number(c.progress) || 0), 0);
                 const avgProgress = courses.length > 0 ? Math.round(totalProgress / courses.length) : 0;
 
                 // Average score from graded exams
-                const gradedExams = exams.filter(e => e.submission && e.submission.percentage !== undefined);
+                // Note: database might return percentage as string, so we cast it to Number
+                const gradedExams = exams.filter(e => e.submission && (e.submission.percentage !== undefined && e.submission.percentage !== null));
+                const totalExamPercentage = gradedExams.reduce((sum, e) => sum + (Number(e.submission.percentage) || 0), 0);
                 const avgExamScore = gradedExams.length > 0
-                    ? Math.round(gradedExams.reduce((sum, e) => sum + e.submission.percentage, 0) / gradedExams.length)
-                    : 0;
+                    ? Math.round(totalExamPercentage / gradedExams.length)
+                    : null; // Use null to indicate no exams found
 
                 const certificates = courses.filter(c => c.isCompleted).length;
 
                 setStats({
                     completionRate: avgProgress,
                     totalCourses: courses.length,
-                    averageScore: avgExamScore || (avgProgress > 0 ? avgProgress - 5 : 0), // Fallback to progress-based score if no exams
+                    // If we have graded exams, use that score even if it's 0. Only fallback to progress-based if no exams exist.
+                    averageScore: avgExamScore !== null ? avgExamScore : (avgProgress > 0 ? avgProgress - 5 : 0),
                     certificatesEarned: certificates
                 });
 
