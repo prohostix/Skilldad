@@ -21,7 +21,7 @@ jobs:
           cache-dependency-path: client/package-lock.json
 
       - name: Install Dependencies
-        run: cd client && npm ci
+        run: cd client && npm install --force
 
       - name: Build Frontend
         run: cd client && npm run build
