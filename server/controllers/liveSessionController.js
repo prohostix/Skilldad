@@ -7,12 +7,32 @@ const createSession = asyncHandler(async (req, res) => {
     const universityId = req.user.id;
 
     const id = `sess_${Date.now()}`;
-    await query(`
-        INSERT INTO live_sessions (id, topic, description, start_time, duration, timezone, instructor_id, university_id, course_id, status, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'scheduled', NOW(), NOW())
-    `, [id, topic, description, startTime, duration, timezone || 'Asia/Kolkata', instructor || req.user.id, universityId, courseId || null]);
 
-    res.status(201).json({ success: true, id });
+    // Create Zoom meeting
+    let zoomData = null;
+    try {
+        const { createZoomMeeting } = require('../utils/zoomUtils');
+        const meetingStartTime = new Date(startTime);
+        const meetingDuration = parseInt(duration) || 60;
+        const hostEmail = req.user.email;
+        const tz = timezone || 'Asia/Kolkata';
+
+        zoomData = await createZoomMeeting(topic, meetingStartTime, meetingDuration, hostEmail, tz);
+        console.log(`[Session] Zoom meeting created for session ${id}: Meeting ID ${zoomData.meetingId}`);
+    } catch (zoomError) {
+        console.error(`[Session] Failed to create Zoom meeting for session ${id}:`, zoomError.message);
+        return res.status(500).json({ 
+            success: false, 
+            message: `Failed to create Zoom meeting: ${zoomError.message}` 
+        });
+    }
+
+    await query(`
+        INSERT INTO live_sessions (id, topic, description, start_time, duration, timezone, instructor_id, university_id, course_id, zoom, status, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'scheduled', NOW(), NOW())
+    `, [id, topic, description, startTime, duration, timezone || 'Asia/Kolkata', instructor || req.user.id, universityId, courseId || null, JSON.stringify(zoomData)]);
+
+    res.status(201).json({ success: true, id, joinUrl: zoomData?.joinUrl });
 });
 
 // @desc    Get all sessions for a user
