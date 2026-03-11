@@ -58,7 +58,13 @@ const getStudentExams = asyncHandler(async (req, res) => {
       duration: exam.duration,
       totalMarks: exam.total_marks,
       status: exam.status,
-      questions: examQuestions.map(q => ({ ...q, _id: q.id, question: q.question_text })),
+      questions: examQuestions.map(q => ({ 
+        ...q, 
+        _id: q.id, 
+        question: q.question_text,
+        questionText: q.question_text,
+        questionType: q.question_type
+      })),
       submission: sub ? { ...sub, _id: sub.id } : null,
       hasSubmitted: sub && sub.status !== 'in-progress'
     };

@@ -231,11 +231,33 @@ const getMySubmission = asyncHandler(async (req, res) => {
     WHERE s.exam_id = $1 AND s.student_id = $2
   `, [examId, studentId.toString()]);
 
-  const submission = subRes.rows[0];
+  let submission = subRes.rows[0];
 
   if (!submission) {
     res.status(404);
     throw new Error('Submission not found');
+  }
+
+  // Populate question details into answers if they exist
+  if (submission.answers && Array.isArray(submission.answers)) {
+    const qRes = await query(`
+      SELECT id as _id, question_text as "questionText", question_type as "questionType", 
+             options, marks, negative_marks as "negativeMarks", "order"
+      FROM questions 
+      WHERE exam_id = $1
+      ORDER BY "order" ASC
+    `, [examId]);
+    
+    const questionsMap = {};
+    qRes.rows.forEach(q => { questionsMap[q._id] = q; });
+    
+    submission.answers = submission.answers.map(ans => {
+      const qId = ans.questionId || (ans.question && (ans.question._id || ans.question)) || ans.question;
+      return {
+        ...ans,
+        question: questionsMap[qId] || ans.question || null
+      };
+    });
   }
 
   res.json({
