@@ -720,7 +720,7 @@ const LandingPage = () => {
                                         <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/40 group-hover:border-primary transition-all relative">
                                             <img
-                                                src={director.image}
+                                                src={director.imageUrl || director.image}
                                                 alt={director.name}
                                                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                                                 onError={(e) => {
@@ -731,7 +731,7 @@ const LandingPage = () => {
                                         </div>
                                     </div>
                                     <h3 className="text-lg font-bold text-white mb-2 font-poppins group-hover:text-primary transition-colors">{director.name}</h3>
-                                    <p className="text-xs text-primary font-black uppercase tracking-[0.2em]">{director.title}</p>
+                                    <p className="text-xs text-primary font-black uppercase tracking-[0.2em]">{director.role || director.title}</p>
 
                                     <div className="mt-8 pt-6 border-t border-white/5 w-full">
                                         <p className="text-[10px] text-text-muted leading-relaxed font-inter italic">
