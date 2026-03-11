@@ -155,14 +155,14 @@ const LandingPage = () => {
     const row1Static = [
         { name: 'TCS', logo: 'https://cdn.worldvectorlogo.com/logos/tata-consultancy-services-1.svg' },
         { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
-        { name: 'Wipro', logo: 'https://www.vectorlogo.zone/logos/wipro/wipro-ar21.svg' },
-        { name: 'Accenture', logo: 'https://www.vectorlogo.zone/logos/accenture/accenture-ar21.svg' },
-        { name: 'IBM', logo: 'https://www.vectorlogo.zone/logos/ibm/ibm-ar21.svg' },
-        { name: 'HCL Technologies', logo: 'https://www.vectorlogo.zone/logos/hcl/hcl-ar21.svg' },
-        { name: 'Capgemini', logo: 'https://www.vectorlogo.zone/logos/capgemini/capgemini-ar21.svg' },
-        { name: 'Cognizant', logo: 'https://www.vectorlogo.zone/logos/cognizant/cognizant-ar21.svg' },
-        { name: 'Tech Mahindra', logo: 'https://www.vectorlogo.zone/logos/techmahindra/techmahindra-ar21.svg' },
-        { name: 'Deloitte', logo: 'https://www.vectorlogo.zone/logos/deloitte/deloitte-ar21.svg' }
+        { name: 'Wipro', logo: null },
+        { name: 'Accenture', logo: 'https://cdn.worldvectorlogo.com/logos/accenture-7.svg' },
+        { name: 'IBM', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg' },
+        { name: 'HCL Technologies', logo: null },
+        { name: 'Capgemini', logo: null },
+        { name: 'Cognizant', logo: null },
+        { name: 'Tech Mahindra', logo: null },
+        { name: 'Deloitte', logo: null }
     ];
     const row2Static = [
         { name: 'Google', logo: 'https://www.vectorlogo.zone/logos/google/google-ar21.svg' },
