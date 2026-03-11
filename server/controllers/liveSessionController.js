@@ -164,7 +164,7 @@ module.exports = {
     }),
     getZoomSDKConfig: asyncHandler(async (req, res) => {
         const { id } = req.params;
-        const resSet = await query("SELECT zoom, host_id FROM live_sessions WHERE id = $1", [id]);
+        const resSet = await query("SELECT zoom, instructor_id FROM live_sessions WHERE id = $1", [id]);
 
         if (resSet.rows.length === 0) {
             return res.status(404).json({ message: 'Session not found' });
@@ -174,7 +174,7 @@ module.exports = {
         const zoom = typeof session.zoom === 'string' ? JSON.parse(session.zoom || '{}') : (session.zoom || {});
 
         const { generateZoomSignature, decryptPasscode } = require('../utils/zoomUtils');
-        const role = (req.user._id.toString() === session.host_id || req.user.role !== 'student') ? 1 : 0;
+        const role = (req.user.id === session.instructor_id || req.user.role !== 'student') ? 1 : 0;
 
         let passWord = '';
         if (zoom.passcode) {
