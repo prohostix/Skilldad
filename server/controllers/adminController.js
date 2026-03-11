@@ -857,33 +857,44 @@ async function getUniversityDetail(req, res) {
         // Manual assigned IDs
         const assignedIds = university.profile?.assigned_courses || [];
 
-        // Combine unique IDs
-        const finalIds = Array.from(new Set([...providedIds, ...assignedIds]));
+        // UNIQUE combined IDs
+        const finalIds = Array.from(new Set([...providedIds, ...assignedIds].filter(id => id && typeof id === 'string'))).filter(id => id.trim() !== '');
 
         // Fetch full course data for all identified IDs
         let uniqueCourses = [];
         if (finalIds.length > 0) {
-            const uniqueCoursesRes = await query('SELECT * FROM courses WHERE id = ANY($1)', [finalIds]);
-            uniqueCourses = uniqueCoursesRes.rows;
+            try {
+                const uniqueCoursesRes = await query('SELECT * FROM courses WHERE id = ANY($1)', [finalIds]);
+                uniqueCourses = uniqueCoursesRes.rows;
+            } catch (err) {
+                console.error('[getUniversityDetail] Error fetching courses:', err.message);
+                // Non-fatal, continue with empty/partial list
+            }
         }
 
         const rawStudentsRes = await query('SELECT id as _id, name, email, is_verified as "isVerified", created_at as "createdAt" FROM users WHERE university_id = $1 AND role = \'student\'', [university._id]);
         const rawStudents = rawStudentsRes.rows;
 
         const students = await Promise.all(rawStudents.map(async (student) => {
-            const enrollmentRes = await query(`
-                SELECT c.title as course_title 
-                FROM enrollments e 
-                LEFT JOIN courses c ON e.course_id = c.id 
-                WHERE e.student_id = $1 
-                ORDER BY e.created_at DESC LIMIT 1
-            `, [student._id]);
-            const latestEnrollment = enrollmentRes.rows[0];
-            return {
-                ...student,
-                course: latestEnrollment && latestEnrollment.course_title ? latestEnrollment.course_title : 'Enrolled'
-            };
+            try {
+                const enrollmentRes = await query(`
+                    SELECT c.title as course_title 
+                    FROM enrollments e 
+                    LEFT JOIN courses c ON e.course_id = c.id 
+                    WHERE e.student_id = $1 
+                    ORDER BY e.created_at DESC LIMIT 1
+                `, [student._id]);
+                const latestEnrollment = enrollmentRes.rows[0];
+                return {
+                    ...student,
+                    course: latestEnrollment && latestEnrollment.course_title ? latestEnrollment.course_title : 'Enrolled'
+                };
+            } catch (err) {
+                console.error(`[getUniversityDetail] Error for student ${student._id}:`, err.message);
+                return { ...student, course: 'Error' };
+            }
         }));
+
 
         res.json({
             university: {

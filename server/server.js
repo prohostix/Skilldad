@@ -4,6 +4,18 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const path = require('path');
 const compression = require('compression');
+const colors = require('colors');
+
+// Handle EIO (Input/output error) which can happen when terminal is detached
+process.stdout.on('error', (err) => {
+    if (err.code === 'EIO') return;
+    console.error('stdout error:', err);
+});
+process.stderr.on('error', (err) => {
+    if (err.code === 'EIO') return;
+    console.error('stderr error:', err);
+});
+
 
 // Load env vars from the correct path regardless of where it's run from
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -36,20 +48,21 @@ Object.entries(uploads).forEach(([key, dirPath]) => {
   try {
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
-      console.log(`[Storage] Created ${key}: ${dirPath}`);
+      console.log(`[Storage] Created ${key}: ${dirPath}`.green);
     } else {
       // Test writability
       const testFile = path.join(dirPath, '.write-test');
       fs.writeFileSync(testFile, 'test');
       fs.unlinkSync(testFile);
-      console.log(`[Storage] Verified ${key} (Writable): ${dirPath}`);
+      console.log(`[Storage] Verified ${key} (Writable): ${dirPath}`.cyan);
     }
     uploadsSucceeded.push(dirPath);
   } catch (err) {
-    console.error(`[Storage] CRITICAL FAILURE for ${key}: ${dirPath}`, err.message);
+    console.error(`[Storage] CRITICAL FAILURE for ${key}: ${dirPath}`.red.bold, err.message);
     uploadsFailed.push({ path: dirPath, error: err.message });
   }
 });
+
 
 // Expose root path for routes to use consistently
 global.BASE_UPLOAD_PATH = uploads.ROOT;
