@@ -68,7 +68,7 @@ router.get('/users/all', protect, checkAdmin, async (req, res) => {
     try {
         const { query } = require('../config/postgres');
         const result = await query(
-            `SELECT id as _id, name, email, role, phone, is_verified as "isVerified",
+            `SELECT id as _id, name, email, role, is_verified as "isVerified",
                     profile_image as "profileImage", created_at as "createdAt"
              FROM users ORDER BY created_at DESC`
         );
