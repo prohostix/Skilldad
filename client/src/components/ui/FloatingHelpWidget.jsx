@@ -30,7 +30,7 @@ const FloatingHelpWidget = () => {
                     options: [
                         { label: 'Create Account', link: '/register' },
                         { label: 'View Course Catalog', link: '/courses' },
-                        { label: 'Explore Universities', link: '/universities' },
+                        { label: 'Explore Universities', link: '/courses' },
                         { label: 'Contact Support', link: '/support' }
                     ]
                 }
