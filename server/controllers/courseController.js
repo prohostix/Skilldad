@@ -266,7 +266,15 @@ module.exports = {
     createCourse,
     updateCourse,
     getAdminCourses,
-    deleteCourse: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
+    deleteCourse: asyncHandler(async (req, res) => {
+        const { id } = req.params;
+        const courseRes = await query('SELECT id FROM courses WHERE id = $1', [id]);
+        if (courseRes.rows.length === 0) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+        await query('DELETE FROM courses WHERE id = $1', [id]);
+        res.json({ message: 'Course removed' });
+    }),
     addModule,
     updateModule,
     deleteModule,
@@ -274,5 +282,33 @@ module.exports = {
     updateVideo,
     deleteVideo,
     uploadThumbnail,
-    addExercise: async (req, res) => res.status(501).json({ message: 'Not implemented' })
+    addExercise: asyncHandler(async (req, res) => {
+        const { id, moduleId, videoId } = req.params;
+        const { title, type, content } = req.body;
+        
+        const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+        if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+        
+        let modules = courseRes.rows[0].modules || [];
+        const moduleIndex = modules.findIndex(m => m._id === moduleId);
+        if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+        
+        const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
+        if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
+        
+        const newExercise = {
+            _id: `ex_${Date.now()}`,
+            title: title || 'New Exercise',
+            type: type || 'video-interaction',
+            content: content || {}
+        };
+        
+        if (!modules[moduleIndex].videos[videoIndex].exercises) {
+            modules[moduleIndex].videos[videoIndex].exercises = [];
+        }
+        modules[moduleIndex].videos[videoIndex].exercises.push(newExercise);
+        
+        await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+        res.status(201).json({ message: 'Exercise added', exercise: newExercise });
+    })
 };
