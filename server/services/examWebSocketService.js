@@ -447,7 +447,7 @@ class ExamWebSocketService {
       const ongoingExamsRes = await query(`
         SELECT * FROM exams 
         WHERE status IN ('scheduled', 'ongoing') 
-        AND scheduled_start_time <= $1 AND scheduled_end_time > $1
+        AND scheduled_start <= $1 AND scheduled_end > $1
       `, [now]);
       const ongoingExams = ongoingExamsRes.rows;
 

@@ -26,8 +26,8 @@ async function checkAndSendReminders() {
             SELECT e.*, c.title as course_title 
             FROM exams e
             LEFT JOIN courses c ON e.course_id = c.id
-            WHERE e.scheduled_start_time >= $1 
-            AND e.scheduled_start_time <= $2
+            WHERE e.scheduled_start >= $1 
+            AND e.scheduled_start <= $2
             AND e.status = 'scheduled'
         `, [twentyFiveMinutesFromNow, thirtyMinutesFromNow]);
 
@@ -42,7 +42,7 @@ async function checkAndSendReminders() {
 
         // Send reminders for each exam
         for (const exam of upcomingExams) {
-            const scheduledStart = new Date(exam.scheduled_start_time || exam.scheduledStartTime);
+            const scheduledStart = new Date(exam.scheduled_start);
             const reminderKey = `${exam.id}-${scheduledStart.getTime()}`;
             
             // Skip if reminder already sent for this exam

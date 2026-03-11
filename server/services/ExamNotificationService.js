@@ -49,7 +49,7 @@ class ExamNotificationService {
                     {
                         examTitle: exam.title,
                         courseTitle: courseTitle,
-                        scheduledDate: exam.scheduled_start_time || exam.scheduledStartTime
+                        scheduledDate: exam.scheduled_start
                     },
                     { email: true, whatsapp: true }
                 ).catch(err => {
@@ -143,7 +143,7 @@ class ExamNotificationService {
             {
                 examTitle: exam.title,
                 courseTitle: courseTitle,
-                startTime: exam.scheduled_start_time || exam.scheduledStartTime,
+                startTime: exam.scheduled_start,
                 duration: exam.duration
             },
             { email: true, whatsapp: false } // Email only for reminders
