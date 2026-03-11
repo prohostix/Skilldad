@@ -66,9 +66,13 @@ router.get('/analytics', protect, checkAdmin, getPlatformAnalytics);
 // All users without pagination — used by B2B management
 router.get('/users/all', protect, checkAdmin, async (req, res) => {
     try {
-        const User = require('../models/userModel');
-        const users = await User.find({}).select('-password').sort('-createdAt');
-        res.json({ users });
+        const { query } = require('../config/db');
+        const result = await query(
+            `SELECT id as _id, name, email, role, phone, is_verified as "isVerified",
+                    profile_image as "profileImage", created_at as "createdAt"
+             FROM users ORDER BY created_at DESC`
+        );
+        res.json({ users: result.rows });
     } catch (e) {
         res.status(500).json({ message: e.message });
     }
@@ -104,32 +108,34 @@ router.delete('/students/:id', protect, checkAdmin, deleteStudent);
 router.get('/partner-logos', protect, checkAdmin, getPartnerLogos);
 router.post('/partner-logos', protect, checkAdmin, createPartnerLogo);
 router.post('/partner-logos/seed', protect, checkAdmin, async (req, res) => {
-    // One-time seed endpoint for partner logos
     try {
-        const PartnerLogo = require('../models/partnerLogoModel');
+        const { query: dbQuery } = require('../config/db');
 
         const samplePartners = [
-            { name: 'TechCorp Solutions', logo: '/assets/logos/techcorp.png', type: 'corporate', order: 1, isActive: true },
-            { name: 'Global Innovations Ltd', logo: '/assets/logos/global-innovations.png', type: 'corporate', order: 2, isActive: true },
-            { name: 'Digital Dynamics Inc', logo: '/assets/logos/digital-dynamics.png', type: 'corporate', order: 3, isActive: true },
-            { name: 'Enterprise Systems Group', logo: '/assets/logos/enterprise-systems.png', type: 'corporate', order: 4, isActive: true },
-            { name: 'CloudTech Partners', logo: '/assets/logos/cloudtech.png', type: 'corporate', order: 5, isActive: true },
-            { name: 'DataFlow Corporation', logo: '/assets/logos/dataflow.png', type: 'corporate', order: 6, isActive: true },
-            { name: 'NextGen Technologies', logo: '/assets/logos/nextgen.png', type: 'corporate', order: 7, isActive: true },
-            { name: 'Smart Solutions International', logo: '/assets/logos/smart-solutions.png', type: 'corporate', order: 8, isActive: true },
-            { name: 'Innovate Labs', logo: '/assets/logos/innovate-labs.png', type: 'corporate', order: 9, isActive: true }
+            { name: 'TechCorp Solutions', logo: '/assets/logos/techcorp.png', type: 'corporate', order: 1 },
+            { name: 'Global Innovations Ltd', logo: '/assets/logos/global-innovations.png', type: 'corporate', order: 2 },
+            { name: 'Digital Dynamics Inc', logo: '/assets/logos/digital-dynamics.png', type: 'corporate', order: 3 },
+            { name: 'Enterprise Systems Group', logo: '/assets/logos/enterprise-systems.png', type: 'corporate', order: 4 },
+            { name: 'CloudTech Partners', logo: '/assets/logos/cloudtech.png', type: 'corporate', order: 5 },
+            { name: 'DataFlow Corporation', logo: '/assets/logos/dataflow.png', type: 'corporate', order: 6 },
+            { name: 'NextGen Technologies', logo: '/assets/logos/nextgen.png', type: 'corporate', order: 7 },
+            { name: 'Smart Solutions International', logo: '/assets/logos/smart-solutions.png', type: 'corporate', order: 8 },
+            { name: 'Innovate Labs', logo: '/assets/logos/innovate-labs.png', type: 'corporate', order: 9 }
         ];
 
-        // Clear existing (optional)
-        await PartnerLogo.deleteMany({});
+        await dbQuery('DELETE FROM partner_logos');
 
-        // Insert sample partners
-        const inserted = await PartnerLogo.insertMany(samplePartners);
+        for (const p of samplePartners) {
+            await dbQuery(
+                'INSERT INTO partner_logos (name, logo, type, display_order, is_active) VALUES ($1, $2, $3, $4, true)',
+                [p.name, p.logo, p.type, p.order]
+            );
+        }
 
         res.json({
             success: true,
-            message: `Successfully seeded ${inserted.length} partner logos`,
-            partners: inserted.map(p => ({ name: p.name, order: p.order }))
+            message: `Successfully seeded ${samplePartners.length} partner logos`,
+            partners: samplePartners.map(p => ({ name: p.name, order: p.order }))
         });
     } catch (error) {
         console.error('Seed error:', error);
