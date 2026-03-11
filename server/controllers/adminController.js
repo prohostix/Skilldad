@@ -767,7 +767,7 @@ async function inviteUser(req, res) {
         const newId = `user_${Date.now()}`;
 
         await query(`
-            INSERT INTO users (id, name, email, password, role, "universityId", is_verified, created_at, updated_at)
+            INSERT INTO users (id, name, email, password, role, university_id, is_verified, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())
         `, [newId, name, normalizedEmail, hashedPassword, role, universityId || null]);
 
@@ -867,7 +867,7 @@ async function getUniversityDetail(req, res) {
             uniqueCourses = uniqueCoursesRes.rows;
         }
 
-        const rawStudentsRes = await query('SELECT id as _id, name, email, is_verified as "isVerified", created_at as "createdAt" FROM users WHERE "universityId" = $1 AND role = \'student\'', [university._id]);
+        const rawStudentsRes = await query('SELECT id as _id, name, email, is_verified as "isVerified", created_at as "createdAt" FROM users WHERE university_id = $1 AND role = \'student\'', [university._id]);
         const rawStudents = rawStudentsRes.rows;
 
         const students = await Promise.all(rawStudents.map(async (student) => {
@@ -951,7 +951,7 @@ const adminEnrollStudent = async (req, res) => {
 
         // Update student's universityId if we have one
         if (assignedUniversityId && (!student.universityId || student.universityId !== assignedUniversityId)) {
-            await query('UPDATE users SET "universityId" = $1, updated_at = NOW() WHERE id = $2', [assignedUniversityId, studentId]);
+            await query('UPDATE users SET university_id = $1, updated_at = NOW() WHERE id = $2', [assignedUniversityId, studentId]);
             console.log(`[adminEnrollStudent] Updated student ${student.name} universityId to ${assignedUniversityId}`);
         }
 
