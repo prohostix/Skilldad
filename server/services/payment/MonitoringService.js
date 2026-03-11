@@ -118,7 +118,7 @@ class MonitoringService {
 
     // Query transactions from database for accurate metrics
     const transactionsRes = await query(`
-        SELECT status, created_at as "initiatedAt", updated_at as "completedAt", error_message as "errorCategory", payment_method as "paymentMethod"
+        SELECT status, created_at as "initiatedAt", updated_at as "completedAt", notes as "errorCategory", payment_method as "paymentMethod"
         FROM payments
         WHERE created_at >= $1
     `, [startDate]);
@@ -335,7 +335,7 @@ class MonitoringService {
         paymentMethod: t.payment_method,
         initiatedAt: t.created_at,
         completedAt: t.updated_at,
-        errorMessage: t.error_message
+        errorMessage: t.notes
       }));
     } catch (error) {
       console.error('[MonitoringService] Error fetching recent transactions:', error);

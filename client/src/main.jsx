@@ -7,8 +7,8 @@ import App from './App.jsx'
 import { ToastProvider } from './context/ToastContext'
 
 // Configure axios base URL for entire app
-// Hardcoded fallback ensures Vercel always reaches the Render backend
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'https://skilldad-server.onrender.com'
+// Uses VITE_API_URL env var, or defaults to same-origin (handled by Nginx proxy)
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || ''
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

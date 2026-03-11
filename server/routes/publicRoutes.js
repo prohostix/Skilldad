@@ -7,7 +7,7 @@ const { query } = require('../config/postgres');
 // @access  Public
 router.get('/partner-logos', async (req, res) => {
     try {
-        const logosRes = await query(`SELECT id as _id, name, image_url as "imageUrl", "order", is_active as "isActive" FROM partner_logos WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        const logosRes = await query(`SELECT id as _id, name, logo as "imageUrl", "order", is_active as "isActive" FROM partner_logos WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
         res.json(logosRes.rows || []);
     } catch (error) {
         // Log error for debugging database connection issues
@@ -21,7 +21,7 @@ router.get('/partner-logos', async (req, res) => {
 // @access  Public
 router.get('/directors', async (req, res) => {
     try {
-        const directorsRes = await query(`SELECT id as _id, name, role, bio, image_url as "imageUrl", linkedin_url as "linkedinUrl", twitter_url as "twitterUrl", "order", is_active as "isActive" FROM directors WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        const directorsRes = await query(`SELECT id as _id, name, title as role, image as "imageUrl", "order", is_active as "isActive" FROM directors WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
         res.json(directorsRes.rows || []);
     } catch (error) {
         // Log error for debugging database connection issues

@@ -13,8 +13,8 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (user && user.token) {
-            // Point socket.io to the exact backend server URL, NOT Vercel
-            const socketUrl = import.meta.env.VITE_API_URL || 'https://skilldad-server.onrender.com';
+            // Point socket.io to the exact backend server URL
+            const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
 
             const newSocket = io(socketUrl, {
                 auth: {

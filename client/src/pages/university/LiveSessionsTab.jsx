@@ -793,7 +793,7 @@ const LiveSessionsTab = ({ students }) => {
 
             // Wake up Render server first (fire and forget)
             if (attempt === 1) {
-                axios.get('https://skilldad-server.onrender.com/health').catch(() => { });
+                axios.get('/health').catch(() => { });
             }
 
             const { data } = await axios.get('/api/sessions', {

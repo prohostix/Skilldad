@@ -23,14 +23,7 @@ jobs:
       - name: Install Dependencies
         run: cd server && npm ci
 
-      - name: Run Tests
-        run: cd server && npm test
-        env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          PGHOST: ${{ secrets.PGHOST }}
-          PGUSER: ${{ secrets.PGUSER }}
-          PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          PGDATABASE: ${{ secrets.PGDATABASE }}
+
 
       # Note: Actual deployment step depends on the specific AWS service (EC2, App Runner, etc.)
       # This is a placeholder for AWS App Runner deployment

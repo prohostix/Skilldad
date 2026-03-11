@@ -31,8 +31,8 @@ const CourseCatalog = () => {
     const [universityName, setUniversityName] = useState('');
 
     useEffect(() => {
-        // Wake up Render server immediately to avoid 503 cold starts
-        axios.get('https://skilldad-server.onrender.com/health').catch(() => { });
+        // Server health check (same-origin)
+        axios.get('/health').catch(() => { });
 
         const fetchCourses = async () => {
             try {

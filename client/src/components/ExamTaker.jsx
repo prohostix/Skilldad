@@ -73,7 +73,7 @@ const ExamTaker = () => {
     }, [currentQuestionIndex]);
 
     const setupWebSocket = () => {
-        const socketUrl = import.meta.env.VITE_API_URL || 'https://skilldad-server.onrender.com';
+        const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         socketRef.current = io(socketUrl, { auth: { token: userInfo.token } });
 
