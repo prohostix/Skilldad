@@ -157,6 +157,7 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/webhooks', require('./routes/webhookRoutes'));
 app.use('/api/discount', require('./routes/discountRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
+app.use('/', require('./routes/seoRoutes'));
 
 // Payment Routes
 app.use('/api/payment', require('./routes/paymentRoutes'));
