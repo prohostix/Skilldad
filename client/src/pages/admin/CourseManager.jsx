@@ -25,9 +25,11 @@ const CourseManager = () => {
         description: '',
         category: '',
         price: 0,
+        instructorId: '',
         instructorName: '',
         universityName: '',
-        isPublished: false
+        isPublished: false,
+        isFeatured: false
     });
     const [universities, setUniversities] = useState([]);
     const navigate = useNavigate();
@@ -71,10 +73,11 @@ const CourseManager = () => {
             description: '',
             category: '',
             price: 0,
-            instructor: '',
+            instructorId: '',
             instructorName: '',
             universityName: '',
-            isPublished: true
+            isPublished: true,
+            isFeatured: false
         });
         setEditingCourse(null);
         setShowCreateModal(true);
@@ -86,10 +89,11 @@ const CourseManager = () => {
             description: course.description,
             category: course.category,
             price: course.price,
-            instructor: course.instructor?._id || course.instructor || '',
+            instructorId: course.instructor?._id || course.instructor || '',
             instructorName: course.instructorName || '',
             universityName: course.universityName || '',
-            isPublished: course.isPublished || false
+            isPublished: course.isPublished || false,
+            isFeatured: course.isFeatured || false
         });
         setEditingCourse(course);
         setShowCreateModal(true);
@@ -359,13 +363,13 @@ const CourseManager = () => {
                                     </label>
                                     <select
                                         className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter appearance-none"
-                                        value={formData.instructor}
+                                        value={formData.instructorId}
                                         onChange={(e) => {
                                             const univId = e.target.value;
                                             const univ = universities.find(u => u._id === univId);
                                             setFormData({
                                                 ...formData,
-                                                instructor: univId,
+                                                instructorId: univId,
                                                 universityName: univ ? univ.name : ''
                                             });
                                         }}
@@ -406,7 +410,7 @@ const CourseManager = () => {
                                 </div>
                             </div>
 
-                            <div className="pt-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                                 <label className="flex items-center space-x-3 p-3.5 bg-primary/5 border border-primary/20 rounded-xl cursor-pointer hover:bg-primary/10 transition-all group">
                                     <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${formData.isPublished ? 'bg-primary border-primary' : 'border-white/20 group-hover:border-primary/50'}`}>
                                         {formData.isPublished && (
@@ -423,7 +427,27 @@ const CourseManager = () => {
                                     />
                                     <div>
                                         <p className="text-sm font-bold text-white leading-none">Publish Course</p>
-                                        <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider font-medium">Make this course visible in the library</p>
+                                        <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider font-medium">Make visible in library</p>
+                                    </div>
+                                </label>
+
+                                <label className="flex items-center space-x-3 p-3.5 bg-amber-500/5 border border-amber-500/20 rounded-xl cursor-pointer hover:bg-amber-500/10 transition-all group">
+                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${formData.isFeatured ? 'bg-amber-500 border-amber-500' : 'border-white/20 group-hover:border-amber-500/50'}`}>
+                                        {formData.isFeatured && (
+                                            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="hidden"
+                                        checked={formData.isFeatured}
+                                        onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                                    />
+                                    <div>
+                                        <p className="text-sm font-bold text-white leading-none">Feature on Landing</p>
+                                        <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider font-medium">Top 3 on Landing Page</p>
                                     </div>
                                 </label>
                             </div>
