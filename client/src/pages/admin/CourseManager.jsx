@@ -115,6 +115,12 @@ const CourseManager = () => {
                 }
             };
 
+            // Validation: University is mandatory for Admin
+            if (userInfo.role === 'admin' && !formData.instructorId) {
+                showToast('Please select a Provider University', 'error');
+                return;
+            }
+
             if (editingCourse) {
                 // Update existing course
                 await axios.put(`/api/courses/${editingCourse._id}`, formData, config);
@@ -362,6 +368,7 @@ const CourseManager = () => {
                                         Provider University
                                     </label>
                                     <select
+                                        required
                                         className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter appearance-none"
                                         value={formData.instructorId}
                                         onChange={(e) => {
@@ -374,7 +381,7 @@ const CourseManager = () => {
                                             });
                                         }}
                                     >
-                                        <option value="" className="bg-black text-white">Select University</option>
+                                        <option value="" disabled className="bg-black text-white">Select Provider University (Mandatory)</option>
                                         {universities.map(u => (
                                             <option key={u._id} value={u._id} className="bg-black text-white">{u.name}</option>
                                         ))}

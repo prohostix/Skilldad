@@ -134,13 +134,36 @@ const getCourse = asyncHandler(async (req, res) => {
 // @desc    Create new course
 const createCourse = asyncHandler(async (req, res) => {
     const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured } = req.body;
-    const finalInstructorId = req.user.role === 'admin' ? (instructorId || req.user.id) : req.user.id;
+    
+    // For Admin, instructorId (University) is mandatory
+    if (req.user.role === 'admin' && !instructorId) {
+        res.status(400);
+        throw new Error('Provider University is mandatory for course creation');
+    }
+
+    const finalInstructorId = req.user.role === 'admin' ? instructorId : req.user.id;
     const newId = `course_${Date.now()}`;
 
     await query(`
         INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
     `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '']);
+
+    // Auto-sync with University profile.assigned_courses
+    try {
+        const uniRes = await query('SELECT profile FROM users WHERE id = $1', [finalInstructorId]);
+        if (uniRes.rows.length > 0) {
+            const profile = typeof uniRes.rows[0].profile === 'string' ? JSON.parse(uniRes.rows[0].profile) : (uniRes.rows[0].profile || {});
+            const assigned = profile.assigned_courses || [];
+            if (!assigned.includes(newId)) {
+                assigned.push(newId);
+                profile.assigned_courses = assigned;
+                await query('UPDATE users SET profile = $1 WHERE id = $2', [JSON.stringify(profile), finalInstructorId]);
+            }
+        }
+    } catch (err) {
+        console.error('Error syncing university course list:', err);
+    }
 
     const saved = await query('SELECT * FROM courses WHERE id = $1', [newId]);
     res.status(201).json({ 
@@ -159,6 +182,10 @@ const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName } = req.body;
 
+    // Get old course to check for instructor changes
+    const oldCourseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
+    const oldInstructorId = oldCourseRes.rows[0]?.instructor_id;
+
     await query(`
         UPDATE courses 
         SET title = COALESCE($1, title),
@@ -173,6 +200,32 @@ const updateCourse = asyncHandler(async (req, res) => {
             updated_at = NOW()
         WHERE id = $10
     `, [title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, id]);
+
+    // Handle instructor change in assigned_courses list
+    if (instructorId && oldInstructorId && instructorId !== oldInstructorId) {
+        try {
+            // Remove from old
+            const oldUniRes = await query('SELECT profile FROM users WHERE id = $1', [oldInstructorId]);
+            if (oldUniRes.rows.length > 0) {
+                const profile = typeof oldUniRes.rows[0].profile === 'string' ? JSON.parse(oldUniRes.rows[0].profile) : (oldUniRes.rows[0].profile || {});
+                profile.assigned_courses = (profile.assigned_courses || []).filter(cid => cid !== id);
+                await query('UPDATE users SET profile = $1 WHERE id = $2', [JSON.stringify(profile), oldInstructorId]);
+            }
+            // Add to new
+            const newUniRes = await query('SELECT profile FROM users WHERE id = $1', [instructorId]);
+            if (newUniRes.rows.length > 0) {
+                const profile = typeof newUniRes.rows[0].profile === 'string' ? JSON.parse(newUniRes.rows[0].profile) : (newUniRes.rows[0].profile || {});
+                const assigned = profile.assigned_courses || [];
+                if (!assigned.includes(id)) {
+                    assigned.push(id);
+                    profile.assigned_courses = assigned;
+                    await query('UPDATE users SET profile = $1 WHERE id = $2', [JSON.stringify(profile), instructorId]);
+                }
+            }
+        } catch (err) {
+            console.error('Error updating university course lists:', err);
+        }
+    }
 
     const updated = await query('SELECT * FROM courses WHERE id = $1', [id]);
     res.json({ 

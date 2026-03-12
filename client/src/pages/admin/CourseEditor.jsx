@@ -203,7 +203,7 @@ const CourseEditor = () => {
                             label="Featured in Top 3 on Landing Page"
                         />
                     </Box>
-                    <Button type="submit" variant="contained">Save Basic Info</Button>
+                    <Button type="submit" variant="contained">Save Changes</Button>
                 </form>
 
                 <Divider sx={{ my: 4 }} />
