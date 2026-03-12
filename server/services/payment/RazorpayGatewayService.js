@@ -67,23 +67,28 @@ class RazorpayGatewayService {
     async createOrder(orderData) {
         try {
             const options = {
-                amount: orderData.amount, // Amount in paise
-                currency: orderData.currency || 'INR',
-                receipt: orderData.receipt,
-                notes: orderData.notes || {}
-            };
+            amount: orderData.amount, // Amount in paise
+            currency: orderData.currency || 'INR',
+            receipt: orderData.receipt || orderData.transactionId, // Map transactionId to receipt
+            notes: orderData.notes || {
+                courseId: orderData.courseId,
+                studentId: orderData.studentId,
+                transactionId: orderData.transactionId
+            }
+        };
 
-            const order = await this.razorpay.orders.create(options);
+        const order = await this.razorpay.orders.create(options);
 
-            console.log(`✅ Razorpay order created: ${order.id}`);
+        console.log(`✅ Razorpay order created: ${order.id}`);
 
-            return {
-                order_id: order.id,
-                amount: order.amount,
-                currency: order.currency,
-                receipt: order.receipt,
-                status: order.status
-            };
+        return {
+            orderId: order.id,
+            order_id: order.id, // Keep for backward compatibility
+            amount: order.amount,
+            currency: order.currency,
+            receipt: order.receipt,
+            status: order.status
+        };
         } catch (error) {
             console.error('❌ Razorpay order creation error:', error);
             throw new Error(`Failed to create Razorpay order: ${error.message}`);
@@ -105,7 +110,15 @@ class RazorpayGatewayService {
      */
     verifyPaymentSignature(paymentData) {
         try {
-            const { order_id, payment_id, signature } = paymentData;
+            // Support both camelCase and snake_case for maximum compatibility
+            const order_id = paymentData.orderId || paymentData.order_id || paymentData.razorpay_order_id;
+            const payment_id = paymentData.paymentId || paymentData.payment_id || paymentData.razorpay_payment_id;
+            const signature = paymentData.signature || paymentData.razorpay_signature;
+
+            if (!order_id || !payment_id || !signature) {
+                console.warn('⚠️ Missing parameters for signature verification', { order_id, payment_id, hasSignature: !!signature });
+                return false;
+            }
 
             // Generate expected signature
             const text = `${order_id}|${payment_id}`;
@@ -147,8 +160,10 @@ class RazorpayGatewayService {
             const payment = await this.razorpay.payments.fetch(paymentId);
 
             return {
-                id: payment.id,
-                order_id: payment.order_id,
+                paymentId: payment.id,
+                id: payment.id, // Compatibility
+                orderId: payment.order_id,
+                order_id: payment.order_id, // Compatibility
                 status: payment.status,
                 method: payment.method,
                 amount: payment.amount,

@@ -169,8 +169,17 @@ const PaymentInitiation = () => {
                 customerPhone: userInfo.phone || '',
                 onSuccess: async (response) => {
                     // Payment successful - redirect to callback
-                    const callbackUrl = `/api/payment/callback?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&razorpay_signature=${response.razorpay_signature}`;
-                    window.location.href = callbackUrl;
+                    // Use absolute URL for callback if possible to avoid relative path issues when VITE_API_URL is empty
+            let baseUrl = import.meta.env.VITE_API_URL;
+            if (!baseUrl || baseUrl === '') {
+                baseUrl = window.location.origin;
+            } else if (!baseUrl.startsWith('http')) {
+                baseUrl = `${window.location.origin}${baseUrl.startsWith('/') ? '' : '/'}${baseUrl}`;
+            }
+
+            const callbackUrl = `${baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl}/api/payment/callback?razorpay_payment_id=${response.razorpay_payment_id}&razorpay_order_id=${response.razorpay_order_id}&razorpay_signature=${response.razorpay_signature}`;
+
+            window.location.href = callbackUrl;
                 },
                 onFailure: (error) => {
                     setError(`Payment failed: ${error.error_description || 'Unknown error'}`);

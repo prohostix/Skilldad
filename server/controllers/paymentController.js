@@ -188,6 +188,8 @@ const initiatePayment = async (req, res) => {
     const { courseId, discountCode } = req.body;
     const studentId = req.user.id;
 
+    console.log('[PAYMENT] Initiating payment:', { courseId, discountCode, studentId, body: req.body });
+
     // Validate required fields
     if (!courseId) {
       console.warn('[PAYMENT] Initiation failed: missing courseId');
@@ -437,7 +439,7 @@ const initiatePayment = async (req, res) => {
     await monitoringService.trackPaymentAttempt(transactionId, 'initiated');
 
     // Return Razorpay order details (Requirement 1.6)
-    res.status(200).json({
+    const responseData = {
       success: true,
       transactionId,
       sessionId: session.sessionId,
@@ -451,7 +453,15 @@ const initiatePayment = async (req, res) => {
         gst: gstAmount.toFixed(2),
         total: (finalAmount + gstAmount).toFixed(2),
       },
+    };
+
+    console.log('[PAYMENT] Returning initiation data:', {
+      orderId: responseData.orderId,
+      transactionId: responseData.transactionId,
+      hasKeyId: !!responseData.keyId
     });
+
+    res.status(200).json(responseData);
 
   } catch (error) {
     // Log the full error with stack trace for debugging
