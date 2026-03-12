@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, TextField, Button, Paper, Divider, Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Grid } from '@mui/material';
+import { Box, Typography, TextField, Button, Paper, Divider, Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemText, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Grid, FormControlLabel, Checkbox } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -191,6 +191,18 @@ const CourseEditor = () => {
                         sx={{ mb: 2 }}
                         placeholder="Manual override for university name"
                     />
+                    <Box sx={{ mb: 2 }}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={course.isFeatured || false}
+                                    onChange={(e) => setCourse({ ...course, isFeatured: e.target.checked })}
+                                    color="primary"
+                                />
+                            }
+                            label="Featured in Top 3 on Landing Page"
+                        />
+                    </Box>
                     <Button type="submit" variant="contained">Save Basic Info</Button>
                 </form>
 

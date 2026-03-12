@@ -14,6 +14,7 @@ const getCourses = asyncHandler(async (req, res) => {
                 FROM courses c
                 JOIN users u ON c.instructor_id = u.id
                 WHERE c.is_published = true AND c.instructor_id = $1
+                ORDER BY c.is_featured DESC, c.created_at DESC
             `, [universityId]);
         } else {
             coursesRes = await query(`
@@ -21,6 +22,7 @@ const getCourses = asyncHandler(async (req, res) => {
                 FROM courses c
                 JOIN users u ON c.instructor_id = u.id
                 WHERE c.is_published = true
+                ORDER BY c.is_featured DESC, c.created_at DESC
             `);
         }
 
@@ -28,6 +30,7 @@ const getCourses = asyncHandler(async (req, res) => {
             ...course,
             _id: course.id,
             isPublished: course.is_published,
+            isFeatured: course.is_featured,
             instructorName: course.instructor_name,
             instructor: {
                 name: course.instructor_name,
@@ -55,7 +58,7 @@ const getAdminCourses = asyncHandler(async (req, res) => {
                 SELECT c.*, u.name as instructor_name
                 FROM courses c
                 LEFT JOIN users u ON c.instructor_id = u.id
-                ORDER BY c.created_at DESC
+                ORDER BY c.is_featured DESC, c.created_at DESC
             `);
         } else {
             coursesRes = await query(`
@@ -63,7 +66,7 @@ const getAdminCourses = asyncHandler(async (req, res) => {
                 FROM courses c
                 LEFT JOIN users u ON c.instructor_id = u.id
                 WHERE c.instructor_id = $1
-                ORDER BY c.created_at DESC
+                ORDER BY c.is_featured DESC, c.created_at DESC
             `, [userId]);
         }
 
@@ -71,6 +74,7 @@ const getAdminCourses = asyncHandler(async (req, res) => {
             ...c, 
             _id: c.id,
             isPublished: c.is_published,
+            isFeatured: c.is_featured,
             instructorName: c.instructor_name
         })));
     } catch (error) {
@@ -110,6 +114,7 @@ const getCourse = asyncHandler(async (req, res) => {
         ...course,
         _id: course.id,
         isPublished: course.is_published,
+        isFeatured: course.is_featured,
         instructorName: course.instructor_name,
         isEnrolled,
         instructor: {
@@ -122,20 +127,21 @@ const getCourse = asyncHandler(async (req, res) => {
 
 // @desc    Create new course
 const createCourse = asyncHandler(async (req, res) => {
-    const { title, description, category, price, isPublished, instructorId } = req.body;
+    const { title, description, category, price, isPublished, instructorId, isFeatured } = req.body;
     const finalInstructorId = req.user.role === 'admin' ? (instructorId || req.user.id) : req.user.id;
     const newId = `course_${Date.now()}`;
 
     await query(`
-        INSERT INTO courses (id, title, description, category, price, is_published, instructor_id, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-    `, [newId, title, description, category, price || 0, isPublished || false, finalInstructorId]);
+        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId]);
 
     const saved = await query('SELECT * FROM courses WHERE id = $1', [newId]);
     res.status(201).json({ 
         ...saved.rows[0], 
         _id: newId,
         isPublished: saved.rows[0].is_published,
+        isFeatured: saved.rows[0].is_featured,
         instructorName: saved.rows[0].instructor_name
     });
 });
@@ -143,7 +149,7 @@ const createCourse = asyncHandler(async (req, res) => {
 // @desc    Update course
 const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, category, price, isPublished } = req.body;
+    const { title, description, category, price, isPublished, isFeatured } = req.body;
 
     await query(`
         UPDATE courses 
@@ -152,15 +158,17 @@ const updateCourse = asyncHandler(async (req, res) => {
             category = COALESCE($3, category),
             price = COALESCE($4, price),
             is_published = COALESCE($5, is_published),
+            is_featured = COALESCE($6, is_featured),
             updated_at = NOW()
-        WHERE id = $6
-    `, [title, description, category, price, isPublished, id]);
+        WHERE id = $7
+    `, [title, description, category, price, isPublished, isFeatured, id]);
 
     const updated = await query('SELECT * FROM courses WHERE id = $1', [id]);
     res.json({ 
         ...updated.rows[0], 
         _id: id,
         isPublished: updated.rows[0].is_published,
+        isFeatured: updated.rows[0].is_featured,
         instructorName: updated.rows[0].instructor_name
     });
 });

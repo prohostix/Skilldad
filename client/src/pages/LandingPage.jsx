@@ -494,63 +494,76 @@ const LandingPage = () => {
                             { title: 'Neural Network Architecture', category: 'AI & Data', icon: Cpu, description: 'Experience the next generation of AI & Data education with high-fidelity modules.' },
                             { title: 'Cryptographic Governance', category: 'Security', icon: ShieldCheck, description: 'Experience the next generation of Security education with high-fidelity modules.' },
                             { title: 'Quantum Financial Systems', category: 'Finance', icon: BarChart, description: 'Experience the next generation of Finance education with high-fidelity modules.' }
-                        ]).map((c, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-150px" }}
-                                transition={{ delay: i * 0.03, duration: 0.25 }}
-                                whileHover={{ y: -6 }}
-                                className="h-full"
-                            >
-                                <GlassCard
-                                    className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-6 text-left hover:shadow-glow-purple cursor-pointer"
-                                    onClick={() => c._id && navigate(`/course/${c._id}`)}
+                        ]).map((c, i) => {
+                            // Map icon based on category for dynamic courses
+                            const getIcon = (category) => {
+                                const cat = category?.toLowerCase() || '';
+                                if (cat.includes('ai') || cat.includes('data') || cat.includes('neural')) return Cpu;
+                                if (cat.includes('security') || cat.includes('governance') || cat.includes('cryptographic')) return ShieldCheck;
+                                if (cat.includes('finance') || cat.includes('quantum') || cat.includes('economic')) return BarChart;
+                                if (cat.includes('network') || cat.includes('system')) return Network;
+                                return Book;
+                            };
+                            const Icon = c.icon || getIcon(c.category);
+
+                            return (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: "-150px" }}
+                                    transition={{ delay: i * 0.03, duration: 0.25 }}
+                                    whileHover={{ y: -6 }}
+                                    className="h-full"
                                 >
-                                    <div className="w-12 h-12 rounded-[20px] bg-primary/20 text-primary flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-105 shadow-2xl border border-primary/30 group-hover:border-primary/50">
-                                        {c.icon ? <c.icon size={24} strokeWidth={2.5} /> : <Book size={24} strokeWidth={2.5} />}
-                                    </div>
-                                    <div className="flex flex-col mb-3">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-1 block">{c.category}</span>
-                                        <div className="flex flex-col">
-                                            <p className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none">
-                                                {c.instructorName || c.instructor?.name || 'Academic Lead'}
-                                            </p>
-                                            {(c.universityName || c.instructor?.profile?.universityName || (c.instructor?.role === 'university' && c.instructor?.name)) && (
-                                                <p className="text-[8px] font-bold text-primary/70 uppercase tracking-wider mt-0.5">
-                                                    {c.universityName || c.instructor?.profile?.universityName || c.instructor?.name}
+                                    <GlassCard
+                                        className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-6 text-left hover:shadow-glow-purple cursor-pointer"
+                                        onClick={() => c._id && navigate(`/course/${c._id}`)}
+                                    >
+                                        <div className="w-12 h-12 rounded-[20px] bg-primary/20 text-primary flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-105 shadow-2xl border border-primary/30 group-hover:border-primary/50">
+                                            <Icon size={24} strokeWidth={2.5} />
+                                        </div>
+                                        <div className="flex flex-col mb-3">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-1 block">{c.category}</span>
+                                            <div className="flex flex-col">
+                                                <p className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none">
+                                                    {c.instructorName || c.instructor?.name || 'Academic Lead'}
                                                 </p>
-                                            )}
+                                                {(c.universityName || c.instructor?.profile?.universityName || (c.instructor?.role === 'university' && c.instructor?.name)) && (
+                                                    <p className="text-[8px] font-bold text-primary/70 uppercase tracking-wider mt-0.5">
+                                                        {c.universityName || c.instructor?.profile?.universityName || c.instructor?.name}
+                                                    </p>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-white mb-4 group-hover:text-primary transition-colors font-poppins">{c.title}</h3>
-                                    <p className="text-text-secondary font-inter text-sm leading-relaxed mb-6 opacity-80 group-hover:opacity-100 transition-opacity line-clamp-2">
-                                        {c.description || `Experience high-fidelity education in ${c.category} with our institutional track.`}
-                                    </p>
-                                    <div className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-between group/link">
-                                        <div className="flex flex-col">
-                                            <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Enrollment Fee</span>
-                                            <span className="text-sm font-black text-white">₹{c.price || '199'}</span>
+                                        <h3 className="text-lg font-bold text-white mb-4 group-hover:text-primary transition-colors font-poppins">{c.title}</h3>
+                                        <p className="text-text-secondary font-inter text-sm leading-relaxed mb-6 opacity-80 group-hover:opacity-100 transition-opacity line-clamp-2">
+                                            {c.description || `Experience high-fidelity education in ${c.category} with our institutional track.`}
+                                        </p>
+                                        <div className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-between group/link">
+                                            <div className="flex flex-col">
+                                                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Enrollment Fee</span>
+                                                <span className="text-sm font-black text-white">₹{c.price || '199'}</span>
+                                            </div>
+                                            <ModernButton
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                                                    if (userInfo) {
+                                                        navigate(`/dashboard/payment/${c._id}`);
+                                                    } else {
+                                                        navigate('/login', { state: { from: `/course/${c._id}` } });
+                                                    }
+                                                }}
+                                                className="!px-6 !py-2.5 !text-[9px] uppercase tracking-widest font-black"
+                                            >
+                                                Enroll Now
+                                            </ModernButton>
                                         </div>
-                                        <ModernButton
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                                                if (userInfo) {
-                                                    navigate(`/dashboard/payment/${c._id}`);
-                                                } else {
-                                                    navigate('/login', { state: { from: `/course/${c._id}` } });
-                                                }
-                                            }}
-                                            className="!px-6 !py-2.5 !text-[9px] uppercase tracking-widest font-black"
-                                        >
-                                            Enroll Now
-                                        </ModernButton>
-                                    </div>
-                                </GlassCard>
-                            </motion.div>
-                        ))}
+                                    </GlassCard>
+                                </motion.div>
+                            );
+                        })}
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
