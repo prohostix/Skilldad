@@ -846,6 +846,10 @@ async function getUniversityDetail(req, res) {
         const universityRes = await query('SELECT id as _id, name, email, role, bio, profile_image as "profileImage", profile FROM users WHERE id = $1', [req.params.id]);
         const university = universityRes.rows[0];
 
+        if (university && typeof university.profile === 'string') {
+            try { university.profile = JSON.parse(university.profile); } catch(e) { university.profile = {}; }
+        }
+
         if (!university || university.role !== 'university') {
             return res.status(404).json({ message: 'University not found' });
         }
@@ -1182,7 +1186,7 @@ const updateUniversityProfile = async (req, res) => {
             return res.status(404).json({ message: 'University not found' });
         }
 
-        const updatedProfile = user.profile || {};
+        const updatedProfile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
         const updatedBio = bio !== undefined ? bio : user.bio;
         updatedProfile.location = location !== undefined ? location : updatedProfile.location;
         updatedProfile.website = website !== undefined ? website : updatedProfile.website;

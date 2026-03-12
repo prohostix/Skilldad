@@ -263,116 +263,23 @@ const UniversityDetail = () => {
                     </div>
 
                     <div className="space-y-4 pt-2">
-                        {isEditing ? (
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">About / Bio</label>
-                                    <textarea
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-primary transition-all resize-none"
-                                        rows="4"
-                                        placeholder="Enter university description..."
-                                        value={editData.bio}
-                                        onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-                                    ></textarea>
-                                </div>
-                                <div>
-                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Location</label>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-3 top-2.5 text-white/30" size={14} />
-                                        <input
-                                            type="text"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
-                                            placeholder="City, Country"
-                                            value={editData.location}
-                                            onChange={(e) => setEditData({ ...editData, location: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Website</label>
-                                    <div className="relative">
-                                        <Globe className="absolute left-3 top-2.5 text-white/30" size={14} />
-                                        <input
-                                            type="url"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
-                                            placeholder="https://university.edu"
-                                            value={editData.website}
-                                            onChange={(e) => setEditData({ ...editData, website: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Phone</label>
-                                    <div className="relative">
-                                        <Phone className="absolute left-3 top-2.5 text-white/30" size={14} />
-                                        <input
-                                            type="tel"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-9 pr-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
-                                            placeholder="+1 234 567 890"
-                                            value={editData.phone}
-                                            onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">YouTube Video URL</label>
-                                    <input
-                                        type="url"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
-                                        placeholder="https://youtube.com/watch?v=..."
-                                        value={editData.youtubeUrl}
-                                        onChange={(e) => setEditData({ ...editData, youtubeUrl: e.target.value })}
-                                    />
-                                </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Email</span>
+                            <span className="text-white text-sm font-semibold">{university.email}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Discount Rate</span>
+                            <span className="text-emerald-400 text-sm font-bold">{university.discountRate || 0}%</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Status</span>
+                            <div className="flex items-center space-x-1.5">
+                                <span className={`w-2 h-2 rounded-full ${university.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                                <span className={`text-xs font-bold ${university.isVerified ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                    {university.isVerified ? 'VERIFIED' : 'PENDING'}
+                                </span>
                             </div>
-                        ) : (
-                            <>
-                                {university.bio && (
-                                    <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                                        <p className="text-white/60 text-xs leading-relaxed">{university.bio}</p>
-                                    </div>
-                                )}
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                                    <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Email</span>
-                                    <span className="text-white text-sm font-semibold">{university.email}</span>
-                                </div>
-                                {university.profile?.location && (
-                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                                        <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Location</span>
-                                        <span className="text-white text-sm font-semibold">{university.profile.location}</span>
-                                    </div>
-                                )}
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                                    <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Discount Rate</span>
-                                    <span className="text-emerald-400 text-sm font-bold">{university.discountRate || 0}%</span>
-                                </div>
-                                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
-                                    <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Status</span>
-                                    <div className="flex items-center space-x-1.5">
-                                        <span className={`w-2 h-2 rounded-full ${university.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                                        <span className={`text-xs font-bold ${university.isVerified ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                            {university.isVerified ? 'VERIFIED' : 'PENDING'}
-                                        </span>
-                                    </div>
-                                </div>
-                                {university.profile?.youtubeUrl && (
-                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group relative overflow-hidden">
-                                        <div className="flex flex-col">
-                                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">YouTube Link</span>
-                                            <a 
-                                                href={university.profile.youtubeUrl} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="text-primary text-[10px] truncate max-w-[150px] hover:underline"
-                                            >
-                                                {university.profile.youtubeUrl}
-                                            </a>
-                                        </div>
-                                        <Youtube size={16} className="text-red-500 opacity-50" />
-                                    </div>
-                                )}
-                            </>
-                        )}
+                        </div>
                     </div>
 
                     <div className="pt-4">
@@ -489,6 +396,115 @@ const UniversityDetail = () => {
 
                 {/* Right Content */}
                 <div className="lg:col-span-2 space-y-8">
+                    {/* Bio & Details Sections */}
+                    {isEditing ? (
+                        <GlassCard className="space-y-6">
+                            <div className="border-b border-white/10 pb-4">
+                                <h3 className="text-base font-semibold text-white font-inter flex items-center">
+                                    <Edit3 size={18} className="mr-2 text-primary" /> Institutional Profile Details
+                                </h3>
+                                <p className="text-white/40 text-xs mt-1">Update global settings and information for this university.</p>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="md:col-span-2">
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Detailed About / Bio</label>
+                                    <textarea
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-sm focus:outline-none focus:border-primary transition-all resize-none min-h-[150px]"
+                                        placeholder="Describe the university, its heritage, and its vision..."
+                                        value={editData.bio}
+                                        onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                                    ></textarea>
+                                </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Physical Location</label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-4 top-3 text-white/30" size={16} />
+                                        <input
+                                            type="text"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="City, Country"
+                                            value={editData.location}
+                                            onChange={(e) => setEditData({ ...editData, location: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Official Website</label>
+                                    <div className="relative">
+                                        <Globe className="absolute left-4 top-3 text-white/30" size={16} />
+                                        <input
+                                            type="url"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="https://university.edu"
+                                            value={editData.website}
+                                            onChange={(e) => setEditData({ ...editData, website: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Contact Hotline</label>
+                                    <div className="relative">
+                                        <Phone className="absolute left-4 top-3 text-white/30" size={16} />
+                                        <input
+                                            type="tel"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="+1 (555) 000-0000"
+                                            value={editData.phone}
+                                            onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">YouTube Showcase URL</label>
+                                    <div className="relative">
+                                        <Youtube className="absolute left-4 top-3 text-white/30" size={16} />
+                                        <input
+                                            type="url"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="https://youtube.com/watch?v=..."
+                                            value={editData.youtubeUrl}
+                                            onChange={(e) => setEditData({ ...editData, youtubeUrl: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </GlassCard>
+                    ) : (
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <GlassCard className="space-y-4">
+                                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">Heritage & Vision</h4>
+                                <p className="text-white/60 text-sm leading-relaxed italic">
+                                    {university.bio || "No description provided for this institution yet."}
+                                </p>
+                            </GlassCard>
+                            
+                            <GlassCard className="space-y-4">
+                                <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-4">Connection Details</h4>
+                                <div className="space-y-3">
+                                    <div className="flex items-center text-white/80 space-x-3 text-sm">
+                                        <MapPin size={16} className="text-white/30" />
+                                        <span>{university.profile?.location || 'Not specified'}</span>
+                                    </div>
+                                    <div className="flex items-center text-white/80 space-x-3 text-sm">
+                                        <Globe size={16} className="text-white/30" />
+                                        <a href={university.profile?.website} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">
+                                            {university.profile?.website || 'No website listed'}
+                                        </a>
+                                    </div>
+                                    <div className="flex items-center text-white/80 space-x-3 text-sm">
+                                        <Phone size={16} className="text-white/30" />
+                                        <span>{university.profile?.phone || 'No phone listed'}</span>
+                                    </div>
+                                </div>
+                            </GlassCard>
+                        </div>
+                    )}
+
                     {/* Courses List */}
                     <GlassCard className="!p-0 border-white/10 overflow-hidden">
                         <div className="p-6 border-b border-white/10 flex items-center justify-between">
