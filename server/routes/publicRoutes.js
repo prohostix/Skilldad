@@ -119,6 +119,37 @@ router.get('/universities/:name/courses', async (req, res) => {
     }
 });
 
+// @desc    Get full university profile by name
+// @route   GET /api/public/universities/profile/:name
+// @access  Public
+router.get('/universities/profile/:name', async (req, res) => {
+    try {
+        const uniName = decodeURIComponent(req.params.name);
+        
+        const uniRes = await query(`
+            SELECT id, name, email, profile, profile_image as "profileImage", bio
+            FROM users 
+            WHERE role = 'university' AND name = $1 AND is_verified = true
+        `, [uniName]);
+        
+        if (uniRes.rows.length === 0) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+        
+        const uni = uniRes.rows[0];
+        const profile = typeof uni.profile === 'string' ? JSON.parse(uni.profile) : (uni.profile || {});
+        
+        res.json({
+            ...uni,
+            profile,
+            _id: uni.id
+        });
+    } catch (error) {
+        console.error('Error fetching university profile:', error.message);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 
 // @desc    Send demo notifications
 // @route   POST /api/public/demo-notification

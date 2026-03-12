@@ -10,7 +10,9 @@ import {
     ArrowLeft,
     Globe,
     Calendar,
-    Award
+    Award,
+    Youtube,
+    Image as ImageIcon
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
@@ -101,13 +103,35 @@ const UniversityPublicDetail = () => {
 
     const [courses, setCourses] = useState([]);
     const [loadingCourses, setLoadingCourses] = useState(true);
+    const [university, setUniversity] = useState(location.state?.university || null);
+    const [loadingProfile, setLoadingProfile] = useState(!location.state?.university);
 
     const universityName = decodeURIComponent(name);
 
-    // Get university details from location state or fallback
-    const university = location.state?.university || fallbackUniversities.find(u => u.name === universityName);
+    const getYoutubeId = (url) => {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    };
 
     useEffect(() => {
+        const fetchProfile = async () => {
+            if (location.state?.university) return;
+            try {
+                setLoadingProfile(true);
+                const { data } = await axios.get(`/api/public/universities/profile/${encodeURIComponent(universityName)}`);
+                setUniversity(data);
+            } catch (error) {
+                console.error("Error fetching university profile:", error);
+                // Fallback to static data if API fails or university not found
+                const fallback = fallbackUniversities.find(u => u.name === universityName);
+                if (fallback) setUniversity(fallback);
+            } finally {
+                setLoadingProfile(false);
+            }
+        };
+
         const fetchCourses = async () => {
             try {
                 // Fetch courses for this specific university
@@ -120,15 +144,27 @@ const UniversityPublicDetail = () => {
             }
         };
 
+        fetchProfile();
         fetchCourses();
-    }, [universityName]);
+    }, [universityName, location.state]);
+
+    if (loadingProfile) {
+        return (
+            <div className="min-h-screen bg-[#05030B] flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     if (!university) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] text-white flex flex-col pt-24 items-center">
                 <Navbar />
-                <h1 className="text-3xl font-black mt-20">University Not Found</h1>
-                <ModernButton className="mt-8" onClick={() => navigate('/platform')}>Go Back</ModernButton>
+                <div className="text-center mt-20">
+                    <h1 className="text-3xl font-black mb-4">University Not Found</h1>
+                    <p className="text-white/40 mb-8 font-inter">We couldn't find the institution you're looking for.</p>
+                    <ModernButton onClick={() => navigate('/platform')}>Explore Universities</ModernButton>
+                </div>
             </div>
         );
     }
@@ -241,18 +277,18 @@ const UniversityPublicDetail = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         {university.profile.personnel.map((person, idx) => (
                                             <div key={idx} className="flex items-center space-x-3 bg-white/5 p-3 rounded-2xl border border-white/10">
-                                                <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20">
+                                                <div className="w-10 h-10 rounded-full bg-white/10 overflow-hidden border border-white/20 text-center">
                                                     {person.image ? (
                                                         <img src={person.image} alt={person.name} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-white/50 text-xs font-bold uppercase">
-                                                            {person.name?.charAt(0) || '?'}
-                                                        </div>
+                                                        <span className="text-[10px] font-bold text-white/40 uppercase">
+                                                            {person.name?.charAt(0)}
+                                                        </span>
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <p className="text-white text-sm font-bold">{person.name}</p>
-                                                    <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-0.5">{person.role}</p>
+                                                    <p className="text-white text-sm font-bold leading-none">{person.name}</p>
+                                                    <p className="text-primary text-[10px] font-black uppercase tracking-widest mt-1">{person.role}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -263,6 +299,58 @@ const UniversityPublicDetail = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Video & Gallery Section */}
+            {(university.profile?.youtubeUrl || (university.profile?.gallery && university.profile.gallery.length > 0)) && (
+                <div className="max-w-7xl mx-auto px-4 py-16">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        {/* YouTube Video */}
+                        {university.profile?.youtubeUrl && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-black text-white font-space flex items-center gap-3">
+                                    <Youtube className="text-red-500" /> University <span className="text-primary">Overview</span>
+                                </h2>
+                                <div className="aspect-video rounded-[30px] overflow-hidden border-2 border-white/10 bg-white/5 shadow-2xl relative">
+                                    {getYoutubeId(university.profile.youtubeUrl) ? (
+                                        <iframe
+                                            className="w-full h-full"
+                                            src={`https://www.youtube.com/embed/${getYoutubeId(university.profile.youtubeUrl)}`}
+                                            title="University Video"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        ></iframe>
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center text-white/40 font-inter">
+                                            Video format not supported
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Gallery */}
+                        {university.profile?.gallery && university.profile.gallery.length > 0 && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-black text-white font-space flex items-center gap-3">
+                                    <ImageIcon className="text-emerald-400" /> Campus <span className="text-primary">Gallery</span>
+                                </h2>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    {university.profile.gallery.map((img, idx) => (
+                                        <motion.div
+                                            key={idx}
+                                            whileHover={{ scale: 1.05 }}
+                                            className="aspect-square rounded-2xl overflow-hidden border border-white/10 bg-white/5 group cursor-pointer"
+                                        >
+                                            <img src={img} alt={`Gallery ${idx}`} className="w-full h-full object-cover group-hover:opacity-80 transition-opacity" />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Courses Section */}
             <div className="max-w-7xl mx-auto px-4 py-16">

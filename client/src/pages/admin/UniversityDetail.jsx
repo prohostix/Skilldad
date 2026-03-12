@@ -39,6 +39,8 @@ const UniversityDetail = () => {
         location: '',
         website: '',
         phone: '',
+        youtubeUrl: '',
+        gallery: [],
         personnel: []
     });
     const [uploading, setUploading] = useState(false);
@@ -59,6 +61,8 @@ const UniversityDetail = () => {
                 location: data.university.profile?.location || '',
                 website: data.university.profile?.website || '',
                 phone: data.university.profile?.phone || '',
+                youtubeUrl: data.university.profile?.youtubeUrl || '',
+                gallery: data.university.profile?.gallery || [],
                 personnel: data.university.profile?.personnel || []
             });
         } catch (error) {
@@ -310,6 +314,16 @@ const UniversityDetail = () => {
                                         />
                                     </div>
                                 </div>
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">YouTube Video URL</label>
+                                    <input
+                                        type="url"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2 px-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                        placeholder="https://youtube.com/watch?v=..."
+                                        value={editData.youtubeUrl}
+                                        onChange={(e) => setEditData({ ...editData, youtubeUrl: e.target.value })}
+                                    />
+                                </div>
                             </div>
                         ) : (
                             <>
@@ -400,6 +414,51 @@ const UniversityDetail = () => {
                         accept="image/*"
                         onChange={handleCoverUpload}
                     />
+                </GlassCard>
+
+                {/* Gallery Card (Admin Only) */}
+                <GlassCard className="lg:col-span-1 space-y-4">
+                    <h3 className="text-sm font-semibold text-white font-inter flex items-center">
+                        <Camera size={16} className="mr-2 text-primary" /> Photo Gallery
+                    </h3>
+                    <div className="space-y-3">
+                        <div className="flex gap-2">
+                            <input 
+                                type="text"
+                                placeholder="Paste image URL..."
+                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary"
+                                id="gallery-input"
+                            />
+                            <button 
+                                onClick={() => {
+                                    const input = document.getElementById('gallery-input');
+                                    if (input.value) {
+                                        setEditData({ ...editData, gallery: [...editData.gallery, input.value] });
+                                        input.value = '';
+                                    }
+                                }}
+                                className="px-3 py-2 bg-primary/20 text-primary rounded-xl text-xs font-bold uppercase"
+                            >
+                                Add
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                            {editData.gallery.map((img, idx) => (
+                                <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
+                                    <img src={img} className="w-full h-full object-cover" alt="Gallery" />
+                                    <button 
+                                        onClick={() => {
+                                            const updated = editData.gallery.filter((_, i) => i !== idx);
+                                            setEditData({ ...editData, gallery: updated });
+                                        }}
+                                        className="absolute top-1 right-1 p-1 bg-red-500 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </GlassCard>
 
                 {/* Right Content */}
