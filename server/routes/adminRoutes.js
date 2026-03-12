@@ -29,6 +29,7 @@ const {
     updateDirector,
     deleteDirector,
     getUniversities,
+    deleteUniversity,
     assignCoursesToUniversity,
     getUniversityDetail,
     adminEnrollStudent,
@@ -82,6 +83,7 @@ router.get('/users', protect, checkAdmin, getAllUsers);
 router.get('/users/:id', protect, checkAdmin, getUserById);
 router.get('/universities', protect, checkAdmin, getUniversities);
 router.get('/universities/:id', protect, checkAdmin, getUniversityDetail);
+router.delete('/universities/:id', protect, checkAdmin, deleteUniversity);
 router.put('/universities/:id/courses', protect, checkAdmin, assignCoursesToUniversity);
 router.put('/universities/:id/profile', protect, checkAdmin, updateUniversityProfile);
 router.post('/universities/:id/upload-image', protect, checkAdmin, upload.single('profileImage'), uploadUniversityProfileImage);

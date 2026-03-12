@@ -16,7 +16,8 @@ import {
     Camera,
     FileText,
     Upload,
-    BookOpen
+    BookOpen,
+    Trash2
 } from 'lucide-react';
 import {
     ResponsiveContainer,
@@ -68,6 +69,8 @@ const UniversityManagement = () => {
         type: 'exam_paper',
         file: null
     });
+    const [openDelete, setOpenDelete] = useState(false);
+    const [loadingDelete, setLoadingDelete] = useState(false);
 
     // Courses Selection Logic
     const [allCourses, setAllCourses] = useState([]);
@@ -315,6 +318,25 @@ const UniversityManagement = () => {
             showToast(error.response?.data?.message || 'Upload failed', 'error');
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleDeleteUniversity = async () => {
+        if (!selectedPartner?._id) return;
+        
+        setLoadingDelete(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            await axios.delete(`/api/admin/universities/${selectedPartner._id}`, config);
+            showToast(`${selectedPartner.name} deleted successfully`, 'success');
+            setOpenDelete(false);
+            fetchPartners();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to delete university', 'error');
+        } finally {
+            setLoadingDelete(false);
         }
     };
 
@@ -586,6 +608,17 @@ const UniversityManagement = () => {
                                             className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-primary"
                                         >
                                             <Edit3 size={18} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedPartner(partner);
+                                                setOpenDelete(true);
+                                            }}
+                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-red-500"
+                                            title="Delete University"
+                                        >
+                                            <Trash2 size={18} />
                                         </button>
                                         <button
                                             onClick={(e) => {
@@ -1068,6 +1101,38 @@ const UniversityManagement = () => {
                     </div>
                 )
             }
+            {/* Delete Confirmation Modal */}
+            {openDelete && (
+                <div className="fixed inset-0 z-[99999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenDelete(false)}>
+                    <GlassCard className="w-full max-w-sm bg-black/95 border-red-500/20 my-auto shadow-2xl relative z-[100001]" onClick={e => e.stopPropagation()}>
+                        <div className="flex flex-col items-center text-center p-4">
+                            <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4">
+                                <Trash2 size={32} />
+                            </div>
+                            <h3 className="text-lg font-semibold text-white font-inter mb-2">Delete Institution?</h3>
+                            <p className="text-sm text-white/60 mb-8 font-inter">
+                                Are you sure you want to remove <span className="text-white font-bold">{selectedPartner?.name}</span>? This action cannot be undone if there are no dependencies.
+                            </p>
+                            
+                            <div className="flex w-full gap-3">
+                                <button
+                                    onClick={() => setOpenDelete(false)}
+                                    className="flex-1 py-3 text-sm font-bold text-white/50 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDeleteUniversity}
+                                    disabled={loadingDelete}
+                                    className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-red-500/20 transition-all disabled:opacity-50"
+                                >
+                                    {loadingDelete ? 'Deleting...' : 'Delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </GlassCard>
+                </div>
+            )}
         </div >
     );
 };

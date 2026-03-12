@@ -792,10 +792,74 @@ async function inviteUser(req, res) {
 // @desc    Get all universities
 async function getUniversities(req, res) {
     try {
-        const resSet = await query("SELECT id as _id, name, bio, profile FROM users WHERE role = 'university'");
+        const resSet = await query(`
+            SELECT 
+                id as _id, 
+                name, 
+                email, 
+                role, 
+                bio, 
+                profile, 
+                is_verified as "isVerified", 
+                discount_rate as "discountRate",
+                created_at
+            FROM users 
+            WHERE role = 'university' OR role = 'partner' 
+            ORDER BY created_at DESC
+        `);
         res.json(resSet.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+}
+
+// @desc    Delete a university and its associated data
+// @route   DELETE /api/admin/universities/:id
+// @access  Private (Admin)
+async function deleteUniversity(req, res) {
+    try {
+        const { id } = req.params;
+
+        // 1. Check if university exists
+        const uniRes = await query('SELECT id, name, role FROM users WHERE id = $1', [id]);
+        const uni = uniRes.rows[0];
+
+        if (!uni) {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        if (uni.role !== 'university' && uni.role !== 'partner') {
+            return res.status(400).json({ message: 'User is not a university or partner' });
+        }
+
+        // 2. Check for dependencies (Courses)
+        const coursesRes = await query('SELECT id FROM courses WHERE instructor_id = $1 LIMIT 1', [id]);
+        if (coursesRes.rows.length > 0) {
+            return res.status(400).json({ 
+                message: 'Cannot delete university: It has associated courses. Please delete or reassign courses first.' 
+            });
+        }
+
+        // 3. Check for Exams
+        const examsRes = await query('SELECT id FROM exams WHERE university_id = $1 LIMIT 1', [id]);
+        if (examsRes.rows.length > 0) {
+            return res.status(400).json({ 
+                message: 'Cannot delete university: It has associated exams.' 
+            });
+        }
+
+        // 4. Perform Deletion
+        await query('DELETE FROM users WHERE id = $1', [id]);
+
+        // Notify via WebSocket
+        if (socketService.notifyUserListUpdate) {
+            socketService.notifyUserListUpdate('deleted', { ...uni, _id: uni.id });
+        }
+
+        res.json({ message: 'University deleted successfully' });
+    } catch (error) {
+        console.error('[deleteUniversity] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error during deletion' });
     }
 }
 
@@ -812,8 +876,8 @@ async function assignCoursesToUniversity(req, res) {
             return res.status(404).json({ message: 'University not found' });
         }
 
-        if (university.role !== 'university') {
-            return res.status(400).json({ message: 'Target entity is not a university' });
+        if (university.role !== 'university' && university.role !== 'partner') {
+            return res.status(400).json({ message: 'Target entity is not a university or partner' });
         }
 
         let updatedAssignedCourses = university.profile?.assigned_courses || [];
@@ -850,8 +914,8 @@ async function getUniversityDetail(req, res) {
             try { university.profile = JSON.parse(university.profile); } catch(e) { university.profile = {}; }
         }
 
-        if (!university || university.role !== 'university') {
-            return res.status(404).json({ message: 'University not found' });
+        if (!university || (university.role !== 'university' && university.role !== 'partner')) {
+            return res.status(404).json({ message: 'University or partner not found' });
         }
 
         // Fetch courses where this university is the instructor (Provider University)
@@ -1245,6 +1309,7 @@ module.exports = {
     deleteDirector,
     inviteUser,
     getUniversities,
+    deleteUniversity,
     assignCoursesToUniversity,
     getUniversityDetail,
     adminEnrollStudent,

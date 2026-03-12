@@ -17,7 +17,8 @@ import {
     X,
     Globe,
     Phone,
-    MapPin
+    MapPin,
+    Youtube
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
