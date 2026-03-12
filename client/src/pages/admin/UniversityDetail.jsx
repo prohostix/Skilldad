@@ -355,6 +355,22 @@ const UniversityDetail = () => {
                                         </span>
                                     </div>
                                 </div>
+                                {university.profile?.youtubeUrl && (
+                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group relative overflow-hidden">
+                                        <div className="flex flex-col">
+                                            <span className="text-white/40 text-xs font-bold uppercase tracking-wider">YouTube Link</span>
+                                            <a 
+                                                href={university.profile.youtubeUrl} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="text-primary text-[10px] truncate max-w-[150px] hover:underline"
+                                            >
+                                                {university.profile.youtubeUrl}
+                                            </a>
+                                        </div>
+                                        <Youtube size={16} className="text-red-500 opacity-50" />
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>
@@ -422,39 +438,49 @@ const UniversityDetail = () => {
                         <Camera size={16} className="mr-2 text-primary" /> Photo Gallery
                     </h3>
                     <div className="space-y-3">
-                        <div className="flex gap-2">
-                            <input 
-                                type="text"
-                                placeholder="Paste image URL..."
-                                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary"
-                                id="gallery-input"
-                            />
-                            <button 
-                                onClick={() => {
-                                    const input = document.getElementById('gallery-input');
-                                    if (input.value) {
-                                        setEditData({ ...editData, gallery: [...editData.gallery, input.value] });
-                                        input.value = '';
-                                    }
-                                }}
-                                className="px-3 py-2 bg-primary/20 text-primary rounded-xl text-xs font-bold uppercase"
-                            >
-                                Add
-                            </button>
-                        </div>
+                        {isEditing ? (
+                            <div className="flex gap-2">
+                                <input 
+                                    type="text"
+                                    placeholder="Paste image URL..."
+                                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary"
+                                    id="gallery-input"
+                                />
+                                <button 
+                                    onClick={() => {
+                                        const input = document.getElementById('gallery-input');
+                                        if (input.value) {
+                                            setEditData({ ...editData, gallery: [...editData.gallery, input.value] });
+                                            input.value = '';
+                                        }
+                                    }}
+                                    className="px-3 py-2 bg-primary/20 text-primary rounded-xl text-xs font-bold uppercase"
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="py-2 border-b border-white/5 mb-2">
+                                <p className="text-[10px] text-white/30 uppercase font-black tracking-widest">
+                                    {university.profile?.gallery?.length || 0} Campus Photos Saved
+                                </p>
+                            </div>
+                        )}
                         <div className="grid grid-cols-3 gap-2">
-                            {editData.gallery.map((img, idx) => (
+                            {(isEditing ? editData.gallery : (university.profile?.gallery || [])).map((img, idx) => (
                                 <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
                                     <img src={img} className="w-full h-full object-cover" alt="Gallery" />
-                                    <button 
-                                        onClick={() => {
-                                            const updated = editData.gallery.filter((_, i) => i !== idx);
-                                            setEditData({ ...editData, gallery: updated });
-                                        }}
-                                        className="absolute top-1 right-1 p-1 bg-red-500 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <X size={12} />
-                                    </button>
+                                    {isEditing && (
+                                        <button 
+                                            onClick={() => {
+                                                const updated = editData.gallery.filter((_, i) => i !== idx);
+                                                setEditData({ ...editData, gallery: updated });
+                                            }}
+                                            className="absolute top-1 right-1 p-1 bg-red-500 rounded-md text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>

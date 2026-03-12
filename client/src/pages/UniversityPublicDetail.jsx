@@ -117,16 +117,17 @@ const UniversityPublicDetail = () => {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            if (location.state?.university) return;
             try {
                 setLoadingProfile(true);
                 const { data } = await axios.get(`/api/public/universities/profile/${encodeURIComponent(universityName)}`);
                 setUniversity(data);
             } catch (error) {
                 console.error("Error fetching university profile:", error);
-                // Fallback to static data if API fails or university not found
-                const fallback = fallbackUniversities.find(u => u.name === universityName);
-                if (fallback) setUniversity(fallback);
+                // If we already have partial data from state, keep using it as a base
+                if (!university) {
+                    const fallback = fallbackUniversities.find(u => u.name === universityName);
+                    if (fallback) setUniversity(fallback);
+                }
             } finally {
                 setLoadingProfile(false);
             }
