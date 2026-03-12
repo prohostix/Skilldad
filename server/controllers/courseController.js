@@ -27,6 +27,8 @@ const getCourses = asyncHandler(async (req, res) => {
         const validCourses = coursesRes.rows.map(course => ({
             ...course,
             _id: course.id,
+            isPublished: course.is_published,
+            instructorName: course.instructor_name,
             instructor: {
                 name: course.instructor_name,
                 profile: course.instructor_profile,
@@ -65,7 +67,12 @@ const getAdminCourses = asyncHandler(async (req, res) => {
             `, [userId]);
         }
 
-        res.status(200).json(coursesRes.rows.map(c => ({ ...c, _id: c.id })));
+        res.status(200).json(coursesRes.rows.map(c => ({ 
+            ...c, 
+            _id: c.id,
+            isPublished: c.is_published,
+            instructorName: c.instructor_name
+        })));
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -92,6 +99,8 @@ const getCourse = asyncHandler(async (req, res) => {
     res.status(200).json({
         ...course,
         _id: course.id,
+        isPublished: course.is_published,
+        instructorName: course.instructor_name,
         instructor: {
             name: course.instructor_name,
             profile: course.instructor_profile,
@@ -112,7 +121,12 @@ const createCourse = asyncHandler(async (req, res) => {
     `, [newId, title, description, category, price || 0, isPublished || false, finalInstructorId]);
 
     const saved = await query('SELECT * FROM courses WHERE id = $1', [newId]);
-    res.status(201).json({ ...saved.rows[0], _id: newId });
+    res.status(201).json({ 
+        ...saved.rows[0], 
+        _id: newId,
+        isPublished: saved.rows[0].is_published,
+        instructorName: saved.rows[0].instructor_name
+    });
 });
 
 // @desc    Update course
@@ -132,7 +146,12 @@ const updateCourse = asyncHandler(async (req, res) => {
     `, [title, description, category, price, isPublished, id]);
 
     const updated = await query('SELECT * FROM courses WHERE id = $1', [id]);
-    res.json({ ...updated.rows[0], _id: id });
+    res.json({ 
+        ...updated.rows[0], 
+        _id: id,
+        isPublished: updated.rows[0].is_published,
+        instructorName: updated.rows[0].instructor_name
+    });
 });
 
 const addModule = asyncHandler(async (req, res) => {

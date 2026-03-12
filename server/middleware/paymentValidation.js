@@ -18,7 +18,7 @@ const initiatePaymentValidation = [
     .isString()
     .withMessage('Invalid course ID format')
     .trim()
-    .isLength({ min: 10, max: 64 })
+    .isLength({ min: 1, max: 64 })
     .withMessage('Course ID length is invalid'),
 
   body('discountCode')

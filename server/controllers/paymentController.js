@@ -287,7 +287,7 @@ const initiatePayment = async (req, res) => {
     }
 
     // Validate amount limits (Requirements 17.4, 17.5)
-    const minAmount = 10;
+    const minAmount = 1;
     const maxAmount = 500000;
 
     if (finalAmount < minAmount) {
