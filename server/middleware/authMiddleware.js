@@ -35,6 +35,30 @@ const protect = async (req, res, next) => {
     }
 };
 
+// Optional protection - populates req.user if token is present, but doesn't block if not
+const optionalProtect = async (req, res, next) => {
+    let token;
+
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        try {
+            token = req.headers.authorization.split(' ')[1];
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+            const userRes = await query(`
+                SELECT id, id as _id, name, email, role, profile, university_id, registered_by 
+                FROM users 
+                WHERE id = $1
+            `, [decoded.id]);
+            req.user = userRes.rows[0];
+            return next();
+        } catch (error) {
+            console.error('Optional auth error (continuing as guest):', error.message);
+            return next();
+        }
+    }
+    next();
+};
+
 const admin = (req, res, next) => {
     if (req.user && req.user.role?.toLowerCase() === 'admin') {
         next();
@@ -90,4 +114,4 @@ const authorize = (...roles) => {
     };
 };
 
-module.exports = { protect, admin, university, partner, finance, authorize };
+module.exports = { protect, optionalProtect, admin, university, partner, finance, authorize };

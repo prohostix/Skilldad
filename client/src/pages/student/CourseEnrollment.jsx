@@ -171,9 +171,16 @@ const CourseEnrollment = () => {
     useEffect(() => {
         const fetchCourse = async () => {
             try {
-                const { data } = await axios.get(`/api/courses/${courseId}`);
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                let config = {};
+                if (userInfo && userInfo.token) {
+                    config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                }
+
+                const { data } = await axios.get(`/api/courses/${courseId}`, config);
                 // Merge real data with mock defaults to preserve UI layout
                 setCourse({ ...mockCourse, ...data });
+                setIsEnrolled(data.isEnrolled || false);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching course:', error);

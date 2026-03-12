@@ -236,7 +236,16 @@ const PaymentCallback = () => {
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <ModernButton
+                                onClick={() => navigate(transactionData?.course?.id ? `/dashboard/course/${transactionData.course.id}` : '/dashboard')}
+                                className="!px-8"
+                            >
+                                <PlayCircle size={18} className="mr-2" />
+                                Start Learning
+                            </ModernButton>
+
+                            <ModernButton
                                 onClick={() => navigate('/dashboard')}
+                                variant="secondary"
                                 className="!px-8"
                             >
                                 <Home size={18} className="mr-2" />

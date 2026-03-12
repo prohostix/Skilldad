@@ -96,11 +96,22 @@ const getCourse = asyncHandler(async (req, res) => {
         throw new Error('Course not found');
     }
 
+    // Check enrollment if user is logged in
+    let isEnrolled = false;
+    if (req.user) {
+        const enrollRes = await query(`
+            SELECT id FROM enrollments 
+            WHERE student_id = $1 AND course_id = $2 AND status = 'active'
+        `, [req.user.id, id]);
+        isEnrolled = enrollRes.rows.length > 0;
+    }
+
     res.status(200).json({
         ...course,
         _id: course.id,
         isPublished: course.is_published,
         instructorName: course.instructor_name,
+        isEnrolled,
         instructor: {
             name: course.instructor_name,
             profile: course.instructor_profile,
