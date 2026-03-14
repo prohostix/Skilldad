@@ -42,7 +42,8 @@ const createTicket = async (req, res) => {
 const getTickets = async (req, res) => {
     try {
         const ticketsResult = await query('SELECT * FROM support_tickets ORDER BY created_at DESC');
-        res.json(ticketsResult.rows);
+        const tickets = ticketsResult.rows.map(t => ({ ...t, _id: t.id }));
+        res.json(tickets);
     } catch (error) {
         console.error('Get tickets error:', error);
         res.status(500).json({ message: 'Server error fetching tickets' });
@@ -88,8 +89,8 @@ const updateTicketStatus = async (req, res) => {
         }
 
         // Real-time: Notify user of response
-        if (ticket.user) {
-            socketService.sendToUser(ticket.user, 'notification', {
+        if (ticket.user_id) {
+            socketService.sendToUser(ticket.user_id, 'notification', {
                 type: 'support_update',
                 title: 'Support Update',
                 message: `An administrator has responded to your ticket: ${ticket.subject}`,
@@ -98,7 +99,8 @@ const updateTicketStatus = async (req, res) => {
             });
         }
 
-        res.json(updatedTicket);
+
+        res.json({ ...updatedTicket, _id: updatedTicket.id });
     } catch (error) {
         console.error('Update ticket error:', error);
         res.status(500).json({ message: 'Server error updating ticket' });

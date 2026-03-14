@@ -100,17 +100,30 @@ const Services = () => {
                                             {service.description}
                                         </p>
 
-                                        <div className="space-y-3">
-                                            <h4 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider">Key Features</h4>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                {(service.features || []).map((feature, idx) => (
-                                                    <div key={idx} className="flex items-center space-x-2">
+                                        <div className="space-y-4">
+                                            <h4 className="text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-accent to-white uppercase tracking-wider mb-2">Key Highlights</h4>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {(service.features || []).slice(0, expandedId === service.id ? service.features.length : 4).map((feature, idx) => (
+                                                    <div key={idx} className="flex items-center space-x-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 group-hover:border-primary/20 transition-all">
                                                         <LucideIcons.CheckCircle className="text-emerald-400 flex-shrink-0" size={16} />
-                                                        <span className="text-xs md:text-sm text-gray-300">{feature}</span>
+                                                        <span className="text-xs md:text-sm text-gray-300 font-medium">{feature}</span>
                                                     </div>
                                                 ))}
+                                                {service.features && service.features.length > 4 && expandedId !== service.id && (
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setExpandedId(service.id);
+                                                        }}
+                                                        className="flex items-center justify-center gap-2 p-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all group/more w-full"
+                                                    >
+                                                        <span className="text-xs font-black text-primary uppercase tracking-widest">+{service.features.length - 4} Advanced Features</span>
+                                                        <LucideIcons.ArrowRight size={14} className="text-primary group-hover/more:translate-x-1 transition-transform" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
+
                                     </div>
                                     
                                     {/* Expanded Content */}

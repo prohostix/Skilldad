@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { createTicket, getTickets, updateTicketStatus } = require('../controllers/supportController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, optionalProtect } = require('../middleware/authMiddleware');
 
 const checkAdmin = (req, res, next) => {
     if (req.user && req.user.role?.toLowerCase() === 'admin') {
@@ -11,7 +11,8 @@ const checkAdmin = (req, res, next) => {
     }
 };
 
-router.post('/', createTicket);
+router.post('/', optionalProtect, createTicket);
+
 router.get('/', protect, checkAdmin, getTickets);
 router.put('/:id', protect, checkAdmin, updateTicketStatus);
 

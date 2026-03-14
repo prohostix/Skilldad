@@ -157,19 +157,33 @@ const CourseDetail = () => {
                                 </div>
                             </div>
 
-                            <ModernButton
-                                className="px-12 py-5 shadow-glow-gradient"
-                                onClick={() => {
-                                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                                    if (userInfo) {
-                                        navigate(`/dashboard/payment/${courseId}`);
-                                    } else {
-                                        navigate('/login', { state: { from: `/course/${courseId}` } });
-                                    }
-                                }}
-                            >
-                                Enroll for ₹{Number(course.price)?.toFixed(2) || '0.00'}
-                            </ModernButton>
+                            <div className="flex flex-wrap gap-4 mb-12">
+                                <ModernButton
+                                    className="px-12 py-5 shadow-glow-gradient"
+                                    onClick={() => {
+                                        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                                        if (userInfo) {
+                                            navigate(`/dashboard/payment/${courseId}`);
+                                        } else {
+                                            navigate('/login', { state: { from: `/course/${courseId}` } });
+                                        }
+                                    }}
+                                >
+                                    Enroll for ₹{Number(course.price)?.toFixed(2) || '0.00'}
+                                </ModernButton>
+
+                                {course.brochure_url && (
+                                    <a 
+                                        href={course.brochure_url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-3 px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all group"
+                                    >
+                                        <BookOpen size={20} className="text-primary" />
+                                        Download Brochure
+                                    </a>
+                                )}
+                            </div>
                         </motion.div>
 
                         <motion.div
@@ -204,58 +218,98 @@ const CourseDetail = () => {
             <section className="py-24 px-6 bg-white/[0.02] border-y border-white/10">
                 <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-16">
                     {/* Syllabus */}
-                    <div className="lg:col-span-2 space-y-12">
-                        <div>
-                            <h2 className="text-2xl font-black mb-8 flex items-center space-x-4 tracking-tight">
-                                <Layout className="text-primary" size={28} />
-                                <span>Course Architecture</span>
-                            </h2>
-                            <div className="space-y-4">
-                                {course.modules?.map((module, idx) => (
-                                    <GlassCard key={idx} className="!p-6 border-white/5 hover:border-primary/20 transition-all">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="font-bold text-lg flex items-center space-x-3">
-                                                <span className="text-primary text-xs font-black w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">{idx + 1}</span>
-                                                <span>{module.title}</span>
-                                            </h3>
-                                            <span className="text-xs text-text-muted font-bold uppercase tracking-widest">{module.videos?.length || 0} Sessions</span>
-                                        </div>
-                                        <div className="space-y-3">
-                                            {module.videos?.map((video, vIdx) => (
-                                                <div key={vIdx} className="flex items-center space-x-3 text-sm text-text-secondary">
-                                                    <PlayCircle size={14} className="text-white/30" />
-                                                    <span>{video.title}</span>
-                                                    <span className="ml-auto text-xs text-text-muted">{video.duration}</span>
+                    <div className="lg:col-span-2 space-y-20">
+                        {course.university_tools && course.university_tools.length > 0 && (
+                            <section className="relative overflow-hidden p-10 rounded-[48px] border border-primary/20 bg-primary/5 shadow-glow-purple/10">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[90px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                <div className="relative z-10">
+                                    <h2 className="text-3xl font-black mb-8 flex items-center space-x-4 tracking-tighter uppercase">
+                                        <Sparkles className="text-primary-accent" size={32} />
+                                        <span>Exclusive University Ecosystem</span>
+                                    </h2>
+                                    <div className="grid sm:grid-cols-2 gap-6">
+                                        {course.university_tools.map((tool, i) => (
+                                            <div key={i} className="p-6 bg-white/[0.03] backdrop-blur-md rounded-3xl border border-white/5 flex items-start gap-4 group hover:bg-white/[0.08] hover:border-primary/40 transition-all duration-500">
+                                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:rotate-6 transition-all shadow-lg">
+                                                    <Layout size={24} />
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </GlassCard>
+                                                <div>
+                                                    <h4 className="font-black text-white mb-2 tracking-tight">{tool.name || tool}</h4>
+                                                    <p className="text-xs text-text-secondary leading-relaxed font-inter font-medium opacity-80">{tool.description || 'Exclusive toolkit and specialized environment provided by the university for immersive learning.'}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+                        )}
+
+                        <div>
+                            <h2 className="text-3xl font-black mb-10 flex items-center space-x-4 tracking-tighter uppercase">
+                                <Layout className="text-primary" size={32} />
+                                <span>Mastery Framework</span>
+                            </h2>
+                            <div className="space-y-6">
+                                {course.modules?.map((module, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        whileHover={{ x: 10 }}
+                                        className="transition-all"
+                                    >
+                                        <GlassCard className="!p-8 border-white/5 hover:border-primary/30 transition-all shadow-xl hover:bg-white/[0.04]">
+                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                                <h3 className="font-black text-xl flex items-center space-x-4">
+                                                    <span className="text-primary text-sm font-black w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg">{idx + 1}</span>
+                                                    <span className="tracking-tight">{module.title}</span>
+                                                </h3>
+                                                <div className="flex items-center gap-4">
+                                                    <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-text-muted">
+                                                        {module.videos?.length || 0} Core Sessions
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="grid sm:grid-cols-2 gap-4">
+                                                {module.videos?.map((video, vIdx) => (
+                                                    <div key={vIdx} className="flex items-center space-x-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-sm text-text-secondary hover:text-white transition-colors group">
+                                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/30 group-hover:text-primary transition-colors">
+                                                            <PlayCircle size={16} />
+                                                        </div>
+                                                        <span className="font-bold flex-1">{video.title}</span>
+                                                        <span className="text-[10px] font-black opacity-30">{video.duration}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </GlassCard>
+                                    </motion.div>
                                 ))}
                             </div>
                         </div>
 
                         <div>
-                            <h2 className="text-2xl font-black mb-8 flex items-center space-x-4 tracking-tight">
-                                <BookOpen className="text-purple-400" size={28} />
-                                <span>Learning Outcomes</span>
+                            <h2 className="text-3xl font-black mb-10 flex items-center space-x-4 tracking-tighter uppercase">
+                                <BookOpen className="text-purple-400" size={32} />
+                                <span>Strategic Capabilities</span>
                             </h2>
-                            <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="grid sm:grid-cols-2 gap-6">
                                 {[
-                                    "Master industry-standard frameworks",
-                                    "Build production-grade applications",
-                                    "Optimize system architecture",
-                                    "Implement advanced security protocols",
-                                    "Visualize deep-learning analytics",
-                                    "Join the global talent matrix"
+                                    "Master industry-standard global frameworks",
+                                    "Architect production-grade secure systems",
+                                    "Lead cross-functional technical teams",
+                                    "Deploy advanced AI-driven solutions",
+                                    "Analyze deep-learning neural matrices",
+                                    "Accelerate your professional trajectory"
                                 ].map((outcome, i) => (
-                                    <div key={i} className="flex items-center space-x-3 p-4 bg-white/5 rounded-2xl border border-white/10">
-                                        <CheckCircle2 size={18} className="text-emerald-400" />
-                                        <span className="text-sm font-medium text-text-secondary">{outcome}</span>
+                                    <div key={i} className="flex items-center space-x-4 p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-emerald-500/20 transition-all group">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                            <CheckCircle2 size={20} />
+                                        </div>
+                                        <span className="text-base font-bold text-text-secondary group-hover:text-white transition-colors">{outcome}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     </div>
+
 
                     {/* Inquiry Form */}
                     <div className="space-y-8 sticky top-32 h-fit">

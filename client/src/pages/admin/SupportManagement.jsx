@@ -156,15 +156,15 @@ const SupportManagement = () => {
                             <p className="text-white/30 text-sm">No tickets found</p>
                         </div>
                     ) : (
-                        filteredTickets.map(ticket => (
+                        filteredTickets.map((ticket, idx) => (
                             <motion.div
-                                key={ticket._id}
+                                key={ticket._id || ticket.id || `ticket-${idx}`}
                                 layout
                                 onClick={() => {
                                     setSelectedTicket(ticket);
                                     setResponse(ticket.adminResponse || '');
                                 }}
-                                className={`p-4 rounded-xl border transition-all cursor-pointer group hover:border-primary/50 ${selectedTicket?._id === ticket._id
+                                className={`p-4 rounded-xl border transition-all cursor-pointer group hover:border-primary/50 ${(selectedTicket?._id || selectedTicket?.id) === (ticket._id || ticket.id)
                                     ? 'bg-primary/10 border-primary shadow-lg shadow-primary/10'
                                     : 'bg-white/5 border-white/10 hover:bg-white/10'
                                     }`}
@@ -183,11 +183,11 @@ const SupportManagement = () => {
                                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/5">
                                     <div className="flex items-center gap-2">
                                         <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] text-white/50 border border-white/10">
-                                            {ticket.name.charAt(0)}
+                                            {(ticket.name || 'U').charAt(0)}
                                         </div>
                                         <span className="text-[10px] font-medium text-white/70">{ticket.name}</span>
                                     </div>
-                                    <ChevronRight size={14} className={`text-white/20 group-hover:text-primary transition-all ${selectedTicket?._id === ticket._id ? 'rotate-90 translate-x-1' : ''}`} />
+                                    <ChevronRight size={14} className={`text-white/20 group-hover:text-primary transition-all ${(selectedTicket?._id || selectedTicket?.id) === (ticket._id || ticket.id) ? 'rotate-90 translate-x-1' : ''}`} />
                                 </div>
                             </motion.div>
                         ))
@@ -214,7 +214,7 @@ const SupportManagement = () => {
                                                     {getStatusIcon(selectedTicket.status)}
                                                     {selectedTicket.status}
                                                 </span>
-                                                <span className="text-xs text-white/50 font-medium">#{selectedTicket._id.slice(-6).toUpperCase()}</span>
+                                                <span className="text-xs text-white/50 font-medium">#{(selectedTicket._id || selectedTicket.id || '').toString().slice(-6).toUpperCase()}</span>
                                             </div>
                                             <h2 className="text-lg font-bold text-white font-inter">{selectedTicket.subject}</h2>
                                         </div>

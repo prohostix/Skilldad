@@ -128,79 +128,127 @@ const PlatformAnalytics = () => {
             </div>
 
             {/* Impact Metric Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Object.entries(analytics.revenueImpact).map(([key, val], i) => (
-                    <GlassCard key={key} className="relative overflow-hidden group border-[#7C3AED]/30 !p-4">
+                    <GlassCard key={key} className="relative overflow-hidden group border-[#7C3AED]/30 !p-6 min-h-[140px] flex flex-col justify-center">
                         <div className="relative z-10 text-left">
-                            <p className="text-xs font-semibold text-[#A78BFA] uppercase tracking-widest font-inter mb-1">
-                                {key} Impact
+                            <p className="text-[10px] font-black text-[#A78BFA] uppercase tracking-[0.2em] mb-2">
+                                {key.replace('_', ' ')} Impact
                             </p>
-                            <p className="text-xl font-semibold text-white font-inter">
+                            <p className="text-3xl font-black text-white tracking-tighter">
                                 ₹{val.toLocaleString()}
                             </p>
-                            <div className="mt-2 flex items-center space-x-2 text-[#E879F9] text-xs font-semibold">
+                            <div className="mt-4 flex items-center space-x-2 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
                                 <TrendingUp size={12} />
-                                <span>+14.2%</span>
+                                <span>+14.2% Growth</span>
                             </div>
                         </div>
-                        <div className="absolute right-[-10px] bottom-[-10px] opacity-10 group-hover:scale-110 transition-transform duration-500">
-                            <CircleDollarSign size={80} color={COLORS[i % COLORS.length]} />
+                        <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] group-hover:opacity-[0.07] group-hover:scale-110 transition-all duration-700">
+                            <CircleDollarSign size={140} color={COLORS[i % COLORS.length]} />
                         </div>
                     </GlassCard>
                 ))}
             </div>
 
             {/* Main Visualizations */}
-            <div className="grid lg:grid-cols-2 gap-6">
-                <ChartCard
-                    title="Enrollment Distribution"
-                    data={enrollmentData}
-                    type="bar"
-                    color="#5B5CF0"
-                />
+            <div className="grid lg:grid-cols-2 gap-8">
+                <div className="h-full">
+                    <ChartCard
+                        title="Enrollment Distribution"
+                        data={enrollmentData}
+                        type="bar"
+                        color="#6D28D9"
+                        className="h-full min-h-[400px]"
+                    />
+                </div>
 
-                <GlassCard title="User Demographics" icon={PieChartIcon} className="!p-4">
-                    <div className="h-[280px] w-full relative">
-                        <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
+                <GlassCard className="!p-8 flex flex-col h-full min-h-[400px]">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                            <PieChartIcon size={20} />
+                        </div>
+                        <h3 className="text-lg font-bold text-white">User Demographics</h3>
+                    </div>
+                    <div className="flex-1 w-full relative min-h-[280px]">
+                        <ResponsiveContainer width="100%" height="100%" minHeight={280}>
                             <PieChart>
                                 <Pie
                                     data={roleData}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={50}
-                                    outerRadius={80}
-                                    paddingAngle={5}
+                                    innerRadius={70}
+                                    outerRadius={100}
+                                    paddingAngle={8}
                                     dataKey="value"
-                                    stroke="#020005" // Match background for separation
+                                    stroke="transparent"
                                 >
                                     {roleData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
                                 <RechartsTooltip
-                                    contentStyle={{ backgroundColor: '#0B001A', borderColor: '#7C3AED', color: '#fff' }}
-                                    itemStyle={{ color: '#E9D5FF' }}
+                                    contentStyle={{ 
+                                        backgroundColor: 'rgba(11, 0, 26, 0.9)', 
+                                        borderColor: 'rgba(124, 58, 237, 0.3)', 
+                                        borderRadius: '16px',
+                                        backdropFilter: 'blur(10px)',
+                                        color: '#fff',
+                                        padding: '12px'
+                                    }}
+                                    itemStyle={{ color: '#E9D5FF', fontSize: '12px', fontWeight: 'bold' }}
                                 />
-                                <RechartsLegend verticalAlign="bottom" height={36} wrapperStyle={{ color: '#E9D5FF' }} />
+                                <RechartsLegend 
+                                    verticalAlign="bottom" 
+                                    height={36} 
+                                    wrapperStyle={{ 
+                                        color: '#E9D5FF', 
+                                        fontSize: '12px', 
+                                        fontWeight: '600',
+                                        paddingTop: '20px'
+                                    }} 
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
                 </GlassCard>
             </div>
 
-            {/* Comparative Analysis (Placeholder/Extended) */}
-            <GlassCard title="Strategic Growth Map" icon={BarChart3} className="!p-4">
-                <div className="h-[300px] mt-4 relative">
-                    <ResponsiveContainer width="100%" height="100%" aspect={2.5}>
-                        <BarChart data={enrollmentData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#A78BFA', fontSize: 12 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#A78BFA', fontSize: 12 }} />
-                            <RechartsTooltip
-                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                contentStyle={{ backgroundColor: '#0B001A', borderColor: '#7C3AED', color: '#fff' }}
+            {/* Strategic Growth Map */}
+            <GlassCard className="!p-8 border-white/5">
+                <div className="flex items-center gap-3 mb-8">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <BarChart3 size={20} />
+                    </div>
+                    <h3 className="text-lg font-bold text-white">Strategic Growth Map</h3>
+                </div>
+                <div className="h-[400px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={enrollmentData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                            <XAxis 
+                                dataKey="name" 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600 }} 
+                                dy={10}
                             />
-                            <Bar dataKey="value" radius={[10, 10, 0, 0]}>
+                            <YAxis 
+                                axisLine={false} 
+                                tickLine={false} 
+                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11, fontWeight: 600 }} 
+                            />
+                            <RechartsTooltip
+                                cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+                                contentStyle={{ 
+                                    backgroundColor: 'rgba(11, 0, 26, 0.9)', 
+                                    borderColor: 'rgba(124, 58, 237, 0.3)', 
+                                    borderRadius: '16px',
+                                    backdropFilter: 'blur(10px)',
+                                    color: '#fff',
+                                    padding: '12px'
+                                }}
+                            />
+                            <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={40}>
                                 {enrollmentData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}

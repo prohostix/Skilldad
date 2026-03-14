@@ -14,7 +14,8 @@ const {
     deleteVideo,
     addExercise,
     getAdminCourses,
-    uploadThumbnail
+    uploadThumbnail,
+    uploadBrochure
 } = require('../controllers/courseController');
 const {
     linkZoomRecordingToVideo,
@@ -29,6 +30,7 @@ router.route('/admin').get(protect, getAdminCourses);
 router.route('/zoom-recordings/available').get(protect, getAvailableZoomRecordings);
 router.route('/:id').get(optionalProtect, getCourse).put(protect, updateCourse).delete(protect, deleteCourse);
 router.route('/:id/upload-thumbnail').post(protect, upload.single('thumbnail'), uploadThumbnail);
+router.route('/:id/upload-brochure').post(protect, upload.single('brochure'), uploadBrochure);
 router.route('/:id/modules').post(protect, addModule);
 router.route('/:id/modules/:moduleId').put(protect, updateModule).delete(protect, deleteModule);
 router.route('/:id/modules/:moduleId/videos').post(protect, addVideo);

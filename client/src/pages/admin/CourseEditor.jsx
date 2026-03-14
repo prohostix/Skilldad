@@ -19,7 +19,9 @@ const CourseEditor = () => {
     const [newVideoData, setNewVideoData] = useState({ title: '', url: '' });
     
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
+    const [brochureUploading, setBrochureUploading] = useState(false);
     const fileInputRef = React.useRef(null);
+    const brochureInputRef = React.useRef(null);
 
     const fetchCourse = async () => {
         try {
@@ -127,6 +129,32 @@ const CourseEditor = () => {
         }
     };
 
+    const handleBrochureUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('brochure', file);
+
+        setBrochureUploading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+            await axios.post(`/api/courses/${id}/upload-brochure`, formData, config);
+            fetchCourse();
+        } catch (error) {
+            console.error('Brochure upload error:', error);
+            alert('Failed to upload brochure');
+        } finally {
+            setBrochureUploading(false);
+        }
+    };
+
     if (!course) return <Typography>Loading Editor...</Typography>;
 
     return (
@@ -192,6 +220,94 @@ const CourseEditor = () => {
                         placeholder="Manual override for university name"
                     />
                     <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Course Brochure (PDF/Document)</Typography>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                            <TextField
+                                fullWidth label="Brochure URL (Manual Override)"
+                                value={course.brochure_url || ''}
+                                onChange={(e) => setCourse({ ...course, brochure_url: e.target.value })}
+                                placeholder="https://example.com/course-brochure.pdf"
+                                size="small"
+                            />
+                            <input
+                                accept=".pdf,.doc,.docx"
+                                style={{ display: 'none' }}
+                                id="brochure-upload"
+                                type="file"
+                                onChange={handleBrochureUpload}
+                            />
+                            <label htmlFor="brochure-upload">
+                                <Button 
+                                    variant="outlined" 
+                                    component="span" 
+                                    size="medium"
+                                    disabled={brochureUploading}
+                                    sx={{ whiteSpace: 'nowrap' }}
+                                >
+                                    {brochureUploading ? 'Uploading...' : 'Upload PDF'}
+                                </Button>
+                            </label>
+                        </Box>
+                    </Box>
+
+                    <Box sx={{ mb: 4, p: 3, bgcolor: 'rgba(255, 255, 255, 0.03)', borderRadius: 2, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <Typography variant="h6" gutterBottom sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box component="span" sx={{ color: 'primary.main', fontSize: '1.2rem' }}>✦</Box>
+                            University Tools & Resources
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                            Add specialized toolsets and exclusive resources provided by the university for this course.
+                        </Typography>
+                        
+                        {(course.university_tools || []).map((tool, idx) => (
+                            <Box key={idx} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'flex-start' }}>
+                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                    <TextField
+                                        fullWidth size="small" label="Tool Name"
+                                        value={tool.name || ''}
+                                        onChange={(e) => {
+                                            const updated = [...course.university_tools];
+                                            updated[idx].name = e.target.value;
+                                            setCourse({ ...course, university_tools: updated });
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth size="small" multiline rows={2} label="Description"
+                                        value={tool.description || ''}
+                                        onChange={(e) => {
+                                            const updated = [...course.university_tools];
+                                            updated[idx].description = e.target.value;
+                                            setCourse({ ...course, university_tools: updated });
+                                        }}
+                                    />
+                                </Box>
+                                <IconButton 
+                                    color="error" 
+                                    onClick={() => {
+                                        const updated = course.university_tools.filter((_, i) => i !== idx);
+                                        setCourse({ ...course, university_tools: updated });
+                                    }}
+                                    sx={{ mt: 0.5 }}
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Box>
+                        ))}
+                        
+                        <Button 
+                            startIcon={<AddIcon />} 
+                            variant="text" 
+                            size="small"
+                            onClick={() => {
+                                const tools = course.university_tools || [];
+                                setCourse({ ...course, university_tools: [...tools, { name: '', description: '' }] });
+                            }}
+                        >
+                            Add New Tool
+                        </Button>
+                    </Box>
+
+                    <Box sx={{ mb: 4 }}>
                         <FormControlLabel
                             control={
                                 <Checkbox
@@ -203,7 +319,10 @@ const CourseEditor = () => {
                             label="Featured in Top 3 on Landing Page"
                         />
                     </Box>
-                    <Button type="submit" variant="contained">Save Changes</Button>
+
+                    <Button type="submit" variant="contained" size="large" sx={{ px: 6, py: 1.5, borderRadius: 3 }}>
+                        Save All Changes
+                    </Button>
                 </form>
 
                 <Divider sx={{ my: 4 }} />

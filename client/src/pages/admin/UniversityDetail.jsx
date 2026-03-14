@@ -18,7 +18,9 @@ import {
     Globe,
     Phone,
     MapPin,
-    Youtube
+    Youtube,
+    Award,
+    Rocket
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -41,13 +43,21 @@ const UniversityDetail = () => {
         website: '',
         phone: '',
         youtubeUrl: '',
+        portalUrl: '',
+        registrarUrl: '',
+        helpline: '',
+        uvc: '',
         gallery: [],
-        personnel: []
+        personnel: [],
+        certificates: [],
+        achievements: []
     });
     const [uploading, setUploading] = useState(false);
     const [uploadingCover, setUploadingCover] = useState(false);
+    const [uploadingGallery, setUploadingGallery] = useState(false);
     const fileInputRef = useRef(null);
     const coverInputRef = useRef(null);
+    const galleryInputRef = useRef(null);
 
     const fetchDetails = async () => {
         try {
@@ -63,8 +73,14 @@ const UniversityDetail = () => {
                 website: data.university.profile?.website || '',
                 phone: data.university.profile?.phone || '',
                 youtubeUrl: data.university.profile?.youtubeUrl || '',
+                portalUrl: data.university.profile?.portalUrl || '',
+                registrarUrl: data.university.profile?.registrarUrl || '',
+                helpline: data.university.profile?.helpline || '',
+                uvc: data.university.profile?.uvc || '',
                 gallery: data.university.profile?.gallery || [],
-                personnel: data.university.profile?.personnel || []
+                personnel: data.university.profile?.personnel || [],
+                certificates: data.university.profile?.certificates || [],
+                achievements: data.university.profile?.achievements || []
             });
         } catch (error) {
             console.error('Error fetching university details:', error);
@@ -149,6 +165,38 @@ const UniversityDetail = () => {
             showToast(error.response?.data?.message || 'Failed to upload cover image', 'error');
         } finally {
             setUploadingCover(false);
+        }
+    };
+
+    const handleGalleryUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const formData = new FormData();
+        files.forEach(file => {
+            formData.append('galleryImages', file);
+        });
+
+        setUploadingGallery(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            const { data } = await axios.post(`/api/admin/universities/${id}/upload-gallery`, formData, config);
+
+            showToast(`${files.length} images added to gallery`, 'success');
+            setEditData({ ...editData, gallery: data.gallery });
+            fetchDetails();
+        } catch (error) {
+            console.error('Error uploading gallery images:', error);
+            showToast(error.response?.data?.message || 'Failed to upload gallery images', 'error');
+        } finally {
+            setUploadingGallery(false);
         }
     };
 
@@ -345,7 +393,37 @@ const UniversityDetail = () => {
                     <h3 className="text-sm font-semibold text-white font-inter flex items-center">
                         <Camera size={16} className="mr-2 text-primary" /> Photo Gallery
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
+                        {isEditing && (
+                            <div className="space-y-3">
+                                <label 
+                                    className="w-full py-3 bg-primary/10 border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-primary/20 transition-all group"
+                                    onClick={() => galleryInputRef.current.click()}
+                                >
+                                    {uploadingGallery ? (
+                                        <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                                    ) : (
+                                        <>
+                                            <Camera size={20} className="text-primary mb-1 group-hover:scale-110 transition-transform" />
+                                            <span className="text-[10px] font-black uppercase text-primary">Upload Campus Photos</span>
+                                        </>
+                                    )}
+                                </label>
+                                <input 
+                                    type="file"
+                                    ref={galleryInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleGalleryUpload}
+                                />
+                                <div className="flex items-center gap-2">
+                                    <div className="h-px flex-1 bg-white/5"></div>
+                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">OR USE URL</span>
+                                    <div className="h-px flex-1 bg-white/5"></div>
+                                </div>
+                            </div>
+                        )}
                         {isEditing ? (
                             <div className="flex gap-2">
                                 <input 
@@ -370,7 +448,7 @@ const UniversityDetail = () => {
                         ) : (
                             <div className="py-2 border-b border-white/5 mb-2">
                                 <p className="text-[10px] text-white/30 uppercase font-black tracking-widest">
-                                    {university.profile?.gallery?.length || 0} Campus Photos Saved
+                                    {(isEditing ? editData.gallery : (university.profile?.gallery || [])).length} Campus Photos Saved
                                 </p>
                             </div>
                         )}
@@ -473,6 +551,50 @@ const UniversityDetail = () => {
                                         />
                                     </div>
                                 </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Official Portal URL</label>
+                                    <input
+                                        type="url"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                        placeholder="https://portal.university.edu"
+                                        value={editData.portalUrl}
+                                        onChange={(e) => setEditData({ ...editData, portalUrl: e.target.value })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Registrar's Office URL</label>
+                                    <input
+                                        type="url"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                        placeholder="https://registrar.university.edu"
+                                        value={editData.registrarUrl}
+                                        onChange={(e) => setEditData({ ...editData, registrarUrl: e.target.value })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Helpline Number</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                        placeholder="1800-XXX-XXXX"
+                                        value={editData.helpline}
+                                        onChange={(e) => setEditData({ ...editData, helpline: e.target.value })}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">University Verification Code (UVC)</label>
+                                    <input
+                                        type="text"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all font-mono"
+                                        placeholder="UVC-XXXX"
+                                        value={editData.uvc}
+                                        onChange={(e) => setEditData({ ...editData, uvc: e.target.value })}
+                                    />
+                                </div>
                             </div>
                         </GlassCard>
                     ) : (
@@ -520,7 +642,7 @@ const UniversityDetail = () => {
                             {university.assignedCourses?.length > 0 ? (
                                 university.assignedCourses.map(course => (
                                     <div
-                                        key={course._id}
+                                        key={course._id || course.id}
                                         onClick={() => navigate(`/admin/courses/edit/${course._id}`)}
                                         className="p-4 bg-white/5 rounded-xl border border-white/10 group hover:border-primary/50 transition-all flex items-center space-x-4 cursor-pointer hover:bg-white/10"
                                     >
@@ -564,7 +686,7 @@ const UniversityDetail = () => {
                                 <tbody className="divide-y divide-white/5">
                                     {students.map(student => (
                                         <tr
-                                            key={student._id}
+                                            key={student._id || student.id}
                                             className="hover:bg-white/5 transition-colors cursor-pointer"
                                             onClick={() => navigate(`/admin/students`)}
                                         >
@@ -610,6 +732,156 @@ const UniversityDetail = () => {
                         </div>
                     </GlassCard>
 
+                    {/* Certificates Manager */}
+                    <GlassCard className="!p-0 border-white/10 overflow-hidden">
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                            <h3 className="text-base font-semibold text-white font-inter flex items-center">
+                                <Award size={18} className="mr-2 text-amber-500" /> Accreditations & Certificates
+                            </h3>
+                            {isEditing && (
+                                <button 
+                                    onClick={() => setEditData({
+                                        ...editData,
+                                        certificates: [...editData.certificates, { title: '', issuer: '', image: '' }]
+                                    })}
+                                    className="px-3 py-1.5 bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 rounded-lg text-xs font-bold uppercase transition-colors"
+                                >
+                                    + Add Certificate
+                                </button>
+                            )}
+                        </div>
+                        <div className="p-6">
+                            {!isEditing ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {(university.profile?.certificates || []).map((cert, idx) => (
+                                        <div key={cert.id || `cert-${idx}`} className="p-4 bg-white/5 rounded-xl border border-white/10 flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                                <Award size={20} />
+                                            </div>
+                                            <div>
+                                                <p className="text-white font-bold text-sm">{cert.title || 'Certificate'}</p>
+                                                <p className="text-amber-500/60 text-[10px] font-black uppercase tracking-widest">{cert.issuer || 'SkillDad Verified'}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {university.profile?.certificates?.length === 0 && (
+                                        <div className="col-span-full py-6 text-center text-white/30 text-xs font-black uppercase tracking-widest border border-dashed border-white/10 rounded-xl">
+                                            No certificates added
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {editData.certificates.map((cert, idx) => (
+                                        <div key={cert.id || `cert-edit-${idx}`} className="flex gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative group">
+                                            <div className="flex-1 space-y-3">
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Certificate Title" 
+                                                    value={cert.title}
+                                                    onChange={(e) => {
+                                                        const updated = [...editData.certificates];
+                                                        updated[idx].title = e.target.value;
+                                                        setEditData({ ...editData, certificates: updated });
+                                                    }}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Issuer (Optional)" 
+                                                    value={cert.issuer}
+                                                    onChange={(e) => {
+                                                        const updated = [...editData.certificates];
+                                                        updated[idx].issuer = e.target.value;
+                                                        setEditData({ ...editData, certificates: updated });
+                                                    }}
+                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={() => {
+                                                    const updated = editData.certificates.filter((_, i) => i !== idx);
+                                                    setEditData({ ...editData, certificates: updated });
+                                                }}
+                                                className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </GlassCard>
+
+                    {/* Achievements Manager */}
+                    <GlassCard className="!p-0 border-white/10 overflow-hidden">
+                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                            <h3 className="text-base font-semibold text-white font-inter flex items-center">
+                                <CheckCircle size={18} className="mr-2 text-emerald-500" /> Academic Achievements
+                            </h3>
+                            {isEditing && (
+                                <button 
+                                    onClick={() => setEditData({
+                                        ...editData,
+                                        achievements: [...editData.achievements, { title: '' }]
+                                    })}
+                                    className="px-3 py-1.5 bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30 rounded-lg text-xs font-bold uppercase transition-colors"
+                                >
+                                    + Add Achievement
+                                </button>
+                            )}
+                        </div>
+                        <div className="p-6">
+                            {!isEditing ? (
+                                <div className="space-y-3">
+                                    {(university.profile?.achievements || []).map((ach, idx) => (
+                                        <div key={ach.id || `ach-${idx}`} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                                            <CheckCircle size={14} className="text-emerald-500" />
+                                            <span className="text-white text-sm font-medium">{ach.title || ach}</span>
+                                        </div>
+                                    ))}
+                                    {university.profile?.achievements?.length === 0 && (
+                                        <div className="py-6 text-center text-white/30 text-xs font-black uppercase tracking-widest border border-dashed border-white/10 rounded-xl">
+                                            No achievements added
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {editData.achievements.map((ach, idx) => (
+                                        <div key={ach.id || `ach-edit-${idx}`} className="flex gap-2">
+                                            <input 
+                                                type="text" 
+                                                placeholder="Achievement Description" 
+                                                value={ach.title || ach}
+                                                onChange={(e) => {
+                                                    const updated = [...editData.achievements];
+                                                    if (typeof updated[idx] === 'object') {
+                                                        updated[idx].title = e.target.value;
+                                                    } else {
+                                                        updated[idx] = e.target.value;
+                                                    }
+                                                    setEditData({ ...editData, achievements: updated });
+                                                }}
+                                                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                            />
+                                            <button 
+                                                onClick={() => {
+                                                    const updated = editData.achievements.filter((_, i) => i !== idx);
+                                                    setEditData({ ...editData, achievements: updated });
+                                                }}
+                                                className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </GlassCard>
+
                     {/* Personnel Manager */}
                     <GlassCard className="!p-0 border-white/10 overflow-hidden">
                         <div className="p-6 border-b border-white/10 flex items-center justify-between">
@@ -630,7 +902,7 @@ const UniversityDetail = () => {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {university.profile?.personnel?.length > 0 ? (
                                         university.profile.personnel.map((person, idx) => (
-                                            <div key={idx} className="flex items-center space-x-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                                            <div key={person.id || `person-${idx}`} className="flex items-center space-x-4 p-4 bg-white/5 rounded-xl border border-white/10">
                                                 <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 border border-white/20">
                                                     {person.image ? (
                                                         <img src={person.image} alt={person.name} className="w-full h-full object-cover" />
@@ -655,7 +927,7 @@ const UniversityDetail = () => {
                             ) : (
                                 <div className="space-y-4">
                                     {editData.personnel.map((person, idx) => (
-                                        <div key={idx} className="flex flex-col sm:flex-row gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative group">
+                                        <div key={person.id || `person-edit-${idx}`} className="flex flex-col sm:flex-row gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative group">
                                             <div className="flex-1 space-y-3">
                                                 <input 
                                                     type="text" 

@@ -45,10 +45,10 @@ const createDiscount = async (req, res) => {
 
         const id = `disc_${Date.now()}`;
         const result = await query(`
-            INSERT INTO discounts (id, code, type, value, partner_id) 
-            VALUES ($1, $2, $3, $4, $5) 
+            INSERT INTO discounts (id, code, type, value, expiry_date, partner_id) 
+            VALUES ($1, $2, $3, $4, $5, $6) 
             RETURNING *
-        `, [id, code.toUpperCase(), type || 'percentage', value, partner || null]);
+        `, [id, code.toUpperCase(), type || 'percentage', value, expiryDate || null, partner || null]);
 
         res.status(201).json(result.rows[0]);
     } catch (error) {

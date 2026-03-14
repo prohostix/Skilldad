@@ -133,7 +133,7 @@ const getCourse = asyncHandler(async (req, res) => {
 
 // @desc    Create new course
 const createCourse = asyncHandler(async (req, res) => {
-    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured } = req.body;
+    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools } = req.body;
     
     // For Admin, instructorId (University) is mandatory
     if (req.user.role === 'admin' && !instructorId) {
@@ -145,9 +145,9 @@ const createCourse = asyncHandler(async (req, res) => {
     const newId = `course_${Date.now()}`;
 
     await query(`
-        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
-    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '']);
+        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || [])]);
 
     // Auto-sync with University profile.assigned_courses
     try {
@@ -180,7 +180,7 @@ const createCourse = asyncHandler(async (req, res) => {
 // @desc    Update course
 const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName } = req.body;
+    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools } = req.body;
 
     // Get old course to check for instructor changes
     const oldCourseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
@@ -197,9 +197,11 @@ const updateCourse = asyncHandler(async (req, res) => {
             instructor_id = COALESCE($7, instructor_id),
             instructor_name = COALESCE($8, instructor_name),
             university_name = COALESCE($9, university_name),
+            brochure_url = COALESCE($10, brochure_url),
+            university_tools = COALESCE($11, university_tools),
             updated_at = NOW()
-        WHERE id = $10
-    `, [title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, id]);
+        WHERE id = $12
+    `, [title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, id]);
 
     // Handle instructor change in assigned_courses list
     if (instructorId && oldInstructorId && instructorId !== oldInstructorId) {
@@ -364,6 +366,16 @@ const uploadThumbnail = asyncHandler(async (req, res) => {
     res.json({ message: 'Thumbnail uploaded', thumbnail: imagePath });
 });
 
+const uploadBrochure = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!req.file) return res.status(400).json({ message: 'Please upload a file' });
+    
+    const filePath = `/uploads/${req.file.filename}`;
+    await query('UPDATE courses SET brochure_url = $1, updated_at = NOW() WHERE id = $2', [filePath, id]);
+    
+    res.json({ message: 'Brochure uploaded', brochure_url: filePath });
+});
+
 module.exports = {
     getCourses,
     getCourse,
@@ -432,6 +444,7 @@ module.exports = {
     updateVideo,
     deleteVideo,
     uploadThumbnail,
+    uploadBrochure,
     addExercise: asyncHandler(async (req, res) => {
         const { id, moduleId, videoId } = req.params;
         const { title, type, content } = req.body;

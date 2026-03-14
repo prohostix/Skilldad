@@ -36,7 +36,10 @@ const {
     adminUnenrollStudent,
     uploadUniversityProfileImage,
     uploadUniversityCoverImage,
-    updateUniversityProfile
+    updateUniversityProfile,
+    uploadUniversityGalleryImages,
+    uploadPartnerLogoImage,
+    uploadDirectorImage
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -88,6 +91,7 @@ router.put('/universities/:id/courses', protect, checkAdmin, assignCoursesToUniv
 router.put('/universities/:id/profile', protect, checkAdmin, updateUniversityProfile);
 router.post('/universities/:id/upload-image', protect, checkAdmin, upload.single('profileImage'), uploadUniversityProfileImage);
 router.post('/universities/:id/upload-cover', protect, checkAdmin, upload.single('coverImage'), uploadUniversityCoverImage);
+router.post('/universities/:id/upload-gallery', protect, checkAdmin, upload.array('galleryImages', 10), uploadUniversityGalleryImages);
 // Moved up
 router.put('/entities/:id', protect, checkAdmin, updateEntity);
 router.get('/partners/:id', protect, checkAdmin, getPartnerDetails);
@@ -113,8 +117,7 @@ router.get('/partner-logos', protect, checkAdmin, getPartnerLogos);
 router.post('/partner-logos', protect, checkAdmin, createPartnerLogo);
 router.post('/partner-logos/seed', protect, checkAdmin, async (req, res) => {
     try {
-        const { query: dbQuery } = require('../config/postgres');
-
+        const crypto = require('crypto');
         const samplePartners = [
             { name: 'TechCorp Solutions', logo: '/assets/logos/techcorp.png', type: 'corporate', order: 1 },
             { name: 'Global Innovations Ltd', logo: '/assets/logos/global-innovations.png', type: 'corporate', order: 2 },
@@ -130,9 +133,10 @@ router.post('/partner-logos/seed', protect, checkAdmin, async (req, res) => {
         await dbQuery('DELETE FROM partner_logos');
 
         for (const p of samplePartners) {
+            const newId = crypto.randomUUID();
             await dbQuery(
-                'INSERT INTO partner_logos (name, logo, type, display_order, is_active) VALUES ($1, $2, $3, $4, true)',
-                [p.name, p.logo, p.type, p.order]
+                'INSERT INTO partner_logos (id, name, logo, type, "order", is_active) VALUES ($1, $2, $3, $4, $5, true)',
+                [newId, p.name, p.logo, p.type, p.order]
             );
         }
 
@@ -147,12 +151,14 @@ router.post('/partner-logos/seed', protect, checkAdmin, async (req, res) => {
     }
 });
 router.put('/partner-logos/:id', protect, checkAdmin, updatePartnerLogo);
+router.post('/partner-logos/:id/upload', protect, checkAdmin, upload.single('logo'), uploadPartnerLogoImage);
 router.delete('/partner-logos/:id', protect, checkAdmin, deletePartnerLogo);
 
 // Director Management Routes
 router.get('/directors', protect, checkAdmin, getDirectors);
 router.post('/directors', protect, checkAdmin, createDirector);
 router.put('/directors/:id', protect, checkAdmin, updateDirector);
+router.post('/directors/:id/upload', protect, checkAdmin, upload.single('image'), uploadDirectorImage);
 router.delete('/directors/:id', protect, checkAdmin, deleteDirector);
 
 module.exports = router;

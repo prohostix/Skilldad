@@ -51,6 +51,7 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
                 p_def->>'title' as title,
                 p_def->>'description' as description,
                 p_def->>'deadline' as deadline,
+                p_def->>'universityId' as "universityId",
                 u.name as "instructorName",
                 u.email as "instructorEmail"
             FROM courses c
@@ -209,14 +210,16 @@ router.get('/:id', protect, async (req, res) => {
 // @access  Private (Instructor/Admin)
 router.post('/', protect, authorize('university', 'admin'), async (req, res) => {
     try {
-        const { title, description, deadline, rubric, courseId } = req.body;
+        const { title, description, deadline, rubric, courseId, universityId, points } = req.body;
         
         const newProject = {
             _id: 'proj_' + Date.now(),
             title,
             description,
             deadline,
-            rubric
+            rubric,
+            universityId,
+            points: points || 100
         };
 
         const userId = req.user.id || req.user._id;
@@ -247,7 +250,7 @@ router.post('/', protect, authorize('university', 'admin'), async (req, res) => 
 router.put('/:id', protect, authorize('university', 'admin'), async (req, res) => {
     try {
         const projectId = req.params.id;
-        const { title, description, deadline, rubric, courseId } = req.body;
+        const { title, description, deadline, rubric, courseId, universityId, points } = req.body;
         const userId = req.user.id || req.user._id;
 
         const result = await query(`
@@ -266,7 +269,7 @@ router.put('/:id', protect, authorize('university', 'admin'), async (req, res) =
             RETURNING id, title
         `, [
             projectId, 
-            JSON.stringify({ title, description, deadline, rubric }), 
+            JSON.stringify({ title, description, deadline, rubric, universityId, points }), 
             courseId, 
             userId, 
             req.user.role

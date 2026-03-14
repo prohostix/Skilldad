@@ -478,4 +478,20 @@ CREATE TABLE IF NOT EXISTS payment_sessions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-
+-- 32. Services Table
+CREATE TABLE IF NOT EXISTS services (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    icon_name TEXT DEFAULT 'BookOpen',
+    features JSONB DEFAULT '[]'::jsonb,
+    color_class TEXT DEFAULT 'text-purple-500',
+    bg_class TEXT DEFAULT 'bg-purple-500/10',
+    details TEXT,
+    sub_services JSONB DEFAULT '[]'::jsonb,
+    category TEXT DEFAULT 'main',
+    display_order INTEGER DEFAULT 0,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

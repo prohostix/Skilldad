@@ -149,6 +149,15 @@ const Support = () => {
 
     useEffect(() => {
         fetchFaqs();
+        // Load userInfo to pre-fill form
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (userInfo) {
+            setFormData(prev => ({
+                ...prev,
+                name: userInfo.name || '',
+                email: userInfo.email || ''
+            }));
+        }
     }, []);
 
     const filteredFaqs = useMemo(() => {
@@ -402,6 +411,18 @@ const Support = () => {
                                         </select>
                                         <ChevronDown size={16} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" />
                                     </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Your Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Alex Johnson"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm text-white placeholder:text-white/10 focus:border-primary focus:outline-none transition-all"
+                                        required
+                                    />
                                 </div>
 
                                 <div className="space-y-2">

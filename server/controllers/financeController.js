@@ -192,13 +192,88 @@ const updatePaymentStatus = async (req, res) => {
     }
 };
 
+// @desc    Approve/Reject Payout
+const approvePayout = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // 'approved' or 'rejected'
+
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid payout status' });
+        }
+
+        const result = await query(
+            `UPDATE payouts 
+             SET status = $1, reviewed_by = $2, reviewed_at = NOW(), payout_date = CASE WHEN $1 = 'approved' THEN NOW() ELSE payout_date END
+             WHERE id = $3 RETURNING *`,
+            [status, req.user.id, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Payout record not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error in approvePayout:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get Payout History for Admin/Finance
+const getPayoutHistory = async (req, res) => {
+    try {
+        const { status, partnerId } = req.query;
+        let sql = `
+            SELECT p.*, p.id as _id, u.name as partner_name, u.email as partner_email
+            FROM payouts p
+            JOIN users u ON p.partner_id = u.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (status) {
+            sql += ` AND p.status = $${params.length + 1}`;
+            params.push(status);
+        }
+
+        if (partnerId) {
+            sql += ` AND p.partner_id = $${params.length + 1}`;
+            params.push(partnerId);
+        }
+
+        sql += ` ORDER BY p.created_at DESC`;
+
+        const result = await query(sql, params);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error in getPayoutHistory:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get Partners for Finance filtering
+const getFinancePartners = async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT DISTINCT u.id, u.name, u.email 
+            FROM users u
+            JOIN payouts p ON u.id = p.partner_id
+            WHERE u.role = 'partner'
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getFinanceStats,
     getStudentPayments,
     updatePaymentStatus,
     getEnrollmentSummaries: async (req, res) => res.json([]),
-    approvePayout: async (req, res) => res.json({}),
-    getPayoutHistory: async (req, res) => res.json({ payouts: [] }),
+    approvePayout,
+    getPayoutHistory,
     exportReport: async (req, res) => res.json({}),
-    getFinancePartners: async (req, res) => res.json([])
+    getFinancePartners
 };

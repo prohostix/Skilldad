@@ -107,7 +107,8 @@ const B2BManagement = () => {
             const { data } = await axios.get('/api/admin/users/all', config);
             const institutional = (data.users || []).filter(u => {
                 const role = u.role?.toLowerCase();
-                return role === 'partner' || role === 'b2b' || role === 'university';
+                // Strictly allow only partner and b2b roles, exclude university
+                return (role === 'partner' || role === 'b2b');
             });
             setPartners(institutional);
         } catch (error) {
@@ -132,9 +133,9 @@ const B2BManagement = () => {
         const handleUserListUpdate = (data) => {
             console.log('[B2B] Received userListUpdate:', data);
 
-            // Handle real-time updates for partners, b2b and universities
+            // Handle real-time updates for partners and b2b entities only
             const role = data.user?.role?.toLowerCase();
-            if (role === 'partner' || role === 'university' || role === 'b2b') {
+            if (role === 'partner' || role === 'b2b') {
                 if (data.action === 'created') {
                     // Add new partner to the list
                     setPartners(prev => {

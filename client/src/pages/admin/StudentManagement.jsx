@@ -33,6 +33,8 @@ import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
 import { useSocket } from '../../context/SocketContext';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 const StudentManagement = () => {
     const { showToast } = useToast();
@@ -304,6 +306,52 @@ const StudentManagement = () => {
         }
     };
 
+    const handleExportPDF = () => {
+        try {
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(18);
+            doc.text('SkillDad Student Audit Report', 14, 22);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            
+            // Add date and count
+            const date = new Date().toLocaleDateString();
+            doc.text(`Generated on: ${date}`, 14, 30);
+            doc.text(`Total Students: ${students.length}`, 14, 36);
+            
+            // Define columns
+            const tableColumn = ["Name", "Email", "Phone", "University", "Verified", "Joined"];
+            
+            // Define rows
+            const tableRows = students.map(student => [
+                student.name || 'N/A',
+                student.email || 'N/A',
+                student.phone || 'N/A',
+                getUniversityName(student),
+                student.isVerified ? 'Yes' : 'No',
+                new Date(student.createdAt).toLocaleDateString()
+            ]);
+
+            // Auto-table plugin
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 45,
+                theme: 'grid',
+                headStyles: { fillColor: [91, 92, 240] }, // Primary color
+                styles: { fontSize: 8 }
+            });
+
+            doc.save(`students_report_${new Date().toISOString().split('T')[0]}.pdf`);
+            showToast?.('PDF report generated successfully', 'success');
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            showToast?.('Failed to generate PDF report', 'error');
+        }
+    };
+
     const [addStudentOpen, setAddStudentOpen] = useState(false);
     const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'student', universityId: '' });
 
@@ -389,8 +437,11 @@ const StudentManagement = () => {
                     <DashboardHeading title="Student Management" />
                 </div>
                 <div className="flex gap-3">
-                    <ModernButton variant="secondary" onClick={handleExportStudents}>
-                        <Download size={16} className="mr-2" /> Export
+                    <ModernButton variant="secondary" onClick={handleExportStudents} title="Export to CSV">
+                        <Download size={16} className="mr-2" /> CSV
+                    </ModernButton>
+                    <ModernButton variant="secondary" onClick={handleExportPDF} title="Export to PDF">
+                        <FileText size={16} className="mr-2" /> PDF
                     </ModernButton>
                     <ModernButton onClick={() => setAddStudentOpen(true)}>
                         <Plus size={16} className="mr-2" /> Add Student

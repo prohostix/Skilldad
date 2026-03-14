@@ -629,7 +629,8 @@ async function getPartnerLogos(req, res) {
 async function createPartnerLogo(req, res) {
     try {
         const { name, order, type, logo: logoUrl, location, students, programs } = req.body;
-        const newId = `pl_${Date.now()}`;
+        const crypto = require('crypto');
+        const newId = crypto.randomUUID();
         const result = await query(`
             INSERT INTO partner_logos (id, name, logo, type, location, students, programs, "order", is_active)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
@@ -638,6 +639,7 @@ async function createPartnerLogo(req, res) {
 
         res.status(201).json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
+        console.error('Create Partner Logo Error:', error);
         res.status(500).json({ message: error.message });
     }
 }
@@ -680,6 +682,29 @@ async function deletePartnerLogo(req, res) {
     }
 }
 
+// @desc    Upload partner logo image
+// @route   POST /api/admin/partner-logos/:id/upload
+// @access  Private (Admin)
+async function uploadPartnerLogoImage(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+        const logoUrl = `/uploads/${req.file.filename}`;
+        const result = await query(
+            'UPDATE partner_logos SET logo = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [logoUrl, req.params.id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Partner logo not found' });
+        }
+        res.json({ ...result.rows[0], _id: result.rows[0].id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 // Director Management
 
 // @desc    Get all directors
@@ -700,7 +725,8 @@ async function getDirectors(req, res) {
 async function createDirector(req, res) {
     try {
         const { name, title, image, order } = req.body;
-        const newId = `dir_${Date.now()}`;
+        const crypto = require('crypto');
+        const newId = crypto.randomUUID();
         const result = await query(`
             INSERT INTO directors (id, name, title, image, "order", is_active)
             VALUES ($1, $2, $3, $4, $5, true) RETURNING *
@@ -708,6 +734,7 @@ async function createDirector(req, res) {
 
         res.status(201).json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
+        console.error('Create Director Error:', error);
         res.status(500).json({ message: error.message });
     }
 }
@@ -749,28 +776,57 @@ async function deleteDirector(req, res) {
     }
 }
 
+// @desc    Upload director image
+// @route   POST /api/admin/directors/:id/upload
+// @access  Private (Admin)
+async function uploadDirectorImage(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+        const imageUrl = `/uploads/${req.file.filename}`;
+        const result = await query(
+            'UPDATE directors SET image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [imageUrl, req.params.id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Director not found' });
+        }
+        res.json({ ...result.rows[0], _id: result.rows[0].id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 // @desc    Invite new user & send email
 // @route   POST /api/admin/users/invite
 // @access  Private (Admin)
 async function inviteUser(req, res) {
     try {
         const { name, email, password, role, universityId } = req.body;
+        console.log('[inviteUser] Request Payload:', { name, email, role, universityId, hasPassword: !!password });
+        
         const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
         // Check if user exists in PG
         const exists = await query('SELECT id FROM users WHERE email = $1', [normalizedEmail]);
         if (exists.rows.length > 0) {
+            console.log('[inviteUser] User already exists:', normalizedEmail);
             return res.status(400).json({ message: 'User already exists' });
         }
 
+        console.log('[inviteUser] Hashing password...');
         const hashedPassword = await bcrypt.hash(password, 8);
         const newId = `user_${Date.now()}`;
 
+        console.log('[inviteUser] Inserting into DB...');
         await query(`
             INSERT INTO users (id, name, email, password, role, university_id, is_verified, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())
         `, [newId, name, normalizedEmail, hashedPassword, role, universityId || null]);
 
+        console.log('[inviteUser] DB Insert successful. Sending email...');
         // Email notification
         try {
             await sendEmail({
@@ -778,13 +834,14 @@ async function inviteUser(req, res) {
                 subject: 'Account Created - SkillDad',
                 html: emailTemplates.invitation(name, role, normalizedEmail, password)
             });
+            console.log('[inviteUser] Email sent successfully to:', normalizedEmail);
         } catch (err) {
-            console.error('Invite email failed:', err.message);
+            console.error('[inviteUser] Invite email failed:', err.message);
         }
 
         res.status(201).json({ success: true, message: 'User invited successfully' });
     } catch (error) {
-        console.error('Invite user error:', error);
+        console.error('[inviteUser] CRITICAL ERROR:', error);
         res.status(500).json({ message: error.message });
     }
 }
@@ -1242,7 +1299,7 @@ const uploadUniversityCoverImage = async (req, res) => {
 // @access  Private (Admin)
 const updateUniversityProfile = async (req, res) => {
     try {
-        const { bio, location, website, phone, personnel, youtubeUrl, gallery } = req.body;
+        const { bio, location, website, phone, personnel, youtubeUrl, gallery, certificates, achievements } = req.body;
         const userRes = await query('SELECT role, bio, profile FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
 
@@ -1257,6 +1314,8 @@ const updateUniversityProfile = async (req, res) => {
         updatedProfile.phone = phone !== undefined ? phone : updatedProfile.phone;
         updatedProfile.youtubeUrl = youtubeUrl !== undefined ? youtubeUrl : updatedProfile.youtubeUrl;
         updatedProfile.gallery = gallery !== undefined ? gallery : updatedProfile.gallery;
+        updatedProfile.certificates = certificates !== undefined ? certificates : updatedProfile.certificates;
+        updatedProfile.achievements = achievements !== undefined ? achievements : updatedProfile.achievements;
         if (personnel !== undefined) updatedProfile.personnel = personnel;
 
 
@@ -1280,6 +1339,42 @@ const updateUniversityProfile = async (req, res) => {
         res.status(500).json({ message: error.message || 'Server error updating profile' });
     }
 };
+
+// @desc    Upload university gallery images (multiple)
+// @route   POST /api/admin/universities/:id/upload-gallery
+// @access  Private (Admin)
+const uploadUniversityGalleryImages = async (req, res) => {
+    try {
+        const userRes = await query('SELECT role, profile FROM users WHERE id = $1', [req.params.id]);
+        const user = userRes.rows[0];
+
+        if (!user || user.role !== 'university') {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: 'Please upload images' });
+        }
+
+        const newImages = req.files.map(file => `/uploads/${file.filename}`);
+        const profile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
+        const currentGallery = profile.gallery || [];
+        
+        const updatedGallery = [...currentGallery, ...newImages];
+        profile.gallery = updatedGallery;
+
+        await query('UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2', [JSON.stringify(profile), req.params.id]);
+
+        res.json({
+            message: `${req.files.length} images added to gallery`,
+            gallery: updatedGallery
+        });
+    } catch (error) {
+        console.error('[uploadUniversityGalleryImages] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error uploading gallery' });
+    }
+};
+
 
 module.exports = {
     updateEntity,
@@ -1307,6 +1402,8 @@ module.exports = {
     createDirector,
     updateDirector,
     deleteDirector,
+    uploadPartnerLogoImage,
+    uploadDirectorImage,
     inviteUser,
     getUniversities,
     deleteUniversity,
@@ -1316,5 +1413,6 @@ module.exports = {
     adminUnenrollStudent,
     uploadUniversityProfileImage,
     uploadUniversityCoverImage,
-    updateUniversityProfile
+    updateUniversityProfile,
+    uploadUniversityGalleryImages
 };

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Edit2, Trash2, Save, X, Building2, User as UserIcon,
-    Image as ImageIcon, LayoutGrid, List, Heart
+    Image as ImageIcon, LayoutGrid, List, Heart, Upload, Loader2
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -19,6 +19,7 @@ const PartnerLogoManager = () => {
     const [bulkNames, setBulkNames] = useState('');
     const [editingItem, setEditingItem] = useState(null);
     const [formData, setFormData] = useState({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: 'corporate' });
+    const [uploading, setUploading] = useState(null);
     const { showToast } = useToast();
 
     useEffect(() => {
@@ -129,6 +130,35 @@ const PartnerLogoManager = () => {
         }
     };
 
+    const handleFileUpload = async (id, file) => {
+        if (!file) return;
+        try {
+            setUploading(id);
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const config = {
+                headers: { 
+                    Authorization: `Bearer ${userInfo?.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+
+            const uploadFormData = new FormData();
+            uploadFormData.append(activeTab === 'directors' ? 'image' : 'logo', file);
+
+            const url = activeTab === 'directors' 
+                ? `/api/admin/directors/${id}/upload` 
+                : `/api/admin/partner-logos/${id}/upload`;
+
+            await axios.post(url, uploadFormData, config);
+            showToast('Image uploaded successfully', 'success');
+            fetchAll();
+        } catch (error) {
+            showToast('Upload failed', 'error');
+        } finally {
+            setUploading(null);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -157,11 +187,14 @@ const PartnerLogoManager = () => {
                     </button>
                     <button
                         onClick={() => { setActiveTab('university'); setEditingItem(null); }}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'university' ? 'bg-primary text-white shadow-glow-purple' : 'text-white/50 hover:text-white'
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-0.5 ${activeTab === 'university' ? 'bg-primary text-white shadow-glow-purple' : 'text-white/50 hover:text-white'
                             }`}
                     >
-                        <LayoutGrid size={14} />
-                        Uni Partners
+                        <div className="flex items-center gap-2">
+                            <LayoutGrid size={14} />
+                            Featured Unis
+                        </div>
+                        <span className="text-[8px] opacity-70">(Landing 4-Cards)</span>
                     </button>
                     <button
                         onClick={() => { setActiveTab('directors'); setEditingItem(null); }}
@@ -309,7 +342,8 @@ const PartnerLogoManager = () => {
                                         {activeTab === 'university' && (
                                             <>
                                                 <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Location</th>
-                                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Students</th>
+                                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Scholars</th>
+                                                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Modules</th>
                                             </>
                                         )}
                                         <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/40">Visibility</th>
@@ -386,9 +420,23 @@ const PartnerLogoManager = () => {
                                                                     value={editingItem.students || ''}
                                                                     onChange={(e) => setEditingItem({ ...editingItem, students: e.target.value })}
                                                                     className="w-full px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-white text-xs"
+                                                                    placeholder="e.g. 12K+"
                                                                 />
                                                             ) : (
                                                                 <span className="text-emerald-400 font-bold text-xs">{item.students}</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            {editingItem?._id === item._id ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={editingItem.programs || ''}
+                                                                    onChange={(e) => setEditingItem({ ...editingItem, programs: e.target.value })}
+                                                                    className="w-full px-2 py-1 bg-white/10 border border-white/20 rounded-lg text-white text-xs"
+                                                                    placeholder="e.g. 45+"
+                                                                />
+                                                            ) : (
+                                                                <span className="text-emerald-400 font-bold text-xs">{item.programs}</span>
                                                             )}
                                                         </td>
                                                     </>
@@ -411,6 +459,21 @@ const PartnerLogoManager = () => {
                                                             </>
                                                         ) : (
                                                             <>
+                                                                    {uploading === item._id ? (
+                                                                        <div className="p-2 text-primary animate-spin">
+                                                                            <Loader2 size={14} />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <label className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
+                                                                            <Upload size={14} />
+                                                                            <input 
+                                                                                type="file" 
+                                                                                className="hidden" 
+                                                                                onChange={(e) => handleFileUpload(item._id, e.target.files[0])}
+                                                                                accept="image/*"
+                                                                            />
+                                                                        </label>
+                                                                    )}
                                                                 <button onClick={() => setEditingItem(item)} className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 opacity-0 group-hover:opacity-100 transition-all"><Edit2 size={14} /></button>
                                                                 <button onClick={() => handleDelete(item._id)} className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={14} /></button>
                                                             </>
@@ -441,6 +504,21 @@ const PartnerLogoManager = () => {
                             directors.map((director) => (
                                 <GlassCard key={director._id} className="relative group overflow-hidden flex flex-col items-center text-center p-6 !bg-white/[0.03] border-white/10 hover:border-primary/50 transition-all duration-300 rounded-[32px]">
                                     <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                        {uploading === director._id ? (
+                                            <div className="p-2 text-primary animate-spin">
+                                                <Loader2 size={14} />
+                                            </div>
+                                        ) : (
+                                            <label className="p-2 bg-emerald-500/20 text-emerald-400 rounded-xl cursor-pointer">
+                                                <Upload size={14} />
+                                                <input 
+                                                    type="file" 
+                                                    className="hidden" 
+                                                    onChange={(e) => handleFileUpload(director._id, e.target.files[0])}
+                                                    accept="image/*"
+                                                />
+                                            </label>
+                                        )}
                                         <button onClick={() => setEditingItem(director)} className="p-2 bg-primary/20 text-primary rounded-xl"><Edit2 size={14} /></button>
                                         <button onClick={() => handleDelete(director._id)} className="p-2 bg-red-500/20 text-red-400 rounded-xl"><Trash2 size={14} /></button>
                                     </div>
@@ -678,7 +756,7 @@ const PartnerLogoManager = () => {
                                         try {
                                             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
                                             const config = { headers: { Authorization: `Bearer ${userInfo?.token}` } };
-                                            await Promise.all(names.map((name, i) => axios.post('/api/admin/partner-logos', { name, order: logos.length + i + 1 }, config)));
+                                            await Promise.all(names.map((name, i) => axios.post('/api/admin/partner-logos', { name, type: 'corporate', order: logos.length + i + 1 }, config)));
                                             showToast(`${names.length} companies added`, 'success');
                                             setShowBulkModal(false);
                                             setBulkNames('');

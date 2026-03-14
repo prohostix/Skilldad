@@ -16,9 +16,11 @@ const ProjectManager = () => {
         title: '',
         description: '',
         course: '',
+        universityId: '',
         deadline: '',
         points: 100
     });
+    const [universities, setUniversities] = useState([]);
 
     const fetchProjects = async () => {
         try {
@@ -42,9 +44,21 @@ const ProjectManager = () => {
         }
     };
 
+    const fetchUniversities = async () => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.get('/api/admin/universities', config);
+            setUniversities(data);
+        } catch (error) {
+            console.error('Error fetching universities:', error);
+        }
+    };
+
     useEffect(() => {
         fetchProjects();
         fetchCourses();
+        fetchUniversities();
     }, []);
 
     const handleSubmit = async (e) => {
@@ -52,17 +66,22 @@ const ProjectManager = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
+        const payload = {
+            ...formData,
+            courseId: formData.course // Map 'course' field from frontend to 'courseId' for backend
+        };
+
         try {
             if (editingProject) {
-                await axios.put(`/api/projects/${editingProject._id}`, formData, config);
+                await axios.put(`/api/projects/${editingProject._id}`, payload, config);
                 showToast('Project updated successfully!', 'success');
             } else {
-                await axios.post('/api/projects', formData, config);
+                await axios.post('/api/projects', payload, config);
                 showToast('Project created successfully!', 'success');
             }
             setShowModal(false);
             setEditingProject(null);
-            setFormData({ title: '', description: '', course: '', deadline: '', points: 100 });
+            setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100 });
             fetchProjects();
         } catch (error) {
             showToast(error.response?.data?.message || error.message, 'error');
@@ -90,7 +109,7 @@ const ProjectManager = () => {
                     <div>
                         <DashboardHeading title="Project Management" />
                     </div>
-                    <ModernButton onClick={() => { setShowModal(true); setEditingProject(null); }} className="!px-4 !py-2 text-sm">
+                    <ModernButton onClick={() => { setShowModal(true); setEditingProject(null); setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100 }); }} className="!px-4 !py-2 text-sm">
                         <Plus size={16} className="mr-1.5" /> Create Project
                     </ModernButton>
                 </div>
@@ -123,7 +142,8 @@ const ProjectManager = () => {
                                                     setFormData({
                                                         title: project.title,
                                                         description: project.description,
-                                                        course: project.course?._id || '',
+                                                        course: project.courseId || project.course?._id || '',
+                                                        universityId: project.universityId || '',
                                                         deadline: project.deadline?.split('T')[0] || '',
                                                         points: project.points
                                                     });
@@ -156,7 +176,7 @@ const ProjectManager = () => {
                         if (e.target === e.currentTarget) {
                             setShowModal(false);
                             setEditingProject(null);
-                            setFormData({ title: '', description: '', course: '', deadline: '', points: 100 });
+                            setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100 });
                         }
                     }}
                 >
@@ -185,21 +205,38 @@ const ProjectManager = () => {
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-white/70 text-sm mb-2">Course</label>
-                                <select
-                                    required
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
-                                    value={formData.course}
-                                    onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                                >
-                                    <option value="">Select Course</option>
-                                    {courses.map((course) => (
-                                        <option key={course._id} value={course._id} className="bg-[#0B0F1A]">
-                                            {course.title}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-white/70 text-sm mb-2">Course</label>
+                                    <select
+                                        required
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                        value={formData.course}
+                                        onChange={(e) => setFormData({ ...formData, course: e.target.value })}
+                                    >
+                                        <option value="">Select Course</option>
+                                        {courses.map((course) => (
+                                            <option key={course._id} value={course._id} className="bg-[#0B0F1A]">
+                                                {course.title}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-white/70 text-sm mb-2">University (Optional)</label>
+                                    <select
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                        value={formData.universityId}
+                                        onChange={(e) => setFormData({ ...formData, universityId: e.target.value })}
+                                    >
+                                        <option value="">Independent / SkillDad</option>
+                                        {universities.map((uni) => (
+                                            <option key={uni._id} value={uni._id} className="bg-[#0B0F1A]">
+                                                {uni.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -228,7 +265,7 @@ const ProjectManager = () => {
                                     onClick={() => {
                                         setShowModal(false);
                                         setEditingProject(null);
-                                        setFormData({ title: '', description: '', course: '', deadline: '', points: 100 });
+                                        setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100 });
                                     }}
                                     className="flex-1 py-3 text-white/70 hover:bg-white/5 rounded-xl transition-colors"
                                 >

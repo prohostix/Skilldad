@@ -8,7 +8,8 @@ import {
     Edit3,
     Trash2,
     ExternalLink,
-    BookOpen
+    BookOpen,
+    X
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -29,7 +30,9 @@ const CourseManager = () => {
         instructorName: '',
         universityName: '',
         isPublished: false,
-        isFeatured: false
+        isFeatured: false,
+        brochure_url: '',
+        university_tools: []
     });
     const [universities, setUniversities] = useState([]);
     const navigate = useNavigate();
@@ -77,7 +80,9 @@ const CourseManager = () => {
             instructorName: '',
             universityName: '',
             isPublished: true,
-            isFeatured: false
+            isFeatured: false,
+            brochure_url: '',
+            university_tools: []
         });
         setEditingCourse(null);
         setShowCreateModal(true);
@@ -93,7 +98,9 @@ const CourseManager = () => {
             instructorName: course.instructorName || '',
             universityName: course.universityName || '',
             isPublished: course.isPublished || false,
-            isFeatured: course.isFeatured || false
+            isFeatured: course.isFeatured || false,
+            brochure_url: course.brochure_url || '',
+            university_tools: course.university_tools || []
         });
         setEditingCourse(course);
         setShowCreateModal(true);
@@ -415,6 +422,74 @@ const CourseManager = () => {
                                         onChange={(e) => setFormData({ ...formData, universityName: e.target.value })}
                                     />
                                 </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
+                                        Brochure URL (Download Link)
+                                    </label>
+                                    <input
+                                        type="url"
+                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
+                                        placeholder="https://example.com/brochure.pdf"
+                                        value={formData.brochure_url || ''}
+                                        onChange={(e) => setFormData({ ...formData, brochure_url: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-sm font-medium text-white/70 font-inter">
+                                    University Tools & Resources
+                                </label>
+                                {(formData.university_tools || []).map((tool, idx) => (
+                                    <div key={idx} className="flex gap-2 items-start bg-white/5 p-3 rounded-xl border border-white/10">
+                                        <div className="flex-1 space-y-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Tool Name"
+                                                className="w-full px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-xs text-white"
+                                                value={tool.name}
+                                                onChange={(e) => {
+                                                    const updated = [...formData.university_tools];
+                                                    updated[idx].name = e.target.value;
+                                                    setFormData({ ...formData, university_tools: updated });
+                                                }}
+                                            />
+                                            <textarea
+                                                placeholder="Description"
+                                                className="w-full px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-xs text-white"
+                                                value={tool.description}
+                                                onChange={(e) => {
+                                                    const updated = [...formData.university_tools];
+                                                    updated[idx].description = e.target.value;
+                                                    setFormData({ ...formData, university_tools: updated });
+                                                }}
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const updated = formData.university_tools.filter((_, i) => i !== idx);
+                                                setFormData({ ...formData, university_tools: updated });
+                                            }}
+                                            className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({
+                                        ...formData,
+                                        university_tools: [...(formData.university_tools || []), { name: '', description: '' }]
+                                    })}
+                                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors"
+                                >
+                                    + Add Tool or Resource
+                                </button>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
