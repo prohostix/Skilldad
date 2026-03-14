@@ -66,6 +66,8 @@ const samplePartners = [
 async function seedPartnerLogos() {
     try {
         console.log('Connecting to PostgreSQL...');
+        const { connectPostgres } = require('../config/postgres');
+        await connectPostgres();
         
         // Clear existing partner logos
         console.log('\nClearing existing partner logos...');
