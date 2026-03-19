@@ -49,7 +49,8 @@ const B2BManagement = () => {
     const [editData, setEditData] = useState({
         name: '',
         email: '',
-        role: ''
+        role: '',
+        password: ''
     });
     const [newEntity, setNewEntity] = useState({
         name: '',
@@ -198,7 +199,8 @@ const B2BManagement = () => {
                 name: (editData.name || selectedPartner.name || '').trim(),
                 email: (editData.email || selectedPartner.email || '').trim(),
                 role: (editData.role || selectedPartner.role || 'partner'),
-                discountRate: Number(newRate) || 0
+                discountRate: Number(newRate) || 0,
+                password: editData.password?.trim() || undefined
             };
 
             console.log('[B2B] Updating entity', selectedPartner._id, payload);
@@ -238,7 +240,8 @@ const B2BManagement = () => {
         setEditData({
             name: partner.name,
             email: partner.email,
-            role: partner.role
+            role: partner.role,
+            password: ''
         });
         setOpenEdit(true);
     };
@@ -782,6 +785,16 @@ const B2BManagement = () => {
                                     className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
                                     value={editData.email}
                                     onChange={e => setEditData(prev => ({ ...prev, email: e.target.value }))}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">New Password (leave blank to keep current)</label>
+                                <input
+                                    type="password"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
+                                    placeholder="Enter new password"
+                                    value={editData.password}
+                                    onChange={e => setEditData(prev => ({ ...prev, password: e.target.value }))}
                                 />
                             </div>
                             <div>

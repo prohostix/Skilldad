@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 const updateEntity = async (req, res) => {
     try {
         console.log('[updateEntity] body:', req.body, 'id:', req.params.id);
-        const { name, email, role, discountRate, bio } = req.body;
+        const { name, email, role, discountRate, bio, password } = req.body;
 
         const userRes = await query('SELECT * FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
@@ -22,6 +22,7 @@ const updateEntity = async (req, res) => {
         let updatedName = user.name;
         let updatedProfile = user.profile || {};
         let updatedBio = bio !== undefined ? bio : user.bio;
+        let updatedPassword = user.password;
 
         if (name && name.trim()) {
             updatedName = name.trim();
@@ -44,14 +45,18 @@ const updateEntity = async (req, res) => {
             updatedRole = lowerRole;
         }
 
+        if (password && password.trim()) {
+            updatedPassword = await bcrypt.hash(password, 8);
+        }
+
         const updatedDiscountRate = discountRate !== undefined && discountRate !== null ? Number(discountRate) : user.discount_rate;
 
         const result = await query(`
             UPDATE users 
-            SET name = $1, email = $2, role = $3, discount_rate = $4, profile = $5, bio = $6, updated_at = NOW()
-            WHERE id = $7
+            SET name = $1, email = $2, role = $3, discount_rate = $4, profile = $5, bio = $6, password = $7, updated_at = NOW()
+            WHERE id = $8
             RETURNING id, name, email, role, discount_rate, bio, is_verified
-        `, [updatedName, updatedEmail, updatedRole, updatedDiscountRate, JSON.stringify(updatedProfile), updatedBio, req.params.id]);
+        `, [updatedName, updatedEmail, updatedRole, updatedDiscountRate, JSON.stringify(updatedProfile), updatedBio, updatedPassword, req.params.id]);
 
         const saved = result.rows[0];
         console.log('[updateEntity] saved:', saved.id, saved.discount_rate);
