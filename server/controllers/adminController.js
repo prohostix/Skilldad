@@ -20,7 +20,7 @@ const updateEntity = async (req, res) => {
         }
 
         let updatedName = user.name;
-        let updatedProfile = user.profile || {};
+        let updatedProfile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
         let updatedBio = bio !== undefined ? bio : user.bio;
         let updatedPassword = user.password;
 
@@ -942,7 +942,7 @@ async function assignCoursesToUniversity(req, res) {
             return res.status(400).json({ message: 'Target entity is not a university or partner' });
         }
 
-        let updatedAssignedCourses = university.profile?.assigned_courses || [];
+        let updatedAssignedCourses = Array.isArray(university.profile?.assigned_courses) ? university.profile.assigned_courses : [];
         if (Array.isArray(courses)) {
             updatedAssignedCourses = courses;
         }
@@ -985,10 +985,10 @@ async function getUniversityDetail(req, res) {
         const providedIds = providedCoursesRes.rows.map(p => p.id.toString());
 
         // Manual assigned IDs
-        const assignedIds = university.profile?.assigned_courses || [];
+        const assignedIds = Array.isArray(university.profile?.assigned_courses) ? university.profile.assigned_courses : [];
 
         // UNIQUE combined IDs
-        const finalIds = Array.from(new Set([...providedIds, ...assignedIds].filter(id => id && typeof id === 'string'))).filter(id => id.trim() !== '');
+        const finalIds = Array.from(new Set([...providedIds, ...assignedIds].filter(id => id && (typeof id === 'string' || typeof id === 'number')))).map(id => id.toString()).filter(id => id.trim() !== '');
 
         // Fetch full course data for all identified IDs
         let uniqueCourses = [];
