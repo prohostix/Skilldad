@@ -378,26 +378,33 @@ const UniversityPublicDetail = () => {
                     </aside>
                 </div>
 
-                {/* Media Spotlights */}
-                <div className="grid lg:grid-cols-2 gap-10">
-                    {university.profile?.youtubeUrl && (
-                        <section className="space-y-10">
+                {/* Media & Accreditations Matrix */}
+                <div className="grid lg:grid-cols-2 gap-16 items-start">
+                    {/* Media Spotlights */}
+                    {(university.profile?.videos?.length > 0 || university.profile?.youtubeUrl) ? (
+                        <div className="space-y-10">
                             <h3 className="text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
                                 <div className="w-2 h-8 bg-red-600 rounded-full"></div>
-                                Direct Experience
+                                Experience Spotlight
                             </h3>
-                            <div className="relative aspect-video rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl">
-                                <iframe
-                                    className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
-                                    src={`https://www.youtube.com/embed/${getYoutubeId(university.profile.youtubeUrl)}?autoplay=0&controls=1`}
-                                    title="Experience Spotlight"
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                ></iframe>
+                            <div className="space-y-6">
+                                {(university.profile?.videos?.length > 0 ? university.profile.videos : [university.profile?.youtubeUrl]).filter(url => !!url).map((url, vIdx) => (
+                                    <div key={vIdx} className="relative aspect-video rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl">
+                                        <iframe
+                                            className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
+                                            src={`https://www.youtube.com/embed/${getYoutubeId(url)}?autoplay=0&controls=1`}
+                                            title={`Experience Spotlight ${vIdx + 1}`}
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        ></iframe>
+                                    </div>
+                                ))}
                             </div>
-                        </section>
-                    ) || <div className="lg:col-span-1 p-12 bg-white/[0.02] border border-white/5 rounded-[48px] flex items-center justify-center text-white/20 italic">No Media Spotlight Available</div>}
+                        </div>
+                    ) : (
+                        <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[48px] flex items-center justify-center text-white/20 italic">No Media Spotlight Available</div>
+                    )}
 
                     {/* Elite Accreditations Section */}
                     <section className="space-y-10">
@@ -405,7 +412,7 @@ const UniversityPublicDetail = () => {
                             <div className="w-2 h-8 bg-amber-500 rounded-full"></div>
                             Institutional Accreditations
                         </h3>
-                        <div className="grid grid-cols-2 gap-6 h-full content-start">
+                        <div className="grid grid-cols-2 gap-6">
                             {(university.profile?.certificates || [
                                 { title: "ISO 9001:2015 Certified", issuer: "Quality Board" },
                                 { title: "Global Innovation Shield", issuer: "World Tech Forum" }
@@ -480,19 +487,19 @@ const UniversityPublicDetail = () => {
                     )}
                 </section>
 
-                {/* Academic Leadership */}
-                {university.profile?.personnel && university.profile.personnel.length > 0 && (
+                {/* Faculty & Academic Leadership */}
+                {(university.profile?.faculty?.length > 0 || university.profile?.personnel?.length > 0) && (
                     <section className="space-y-12">
                          <div className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] mb-4">
-                            <Users size={16} /> Academic Leadership
+                            <Users size={16} /> Faculty & Academic Leadership
                         </div>
                         <h2 className="text-4xl font-black text-white font-jakarta mb-16">Distinguished <span className="text-primary italic">Directory</span></h2>
-                        <div className="grid md:grid-cols-4 gap-8">
-                            {university.profile.personnel.map((person, i) => (
-                                <div key={i} className="group text-center space-y-6">
-                                    <div className="relative mx-auto w-48 h-48">
+                        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-10">
+                            {(university.profile.faculty || university.profile.personnel).map((person, i) => (
+                                <div key={i} className="group flex flex-col items-center text-center space-y-6 p-6 rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all">
+                                    <div className="relative w-40 h-40">
                                         <div className="absolute -inset-2 bg-gradient-to-tr from-primary to-purple-600 rounded-full blur-xl opacity-0 group-hover:opacity-30 transition duration-500"></div>
-                                        <div className="relative w-48 h-48 rounded-[40px] overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all">
+                                        <div className="relative w-40 h-40 rounded-[32px] overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all">
                                             <img
                                                 src={person.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=101010&color=fff&bold=true`}
                                                 alt={person.name}
@@ -500,9 +507,14 @@ const UniversityPublicDetail = () => {
                                             />
                                         </div>
                                     </div>
-                                    <div>
+                                    <div className="space-y-2">
                                         <h4 className="text-xl font-black text-white tracking-tight">{person.name}</h4>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">{person.role}</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-primary">{person.role}</p>
+                                        {person.description && (
+                                            <p className="text-white/40 text-xs italic line-clamp-3 pt-2 border-t border-white/5">
+                                                {person.description}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             ))}

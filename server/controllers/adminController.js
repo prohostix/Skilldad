@@ -1299,7 +1299,7 @@ const uploadUniversityCoverImage = async (req, res) => {
 // @access  Private (Admin)
 const updateUniversityProfile = async (req, res) => {
     try {
-        const { bio, location, website, phone, personnel, youtubeUrl, gallery, certificates, achievements } = req.body;
+        const { bio, location, website, phone, personnel, faculty, youtubeUrl, videos, gallery, certificates, achievements } = req.body;
         const userRes = await query('SELECT role, bio, profile FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
 
@@ -1313,10 +1313,12 @@ const updateUniversityProfile = async (req, res) => {
         updatedProfile.website = website !== undefined ? website : updatedProfile.website;
         updatedProfile.phone = phone !== undefined ? phone : updatedProfile.phone;
         updatedProfile.youtubeUrl = youtubeUrl !== undefined ? youtubeUrl : updatedProfile.youtubeUrl;
+        updatedProfile.videos = videos !== undefined ? videos : updatedProfile.videos;
         updatedProfile.gallery = gallery !== undefined ? gallery : updatedProfile.gallery;
         updatedProfile.certificates = certificates !== undefined ? certificates : updatedProfile.certificates;
         updatedProfile.achievements = achievements !== undefined ? achievements : updatedProfile.achievements;
         if (personnel !== undefined) updatedProfile.personnel = personnel;
+        if (faculty !== undefined) updatedProfile.faculty = faculty;
 
 
         const result = await query(`

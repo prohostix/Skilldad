@@ -49,8 +49,10 @@ const UniversityDetail = () => {
         uvc: '',
         gallery: [],
         personnel: [],
+        faculty: [],
         certificates: [],
-        achievements: []
+        achievements: [],
+        videos: []
     });
     const [uploading, setUploading] = useState(false);
     const [uploadingCover, setUploadingCover] = useState(false);
@@ -79,8 +81,10 @@ const UniversityDetail = () => {
                 uvc: data.university.profile?.uvc || '',
                 gallery: data.university.profile?.gallery || [],
                 personnel: data.university.profile?.personnel || [],
+                faculty: data.university.profile?.faculty || data.university.profile?.personnel || [],
                 certificates: data.university.profile?.certificates || [],
-                achievements: data.university.profile?.achievements || []
+                achievements: data.university.profile?.achievements || [],
+                videos: data.university.profile?.videos || (data.university.profile?.youtubeUrl ? [data.university.profile.youtubeUrl] : [])
             });
         } catch (error) {
             console.error('Error fetching university details:', error);
@@ -216,6 +220,42 @@ const UniversityDetail = () => {
     const handleRemovePersonnel = (index) => {
         const updated = editData.personnel.filter((_, i) => i !== index);
         setEditData({ ...editData, personnel: updated });
+    };
+
+    const handleAddFaculty = () => {
+        setEditData({
+            ...editData,
+            faculty: [...editData.faculty, { name: '', role: '', image: '', description: '' }]
+        });
+    };
+
+    const handleUpdateFaculty = (index, field, value) => {
+        const updated = [...editData.faculty];
+        updated[index][field] = value;
+        setEditData({ ...editData, faculty: updated });
+    };
+
+    const handleRemoveFaculty = (index) => {
+        const updated = editData.faculty.filter((_, i) => i !== index);
+        setEditData({ ...editData, faculty: updated });
+    };
+
+    const handleAddVideo = () => {
+        setEditData({
+            ...editData,
+            videos: [...editData.videos, '']
+        });
+    };
+
+    const handleUpdateVideo = (index, value) => {
+        const updated = [...editData.videos];
+        updated[index] = value;
+        setEditData({ ...editData, videos: updated });
+    };
+
+    const handleRemoveVideo = (index) => {
+        const updated = editData.videos.filter((_, i) => i !== index);
+        setEditData({ ...editData, videos: updated });
     };
 
     if (loading) {
@@ -538,17 +578,42 @@ const UniversityDetail = () => {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">YouTube Showcase URL</label>
-                                    <div className="relative">
-                                        <Youtube className="absolute left-4 top-3 text-white/30" size={16} />
-                                        <input
-                                            type="url"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
-                                            placeholder="https://youtube.com/watch?v=..."
-                                            value={editData.youtubeUrl}
-                                            onChange={(e) => setEditData({ ...editData, youtubeUrl: e.target.value })}
-                                        />
+                                <div className="md:col-span-2 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider">YouTube Video Showcases</label>
+                                        <button 
+                                            onClick={handleAddVideo}
+                                            className="px-3 py-1 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg text-xs font-bold uppercase transition-colors"
+                                        >
+                                            + Add Video
+                                        </button>
+                                    </div>
+                                    <div className="space-y-3">
+                                        {editData.videos.map((vid, vIdx) => (
+                                            <div key={vIdx} className="flex gap-2">
+                                                <div className="relative flex-1">
+                                                    <Youtube className="absolute left-4 top-3 text-white/30" size={16} />
+                                                    <input
+                                                        type="url"
+                                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                                        placeholder="https://youtube.com/watch?v=..."
+                                                        value={vid}
+                                                        onChange={(e) => handleUpdateVideo(vIdx, e.target.value)}
+                                                    />
+                                                </div>
+                                                <button 
+                                                    onClick={() => handleRemoveVideo(vIdx)}
+                                                    className="p-2.5 text-rose-500 hover:bg-rose-500/10 rounded-xl border border-white/10"
+                                                >
+                                                    <X size={18} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        {editData.videos.length === 0 && (
+                                            <div className="py-4 text-center border border-dashed border-white/10 rounded-xl text-white/30 text-[10px] font-black uppercase tracking-widest">
+                                                No videos added
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -882,86 +947,103 @@ const UniversityDetail = () => {
                         </div>
                     </GlassCard>
 
-                    {/* Personnel Manager */}
+                    {/* Faculty Manager */}
                     <GlassCard className="!p-0 border-white/10 overflow-hidden">
                         <div className="p-6 border-b border-white/10 flex items-center justify-between">
                             <h3 className="text-base font-semibold text-white font-inter flex items-center">
-                                <Users size={18} className="mr-2 text-purple-400" /> Key Personnel & Directors
+                                <Users size={18} className="mr-2 text-purple-400" /> Faculty & Academic Leadership
                             </h3>
                             {isEditing && (
                                 <button 
-                                    onClick={handleAddPersonnel}
+                                    onClick={handleAddFaculty}
                                     className="px-3 py-1.5 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg text-xs font-bold uppercase transition-colors"
                                 >
-                                    + Add Person
+                                    + Add Faculty
                                 </button>
                             )}
                         </div>
                         <div className="p-6">
                             {!isEditing ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {university.profile?.personnel?.length > 0 ? (
-                                        university.profile.personnel.map((person, idx) => (
-                                            <div key={person.id || `person-${idx}`} className="flex items-center space-x-4 p-4 bg-white/5 rounded-xl border border-white/10">
-                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 border border-white/20">
-                                                    {person.image ? (
-                                                        <img src={person.image} alt={person.name} className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-white/50 text-sm font-bold uppercase">
-                                                            {person.name?.charAt(0) || '?'}
-                                                        </div>
-                                                    )}
+                                    {editData.faculty?.length > 0 ? (
+                                        editData.faculty.map((person, idx) => (
+                                            <div key={person.id || `faculty-${idx}`} className="flex flex-col p-4 bg-white/5 rounded-xl border border-white/10">
+                                                <div className="flex items-center space-x-4 mb-3">
+                                                    <div className="w-12 h-12 rounded-full overflow-hidden bg-white/10 border border-white/20">
+                                                        {person.image ? (
+                                                            <img src={person.image} alt={person.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-white/50 text-sm font-bold uppercase">
+                                                                {person.name?.charAt(0) || '?'}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-white font-bold text-sm">{person.name}</p>
+                                                        <p className="text-purple-400 text-[10px] font-black uppercase tracking-widest mt-0.5">{person.role}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-white font-bold text-sm">{person.name}</p>
-                                                    <p className="text-purple-400 text-[10px] font-black uppercase tracking-widest mt-0.5">{person.role}</p>
-                                                </div>
+                                                {person.description && (
+                                                    <p className="text-white/40 text-xs italic line-clamp-2 mt-2 border-t border-white/5 pt-2">
+                                                        "{person.description}"
+                                                    </p>
+                                                )}
                                             </div>
                                         ))
                                     ) : (
                                         <div className="col-span-full py-6 text-center text-white/30 text-xs font-black uppercase tracking-widest border border-dashed border-white/10 rounded-xl">
-                                            No personnel added
+                                            No faculty members added
                                         </div>
                                     )}
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {editData.personnel.map((person, idx) => (
-                                        <div key={person.id || `person-edit-${idx}`} className="flex flex-col sm:flex-row gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative group">
-                                            <div className="flex-1 space-y-3">
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Full Name" 
-                                                    value={person.name}
-                                                    onChange={(e) => handleUpdatePersonnel(idx, 'name', e.target.value)}
-                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                                                />
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Role / Title" 
-                                                    value={person.role}
-                                                    onChange={(e) => handleUpdatePersonnel(idx, 'role', e.target.value)}
-                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                                                />
-                                                <input 
-                                                    type="url" 
-                                                    placeholder="Image URL (Optional)" 
-                                                    value={person.image}
-                                                    onChange={(e) => handleUpdatePersonnel(idx, 'image', e.target.value)}
-                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                                                />
+                                    {editData.faculty.map((person, idx) => (
+                                        <div key={person.id || `faculty-edit-${idx}`} className="flex flex-col gap-3 p-4 bg-white/5 border border-white/10 rounded-xl relative group">
+                                            <div className="flex flex-col sm:flex-row gap-3">
+                                                <div className="flex-1 space-y-3">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Full Name" 
+                                                        value={person.name}
+                                                        onChange={(e) => handleUpdateFaculty(idx, 'name', e.target.value)}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                    />
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Role / Title" 
+                                                        value={person.role}
+                                                        onChange={(e) => handleUpdateFaculty(idx, 'role', e.target.value)}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 space-y-3">
+                                                    <input 
+                                                        type="url" 
+                                                        placeholder="Image URL" 
+                                                        value={person.image}
+                                                        onChange={(e) => handleUpdateFaculty(idx, 'image', e.target.value)}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                    />
+                                                    <button 
+                                                        onClick={() => handleRemoveFaculty(idx)}
+                                                        className="w-full sm:w-auto self-start p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors flex items-center justify-center gap-2 border border-rose-500/20"
+                                                        title="Remove"
+                                                    >
+                                                        <X size={16} /> <span className="sm:hidden text-xs uppercase font-bold">Remove Member</span>
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <button 
-                                                onClick={() => handleRemovePersonnel(idx)}
-                                                className="self-start sm:self-center p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
-                                                title="Remove"
-                                            >
-                                                <X size={16} />
-                                            </button>
+                                            <textarea 
+                                                placeholder="Brief description / background..." 
+                                                value={person.description}
+                                                onChange={(e) => handleUpdateFaculty(idx, 'description', e.target.value)}
+                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary resize-none h-20"
+                                            ></textarea>
                                         </div>
                                     ))}
-                                    {editData.personnel.length === 0 && (
-                                        <div className="text-center py-6 text-white/30 text-xs font-black uppercase">Click 'Add Person' to build directory</div>
+                                    {editData.faculty.length === 0 && (
+                                        <div className="text-center py-6 text-white/30 text-xs font-black uppercase">Click 'Add Faculty' to build directory</div>
                                     )}
                                 </div>
                             )}
