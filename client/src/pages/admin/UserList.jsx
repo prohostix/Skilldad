@@ -462,7 +462,8 @@ const UserList = () => {
                     </motion.div>
                 )}
 
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left font-inter">
                         <thead className="bg-white/5 text-white/70 text-xs uppercase tracking-wider font-semibold">
                             <tr>
@@ -538,6 +539,73 @@ const UserList = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+                    {filteredUsers.map((user) => (
+                        <div key={user._id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col space-y-4 shadow-sm relative group overflow-hidden">
+                            {/* Accent Glow */}
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-primary/20 transition-all"></div>
+                            
+                            <div className="flex justify-between items-start">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/20 overflow-hidden shadow-sm flex-shrink-0">
+                                        <img src={`https://ui-avatars.com/api/?name=${user.name}&background=random`} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="font-bold text-white text-sm">{user.name}</p>
+                                        <p className="text-xs text-white/50 flex items-center font-medium mt-0.5">
+                                            <Mail size={12} className="mr-1" /> {user.email}
+                                        </p>
+                                        {user.profile?.universityName && (
+                                            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] leading-none mt-1.5 line-clamp-1">
+                                                {user.profile.universityName}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                                <span className="px-3 py-1.5 bg-primary/20 text-primary border border-primary/30 rounded-lg text-[10px] font-bold uppercase tracking-widest leading-none">
+                                    {user.role}
+                                </span>
+                                <div className={`flex items-center space-x-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-bold uppercase transition-all w-fit ${user.isVerified
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                    }`}>
+                                    {user.isVerified ? <CheckCircle size={10} /> : <XCircle size={10} />}
+                                    <span>{user.isVerified ? 'Verified' : 'Pending'}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 border-t border-white/5 pt-3">
+                                <button
+                                    onClick={() => openPermissionModal(user)}
+                                    className="flex-1 min-w-[120px] px-3 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-[11px] font-bold hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-1.5"
+                                >
+                                    <ShieldCheck size={14} />
+                                    Permissions
+                                </button>
+                                {user.isVerified && user.role !== 'student' && (
+                                    <button
+                                        onClick={() => handleRevokePermission(user._id)}
+                                        className="flex-1 min-w-[80px] px-3 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[11px] font-bold hover:bg-red-500/20 transition-all"
+                                    >
+                                        Revoke
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => handleDeleteUser(user)}
+                                    className="px-3 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/30 transition-all flex items-center justify-center shadow-lg"
+                                    title="Delete User"
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </GlassCard>
 

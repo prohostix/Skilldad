@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 const updateEntity = async (req, res) => {
     try {
         console.log('[updateEntity] body:', req.body, 'id:', req.params.id);
-        const { name, email, role, discountRate, bio, password } = req.body;
+        const { name, email, role, discountRate, bio, password, profileImage } = req.body;
 
         const userRes = await query('SELECT * FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
@@ -23,6 +23,7 @@ const updateEntity = async (req, res) => {
         let updatedProfile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
         let updatedBio = bio !== undefined ? bio : user.bio;
         let updatedPassword = user.password;
+        let updatedProfileImage = profileImage !== undefined ? profileImage : user.profile_image;
 
         if (name && name.trim()) {
             updatedName = name.trim();
@@ -37,7 +38,7 @@ const updateEntity = async (req, res) => {
         const updatedEmail = email ? email.trim() : user.email;
         let updatedRole = user.role;
         if (role) {
-            const validRoles = ['student', 'university', 'partner', 'admin', 'finance'];
+            const validRoles = ['student', 'university', 'partner', 'admin', 'finance', 'instructor'];
             const lowerRole = role.toLowerCase();
             if (!validRoles.includes(lowerRole)) {
                 return res.status(400).json({ message: `Invalid role: ${role}` });
@@ -53,10 +54,10 @@ const updateEntity = async (req, res) => {
 
         const result = await query(`
             UPDATE users 
-            SET name = $1, email = $2, role = $3, discount_rate = $4, profile = $5, bio = $6, password = $7, updated_at = NOW()
-            WHERE id = $8
-            RETURNING id, name, email, role, discount_rate, bio, is_verified
-        `, [updatedName, updatedEmail, updatedRole, updatedDiscountRate, JSON.stringify(updatedProfile), updatedBio, updatedPassword, req.params.id]);
+            SET name = $1, email = $2, role = $3, discount_rate = $4, profile = $5, bio = $6, password = $7, profile_image = $8, updated_at = NOW()
+            WHERE id = $9
+            RETURNING id, name, email, role, discount_rate, bio, is_verified, profile_image
+        `, [updatedName, updatedEmail, updatedRole, updatedDiscountRate, JSON.stringify(updatedProfile), updatedBio, updatedPassword, updatedProfileImage, req.params.id]);
 
         const saved = result.rows[0];
         console.log('[updateEntity] saved:', saved.id, saved.discount_rate);
@@ -1304,8 +1305,8 @@ const uploadUniversityCoverImage = async (req, res) => {
 // @access  Private (Admin)
 const updateUniversityProfile = async (req, res) => {
     try {
-        const { bio, location, website, phone, personnel, faculty, youtubeUrl, videos, gallery, certificates, achievements } = req.body;
-        const userRes = await query('SELECT role, bio, profile FROM users WHERE id = $1', [req.params.id]);
+        const { bio, location, website, phone, personnel, faculty, youtubeUrl, videos, gallery, certificates, achievements, profileImage, coverImage } = req.body;
+        const userRes = await query('SELECT role, bio, profile, profile_image FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
 
         if (!user || user.role !== 'university') {
@@ -1314,6 +1315,9 @@ const updateUniversityProfile = async (req, res) => {
 
         const updatedProfile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
         const updatedBio = bio !== undefined ? bio : user.bio;
+        const updatedProfileImage = profileImage !== undefined ? profileImage : user.profile_image;
+
+        if (coverImage !== undefined) updatedProfile.coverImage = coverImage;
         updatedProfile.location = location !== undefined ? location : updatedProfile.location;
         updatedProfile.website = website !== undefined ? website : updatedProfile.website;
         updatedProfile.phone = phone !== undefined ? phone : updatedProfile.phone;
@@ -1327,9 +1331,9 @@ const updateUniversityProfile = async (req, res) => {
 
 
         const result = await query(`
-            UPDATE users SET bio = $1, profile = $2, updated_at = NOW() WHERE id = $3
-            RETURNING id, bio, profile
-        `, [updatedBio, JSON.stringify(updatedProfile), req.params.id]);
+            UPDATE users SET bio = $1, profile = $2, profile_image = $3, updated_at = NOW() WHERE id = $4
+            RETURNING id, bio, profile, profile_image
+        `, [updatedBio, JSON.stringify(updatedProfile), updatedProfileImage, req.params.id]);
 
         const updatedUser = result.rows[0];
 

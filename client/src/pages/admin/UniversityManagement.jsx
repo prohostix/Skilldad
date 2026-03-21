@@ -157,7 +157,8 @@ const UniversityManagement = () => {
                 role: (editData.role || selectedPartner.role || 'partner'),
                 discountRate: Number(newRate) || 0,
                 bio: (editData.bio !== undefined ? editData.bio : (selectedPartner.bio || '')).trim(),
-                password: editData.password?.trim() || undefined
+                password: editData.password?.trim() || undefined,
+                profileImage: editData.profileImage?.trim() || undefined
             };
 
             console.log('[B2B] Updating entity', selectedPartner._id, payload);
@@ -195,11 +196,9 @@ const UniversityManagement = () => {
         setSelectedPartner(partner);
         setNewRate(partner.discountRate || 0);
         setEditData({
-            name: partner.name,
-            email: partner.email,
-            role: partner.role,
             bio: partner.bio || '',
-            password: ''
+            password: '',
+            profileImage: partner.profileImage || partner.profile_image || ''
         });
         setOpenEdit(true);
     };
@@ -519,7 +518,8 @@ const UniversityManagement = () => {
                     </div>
                 </div>
                 <div className="overflow-x-auto pb-2">
-                    <table className="w-full text-left font-inter border-collapse min-w-[800px]">
+                    {/* Desktop Table View */}
+                    <table className="w-full text-left font-inter border-collapse min-w-[800px] hidden md:table">
                         <thead>
                             <tr className="bg-white/5 border-b border-white/10">
                                 <th className="px-6 py-4 text-xs font-bold text-white/50 uppercase tracking-widest">Entity Name</th>
@@ -644,6 +644,72 @@ const UniversityManagement = () => {
                             ))}
                         </tbody>
                     </table>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden divide-y divide-white/5">
+                        {filteredPartners.map((partner) => (
+                            <div key={partner._id} className="p-4 space-y-4 hover:bg-white/5 transition-colors" onClick={() => navigate(`/admin/university/${partner._id}`)}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white font-poppins shrink-0">
+                                            {partner.name?.charAt(0)}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-bold text-white truncate">{partner.name}</p>
+                                            <p className="text-[10px] text-white/40 truncate">{partner.email}</p>
+                                        </div>
+                                    </div>
+                                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${partner.role === 'university' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-purple-500/20 text-purple-400'
+                                        }`}>
+                                        {partner.role}
+                                    </span>
+                                </div>
+                                
+                                <div className="flex items-center justify-between text-xs border-t border-white/5 pt-3">
+                                    <div className="flex items-center space-x-1.5 font-bold uppercase tracking-wide">
+                                        <span className={`w-2 h-2 rounded-full ${partner.isVerified ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></span>
+                                        <span className={partner.isVerified ? 'text-emerald-400' : 'text-amber-400'}>
+                                            {partner.isVerified ? 'Active' : 'Pending'}
+                                        </span>
+                                    </div>
+                                    <div className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+                                        Discount: <span className="text-white">{partner.discountRate || 0}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end space-x-1 pt-1">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleManageCourses(partner);
+                                        }}
+                                        className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-white/60"
+                                    >
+                                        <BookOpen size={16} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleEditPartner(partner);
+                                        }}
+                                        className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-white/60"
+                                    >
+                                        <Edit3 size={16} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPartner(partner);
+                                            setOpenDelete(true);
+                                        }}
+                                        className="p-2.5 bg-white/5 hover:bg-rose-500/10 rounded-xl transition-colors text-rose-500/60"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </GlassCard>
 
@@ -654,7 +720,7 @@ const UniversityManagement = () => {
                     onClick={(e) => { if (e.target === e.currentTarget) setOpenDiscount(false); }}
                 >
                     <div
-                        className="w-full max-w-md bg-black/95 backdrop-blur-xl rounded-[24px] p-6 border-2 border-primary/20 shadow-2xl my-8"
+                        className="w-full max-w-md bg-black/95 backdrop-blur-xl rounded-[24px] p-5 sm:p-6 border-2 border-primary/20 shadow-2xl my-8 max-h-[85vh] overflow-y-auto"
                         onClick={e => e.stopPropagation()}
                     >
                         <h3 className="text-base font-semibold text-white font-inter mb-2">Partner Incentives</h3>
@@ -699,7 +765,7 @@ const UniversityManagement = () => {
                     onClick={(e) => { if (e.target === e.currentTarget) setOpenEdit(false); }}
                 >
                     <div
-                        className="w-full max-w-sm bg-black/95 rounded-[24px] p-6 border-2 border-primary/20 my-8 shadow-2xl"
+                        className="w-full max-w-sm bg-black/95 rounded-[24px] p-5 sm:p-6 border-2 border-primary/20 my-8 shadow-2xl max-h-[85vh] overflow-y-auto"
                         onClick={e => e.stopPropagation()}
                     >
                         <h3 className="text-base font-semibold text-white font-inter mb-4">Edit Entity Details</h3>
@@ -735,6 +801,17 @@ const UniversityManagement = () => {
                                 onChange={handleLogoUpload}
                             />
                             <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Update Institution Logo</p>
+                        </div>
+                        
+                        <div className="w-full px-2 mb-6">
+                            <label className="block text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-2 text-center">OR PASTE LOGO URL</label>
+                            <input 
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all"
+                                placeholder="https://example.com/logo.png"
+                                value={editData.profileImage}
+                                onChange={e => setEditData(prev => ({ ...prev, profileImage: e.target.value }))}
+                            />
                         </div>
 
                         <div className="space-y-3 mb-6">
@@ -831,7 +908,7 @@ const UniversityManagement = () => {
                         }
                     }}
                 >
-                    <GlassCard className="w-full max-w-sm bg-black/95 backdrop-blur-xl shadow-2xl relative z-[100000] border-white/20 my-8" onClick={(e) => e.stopPropagation()}>
+                    <GlassCard className="w-full max-w-sm bg-black/95 backdrop-blur-xl shadow-2xl relative z-[100000] border-white/20 my-8 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <h3 className="text-base font-semibold text-white font-inter mb-4">Onboard New Entity</h3>
 
                         <div className="space-y-3 mb-6">
@@ -919,7 +996,7 @@ const UniversityManagement = () => {
             {/* Compliance Modal */}
             {openAudits && (
                 <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenAudits(false)}>
-                    <GlassCard className="w-full max-w-2xl bg-black/95 border-white/20 my-8" onClick={e => e.stopPropagation()}>
+                    <GlassCard className="w-full max-w-2xl bg-black/95 border-white/20 my-8 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-semibold text-white font-inter">Compliance Audit Report</h3>
                             <button onClick={() => setOpenAudits(false)} className="text-white/50 hover:text-white">✕</button>
@@ -952,7 +1029,7 @@ const UniversityManagement = () => {
             {
                 openAssign && (
                     <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenAssign(false)}>
-                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8" onClick={e => e.stopPropagation()}>
+                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-semibold text-white font-inter mb-2">Rapid Assignment</h3>
                             <p className="text-sm text-white/60 mb-6 font-inter underline decoration-primary decoration-2 underline-offset-4">Assigning: {selectedCourse}</p>
 
@@ -983,7 +1060,7 @@ const UniversityManagement = () => {
             {
                 openCoursesModal && (
                     <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenCoursesModal(false)}>
-                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-semibold text-white font-inter mb-2">Manage Assigned Courses</h3>
                             <p className="text-sm text-white/60 mb-6 font-inter underline decoration-primary decoration-2 underline-offset-4">
                                 Target: {selectedPartner?.name}
@@ -1035,7 +1112,7 @@ const UniversityManagement = () => {
             {
                 openSendDoc && (
                     <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenSendDoc(false)}>
-                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-semibold text-white font-inter mb-2">Send Official Documents</h3>
                             <p className="text-sm text-white/60 mb-6 font-inter">Target: <span className="text-indigo-400 font-bold">{selectedPartner?.name}</span></p>
 

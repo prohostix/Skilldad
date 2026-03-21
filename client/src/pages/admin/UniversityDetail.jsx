@@ -47,6 +47,8 @@ const UniversityDetail = () => {
         registrarUrl: '',
         helpline: '',
         uvc: '',
+        profileImage: '',
+        coverImage: '',
         gallery: [],
         personnel: [],
         faculty: [],
@@ -79,6 +81,8 @@ const UniversityDetail = () => {
                 registrarUrl: data.university.profile?.registrarUrl || '',
                 helpline: data.university.profile?.helpline || '',
                 uvc: data.university.profile?.uvc || '',
+                profileImage: data.university.profile_image || '',
+                coverImage: data.university.profile?.coverImage || '',
                 gallery: data.university.profile?.gallery || [],
                 personnel: data.university.profile?.personnel || [],
                 faculty: data.university.profile?.faculty || data.university.profile?.personnel || [],
@@ -347,6 +351,19 @@ const UniversityDetail = () => {
                             onChange={handleImageUpload}
                         />
 
+                        {isEditing && (
+                            <div className="w-full px-4 mt-4">
+                                <label className="block text-white/40 text-[8px] font-black uppercase tracking-[0.2em] mb-2 text-center">OR PASTE LOGO URL</label>
+                                <input 
+                                    type="text"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all"
+                                    placeholder="https://example.com/logo.png"
+                                    value={editData.profileImage}
+                                    onChange={(e) => setEditData({ ...editData, profileImage: e.target.value })}
+                                />
+                            </div>
+                        )}
+
                         <h3 className="text-xl font-bold text-white text-center mt-3">{university.name}</h3>
                         <p className="text-primary text-xs font-black uppercase tracking-widest mt-1">University Logo</p>
                     </div>
@@ -426,6 +443,19 @@ const UniversityDetail = () => {
                         accept="image/*"
                         onChange={handleCoverUpload}
                     />
+                    
+                    {isEditing && (
+                        <div className="w-full pt-2">
+                            <label className="block text-white/40 text-[8px] font-black uppercase tracking-[0.2em] mb-2">OR PASTE COVER URL</label>
+                            <input 
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all"
+                                placeholder="https://example.com/cover.jpg"
+                                value={editData.coverImage}
+                                onChange={(e) => setEditData({ ...editData, coverImage: e.target.value })}
+                            />
+                        </div>
+                    )}
                 </GlassCard>
 
                 {/* Gallery Card (Admin Only) */}
@@ -739,7 +769,8 @@ const UniversityDetail = () => {
                             </span>
                         </div>
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left font-inter">
+                            {/* Desktop Table View */}
+                            <table className="w-full text-left font-inter hidden md:table">
                                 <thead>
                                     <tr className="bg-white/5 border-b border-white/10">
                                         <th className="px-6 py-4 text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Learner</th>
@@ -794,6 +825,47 @@ const UniversityDetail = () => {
                                     )}
                                 </tbody>
                             </table>
+
+                            {/* Mobile Card View */}
+                            <div className="md:hidden divide-y divide-white/5">
+                                {students.map(student => (
+                                    <div 
+                                        key={student._id || student.id} 
+                                        className="p-4 space-y-3 hover:bg-white/5 transition-colors"
+                                        onClick={() => navigate(`/admin/students`)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-xs uppercase">
+                                                    {student.name?.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <p className="text-white font-semibold text-sm">{student.name}</p>
+                                                    <p className="text-[10px] text-white/40">{student.email}</p>
+                                                </div>
+                                            </div>
+                                            {student.isVerified ? (
+                                                <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase tracking-widest rounded-full">Active</span>
+                                            ) : (
+                                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest rounded-full">Pending</span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                                            <span className="text-white/40">Course</span>
+                                            <span className="text-white truncate max-w-[150px]">{student.course || 'Enrolled'}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
+                                            <span className="text-white/40">Joined</span>
+                                            <span className="text-white/60">{new Date(student.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {students.length === 0 && (
+                                    <div className="py-12 text-center text-white/20 text-xs font-black uppercase tracking-widest">
+                                        No Students Found
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </GlassCard>
 

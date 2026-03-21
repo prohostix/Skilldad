@@ -500,8 +500,9 @@ const StudentManagement = () => {
             </div>
 
             {/* Students Table */}
-            <GlassCard className="overflow-hidden">
-                <div className="overflow-x-auto">
+            <GlassCard className="overflow-hidden !p-0 sm:!p-6">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-white/5 border-b border-white/10">
                             <tr>
@@ -577,6 +578,71 @@ const StudentManagement = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+                    {filteredStudents.map((student) => (
+                        <div key={student._id} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col space-y-4 shadow-sm relative group overflow-hidden">
+                            {/* Accent Glow */}
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-primary/20 transition-all"></div>
+                            
+                            <div className="flex justify-between items-start">
+                                <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleViewStudent(student)}>
+                                    <div className="w-12 h-12 rounded-xl bg-primary/20 flex flex-shrink-0 items-center justify-center text-primary font-bold shadow-sm">
+                                        {student.name?.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="font-bold text-white text-sm group-hover:text-primary transition-colors">{student.name}</p>
+                                        <p className="text-xs text-white/50 flex flex-col font-medium mt-0.5">
+                                            <span>{student.email}</span>
+                                            <span className="text-[10px] text-white/30 truncate max-w-[180px]">ID: {student._id.slice(-6)}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex flex-col space-y-2 border-t border-white/5 pt-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-white/50 uppercase tracking-wider font-bold">University</span>
+                                    <span className="text-sm font-medium text-white text-right max-w-[150px] leading-tight line-clamp-2">{getUniversityName(student)}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-white/50 uppercase tracking-wider font-bold">Enrolled Course</span>
+                                    <span className="text-xs text-primary font-medium italic truncate max-w-[150px]">{student.course || 'No Course'}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-white/50 uppercase tracking-wider font-bold">Total Enrollments</span>
+                                    <span className="text-sm font-black text-white px-2 py-0.5 bg-white/10 rounded">{student.enrollmentCount || 0}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                                <span className={`inline-flex px-2.5 py-1 text-[10px] font-bold uppercase rounded-full ${student.isVerified
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                    }`}>
+                                    {student.isVerified ? 'Active' : 'Pending'}
+                                </span>
+                                
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => handleViewStudent(student)}
+                                        className="p-2 bg-primary/20 text-primary border border-primary/30 rounded-xl hover:bg-primary/30 transition-all shadow-sm"
+                                    >
+                                        <Eye size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteStudent(student._id)}
+                                        className="p-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl hover:bg-red-500/30 transition-all shadow-sm"
+                                        title="Delete Student"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </GlassCard>
 

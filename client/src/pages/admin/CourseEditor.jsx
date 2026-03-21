@@ -176,19 +176,34 @@ const CourseEditor = () => {
                             <Typography color="text.secondary">No Thumbnail</Typography>
                         )}
                     </Box>
-                    <Box>
-                        <input
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            id="thumbnail-upload"
-                            type="file"
-                            onChange={handleThumbnailUpload}
-                        />
-                        <label htmlFor="thumbnail-upload">
-                            <Button variant="outlined" component="span" startIcon={<PhotoCamera />} disabled={thumbnailUploading}>
-                                {thumbnailUploading ? 'Uploading...' : 'Upload Thumbnail'}
-                            </Button>
-                        </label>
+                    <Box sx={{ flex: 1 }}>
+                        <Typography variant="caption" sx={{ mb: 1, display: 'block', fontWeight: 'bold', color: 'text.secondary' }}>THUMBNAIL IMAGE</Typography>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                            <TextField
+                                fullWidth size="small" label="Thumbnail URL (Direct Link)"
+                                value={course.thumbnail || ''}
+                                onChange={(e) => setCourse({ ...course, thumbnail: e.target.value })}
+                                placeholder="https://example.com/image.jpg"
+                            />
+                            <input
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                id="thumbnail-upload"
+                                type="file"
+                                onChange={handleThumbnailUpload}
+                            />
+                            <label htmlFor="thumbnail-upload">
+                                <Button 
+                                    variant="outlined" 
+                                    component="span" 
+                                    startIcon={<PhotoCamera />} 
+                                    disabled={thumbnailUploading}
+                                    sx={{ whiteSpace: 'nowrap' }}
+                                >
+                                    {thumbnailUploading ? 'Uploading...' : 'Upload File'}
+                                </Button>
+                            </label>
+                        </Box>
                     </Box>
                 </Box>
 

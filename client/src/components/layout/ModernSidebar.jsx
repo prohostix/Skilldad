@@ -141,7 +141,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                     width: isOpen ? 280 : 0,
                     opacity: isOpen ? 1 : 0
                 }}
-                className="fixed lg:sticky top-0 left-0 h-screen bg-black/95 backdrop-blur-2xl border-r border-white/5 z-[100] p-4 flex flex-col shadow-2xl overflow-y-auto scrollbar-hide shrink-0 lg:w-[280px]"
+                className="fixed lg:sticky top-0 left-0 h-screen bg-black/95 backdrop-blur-2xl border-r border-white/5 z-[100] p-4 flex flex-col shadow-2xl overflow-y-auto overflow-x-hidden scrollbar-hide shrink-0 lg:w-[280px]"
                 style={{
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none'
@@ -169,7 +169,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                 <div key={item.name}>
                                     <button
                                         onClick={() => setUniversitiesDropdownOpen(!universitiesDropdownOpen)}
-                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 group ${isAnySubItemActive
+                                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all duration-200 group ${isAnySubItemActive
                                             ? 'bg-primary/20 text-white'
                                             : 'text-white/50 hover:bg-white/10 hover:text-white'
                                             }`}
@@ -203,7 +203,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                                                 navigate(subItem.path);
                                                                 if (window.innerWidth < 1024) setIsOpen(false);
                                                             }}
-                                                            className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg transition-all duration-200 text-xs ${isSubActive
+                                                            className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 text-xs ${isSubActive
                                                                 ? 'bg-primary text-white shadow-lg shadow-primary/30'
                                                                 : 'text-white/50 hover:bg-white/10 hover:text-white'
                                                                 }`}
@@ -230,7 +230,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                     // Only close on mobile
                                     if (window.innerWidth < 1024) setIsOpen(false);
                                 }}
-                                className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg transition-all duration-200 group ${isActive
+                                className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all duration-200 group ${isActive
                                     ? 'bg-primary text-white shadow-lg shadow-primary/30'
                                     : item.name === 'Dashboard'
                                         ? 'text-white hover:bg-white/10 hover:text-white'
@@ -247,7 +247,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                     <div className="pt-3">
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-white/70 hover:bg-primary/10 hover:text-white transition-all duration-200 border border-primary"
+                            className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg text-white/70 hover:bg-primary/10 hover:text-white transition-all duration-200 border border-primary"
                         >
                             <LogOut size={16} className="flex-shrink-0" />
                             <span className="font-medium font-inter text-xs whitespace-nowrap">Logout</span>

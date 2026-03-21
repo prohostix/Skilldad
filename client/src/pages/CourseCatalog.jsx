@@ -29,6 +29,7 @@ const CourseCatalog = () => {
     const [selectedUniversity, setSelectedUniversity] = useState('All');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [universityName, setUniversityName] = useState('');
+    const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
     useEffect(() => {
         // Server health check (same-origin)
@@ -132,25 +133,36 @@ const CourseCatalog = () => {
                 {/* Controls Section */}
                 <div className="max-w-[1300px] mx-auto mb-6 px-4">
                     <div className="flex flex-col gap-4 items-stretch">
-                        {/* Search Bar */}
-                        <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} w-full`}>
-                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
-                                <Search size={16} />
+                        {/* Search & Mobile Filter Toggle */}
+                        <div className="flex items-center gap-3 w-full">
+                            <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1`}>
+                                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
+                                    <Search size={16} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Search by tech, track, or instructor..."
+                                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/50 transition-all font-inter text-white placeholder:text-white/20 font-medium text-sm md:text-base"
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value)}
+                                    onFocus={() => setIsSearchFocused(true)}
+                                    onBlur={() => setIsSearchFocused(false)}
+                                />
                             </div>
-                            <input
-                                type="text"
-                                placeholder="Search by tech, track, or instructor..."
-                                className="w-full pl-12 pr-4 py-3 md:py-4 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/50 transition-all font-inter text-white placeholder:text-white/20 font-medium text-sm md:text-base"
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value)}
-                                onFocus={() => setIsSearchFocused(true)}
-                                onBlur={() => setIsSearchFocused(false)}
-                            />
+                            <button
+                                onClick={() => setIsMobileFilterOpen(true)}
+                                className="md:hidden p-3.5 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 text-white/70 hover:text-white transition-colors flex shrink-0 items-center justify-center relative"
+                            >
+                                <Filter size={20} />
+                                {(category !== 'All' || selectedUniversity !== 'All') && (
+                                    <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-primary border border-[#0A0714]"></span>
+                                )}
+                            </button>
                         </div>
 
-                        {/* Category Filter and View Toggle Row */}
-                        <div className="flex items-center justify-between gap-4 flex-wrap md:flex-nowrap">
-                            {/* Category Filter */}
+                        {/* Category Filter and View Toggle Row Tracker */}
+                        <div className="hidden md:flex items-center justify-between gap-4 flex-wrap md:flex-nowrap">
+                            {/* Category Filter Desktop */}
                             <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar scroll-smooth flex-1 min-w-0">
                                 {categories.map((cat) => (
                                     <button
@@ -194,25 +206,6 @@ const CourseCatalog = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Mobile University Filter (displays on small screens if needed) */}
-                        {!isFixedUniversity && universities.length > 2 && (
-                            <div className="relative group/univ md:hidden mt-2">
-                                <select
-                                    value={selectedUniversity}
-                                    onChange={(e) => setSelectedUniversity(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-10 py-3 text-white/80 focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-sm shadow-xl"
-                                >
-                                    <option value="All" className="bg-[#050514]">All Providers (Universities)</option>
-                                    {universities.filter(u => u !== 'All').map(uni => (
-                                        <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
-                                    ))}
-                                </select>
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
-                                    <Filter size={16} />
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
 
@@ -325,6 +318,81 @@ const CourseCatalog = () => {
                         </div>
                     </GlassCard>
                 </div>
+
+                {/* Mobile Filter Drawer Container */}
+                <AnimatePresence>
+                    {isMobileFilterOpen && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm md:hidden"
+                            onClick={() => setIsMobileFilterOpen(false)}
+                        >
+                            <motion.div
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto bg-[#0A0714] border-t border-white/10 rounded-t-[32px] p-6 shadow-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
+                                <h3 className="text-xl font-bold text-white font-jakarta mb-6">Filters</h3>
+                                
+                                <div className="space-y-6">
+                                    {/* Mobile University Select */}
+                                    {!isFixedUniversity && universities.length > 2 && (
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-black text-white/40 uppercase tracking-widest">Provider</label>
+                                            <div className="relative group/univ">
+                                                <select
+                                                    value={selectedUniversity}
+                                                    onChange={(e) => setSelectedUniversity(e.target.value)}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-10 py-3.5 text-white focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-sm shadow-xl"
+                                                >
+                                                    <option value="All" className="bg-[#050514]">All Providers</option>
+                                                    {universities.filter(u => u !== 'All').map(uni => (
+                                                        <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
+                                                    <Filter size={16} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Mobile Categories */}
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-black text-white/40 uppercase tracking-widest">Category</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {categories.map((cat) => (
+                                                <button
+                                                    key={cat}
+                                                    onClick={() => setCategory(cat)}
+                                                    className={`px-4 py-2.5 rounded-xl font-black font-inter text-[10px] uppercase tracking-widest whitespace-nowrap transition-all duration-300 border ${category === cat
+                                                        ? 'bg-primary text-white border-primary shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                                        : 'bg-white/5 text-white/50 border-white/5 hover:border-primary/30 hover:text-white hover:bg-white/10'
+                                                        }`}
+                                                >
+                                                    {cat}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <ModernButton
+                                    className="w-full mt-8 !py-4 justify-center shadow-glow-purple"
+                                    onClick={() => setIsMobileFilterOpen(false)}
+                                >
+                                    Apply Filters
+                                </ModernButton>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </main>
 
             <Footer />

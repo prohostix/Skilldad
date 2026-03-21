@@ -239,15 +239,15 @@ const LandingPage = () => {
             {/* Hiring Partners Marquee Banner */}
             <section className="relative py-16 md:py-20 overflow-hidden bg-transparent z-10 section-optimize">
                 {/* Label */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-6 sm:mb-8 px-4">
                     <motion.h2
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        className="text-lg md:text-xl font-black text-white font-jakarta tracking-tight uppercase"
+                        className="text-base md:text-xl font-black text-white font-jakarta tracking-tight uppercase break-words"
                     >
-                        Companies That <span className="text-primary">Trust SkillDad</span>
+                        Companies That <span className="text-primary block sm:inline mt-1 sm:mt-0">Trust SkillDad</span>
                     </motion.h2>
-                    <div className="w-12 h-0.5 bg-primary/20 mx-auto mt-2 rounded-full" />
+                    <div className="w-12 h-0.5 bg-primary/20 mx-auto mt-3 rounded-full" />
                 </div>
 
                 {/* Row 1 — Scrolls Left */}
@@ -256,15 +256,15 @@ const LandingPage = () => {
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="px-6 py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-primary/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[140px] h-14">
+                                <div className="px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-primary/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14">
                                     {company.logo ? (
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            className="h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
+                                            className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
-                                        <span className="text-white/70 font-bold text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
+                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
                                     )}
                                 </div>
                             </div>
@@ -281,15 +281,15 @@ const LandingPage = () => {
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
-                                <div className="px-6 py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-purple-400/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[140px] h-14">
+                                <div className="px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-purple-400/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14">
                                     {company.logo ? (
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            className="h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
+                                            className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
-                                        <span className="text-white/70 font-bold text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
+                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
                                     )}
                                 </div>
                             </div>
@@ -357,7 +357,7 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8, delay: 0.1 }}
-                                className="text-xl sm:text-2xl lg:text-3xl font-black text-text-primary mb-4 md:mb-6 font-jakarta tracking-tighter leading-[1.1] md:leading-[1.1]"
+                                className="text-2xl xs:text-3xl lg:text-4xl font-black text-text-primary mb-4 md:mb-6 font-jakarta tracking-tighter leading-[1.1] md:leading-[1.1]"
                             >
                                 Master the <br className="hidden sm:block" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary-dark">Institutional</span> Flow
                             </motion.h2>
@@ -366,7 +366,7 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8, delay: 0.2 }}
-                                className="text-base sm:text-lg text-text-secondary font-inter leading-relaxed max-w-xl mx-auto lg:mx-0"
+                                className="text-sm sm:text-base lg:text-lg text-text-secondary font-inter leading-relaxed max-w-xl mx-auto lg:mx-0 px-4 sm:px-0"
                             >
                                 Experience a platform where students, companies, and universities harmonize in a singular high-fidelity learning matrix.
                             </motion.p>
@@ -489,7 +489,7 @@ const LandingPage = () => {
                     </div>
 
                     {/* Featured Course Preview */}
-                    <div className="grid md:grid-cols-3 gap-8 mb-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16 md:mb-20">
                         {(featuredCourses.length > 0 ? featuredCourses : [
                             { title: 'Neural Network Architecture', category: 'AI & Data', icon: Cpu, description: 'Experience the next generation of AI & Data education with high-fidelity modules.' },
                             { title: 'Cryptographic Governance', category: 'Security', icon: ShieldCheck, description: 'Experience the next generation of Security education with high-fidelity modules.' },
@@ -636,7 +636,7 @@ const LandingPage = () => {
                     </div>
 
                     {/* University Grid */}
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         {universities.map((uni, i) => (
                             <motion.div
                                 key={i}
@@ -717,7 +717,7 @@ const LandingPage = () => {
                         </motion.p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                         {directors.map((director, i) => (
                             <motion.div
                                 key={i}

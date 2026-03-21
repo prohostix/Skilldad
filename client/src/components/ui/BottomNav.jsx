@@ -34,21 +34,20 @@ const BottomNav = () => {
     ];
 
     return (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-6">
-            <div className="bg-[#0A0A1F]/90 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-2xl flex items-center justify-around p-3">
+        <div className="lg:hidden fixed bottom-4 left-4 right-4 z-[45] max-w-sm mx-auto">
+            <div className="bg-[#04020a]/85 backdrop-blur-xl border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.8)] rounded-3xl flex items-center justify-around p-2 gap-1 overflow-hidden">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
                         <button
                             key={item.label}
                             onClick={() => navigate(item.path)}
-                            className={`flex flex-col items-center space-y-1 transition-all duration-300 ${isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-600'
-                                }`}
+                            className={`flex flex-col items-center flex-1 py-1.5 rounded-2xl transition-all duration-300 relative ${
+                                isActive ? 'bg-primary/10 text-primary shadow-[inset_0_0_12px_rgba(192,38,255,0.15)]' : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                            }`}
                         >
-                            <div className={`p-2 rounded-xl transition-all ${isActive ? 'bg-primary/10' : ''}`}>
-                                <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                            </div>
-                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'opacity-100' : 'opacity-60'}`}>
+                            <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'scale-110 transition-all duration-300 drop-shadow-[0_0_6px_rgba(192,38,255,0.5)]' : 'transition-colors'} />
+                            <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-all duration-300 ${isActive ? 'opacity-100 drop-shadow-[0_0_6px_rgba(192,38,255,0.4)]' : 'opacity-50'}`}>
                                 {item.label}
                             </span>
                         </button>

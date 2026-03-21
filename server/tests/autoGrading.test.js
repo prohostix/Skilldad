@@ -1,232 +1,106 @@
-/**
- * Auto-Grading Service Tests
- * 
- * Tests for MCQ auto-grading functionality
- */
-
-const mongoose = require('mongoose');
-const ExamSubmissionNew = require('../models/examSubmissionNewModel');
-const Exam = require('../models/examModel');
-const Question = require('../models/questionModel');
 const { autoGradeMCQSubmission } = require('../services/autoGradingService');
+const { query } = require('../config/postgres');
+
+jest.mock('../config/postgres');
 
 describe('Auto-Grading Service', () => {
-  let examId, submissionId, questionIds;
+    const mockSubmissionId = 'sub_123';
+    const mockExamId = 'exam_456';
 
-  beforeAll(async () => {
-    // Connect to test database
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/skilldad_test');
-    }
-  });
-
-  afterAll(async () => {
-    // Clean up test data
-    if (examId) await Exam.findByIdAndDelete(examId);
-    if (submissionId) await ExamSubmissionNew.findByIdAndDelete(submissionId);
-    if (questionIds) await Question.deleteMany({ _id: { $in: questionIds } });
-    
-    await mongoose.connection.close();
-  });
-
-  describe('autoGradeMCQSubmission', () => {
-    it('should grade MCQ questions correctly with positive marks', async () => {
-      // Create test exam
-      const exam = await Exam.create({
-        title: 'Test Exam',
-        course: new mongoose.Types.ObjectId(),
-        university: new mongoose.Types.ObjectId(),
-        createdBy: new mongoose.Types.ObjectId(),
-        examType: 'online-mcq',
-        scheduledStartTime: new Date(),
-        scheduledEndTime: new Date(Date.now() + 3600000),
-        duration: 60,
-        totalMarks: 10,
-      });
-      examId = exam._id;
-
-      // Create test questions
-      const question1 = await Question.create({
-        exam: examId,
-        questionType: 'mcq',
-        questionText: 'What is 2+2?',
-        options: [
-          { text: '3', isCorrect: false },
-          { text: '4', isCorrect: true },
-          { text: '5', isCorrect: false },
-        ],
-        marks: 5,
-        negativeMarks: 1,
-        order: 1,
-      });
-
-      const question2 = await Question.create({
-        exam: examId,
-        questionType: 'mcq',
-        questionText: 'What is the capital of France?',
-        options: [
-          { text: 'London', isCorrect: false },
-          { text: 'Paris', isCorrect: true },
-          { text: 'Berlin', isCorrect: false },
-        ],
-        marks: 5,
-        negativeMarks: 1,
-        order: 2,
-      });
-
-      questionIds = [question1._id, question2._id];
-
-      // Create test submission with answers
-      const submission = await ExamSubmissionNew.create({
-        exam: examId,
-        student: new mongoose.Types.ObjectId(),
-        startedAt: new Date(),
-        submittedAt: new Date(),
-        status: 'submitted',
-        answers: [
-          {
-            question: question1._id,
-            questionType: 'mcq',
-            selectedOption: 1, // Correct answer
-          },
-          {
-            question: question2._id,
-            questionType: 'mcq',
-            selectedOption: 1, // Correct answer
-          },
-        ],
-      });
-      submissionId = submission._id;
-
-      // Grade the submission
-      const result = await autoGradeMCQSubmission(submissionId);
-
-      // Assertions
-      expect(result.mcqCount).toBe(2);
-      expect(result.correctCount).toBe(2);
-      expect(result.incorrectCount).toBe(0);
-      expect(result.obtainedMarks).toBe(10);
-      expect(result.totalMarks).toBe(10);
-      expect(result.percentage).toBe(100);
-      expect(result.status).toBe('graded');
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    it('should apply negative marking for incorrect answers', async () => {
-      // Create test exam
-      const exam = await Exam.create({
-        title: 'Test Exam 2',
-        course: new mongoose.Types.ObjectId(),
-        university: new mongoose.Types.ObjectId(),
-        createdBy: new mongoose.Types.ObjectId(),
-        examType: 'online-mcq',
-        scheduledStartTime: new Date(),
-        scheduledEndTime: new Date(Date.now() + 3600000),
-        duration: 60,
-        totalMarks: 10,
-      });
-      const testExamId = exam._id;
+    describe('autoGradeMCQSubmission', () => {
+        it('should grade MCQ questions correctly with positive marks', async () => {
+            // 1. Mock submission fetch
+            query.mockResolvedValueOnce({
+                rows: [{
+                    id: mockSubmissionId,
+                    exam_id: mockExamId,
+                    answers: [
+                        { question: 'q1', selectedOption: 1 }, // Correct
+                        { question: 'q2', selectedOption: 1 }  // Correct
+                    ]
+                }]
+            });
 
-      // Create test question
-      const question = await Question.create({
-        exam: testExamId,
-        questionType: 'mcq',
-        questionText: 'Test question',
-        options: [
-          { text: 'Wrong', isCorrect: false },
-          { text: 'Correct', isCorrect: true },
-        ],
-        marks: 5,
-        negativeMarks: 2,
-        order: 1,
-      });
+            // 2. Mock exam fetch
+            query.mockResolvedValueOnce({
+                rows: [{ id: mockExamId, total_points: 10 }]
+            });
 
-      // Create submission with wrong answer
-      const submission = await ExamSubmissionNew.create({
-        exam: testExamId,
-        student: new mongoose.Types.ObjectId(),
-        startedAt: new Date(),
-        submittedAt: new Date(),
-        status: 'submitted',
-        answers: [
-          {
-            question: question._id,
-            questionType: 'mcq',
-            selectedOption: 0, // Wrong answer
-          },
-        ],
-      });
+            // 3. Mock questions fetch
+            query.mockResolvedValueOnce({
+                rows: [
+                    { id: 'q1', question_type: 'mcq', marks: 5, negative_marks: 1, options: [{ isCorrect: false }, { isCorrect: true }] },
+                    { id: 'q2', question_type: 'mcq', marks: 5, negative_marks: 1, options: [{ isCorrect: false }, { isCorrect: true }] }
+                ]
+            });
 
-      // Grade the submission
-      const result = await autoGradeMCQSubmission(submission._id);
+            // 4. Mock update
+            query.mockResolvedValueOnce({ rows: [] });
 
-      // Assertions
-      expect(result.correctCount).toBe(0);
-      expect(result.incorrectCount).toBe(1);
-      expect(result.obtainedMarks).toBe(0); // Should be 0, not negative
-      expect(result.percentage).toBe(0);
+            const result = await autoGradeMCQSubmission(mockSubmissionId);
 
-      // Clean up
-      await Exam.findByIdAndDelete(testExamId);
-      await Question.findByIdAndDelete(question._id);
-      await ExamSubmissionNew.findByIdAndDelete(submission._id);
+            expect(result.correctCount).toBe(2);
+            expect(result.obtainedMarks).toBe(10);
+            expect(result.percentage).toBe(100);
+        });
+
+        it('should apply negative marking for incorrect answers', async () => {
+            query.mockResolvedValueOnce({
+                rows: [{
+                    id: mockSubmissionId,
+                    exam_id: mockExamId,
+                    answers: [{ question: 'q1', selectedOption: 0 }] // Incorrect
+                }]
+            });
+
+            query.mockResolvedValueOnce({
+                rows: [{ id: mockExamId, total_points: 10 }]
+            });
+
+            query.mockResolvedValueOnce({
+                rows: [{ id: 'q1', question_type: 'mcq', marks: 5, negative_marks: 2, options: [{ isCorrect: false }, { isCorrect: true }] }]
+            });
+
+            query.mockResolvedValueOnce({ rows: [] });
+
+            const result = await autoGradeMCQSubmission(mockSubmissionId);
+
+            expect(result.correctCount).toBe(0);
+            expect(result.obtainedMarks).toBe(0); // 0 - 2 = -2, but clamped to 0
+        });
+
+        it('should ensure obtainedMarks is never negative', async () => {
+            query.mockResolvedValueOnce({
+                rows: [{
+                    id: mockSubmissionId,
+                    exam_id: mockExamId,
+                    answers: [{ question: 'q1', selectedOption: 0 }] // Incorrect
+                }]
+            });
+
+            query.mockResolvedValueOnce({
+                rows: [{ id: mockExamId, total_points: 5 }]
+            });
+
+            query.mockResolvedValueOnce({
+                rows: [{ id: 'q1', question_type: 'mcq', marks: 5, negative_marks: 10, options: [{ isCorrect: false }, { isCorrect: true }] }]
+            });
+
+            query.mockResolvedValueOnce({ rows: [] });
+
+            const result = await autoGradeMCQSubmission(mockSubmissionId);
+
+            expect(result.obtainedMarks).toBe(0);
+        });
+
+        it('should throw error when submission does not exist', async () => {
+            query.mockResolvedValueOnce({ rows: [] });
+
+            await expect(autoGradeMCQSubmission('fake_sub')).rejects.toThrow('Submission not found');
+        });
     });
-
-    it('should ensure obtainedMarks is never negative', async () => {
-      // Create test exam
-      const exam = await Exam.create({
-        title: 'Test Exam 3',
-        course: new mongoose.Types.ObjectId(),
-        university: new mongoose.Types.ObjectId(),
-        createdBy: new mongoose.Types.ObjectId(),
-        examType: 'online-mcq',
-        scheduledStartTime: new Date(),
-        scheduledEndTime: new Date(Date.now() + 3600000),
-        duration: 60,
-        totalMarks: 5,
-      });
-      const testExamId = exam._id;
-
-      // Create test question with high negative marks
-      const question = await Question.create({
-        exam: testExamId,
-        questionType: 'mcq',
-        questionText: 'Test question',
-        options: [
-          { text: 'Wrong', isCorrect: false },
-          { text: 'Correct', isCorrect: true },
-        ],
-        marks: 5,
-        negativeMarks: 4, // High but less than positive marks
-        order: 1,
-      });
-
-      // Create submission with wrong answer
-      const submission = await ExamSubmissionNew.create({
-        exam: testExamId,
-        student: new mongoose.Types.ObjectId(),
-        startedAt: new Date(),
-        submittedAt: new Date(),
-        status: 'submitted',
-        answers: [
-          {
-            question: question._id,
-            questionType: 'mcq',
-            selectedOption: 0, // Wrong answer
-          },
-        ],
-      });
-
-      // Grade the submission
-      const result = await autoGradeMCQSubmission(submission._id);
-
-      // Assertions - should be 0, not negative
-      expect(result.obtainedMarks).toBe(0);
-      expect(result.obtainedMarks).toBeGreaterThanOrEqual(0);
-
-      // Clean up
-      await Exam.findByIdAndDelete(testExamId);
-      await Question.findByIdAndDelete(question._id);
-      await ExamSubmissionNew.findByIdAndDelete(submission._id);
-    });
-  });
 });

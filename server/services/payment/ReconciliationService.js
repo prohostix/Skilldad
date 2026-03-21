@@ -1,5 +1,5 @@
 const { query } = require('../../config/postgres');
-const HDFCGatewayService = require('./HDFCGatewayService');
+const RazorpayGatewayService = require('./RazorpayGatewayService');
 
 /**
  * ReconciliationService - Handles reconciliation between SkillDad and Payment Gateway
@@ -12,7 +12,7 @@ class ReconciliationService {
    * @param {Object} gatewayService - Gateway service instance (optional)
    */
   constructor(gatewayService = null) {
-    this.gatewayService = gatewayService || new HDFCGatewayService();
+    this.gatewayService = gatewayService || new RazorpayGatewayService({});
   }
 
   /**

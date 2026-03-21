@@ -133,7 +133,7 @@ const getCourse = asyncHandler(async (req, res) => {
 
 // @desc    Create new course
 const createCourse = asyncHandler(async (req, res) => {
-    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools } = req.body;
+    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail } = req.body;
     
     // For Admin, instructorId (University) is mandatory
     if (req.user.role === 'admin' && !instructorId) {
@@ -145,9 +145,9 @@ const createCourse = asyncHandler(async (req, res) => {
     const newId = `course_${Date.now()}`;
 
     await query(`
-        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
-    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || [])]);
+        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '']);
 
     // Auto-sync with University profile.assigned_courses
     try {
@@ -180,7 +180,7 @@ const createCourse = asyncHandler(async (req, res) => {
 // @desc    Update course
 const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools } = req.body;
+    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail } = req.body;
 
     // Get old course to check for instructor changes
     const oldCourseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
@@ -199,9 +199,10 @@ const updateCourse = asyncHandler(async (req, res) => {
             university_name = COALESCE($9, university_name),
             brochure_url = COALESCE($10, brochure_url),
             university_tools = COALESCE($11, university_tools),
+            thumbnail = COALESCE($12, thumbnail),
             updated_at = NOW()
-        WHERE id = $12
-    `, [title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, id]);
+        WHERE id = $13
+    `, [title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, id]);
 
     // Handle instructor change in assigned_courses list
     if (instructorId && oldInstructorId && instructorId !== oldInstructorId) {

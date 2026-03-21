@@ -51,7 +51,7 @@ const Navbar = ({ onToggleSidebar }) => {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="absolute top-16 left-0 w-full bg-black/95 backdrop-blur-2xl border-b border-white/10 px-4 py-3 sm:hidden z-50 overflow-hidden"
+                        className="absolute top-16 left-0 w-full bg-black/95 backdrop-blur-2xl border-b border-white/10 px-4 py-3 sm:hidden z-[60] overflow-hidden shadow-2xl"
                     >
                         <div className="relative">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
@@ -72,30 +72,30 @@ const Navbar = ({ onToggleSidebar }) => {
                 )}
             </AnimatePresence>
 
-            <div className="flex items-center space-x-3 sm:space-x-5">
-                <button className="relative p-2.5 text-slate-400 hover:bg-white/5 rounded-xl transition-all hover:text-primary">
-                    <Bell size={20} />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+                <button className="relative p-2 text-slate-400 hover:bg-white/5 rounded-xl transition-all hover:text-primary">
+                    <Bell size={18} className="sm:w-5 sm:h-5" />
+                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
                 </button>
 
                 <div className="h-8 w-px bg-white/5 hidden sm:block"></div>
 
                 <div
                     onClick={() => navigate('/settings')}
-                    className="flex items-center space-x-3 cursor-pointer group hover:bg-white/5 p-1 rounded-xl transition-all"
+                    className="flex items-center space-x-3 cursor-pointer group hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-all"
                 >
                     {userInfo.profileImage ? (
-                        <div className="w-8 h-8 rounded-lg bg-slate-900 overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-900 overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all">
                             <img
                                 src={`${userInfo.profileImage}`}
                                 alt="Profile"
                                 className="w-full h-full object-cover"
-                                onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>'; }}
+                                onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>'; }}
                             />
                         </div>
                     ) : (
-                        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary border border-primary/20 group-hover:border-primary/50 transition-all shadow-[0_0_10px_rgba(192,38,255,0.2)]">
-                            <User size={16} />
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary border border-primary/20 group-hover:border-primary/50 transition-all shadow-[0_0_10px_rgba(192,38,255,0.2)]">
+                            <User size={14} className="sm:w-4 sm:h-4" />
                         </div>
                     )}
                     <div className="hidden md:block">

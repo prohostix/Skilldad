@@ -35,7 +35,7 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
         switch (type) {
             case 'line':
                 return (
-                    <LineChart data={data}>
+                    <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                             <linearGradient id="alyraLineGradient" x1="0" y1="0" x2="1" y2="0">
                                 <stop offset="0%" stopColor="#5B5CFF" />
@@ -44,18 +44,18 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 12, fontWeight: 600 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 12, fontWeight: 600 }} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 10, fontWeight: 600 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 10, fontWeight: 600 }} />
                         <Tooltip content={<CustomTooltip />} />
                         <Line type="monotone" dataKey={dataKey} stroke="url(#alyraLineGradient)" strokeWidth={3} dot={{ fill: '#5B5CFF', strokeWidth: 2, r: 4, stroke: '#020005' }} activeDot={{ r: 6, strokeWidth: 0, fill: '#B05CFF', filter: 'drop-shadow(0 0 8px rgba(176,92,255,0.6))' }} />
                     </LineChart>
                 );
             case 'bar':
                 return (
-                    <BarChart data={data}>
+                    <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 12, fontWeight: 600 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 12, fontWeight: 600 }} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 10, fontWeight: 600 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 10, fontWeight: 600 }} />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
                         <Bar dataKey={dataKey} radius={[10, 10, 0, 0]}>
                             {data.map((entry, index) => (
@@ -67,7 +67,7 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
             case 'area':
             default:
                 return (
-                    <AreaChart data={data}>
+                    <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                             <linearGradient id="alyraAreaGradient" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#5B5CFF" stopOpacity={0.4} />
@@ -81,8 +81,8 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 12, fontWeight: 600 }} dy={10} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 12, fontWeight: 600 }} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 10, fontWeight: 600 }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6E72A5', fontSize: 10, fontWeight: 600 }} />
                         <Tooltip content={<CustomTooltip />} />
                         <Area type="monotone" dataKey={dataKey} stroke="url(#alyraStrokeGradient)" fillOpacity={1} fill="url(#alyraAreaGradient)" strokeWidth={3} />
                     </AreaChart>
@@ -96,8 +96,8 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
                 <h3 className="text-lg font-bold text-text-primary font-poppins">{title}</h3>
                 {subtitle && <p className="text-xs text-text-muted mt-1 font-inter">{subtitle}</p>}
             </div>
-            <div className="h-[300px] w-full relative">
-                <ResponsiveContainer width="100%" height="100%" aspect={2}>
+            <div className="h-[250px] sm:h-[300px] w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
                     {renderChart()}
                 </ResponsiveContainer>
             </div>

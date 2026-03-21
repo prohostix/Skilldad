@@ -629,9 +629,9 @@ function generateSuccessMessage(transaction, transactionId) {
 
 // Helper function to generate failure message HTML
 function generateFailureMessage(transaction, transactionId) {
-  const canRetry = transaction.retryCount < 3;
+  const canRetry = (transaction.retry_count || 0) < 3;
   const retryMessage = canRetry
-    ? '<p><a href="/courses/' + transaction.course._id + '" class="button">Try Again</a></p>'
+    ? '<p><a href="/courses/' + (transaction.course_id) + '" class="button">Try Again</a></p>'
     : '<p>Maximum retry attempts reached. Please contact support.</p>';
 
   return `
@@ -1313,6 +1313,57 @@ const getPendingProofs = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Download payment receipt
+ * @route   GET /api/payment/receipt/:transactionId
+ * @access  Private (Student, Admin, Finance)
+ */
+const getReceipt = async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const transRes = await query('SELECT * FROM transactions WHERE transaction_id = $1', [transactionId]);
+    const transaction = transRes.rows[0];
+
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Transaction not found',
+      });
+    }
+
+    // Check if user has access to this transaction
+    if (
+      req.user.role !== 'admin' &&
+      req.user.role !== 'finance' &&
+      transaction.student_id.toString() !== req.user.id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to access this receipt',
+      });
+    }
+
+    if (!transaction.receipt_url) {
+      return res.status(404).json({
+        success: false,
+        message: 'Receipt not available for this transaction',
+      });
+    }
+
+    res.json({
+      success: true,
+      receiptUrl: transaction.receipt_url,
+      receiptNumber: transaction.receipt_number,
+    });
+  } catch (error) {
+    console.error('Receipt retrieval error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve receipt',
+    });
+  }
+};
+
 module.exports = {
   initiatePayment,
   handleCallback,
@@ -1324,5 +1375,6 @@ module.exports = {
   createManualPayment,
   approvePayment,
   rejectPayment,
-  getPendingProofs
+  getPendingProofs,
+  getReceipt
 };

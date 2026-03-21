@@ -160,12 +160,29 @@ const UniversityPublicDetail = () => {
 
     if (!university) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] text-white flex flex-col pt-24 items-center">
+            <div className="min-h-screen bg-[#05030B] text-white flex flex-col pt-24 items-center px-6">
                 <Navbar />
-                <div className="text-center mt-20">
-                    <h1 className="text-3xl font-black mb-4">University Not Found</h1>
-                    <p className="text-white/40 mb-8 font-inter">We couldn't find the institution you're looking for.</p>
-                    <ModernButton onClick={() => navigate('/platform')}>Explore Universities</ModernButton>
+                <div className="max-w-md w-full mt-32">
+                    <GlassCard className="text-center p-12 border-white/10 shadow-3xl">
+                        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-primary/20">
+                            <Info size={40} className="text-primary" />
+                        </div>
+                        <h1 className="text-3xl font-black mb-4 font-jakarta tracking-tight">University Not Found</h1>
+                        <p className="text-white/40 mb-10 font-inter text-sm leading-relaxed">
+                            We couldn't locate the specific institution <span className="text-white/60 font-bold">"{universityName}"</span>. It may have been moved or the link might be outdated.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <ModernButton onClick={() => navigate('/platform')} className="w-full justify-center">
+                                Browse Institutions
+                            </ModernButton>
+                            <button 
+                                onClick={() => navigate(-1)}
+                                className="text-white/40 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors py-2"
+                            >
+                                Go Back
+                            </button>
+                        </div>
+                    </GlassCard>
                 </div>
             </div>
         );
@@ -176,7 +193,7 @@ const UniversityPublicDetail = () => {
             <Navbar />
 
             {/* Cinematic Hero Section */}
-            <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+            <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <motion.img
                         initial={{ scale: 1.1, opacity: 0 }}
@@ -190,58 +207,17 @@ const UniversityPublicDetail = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-[#05030B] via-transparent to-[#05030B]/20"></div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-6 relative z-10 w-full pt-32">
-                    <div className="grid lg:grid-cols-12 gap-16 items-center">
-                        <div className="lg:col-span-8">
-                            <motion.div
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.8 }}
-                                className="space-y-8"
-                            >
-                                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-primary-accent text-[12px] font-black uppercase tracking-[0.4em] backdrop-blur-3xl">
-                                    <Award size={18} className="text-primary-accent" />
-                                    <span>Global Academic Partner</span>
-                                </div>
-                                
-                                <h1 className="text-6xl md:text-[100px] font-black text-white font-jakarta tracking-tighter leading-[0.85] py-2">
-                                    {university.name}
-                                </h1>
-
-                                <div className="flex flex-wrap items-center gap-10 pt-6">
-                                    <div className="group">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-primary transition-colors">Global Campus</p>
-                                        <div className="flex items-center gap-3 text-white font-bold text-lg">
-                                            <MapPin size={20} className="text-primary" /> 
-                                            {university.profile?.location || university.location || 'Excellence Hub'}
-                                        </div>
-                                    </div>
-                                    <div className="h-12 w-px bg-white/10 hidden md:block"></div>
-                                    <div className="group">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-amber-400 transition-colors">Global Accreditation</p>
-                                        <div className="flex items-center gap-3 text-white font-bold text-lg">
-                                            <Star size={20} className="text-amber-400" /> Top {Math.floor(Math.random() * 50) + 1} Elite
-                                        </div>
-                                    </div>
-                                    <div className="h-12 w-px bg-white/10 hidden md:block"></div>
-                                    <div className="group">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-emerald-400 transition-colors">Total Scholars</p>
-                                        <div className="flex items-center gap-3 text-white font-bold text-lg">
-                                            <Users size={20} className="text-emerald-400" /> {university.students || '25k+ Users'}
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        </div>
-
-                        <div className="lg:col-span-4 hidden lg:block">
+                <div className="max-w-7xl mx-auto px-6 relative z-10 w-full pt-32 pb-12">
+                    <div className="flex flex-col lg:flex-row items-center lg:items-start lg:grid lg:grid-cols-12 gap-10 lg:gap-16">
+                        {/* Mobile & Desktop Logo Container */}
+                        <div className="lg:col-span-4 w-full flex justify-center lg:justify-end order-1 lg:order-2">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
-                                className="relative group p-4 bg-white/5 border border-white/10 rounded-[64px] backdrop-blur-xl"
+                                className="relative group p-2.5 sm:p-4 bg-white/5 border border-white/10 rounded-[48px] sm:rounded-[64px] backdrop-blur-xl w-48 sm:w-64 lg:w-full max-w-[280px]"
                             >
-                                <div className="aspect-square rounded-[48px] overflow-hidden border border-white/20">
+                                <div className="aspect-square rounded-[36px] sm:rounded-[48px] overflow-hidden border border-white/20">
                                     <img
                                         src={university.profileImage || university.profile?.profileImage || 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&q=80&w=400'}
                                         alt={university.name}
@@ -254,13 +230,55 @@ const UniversityPublicDetail = () => {
                                 </div>
                             </motion.div>
                         </div>
+
+                        <div className="lg:col-span-8 order-2 lg:order-1 text-center lg:text-left">
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8 }}
+                                className="space-y-6 sm:space-y-8"
+                            >
+                                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-primary-accent text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] backdrop-blur-3xl mx-auto lg:mx-0">
+                                    <Award size={18} className="text-primary-accent" />
+                                    <span>Global Academic Partner</span>
+                                </div>
+                                
+                                <h1 className="text-4xl xs:text-5xl md:text-7xl lg:text-[100px] font-black text-white font-jakarta tracking-tighter leading-[1.1] md:leading-[0.85] py-2">
+                                    {university.name}
+                                </h1>
+
+                                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 sm:gap-10 pt-4 sm:pt-6">
+                                    <div className="group min-w-[120px] sm:min-w-[140px]">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-primary transition-colors">Global Campus</p>
+                                        <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
+                                            <MapPin size={18} className="text-primary shrink-0" /> 
+                                            <span className="truncate max-w-[150px] sm:max-w-none">{university.profile?.location || university.location || 'Excellence Hub'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-8 sm:h-12 w-px bg-white/10 hidden sm:block"></div>
+                                    <div className="group min-w-[120px] sm:min-w-[140px]">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-amber-400 transition-colors">Accreditation</p>
+                                        <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
+                                            <Star size={18} className="text-amber-400" /> Elite Rank
+                                        </div>
+                                    </div>
+                                    <div className="h-8 sm:h-12 w-px bg-white/10 hidden sm:block"></div>
+                                    <div className="group min-w-[120px] sm:min-w-[140px]">
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-emerald-400 transition-colors">Total Scholars</p>
+                                        <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
+                                            <Users size={18} className="text-emerald-400 shrink-0" /> {university.students || '25k+ Users'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Quick Intelligence Matrix */}
-            <section className="relative -mt-20 z-20 px-6">
-                <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <section className="relative mt-4 sm:-mt-20 z-20 px-4 sm:px-6">
+                <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     {[
                         { label: 'Specialized Courses', val: courses.length || university.courseCount || '45+', icon: BookOpen, color: 'text-primary' },
                         { label: 'Quality Rating', val: 'A++ Triple Crown', icon: Award, color: 'text-amber-400' },
@@ -269,11 +287,11 @@ const UniversityPublicDetail = () => {
                     ].map((stat, i) => (
                         <div key={i} className="group relative">
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <GlassCard className="relative !p-8 flex flex-col justify-between h-full border-white/5 hover:border-primary/20 transition-all">
-                                <stat.icon className={`${stat.color} mb-6`} size={32} />
+                            <GlassCard className="relative !p-4 sm:!p-8 flex flex-col justify-between h-full border-white/5 hover:border-primary/20 transition-all">
+                                <stat.icon className={`${stat.color} mb-4 sm:mb-6`} size={24} />
                                 <div>
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">{stat.label}</p>
-                                    <p className="text-2xl font-black text-white group-hover:text-primary transition-colors">{stat.val}</p>
+                                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white/30 mb-1 sm:mb-2">{stat.label}</p>
+                                    <p className="text-lg sm:text-2xl font-black text-white group-hover:text-primary transition-colors">{stat.val}</p>
                                 </div>
                             </GlassCard>
                         </div>
@@ -281,7 +299,7 @@ const UniversityPublicDetail = () => {
                 </div>
             </section>
 
-            <main className="max-w-7xl mx-auto px-6 py-32 space-y-32">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-32 space-y-20 md:space-y-32">
                 
                 {/* Institutional Identity */}
                 <div className="grid lg:grid-cols-12 gap-20 items-start">
@@ -306,26 +324,26 @@ const UniversityPublicDetail = () => {
                                 <div className="w-2 h-8 bg-primary rounded-full"></div>
                                 National & Global Milestones
                             </h3>
-                            <div className="grid md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                 {(university.profile?.achievements || [
                                     { title: "Academic Excellence 2024", desc: "Ranked #1 for regional innovation and research quality." },
                                     { title: "Industry Integration Leader", desc: "Strategic partnerships with 100+ Fortune 500 companies." }
                                 ]).map((ach, i) => (
-                                    <div key={i} className="p-8 rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group relative overflow-hidden">
+                                    <div key={i} className="p-6 sm:p-8 rounded-[32px] sm:rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] -translate-y-1/2 translate-x-1/2"></div>
-                                        <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
-                                            <Award size={28} />
+                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                                            <Award size={24} className="sm:w-7 sm:h-7" />
                                         </div>
-                                        <h4 className="text-xl font-black text-white mb-3 tracking-tight">{ach.title || ach}</h4>
-                                        <p className="text-white/40 leading-relaxed text-sm font-medium">{ach.desc || "Outstanding contribution to the higher education ecosystem and research excellence."}</p>
+                                        <h4 className="text-lg sm:text-xl font-black text-white mb-2 sm:mb-3 tracking-tight">{ach.title || ach}</h4>
+                                        <p className="text-white/40 leading-relaxed text-xs sm:text-sm font-medium">{ach.desc || "Outstanding contribution to the higher education ecosystem and research excellence."}</p>
                                     </div>
                                 ))}
                             </div>
                         </section>
                     </div>
 
-                    <aside className="lg:col-span-4 space-y-8">
-                        <section className="p-10 rounded-[48px] bg-white/[0.03] border border-white/5 space-y-10 sticky top-32">
+                    <aside className="lg:col-span-4 space-y-6 sm:space-y-8">
+                        <section className="p-6 sm:p-10 rounded-[32px] sm:rounded-[48px] bg-white/[0.03] border border-white/5 space-y-8 sm:space-y-10 lg:sticky lg:top-32">
                             <div className="space-y-2">
                                 <h3 className="text-2xl font-black text-white font-jakarta">Connect</h3>
                                 <p className="text-xs text-white/30 uppercase tracking-widest font-black">Institutional Directory</p>
@@ -373,7 +391,7 @@ const UniversityPublicDetail = () => {
                             >
                                 Enroll in Curriculums <Rocket size={20} className="ml-3 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                             </ModernButton>
-                            <p className="text-[9px] text-center font-black uppercase tracking-[0.2em] text-white/20 mt-4">University verification code: {university.profile?.uvc || university.id?.slice(-8).toUpperCase()}</p>
+                            <p className="text-[9px] text-center font-black uppercase tracking-[0.2em] text-white/20 mt-4">University verification code: {university.profile?.uvc || (typeof university.id === 'string' ? university.id.slice(-8) : String(university.id)).toUpperCase()}</p>
                         </section>
                     </aside>
                 </div>
@@ -382,14 +400,14 @@ const UniversityPublicDetail = () => {
                 <div className="grid lg:grid-cols-2 gap-16 items-start">
                     {/* Media Spotlights */}
                     {(university.profile?.videos?.length > 0 || university.profile?.youtubeUrl) ? (
-                        <div className="space-y-10">
-                            <h3 className="text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
+                        <div className="space-y-6 sm:space-y-10">
+                            <h3 className="text-xl sm:text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
                                 <div className="w-2 h-8 bg-red-600 rounded-full"></div>
                                 Experience Spotlight
                             </h3>
-                            <div className="space-y-6">
+                            <div className="space-y-4 sm:space-y-6">
                                 {(university.profile?.videos?.length > 0 ? university.profile.videos : [university.profile?.youtubeUrl]).filter(url => !!url).map((url, vIdx) => (
-                                    <div key={vIdx} className="relative aspect-video rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl">
+                                    <div key={vIdx} className="relative aspect-video rounded-[32px] sm:rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl">
                                         <iframe
                                             className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
                                             src={`https://www.youtube.com/embed/${getYoutubeId(url)}?autoplay=0&controls=1`}
@@ -412,16 +430,16 @@ const UniversityPublicDetail = () => {
                             <div className="w-2 h-8 bg-amber-500 rounded-full"></div>
                             Institutional Accreditations
                         </h3>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             {(university.profile?.certificates || [
                                 { title: "ISO 9001:2015 Certified", issuer: "Quality Board" },
                                 { title: "Global Innovation Shield", issuer: "World Tech Forum" }
                             ]).slice(0, 4).map((cert, i) => (
-                                <div key={i} className="p-8 pb-10 rounded-[40px] bg-amber-500/[0.03] border border-amber-500/10 hover:border-amber-500/40 transition-all group flex flex-col items-center text-center">
-                                    <div className="w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-6 group-hover:rotate-12 transition-transform">
-                                        <Award size={28} />
+                                <div key={i} className="p-6 sm:p-8 pb-8 sm:pb-10 rounded-[32px] sm:rounded-[40px] bg-amber-500/[0.03] border border-amber-500/10 hover:border-amber-500/40 transition-all group flex flex-col items-center text-center">
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 sm:mb-6 group-hover:rotate-12 transition-transform">
+                                        <Award size={24} className="sm:w-7 sm:h-7" />
                                     </div>
-                                    <h4 className="text-md font-black text-white mb-2 leading-tight uppercase tracking-tight">{cert.title || cert}</h4>
+                                    <h4 className="text-sm sm:text-md font-black text-white mb-2 leading-tight uppercase tracking-tight">{cert.title || cert}</h4>
                                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 text-center">{cert.issuer || 'Official SkillDad Verification'}</p>
                                 </div>
                             ))}
@@ -439,18 +457,18 @@ const UniversityPublicDetail = () => {
                             </div>
                             <ModernButton variant="secondary" className="!px-10">View Virtual Tour</ModernButton>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                             {university.profile.gallery.slice(0, 4).map((img, i) => (
                                 <motion.div
                                     key={i}
                                     whileHover={{ y: -10 }}
-                                    className={`relative rounded-[40px] overflow-hidden border border-white/5 shadow-2xl group cursor-pointer ${
-                                        i === 0 ? 'md:col-span-2 md:row-span-2 aspect-square' : 'aspect-square'
+                                    className={`relative rounded-[32px] sm:rounded-[40px] overflow-hidden border border-white/5 shadow-2xl group cursor-pointer ${
+                                        i === 0 ? 'sm:col-span-2 sm:row-span-2 aspect-square' : 'aspect-square'
                                     }`}
                                 >
                                     <img src={img} alt={`Campus Spot ${i}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
-                                        <ImageIcon className="text-white" size={32} />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 sm:p-8">
+                                        <ImageIcon className="text-white sm:w-8 sm:h-8" size={24} />
                                     </div>
                                 </motion.div>
                             ))}

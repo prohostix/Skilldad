@@ -42,7 +42,8 @@ const {
   createManualPayment,
   approvePayment,
   rejectPayment,
-  getPendingProofs
+  getPendingProofs,
+  getReceipt
 } = require('../controllers/paymentController');
 
 // Import authentication middleware
@@ -231,53 +232,7 @@ router.get(
   statusCheckLimiter,
   receiptValidation,
   handleValidationErrors,
-  async (req, res) => {
-    try {
-      const Transaction = require('../models/payment/Transaction');
-      const transaction = await Transaction.findOne({
-        transactionId: req.params.transactionId,
-      });
-
-      if (!transaction) {
-        return res.status(404).json({
-          success: false,
-          message: 'Transaction not found',
-        });
-      }
-
-      // Check if user has access to this transaction
-      if (
-        req.user.role !== 'admin' &&
-        req.user.role !== 'finance' &&
-        transaction.student.toString() !== req.user._id.toString()
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: 'Not authorized to access this receipt',
-        });
-      }
-
-      if (!transaction.receiptUrl) {
-        return res.status(404).json({
-          success: false,
-          message: 'Receipt not available for this transaction',
-        });
-      }
-
-      // Redirect to receipt URL or serve the file
-      res.json({
-        success: true,
-        receiptUrl: transaction.receiptUrl,
-        receiptNumber: transaction.receiptNumber,
-      });
-    } catch (error) {
-      console.error('Receipt retrieval error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to retrieve receipt',
-      });
-    }
-  }
+  getReceipt
 );
 
 /**
