@@ -876,53 +876,212 @@ async function getUniversities(req, res) {
     }
 }
 
+// Helper to delete physical files from the uploads directory
+const deletePhysicalFiles = async (filePaths) => {
+    const fs = require('fs').promises;
+    const path = require('path');
+    const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
+    
+    for (const filePath of paths) {
+        if (!filePath || typeof filePath !== 'string') continue;
+        
+        // Remove /uploads/ prefix for path joining (if it's a relative URL)
+        const relativePath = filePath.startsWith('/uploads/') ? filePath.replace('/uploads/', '') : filePath;
+        const fullPath = path.join(global.BASE_UPLOAD_PATH || path.join(__dirname, '../uploads'), relativePath);
+        
+        try {
+            const fsSync = require('fs');
+            if (fsSync.existsSync(fullPath)) {
+                await fs.unlink(fullPath);
+                console.log(`[Cleanup] Successfully deleted file: ${fullPath}`);
+            }
+        } catch (err) {
+            console.warn(`[Cleanup] Failed to delete file: ${fullPath}`, err.message);
+        }
+    }
+};
+
 // @desc    Delete a university and its associated data
 // @route   DELETE /api/admin/universities/:id
 // @access  Private (Admin)
 async function deleteUniversity(req, res) {
-    try {
-        const { id } = req.params;
+    const { id } = req.params;
+    const pool = getPool();
+    const client = await pool.connect();
 
-        // 1. Check if university exists
-        const uniRes = await query('SELECT id, name, role FROM users WHERE id = $1', [id]);
+    try {
+        // 1. Fetch full university record
+        const uniRes = await client.query('SELECT id, name, role, profile_image, profile FROM users WHERE id = $1', [id]);
         const uni = uniRes.rows[0];
 
         if (!uni) {
+            client.release();
             return res.status(404).json({ message: 'University not found' });
         }
 
         if (uni.role !== 'university' && uni.role !== 'partner') {
+            client.release();
             return res.status(400).json({ message: 'User is not a university or partner' });
         }
 
-        // 2. Check for dependencies (Courses)
-        const coursesRes = await query('SELECT id FROM courses WHERE instructor_id = $1 LIMIT 1', [id]);
-        if (coursesRes.rows.length > 0) {
-            return res.status(400).json({ 
-                message: 'Cannot delete university: It has associated courses. Please delete or reassign courses first.' 
+        console.log(`[CascadeDelete] Starting full cleanup for ${uni.role}: ${uni.name} (${id})`);
+
+        // 2. Identify all related entities for file cleanup
+        const coursesRes = await client.query('SELECT id, thumbnail, brochure_url, modules FROM courses WHERE instructor_id = $1', [id]);
+        const courses = coursesRes.rows;
+        const courseIds = courses.map(c => c.id);
+
+        const examsRes = await client.query('SELECT id, question_paper_url FROM exams WHERE university_id = $1 OR (course_id = ANY($2))', [id, courseIds.length > 0 ? courseIds : ['_none_']]);
+        const exams = examsRes.rows;
+        const examIds = exams.map(e => e.id);
+
+        const questionsRes = await client.query('SELECT id, question_image FROM questions WHERE exam_id = ANY($1)', [examIds.length > 0 ? examIds : ['_none_']]);
+        const questions = questionsRes.rows;
+
+        const projectsRes = await client.query('SELECT id, file_url FROM projects WHERE student_id = $1 OR course_id = ANY($2)', [id, courseIds.length > 0 ? courseIds : ['_none_']]);
+        const projects = projectsRes.rows;
+
+        const docsRes = await client.query('SELECT id, file_url FROM documents WHERE user_id = $1', [id]);
+        const docs = docsRes.rows;
+
+        const payoutsRes = await client.query('SELECT id, screenshot_url FROM payouts WHERE partner_id = $1', [id]);
+        const payouts = payoutsRes.rows;
+
+        // 3. Build comprehensive list of files to delete
+        const filesToDelete = [];
+        
+        // University files
+        if (uni.profile_image) filesToDelete.push(uni.profile_image);
+        const profile = typeof uni.profile === 'string' ? JSON.parse(uni.profile) : (uni.profile || {});
+        if (profile.coverImage) filesToDelete.push(profile.coverImage);
+        if (Array.isArray(profile.gallery)) filesToDelete.push(...profile.gallery);
+        if (Array.isArray(profile.certificates)) filesToDelete.push(...profile.certificates);
+
+        // Course files
+        courses.forEach(c => {
+            if (c.thumbnail) filesToDelete.push(c.thumbnail);
+            if (c.brochure_url) filesToDelete.push(c.brochure_url);
+            // Handle videos in modules
+            if (Array.isArray(c.modules)) {
+                c.modules.forEach(m => {
+                    if (Array.isArray(m.videos)) {
+                        m.videos.forEach(v => {
+                            if (v.url && (v.url.startsWith('/uploads/') || !v.url.startsWith('http'))) {
+                                filesToDelete.push(v.url);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // Exam files
+        exams.forEach(e => {
+            if (e.question_paper_url) filesToDelete.push(e.question_paper_url);
+        });
+
+        // Question images
+        questions.forEach(q => {
+            if (q.question_image) filesToDelete.push(q.question_image);
+        });
+
+        // Project files
+        projects.forEach(p => {
+            if (p.file_url) filesToDelete.push(p.file_url);
+        });
+
+        // Document files
+        docs.forEach(d => {
+            if (d.file_url) filesToDelete.push(d.file_url);
+        });
+
+        // Payout screenshots
+        payouts.forEach(p => {
+            if (p.screenshot_url) filesToDelete.push(p.screenshot_url);
+        });
+
+        // 4. Perform Physical File Deletion
+        if (filesToDelete.length > 0) {
+            await deletePhysicalFiles(filesToDelete);
+        }
+
+        // Special cleanup for exam subdirectories
+        const fs = require('fs').promises;
+        const path = require('path');
+        for (const examId of examIds) {
+            const answerSheetDir = path.join(global.BASE_UPLOAD_PATH || path.join(__dirname, '../uploads'), 'exams', 'answer-sheets', examId);
+            try {
+                const fsSync = require('fs');
+                if (fsSync.existsSync(answerSheetDir)) {
+                    await fs.rm(answerSheetDir, { recursive: true, force: true });
+                    console.log(`[Cleanup] Deleted answer-sheet directory for exam ${examId}`);
+                }
+            } catch (err) {
+                console.warn(`[Cleanup] Failed to delete directory: ${answerSheetDir}`, err.message);
+            }
+        }
+
+        // 5. Database Deletion (Transaction)
+        await client.query('BEGIN');
+        try {
+            // Nullify student associations
+            await client.query('UPDATE users SET university_id = NULL WHERE university_id = $1', [id]);
+            await client.query('UPDATE users SET registered_by = NULL WHERE registered_by = $1', [id]);
+
+            if (courseIds.length > 0) {
+                // Course dependencies
+                await client.query('DELETE FROM progress WHERE course_id = ANY($1)', [courseIds]);
+                await client.query('DELETE FROM submissions WHERE course_id = ANY($1)', [courseIds]);
+                await client.query('DELETE FROM enrollments WHERE course_id = ANY($1)', [courseIds]);
+                await client.query('DELETE FROM projects WHERE course_id = ANY($1)', [courseIds]);
+                await client.query('DELETE FROM interactive_contents WHERE course_id = ANY($1)', [courseIds]);
+                await client.query('DELETE FROM live_sessions WHERE course_id = ANY($1)', [courseIds]);
+                await client.query('DELETE FROM payments WHERE course_id = ANY($1)', [courseIds]);
+                await client.query('DELETE FROM transactions WHERE course_id = ANY($1)', [courseIds]);
+            }
+
+            if (examIds.length > 0) {
+                // Exam dependencies
+                await client.query('DELETE FROM results WHERE exam_id = ANY($1)', [examIds]);
+                await client.query('DELETE FROM exam_submissions_new WHERE exam_id = ANY($1)', [examIds]);
+                await client.query('DELETE FROM questions WHERE exam_id = ANY($1)', [examIds]);
+                await client.query('DELETE FROM exams WHERE id = ANY($1)', [examIds]);
+            }
+
+            // University dependencies
+            await client.query('DELETE FROM payouts WHERE partner_id = $1', [id]);
+            await client.query('DELETE FROM discounts WHERE partner_id = $1', [id]);
+            await client.query('DELETE FROM live_sessions WHERE university_id = $1 OR instructor_id = $1', [id, id]);
+            await client.query('DELETE FROM documents WHERE user_id = $1', [id]);
+            
+            // Delete courses
+            if (courseIds.length > 0) {
+                await client.query('DELETE FROM courses WHERE id = ANY($1)', [courseIds]);
+            }
+
+            // Finally delete the university/partner
+            await client.query('DELETE FROM users WHERE id = $1', [id]);
+
+            await client.query('COMMIT');
+            
+            // Notify via WebSocket
+            if (socketService.notifyUserListUpdate) {
+                socketService.notifyUserListUpdate('deleted', { ...uni, _id: uni.id });
+            }
+
+            res.json({ 
+                success: true, 
+                message: 'University and all associated data (courses, exams, files) deleted successfully' 
             });
+        } catch (dbError) {
+            await client.query('ROLLBACK');
+            throw dbError;
+        } finally {
+            client.release();
         }
-
-        // 3. Check for Exams
-        const examsRes = await query('SELECT id FROM exams WHERE university_id = $1 LIMIT 1', [id]);
-        if (examsRes.rows.length > 0) {
-            return res.status(400).json({ 
-                message: 'Cannot delete university: It has associated exams.' 
-            });
-        }
-
-        // 4. Perform Deletion
-        await query('DELETE FROM users WHERE id = $1', [id]);
-
-        // Notify via WebSocket
-        if (socketService.notifyUserListUpdate) {
-            socketService.notifyUserListUpdate('deleted', { ...uni, _id: uni.id });
-        }
-
-        res.json({ message: 'University deleted successfully' });
     } catch (error) {
-        console.error('[deleteUniversity] Error:', error);
-        res.status(500).json({ message: error.message || 'Server error during deletion' });
+        console.error('[deleteUniversity] CRITICAL Cascade Error:', error);
+        res.status(500).json({ message: error.message || 'Server error during cascade deletion' });
     }
 }
 

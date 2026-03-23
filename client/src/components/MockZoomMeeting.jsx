@@ -99,125 +99,164 @@ const MockZoomMeeting = ({ isHost = false, onLeave }) => {
   }
 
   return (
-    <div className="relative w-full h-full min-h-[600px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-lg overflow-hidden">
-      {/* Mock Mode Banner */}
-      <div className="absolute top-0 left-0 right-0 bg-yellow-500/20 border-b border-yellow-500/30 px-4 py-2 z-50">
-        <p className="text-yellow-400 text-xs text-center font-medium">
-          🧪 MOCK MODE - Development Environment (No real Zoom connection)
+    <div className="relative w-full h-full min-h-[600px] bg-[#050505] rounded-xl overflow-hidden shadow-2xl border border-white/5">
+      {/* Premium Studio Background / Vignette */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 pointer-events-none z-10"></div>
+      
+      {/* Mock Mode Banner - Professional Style */}
+      <div className="absolute top-0 left-0 right-0 bg-amber-500/10 backdrop-blur-md border-b border-amber-500/20 px-4 py-1.5 z-[60]">
+        <p className="text-amber-500/80 text-[10px] text-center font-bold tracking-[0.2em] uppercase">
+          Studio Simulation Mode • {isHost ? 'Host Console' : 'Broadcasting View'}
         </p>
       </div>
 
-      {/* Video Grid */}
-      <div className="absolute inset-0 top-10 bottom-20 p-4 grid grid-cols-2 gap-4 overflow-auto">
-        {participants.map((participant) => (
-          <div
-            key={participant.id}
-            className="relative bg-gray-800/50 border border-white/10 rounded-lg overflow-hidden aspect-video flex items-center justify-center"
-          >
-            {participant.video ? (
-              <div className="w-full h-full bg-gradient-to-br from-blue-900/30 to-purple-900/30 flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
-                  {participant.name.charAt(0)}
+      {/* Main Broadcasting Area (Spotlight) */}
+      <div className="absolute inset-0 pt-10 pb-20 overflow-hidden flex items-center justify-center p-6">
+        <div className="relative w-full h-full max-w-5xl mx-auto rounded-2xl overflow-hidden bg-[#111] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] group">
+          {/* Main Video (Host) */}
+          {participants.find(p => p.isHost)?.video ? (
+            <div className="w-full h-full bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-center justify-center relative">
+              {/* Animated pulses for "Live" effect */}
+              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] from-primary/40 leading-none"></div>
+              
+              <div className="w-40 h-40 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-5xl font-black shadow-2xl relative z-10">
+                {participants.find(p => p.isHost)?.name.charAt(0)}
+                <div className="absolute -inset-4 bg-primary/20 rounded-full animate-ping opacity-30"></div>
+              </div>
+              
+              {/* Studio Overlay Labels */}
+              <div className="absolute top-6 left-6 flex items-center gap-3">
+                <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-md shadow-lg">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  <span className="text-white text-[10px] font-black tracking-widest uppercase">LIVE</span>
+                </div>
+                <div className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-md border border-white/10">
+                  <span className="text-white/80 text-[10px] font-bold tracking-widest uppercase">REC 00:45:12</span>
                 </div>
               </div>
-            ) : (
-              <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                <VideoOff className="w-12 h-12 text-white/30" />
-              </div>
-            )}
 
-            {/* Participant Info */}
-            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-              <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full">
-                <span className="text-white text-xs font-medium">{participant.name}</span>
-                {participant.isHost && (
-                  <span className="text-xs bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded-full">Host</span>
-                )}
-              </div>
-              {!participant.audio && (
-                <div className="bg-red-500/80 p-1.5 rounded-full">
-                  <MicOff className="w-3 h-3 text-white" />
+              {/* Speaker Identity Tag */}
+              <div className="absolute bottom-6 left-6">
+                <div className="bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-2xl flex flex-col">
+                  <span className="text-primary text-[10px] font-black tracking-widest uppercase mb-1">Speaker</span>
+                  <span className="text-white text-xl font-bold">{participants.find(p => p.isHost)?.name}</span>
+                  <span className="text-white/40 text-[10px] mt-1 font-medium tracking-wide uppercase italic">Lead Instructor @ SkillDad</span>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Control Bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-t border-white/10 px-6 py-4">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          {/* Left Controls */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggleAudio}
-              className={`p-3 rounded-lg transition-colors ${audioEnabled
-                  ? 'bg-white/10 hover:bg-white/20 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                }`}
-              title={audioEnabled ? 'Mute' : 'Unmute'}
-            >
-              {audioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-            </button>
-
-            <button
-              onClick={toggleVideo}
-              className={`p-3 rounded-lg transition-colors ${videoEnabled
-                  ? 'bg-white/10 hover:bg-white/20 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
-                }`}
-              title={videoEnabled ? 'Stop Video' : 'Start Video'}
-            >
-              {videoEnabled ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-            </button>
-          </div>
-
-          {/* Center Controls */}
-          <div className="flex items-center gap-3">
-            <button
-              className="p-3 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-              title="Participants"
-            >
-              <Users className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-3 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-              title="Chat"
-            >
-              <MessageSquare className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-3 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-              title="Share Screen"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-3 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
-              title="Settings"
-            >
-              <Settings className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Right Controls */}
-          <button
-            onClick={handleLeave}
-            className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            Leave
-          </button>
+          ) : (
+            <div className="w-full h-full bg-[#0a0a0a] flex items-center justify-center">
+              <div className="text-center">
+                <VideoOff className="w-20 h-20 text-white/10 mx-auto mb-4" />
+                <p className="text-white/20 font-bold uppercase tracking-widest text-xs">Camera is Off</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Participant Count */}
-      <div className="absolute top-14 right-4 bg-black/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
-        <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-white/60" />
-          <span className="text-white text-sm font-medium">{participants.length}</span>
+      {/* Participants Sidebar/Ribbon (Minimized) */}
+      <div className="absolute top-24 right-10 flex flex-col gap-3 z-50">
+        <div className="bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group/p relative cursor-pointer hover:bg-white/10 transition-colors">
+            <Users size={16} className="text-white/40 group-hover/p:text-primary transition-colors" />
+            <div className="absolute left-0 top-0 translate-x-[-110%] bg-black/80 p-2 rounded-lg border border-white/10 opacity-0 group-hover/p:opacity-100 pointer-events-none transition-opacity whitespace-nowrap">
+              <span className="text-white text-[10px] font-bold uppercase">{participants.length} Active Participants</span>
+            </div>
+          </div>
+          <div className="w-px h-6 bg-white/10"></div>
+          {participants.filter(p => !p.isHost).slice(0, 3).map((p, i) => (
+             <div key={p.id} className="w-10 h-10 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer shadow-lg">
+                <span className="text-white/60 text-xs font-bold">{p.name.charAt(0)}</span>
+             </div>
+          ))}
+          {participants.length > 4 && (
+            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+              <span className="text-white/40 text-[10px] font-bold">+{participants.length - 4}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Chat Preview Overlay (Bottom Left) */}
+      <div className="absolute bottom-28 left-10 z-50 pointer-events-none max-w-xs">
+        <div className="space-y-2 opacity-60">
+           <div className="bg-black/40 backdrop-blur-sm p-3 rounded-xl border border-white/10 flex gap-2 items-start">
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center text-[10px] text-blue-400 font-bold">S</div>
+              <div>
+                <p className="text-white/40 text-[9px] font-bold uppercase">Sarah M.</p>
+                <p className="text-white/90 text-[11px] leading-tight mt-0.5">This architecture is amazing! Love the Microservices approach.</p>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      {/* Professional Studio Control Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black via-[#0a0a0b]/95 to-transparent border-t border-white/5 flex items-center justify-center px-10 z-[60]">
+        <div className="w-full max-w-5xl flex items-center justify-between">
+          {/* Left: AV Controls */}
+          <div className="flex items-center gap-4">
+             <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 mr-2">
+                <button
+                  onClick={toggleAudio}
+                  className={`p-3 rounded-lg transition-all ${audioEnabled
+                      ? 'text-white/60 hover:text-white hover:bg-white/10'
+                      : 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                    }`}
+                >
+                  {audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}
+                </button>
+                <button
+                  onClick={toggleVideo}
+                  className={`p-3 rounded-lg transition-all ${videoEnabled
+                      ? 'text-white/60 hover:text-white hover:bg-white/10'
+                      : 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                    }`}
+                >
+                  {videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}
+                </button>
+             </div>
+
+             {isHost && (
+               <button className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2.5 rounded-xl border border-primary/20 transition-all group">
+                 <Share2 size={16} />
+                 <span className="text-[11px] font-black tracking-widest uppercase">Share Stream</span>
+               </button>
+             )}
+          </div>
+
+          {/* Center: Main Broadcast Actions */}
+          <div className="flex items-center gap-6">
+            <button className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-1 group">
+              <MessageSquare size={18} />
+              <span className="text-[9px] font-bold tracking-widest uppercase group-hover:text-primary transition-colors">Chat</span>
+            </button>
+            <button className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-1 group">
+              <Users size={18} />
+              <span className="text-[9px] font-bold tracking-widest uppercase group-hover:text-primary transition-colors">Audience</span>
+            </button>
+            <div className="w-px h-8 bg-white/10 mx-2"></div>
+            <button className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-1 group">
+              <Settings size={18} />
+              <span className="text-[9px] font-bold tracking-widest uppercase group-hover:text-primary transition-colors">Settings</span>
+            </button>
+          </div>
+
+          {/* Right: Exit Action */}
+          <div className="flex items-center gap-6">
+             {isHost && (
+               <div className="flex flex-col items-end mr-4">
+                 <span className="text-red-500 text-[10px] font-black tracking-[0.2em] uppercase mb-1">Broadcasting</span>
+                 <span className="text-white/40 text-[9px] font-semibold tabular-nums">01:14:45</span>
+               </div>
+             )}
+             <button
+                onClick={handleLeave}
+                className="group relative px-8 py-3 bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white text-[11px] font-black rounded-xl border border-red-500/30 hover:border-red-600 transition-all duration-300 tracking-[0.1em] shadow-[0_0_30px_rgba(239,68,68,0.1)] hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]"
+             >
+                {isHost ? 'END BROADCAST' : 'LEAVE STUDIO'}
+             </button>
+          </div>
         </div>
       </div>
     </div>

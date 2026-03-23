@@ -35,7 +35,17 @@ const Login = () => {
 
     useEffect(() => {
         if (user && user.token) {
-            navigate('/');
+            const redirectToDashboard = (role) => {
+                switch (role) {
+                    case 'admin': return '/admin/dashboard';
+                    case 'university': return '/university/dashboard';
+                    case 'partner': return '/partner/dashboard';
+                    case 'finance': return '/finance/dashboard';
+                    case 'student': return '/dashboard';
+                    default: return '/';
+                }
+            };
+            navigate(redirectToDashboard(user.role));
         }
         
         // Show session expired message
@@ -55,8 +65,20 @@ const Login = () => {
         try {
             const { data } = await axios.post('/api/users/login', formData);
             updateUser(data); // updates context + localStorage so Navbar re-renders
-            // Always go to home page after login — Dashboard button is in Navbar
-            navigate(from || '/');
+            
+            // Redirect based on role
+            const redirectToDashboard = (role) => {
+                switch (role) {
+                    case 'admin': return '/admin/dashboard';
+                    case 'university': return '/university/dashboard';
+                    case 'partner': return '/partner/dashboard';
+                    case 'finance': return '/finance/dashboard';
+                    case 'student': return '/dashboard';
+                    default: return '/';
+                }
+            };
+
+            navigate(from || redirectToDashboard(data.role));
         } catch (err) {
             setError(err.response?.data?.message || 'Check your neural credentials and try again.');
         } finally {

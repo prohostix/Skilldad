@@ -184,144 +184,174 @@ const SessionDetail = () => {
 
   // Show session details with join button
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0b2e] to-[#0a0118] p-4">
-      <div className="max-w-4xl mx-auto py-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#050505] p-6 lg:p-10">
+      <div className="max-w-5xl mx-auto">
         {/* Back Button */}
         <button
           onClick={() => navigate('/university/live-sessions')}
-          className="flex items-center gap-2 text-white/60 hover:text-white mb-6 transition-colors"
+          className="group flex items-center gap-3 text-white/40 hover:text-primary mb-10 transition-all"
         >
-          <ArrowLeft size={20} />
-          <span className="text-sm font-medium">Back to Sessions</span>
+          <div className="p-2 rounded-xl bg-white/5 border border-white/5 group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
+            <ArrowLeft size={18} />
+          </div>
+          <span className="text-xs font-black tracking-widest uppercase">Return to Hub</span>
         </button>
 
-        {/* Session Header */}
-        <GlassCard className="p-8 mb-6">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${session.status === 'live' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                  session.status === 'scheduled' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                    'bg-white/10 text-white/60 border border-white/20'
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Info Column */}
+          <div className="lg:col-span-2 space-y-8">
+            <GlassCard className="p-10 overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border shadow-lg ${
+                    session.status === 'live' 
+                      ? 'bg-red-600/10 text-red-500 border-red-600/20' 
+                      : session.status === 'scheduled'
+                        ? 'bg-amber-600/10 text-amber-500 border-amber-600/20'
+                        : 'bg-white/5 text-white/40 border-white/10'
                   }`}>
-                  {session.status === 'live' ? '🔴 Live Now' :
-                    session.status === 'scheduled' ? '📅 Scheduled' :
-                      '✓ Ended'}
+                    {session.status === 'live' ? '• Live Broadcast' : session.status === 'scheduled' ? 'Upcoming Session' : 'Archive available'}
+                  </div>
+                  {session.course?.title && (
+                    <span className="text-primary text-[10px] font-black uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10">
+                      {session.course.title}
+                    </span>
+                  )}
+                </div>
+
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">{session.topic}</h1>
+                <p className="text-white/50 text-base lg:text-lg leading-relaxed mb-10 max-w-2xl">{session.description}</p>
+
+                <div className="flex flex-wrap gap-8 pt-8 border-t border-white/5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5">
+                      <Calendar size={20} />
+                    </div>
+                    <div>
+                      <p className="text-white/20 text-[9px] font-black tracking-widest uppercase">Date</p>
+                      <p className="text-white text-sm font-bold">{formatDate(session.startTime)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5">
+                      <Clock size={20} />
+                    </div>
+                    <div>
+                      <p className="text-white/20 text-[9px] font-black tracking-widest uppercase">Schedule</p>
+                      <p className="text-white text-sm font-bold">{formatTime(session.startTime)} ({session.duration} min)</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">{session.topic}</h1>
-              <p className="text-white/60 text-sm mb-4">{session.description}</p>
+            </GlassCard>
 
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-2 text-white/60">
-                  <Calendar size={16} className="text-primary" />
-                  <span>{formatDate(session.startTime)}</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/60">
-                  <Clock size={16} className="text-primary" />
-                  <span>{formatTime(session.startTime)} · {session.duration} min</span>
-                </div>
-                <div className="flex items-center gap-2 text-white/60">
-                  <Users size={16} className="text-primary" />
-                  <span>{session.enrolledStudents?.length || 0} enrolled</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Instructor Info */}
-          {session.instructor && (
-            <div className="border-t border-white/10 pt-4">
-              <p className="text-xs text-white/40 mb-1">Instructor</p>
-              <p className="text-white font-medium">
-                {session.instructor.name || session.instructor.email}
-              </p>
-            </div>
-          )}
-        </GlassCard>
-
-        {/* Join Meeting Section */}
-        {session.status === 'live' && (
-          <GlassCard className="p-8 text-center border-primary/30 bg-primary/5">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center">
-              <Video size={32} className="text-primary animate-pulse" />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">
-              {isHost ? 'Start Your Session' : 'Join Live Session'}
-            </h2>
-            <p className="text-white/60 mb-6">
-              {isHost
-                ? 'Click below to start hosting this live session'
-                : 'The session is live. Click below to join the meeting'}
-            </p>
-            <ModernButton
-              onClick={handleStartMeeting}
-              className="bg-primary hover:bg-primary/90 text-white px-8 py-3 text-lg"
-            >
-              <Video size={20} />
-              {isHost ? 'Start Meeting' : 'Join Meeting'}
-            </ModernButton>
-          </GlassCard>
-        )}
-
-        {/* Scheduled Session Info */}
-        {session.status === 'scheduled' && (
-          <GlassCard className="p-8 text-center border-amber-500/30 bg-amber-500/5">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-amber-500/20 border-2 border-amber-500/40 flex items-center justify-center">
-              <Calendar size={32} className="text-amber-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Session Scheduled</h2>
-            <p className="text-white/60 mb-2">
-              This session will start on {formatDate(session.startTime)} at {formatTime(session.startTime)}
-            </p>
-            <p className="text-white/40 text-sm">
-              {isHost ? 'You will be able to start the meeting when the scheduled time arrives' : 'You will receive a notification when the session goes live'}
-            </p>
-          </GlassCard>
-        )}
-
-        {/* Ended Session Info */}
-        {session.status === 'ended' && (
-          <>
-            <GlassCard className="p-8 text-center mb-6">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center">
-                <svg className="w-8 h-8 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Session Ended</h2>
-              <p className="text-white/60 mb-2">This session has concluded</p>
-
-              {/* Recording Status */}
-              {session.recording?.status === 'completed' && (
-                <div className="mt-4">
-                  <p className="text-primary text-sm font-semibold mb-2">✓ Recording Available</p>
-                  {session.recording.durationMs && session.recording.fileSizeBytes && (
-                    <div className="flex items-center justify-center gap-4 text-xs text-white/60">
-                      <span>Duration: {formatDuration(session.recording.durationMs)}</span>
-                      <span>•</span>
-                      <span>Size: {formatFileSize(session.recording.fileSizeBytes)}</span>
+            {/* Join Section */}
+            {(session.status === 'live' || session.status === 'scheduled') && (
+              <GlassCard className={`p-10 border-2 transition-all duration-500 ${
+                session.status === 'live' ? 'border-primary/40 bg-primary/5' : 'border-white/5 bg-transparent'
+              }`}>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                  <div className="text-center md:text-left">
+                    <h2 className="text-2xl font-bold text-white mb-2">
+                       {session.status === 'live' ? (isHost ? 'Ready to Broadcast?' : 'The Studio is Live!') : 'Scheduled for Broadcast'}
+                    </h2>
+                    <p className="text-white/40 text-sm max-w-md">
+                      {session.status === 'live' 
+                        ? (isHost ? 'Your audience is waiting. Enter the studio to begin your session.' : 'Join now to participate in this interactive learning experience.')
+                        : `This session will go live at ${formatTime(session.startTime)}. Please return 5 minutes before the start time.`
+                      }
+                    </p>
+                  </div>
+                  
+                  {session.status === 'live' ? (
+                    <button
+                      onClick={handleStartMeeting}
+                      className="whitespace-nowrap px-10 py-4 bg-primary hover:bg-primary/90 text-white text-[11px] font-black tracking-widest uppercase rounded-2xl shadow-[0_10px_30px_rgba(79,70,229,0.4)] transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3"
+                    >
+                      <Video size={18} />
+                      {isHost ? 'Enter Studio' : 'Watch Broadcast'}
+                    </button>
+                  ) : (
+                    <div className="px-10 py-4 bg-white/5 border border-white/10 text-white/40 text-[10px] font-black tracking-widest uppercase rounded-2xl cursor-not-allowed italic">
+                      Waiting for Schedule
                     </div>
                   )}
                 </div>
+              </GlassCard>
+            )}
+          </div>
+
+          {/* Sidebar Column */}
+          <div className="space-y-8">
+            {/* Instructor Details */}
+            <GlassCard className="p-8">
+              <h3 className="text-white/20 text-[10px] font-black tracking-widest uppercase mb-6">Instructor in Charge</h3>
+              {session.instructor && (
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-primary/20 flex items-center justify-center text-primary text-xl font-black">
+                    {session.instructor.name?.charAt(0) || 'I'}
+                  </div>
+                  <div>
+                    <p className="text-white font-bold leading-tight">{session.instructor.name || session.instructor.email}</p>
+                    <p className="text-white/40 text-[10px] font-bold tracking-widest uppercase mt-1">Lead Instructor</p>
+                  </div>
+                </div>
               )}
-              {session.recording?.status === 'processing' && (
-                <p className="text-amber-400 text-sm mt-4">⏳ Recording is being processed...</p>
-              )}
-              {session.recording?.status === 'failed' && (
-                <p className="text-red-400 text-sm mt-4">✗ Recording failed to process</p>
-              )}
-              {!session.recording && (
-                <p className="text-white/40 text-sm mt-4">No recording available</p>
-              )}
+              <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/40">Engagement</span>
+                  <span className="text-white font-bold">{session.enrolledStudents?.length || 0} Students</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-white/40">Broadcasting Type</span>
+                  <span className="text-primary font-black uppercase tracking-widest text-[9px]">Premium Studio</span>
+                </div>
+              </div>
             </GlassCard>
 
-            {/* Recording Player */}
-            <ZoomRecordingPlayer
-              sessionId={sessionId}
-              onError={handleMeetingError}
-            />
-          </>
+            {/* Session ended / Recording */}
+            {session.status === 'ended' && (
+              <GlassCard className="p-8 bg-emerald-500/5 border-emerald-500/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <svg size={16} fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-white text-sm font-bold uppercase tracking-wide">Archived Content</h3>
+                </div>
+                <p className="text-white/40 text-xs leading-relaxed mb-6">This broadcast has concluded. You can access the recording below.</p>
+                
+                {session.recording?.status === 'completed' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="text-white/30 lowercase italic">duration: {formatDuration(session.recording.durationMs)}</span>
+                      <span className="text-white/30 lowercase italic">size: {formatFileSize(session.recording.fileSizeBytes)}</span>
+                    </div>
+                  </div>
+                )}
+              </GlassCard>
+            )}
+          </div>
+        </div>
+
+        {/* Recording Player Full Width */}
+        {session.status === 'ended' && (
+          <div className="mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <h2 className="text-xs font-black text-white/20 uppercase tracking-[0.3em] mb-6 mb-12 flex items-center gap-4">
+               <div className="h-px flex-1 bg-white/5"></div>
+               Review Broadcast Recording
+               <div className="h-px flex-1 bg-white/5"></div>
+            </h2>
+            <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/5">
+              <ZoomRecordingPlayer
+                sessionId={sessionId}
+                onError={handleMeetingError}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -1,0 +1,9 @@
+{
+  "appId": "com.skilldad.app",
+  "appName": "SkillDad",
+  "webDir": "dist",
+  "server": {
+    "url": "https://skilldad.com",
+    "cleartext": true
+  }
+}
