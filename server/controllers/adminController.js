@@ -1,4 +1,4 @@
-const { query } = require('../config/postgres');
+const { query, getPool } = require('../config/postgres');
 const sendEmail = require('../utils/sendEmail');
 const emailTemplates = require('../utils/emailTemplates');
 const socketService = require('../services/SocketService');
