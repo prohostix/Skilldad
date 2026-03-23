@@ -27,8 +27,17 @@ jobs:
 
       # Note: Actual deployment step depends on the specific AWS service (EC2, App Runner, etc.)
       # This is a placeholder for AWS App Runner deployment
-      - name: Deploy to AWS App Runner
+      - name: Deploy to EC2 via SSH
         if: github.ref == 'refs/heads/main'
-        run: |
-          echo "Deploying to AWS App Runner..."
-          # aws apprunner start-deployment --service-arn ${{ secrets.AWS_APP_RUNNER_SERVICE_ARN }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 13.233.85.18
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /var/www/skilldad
+            git fetch origin main
+            git reset --hard origin/main
+            cd server
+            npm install
+            pm2 restart skilldad-backend
