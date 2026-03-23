@@ -941,7 +941,7 @@ async function deleteUniversity(req, res) {
         const projectsRes = await client.query('SELECT id, file_url FROM projects WHERE student_id = $1 OR course_id = ANY($2)', [id, courseIds.length > 0 ? courseIds : ['_none_']]);
         const projects = projectsRes.rows;
 
-        const docsRes = await client.query('SELECT id, file_url FROM documents WHERE user_id = $1', [id]);
+        const docsRes = await client.query('SELECT id, file_url FROM documents WHERE university_id = $1 OR uploaded_by_id = $1', [id]);
         const docs = docsRes.rows;
 
         const payoutsRes = await client.query('SELECT id, screenshot_url FROM payouts WHERE partner_id = $1', [id]);
