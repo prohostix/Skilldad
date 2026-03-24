@@ -1050,7 +1050,7 @@ async function deleteUniversity(req, res) {
             // University dependencies
             await client.query('DELETE FROM payouts WHERE partner_id = $1', [id]);
             await client.query('DELETE FROM discounts WHERE partner_id = $1', [id]);
-            await client.query('DELETE FROM live_sessions WHERE university_id = $1 OR instructor_id = $1', [id, id]);
+            await client.query('DELETE FROM live_sessions WHERE university_id = $1 OR instructor_id = $2', [id, id]);
             await client.query('DELETE FROM documents WHERE user_id = $1', [id]);
             
             // Delete courses
