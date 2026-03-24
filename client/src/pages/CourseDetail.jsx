@@ -21,6 +21,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
+import { getMediaUrl } from '../utils/media';
 
 
 
@@ -46,13 +47,6 @@ const CourseDetail = () => {
         fetchCourse();
     }, [courseId]);
 
-
-    const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-    const getMediaUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
 
     const handleInquirySubmit = async (e) => {
         e.preventDefault();

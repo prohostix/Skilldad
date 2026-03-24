@@ -26,6 +26,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import { getMediaUrl } from '../../utils/media';
 
 const UniversityDetail = () => {
     const { id } = useParams();
@@ -210,13 +211,6 @@ const UniversityDetail = () => {
         }
     };
     
-    const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-    const getMediaUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
-
     const handleFacultyPhotoUpload = async (e, index) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -371,7 +365,7 @@ const UniversityDetail = () => {
                                     alt={university.name}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/128?text=UNI';
+                                        e.target.src = '/assets/placeholders/university.png';
                                     }}
                                 />
                             ) : (
@@ -462,7 +456,7 @@ const UniversityDetail = () => {
                                 src={getMediaUrl(university.profile.coverImage)} 
                                 alt="Cover" 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                                onError={(e) => { e.target.src = 'https://via.placeholder.com/400x200?text=COVER'; }}
+                                onError={(e) => { e.target.src = '/assets/placeholders/course-cover.png'; }}
                             />
                         ) : (
                             <div className="text-center text-white/40 group-hover:text-primary transition-colors">

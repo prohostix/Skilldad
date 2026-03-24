@@ -6,11 +6,11 @@ const whatsAppService = require('../services/WhatsAppService');
 const getFinanceStats = async (req, res) => {
     try {
         // Calculate total revenue from approved manual payments
-        const manualRevenueRes = await query("SELECT SUM(amount) as total FROM payments WHERE status = 'approved'");
+        const manualRevenueRes = await query("SELECT SUM(final_amount) as total FROM transactions WHERE status = 'success' AND transaction_id LIKE 'MAN-%'");
         const manualRevenue = parseFloat(manualRevenueRes.rows[0].total) || 0;
 
         // Calculate total revenue from successful gateway transactions
-        const gatewayRevenueRes = await query("SELECT SUM(CAST(final_amount AS NUMERIC)) as total FROM transactions WHERE status = 'success'");
+        const gatewayRevenueRes = await query("SELECT SUM(final_amount) as total FROM transactions WHERE status = 'success' AND transaction_id NOT LIKE 'MAN-%'");
         const gatewayRevenue = parseFloat(gatewayRevenueRes.rows[0].total) || 0;
 
         const totalRevenue = manualRevenue + gatewayRevenue;
@@ -37,11 +37,11 @@ const getFinanceStats = async (req, res) => {
         const totalPayoutsAmountRes = await query("SELECT SUM(amount) as total FROM payouts WHERE status = 'approved'");
 
         // Get payment counts
-        const pendingPaymentsCountRes = await query("SELECT COUNT(*) FROM payments WHERE status = 'pending'");
-        const approvedPaymentsCountRes = await query("SELECT COUNT(*) FROM payments WHERE status = 'approved'");
+        const pendingPaymentsCountRes = await query("SELECT COUNT(*) FROM transactions WHERE status = 'pending'");
+        const approvedPaymentsCountRes = await query("SELECT COUNT(*) FROM transactions WHERE status = 'success'");
 
         // Get gateway success count
-        const gatewaySuccessCountRes = await query("SELECT COUNT(*) FROM transactions WHERE status = 'success'");
+        const gatewaySuccessCountRes = await query("SELECT COUNT(*) FROM transactions WHERE status = 'success' AND transaction_id NOT LIKE 'MAN-%'");
 
         const totalEnrollmentsRes = await query("SELECT COUNT(*) FROM enrollments");
 
@@ -54,7 +54,7 @@ const getFinanceStats = async (req, res) => {
             approvedPayoutsCount: approvedPayoutsRes.rows.length,
             totalPayoutsAmount: parseFloat(totalPayoutsAmountRes.rows[0].total) || 0,
             pendingPaymentsCount: parseInt(pendingPaymentsCountRes.rows[0].count),
-            approvedPaymentsCount: parseInt(approvedPaymentsCountRes.rows[0].count) + parseInt(gatewaySuccessCountRes.rows[0].count),
+            approvedPaymentsCount: parseInt(approvedPaymentsCountRes.rows[0].count),
             totalEnrollments: parseInt(totalEnrollmentsRes.rows[0].count),
         });
     } catch (error) {
@@ -71,18 +71,19 @@ const getStudentPayments = async (req, res) => {
 
         // Simplified query for manual payments
         let manualSql = `
-            SELECT p.*, s.name as student_name, s.email as student_email, c.title as course_title, c.price as course_price, u.name as partner_name
-            FROM payments p
-            JOIN users s ON p.student_id = s.id
-            JOIN courses c ON p.course_id = c.id
-            LEFT JOIN users u ON p.partner_id = u.id
-            WHERE 1=1
+            SELECT t.*, s.name as student_name, s.email as student_email, c.title as course_title, c.price as course_price, u.name as partner_name
+            FROM transactions t
+            JOIN users s ON t.student_id = s.id
+            JOIN courses c ON t.course_id = c.id
+            LEFT JOIN users u ON c.instructor_id = u.id
+            WHERE t.transaction_id LIKE 'MAN-%'
         `;
         const params = [];
 
         if (status && status !== 'all') {
-            manualSql += ` AND p.status = $${params.length + 1}`;
-            params.push(status);
+            const pgStatus = status === 'approved' ? 'success' : status === 'rejected' ? 'failed' : status;
+            manualSql += ` AND t.status = $${params.length + 1}`;
+            params.push(pgStatus);
         }
 
         const manualRes = await query(manualSql, params);
@@ -93,20 +94,25 @@ const getStudentPayments = async (req, res) => {
             FROM transactions t
             JOIN users s ON t.student_id = s.id
             JOIN courses c ON t.course_id = c.id
-            WHERE t.status IN ('success', 'pending', 'failed')
+            WHERE t.transaction_id NOT LIKE 'MAN-%'
         `);
 
         const allPayments = [
-            ...manualRes.rows.map(r => ({ ...r, _id: r.id, isGateway: false })),
+            ...manualRes.rows.map(r => ({ 
+                ...r, 
+                _id: r.id, 
+                isGateway: false,
+                amount: parseFloat(r.final_amount),
+                status: r.status === 'success' ? 'approved' : r.status === 'failed' ? 'rejected' : 'pending'
+            })),
             ...gatewayRes.rows.map(r => {
-                const isManual = r.transaction_id?.startsWith('MAN-');
                 return {
                     ...r,
                     _id: r.id,
                     amount: parseFloat(r.final_amount),
                     status: r.status === 'success' ? 'approved' : r.status === 'failed' ? 'rejected' : 'pending',
-                    isGateway: !isManual,
-                    isManual: isManual,
+                    isGateway: true,
+                    isManual: false,
                     student: { name: r.student_name, email: r.student_email },
                     course: { title: r.course_title, price: r.course_price }
                 };
@@ -143,7 +149,7 @@ const updatePaymentStatus = async (req, res) => {
         let payment;
         if (isManualTxn) {
             const transRes = await query(`
-                SELECT t.*, s.name as student_name, s.email as student_email, c.title as course_title, t.transaction_id as id
+                SELECT t.*, s.name as student_name, s.email as student_email, c.title as course_title, t.id as id
                 FROM transactions t
                 JOIN users s ON t.student_id = s.id
                 JOIN courses c ON t.course_id = c.id
@@ -151,23 +157,24 @@ const updatePaymentStatus = async (req, res) => {
             `, [id]);
             payment = transRes.rows[0];
         } else {
-            const paymentRes = await query(`
-                SELECT p.*, s.name as student_name, s.email as student_email, c.title as course_title
-                FROM payments p
-                JOIN users s ON p.student_id = s.id
-                JOIN courses c ON p.course_id = c.id
-                WHERE p.id = $1
+            const transRes = await query(`
+                SELECT t.*, s.name as student_name, s.email as student_email, c.title as course_title
+                FROM transactions t
+                JOIN users s ON t.student_id = s.id
+                JOIN courses c ON t.course_id = c.id
+                WHERE t.id = $1
             `, [id]);
-            payment = paymentRes.rows[0];
+            payment = transRes.rows[0];
         }
 
         if (!payment) return res.status(404).json({ message: 'Payment not found' });
 
+        const pgStatus = status === 'approved' ? 'success' : status === 'rejected' ? 'failed' : status;
         await query(`
-            UPDATE ${tableName} 
+            UPDATE transactions
             SET status = $1, notes = $2, reviewed_by = $3, reviewed_at = NOW() 
             WHERE ${idColumn} = $4
-        `, [status, notes, req.user.id, id]);
+        `, [pgStatus, notes, req.user.id, id]);
 
         if (status === 'approved') {
             const enrollId = `enroll_${Date.now()}`;

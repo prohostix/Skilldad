@@ -16,6 +16,14 @@ import {
 import GlassCard from '../ui/GlassCard';
 
 const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', color = '#5B5CFF' }) => {
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) return <div className="h-[250px] sm:h-[300px] w-full bg-white/5 animate-pulse rounded-2xl" />;
+
     // Custom tooltip with Alyra dark theme
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {

@@ -1036,7 +1036,6 @@ async function deleteUniversity(req, res) {
                 await client.query('DELETE FROM projects WHERE course_id = ANY($1)', [courseIds]);
                 await client.query('DELETE FROM interactive_contents WHERE course_id = ANY($1)', [courseIds]);
                 await client.query('DELETE FROM live_sessions WHERE course_id = ANY($1)', [courseIds]);
-                await client.query('DELETE FROM payments WHERE course_id = ANY($1)', [courseIds]);
                 await client.query('DELETE FROM transactions WHERE course_id = ANY($1)', [courseIds]);
             }
 
