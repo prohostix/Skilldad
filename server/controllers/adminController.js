@@ -955,7 +955,16 @@ async function deleteUniversity(req, res) {
         const profile = typeof uni.profile === 'string' ? JSON.parse(uni.profile) : (uni.profile || {});
         if (profile.coverImage) filesToDelete.push(profile.coverImage);
         if (Array.isArray(profile.gallery)) filesToDelete.push(...profile.gallery);
-        if (Array.isArray(profile.certificates)) filesToDelete.push(...profile.certificates);
+        if (Array.isArray(profile.certificates)) {
+            profile.certificates.forEach(cert => {
+                if (cert.file_url) filesToDelete.push(cert.file_url);
+            });
+        }
+        if (Array.isArray(profile.faculty)) {
+            profile.faculty.forEach(fac => {
+                if (fac.image) filesToDelete.push(fac.image);
+            });
+        }
 
         // Course files
         courses.forEach(c => {
@@ -1005,22 +1014,6 @@ async function deleteUniversity(req, res) {
             await deletePhysicalFiles(filesToDelete);
         }
 
-        // Special cleanup for exam subdirectories
-        const fs = require('fs').promises;
-        const path = require('path');
-        for (const examId of examIds) {
-            const answerSheetDir = path.join(global.BASE_UPLOAD_PATH || path.join(__dirname, '../uploads'), 'exams', 'answer-sheets', examId);
-            try {
-                const fsSync = require('fs');
-                if (fsSync.existsSync(answerSheetDir)) {
-                    await fs.rm(answerSheetDir, { recursive: true, force: true });
-                    console.log(`[Cleanup] Deleted answer-sheet directory for exam ${examId}`);
-                }
-            } catch (err) {
-                console.warn(`[Cleanup] Failed to delete directory: ${answerSheetDir}`, err.message);
-            }
-        }
-
         // 5. Database Deletion (Transaction)
         await client.query('BEGIN');
         try {
@@ -1062,6 +1055,11 @@ async function deleteUniversity(req, res) {
             await client.query('DELETE FROM users WHERE id = $1', [id]);
 
             await client.query('COMMIT');
+            
+            // 6. Delete Physical Files after successful DB cleanup
+            if (filesToDelete.length > 0) {
+                await deletePhysicalFiles(filesToDelete);
+            }
             
             // Notify via WebSocket
             if (socketService.notifyUserListUpdate) {
@@ -1463,7 +1461,7 @@ const uploadUniversityCoverImage = async (req, res) => {
 // @access  Private (Admin)
 const updateUniversityProfile = async (req, res) => {
     try {
-        const { bio, location, website, phone, personnel, faculty, youtubeUrl, videos, gallery, certificates, achievements, profileImage, coverImage } = req.body;
+        const { bio, location, website, phone, personnel, faculty, youtubeUrl, videos, gallery, certificates, achievements, profileImage, coverImage, foundedYear } = req.body;
         const userRes = await query('SELECT role, bio, profile, profile_image FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
 
@@ -1484,6 +1482,7 @@ const updateUniversityProfile = async (req, res) => {
         updatedProfile.gallery = gallery !== undefined ? gallery : updatedProfile.gallery;
         updatedProfile.certificates = certificates !== undefined ? certificates : updatedProfile.certificates;
         updatedProfile.achievements = achievements !== undefined ? achievements : updatedProfile.achievements;
+        updatedProfile.foundedYear = foundedYear !== undefined ? foundedYear : updatedProfile.foundedYear;
         if (personnel !== undefined) updatedProfile.personnel = personnel;
         if (faculty !== undefined) updatedProfile.faculty = faculty;
 

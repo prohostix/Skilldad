@@ -55,7 +55,8 @@ const UniversityDetail = () => {
         faculty: [],
         certificates: [],
         achievements: [],
-        videos: []
+        videos: [],
+        foundedYear: ''
     });
     const [uploading, setUploading] = useState(false);
     const [uploadingCover, setUploadingCover] = useState(false);
@@ -91,7 +92,8 @@ const UniversityDetail = () => {
                 faculty: data.university.profile?.faculty || data.university.profile?.personnel || [],
                 certificates: data.university.profile?.certificates || [],
                 achievements: data.university.profile?.achievements || [],
-                videos: data.university.profile?.videos || (data.university.profile?.youtubeUrl ? [data.university.profile.youtubeUrl] : [])
+                videos: data.university.profile?.videos || (data.university.profile?.youtubeUrl ? [data.university.profile.youtubeUrl] : []),
+                foundedYear: data.university.profile?.foundedYear || ''
             });
         } catch (error) {
             console.error('Error fetching university details:', error);
@@ -729,6 +731,20 @@ const UniversityDetail = () => {
                                         onChange={(e) => setEditData({ ...editData, uvc: e.target.value })}
                                     />
                                 </div>
+
+                                <div>
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Founded Year</label>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-4 top-3 text-white/30" size={16} />
+                                        <input
+                                            type="text"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="e.g. 1920"
+                                            value={editData.foundedYear}
+                                            onChange={(e) => setEditData({ ...editData, foundedYear: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </GlassCard>
                     ) : (
@@ -757,6 +773,12 @@ const UniversityDetail = () => {
                                         <Phone size={16} className="text-white/30" />
                                         <span>{university.profile?.phone || 'No phone listed'}</span>
                                     </div>
+                                    {university.profile?.foundedYear && (
+                                        <div className="flex items-center text-white/80 space-x-3 text-sm">
+                                            <Calendar size={16} className="text-white/30" />
+                                            <span>Founded in {university.profile.foundedYear}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </GlassCard>
                         </div>

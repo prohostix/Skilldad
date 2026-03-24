@@ -12,9 +12,9 @@ import {
     Image as ImageIcon,
     Info,
     Mail,
-    Phone,
     Globe,
-    Rocket
+    Rocket,
+    Calendar
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
@@ -257,9 +257,9 @@ const UniversityPublicDetail = () => {
                                     </div>
                                     <div className="h-8 sm:h-12 w-px bg-white/10 hidden sm:block"></div>
                                     <div className="group min-w-[120px] sm:min-w-[140px]">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-amber-400 transition-colors">Accreditation</p>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-amber-400 transition-colors">Foundation</p>
                                         <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
-                                            <Star size={18} className="text-amber-400" /> Elite Rank
+                                            <Calendar size={18} className="text-amber-400" /> {university.profile?.foundedYear || university.established || 'Est. Heritage'}
                                         </div>
                                     </div>
                                     <div className="h-8 sm:h-12 w-px bg-white/10 hidden sm:block"></div>
