@@ -30,3 +30,4 @@ server/uploads/
 # IDE
 .vscode/
 .idea/
+client/android/
