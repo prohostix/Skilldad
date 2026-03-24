@@ -12,13 +12,18 @@ const autoGradingService = require('../services/autoGradingService');
 const getStudentExams = asyncHandler(async (req, res) => {
   const studentId = req.user.id;
 
+  console.log(`[Exams] Fetching exams for student: ${studentId}`);
+
   // 1. Get enrolled courses from PG
   const enrollRes = await query(`
       SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active'
   `, [studentId]);
   const courseIds = enrollRes.rows.map(r => r.course_id);
 
+  console.log(`[Exams] Active enrollments found: ${courseIds.length}`, courseIds);
+
   if (courseIds.length === 0) {
+    console.warn(`[Exams] No active enrollments for student: ${studentId}`);
     return res.json({ success: true, data: [] });
   }
 
@@ -32,6 +37,8 @@ const getStudentExams = asyncHandler(async (req, res) => {
       ORDER BY e.created_at DESC
   `, [courseIds]);
   const exams = examsRes.rows;
+
+  console.log(`[Exams] Exams found for courses: ${exams.length}`);
 
   // 3. Get questions and submissions from PG
   const examIds = exams.map(e => e.id);
@@ -78,7 +85,7 @@ const getStudentExams = asyncHandler(async (req, res) => {
  */
 const startExam = asyncHandler(async (req, res) => {
   const { examId } = req.params;
-  const studentId = req.user._id.toString();
+  const studentId = req.user.id || req.user._id;
 
   // 1. Check access in PG
   const accessResult = await examAccessService.checkExamAccess(examId, studentId);

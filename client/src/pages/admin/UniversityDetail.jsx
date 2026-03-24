@@ -62,6 +62,8 @@ const UniversityDetail = () => {
     const fileInputRef = useRef(null);
     const coverInputRef = useRef(null);
     const galleryInputRef = useRef(null);
+    const facultyPhotoInputRef = useRef(null);
+    const [uploadingFacultyIdx, setUploadingFacultyIdx] = useState(null);
 
     const fetchDetails = async () => {
         try {
@@ -207,6 +209,49 @@ const UniversityDetail = () => {
             setUploadingGallery(false);
         }
     };
+    
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+    const getMediaUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
+
+    const handleFacultyPhotoUpload = async (e, index) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('facultyPhoto', file);
+
+        setUploadingFacultyIdx(index);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            const { data } = await axios.post(`/api/admin/universities/${id}/faculty/${index}/upload-image`, formData, config);
+
+            showToast('Faculty photo updated', 'success');
+            
+            // Update local state
+            const updatedFaculty = [...editData.faculty];
+            updatedFaculty[index].image = data.imagePath;
+            setEditData({ ...editData, faculty: updatedFaculty });
+            
+            // Refresh details to ensure consistency
+            fetchDetails();
+        } catch (error) {
+            console.error('Error uploading faculty photo:', error);
+            showToast(error.response?.data?.message || 'Failed to upload faculty photo', 'error');
+        } finally {
+            setUploadingFacultyIdx(null);
+        }
+    };
 
     const handleAddPersonnel = () => {
         setEditData({
@@ -322,7 +367,7 @@ const UniversityDetail = () => {
                         >
                             {university.profileImage ? (
                                 <img
-                                    src={university.profileImage}
+                                    src={getMediaUrl(university.profileImage)}
                                     alt={university.name}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -414,7 +459,7 @@ const UniversityDetail = () => {
                     >
                         {university.profile?.coverImage ? (
                             <img 
-                                src={university.profile.coverImage} 
+                                src={getMediaUrl(university.profile.coverImage)} 
                                 alt="Cover" 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                                 onError={(e) => { e.target.src = 'https://via.placeholder.com/400x200?text=COVER'; }}
@@ -1090,13 +1135,30 @@ const UniversityDetail = () => {
                                                     />
                                                 </div>
                                                 <div className="flex-1 space-y-3">
-                                                    <input 
-                                                        type="url" 
-                                                        placeholder="Image URL" 
-                                                        value={person.image}
-                                                        onChange={(e) => handleUpdateFaculty(idx, 'image', e.target.value)}
-                                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
-                                                    />
+                                                    <div className="flex gap-2">
+                                                        <input 
+                                                            type="url" 
+                                                            placeholder="Image URL" 
+                                                            value={person.image}
+                                                            onChange={(e) => handleUpdateFaculty(idx, 'image', e.target.value)}
+                                                            className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                                                        />
+                                                        <button
+                                                            onClick={() => {
+                                                                setUploadingFacultyIdx(idx);
+                                                                facultyPhotoInputRef.current.click();
+                                                            }}
+                                                            disabled={uploadingFacultyIdx !== null}
+                                                            className="p-2 bg-primary/10 border border-primary/30 text-primary rounded-lg hover:bg-primary/20 transition-all flex items-center justify-center min-w-[40px]"
+                                                            title="Upload Photo"
+                                                        >
+                                                            {uploadingFacultyIdx === idx ? (
+                                                                <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                                                            ) : (
+                                                                <Camera size={16} />
+                                                            )}
+                                                        </button>
+                                                    </div>
                                                     <button 
                                                         onClick={() => handleRemoveFaculty(idx)}
                                                         className="w-full sm:w-auto self-start p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors flex items-center justify-center gap-2 border border-rose-500/20"
@@ -1114,6 +1176,14 @@ const UniversityDetail = () => {
                                             ></textarea>
                                         </div>
                                     ))}
+
+                                    <input 
+                                        type="file"
+                                        ref={facultyPhotoInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={(e) => handleFacultyPhotoUpload(e, uploadingFacultyIdx)}
+                                    />
                                     {editData.faculty.length === 0 && (
                                         <div className="text-center py-6 text-white/30 text-xs font-black uppercase">Click 'Add Faculty' to build directory</div>
                                     )}

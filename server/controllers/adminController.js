@@ -1545,6 +1545,55 @@ const uploadUniversityGalleryImages = async (req, res) => {
     }
 };
 
+// @desc    Upload faculty photo for a specific faculty member
+// @route   POST /api/admin/universities/:id/faculty/:index/upload-image
+// @access  Private (Admin)
+const uploadFacultyPhoto = async (req, res) => {
+    try {
+        const { id, index } = req.params;
+        const userRes = await query('SELECT role, profile FROM users WHERE id = $1', [id]);
+        const user = userRes.rows[0];
+
+        if (!user || user.role !== 'university') {
+            return res.status(404).json({ message: 'University not found' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'Please upload an image' });
+        }
+
+        const imagePath = `/uploads/${req.file.filename}`;
+        const profile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
+        
+        if (!Array.isArray(profile.faculty)) {
+            profile.faculty = [];
+        }
+
+        const idx = parseInt(index);
+        if (isNaN(idx) || idx < 0 || idx >= profile.faculty.length) {
+            // If it's a new faculty member or invalid index, we might just return the path
+            // But usually we update an existing one. Let's return the path for the frontend to handle.
+            return res.json({
+                message: 'Faculty photo uploaded',
+                imagePath: imagePath
+            });
+        }
+
+        profile.faculty[idx].image = imagePath;
+
+        await query('UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2', [JSON.stringify(profile), id]);
+
+        res.json({
+            message: 'Faculty photo updated',
+            imagePath: imagePath,
+            faculty: profile.faculty
+        });
+    } catch (error) {
+        console.error('[uploadFacultyPhoto] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error uploading faculty photo' });
+    }
+};
+
 
 module.exports = {
     updateEntity,
@@ -1584,5 +1633,6 @@ module.exports = {
     uploadUniversityProfileImage,
     uploadUniversityCoverImage,
     updateUniversityProfile,
-    uploadUniversityGalleryImages
+    uploadUniversityGalleryImages,
+    uploadFacultyPhoto
 };

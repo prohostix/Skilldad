@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides step-by-step instructions for deploying the Exam Management System in production. The system requires MongoDB, Redis (for WebSocket scaling), file storage (AWS S3 or local), and proper environment configuration.
+This guide provides step-by-step instructions for deploying the Exam Management System in production. The system requires PostgreSQL (via AWS RDS), Redis (for WebSocket scaling), file storage (AWS S3 or local), and proper environment configuration.
 
 ---
 
@@ -11,7 +11,7 @@ This guide provides step-by-step instructions for deploying the Exam Management 
 Before deployment, ensure you have:
 
 - Node.js 16.x or higher
-- MongoDB 5.0 or higher
+- PostgreSQL 14.x or higher (AWS RDS recommended)
 - Redis 6.x or higher (for WebSocket scaling)
 - AWS S3 account (or alternative file storage)
 - SMTP server for email notifications
@@ -32,9 +32,13 @@ NODE_ENV=production
 PORT=5000
 CLIENT_URL=https://yourdomain.com
 
-# Database
-MONGO_URI=mongodb://username:password@host:port/database?authSource=admin
-MONGO_URI_TEST=mongodb://localhost:27017/exam_system_test
+# Database (RDS PostgreSQL)
+PGHOST=skilldad.cj0mo4q44gde.ap-south-1.rds.amazonaws.com
+PGUSER=postgres
+PGDATABASE=postgres
+PGPASSWORD=your-rds-password
+PGPORT=5432
+PGSSL_CERT_PATH=certs/global-bundle.pem
 
 # JWT Authentication
 JWT_SECRET=your-super-secret-jwt-key-min-32-chars

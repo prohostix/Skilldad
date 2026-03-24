@@ -148,7 +148,7 @@ const FAQManagement = () => {
                     </h2>
                     {chartData.length > 0 ? (
                         <div className="h-[200px] w-full">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
+                            <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200} debounce={50}>
                                 <BarChart data={chartData} layout="vertical" margin={{ left: -20, right: 20 }}>
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#A78BFA', fontSize: 10 }} width={80} />

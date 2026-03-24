@@ -38,6 +38,7 @@ const {
     uploadUniversityCoverImage,
     updateUniversityProfile,
     uploadUniversityGalleryImages,
+    uploadFacultyPhoto,
     uploadPartnerLogoImage,
     uploadDirectorImage
 } = require('../controllers/adminController');
@@ -92,6 +93,7 @@ router.put('/universities/:id/profile', protect, checkAdmin, updateUniversityPro
 router.post('/universities/:id/upload-image', protect, checkAdmin, upload.single('profileImage'), uploadUniversityProfileImage);
 router.post('/universities/:id/upload-cover', protect, checkAdmin, upload.single('coverImage'), uploadUniversityCoverImage);
 router.post('/universities/:id/upload-gallery', protect, checkAdmin, upload.array('galleryImages', 10), uploadUniversityGalleryImages);
+router.post('/universities/:id/faculty/:index/upload-image', protect, checkAdmin, upload.single('facultyPhoto'), uploadFacultyPhoto);
 // Moved up
 router.put('/entities/:id', protect, checkAdmin, updateEntity);
 router.get('/partners/:id', protect, checkAdmin, getPartnerDetails);

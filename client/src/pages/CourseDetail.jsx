@@ -46,6 +46,14 @@ const CourseDetail = () => {
         fetchCourse();
     }, [courseId]);
 
+
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+    const getMediaUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+    };
+
     const handleInquirySubmit = async (e) => {
         e.preventDefault();
         setEnquiryStatus({ loading: true, success: false, error: null });
@@ -111,8 +119,20 @@ const CourseDetail = () => {
                                         <Sparkles size={14} /> <span>{course.category}</span>
                                     </div>
                                     {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && (
-                                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 border-l border-white/20 pl-4">
-                                            Partnered with <span className="text-white">{course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}</span>
+                                        <div className="flex items-center gap-3 border-l border-white/20 pl-4">
+                                            {(course.instructor?.profile?.profileImage || course.instructor?.profileImage) && (
+                                                <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 overflow-hidden flex-shrink-0">
+                                                    <img 
+                                                        src={getMediaUrl(course.instructor?.profile?.profileImage || course.instructor?.profileImage)} 
+                                                        alt="University Logo" 
+                                                        className="w-full h-full object-contain"
+                                                        onError={(e) => { e.target.style.display = 'none'; }}
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                                                Partnered with <span className="text-white">{course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}</span>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -192,7 +212,7 @@ const CourseDetail = () => {
                             className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl group"
                         >
                             <img
-                                src={course.thumbnail || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200`}
+                                src={getMediaUrl(course.thumbnail) || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200`}
                                 alt={course.title}
                                 className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
                                 onError={(e) => {
@@ -284,6 +304,39 @@ const CourseDetail = () => {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Faculty / Scientific Committee Section */}
+                        {course.instructor?.profile?.faculty && course.instructor?.profile?.faculty.length > 0 && (
+                            <section>
+                                <h2 className="text-3xl font-black mb-10 flex items-center space-x-4 tracking-tighter uppercase">
+                                    <Users className="text-emerald-400" size={32} />
+                                    <span>Scientific Committee / Faculty</span>
+                                </h2>
+                                <div className="grid sm:grid-cols-2 gap-8">
+                                    {course.instructor.profile.faculty.map((member, i) => (
+                                        <GlassCard key={i} className="!p-6 border-white/5 hover:border-emerald-500/20 transition-all group overflow-hidden">
+                                            <div className="flex gap-5">
+                                                <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform">
+                                                    <img 
+                                                        src={getMediaUrl(member.image)} 
+                                                        alt={member.name} 
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${member.name}&background=random`; }}
+                                                    />
+                                                </div>
+                                                <div className="flex-1 space-y-1">
+                                                    <h4 className="font-black text-lg text-white tracking-tight">{member.name}</h4>
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary-accent">{member.role || 'Member'}</p>
+                                                    <p className="text-xs text-text-secondary leading-relaxed font-inter line-clamp-3 opacity-80 pt-1">
+                                                        {member.description || 'Specialized faculty member dedicated to providing excellence in this academic path.'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </GlassCard>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
 
                         <div>
                             <h2 className="text-3xl font-black mb-10 flex items-center space-x-4 tracking-tighter uppercase">

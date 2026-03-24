@@ -36,8 +36,17 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /var/www/skilldad
+            # Force update codebase
             git fetch origin main
             git reset --hard origin/main
+            
+            # Install production dependencies
             cd server
-            npm install
-            pm2 restart skilldad-backend
+            npm install --production
+            
+            # Ensure certificates/RDS setup is intact
+            # PM2 Manage
+            pm2 restart skilldad-backend || pm2 start server.js --name skilldad-backend
+            pm2 save
+            
+            echo "Deployment to 13.233.85.18 successful!"

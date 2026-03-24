@@ -37,8 +37,49 @@ This document describes all environment variables used in the SkillDad platform.
 - **Example**: `CLIENT_URL=http://localhost:5173`
 
 ---
-
-## Database
+ 
+ ## Database
+ 
+ ### PostgreSQL (AWS RDS)
+ 
+ The platform uses PostgreSQL (hosted on AWS RDS) as its primary relational database.
+ 
+ #### `PGHOST`
+ - **Type**: String (Hostname)
+ - **Required**: Yes
+ - **Description**: RDS instance endpoint.
+ - **Example**: `PGHOST=skilldad.cj0mo4q44gde.ap-south-1.rds.amazonaws.com`
+ 
+ #### `PGUSER`
+ - **Type**: String
+ - **Required**: Yes
+ - **Description**: Database username.
+ - **Example**: `PGUSER=postgres`
+ 
+ #### `PGDATABASE`
+ - **Type**: String
+ - **Required**: Yes
+ - **Description**: Database name.
+ - **Example**: `PGDATABASE=postgres`
+ 
+ #### `PGPASSWORD`
+ - **Type**: String
+ - **Required**: Yes
+ - **Security**: High
+ - **Description**: Database password.
+ 
+ #### `PGPORT`
+ - **Type**: Number
+ - **Default**: `5432`
+ - **Description**: Database port.
+ 
+ #### `PGSSL_CERT_PATH`
+ - **Type**: String (File Path)
+ - **Required**: Yes (for RDS)
+ - **Description**: Path to the SSL certificate for secure RDS connections.
+ - **Example**: `PGSSL_CERT_PATH=certs/global-bundle.pem`
+ 
+ ### Redis
 
 ### `MONGO_URI`
 - **Type**: String (MongoDB Connection String)

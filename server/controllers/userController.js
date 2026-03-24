@@ -74,12 +74,23 @@ const loginUser = async (req, res) => {
         const { email, password } = req.body;
         const lowerEmail = email.toLowerCase().trim();
 
+        console.log(`[Login] Attempt for email: ${lowerEmail}`);
+
         const userRes = await query('SELECT * FROM users WHERE email = $1', [lowerEmail]);
         const user = userRes.rows[0];
 
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        if (!user) {
+            console.warn(`[Login] User not found for email: ${lowerEmail}`);
             return res.status(401).json({ message: 'Invalid email or password' });
         }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            console.warn(`[Login] Password mismatch for email: ${lowerEmail}`);
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        console.log(`[Login] Success for user: ${user.email} (Role: ${user.role})`);
 
         res.json({
             _id: user.id,
