@@ -432,7 +432,7 @@ const revokePermission = async (req, res) => {
 // @access  Private (Admin)
 const getAllStudents = async (req, res) => {
     try {
-        const { courseId, universityId } = req.query;
+        const { courseId, universityId, registeredBy } = req.query;
 
         let studentsQuery = `
             SELECT 
@@ -461,6 +461,11 @@ const getAllStudents = async (req, res) => {
         if (universityId && universityId !== 'all') {
             studentsQuery += ` AND u.university_id = $${params.length + 1}`;
             params.push(universityId);
+        }
+
+        if (registeredBy) {
+            studentsQuery += ` AND u.registered_by = $${params.length + 1}`;
+            params.push(registeredBy);
         }
 
         studentsQuery += ' ORDER BY u.created_at DESC';
