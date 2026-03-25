@@ -109,7 +109,7 @@ const loginUser = async (req, res) => {
 // @desc    Get current user profile
 const getMe = async (req, res) => {
     try {
-        const userRes = await query('SELECT id, name, email, role, profile FROM users WHERE id = $1', [req.user.id]);
+        const userRes = await query('SELECT id, name, email, role, profile, is_verified as "isVerified" FROM users WHERE id = $1', [req.user.id]);
         const user = userRes.rows[0];
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -119,7 +119,8 @@ const getMe = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
-            profile: user.profile
+            profile: user.profile,
+            isVerified: user.isVerified
         });
     } catch (error) {
         res.status(500).json({ message: error.message });

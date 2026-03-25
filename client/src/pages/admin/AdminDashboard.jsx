@@ -28,7 +28,17 @@ const AdminDashboard = () => {
     // Pre-seed with demo values so the dashboard NEVER shows a blank/loading screen
     const [stats, setStats] = useState({
         totalUsers: 0, totalCourses: 0, totalStudents: 0,
-        totalPartners: 0, totalRevenue: 0, totalTickets: 0
+        totalPartners: 0, totalRevenue: 0, totalTickets: 0,
+        dbSize: 'Calculating...',
+        chartData: [
+            { name: 'Mon', value: 0 },
+            { name: 'Tue', value: 0 },
+            { name: 'Wed', value: 0 },
+            { name: 'Thu', value: 0 },
+            { name: 'Fri', value: 0 },
+            { name: 'Sat', value: 0 },
+            { name: 'Sun', value: 0 },
+        ]
     });
     const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -40,15 +50,18 @@ const AdminDashboard = () => {
         return () => document.removeEventListener('click', handleClickOutside);
     }, [showExportMenu]);
 
-    const chartData = [
-        { name: 'Mon', value: 400 },
-        { name: 'Tue', value: 300 },
-        { name: 'Wed', value: 600 },
-        { name: 'Thu', value: 800 },
-        { name: 'Fri', value: 500 },
-        { name: 'Sat', value: 900 },
-        { name: 'Sun', value: 1100 },
-    ];
+    // Chart data now comes from stats.chartData state
+    const displayChartData = stats.chartData && stats.chartData.length > 0 
+        ? stats.chartData 
+        : [
+            { name: 'Mon', value: 400 },
+            { name: 'Tue', value: 300 },
+            { name: 'Wed', value: 600 },
+            { name: 'Thu', value: 800 },
+            { name: 'Fri', value: 500 },
+            { name: 'Sat', value: 900 },
+            { name: 'Sun', value: 1100 },
+        ];
 
     useEffect(() => {
         // Background fetch — never blocks rendering
@@ -277,8 +290,8 @@ const AdminDashboard = () => {
                     >
                         <ChartCard
                             title="Enrollment Momentum"
-                            subtitle=""
-                            data={chartData}
+                            subtitle="Last 7 Days"
+                            data={displayChartData}
                             type="area"
                             color="#5B5CFF"
                         />
@@ -304,12 +317,12 @@ const AdminDashboard = () => {
                             </div>
 
                             <div className="space-y-6">
-                                {[
+                                {(stats.recentActivities && stats.recentActivities.length > 0 ? stats.recentActivities : [
                                     { user: 'Sarah Jenkins', action: 'Enrolled in Python Masterclass', time: '2m ago', initial: 'SJ' },
                                     { user: 'Tech University', action: 'Added 50 new seats', time: '1h ago', initial: 'TU' },
                                     { user: 'Marcus Thorne', action: 'Certificate generated', time: '5h ago', initial: 'MT' },
                                     { user: 'Fin Global', action: 'Payout approved', time: '1d ago', initial: 'FG' },
-                                ].map((activity, i) => (
+                                ]).map((activity, i) => (
                                     <div key={i} className="flex items-center space-x-4 group cursor-pointer">
                                         <div className="w-10 h-10 rounded-xl bg-white/5 flex-shrink-0 flex items-center justify-center text-xs font-bold text-white/50 border border-white/10 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/30 transition-colors">
                                             {activity.initial}
@@ -348,13 +361,13 @@ const AdminDashboard = () => {
                             <div className="space-y-6 text-left">
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center text-xs">
-                                        <span className="text-white/50 font-bold uppercase tracking-widest">Storage Capacity</span>
-                                        <span className="font-bold text-primary">78%</span>
+                                        <span className="text-white/50 font-bold uppercase tracking-widest">Database Size (Allocated)</span>
+                                        <span className="font-bold text-primary">{stats.dbSize}</span>
                                     </div>
                                     <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            animate={{ width: '78%' }}
+                                            animate={{ width: '100%' }}
                                             transition={{ duration: 2, ease: "easeOut" }}
                                             className="h-full bg-gradient-to-r from-primary via-primary-light to-primary-dark rounded-full shadow-glow-purple"
                                         />
@@ -367,7 +380,7 @@ const AdminDashboard = () => {
                                     </div>
                                     <div className="flex items-center">
                                         <span className="w-2 h-2 rounded-full bg-primary mr-2 shadow-glow-purple"></span>
-                                        DB: Optimized
+                                        DB: {stats.dbSize ? 'Active' : 'Optimized'}
                                     </div>
                                 </div>
                             </div>

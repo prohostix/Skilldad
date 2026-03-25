@@ -51,12 +51,11 @@ const updateEntity = async (req, res) => {
         }
 
         const updatedDiscountRate = discountRate !== undefined && discountRate !== null ? Number(discountRate) : user.discount_rate;
-
         const result = await query(`
             UPDATE users 
             SET name = $1, email = $2, role = $3, discount_rate = $4, profile = $5, bio = $6, password = $7, profile_image = $8, updated_at = NOW()
             WHERE id = $9
-            RETURNING id, name, email, role, discount_rate, bio, is_verified, profile_image
+            RETURNING id, name, email, role, discount_rate, bio, is_verified as "isVerified", profile_image
         `, [updatedName, updatedEmail, updatedRole, updatedDiscountRate, JSON.stringify(updatedProfile), updatedBio, updatedPassword, updatedProfileImage, req.params.id]);
 
         const saved = result.rows[0];
@@ -87,7 +86,7 @@ const updateEntity = async (req, res) => {
             email: saved.email,
             role: saved.role,
             discountRate: saved.discount_rate,
-            isVerified: saved.is_verified,
+            isVerified: saved.isVerified,
             message: 'Entity updated successfully'
         });
     } catch (error) {
@@ -102,13 +101,67 @@ const updateEntity = async (req, res) => {
 // @desc    Get Global Stats (Admin)
 const getGlobalStats = async (req, res) => {
     try {
-        const [userCount, courseCount, studentCount, partnerCount, ticketCount] = await Promise.all([
+        const [userCount, courseCount, studentCount, partnerCount, ticketCount, revenueRes, dbSizeRes, chartRes, activityRes] = await Promise.all([
             query('SELECT COUNT(*) FROM users'),
             query('SELECT COUNT(*) FROM courses'),
             query("SELECT COUNT(*) FROM users WHERE role = 'student'"),
             query("SELECT COUNT(*) FROM users WHERE role = 'partner'"),
-            query("SELECT COUNT(*) FROM audit_logs WHERE action = 'error'") // Placeholder for support tickets
+            query("SELECT COUNT(*) FROM support_tickets WHERE status = 'open'"),
+            query("SELECT SUM(amount) as total FROM transactions WHERE status = 'success'"),
+            query("SELECT pg_database_size(current_database()) as size"),
+            query(`
+                WITH days AS (
+                    SELECT generate_series(
+                        CURRENT_DATE - INTERVAL '6 days',
+                        CURRENT_DATE,
+                        '1 day'::interval
+                    )::date as day
+                )
+                SELECT 
+                    TO_CHAR(d.day, 'Dy') as name,
+                    COUNT(e.id) as value
+                FROM days d
+                LEFT JOIN enrollments e ON d.day = e.enrollment_date::date
+                GROUP BY d.day
+                ORDER BY d.day
+            `),
+            query(`
+                (SELECT 
+                    u.name as user, 
+                    'Enrolled in ' || c.title as action,
+                    e.enrollment_date as time,
+                    u.name as initial
+                FROM enrollments e
+                JOIN users u ON e.student_id = u.id
+                JOIN courses c ON e.course_id = c.id
+                ORDER BY e.enrollment_date DESC
+                LIMIT 5)
+                UNION ALL
+                (SELECT 
+                    name as user,
+                    'Joined the platform' as action,
+                    created_at as time,
+                    name as initial
+                FROM users
+                WHERE role = 'partner'
+                ORDER BY created_at DESC
+                LIMIT 5)
+                ORDER BY time DESC
+                LIMIT 10
+            `)
         ]);
+
+        const totalRevenue = revenueRes.rows[0].total ? parseFloat(revenueRes.rows[0].total) : 0;
+        const dbSizeBytes = parseInt(dbSizeRes.rows[0].size);
+        const dbSizeMB = (dbSizeBytes / (1024 * 1024)).toFixed(2);
+
+        // Map activities to the format expected by the frontend
+        const recentActivities = activityRes.rows.map(act => ({
+            user: act.user,
+            action: act.action,
+            initial: act.initial.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+            time: new Date(act.time).toLocaleString() // Or a more "ago" like format if preferred
+        }));
 
         res.json({
             totalUsers: parseInt(userCount.rows[0].count),
@@ -116,9 +169,13 @@ const getGlobalStats = async (req, res) => {
             totalStudents: parseInt(studentCount.rows[0].count),
             totalPartners: parseInt(partnerCount.rows[0].count),
             totalTickets: parseInt(ticketCount.rows[0].count),
-            totalRevenue: 12500
+            totalRevenue: totalRevenue,
+            dbSize: `${dbSizeMB} MB`,
+            chartData: chartRes.rows,
+            recentActivities
         });
     } catch (error) {
+        console.error('getGlobalStats Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -133,7 +190,7 @@ const getAllUsers = async (req, res) => {
         const countRes = await query('SELECT COUNT(*) FROM users');
         const count = parseInt(countRes.rows[0].count);
 
-        const usersRes = await query('SELECT id as _id, name, email, role, profile, is_verified, created_at FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2', [pageSize, offset]);
+        const usersRes = await query('SELECT id as _id, name, email, role, profile, is_verified as "isVerified", created_at as "createdAt" FROM users ORDER BY created_at DESC LIMIT $1 OFFSET $2', [pageSize, offset]);
 
         res.json({ users: usersRes.rows, page, pages: Math.ceil(count / pageSize) });
     } catch (error) {
@@ -214,7 +271,7 @@ const verifyUser = async (req, res) => {
         }
 
         const newStatus = !userRes.rows[0].is_verified;
-        const result = await query('UPDATE users SET is_verified = $1, updated_at = NOW() WHERE id = $2 RETURNING id, is_verified', [newStatus, req.params.id]);
+        const result = await query('UPDATE users SET is_verified = $1, updated_at = NOW() WHERE id = $2 RETURNING id, is_verified as "isVerified"', [newStatus, req.params.id]);
         const updatedUser = result.rows[0];
 
         // Notify admins via WebSocket
@@ -222,7 +279,7 @@ const verifyUser = async (req, res) => {
 
         res.json({
             _id: updatedUser.id,
-            isVerified: updatedUser.is_verified,
+            isVerified: updatedUser.isVerified,
             message: 'Verification status updated successfully'
         });
     } catch (error) {
@@ -237,44 +294,64 @@ const verifyUser = async (req, res) => {
 const getPlatformAnalytics = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
-        let queryStr = 'SELECT role as _id, COUNT(*) as count FROM users';
+        let userStatsQuery = 'SELECT role as _id, COUNT(*) as count FROM users';
         const params = [];
 
         if (startDate && endDate) {
-            queryStr += ' WHERE created_at >= $1 AND created_at <= $2';
+            userStatsQuery += ' WHERE created_at >= $1 AND created_at <= $2';
             params.push(new Date(startDate), new Date(endDate));
         }
 
-        queryStr += ' GROUP BY role';
+        userStatsQuery += ' GROUP BY role';
+        const userStatsRes = await query(userStatsQuery, params);
 
-        const statsRes = await query(queryStr, params);
-        const userStats = statsRes.rows;
+        // Real enrollment sources
+        const sourcesRes = await query(`
+            SELECT 
+                CASE 
+                    WHEN university_id IS NOT NULL THEN 'University'
+                    WHEN partner_code IS NOT NULL THEN 'Partner'
+                    ELSE 'Direct'
+                END as source,
+                COUNT(*) as count
+            FROM users
+            WHERE role = 'student'
+            GROUP BY 1
+        `);
 
-        // Mock logic for sources and revenue - scaling based on duration if dates provided
-        let scaleFactor = 1;
-        if (startDate && endDate) {
-            const diffTime = Math.abs(new Date(endDate) - new Date(startDate));
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            scaleFactor = Math.max(0.1, Math.min(diffDays / 30, 2)); // Scale relative to a month
-        }
+        // Real revenue impact
+        const revenueImpactRes = await query(`
+            SELECT 
+                CASE 
+                    WHEN u.university_id IS NOT NULL THEN 'University'
+                    WHEN u.partner_code IS NOT NULL THEN 'Partner'
+                    ELSE 'Direct'
+                END as source,
+                COALESCE(SUM(t.amount), 0) as amount
+            FROM transactions t
+            JOIN users u ON t.user_id = u.id
+            WHERE t.status = 'success'
+            GROUP BY 1
+        `);
 
-        const enrollmentSources = [
-            { source: 'Direct', count: Math.round(450 * scaleFactor) },
-            { source: 'University', count: Math.round(320 * scaleFactor) },
-            { source: 'Partner', count: Math.round(180 * scaleFactor) }
-        ];
+        // Convert revenue impact array to object
+        const revenueImpact = {
+            direct: 0,
+            partner: 0,
+            university: 0
+        };
+        revenueImpactRes.rows.forEach(row => {
+            const key = row.source.toLowerCase();
+            revenueImpact[key] = parseFloat(row.amount);
+        });
 
         res.json({
-            userStats,
-            enrollmentSources,
-            revenueImpact: {
-                direct: Math.round(12000 * scaleFactor),
-                partner: Math.round(8500 * scaleFactor),
-                university: Math.round(15400 * scaleFactor)
-            }
+            userStats: userStatsRes.rows,
+            enrollmentSources: sourcesRes.rows,
+            revenueImpact
         });
     } catch (error) {
-        console.error('Analytics Error:', error);
+        console.error('getPlatformAnalytics Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -325,7 +402,7 @@ const getPartnerDetails = async (req, res) => {
 // @access  Private (Admin)
 const getUserById = async (req, res) => {
     try {
-        const userRes = await query('SELECT id as _id, name, email, role, profile, discount_rate, is_verified, created_at FROM users WHERE id = $1', [req.params.id]);
+        const userRes = await query('SELECT id as _id, name, email, role, profile, discount_rate, is_verified as "isVerified", created_at as "createdAt" FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
         if (user) {
             res.json(user);
@@ -374,17 +451,20 @@ const grantPermission = async (req, res) => {
             UPDATE users 
             SET is_verified = true, role = $1, updated_at = NOW()
             WHERE id = $2
-            RETURNING id, name, email, role, is_verified
+            RETURNING id, name, email, role, is_verified as "isVerified"
         `, [role, req.params.id]);
 
         const updatedUser = result.rows[0];
+
+        // Notify admins via WebSocket
+        socketService.notifyUserListUpdate('updated', { ...updatedUser, _id: updatedUser.id });
 
         res.json({
             _id: updatedUser.id,
             name: updatedUser.name,
             email: updatedUser.email,
             role: updatedUser.role,
-            isVerified: updatedUser.is_verified,
+            isVerified: updatedUser.isVerified,
             message: `Successfully granted ${role} permission`
         });
     } catch (error) {
@@ -407,17 +487,20 @@ const revokePermission = async (req, res) => {
             UPDATE users 
             SET is_verified = false, role = 'student', updated_at = NOW()
             WHERE id = $1
-            RETURNING id, name, email, role, is_verified
+            RETURNING id, name, email, role, is_verified as "isVerified"
         `, [req.params.id]);
 
         const updatedUser = result.rows[0];
+
+        // Notify admins via WebSocket
+        socketService.notifyUserListUpdate('updated', { ...updatedUser, _id: updatedUser.id });
 
         res.json({
             _id: updatedUser.id,
             name: updatedUser.name,
             email: updatedUser.email,
             role: updatedUser.role,
-            isVerified: updatedUser.is_verified,
+            isVerified: updatedUser.isVerified,
             message: 'Permission revoked successfully'
         });
     } catch (error) {
@@ -553,7 +636,7 @@ const updateStudent = async (req, res) => {
             UPDATE users 
             SET name = $1, email = $2, bio = $3, is_verified = $4, updated_at = NOW()
             WHERE id = $5
-            RETURNING id, name, email, bio, role, is_verified
+            RETURNING id, name, email, bio, role, is_verified as "isVerified"
         `, [updatedName, updatedEmail, updatedBio, updatedIsVerified, req.params.id]);
 
         const updatedStudent = result.rows[0];
@@ -564,7 +647,7 @@ const updateStudent = async (req, res) => {
             email: updatedStudent.email,
             bio: updatedStudent.bio,
             role: updatedStudent.role,
-            isVerified: updatedStudent.is_verified
+            isVerified: updatedStudent.isVerified
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
