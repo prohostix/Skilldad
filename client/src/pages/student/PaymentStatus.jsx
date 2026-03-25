@@ -458,7 +458,7 @@ const PaymentStatus = () => {
 
                                 {transaction.gstAmount > 0 && (
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-400">GST (18%)</span>
+                                        <span className="text-gray-400">GST</span>
                                         <span className="text-white font-semibold">
                                             ₹{parseFloat(transaction.gstAmount).toFixed(2)}
                                         </span>

@@ -191,12 +191,13 @@ const getUsers = async (req, res) => {
                 whereClauses.push(`role = $${queryParams.length + 1}`);
                 queryParams.push(role);
             }
+            const pId = partnerId || req.query.registeredBy;
             if (universityId) {
                 whereClauses.push(`university_id = $${queryParams.length + 1}`);
                 queryParams.push(universityId);
-            } else if (partnerId) {
+            } else if (pId) {
                 whereClauses.push(`registered_by = $${queryParams.length + 1}`);
-                queryParams.push(partnerId);
+                queryParams.push(pId);
             }
         }
 
