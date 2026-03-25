@@ -161,24 +161,74 @@ const updateProfile = async (req, res) => {
 // @desc    Get all users (Admin)
 const getUsers = async (req, res) => {
     try {
-        const { role } = req.query;
+        const { role, universityId, partnerId } = req.query;
+        const requesterRole = req.user.role?.toLowerCase();
+        const requesterId = req.user._id || req.user.id;
+        
         let usersRes;
-        if (role) {
-            usersRes = await query('SELECT id as _id, name, email, role, profile, created_at FROM users WHERE role = $1 ORDER BY created_at DESC', [role]);
+        
+        let queryStr = 'SELECT id as _id, name, email, role, profile, created_at FROM users';
+        let queryParams = [];
+        let whereClauses = [];
+
+        // Security: If not admin, restrict visibility
+        if (requesterRole !== 'admin') {
+            if (requesterRole === 'university') {
+                // Universities can see students they've registered or students associated with them
+                whereClauses.push(`(role = 'student' AND (university_id = $${queryParams.length + 1} OR registered_by = $${queryParams.length + 1}))`);
+                queryParams.push(requesterId);
+            } else if (requesterRole === 'partner') {
+                // Partners can ONLY see students they have specifically registered
+                whereClauses.push(`(role = 'student' AND registered_by = $${queryParams.length + 1})`);
+                queryParams.push(requesterId);
+            } else {
+                // Other users see nothing by default
+                whereClauses.push('1 = 0');
+            }
         } else {
-            usersRes = await query('SELECT id as _id, name, email, role, profile, created_at FROM users ORDER BY created_at DESC');
+            // Admin can use filters normally
+            if (role) {
+                whereClauses.push(`role = $${queryParams.length + 1}`);
+                queryParams.push(role);
+            }
+            if (universityId) {
+                whereClauses.push(`university_id = $${queryParams.length + 1}`);
+                queryParams.push(universityId);
+            } else if (partnerId) {
+                whereClauses.push(`registered_by = $${queryParams.length + 1}`);
+                queryParams.push(partnerId);
+            }
         }
 
-        // Add enrollment counts for students
+        if (whereClauses.length > 0) {
+            queryStr += ' WHERE ' + whereClauses.join(' AND ');
+        }
+
+        queryStr += ' ORDER BY created_at DESC';
+        usersRes = await query(queryStr, queryParams);
+
+        // Add enrollment data for students
         const users = usersRes.rows;
         if (role === 'student' || !role) {
-            const enrollmentsRes = await query('SELECT student_id, COUNT(*) as count FROM enrollments GROUP BY student_id');
-            const enrollMap = {};
-            enrollmentsRes.rows.forEach(r => enrollMap[r.student_id] = r.count);
+            const enrollmentsRes = await query(`
+                SELECT e.student_id, c.title as course_title
+                FROM enrollments e
+                JOIN courses c ON e.course_id = c.id
+            `);
+            
+            const studentEnrollments = {};
+            enrollmentsRes.rows.forEach(r => {
+                if (!studentEnrollments[r.student_id]) {
+                    studentEnrollments[r.student_id] = [];
+                }
+                studentEnrollments[r.student_id].push(r.course_title);
+            });
 
             const enriched = users.map(u => ({
                 ...u,
-                enrollmentCount: enrollMap[u._id] || 0
+                enrollmentCount: studentEnrollments[u._id]?.length || 0,
+                courses: studentEnrollments[u._id] || [],
+                course: studentEnrollments[u._id]?.[0] || 'No Enrollment' // Maintain backward compatibility
             }));
             return res.json(enriched);
         }

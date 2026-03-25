@@ -75,12 +75,65 @@ const registerStudent = async (req, res) => {
     }
 };
 
+// @desc    Get all students enrolled through this partner
+const getPartnerStudents = async (req, res) => {
+    try {
+        // Fetch students directly registered by the partner OR who used one of the partner's codes
+        const studentsRes = await query(`
+            SELECT 
+                u.id as _id, u.name, u.email, u.profile, u.partner_code, u.created_at,
+                (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = u.id) as enrollments_count
+            FROM users u
+            WHERE (u.registered_by = $1 OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1))
+            AND u.role = 'student'
+            ORDER BY u.created_at DESC
+        `, [req.user.id]);
+
+        // Enrich with progress data if needed (simplified for now)
+        res.json(studentsRes.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get payout history for the partner
+const getPayoutHistory = async (req, res) => {
+    try {
+        const payoutRes = await query(`
+            SELECT * FROM payouts 
+            WHERE partner_id = $1 
+            ORDER BY created_at DESC
+        `, [req.user.id]);
+        res.json(payoutRes.rows);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Request a new payout
+const requestPayout = async (req, res) => {
+    const { amount, method = 'bank_transfer' } = req.body;
+    try {
+        if (!amount || amount <= 0) return res.status(400).json({ message: 'Invalid amount' });
+
+        const id = `payout_${Date.now()}`;
+        await query(`
+            INSERT INTO payouts (id, partner_id, amount, status, method, created_at, updated_at)
+            VALUES ($1, $2, $3, 'pending', $4, NOW(), NOW())
+        `, [id, req.user.id, amount, method]);
+
+        res.status(201).json({ success: true, message: 'Payout request submitted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getPartnerStats,
     createDiscount,
     getDiscounts,
     registerStudent,
-    requestPayout: async (req, res) => res.json({ success: true }),
-    getPartnerStudents: async (req, res) => res.json([]),
-    getPayoutHistory: async (req, res) => res.json([])
+    requestPayout,
+    getPartnerStudents,
+    getPayoutHistory
 };

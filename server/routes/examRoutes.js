@@ -5,6 +5,29 @@ const { query } = require('../config/postgres');
 const auditLogService = require('../services/auditLogService');
 const examController = require('../controllers/examController');
 const examSubmissionController = require('../controllers/examSubmissionController');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for student answer sheet uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const dest = path.join(process.cwd(), 'uploads', 'exams', 'answers');
+        if (!fs.existsSync(dest)) {
+            fs.mkdirSync(dest, { recursive: true });
+        }
+        cb(null, dest);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, `answer-${req.params.examId}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
+});
 
 // Standardized PG implementation for Exam Routes
 
@@ -118,7 +141,7 @@ router.post('/admin/schedule', protect, authorize('admin', 'university'), async 
             title, description, course, university,
             examType, scheduledStartTime, scheduledEndTime,
             duration, totalMarks, passingScore, isMockExam, instructions,
-            mandatedSlotId
+            mandatedSlotId, linkedPaper, answerKey
         } = req.body;
 
         const newId = `exam_${Date.now()}`;
@@ -133,15 +156,17 @@ router.post('/admin/schedule', protect, authorize('admin', 'university'), async 
                 id, title, description, course_id, university_id, 
                 exam_type, scheduled_start, scheduled_end, 
                 duration, total_marks, passing_score, created_by_id, 
-                is_mock_exam, instructions, status, mandated_slot_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'scheduled', $15)
+                is_mock_exam, instructions, status, mandated_slot_id,
+                linked_paper_id, answer_key_id
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'scheduled', $15, $16, $17)
         `, [
             newId, title, description, courseId, universityId,
             examType || 'online-mcq',
             scheduledStartTime || null,
             scheduledEndTime || null,
             duration, totalMarks || 100, passingScore || 40, createdById,
-            isMockExam || false, instructions || null, mandatedSlotId || null
+            isMockExam || false, instructions || null, mandatedSlotId || null,
+            linkedPaper || null, answerKey || null
         ]);
 
         await auditLogService.logAuditEvent({
@@ -174,10 +199,12 @@ router.post('/', protect, authorize('admin', 'university'), async (req, res, nex
 router.get('/student/my-exams', protect, examController.getStudentExams);
 router.get('/:id', protect, examController.getExam);
 router.post('/:examId/start', protect, examController.startExam);
+router.get('/:id/question-paper', protect, examController.downloadQuestionPaper);
 
 // Submission related routes
 router.post('/:submissionId/answer', protect, examSubmissionController.submitAnswer);
 router.post('/:submissionId/submit', protect, examSubmissionController.submitExam);
+router.post('/:examId/upload-answer', protect, upload.single('document'), examSubmissionController.uploadAnswerSheet);
 router.get('/exam/:examId/my-submission', protect, examSubmissionController.getMySubmission);
 
 // Admin/University Result/Grading routes

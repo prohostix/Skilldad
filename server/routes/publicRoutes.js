@@ -47,7 +47,7 @@ router.get('/universities', async (req, res) => {
                 )) as "studentCount",
                 (SELECT COUNT(*) FROM courses c WHERE c.instructor_id = u.id) as "courseCount"
             FROM users u
-            WHERE u.role = 'university' AND u.is_verified = true
+            WHERE LOWER(u.role) = 'university' AND u.is_verified = true
             ORDER BY u.name ASC
         `);
 

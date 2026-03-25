@@ -56,6 +56,7 @@ const UniversityManagement = () => {
         discountRate: 0
     });
     const [searchQuery, setSearchQuery] = useState('');
+    const [roleFilter, setRoleFilter] = useState('all');
     const [openAudits, setOpenAudits] = useState(false);
     const [openAssign, setOpenAssign] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState('');
@@ -246,10 +247,12 @@ const UniversityManagement = () => {
         }
     };
 
-    const filteredPartners = partners.filter(p =>
-        p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredPartners = (partners || []).filter(p => {
+        const matchesSearch = p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.email?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesRole = roleFilter === 'all' || p.role === roleFilter;
+        return matchesSearch && matchesRole;
+    });
 
     const handleManageCourses = (partner) => {
         setSelectedPartner(partner);
@@ -505,6 +508,26 @@ const UniversityManagement = () => {
                 <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <h3 className="text-base font-semibold text-white font-inter">Partner Network</h3>
                     <div className="flex space-x-2">
+                        <div className="flex bg-white/5 p-1 rounded-xl">
+                            <button
+                                onClick={() => setRoleFilter('all')}
+                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${roleFilter === 'all' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                            >
+                                All
+                            </button>
+                            <button
+                                onClick={() => setRoleFilter('university')}
+                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${roleFilter === 'university' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                            >
+                                Universities
+                            </button>
+                            <button
+                                onClick={() => setRoleFilter('partner')}
+                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${roleFilter === 'partner' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                            >
+                                Partners
+                            </button>
+                        </div>
                         <div className="relative">
                             <input
                                 type="text"

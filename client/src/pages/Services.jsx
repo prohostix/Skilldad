@@ -101,7 +101,16 @@ const Services = () => {
                                         </p>
 
                                         <div className="space-y-4">
-                                            <h4 className="text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-accent to-white uppercase tracking-wider mb-2">Key Highlights</h4>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setExpandedId(expandedId === service.id ? null : service.id);
+                                                }}
+                                                className="text-xs md:text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-accent to-white uppercase tracking-wider mb-2 hover:from-white hover:to-primary transition-all duration-300 flex items-center gap-2 cursor-pointer group/highlights"
+                                            >
+                                                Key Highlights 
+                                                <LucideIcons.ArrowRight size={14} className={`text-primary transition-transform duration-300 ${expandedId === service.id ? 'rotate-90' : 'group-hover/highlights:translate-x-1'}`} />
+                                            </button>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 {(service.features || []).slice(0, expandedId === service.id ? service.features.length : 4).map((feature, idx) => (
                                                     <div key={idx} className="flex items-center space-x-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 group-hover:border-primary/20 transition-all">

@@ -621,8 +621,34 @@ const ExamManagement = () => {
                                     {console.log('[Grading UI] Answers:', selectedSubmission.answers)}
                                     {(!selectedSubmission.answers || selectedSubmission.answers.length === 0) ? (
                                         <div className="p-8 bg-white/[0.02] border border-white/5 rounded-2xl text-center">
-                                            <p className="text-white/40 text-sm">No answers found in this submission</p>
-                                            <p className="text-white/20 text-xs mt-2">This might be a PDF-based exam or the submission is incomplete</p>
+                                            {selectedSubmission.answer_sheet_url ? (
+                                                <div className="space-y-4">
+                                                    <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
+                                                        <FileText size={32} className="text-emerald-400" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-white font-bold">Answer Sheet Uploaded</p>
+                                                        <p className="text-white/40 text-xs mt-1">{selectedSubmission.answer_sheet_name || 'paper-submission.pdf'}</p>
+                                                    </div>
+                                                    <ModernButton 
+                                                        size="sm" 
+                                                        onClick={() => {
+                                                            const url = selectedSubmission.answer_sheet_url.startsWith('http') 
+                                                                ? selectedSubmission.answer_sheet_url 
+                                                                : `${import.meta.env.VITE_API_URL || ''}/${selectedSubmission.answer_sheet_url}`;
+                                                            window.open(url, '_blank');
+                                                        }}
+                                                    >
+                                                        <Download size={16} className="mr-2" />
+                                                        Download Answer Sheet
+                                                    </ModernButton>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <p className="text-white/40 text-sm">No answers found in this submission</p>
+                                                    <p className="text-white/20 text-xs mt-2">This might be a PDF-based exam or the submission is incomplete</p>
+                                                </>
+                                            )}
                                         </div>
                                     ) : (
                                         selectedSubmission.answers.map((answer, idx) => {

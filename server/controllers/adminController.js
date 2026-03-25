@@ -439,11 +439,16 @@ const getAllStudents = async (req, res) => {
                 u.id as _id, u.name, u.email, u.role, u.profile, 
                 u.university_id as "universityId", u.registered_by as "registeredBy", 
                 u.is_verified as "isVerified", u.created_at as "createdAt",
-                COUNT(e.id) as "enrollmentCount",
-                MAX(c.title) as "course"
+                COALESCE(e_count.count, 0) as "enrollmentCount",
+                c.title as "course"
             FROM users u
-            LEFT JOIN enrollments e ON u.id = e.student_id
-            LEFT JOIN courses c ON e.course_id = c.id
+            LEFT JOIN (
+                SELECT student_id, COUNT(*) as count, MAX(created_at) as last_enrollment
+                FROM enrollments 
+                GROUP BY student_id
+            ) e_count ON u.id = e_count.student_id
+            LEFT JOIN enrollments e_latest ON u.id = e_latest.student_id AND e_latest.created_at = e_count.last_enrollment
+            LEFT JOIN courses c ON e_latest.course_id = c.id
             WHERE u.role = 'student'
         `;
         const params = [];
@@ -458,7 +463,7 @@ const getAllStudents = async (req, res) => {
             params.push(universityId);
         }
 
-        studentsQuery += ' GROUP BY u.id ORDER BY u.created_at DESC';
+        studentsQuery += ' ORDER BY u.created_at DESC';
 
         const studentsRes = await query(studentsQuery, params);
         res.json(studentsRes.rows.map(s => ({
@@ -867,7 +872,7 @@ async function getUniversities(req, res) {
                 discount_rate as "discountRate",
                 created_at
             FROM users 
-            WHERE role = 'university' OR role = 'partner' 
+            WHERE LOWER(role) = 'university'
             ORDER BY created_at DESC
         `);
         res.json(resSet.rows);
@@ -1303,9 +1308,9 @@ const adminEnrollStudent = async (req, res) => {
         }
 
         await query(`
-            INSERT INTO payments (id, student_id, course_id, amount, payment_method, transaction_id, status, partner_id, center_name, notes, reviewed_by_id, reviewed_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
-        `, [`pay_${Date.now()}`, studentId, courseId, 0, 'admin_enrolled', txnId, 'approved', partnerId || null, centerName, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
+            INSERT INTO transactions (id, student_id, course_id, amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW(), NOW())
+        `, [`txn_${Date.now()}`, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
 
         try {
             socketService.emitToUser(studentId, 'ENROLLMENT_CREATED', {
@@ -1383,7 +1388,7 @@ const adminUnenrollStudent = async (req, res) => {
         }
 
         await query(`
-            UPDATE payments 
+            UPDATE transactions 
             SET status = 'rejected', notes = 'Unenrolled by admin', updated_at = NOW() 
             WHERE student_id = $1 AND course_id = $2 AND payment_method = 'admin_enrolled'
         `, [studentId, courseId]);

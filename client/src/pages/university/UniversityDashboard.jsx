@@ -195,8 +195,10 @@ const UniversityDashboard = () => {
         const email = student.email || '';
         const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             email.toLowerCase().includes(searchTerm.toLowerCase());
-        const studentCourse = student.course || 'Enrolled';
-        const matchesCourse = filterCourse === 'all' || studentCourse === filterCourse;
+        
+        // Multi-course support: check if filterCourse is in student.courses array
+        const studentCourses = student.courses || (student.course ? [student.course] : []);
+        const matchesCourse = filterCourse === 'all' || studentCourses.includes(filterCourse);
         return matchesSearch && matchesCourse;
     });
 
@@ -292,8 +294,7 @@ const UniversityDashboard = () => {
                     name: newStudentData.name,
                     email: newStudentData.email,
                     phone: newStudentData.phone,
-                    // If course selection is ObjectID, pass it here
-                    // If it's title, we might need to find the ID first
+                    password: 'Student@' + Math.random().toString(36).slice(-6), // Generate default password
                     courseId: courses.find(c => c.title === newStudentData.course)?._id
                 }, config);
 
@@ -454,7 +455,11 @@ const UniversityDashboard = () => {
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold text-white">{student.name}</h3>
-                                                <p className="text-sm text-white/50">{student.course || 'Enrolled Student'}</p>
+                                                <p className="text-sm text-white/50">
+                                                    {Array.isArray(student.courses) && student.courses.length > 0 
+                                                        ? student.courses.join(', ') 
+                                                        : student.course || 'Enrolled Student'}
+                                                </p>
                                                 <div className="flex items-center gap-4 mt-1 text-xs text-white/40">
                                                     <span className="flex items-center gap-1">
                                                         <Mail size={12} />
@@ -547,7 +552,10 @@ const UniversityDashboard = () => {
                                         <div className="flex items-center gap-2 text-white/60">
                                             <Users size={16} />
                                             <span className="text-sm font-medium">
-                                                {students.filter(s => s.course === course.title).length} Enrolled
+                                                {students.filter(s => {
+                                                    const courses = s.courses || (s.course ? [s.course] : []);
+                                                    return courses.includes(course.title);
+                                                }).length} Enrolled
                                             </span>
                                         </div>
                                         <button

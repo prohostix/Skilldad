@@ -73,7 +73,9 @@ const getStudentExams = asyncHandler(async (req, res) => {
         questionType: q.question_type
       })),
       submission: sub ? { ...sub, _id: sub.id } : null,
-      hasSubmitted: sub && sub.status !== 'in-progress'
+      hasSubmitted: sub && sub.status !== 'in-progress',
+      linkedPaperId: exam.linked_paper_id,
+      answerKeyId: exam.answer_key_id
     };
   });
 
@@ -136,7 +138,9 @@ const startExam = asyncHandler(async (req, res) => {
       examType: exam.exam_type,
       duration: exam.duration,
       totalMarks: exam.total_marks,
-      instructions: exam.instructions
+      instructions: exam.instructions,
+      linkedPaperId: exam.linked_paper_id,
+      answerKeyId: exam.answer_key_id
     },
     timeRemaining: accessResult.timeRemaining
   });
@@ -220,15 +224,57 @@ const getExam = asyncHandler(async (req, res) => {
     totalMarks: exam.total_marks,
     passingScore: exam.passing_score,
     instructions: exam.instructions,
-    status: exam.status
+    status: exam.status,
+    linkedPaperId: exam.linked_paper_id,
+    answerKeyId: exam.answer_key_id
   };
 
   res.json({ success: true, exam: formattedExam, data: formattedExam });
+});
+
+/**
+ * @desc    Download question paper (PDF)
+ * @access  Private (Student/Admin/University)
+ */
+const downloadQuestionPaper = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  
+  // 1. Get exam and its linked paper ID
+  const examRes = await query('SELECT linked_paper_id FROM exams WHERE id = $1', [id]);
+  const exam = examRes.rows[0];
+  
+  if (!exam || !exam.linked_paper_id) {
+    res.status(404);
+    throw new Error('Question paper not found for this exam');
+  }
+  
+  // 2. Get document details
+  const docRes = await query('SELECT file_url, file_name FROM documents WHERE id = $1', [exam.linked_paper_id]);
+  const document = docRes.rows[0];
+  
+  if (!document) {
+    res.status(404);
+    throw new Error('Linked document not found');
+  }
+  
+  // 3. Serve the file
+  const path = require('path');
+  const fs = require('fs');
+  const filePath = path.join(process.cwd(), document.file_url);
+  
+  if (!fs.existsSync(filePath)) {
+    console.error(`[PDF Exam] File not found: ${filePath}`);
+    res.status(404);
+    throw new Error('Physical file not found on server');
+  }
+  
+  res.download(filePath, document.file_name);
 });
 
 module.exports = {
   getStudentExams,
   startExam,
   getExam,
-  autoGradeExam
+  autoGradeExam,
+  downloadQuestionPaper
 };

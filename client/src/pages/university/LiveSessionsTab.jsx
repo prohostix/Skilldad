@@ -634,7 +634,7 @@ const SessionCard = ({
                     )}
 
                     {/* Join as Host - Embedded Zoom */}
-                    {(session.status === 'scheduled' || session.status === 'live') && session.zoom?.meetingId && (
+                    {(session.status === 'scheduled' || session.status === 'live') && (session.zoom?.meetingId || session.zoom?.meeting_id) && (
                         <button
                             onClick={() => onJoinHost(session._id)}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
@@ -645,7 +645,7 @@ const SessionCard = ({
                     )}
 
                     {/* Join as Student - Embedded Zoom */}
-                    {(session.status === 'scheduled' || session.status === 'live') && session.zoom?.meetingId && (
+                    {(session.status === 'scheduled' || session.status === 'live') && (session.zoom?.meetingId || session.zoom?.meeting_id) && (
                         <button
                             onClick={() => onJoinStudent(session._id)}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold hover:bg-blue-500/20 transition-colors"

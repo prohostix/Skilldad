@@ -78,14 +78,16 @@ const Footer = () => {
                         {/* Social Media Icons */}
                         <div className="flex gap-3">
                             {[
-                                { icon: Linkedin, href: '#', color: 'hover:bg-primary' },
-                                { icon: Twitter, href: '#', color: 'hover:bg-primary-light' },
-                                { icon: Youtube, href: '#', color: 'hover:bg-primary-dark' },
-                                { icon: Instagram, href: '#', color: 'hover:bg-pink-600' }
+                                { icon: Linkedin, href: 'https://linkedin.com/company/skilldad', color: 'hover:bg-primary' },
+                                { icon: Twitter, href: 'https://twitter.com/skilldad', color: 'hover:bg-primary-light' },
+                                { icon: Youtube, href: 'https://youtube.com/@skilldad', color: 'hover:bg-primary-dark' },
+                                { icon: Instagram, href: 'https://instagram.com/skilldad', color: 'hover:bg-pink-600' }
                             ].map((social, idx) => (
                                 <a
                                     key={idx}
                                     href={social.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className={`w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 ${social.color} hover:text-white hover:border-transparent transition-all duration-300 hover:scale-110 hover:shadow-lg`}
                                 >
                                     <social.icon size={18} />

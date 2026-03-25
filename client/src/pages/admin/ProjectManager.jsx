@@ -18,7 +18,10 @@ const ProjectManager = () => {
         course: '',
         universityId: '',
         deadline: '',
-        points: 100
+        points: 100,
+        difficulty: 'Intermediate',
+        requirements: '',
+        submissionGuidelines: ''
     });
     const [universities, setUniversities] = useState([]);
 
@@ -81,7 +84,17 @@ const ProjectManager = () => {
             }
             setShowModal(false);
             setEditingProject(null);
-            setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100 });
+            setFormData({ 
+                title: '', 
+                description: '', 
+                course: '', 
+                universityId: '', 
+                deadline: '', 
+                points: 100,
+                difficulty: 'Intermediate',
+                requirements: '',
+                submissionGuidelines: ''
+            });
             fetchProjects();
         } catch (error) {
             showToast(error.response?.data?.message || error.message, 'error');
@@ -145,7 +158,10 @@ const ProjectManager = () => {
                                                         course: project.courseId || project.course?._id || '',
                                                         universityId: project.universityId || '',
                                                         deadline: project.deadline?.split('T')[0] || '',
-                                                        points: project.points
+                                                        points: project.points,
+                                                        difficulty: project.difficulty || 'Intermediate',
+                                                        requirements: Array.isArray(project.requirements) ? project.requirements.join('\n') : (project.requirements || ''),
+                                                        submissionGuidelines: project.submissionGuidelines || ''
                                                     });
                                                     setShowModal(true);
                                                 }}
@@ -258,6 +274,37 @@ const ProjectManager = () => {
                                         onChange={(e) => setFormData({ ...formData, points: e.target.value })}
                                     />
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-white/70 text-sm mb-2">Difficulty</label>
+                                <select
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                    value={formData.difficulty}
+                                    onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                                >
+                                    <option value="Beginner" className="bg-[#0B0F1A]">Beginner</option>
+                                    <option value="Intermediate" className="bg-[#0B0F1A]">Intermediate</option>
+                                    <option value="Advanced" className="bg-[#0B0F1A]">Advanced</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-white/70 text-sm mb-2">Requirements (one per line)</label>
+                                <textarea
+                                    rows="3"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                    value={formData.requirements}
+                                    onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                                    placeholder="e.g.&#10;Requirement 1&#10;Requirement 2"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-white/70 text-sm mb-2">Submission Guidelines</label>
+                                <textarea
+                                    rows="3"
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white"
+                                    value={formData.submissionGuidelines}
+                                    onChange={(e) => setFormData({ ...formData, submissionGuidelines: e.target.value })}
+                                />
                             </div>
                             <div className="flex gap-3 pt-4">
                                 <button

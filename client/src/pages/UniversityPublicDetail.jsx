@@ -12,6 +12,7 @@ import {
     Image as ImageIcon,
     Info,
     Mail,
+    Phone,
     Globe,
     Rocket,
     Calendar
@@ -20,6 +21,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import CourseCard from '../components/CourseCard';
 import ModernButton from '../components/ui/ModernButton';
+import { toast } from 'react-hot-toast';
 import GlassCard from '../components/ui/GlassCard';
 
 // Fallback data in case page is refreshed and state is lost
@@ -455,7 +457,19 @@ const UniversityPublicDetail = () => {
                                 <p className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">Campus Atmosphere</p>
                                 <h2 className="text-4xl font-black text-white font-jakarta">Explore Academic <span className="text-primary italic">Life</span></h2>
                             </div>
-                            <ModernButton variant="secondary" className="!px-10">View Virtual Tour</ModernButton>
+                            <ModernButton 
+                                onClick={() => {
+                                    if (university.profile?.virtualTourUrl) {
+                                        window.open(university.profile.virtualTourUrl, '_blank');
+                                    } else {
+                                        toast.success('Initialising high-fidelity virtual campus tour... coming soon.');
+                                    }
+                                }}
+                                variant="secondary" 
+                                className="!px-10"
+                            >
+                                View Virtual Tour
+                            </ModernButton>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                             {university.profile.gallery.slice(0, 4).map((img, i) => (

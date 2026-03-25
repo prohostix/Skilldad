@@ -20,63 +20,49 @@ import DashboardHeading from '../../components/ui/DashboardHeading';
 const ProjectView = () => {
     const { courseId } = useParams();
     const [course, setCourse] = useState(null);
+    const [projects, setProjects] = useState([]);
     const [selectedFiles, setSelectedFiles] = useState({});
     const [uploadProgress, setUploadProgress] = useState({});
     const [submissions, setSubmissions] = useState({});
-
-    // Mock project data with comprehensive details
-    const mockProjects = [
-        {
-            id: 1,
-            title: "E-commerce Website Development",
-            description: "Build a complete e-commerce platform with user authentication, product catalog, shopping cart, and payment integration.",
-            deadline: "2024-03-15",
-            status: "in_progress",
-            maxFileSize: "50MB",
-            allowedFormats: [".zip", ".rar", ".pdf", ".docx"],
-            requirements: [
-                "Responsive design for mobile and desktop",
-                "User registration and login system",
-                "Product search and filtering",
-                "Shopping cart functionality",
-                "Payment gateway integration",
-                "Admin panel for product management"
-            ],
-            submissionGuidelines: "Submit your complete project as a ZIP file including source code, documentation, and deployment instructions.",
-            points: 100,
-            difficulty: "Advanced"
-        },
-        {
-            id: 2,
-            title: "Data Analysis Dashboard",
-            description: "Create an interactive dashboard using Python and visualization libraries to analyze sales data.",
-            deadline: "2024-03-20",
-            status: "pending",
-            maxFileSize: "25MB",
-            allowedFormats: [".py", ".ipynb", ".pdf", ".zip"],
-            requirements: [
-                "Data cleaning and preprocessing",
-                "Statistical analysis of sales trends",
-                "Interactive visualizations",
-                "Executive summary report",
-                "Code documentation"
-            ],
-            submissionGuidelines: "Include Jupyter notebook, Python scripts, and a PDF report with your findings.",
-            points: 80,
-            difficulty: "Intermediate"
-        }
-    ];
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchCourse = async () => {
+        const fetchData = async () => {
             try {
-                const { data } = await axios.get(`/api/courses/${courseId}`);
-                setCourse(data);
+                setLoading(true);
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                
+                const [courseRes, projectsRes] = await Promise.all([
+                    axios.get(`/api/courses/${courseId}`, config),
+                    axios.get(`/api/projects/course/${courseId}`, config)
+                ]);
+                
+                setCourse(courseRes.data);
+                setProjects(projectsRes.data || []);
+                
+                // Initialize submissions state from API data
+                const initialSubmissions = {};
+                (projectsRes.data || []).forEach(p => {
+                    if (p.status === 'submitted' || p.status === 'graded') {
+                        initialSubmissions[p.id] = {
+                            submittedAt: p.submittedAt ? new Date(p.submittedAt) : new Date(),
+                            status: p.status,
+                            fileUrl: p.fileUrl,
+                            githubUrl: p.githubUrl,
+                            grade: p.grade,
+                            feedback: p.feedback
+                        };
+                    }
+                });
+                setSubmissions(initialSubmissions);
+                setLoading(false);
             } catch (error) {
                 console.error('Error loading projects:', error);
+                setLoading(false);
             }
         };
-        fetchCourse();
+        fetchData();
     }, [courseId]);
 
     const handleFileSelect = (projectId, files) => {
@@ -90,27 +76,39 @@ const ProjectView = () => {
         const files = selectedFiles[projectId];
         if (!files || files.length === 0) return;
 
-        setUploadProgress(prev => ({ ...prev, [projectId]: 0 }));
-
-        // Simulate upload progress
-        const interval = setInterval(() => {
-            setUploadProgress(prev => {
-                const currentProgress = prev[projectId] || 0;
-                if (currentProgress >= 100) {
-                    clearInterval(interval);
-                    setSubmissions(prevSub => ({
-                        ...prevSub,
-                        [projectId]: {
-                            files: files,
-                            submittedAt: new Date(),
-                            status: 'submitted'
-                        }
-                    }));
-                    return prev;
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const formData = new FormData();
+            files.forEach(file => formData.append('files', file));
+            
+            const config = {
+                headers: { 
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(prev => ({ ...prev, [projectId]: progress }));
                 }
-                return { ...prev, [projectId]: currentProgress + 10 };
-            });
-        }, 200);
+            };
+
+            const { data } = await axios.post(`/api/projects/${projectId}/submit`, formData, config);
+            
+            setSubmissions(prevSub => ({
+                ...prevSub,
+                [projectId]: {
+                    files: files,
+                    submittedAt: new Date(),
+                    status: 'submitted'
+                }
+            }));
+            
+            setUploadProgress(prev => ({ ...prev, [projectId]: 100 }));
+        } catch (error) {
+            console.error('Upload failed:', error);
+            alert('Failed to upload project. Please try again.');
+            setUploadProgress(prev => ({ ...prev, [projectId]: 0 }));
+        }
     };
 
     const removeFile = (projectId, fileIndex) => {
@@ -151,9 +149,9 @@ const ProjectView = () => {
                 <p className="text-white/40 font-inter text-sm max-w-2xl">Apply your theoretical knowledge by completing these industry-aligned hands-on projects.</p>
             </div>
 
-            {mockProjects.length > 0 ? (
+            {projects.length > 0 ? (
                 <div className="grid gap-8">
-                    {mockProjects.map((project) => {
+                    {projects.map((project) => {
                         const isSubmitted = submissions[project.id];
                         const files = selectedFiles[project.id] || [];
                         const progress = uploadProgress[project.id] || 0;
@@ -166,8 +164,8 @@ const ProjectView = () => {
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-3">
                                             <h2 className="text-base font-semibold text-white font-inter">{project.title}</h2>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(project.difficulty)}`}>
-                                                {project.difficulty}
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyColor(project.difficulty || 'Intermediate')}`}>
+                                                {project.difficulty || 'Intermediate'}
                                             </span>
                                         </div>
                                         <p className="text-slate-300 leading-relaxed">{project.description}</p>
@@ -188,7 +186,7 @@ const ProjectView = () => {
                                 <div className="space-y-3">
                                     <h3 className="text-sm font-semibold text-white">Requirements</h3>
                                     <ul className="space-y-2">
-                                        {project.requirements.map((req, index) => (
+                                        {(project.requirements || []).map((req, index) => (
                                             <li key={index} className="flex items-start gap-2 text-slate-300">
                                                 <CheckCircle size={16} className="text-emerald-500 mt-0.5 flex-shrink-0" />
                                                 <span className="text-sm">{req}</span>
@@ -203,8 +201,8 @@ const ProjectView = () => {
                                     <div className="bg-purple-50/10 border border-purple-200/20 rounded-lg p-4">
                                         <p className="text-slate-300 text-sm leading-relaxed">{project.submissionGuidelines}</p>
                                         <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-400">
-                                            <span>Max file size: {project.maxFileSize}</span>
-                                            <span>Allowed formats: {project.allowedFormats.join(', ')}</span>
+                                            <span>Max file size: {project.maxFileSize || '50MB'}</span>
+                                            <span>Allowed formats: {(project.allowedFormats || ['.pdf', '.zip']).join(', ')}</span>
                                         </div>
                                     </div>
                                 </div>

@@ -210,7 +210,7 @@ router.get('/:id', protect, async (req, res) => {
 // @access  Private (Instructor/Admin)
 router.post('/', protect, authorize('university', 'admin'), async (req, res) => {
     try {
-        const { title, description, deadline, rubric, courseId, universityId, points } = req.body;
+        const { title, description, deadline, rubric, courseId, universityId, points, difficulty, requirements, submissionGuidelines, maxFileSize, allowedFormats } = req.body;
         
         const newProject = {
             _id: 'proj_' + Date.now(),
@@ -219,7 +219,14 @@ router.post('/', protect, authorize('university', 'admin'), async (req, res) => 
             deadline,
             rubric,
             universityId,
-            points: points || 100
+            points: points || 100,
+            difficulty: difficulty || 'Intermediate',
+            requirements: typeof requirements === 'string' ? requirements.split('\n').filter(r => r.trim()) : (requirements || []),
+            submissionGuidelines: submissionGuidelines || '',
+            maxFileSize: maxFileSize || '50MB',
+            allowedFormats: Array.isArray(allowedFormats) ? allowedFormats : (typeof allowedFormats === 'string' ? allowedFormats.split(',').map(f => f.trim()) : ['.pdf', '.zip', '.doc', '.docx']),
+            instructorId: req.user.id,
+            createdAt: new Date().toISOString()
         };
 
         const userId = req.user.id || req.user._id;
@@ -269,7 +276,19 @@ router.put('/:id', protect, authorize('university', 'admin'), async (req, res) =
             RETURNING id, title
         `, [
             projectId, 
-            JSON.stringify({ title, description, deadline, rubric, universityId, points }), 
+            JSON.stringify({ 
+                title, 
+                description, 
+                deadline, 
+                rubric, 
+                universityId, 
+                points,
+                difficulty: req.body.difficulty,
+                requirements: typeof req.body.requirements === 'string' ? req.body.requirements.split('\n').filter(r => r.trim()) : req.body.requirements,
+                submissionGuidelines: req.body.submissionGuidelines,
+                maxFileSize: req.body.maxFileSize,
+                allowedFormats: req.body.allowedFormats
+            }), 
             courseId, 
             userId, 
             req.user.role

@@ -467,14 +467,86 @@ const gradeSubmission = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Upload answer sheet for PDF-based exam
+ * @route   POST /api/exams/:examId/upload-answer
+ * @access  Private (Student)
+ */
+const uploadAnswerSheet = asyncHandler(async (req, res) => {
+  const { examId } = req.params;
+  const studentId = req.user._id;
+
+  if (!req.file) {
+    res.status(400);
+    throw new Error('Please upload an answer sheet');
+  }
+
+  // 1. Find or create submission
+  const subRes = await query(`
+    SELECT * FROM exam_submissions_new 
+    WHERE exam_id = $1 AND student_id = $2
+  `, [examId, studentId.toString()]);
+
+  let submission = subRes.rows[0];
+
+  if (submission && submission.status !== 'in-progress') {
+    res.status(400);
+    throw new Error('Exam already submitted');
+  }
+
+  const fileUrl = req.file.path.replace(/\\/g, '/');
+  const fileName = req.file.originalname;
+
+  if (!submission) {
+    const newId = `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    await query(`
+      INSERT INTO exam_submissions_new (
+        id, exam_id, student_id, started_at, submitted_at, 
+        status, answer_sheet_url, answer_sheet_name
+      )
+      VALUES ($1, $2, $3, NOW(), NOW(), 'submitted', $4, $5)
+    `, [newId, examId, studentId.toString(), fileUrl, fileName]);
+    
+    const newSubRes = await query('SELECT * FROM exam_submissions_new WHERE id = $1', [newId]);
+    submission = newSubRes.rows[0];
+  } else {
+    await query(`
+      UPDATE exam_submissions_new 
+      SET status = 'submitted',
+          submitted_at = NOW(),
+          answer_sheet_url = $1,
+          answer_sheet_name = $2,
+          updated_at = NOW()
+      WHERE id = $3
+    `, [fileUrl, fileName, submission.id]);
+  }
+
+  // 3. Log audit event
+  await auditLogService.logAuditEvent({
+    userId: studentId,
+    action: 'exam_answer_uploaded',
+    resource: 'submission',
+    resourceId: submission.id || submission._id,
+    details: { examId, fileName },
+    ipAddress: req.ip || req.connection.remoteAddress,
+    userAgent: req.get('user-agent') || 'unknown'
+  });
+
+  res.json({
+    success: true,
+    message: 'Answer sheet uploaded successfully',
+    submission
+  });
+});
+
 module.exports = {
 
   submitAnswer,
   submitExam,
   getMySubmission,
   getSubmissionForGrading,
-  // Placeholders for other methods if needed
-  uploadAnswerSheet: async (req, res) => res.status(501).json({ message: 'Not implemented' }),
+  // PDF Answer functionality
+  uploadAnswerSheet,
   getSubmissionsForExam,
   gradeSubmission
 };

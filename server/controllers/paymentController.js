@@ -53,11 +53,7 @@ const generateTransactionId = () => {
  * Requirements: 17.7, 17.8, 17.9
  */
 const calculateGST = (amount) => {
-  const gstRate = 0.18;
-  const gstAmount = amount * gstRate;
-
-  // Apply banker's rounding for GST calculation (Requirement 17.8)
-  return bankersRound(gstAmount, 2);
+  return 0; // GST removed as per user request
 };
 
 /**
@@ -158,22 +154,7 @@ const validateAmountPrecision = (amount) => {
  * @returns {Object} { valid: boolean, error: string|null, expectedGST: number }
  */
 const validateGSTCalculation = (baseAmount, gstAmount) => {
-  const gstRate = 0.18; // 18% GST
-  const expectedGST = bankersRound(baseAmount * gstRate, 2);
-
-  // Allow small tolerance for floating point comparison (0.01 INR = 1 paisa)
-  const tolerance = 0.01;
-  const difference = Math.abs(gstAmount - expectedGST);
-
-  if (difference > tolerance) {
-    return {
-      valid: false,
-      error: `GST calculation mismatch. Expected: ${expectedGST.toFixed(2)}, Got: ${gstAmount.toFixed(2)}`,
-      expectedGST
-    };
-  }
-
-  return { valid: true, error: null, expectedGST };
+  return { valid: true, error: null, expectedGST: 0 };
 };
 
 /**

@@ -34,7 +34,7 @@ import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
 import { useSocket } from '../../context/SocketContext';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const StudentManagement = () => {
     const { showToast } = useToast();
@@ -130,6 +130,7 @@ const StudentManagement = () => {
 
     const fetchStudents = async () => {
         try {
+            setLoading(true);
             const rawInfo = localStorage.getItem('userInfo');
             if (!rawInfo) return;
             const userInfo = JSON.parse(rawInfo);
@@ -141,57 +142,14 @@ const StudentManagement = () => {
                 }
             };
             const { data } = await axios.get('/api/admin/students', config);
-
-            if (!data || data.length === 0) {
-                // Fallback demo data
-                setStudents([
-                    {
-                        _id: 'std_demo1',
-                        name: 'Alice Johnson',
-                        email: 'alice@example.com',
-                        phone: '+1 234 567 8901',
-                        address: '123 Tech Lane, Silicon Valley, CA',
-                        bio: 'Aspiring full-stack developer with a passion for clean code.',
-                        isVerified: true,
-                        enrollmentCount: 3,
-                        createdAt: new Date().toISOString()
-                    },
-                    {
-                        _id: 'std_demo2',
-                        name: 'Bob Smith',
-                        email: 'bob@example.com',
-                        phone: '+1 345 678 9012',
-                        address: '456 Innovation Way, Austin, TX',
-                        bio: 'Data science enthusiast exploring machine learning patterns.',
-                        isVerified: false,
-                        enrollmentCount: 1,
-                        createdAt: new Date().toISOString()
-                    }
-                ]);
-            } else {
-                setStudents(data);
-            }
+            setStudents(Array.isArray(data) ? data : []);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching students:', error);
-            // Even on error, show demo data for presentation
-            setStudents([
-                {
-                    _id: 'std_demo1',
-                    name: 'Alice Johnson',
-                    email: 'alice@example.com',
-                    phone: '+1 234 567 8901',
-                    address: '123 Tech Lane, Silicon Valley, CA',
-                    bio: 'Aspiring full-stack developer with a passion for clean code.',
-                    isVerified: true,
-                    enrollmentCount: 3,
-                    createdAt: new Date().toISOString()
-                }
-            ]);
             setLoading(false);
+            showToast?.('Failed to fetch students', 'error');
         }
     };
-
 
     const fetchStudentDetails = async (studentId) => {
         try {
@@ -308,47 +266,67 @@ const StudentManagement = () => {
 
     const handleExportPDF = () => {
         try {
+            // Check if jsPDF and autoTable are available
+            if (!jsPDF) {
+                showToast?.('PDF library not loaded', 'error');
+                return;
+            }
+
             const doc = new jsPDF();
             
             // Add title
             doc.setFontSize(18);
+            doc.setTextColor(40);
             doc.text('SkillDad Student Audit Report', 14, 22);
+            
             doc.setFontSize(11);
             doc.setTextColor(100);
             
             // Add date and count
             const date = new Date().toLocaleDateString();
             doc.text(`Generated on: ${date}`, 14, 30);
-            doc.text(`Total Students: ${students.length}`, 14, 36);
+            doc.text(`Total Students: ${filteredStudents.length}`, 14, 36);
             
             // Define columns
             const tableColumn = ["Name", "Email", "Phone", "University", "Verified", "Joined"];
             
             // Define rows
-            const tableRows = students.map(student => [
+            const tableRows = filteredStudents.map(student => [
                 student.name || 'N/A',
                 student.email || 'N/A',
                 student.phone || 'N/A',
                 getUniversityName(student),
                 student.isVerified ? 'Yes' : 'No',
-                new Date(student.createdAt).toLocaleDateString()
+                student.createdAt ? new Date(student.createdAt).toLocaleDateString() : 'N/A'
             ]);
 
-            // Auto-table plugin
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 45,
-                theme: 'grid',
-                headStyles: { fillColor: [91, 92, 240] }, // Primary color
-                styles: { fontSize: 8 }
-            });
+            // Auto-table
+            // Check if doc.autoTable exists (plugin style) or use imported function
+            if (typeof doc.autoTable === 'function') {
+                doc.autoTable({
+                    head: [tableColumn],
+                    body: tableRows,
+                    startY: 45,
+                    theme: 'grid',
+                    headStyles: { fillColor: [91, 92, 240] },
+                    styles: { fontSize: 8 }
+                });
+            } else {
+                autoTable(doc, {
+                    head: [tableColumn],
+                    body: tableRows,
+                    startY: 45,
+                    theme: 'grid',
+                    headStyles: { fillColor: [91, 92, 240] },
+                    styles: { fontSize: 8 }
+                });
+            }
 
             doc.save(`students_report_${new Date().toISOString().split('T')[0]}.pdf`);
             showToast?.('PDF report generated successfully', 'success');
         } catch (error) {
             console.error('Error generating PDF:', error);
-            showToast?.('Failed to generate PDF report', 'error');
+            showToast?.('Failed to generate PDF report: ' + error.message, 'error');
         }
     };
 

@@ -146,6 +146,7 @@ const Exams = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [downloadingPaper, setDownloadingPaper] = useState(null);
+    const [uploadingPaper, setUploadingPaper] = useState(null);
     const navigate = useNavigate();
     const { showToast } = useToast();
     const socket = useSocket();
@@ -315,25 +316,65 @@ const Exams = () => {
         try {
             const rawInfo = localStorage.getItem('userInfo');
             const userInfo = JSON.parse(rawInfo);
-            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const config = { 
+                headers: { Authorization: `Bearer ${userInfo.token}` },
+                responseType: 'blob'
+            };
 
-            const { data } = await axios.get(`/api/exams/${exam._id}/question-paper`, config);
-
-            // Open the file in a new tab for download/view
-            const fileUrl = `${data.paper.fileUrl.startsWith('http') ? '' : '/'}${data.paper.fileUrl}`;
+            const response = await axios.get(`/api/exams/${exam._id}/question-paper`, config);
+            
+            // Create a blob URL and trigger download
+            const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
-            link.href = fileUrl;
-            link.download = data.paper.fileName || `${data.examTitle}-question-paper`;
-            link.target = '_blank';
+            link.href = url;
+            const contentDisposition = response.headers['content-disposition'];
+            let fileName = `${exam.title}-question-paper.pdf`;
+            if (contentDisposition) {
+                const fileNameMatch = contentDisposition.match(/filename="?(.+?)"?$/);
+                if (fileNameMatch.length === 2) fileName = fileNameMatch[1];
+            }
+            link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
+            link.remove();
+            window.URL.revokeObjectURL(url);
+            
             showToast('Question paper downloaded!', 'success');
         } catch (err) {
-            const msg = err.response?.data?.message || 'Could not access question paper';
+            const msg = 'Could not access question paper';
             showToast(msg, 'error');
         } finally {
             setDownloadingPaper(null);
+        }
+    };
+
+    const uploadAnswerSheet = async (exam, file) => {
+        if (!file) return;
+        setUploadingPaper(exam._id);
+        try {
+            const rawInfo = localStorage.getItem('userInfo');
+            const userInfo = JSON.parse(rawInfo);
+            
+            const formData = new FormData();
+            formData.append('document', file);
+            formData.append('examId', exam._id);
+
+            const config = { 
+                headers: { 
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'multipart/form-data'
+                } 
+            };
+
+            await axios.post(`/api/exams/${exam._id}/upload-answer`, formData, config);
+            
+            showToast('Answer sheet uploaded successfully!', 'success');
+            fetchExams();
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Upload failed';
+            showToast(msg, 'error');
+        } finally {
+            setUploadingPaper(null);
         }
     };
 
@@ -463,9 +504,37 @@ const Exams = () => {
                         </p>
                         <div className="flex flex-col gap-3">
                             {activeExam.examType === 'pdf-based' && (
-                                <ModernButton onClick={() => downloadQuestionPaper(activeExam)} className="w-full">
-                                    Download Question Paper
-                                </ModernButton>
+                                <div className="space-y-4">
+                                    <ModernButton 
+                                        onClick={() => downloadQuestionPaper(activeExam)} 
+                                        className="w-full"
+                                        disabled={downloadingPaper === activeExam._id}
+                                    >
+                                        <Download size={18} className="mr-2" />
+                                        {downloadingPaper === activeExam._id ? 'Downloading...' : 'Download Question Paper'}
+                                    </ModernButton>
+                                    
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            id="answer-upload"
+                                            className="hidden"
+                                            accept=".pdf,.doc,.docx"
+                                            onChange={(e) => uploadAnswerSheet(activeExam, e.target.files[0])}
+                                        />
+                                        <label
+                                            htmlFor="answer-upload"
+                                            className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500/10 border-2 border-dashed border-emerald-500/30 rounded-2xl text-emerald-400 font-bold cursor-pointer hover:bg-emerald-500/20 transition-all"
+                                        >
+                                            {uploadingPaper === activeExam._id ? (
+                                                <RefreshCw size={18} className="animate-spin" />
+                                            ) : (
+                                                <Upload size={18} />
+                                            )}
+                                            {uploadingPaper === activeExam._id ? 'Uploading...' : 'Upload Answer Sheet'}
+                                        </label>
+                                    </div>
+                                </div>
                             )}
                             <ModernButton variant="secondary" onClick={() => { setActiveExam(null); setExamStarted(false); }} className="w-full">
                                 Terminate Session

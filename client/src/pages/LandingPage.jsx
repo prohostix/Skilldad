@@ -194,7 +194,7 @@ const LandingPage = () => {
             logo: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
             image: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
             description: u.bio || 'World-class institution providing excellence in global education through SkillDad.',
-            established: u.createdAt ? new Date(u.createdAt).getFullYear() : '2023',
+            established: u.profile?.foundedYear || u.profile?.established || (u.createdAt ? new Date(u.createdAt).getFullYear() : '2023'),
             rating: (4.8 + (Math.random() * 0.15)).toFixed(1), // Dynamic-ish rating
             specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
         }))
@@ -442,7 +442,11 @@ const LandingPage = () => {
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.1 + 0.6 }}
-                                        className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate('/platform');
+                                        }}
+                                        className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer hover:bg-white/[0.02] transition-colors -mx-6 px-6"
                                     >
                                         <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Expand Logic</span>
                                         <ArrowRight size={16} className="text-text-muted group-hover/link:text-primary transition-all group-hover/link:translate-x-1" />
@@ -682,7 +686,13 @@ const LandingPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="mt-auto pt-3 border-t border-white/10 w-full flex items-center justify-between group/link">
+                                    <div 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate('/platform');
+                                        }}
+                                        className="mt-auto pt-3 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer hover:bg-white/[0.02] transition-colors -mx-6 px-6"
+                                    >
                                         <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Expand Logic</span>
                                         <ArrowRight size={14} className="text-text-muted group-hover/link:text-primary transition-all group-hover/link:translate-x-1" />
                                     </div>

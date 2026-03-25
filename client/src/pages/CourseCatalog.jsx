@@ -19,6 +19,7 @@ import CourseCard from '../components/CourseCard';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
+import { toast } from 'react-hot-toast';
 
 const CourseCatalog = () => {
     const navigate = useNavigate();
@@ -313,7 +314,15 @@ const CourseCatalog = () => {
                                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Message Detail</label>
                                     <textarea rows="3" className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-sm" placeholder="Structure your requirements here..."></textarea>
                                 </div>
-                                <ModernButton className="w-full !py-4 shadow-glow-gradient font-black uppercase tracking-[0.3em] text-[10px]">Transmit Protocol</ModernButton>
+                                <ModernButton 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        toast.success('Protocol Transmitted Successfully. Our advisors will sync with you shortly.');
+                                    }}
+                                    className="w-full !py-4 shadow-glow-gradient font-black uppercase tracking-[0.3em] text-[10px]"
+                                >
+                                    Transmit Protocol
+                                </ModernButton>
                             </form>
                         </div>
                     </GlassCard>

@@ -32,8 +32,8 @@ const PaymentInitiation = () => {
     const [paymentMethod, setPaymentMethod] = useState('online'); // 'online' or 'manual'
     const [screenshot, setScreenshot] = useState(null);
 
-    const GST_RATE = 0.18;
-    const SERVICE_CHARGE_RATE = 0.02;
+    const GST_RATE = 0;
+    const SERVICE_CHARGE_RATE = 0;
 
     useEffect(() => {
         fetchCourseDetails();
@@ -352,14 +352,6 @@ const PaymentInitiation = () => {
                                     <span className="text-emerald-400 font-semibold">-₹{pricing.discount}</span>
                                 </div>
                             )}
-                            <div className="flex justify-between text-sm pt-4 border-t border-white/10">
-                                <span className="text-gray-400">Service Charge (2%)</span>
-                                <span className="text-white font-semibold">₹{pricing.serviceCharge}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-400">GST (18%)</span>
-                                <span className="text-white font-semibold">₹{pricing.gst}</span>
-                            </div>
                             <div className="flex justify-between text-lg font-bold pt-4 border-t border-white/10">
                                 <span className="text-white">Total</span>
                                 <span className="text-primary">₹{pricing.total}</span>

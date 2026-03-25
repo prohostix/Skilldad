@@ -56,7 +56,8 @@ const UniversityDetail = () => {
         certificates: [],
         achievements: [],
         videos: [],
-        foundedYear: ''
+        foundedYear: '',
+        virtualTourUrl: ''
     });
     const [uploading, setUploading] = useState(false);
     const [uploadingCover, setUploadingCover] = useState(false);
@@ -93,7 +94,8 @@ const UniversityDetail = () => {
                 certificates: data.university.profile?.certificates || [],
                 achievements: data.university.profile?.achievements || [],
                 videos: data.university.profile?.videos || (data.university.profile?.youtubeUrl ? [data.university.profile.youtubeUrl] : []),
-                foundedYear: data.university.profile?.foundedYear || ''
+                foundedYear: data.university.profile?.foundedYear || '',
+                virtualTourUrl: data.university.profile?.virtualTourUrl || ''
             });
         } catch (error) {
             console.error('Error fetching university details:', error);
@@ -742,6 +744,20 @@ const UniversityDetail = () => {
                                             placeholder="e.g. 1920"
                                             value={editData.foundedYear}
                                             onChange={(e) => setEditData({ ...editData, foundedYear: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Virtual Tour URL</label>
+                                    <div className="relative">
+                                        <Rocket className="absolute left-4 top-3 text-white/30" size={16} />
+                                        <input
+                                            type="url"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                            placeholder="https://my.matterport.com/show/?m=..."
+                                            value={editData.virtualTourUrl}
+                                            onChange={(e) => setEditData({ ...editData, virtualTourUrl: e.target.value })}
                                         />
                                     </div>
                                 </div>

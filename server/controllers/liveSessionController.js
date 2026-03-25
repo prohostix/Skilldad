@@ -58,13 +58,30 @@ const getSessions = asyncHandler(async (req, res) => {
     }
 
     const resSet = await query(sql, params);
-    res.json(resSet.rows.map(r => ({
-        ...r,
-        _id: r.id,
-        startTime: r.start_time,
-        instructor: { name: r.instructor_name },
-        course: { title: r.course_title }
-    })));
+    
+    const sessions = resSet.rows.map(r => {
+        let zoom = r.zoom;
+        let recording = r.recording;
+        
+        if (zoom && typeof zoom === 'string') {
+            try { zoom = JSON.parse(zoom); } catch (e) {}
+        }
+        if (recording && typeof recording === 'string') {
+            try { recording = JSON.parse(recording); } catch (e) {}
+        }
+
+        return {
+            ...r,
+            _id: r.id,
+            zoom,
+            recording,
+            startTime: r.start_time,
+            instructor: { name: r.instructor_name },
+            course: { title: r.course_title }
+        };
+    });
+
+    res.json(sessions);
 });
 
 // @desc    Get single session
@@ -85,7 +102,14 @@ const getSession = asyncHandler(async (req, res) => {
 
     // Ensure JSON fields are parsed
     if (session.zoom && typeof session.zoom === 'string') {
-        try { session.zoom = JSON.parse(session.zoom); } catch (e) {}
+        try { 
+            session.zoom = JSON.parse(session.zoom);
+            // Ensure compatibility between meetingId and meeting_id
+            if (session.zoom) {
+                if (session.zoom.meeting_id && !session.zoom.meetingId) session.zoom.meetingId = session.zoom.meeting_id;
+                if (session.zoom.meetingId && !session.zoom.meeting_id) session.zoom.meeting_id = session.zoom.meetingId;
+            }
+        } catch (e) {}
     }
     if (session.recording && typeof session.recording === 'string') {
         try { session.recording = JSON.parse(session.recording); } catch (e) {}

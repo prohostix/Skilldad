@@ -119,7 +119,7 @@ const Platform = () => {
             location: u.profile?.location || 'Global',
             students: u.studentCount > 0 ? `${u.studentCount}+` : '100+',
             programs: u.courseCount > 0 ? `${u.courseCount}+` : '10+',
-            established: u.profile?.established || '2020',
+            established: u.profile?.foundedYear || u.profile?.established || '2020',
             rating: 4.8,
             image: u.profileImage || `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`,
             specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
