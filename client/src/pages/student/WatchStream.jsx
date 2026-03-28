@@ -87,6 +87,10 @@ const WatchStream = () => {
         );
     }
 
+    const handleLeave = React.useCallback(() => {
+        navigate('/dashboard/live-classes');
+    }, [navigate]);
+
     return (
         <div className="min-h-screen bg-[#050505] flex flex-col">
             {/* Immersive Header */}
@@ -117,7 +121,7 @@ const WatchStream = () => {
                          </div>
                          <div className="w-px h-8 bg-white/10"></div>
                          <button 
-                            onClick={() => navigate('/dashboard/live-classes')}
+                            onClick={handleLeave}
                             className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white/80 text-[10px] font-black tracking-widest uppercase transition-all"
                          >
                             Exit Studio
@@ -135,7 +139,7 @@ const WatchStream = () => {
                         meetingNumber={session.zoomMeetingId}
                         role={0} // 0 = Participant
                         userName={user?.name || 'Student'}
-                        onLeave={() => navigate('/dashboard/live-classes')}
+                        onLeave={handleLeave}
                     />
                 </div>
 

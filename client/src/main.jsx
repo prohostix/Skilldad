@@ -11,9 +11,7 @@ import { ToastProvider } from './context/ToastContext'
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || ''
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <ToastProvider>
-      <App />
-    </ToastProvider>
-  </StrictMode>,
+  <ToastProvider>
+    <App />
+  </ToastProvider>,
 )

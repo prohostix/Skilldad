@@ -108,24 +108,38 @@ class SocketService {
                 const pubClient = createClient({ url: process.env.REDIS_URL });
                 const subClient = pubClient.duplicate();
 
+                let connectionFailedCount = 0;
+                const MAX_FAILURES = 3;
+
                 // Handle Redis connection errors
                 pubClient.on('error', (err) => {
-                    console.error('[Socket.IO] Redis pub client error:', err.message);
+                    connectionFailedCount++;
+                    if (connectionFailedCount <= MAX_FAILURES) {
+                        console.error('[Socket.IO] Redis pub client error:', err.message);
+                    }
+                    if (connectionFailedCount === MAX_FAILURES) {
+                        console.warn('[Socket.IO] Redis unreachable. Continuing with in-memory adapter only to avoid log spam.');
+                    }
                 });
 
                 subClient.on('error', (err) => {
-                    console.error('[Socket.IO] Redis sub client error:', err.message);
+                    // (Quietly ignore sub errors if already failing)
                 });
 
                 // Connect clients and setup adapter
-                Promise.all([pubClient.connect(), subClient.connect()])
+                Promise.all([
+                    pubClient.connect().catch(e => { throw e; }),
+                    subClient.connect().catch(e => { throw e; })
+                ])
                     .then(() => {
                         this.io.adapter(createAdapter(pubClient, subClient));
                         this.redisAdapter = { pubClient, subClient };
                         console.log('[Socket.IO] Redis adapter configured for horizontal scaling');
                     })
                     .catch((err) => {
-                        console.error('[Socket.IO] Failed to setup Redis adapter:', err.message);
+                        if (connectionFailedCount < MAX_FAILURES) {
+                            console.error('[Socket.IO] Failed to setup Redis adapter:', err.message);
+                        }
                         console.log('[Socket.IO] Using default in-memory adapter');
                     });
             } else {

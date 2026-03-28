@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Video, Mic, MicOff, VideoOff, Users, MessageSquare, Share2, Settings } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import axios from 'axios';
+import { Video, Mic, MicOff, VideoOff, Users, MessageSquare, Share2, Settings, X, Video as VideoIcon } from 'lucide-react';
 
 /**
  * MockZoomMeeting Component
  * Simulates a Zoom meeting interface for development/testing
  * 
+ * @param {string} sessionId - The session ID
  * @param {boolean} isHost - Whether the user is the host
  * @param {function} onLeave - Callback when user leaves the meeting
  */
-const MockZoomMeeting = ({ isHost = false, onLeave }) => {
+const MockZoomMeeting = ({ sessionId, isHost = false, onLeave }) => {
   const [loading, setLoading] = useState(true);
   const [joined, setJoined] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
   const [participants, setParticipants] = useState([
     { id: 1, name: 'You', isHost: isHost, video: true, audio: true }
   ]);
@@ -22,6 +27,20 @@ const MockZoomMeeting = ({ isHost = false, onLeave }) => {
     const timer = setTimeout(() => {
       setLoading(false);
       setJoined(true);
+
+      // Emulate marking the session as live
+      if (isHost) {
+        try {
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const token = localStorage.getItem('token') || userInfo.token;
+          if (token) {
+            axios.put(`/api/sessions/${sessionId}/start`, {}, { headers: { Authorization: `Bearer ${token}` } })
+              .catch(e => console.warn('[MockZoom] Error starting mock session on backend:', e.message));
+          }
+        } catch (e) {
+          console.warn('[MockZoom] Error updating session start:', e.message);
+        }
+      }
 
       // Add mock participants after a delay
       setTimeout(() => {
@@ -45,7 +64,42 @@ const MockZoomMeeting = ({ isHost = false, onLeave }) => {
     return () => clearTimeout(timer);
   }, [isHost]);
 
-  const handleLeave = () => {
+  const handleLeave = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (!isHost) {
+      exitMeeting();
+      return;
+    }
+
+    setShowEndConfirm(true);
+  };
+
+  const confirmEndSession = async () => {
+    setIsEnding(true);
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const token = localStorage.getItem('token') || userInfo.token;
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      
+      console.log(`[MockZoom] Ending session ${sessionId}...`);
+      await axios.put(`/api/sessions/${sessionId}/end`, {}, config);
+      console.log(`[MockZoom] Session ${sessionId} ended.`);
+      
+      exitMeeting();
+    } catch (error) {
+      console.error('[MockZoom] End session failed:', error.message);
+      setIsEnding(false);
+      setShowEndConfirm(false);
+      // Force exit if backend fails
+      exitMeeting();
+    }
+  };
+
+  const exitMeeting = () => {
     setJoined(false);
     if (onLeave) {
       onLeave();
@@ -259,6 +313,47 @@ const MockZoomMeeting = ({ isHost = false, onLeave }) => {
           </div>
         </div>
       </div>
+      {/* Custom Confirmation Modal using Portal to prevent flickering */}
+      {showEndConfirm && createPortal(
+        <div 
+          className="fixed inset-0 z-[30000] flex items-center justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-300"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        >
+          <div className="w-full max-w-sm p-10 bg-[#0a0a0b] border border-white/10 rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-500">
+            <div className="w-20 h-20 mx-auto mb-8 rounded-[1.5rem] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-inner">
+              <div className="w-4 h-4 bg-red-600 rounded-full animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.8)]"></div>
+            </div>
+            <h3 className="text-2xl font-black text-white text-center mb-3 tracking-tight">End Session?</h3>
+            <p className="text-white/40 text-center text-xs mb-10 leading-relaxed font-medium px-4">
+              STUDIO SIMULATION: This will terminate the mock session and sync database state immediately.
+            </p>
+            <div className="flex gap-4">
+              <button
+                disabled={isEnding}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowEndConfirm(false); }}
+                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={isEnding}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); confirmEndSession(); }}
+                className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-3 active:scale-95 shadow-[0_15px_30px_rgba(220,38,38,0.3)]"
+              >
+                {isEnding ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <X size={16} />
+                    Confirm
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

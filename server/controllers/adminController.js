@@ -107,7 +107,7 @@ const getGlobalStats = async (req, res) => {
             query("SELECT COUNT(*) FROM users WHERE role = 'student'"),
             query("SELECT COUNT(*) FROM users WHERE role = 'partner'"),
             query("SELECT COUNT(*) FROM support_tickets WHERE status = 'open'"),
-            query("SELECT SUM(amount) as total FROM transactions WHERE status = 'success'"),
+            query("SELECT SUM(final_amount) as total FROM transactions WHERE status = 'success'"),
             query("SELECT pg_database_size(current_database()) as size"),
             query(`
                 WITH days AS (
@@ -121,7 +121,7 @@ const getGlobalStats = async (req, res) => {
                     TO_CHAR(d.day, 'Dy') as name,
                     COUNT(e.id) as value
                 FROM days d
-                LEFT JOIN enrollments e ON d.day = e.enrollment_date::date
+                LEFT JOIN enrollments e ON d.day = e.created_at::date
                 GROUP BY d.day
                 ORDER BY d.day
             `),
@@ -129,12 +129,12 @@ const getGlobalStats = async (req, res) => {
                 (SELECT 
                     u.name as user, 
                     'Enrolled in ' || c.title as action,
-                    e.enrollment_date as time,
+                    e.created_at as time,
                     u.name as initial
                 FROM enrollments e
                 JOIN users u ON e.student_id = u.id
                 JOIN courses c ON e.course_id = c.id
-                ORDER BY e.enrollment_date DESC
+                ORDER BY e.created_at DESC
                 LIMIT 5)
                 UNION ALL
                 (SELECT 
@@ -159,7 +159,7 @@ const getGlobalStats = async (req, res) => {
         const recentActivities = activityRes.rows.map(act => ({
             user: act.user,
             action: act.action,
-            initial: act.initial.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+            initial: (act.initial || 'U').split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase(),
             time: new Date(act.time).toLocaleString() // Or a more "ago" like format if preferred
         }));
 
@@ -327,7 +327,7 @@ const getPlatformAnalytics = async (req, res) => {
                     WHEN u.partner_code IS NOT NULL THEN 'Partner'
                     ELSE 'Direct'
                 END as source,
-                COALESCE(SUM(t.amount), 0) as amount
+                COALESCE(SUM(t.final_amount), 0) as amount
             FROM transactions t
             JOIN users u ON t.user_id = u.id
             WHERE t.status = 'success'
@@ -1396,7 +1396,7 @@ const adminEnrollStudent = async (req, res) => {
         }
 
         await query(`
-            INSERT INTO transactions (id, student_id, course_id, amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
+            INSERT INTO transactions (id, student_id, course_id, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW(), NOW())
         `, [`txn_${Date.now()}`, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
 

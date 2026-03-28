@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import ZoomMtgEmbedded from '@zoom/meetingsdk/embedded';
 import axios from 'axios';
+import { Video, Radio, X } from 'lucide-react';
 import MockZoomMeeting from './MockZoomMeeting';
 import './ZoomMeeting.css';
 
@@ -18,14 +20,13 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
   const [useMockMode, setUseMockMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
     const initializeZoom = async () => {
-      // Small pre-flight delay to ensure DOM and libraries are fully ready
-      await new Promise(r => setTimeout(r, 100));
-
       // Prevent multiple initialization attempts
       if (!sessionId || initializationInProgress.current || isInitializedRef.current) {
         console.log('[Zoom] Skipping initialization - already in progress or initialized');
@@ -34,6 +35,9 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
       console.log('[Zoom] Starting initialization...');
       initializationInProgress.current = true;
+
+      // Small pre-flight delay to ensure DOM and libraries are fully ready
+      await new Promise(r => setTimeout(r, 100));
 
       try {
         if (!mounted) return;
@@ -87,16 +91,14 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         await client.init({
           zoomAppRoot: meetingSDKElement.current,
           language: 'en-US',
-          patchJsMedia: true, // Enabled for better media handling in broadcasting
           leaveOnPageUnload: true,
           sdkKey: sdkConfig.sdkKey,
-          appKey: sdkConfig.sdkKey,
           customize: {
             video: {
-              isResizable: false,
+              isResizable: true,
               viewSizes: {
-                default: { width: '100%', height: '100%' },
-                ribbon: { width: 0, height: 0 } // Hide the ribbon to focus on speaker
+                default: { width: 1000, height: 600 },
+                ribbon: { width: 300, height: 700 }
               },
               popper: {
                 disableDraggable: true
@@ -117,33 +119,31 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         console.log('[Zoom] Joining meeting...');
 
-        // Try joining with modern parameters first
+        // Clean modern join options avoiding deprecated keys and crash-inducing gallery limits
         try {
           await client.join({
             signature: sdkConfig.signature,
             meetingNumber: sdkConfig.meetingNumber,
             password: sdkConfig.passWord,
             userName: sdkConfig.userName,
-            userEmail: sdkConfig.userEmail,
-            sdkKey: sdkConfig.sdkKey,
-            appKey: sdkConfig.sdkKey,
-            galleryViewColumnSize: 1, // Only show 1 person (speaker) in broadcasting mode
-            view: 'speaker' // Force speaker view for broadcasting
+            userEmail: sdkConfig.userEmail
           });
         } catch (joinErr) {
-          console.warn('[Zoom] Initial join failed, retrying legacy...', joinErr);
-          if (!mounted) return;
-          await client.join({
-            signature: sdkConfig.signature,
-            meetingNumber: sdkConfig.meetingNumber,
-            password: sdkConfig.passWord,
-            userName: sdkConfig.userName,
-            userEmail: sdkConfig.userEmail,
-            galleryViewColumnSize: 1
-          });
+          console.warn('[Zoom] Initial join failed...', joinErr);
+          throw joinErr;
         }
 
         console.log('[Zoom] Successfully joined meeting');
+
+        // Mark session as live in backend for students to join
+        if (isHost) {
+          try {
+            await axios.put(`/api/sessions/${sessionId}/start`, {}, config);
+            console.log('[Zoom] Session marked as live on backend');
+          } catch (e) {
+            console.warn('[Zoom] Failed to mark session live:', e.message);
+          }
+        }
 
         if (mounted) {
           isInitializedRef.current = true;
@@ -189,16 +189,59 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
     };
   }, [sessionId, propToken, onError]); // isHost removed from deps as it doesn't change init logic
 
-  const handleLeave = () => {
+  const handleLeave = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log('[Zoom] handleLeave triggered, isHost:', isHost);
+    
+    // If not host, just leave
+    if (!isHost) {
+      exitMeeting();
+      return;
+    }
+
+    // Show custom confirmation modal for host
+    setShowEndConfirm(true);
+  };
+
+  const confirmEndSession = async () => {
+    setIsEnding(true);
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const token = propToken || localStorage.getItem('token') || userInfo.token;
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+      
+      console.log(`[Zoom] Host is ending session ${sessionId}...`);
+      await axios.put(`/api/sessions/${sessionId}/end`, {}, config);
+      console.log(`[Zoom] Session ${sessionId} marked as ended in database.`);
+      
+      exitMeeting();
+    } catch (err) {
+      console.error('[Zoom] Failed to update session status on leave:', err.message);
+      setIsEnding(false);
+      setShowEndConfirm(false);
+      // Fallback: still let them leave if it's really stuck
+      if (window.confirm("Backend update failed. Force exit studio?")) {
+        exitMeeting();
+      }
+    }
+  };
+
+  const exitMeeting = () => {
     if (zoomClient.current) {
       try {
         zoomClient.current.leaveMeeting();
-        if (onLeave) {
-          onLeave();
-        }
       } catch (err) {
         console.error('[Zoom] Error leaving meeting:', err);
       }
+    }
+    if (onLeave) {
+      onLeave();
     }
   };
 
@@ -282,6 +325,47 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
             <p className="text-white text-[10px] font-black tracking-[0.4em] uppercase">SkillDad Studio Pro</p>
           </div>
         </>
+      )}
+      {/* Custom Confirmation Modal using Portal to prevent flickering/blinking */}
+      {showEndConfirm && createPortal(
+        <div 
+          className="fixed inset-0 z-[30000] flex items-center justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-300"
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        >
+          <div className="w-full max-w-md p-10 bg-[#0a0a0b] border border-white/10 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] animate-in zoom-in-95 duration-500">
+            <div className="w-20 h-20 mx-auto mb-8 rounded-[1.5rem] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-inner">
+              <Radio size={40} className="animate-pulse" />
+            </div>
+            <h3 className="text-2xl font-black text-white text-center mb-3 tracking-tight">End Broadcast?</h3>
+            <p className="text-white/40 text-center text-sm mb-10 leading-relaxed font-medium">
+              This will disconnect all audience members and immediately begin the recording archival process in your dashboard.
+            </p>
+            <div className="flex gap-5">
+              <button
+                disabled={isEnding}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowEndConfirm(false); }}
+                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all border border-white/5 hover:border-white/10"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={isEnding}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); confirmEndSession(); }}
+                className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all shadow-[0_15px_30px_rgba(220,38,38,0.4)] flex items-center justify-center gap-3 active:scale-95"
+              >
+                {isEnding ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <X size={16} />
+                    Confirm End
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

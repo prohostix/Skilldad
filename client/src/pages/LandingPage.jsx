@@ -261,6 +261,7 @@ const LandingPage = () => {
                                         <img
                                             src={company.logo}
                                             alt={company.name}
+                                            crossOrigin="anonymous"
                                             className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
@@ -286,6 +287,7 @@ const LandingPage = () => {
                                         <img
                                             src={company.logo}
                                             alt={company.name}
+                                            crossOrigin="anonymous"
                                             className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
@@ -659,7 +661,12 @@ const LandingPage = () => {
                                     <div className="flex items-center gap-3 mb-3 w-full">
                                         <div className="w-9 h-9 rounded-[14px] bg-primary/20 text-primary flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 border border-primary/30 group-hover:border-primary/50 overflow-hidden p-1.5">
                                             {uni.logo ? (
-                                                <img src={uni.logo} alt={uni.name} className="w-full h-full object-contain" />
+                                                <img 
+                                                    src={uni.logo} 
+                                                    alt={uni.name} 
+                                                    crossOrigin="anonymous"
+                                                    className="w-full h-full object-contain" 
+                                                />
                                             ) : (
                                                 <Library size={18} strokeWidth={2.5} />
                                             )}
@@ -745,6 +752,7 @@ const LandingPage = () => {
                                             <img
                                                 src={director.imageUrl || director.image}
                                                 alt={director.name}
+                                                crossOrigin="anonymous"
                                                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                                                 onError={(e) => {
                                                     e.target.onerror = null;

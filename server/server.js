@@ -127,6 +127,13 @@ app.use(cors({
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Enable Cross-Origin Isolation for Zoom SDK
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+  next();
+});
+
 // Routes
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/db-status', require('./routes/dbStatusRoutes'));
