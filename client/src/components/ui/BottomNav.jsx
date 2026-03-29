@@ -4,9 +4,9 @@ import {
     Home,
     Search,
     BookOpen,
-    User,
-    Settings
+    User
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const BottomNav = () => {
     const navigate = useNavigate();
@@ -34,20 +34,31 @@ const BottomNav = () => {
     ];
 
     return (
-        <div className="lg:hidden fixed bottom-4 left-4 right-4 z-[45] max-w-sm mx-auto">
-            <div className="bg-[#04020a]/85 backdrop-blur-xl border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.8)] rounded-3xl flex items-center justify-around p-2 gap-1 overflow-hidden">
+        <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[45] w-[calc(100%-2rem)] max-w-sm">
+            <div className="bg-[#04020a]/80 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2.5rem] flex items-center justify-around p-1.5 relative overflow-hidden">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
                         <button
                             key={item.label}
                             onClick={() => navigate(item.path)}
-                            className={`flex flex-col items-center flex-1 py-1.5 rounded-2xl transition-all duration-300 relative ${
-                                isActive ? 'bg-primary/10 text-primary shadow-[inset_0_0_12px_rgba(192,38,255,0.15)]' : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                            className={`flex flex-col items-center flex-1 py-1.5 rounded-3xl transition-all duration-500 relative z-10 ${
+                                isActive ? 'text-white' : 'text-white/40 hover:text-white/60'
                             }`}
                         >
-                            <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'scale-110 transition-all duration-300 drop-shadow-[0_0_6px_rgba(192,38,255,0.5)]' : 'transition-colors'} />
-                            <span className={`text-[9px] font-black uppercase tracking-[0.1em] mt-1 transition-all duration-300 ${isActive ? 'opacity-100 drop-shadow-[0_0_6px_rgba(192,38,255,0.4)]' : 'opacity-50'}`}>
+                            {isActive && (
+                                <motion.div
+                                    layoutId="bottomNavIndicator"
+                                    className="absolute inset-0 bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/20 rounded-[2rem] shadow-[0_0_15px_rgba(192,38,255,0.2)]"
+                                    transition={{ type: "spring", bounce: 0.25, duration: 0.5 }}
+                                />
+                            )}
+                            <item.icon 
+                                size={18} 
+                                strokeWidth={isActive ? 2.5 : 2} 
+                                className={`relative transition-all duration-500 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(192,38,255,0.6)]' : ''}`} 
+                            />
+                            <span className={`text-[8px] font-black uppercase tracking-[0.15em] mt-1 relative transition-all duration-500 ${isActive ? 'opacity-100' : 'opacity-40'}`}>
                                 {item.label}
                             </span>
                         </button>

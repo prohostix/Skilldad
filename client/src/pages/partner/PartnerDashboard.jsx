@@ -293,7 +293,7 @@ const PartnerDashboard = () => {
                         className="space-y-8"
                     >
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                             <GlassCard className="group hover:border-primary/40 transition-all">
                                 <div className="flex justify-between items-start mb-6">
                                     <div className="p-3 bg-primary/10 text-primary rounded-2xl group-hover:scale-110 transition-transform">
@@ -355,7 +355,7 @@ const PartnerDashboard = () => {
                             <h2 className="text-base font-bold text-white font-poppins mb-6 flex items-center">
                                 <Zap size={18} className="mr-2 text-primary" /> Quick Actions
                             </h2>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                                 <button
                                     onClick={() => copyToClipboard(generateEnrollmentLink())}
                                     className="p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 hover:border-primary/30 transition-all text-left group"
@@ -697,7 +697,7 @@ const PartnerDashboard = () => {
                             <h2 className="text-base font-bold text-white font-poppins mb-6 flex items-center">
                                 <BarChart3 size={18} className="mr-2 text-primary" /> Performance Analytics
                             </h2>
-                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                                 <div className="p-4 bg-white/5 rounded-xl">
                                     <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Conversion Rate</h3>
                                     <p className="text-lg font-semibold text-white">24.5%</p>

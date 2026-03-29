@@ -410,19 +410,19 @@ const StudentManagement = () => {
     return (
         <div className="space-y-6 pb-20">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <DashboardHeading title="Student Management" />
                 </div>
-                <div className="flex gap-3">
-                    <ModernButton variant="secondary" onClick={handleExportStudents} title="Export to CSV">
-                        <Download size={16} className="mr-2" /> CSV
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <ModernButton variant="secondary" onClick={handleExportStudents} title="Export CSV" className="flex-1 sm:flex-none !px-3 !py-2.5">
+                        <Download size={14} className="mr-1.5" /> CSV
                     </ModernButton>
-                    <ModernButton variant="secondary" onClick={handleExportPDF} title="Export to PDF">
-                        <FileText size={16} className="mr-2" /> PDF
+                    <ModernButton variant="secondary" onClick={handleExportPDF} title="Export PDF" className="flex-1 sm:flex-none !px-3 !py-2.5">
+                        <FileText size={14} className="mr-1.5" /> PDF
                     </ModernButton>
-                    <ModernButton onClick={() => setAddStudentOpen(true)}>
-                        <Plus size={16} className="mr-2" /> Add Student
+                    <ModernButton onClick={() => setAddStudentOpen(true)} className="w-full sm:w-auto !px-4 !py-2.5">
+                        <Plus size={16} className="mr-1.5" /> Add Student
                     </ModernButton>
                 </div>
             </div>
@@ -566,16 +566,16 @@ const StudentManagement = () => {
                             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:bg-primary/20 transition-all"></div>
                             
                             <div className="flex justify-between items-start">
-                                <div className="flex items-center space-x-3 cursor-pointer" onClick={() => handleViewStudent(student)}>
-                                    <div className="w-12 h-12 rounded-xl bg-primary/20 flex flex-shrink-0 items-center justify-center text-primary font-bold shadow-sm">
+                                <div className="flex items-center space-x-3 cursor-pointer group/nav" onClick={() => handleViewStudent(student)}>
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary/20 flex flex-shrink-0 items-center justify-center text-primary font-bold shadow-sm group-hover/nav:bg-primary group-hover/nav:text-white transition-all">
                                         {student.name?.charAt(0).toUpperCase()}
                                     </div>
-                                    <div className="text-left">
-                                        <p className="font-bold text-white text-sm group-hover:text-primary transition-colors">{student.name}</p>
-                                        <p className="text-xs text-white/50 flex flex-col font-medium mt-0.5">
-                                            <span>{student.email}</span>
-                                            <span className="text-[10px] text-white/30 truncate max-w-[180px]">ID: {student._id.slice(-6)}</span>
-                                        </p>
+                                    <div className="text-left min-w-0">
+                                        <p className="font-bold text-white text-sm group-hover/nav:text-primary transition-colors truncate">{student.name}</p>
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] sm:text-xs text-white/50 truncate max-w-[160px] sm:max-w-none">{student.email}</span>
+                                            <span className="text-[9px] text-white/30 truncate mt-0.5">UID: {student._id.slice(-8)}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

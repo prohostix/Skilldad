@@ -147,12 +147,20 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                     msOverflowStyle: 'none'
                 }}
             >
-                <div className="flex items-center space-x-3 mb-10 px-2 cursor-pointer" onClick={() => navigate('/')}>
-                    <img src={logoImg} alt="SkillDad" className="w-10 h-10 object-contain" />
-
-                    <span className="text-xl font-black bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent font-space uppercase tracking-wider">
-                        Skill Dad
-                    </span>
+                <div className="flex items-center justify-between mb-8 px-2">
+                    <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
+                        <img src={logoImg} alt="SkillDad" className="w-10 h-10 object-contain" />
+                        <span className="text-xl font-black bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent font-space uppercase tracking-wider">
+                            Skill Dad
+                        </span>
+                    </div>
+                    {/* Mobile Close Button */}
+                    <button 
+                        onClick={() => setIsOpen(false)}
+                        className="lg:hidden p-2 text-white/50 hover:text-white transition-colors bg-white/5 rounded-xl border border-white/10"
+                    >
+                        <X size={20} />
+                    </button>
                 </div>
 
 

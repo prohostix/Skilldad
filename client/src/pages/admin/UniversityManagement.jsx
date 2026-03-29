@@ -359,7 +359,7 @@ const UniversityManagement = () => {
             </div>
 
             {/* B2B Overview Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <GlassCard className="group hover:border-primary/40">
                     <div className="flex items-center space-x-4">
                         <div className="p-3 bg-primary/10 text-primary rounded-2xl group-hover:scale-110 transition-transform">
@@ -409,7 +409,7 @@ const UniversityManagement = () => {
                 </GlassCard>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 {/* ROI Analytics Chart */}
                 <GlassCard className="lg:col-span-2 shadow-xl border-white/10">
                     <div className="flex items-center justify-between mb-8">
@@ -505,7 +505,7 @@ const UniversityManagement = () => {
 
             {/* Entity Table */}
             <GlassCard className="!p-0 border-white/10 overflow-hidden shadow-xl">
-                <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <h3 className="text-base font-semibold text-white font-inter">Partner Network</h3>
                     <div className="flex space-x-2">
                         <div className="flex bg-white/5 p-1 rounded-xl">

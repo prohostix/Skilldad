@@ -337,7 +337,7 @@ const UniversityDashboard = () => {
             </div>
 
             {/* Dashboard Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                 {[
                     { label: 'Total Students', value: stats.studentCount || 0, icon: Users, color: 'from-blue-500/20 to-blue-600/20', border: 'border-blue-500/30', text: 'text-blue-400' },
                     { label: 'Active Sessions', value: stats.liveSessions || 0, icon: Video, color: 'from-primary/20 to-primary-dark/20', border: 'border-primary/30', text: 'text-primary' },
@@ -385,12 +385,12 @@ const UniversityDashboard = () => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeTab === tab.id
+                                className={`flex items-center px-4 sm:px-6 py-2 rounded-full text-[11px] sm:text-sm font-medium transition-all duration-300 ${activeTab === tab.id
                                     ? 'bg-primary text-white shadow-lg shadow-primary/25'
                                     : 'text-white/50 hover:text-white hover:bg-white/10'
                                     }`}
                             >
-                                <tab.icon size={16} className="mr-2" />
+                                <tab.icon size={window.innerWidth < 640 ? 14 : 16} className="mr-1.5 sm:mr-2" />
                                 {tab.label}
                             </button>
                         ))}
@@ -439,9 +439,9 @@ const UniversityDashboard = () => {
                         {/* Students List */}
                         <div className="grid gap-4">
                             {filteredStudents.map(student => (
-                                <GlassCard key={student._id || student.id} className="p-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-4">
+                                <GlassCard key={student._id || student.id} className="p-3 sm:p-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="flex items-center space-x-3 sm:space-x-4">
                                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden">
                                                 {student.profileImage || student.avatar ? (
                                                     <img
@@ -525,7 +525,7 @@ const UniversityDashboard = () => {
                                 <p className="text-white/40 text-sm">Manage courses assigned to your institution and view enrolled students.</p>
                             </div>
                         </div>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {courses.length > 0 ? courses.map((course) => (
                                 <GlassCard
                                     key={course._id || course}
@@ -622,7 +622,7 @@ const UniversityDashboard = () => {
                         </div>
 
                         {selectedStudentId === 'all' ? (
-                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                                 {/* Course Progress */}
                                 <GlassCard className="p-5">
                                     <h3 className="text-base font-semibold text-white mb-4">Course Progress</h3>

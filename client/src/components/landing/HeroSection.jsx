@@ -172,7 +172,7 @@ const TravelDot = ({ from, to, delay }) => {
 
 const NetworkDiagram = () => (
     <div
-        className="absolute -left-28 sm:-left-10 lg:left-0 top-[60%] sm:top-[54%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-15 sm:opacity-25 md:opacity-80 lg:opacity-100"
+        className="absolute -left-28 sm:-left-10 lg:left-0 top-[60%] sm:top-[54%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
         style={{ width: 420, height: 580 }}
     >
         <div
@@ -282,7 +282,7 @@ const HeroSection = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <div role="heading" aria-level="1" className="text-[26px] xs:text-[32px] sm:text-[42px] md:text-[62px] lg:text-[76px] font-bold leading-[1.1] tracking-[-0.03em] mb-5 sm:mb-6 md:mb-10 font-space px-2 sm:px-0">
+                        <div role="heading" aria-level="1" className="text-[28px] xs:text-[36px] sm:text-[42px] md:text-[62px] lg:text-[76px] font-bold leading-[1.15] xs:leading-[1.1] tracking-[-0.03em] mb-6 md:mb-10 font-space px-4 sm:px-0">
                             <span className="text-white/30 block mb-2">Transform Your</span>
                             <span className="text-white block">
                                 Skills with{' '}
@@ -326,8 +326,8 @@ const HeroSection = () => {
             </div>
 
             {/* University Ticker */}
-            <div className="absolute bottom-4 left-0 right-0 py-5 overflow-hidden whitespace-nowrap z-20">
-                <div className="flex animate-scroll hover:pause will-change-transform" style={{ animationDuration: '150s' }}>
+            <div className="absolute bottom-4 left-0 right-0 py-5 overflow-hidden whitespace-nowrap z-20 pointer-events-none sm:pointer-events-auto">
+                <div className="flex animate-scroll hover:pause-on-desktop will-change-transform" style={{ animationDuration: '150s' }}>
                     {[...partners, ...partners, ...partners].map((partner, i) => (
                         <div key={i} className="mx-6 sm:mx-16 md:mx-28 flex items-center transition-all hover:scale-110 cursor-default">
                             <span className="text-xs xs:text-sm md:text-[22px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 hover:text-white font-inter">{partner}</span>

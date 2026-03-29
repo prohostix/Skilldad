@@ -362,22 +362,22 @@ const B2BManagement = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="text-left">
                     <DashboardHeading title="B2B Partners" />
                 </div>
-                <div className="flex items-center space-x-3">
-                    <ModernButton variant="secondary" onClick={fetchPartners}>
-                        <Activity size={18} className="mr-2" /> Refresh
+                <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
+                    <ModernButton variant="secondary" onClick={fetchPartners} className="flex-1 sm:flex-none !px-3 sm:!px-4">
+                        <Activity size={16} className="mr-1.5 sm:mr-2" /> Refresh
                     </ModernButton>
-                    <ModernButton onClick={() => setOpenOnboard(true)}>
-                        <Plus size={18} className="mr-2" /> Add B2B Partner
+                    <ModernButton onClick={() => setOpenOnboard(true)} className="flex-1 sm:flex-none !px-3 sm:!px-4">
+                        <Plus size={16} className="mr-1.5 sm:mr-2" /> Add Partner
                     </ModernButton>
                 </div>
             </div>
 
             {/* B2B Overview Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <GlassCard className="group hover:border-primary/40">
                     <div className="flex items-center space-x-4">
                         <div className="p-3 bg-primary/10 text-primary rounded-2xl group-hover:scale-110 transition-transform">
@@ -427,7 +427,7 @@ const B2BManagement = () => {
                 </GlassCard>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 {/* ROI Analytics Chart */}
                 <GlassCard className="lg:col-span-2 shadow-xl border-white/10">
                     <div className="flex items-center justify-between mb-8">
@@ -539,7 +539,7 @@ const B2BManagement = () => {
                     </div>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left font-inter border-collapse">
+                    <table className="w-full text-left font-inter border-collapse responsive-table">
                         <thead>
                             <tr className="bg-white/5 border-b border-white/10">
                                 <th className="px-6 py-4 text-xs font-bold text-white/50 uppercase tracking-widest">Entity Name</th>

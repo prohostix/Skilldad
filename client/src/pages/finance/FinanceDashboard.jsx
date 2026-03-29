@@ -575,12 +575,12 @@ const FinanceDashboard = () => {
             </div>
 
             {/* Compact Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {[
-                    { label: 'Total Revenue', val: `₹${stats.totalRevenue?.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: '+22.5%' },
-                    { label: 'Pending Payments', val: stats.pendingPaymentsCount, icon: Clock, color: 'amber', trend: 'Active' },
-                    { label: 'Partner Payouts', val: `₹${stats.totalPayoutsAmount?.toLocaleString()}`, icon: Wallet, color: 'primary', trend: '+12.1%' },
-                    { label: 'Total Enrollments', val: stats.totalEnrollments || 0, icon: Users, color: 'purple', trend: '+8.3%' },
+                    { label: 'Revenue', val: `₹${stats.totalRevenue?.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: '+22.5%' },
+                    { label: 'Pending', val: stats.pendingPaymentsCount, icon: Clock, color: 'amber', trend: 'Active' },
+                    { label: 'Payouts', val: `₹${stats.totalPayoutsAmount?.toLocaleString()}`, icon: Wallet, color: 'primary', trend: '+12.1%' },
+                    { label: 'Enrollments', val: stats.totalEnrollments || 0, icon: Users, color: 'purple', trend: '+8.3%' },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -588,18 +588,18 @@ const FinanceDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                     >
-                        <GlassCard className="group hover:border-primary/40 transition-colors relative overflow-hidden h-full !p-6">
-                            <div className="flex justify-between items-start mb-4">
-                                <div className={`p-3 bg-${stat.color === 'primary' ? 'primary' : stat.color === 'emerald' ? 'emerald' : stat.color === 'amber' ? 'amber' : 'purple'}-500/10 text-${stat.color === 'primary' ? 'primary' : stat.color === 'emerald' ? 'emerald-400' : stat.color === 'amber' ? 'amber-400' : 'purple-400'} rounded-xl group-hover:scale-110 transition-transform`}>
-                                    <stat.icon size={28} />
+                        <GlassCard className="group hover:border-primary/40 transition-colors relative overflow-hidden h-full p-4 sm:p-6">
+                            <div className="flex justify-between items-start mb-3 sm:mb-4">
+                                <div className={`p-2 sm:p-3 bg-${stat.color}-500/10 text-${stat.color === 'emerald' ? 'emerald-400' : stat.color === 'amber' ? 'amber-400' : stat.color === 'primary' ? 'primary' : 'purple-400'} rounded-xl group-hover:scale-110 transition-transform`}>
+                                    <stat.icon size={window.innerWidth < 640 ? 22 : 28} />
                                 </div>
-                                <span className={`text-xs font-bold px-2 py-1 rounded-lg ${stat.trend.includes('+') ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 bg-slate-500/10'}`}>
+                                <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${stat.trend.includes('+') ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 bg-slate-500/10'}`}>
                                     {stat.trend}
                                 </span>
                             </div>
                             <div className="text-left">
-                                <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">{stat.label}</h3>
-                                <p className="text-3xl font-black text-white leading-tight">{stat.val}</p>
+                                <h3 className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">{stat.label}</h3>
+                                <p className="text-xl sm:text-3xl font-black text-white leading-tight">{stat.val}</p>
                             </div>
                         </GlassCard>
                     </motion.div>
@@ -617,9 +617,8 @@ const FinanceDashboard = () => {
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <tab.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
-                        <span className="hidden sm:inline">{tab.label}</span>
-                        <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                        <tab.icon size={window.innerWidth < 640 ? 14 : 16} className="sm:w-[18px] sm:h-[18px]" />
+                        <span className="text-[11px] sm:text-sm">{window.innerWidth < 640 ? tab.label.split(' ')[0] : tab.label}</span>
                     </button>
                 ))}
             </div>
@@ -635,12 +634,12 @@ const FinanceDashboard = () => {
                         {/* Filters */}
                         <GlassCard className="p-4 sm:p-6">
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
-                                <div className="relative flex-1">
-                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                                <div className="relative flex-1 group">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
                                     <input
                                         type="text"
                                         placeholder="Search students, courses..."
-                                        className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                        className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-white/10 transition-all font-medium"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
@@ -678,7 +677,7 @@ const FinanceDashboard = () => {
                         {/* Student Payments Table */}
                         <GlassCard className="overflow-hidden">
                             <div className="overflow-x-auto">
-                                <table className="w-full min-w-[800px]">
+                                <table className="w-full min-w-[800px] responsive-table">
                                     <thead className="bg-white/5 border-b border-white/10">
                                         <tr>
                                             <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Student</th>
@@ -754,7 +753,7 @@ const FinanceDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             {enrollmentSummaries.map((summary, index) => (
                                 <GlassCard key={index} className="!p-6 hover:border-primary/40 transition-colors">
                                     <div className="flex items-center space-x-4 mb-5">
@@ -806,7 +805,7 @@ const FinanceDashboard = () => {
                                 </h2>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="w-full responsive-table">
                                     <thead className="bg-white/5 border-b border-white/10">
                                         <tr>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Partner</th>
@@ -868,7 +867,7 @@ const FinanceDashboard = () => {
                                 </h2>
                             </div>
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="w-full responsive-table">
                                     <thead className="bg-white/5 border-b border-white/10">
                                         <tr>
                                             <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Partner</th>
@@ -913,7 +912,7 @@ const FinanceDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             {[
                                 { title: 'Revenue Report', description: 'Comprehensive revenue analysis', icon: TrendingUp, type: 'revenue' },
                                 { title: 'Payment Summary', description: 'Student payment breakdown', icon: Receipt, type: 'payments' },

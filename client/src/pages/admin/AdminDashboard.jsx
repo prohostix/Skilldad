@@ -174,7 +174,7 @@ const AdminDashboard = () => {
     ];
 
     return (
-        <div className="space-y-10 animate-in fade-in duration-700 pb-20">
+        <div className="space-y-6 sm:space-y-10 animate-in fade-in duration-700 pb-20">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
@@ -240,7 +240,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Matrix Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
                 {widgetStats.map((item, i) => (
                     <motion.div
                         key={i}

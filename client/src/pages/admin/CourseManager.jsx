@@ -171,34 +171,34 @@ const CourseManager = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="text-left">
                     <DashboardHeading title="Course Library" />
                 </div>
-                <ModernButton onClick={handleCreate} className="!px-4 !py-2 text-sm">
+                <ModernButton onClick={handleCreate} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm">
                     <Plus size={16} className="mr-1.5" /> Create New Course
                 </ModernButton>
             </div>
 
             <GlassCard className="!p-0 overflow-hidden">
-                <div className="p-6 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="relative max-w-sm w-full">
+                <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="relative w-full sm:max-w-sm">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
                         <input
                             type="text"
                             placeholder="Filter courses..."
-                            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-white placeholder-white/40"
+                            className="w-full pl-10 pr-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-white placeholder-white/40 text-sm"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                     <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium text-white/70 font-inter">Displaying {filteredCourses.length} results</span>
+                        <span className="text-xs sm:text-sm font-medium text-white/70 font-inter tracking-tight">Displaying {filteredCourses.length} results</span>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left font-inter">
+                    <table className="w-full text-left font-inter responsive-table">
                         <thead className="bg-white/5 text-white/70 text-xs uppercase tracking-wider font-semibold">
                             <tr>
                                 <th className="px-6 py-4">Course Info</th>
@@ -297,7 +297,7 @@ const CourseManager = () => {
                     }}
                 >
                     <GlassCard
-                        className="w-full max-w-2xl relative z-[100000] my-8 bg-black/95 border-white/20"
+                        className="w-full max-w-2xl relative z-[100000] my-2 sm:my-8 bg-black/95 border-white/20 !p-4 sm:!p-8"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <h3 className="text-lg font-semibold text-white mb-6 font-inter">
@@ -333,7 +333,7 @@ const CourseManager = () => {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
                                         Category
@@ -396,7 +396,7 @@ const CourseManager = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
                                         Instructor Name (Custom)

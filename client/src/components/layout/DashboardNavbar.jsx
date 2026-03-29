@@ -51,7 +51,7 @@ const Navbar = ({ onToggleSidebar }) => {
     ];
 
     return (
-        <header className="sticky top-0 z-50 w-full h-16 bg-black/60 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 flex items-center justify-between will-change-transform font-inter">
+        <header className="sticky top-0 z-50 w-full h-14 sm:h-16 bg-black/60 backdrop-blur-xl border-b border-white/5 px-3 sm:px-6 flex items-center justify-between will-change-transform font-inter">
             <div className="flex items-center space-x-4 flex-1">
                 <button
                     onClick={onToggleSidebar}
@@ -115,7 +115,7 @@ const Navbar = ({ onToggleSidebar }) => {
                         className={`relative p-2 rounded-xl transition-all ${isNotifOpen ? 'bg-primary/20 text-primary' : 'text-slate-400 hover:bg-white/5 hover:text-primary'}`}
                     >
                         <Bell size={18} className="sm:w-5 sm:h-5" />
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
+                        <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
                     </button>
 
                     <AnimatePresence>

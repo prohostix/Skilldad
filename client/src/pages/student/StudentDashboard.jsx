@@ -167,9 +167,9 @@ const StudentDashboard = () => {
     );
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 pb-20">
+        <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-20 px-1 sm:px-0">
             {/* 1. Header Section - Refined */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 pb-2 sm:pb-4">
                 <div className="space-y-2">
                     <DashboardHeading
                         title={`Student Dashboard`}
@@ -224,7 +224,7 @@ const StudentDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             {enrolledUniversities.map((university) => (
                                 <div
                                     key={university.id}
@@ -261,7 +261,7 @@ const StudentDashboard = () => {
 
             {/* 2. Stats Grid - University Style with CountingNumber */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {[
                     { label: 'Completion Rate', val: stats.completionRate, suffix: '%', icon: Target, border: 'border-primary/30', color: 'from-primary/20 to-primary-dark/20', text: 'text-primary' },
                     { label: 'Active Courses', val: stats.totalCourses, icon: BookOpen, border: 'border-emerald-500/30', color: 'from-emerald-500/20 to-emerald-600/20', text: 'text-emerald-400' },
@@ -326,7 +326,7 @@ const StudentDashboard = () => {
                                     className="p-0 border-white/15 hover:border-primary/60 transition-all duration-500 cursor-pointer group overflow-hidden bg-white/[0.01]"
                                     onClick={() => navigate(`/dashboard/course/${enrollment.course._id}`)}
                                 >
-                                    <div className="relative aspect-[16/6] overflow-hidden">
+                                    <div className="relative aspect-video sm:aspect-[16/6] overflow-hidden">
                                         <img
                                             src={enrollment.course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                             alt={enrollment.course.title}

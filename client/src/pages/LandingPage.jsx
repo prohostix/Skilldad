@@ -251,7 +251,7 @@ const LandingPage = () => {
                 </div>
 
                 {/* Row 1 — Scrolls Left */}
-                <div className="relative overflow-hidden whitespace-nowrap mb-6">
+                <div className="relative overflow-hidden whitespace-nowrap mb-6 pointer-events-none sm:pointer-events-auto">
                     <div className="flex animate-scroll will-change-transform" style={{ animationDuration: '120s' }}>
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
@@ -277,7 +277,7 @@ const LandingPage = () => {
                 </div>
 
                 {/* Row 2 — Scrolls Right */}
-                <div className="relative overflow-hidden whitespace-nowrap">
+                <div className="relative overflow-hidden whitespace-nowrap pointer-events-none sm:pointer-events-auto">
                     <div className="flex animate-scroll-reverse will-change-transform" style={{ animationDuration: '130s' }}>
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
@@ -386,7 +386,7 @@ const LandingPage = () => {
                         </motion.div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                         {features.map((feature, index) => (
                             <motion.div
                                 key={index}
@@ -642,7 +642,7 @@ const LandingPage = () => {
                     </div>
 
                     {/* University Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                         {universities.map((uni, i) => (
                             <motion.div
                                 key={i}
@@ -734,7 +734,7 @@ const LandingPage = () => {
                         </motion.p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                         {directors.map((director, i) => (
                             <motion.div
                                 key={i}
