@@ -72,7 +72,7 @@ const PartnerStudentManagement = () => {
     const fetchCodes = async () => {
         try {
             const { data } = await axios.get('/api/partner/discounts', config);
-            setPartnerCodes(data);
+            setPartnerCodes(Array.isArray(data) ? data : []);
             if (data.length > 0) {
                 setNewStudentData(prev => ({ ...prev, partnerCode: data[0].code }));
             }
@@ -172,7 +172,7 @@ const PartnerStudentManagement = () => {
         return matchesSearch && matchesCourse;
     });
 
-    const courses = [...new Set(students.map(s => s.course).filter(Boolean))];
+    const courses = [...new Set((students || []).map(s => s.course).filter(Boolean))];
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">

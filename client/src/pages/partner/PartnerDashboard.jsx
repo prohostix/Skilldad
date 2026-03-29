@@ -145,10 +145,10 @@ const PartnerDashboard = () => {
                 axios.get('/api/partner/payouts', config)
             ]);
 
-            setStats(statsRes.data);
-            setStudents(studentsRes.data.length > 0 ? studentsRes.data : []); // Removed student mock fallback
-            setDiscountCodes(discountsRes.data || []); // strictly use real DB records, not mock records
-            setPayoutRequests(payoutsRes.data.length > 0 ? payoutsRes.data : mockPayoutRequests);
+            setStats(statsRes.data || { totalCodes: 0, totalRedemptions: 0, totalEarnings: 0 });
+            setStudents(Array.isArray(studentsRes.data) ? studentsRes.data : []); 
+            setDiscountCodes(Array.isArray(discountsRes.data) ? discountsRes.data : []); 
+            setPayoutRequests(Array.isArray(payoutsRes.data) && payoutsRes.data.length > 0 ? payoutsRes.data : mockPayoutRequests);
             setLoading(false);
         } catch (error) {
             console.error('Error fetching partner data:', error);
@@ -781,7 +781,7 @@ const PartnerDashboard = () => {
                                         <BookOpen size={18} className="mr-2 text-primary" /> Enrolled Courses
                                     </h3>
                                     <div className="space-y-3">
-                                        {selectedStudent.courses.map((course, index) => (
+                                        {selectedStudent.courses?.map((course, index) => (
                                             <div key={index} className="p-3 bg-white/5 rounded-lg">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <h4 className="font-bold text-white">{course.name}</h4>
@@ -809,7 +809,7 @@ const PartnerDashboard = () => {
                                         <FileText size={18} className="mr-2 text-primary" /> Documents
                                     </h3>
                                     <div className="space-y-2">
-                                        {selectedStudent.documents.map((doc, index) => (
+                                        {selectedStudent.documents?.map((doc, index) => (
                                             <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                                                 <div className="flex items-center gap-3">
                                                     <div className={`p-2 rounded-lg ${doc.type === 'certificate' ? 'bg-emerald-500/20 text-emerald-400' :

@@ -73,7 +73,7 @@ const GroupManagement = () => {
     const fetchGroups = async () => {
         try {
             const { data } = await axios.get('/api/university/groups', config);
-            setGroups(data);
+            setGroups(Array.isArray(data) ? data : []);
             setLoading(false);
         } catch (error) {
             console.error(error);
@@ -486,7 +486,7 @@ const GroupManagement = () => {
                                     <FileText size={18} className="mr-2 text-primary" /> Documents
                                 </h3>
                                 <div className="space-y-2">
-                                    {selectedStudent.documents.map((doc, index) => (
+                                    {selectedStudent.documents?.map((doc, index) => (
                                         <div key={index} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
                                             <span className="text-sm text-white">{doc}</span>
                                             <button className="p-1 text-primary hover:bg-primary/10 rounded">

@@ -107,7 +107,7 @@ const getGlobalStats = async (req, res) => {
             query("SELECT COUNT(*) FROM users WHERE role = 'student'"),
             query("SELECT COUNT(*) FROM users WHERE role = 'partner'"),
             query("SELECT COUNT(*) FROM support_tickets WHERE status = 'open'"),
-            query("SELECT SUM(final_amount) as total FROM transactions WHERE status = 'success'"),
+            query("SELECT SUM(amount) as total FROM transactions WHERE status = 'success'"),
             query("SELECT pg_database_size(current_database()) as size"),
             query(`
                 WITH days AS (
@@ -327,7 +327,7 @@ const getPlatformAnalytics = async (req, res) => {
                     WHEN u.partner_code IS NOT NULL THEN 'Partner'
                     ELSE 'Direct'
                 END as source,
-                COALESCE(SUM(t.final_amount), 0) as amount
+                COALESCE(SUM(t.amount), 0) as amount
             FROM transactions t
             JOIN users u ON t.user_id = u.id
             WHERE t.status = 'success'

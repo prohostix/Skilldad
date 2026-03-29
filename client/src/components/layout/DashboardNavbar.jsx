@@ -1,23 +1,57 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, User, X } from 'lucide-react';
+import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
 
 const Navbar = ({ onToggleSidebar }) => {
     const navigate = useNavigate();
-    const [isMobileSearchOpen, setIsMobileSearchOpen] = React.useState(false);
-    // Get user info from context
-    const { user } = useUser();
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
+    
+    // Get user info and logout method from context
+    const { user, logout } = useUser();
     const userInfo = user || JSON.parse(localStorage.getItem('userInfo') || '{}');
     const userName = userInfo.name || 'User';
     const userRole = userInfo.role || 'student';
-
+    
     // Capitalize first letter of role
     const displayRole = userRole.charAt(0).toUpperCase() + userRole.slice(1);
 
+    // Refs for click outside to close dropdowns
+    const profileRef = useRef(null);
+    const notifRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setIsProfileOpen(false);
+            }
+            if (notifRef.current && !notifRef.current.contains(event.target)) {
+                setIsNotifOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleLogout = () => {
+        setIsProfileOpen(false);
+        if (logout) logout();
+        navigate('/login');
+    };
+
+    // Generic Mock Notifications
+    const mockNotifications = [
+        { id: 1, title: 'System Updated', message: 'Platform version 2.4 is live.', time: '10m ago', icon: Info, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+        { id: 2, title: 'New Enrollment', message: 'Alice joined Web Mastery.', time: '1h ago', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10' },
+        { id: 3, title: 'Team Message', message: 'You have a new direct message.', time: '2h ago', icon: MessageSquare, color: 'text-primary', bg: 'bg-primary/10' },
+    ];
+
     return (
-        <header className="sticky top-0 z-30 w-full h-16 bg-black/60 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 flex items-center justify-between will-change-transform font-inter">
+        <header className="sticky top-0 z-50 w-full h-16 bg-black/60 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 flex items-center justify-between will-change-transform font-inter">
             <div className="flex items-center space-x-4 flex-1">
                 <button
                     onClick={onToggleSidebar}
@@ -72,36 +106,117 @@ const Navbar = ({ onToggleSidebar }) => {
                 )}
             </AnimatePresence>
 
-            <div className="flex items-center space-x-2 sm:space-x-4">
-                <button className="relative p-2 text-slate-400 hover:bg-white/5 rounded-xl transition-all hover:text-primary">
-                    <Bell size={18} className="sm:w-5 sm:h-5" />
-                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
-                </button>
+            <div className="flex items-center space-x-3 sm:space-x-4">
+                
+                {/* Notification Bell Dropdown */}
+                <div className="relative" ref={notifRef}>
+                    <button 
+                        onClick={() => setIsNotifOpen(!isNotifOpen)}
+                        className={`relative p-2 rounded-xl transition-all ${isNotifOpen ? 'bg-primary/20 text-primary' : 'text-slate-400 hover:bg-white/5 hover:text-primary'}`}
+                    >
+                        <Bell size={18} className="sm:w-5 sm:h-5" />
+                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
+                    </button>
+
+                    <AnimatePresence>
+                        {isNotifOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                transition={{ duration: 0.2 }}
+                                className="absolute right-0 mt-3 w-80 bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden py-2 z-50 origin-top-right"
+                            >
+                                <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                                    <h3 className="text-white font-semibold text-sm">Notifications</h3>
+                                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">3 New</span>
+                                </div>
+                                <div className="max-h-[300px] overflow-y-auto">
+                                    {mockNotifications.map((notif) => (
+                                        <div key={notif.id} className="px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors flex items-start gap-3 border-b border-white/5 last:border-0">
+                                            <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.bg} ${notif.color}`}>
+                                                <notif.icon size={14} />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-white text-sm font-medium truncate">{notif.title}</p>
+                                                <p className="text-slate-400 text-xs mt-0.5 line-clamp-2">{notif.message}</p>
+                                                <p className="text-slate-500 text-[10px] mt-1">{notif.time}</p>
+                                            </div>
+                                            <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0 my-auto shadow-[0_0_8px_rgba(192,38,255,0.6)]"></div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="px-4 py-2 mt-1 flex justify-center border-t border-white/5 bg-white/[0.02] hover:bg-white/5 cursor-pointer transition-colors">
+                                    <p className="text-primary text-xs font-semibold">Mark all as read</p>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
 
                 <div className="h-8 w-px bg-white/5 hidden sm:block"></div>
 
-                <div
-                    onClick={() => navigate('/settings')}
-                    className="flex items-center space-x-3 cursor-pointer group hover:bg-white/5 p-1 sm:p-1.5 rounded-xl transition-all"
-                >
-                    {userInfo.profileImage ? (
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-900 overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all">
-                            <img
-                                src={`${userInfo.profileImage}`}
-                                alt="Profile"
-                                className="w-full h-full object-cover"
-                                onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>'; }}
-                            />
+                {/* Profile Dropdown */}
+                <div className="relative" ref={profileRef}>
+                    <div
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className={`flex items-center space-x-3 cursor-pointer group p-1 sm:p-1.5 rounded-xl transition-all ${isProfileOpen ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                    >
+                        {userInfo.profileImage ? (
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-900 overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all shadow-lg shrink-0">
+                                <img
+                                    src={`${userInfo.profileImage}`}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>'; }}
+                                />
+                            </div>
+                        ) : (
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 group-hover:border-primary/50 transition-all shadow-[0_0_15px_rgba(192,38,255,0.15)] shrink-0">
+                                <UserIcon size={16} className="sm:w-5 sm:h-5" />
+                            </div>
+                        )}
+                        <div className="hidden md:flex flex-col justify-center items-start">
+                            <p className="text-sm font-bold text-white group-hover:text-primary transition-colors leading-tight">{userName}</p>
+                            <p className="text-[10px] text-slate-400 uppercase tracking-[0.1em] font-bold leading-tight mt-0.5">{displayRole}</p>
                         </div>
-                    ) : (
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary border border-primary/20 group-hover:border-primary/50 transition-all shadow-[0_0_10px_rgba(192,38,255,0.2)]">
-                            <User size={14} className="sm:w-4 sm:h-4" />
-                        </div>
-                    )}
-                    <div className="hidden md:block">
-                        <p className="text-xs font-bold text-white group-hover:text-primary transition-colors leading-none mb-0.5">{userName}</p>
-                        <p className="text-[10px] text-white/30 uppercase tracking-[0.1em] font-medium">{displayRole}</p>
+                        <ChevronDown size={14} className={`hidden md:block text-slate-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180 text-primary' : ''}`} />
                     </div>
+
+                    <AnimatePresence>
+                        {isProfileOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                transition={{ duration: 0.2 }}
+                                className="absolute right-0 mt-3 w-56 bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden py-2 z-50 origin-top-right"
+                            >
+                                <div className="px-4 py-3 border-b border-white/5 md:hidden">
+                                    <p className="text-white font-bold text-sm truncate">{userName}</p>
+                                    <p className="text-slate-400 text-xs font-medium uppercase mt-0.5">{displayRole}</p>
+                                </div>
+                                <div className="py-1">
+                                    <button 
+                                        onClick={() => { setIsProfileOpen(false); navigate('/settings'); }}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-3"
+                                    >
+                                        <Settings size={16} className="text-slate-400" />
+                                        <span>Account Settings</span>
+                                    </button>
+                                </div>
+                                <div className="border-t border-white/5 py-1">
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors flex items-center gap-3"
+                                    >
+                                        <LogOut size={16} />
+                                        <span>Sign Out</span>
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </header>
