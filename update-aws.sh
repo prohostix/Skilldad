@@ -28,7 +28,7 @@ npm install --production
 echo "🏗️ Building frontend..."
 cd ../client
 npm install
-npm run build
+NODE_OPTIONS=--max-old-space-size=1536 npm run build
 
 # 5. Restart Backend Services via PM2
 echo "🔄 Restarting backend services..."
