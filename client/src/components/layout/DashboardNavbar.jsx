@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
+import { useSocket } from '../../context/SocketContext';
 
 const Navbar = ({ onToggleSidebar }) => {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ const Navbar = ({ onToggleSidebar }) => {
     
     // Get user info and logout method from context
     const { user, logout } = useUser();
+    const { notifications, unreadCount, setUnreadCount } = useSocket();
     const userInfo = user || JSON.parse(localStorage.getItem('userInfo') || '{}');
     const userName = userInfo.name || 'User';
     const userRole = userInfo.role || 'student';
@@ -43,12 +45,7 @@ const Navbar = ({ onToggleSidebar }) => {
         navigate('/login');
     };
 
-    // Generic Mock Notifications
-    const mockNotifications = [
-        { id: 1, title: 'System Updated', message: 'Platform version 2.4 is live.', time: '10m ago', icon: Info, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-        { id: 2, title: 'New Enrollment', message: 'Alice joined Web Mastery.', time: '1h ago', icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10' },
-        { id: 3, title: 'Team Message', message: 'You have a new direct message.', time: '2h ago', icon: MessageSquare, color: 'text-primary', bg: 'bg-primary/10' },
-    ];
+    // Generic Mock Notifications - Removed in favor of real socket notifications
 
     return (
         <header className="sticky top-0 z-50 w-full h-14 sm:h-16 bg-black/60 backdrop-blur-xl border-b border-white/5 px-3 sm:px-6 flex items-center justify-between will-change-transform font-inter">
@@ -115,7 +112,9 @@ const Navbar = ({ onToggleSidebar }) => {
                         className={`relative p-2 rounded-xl transition-all ${isNotifOpen ? 'bg-primary/20 text-primary' : 'text-slate-400 hover:bg-white/5 hover:text-primary'}`}
                     >
                         <Bell size={18} className="sm:w-5 sm:h-5" />
-                        <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
+                        {unreadCount > 0 && (
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full ring-2 ring-black animate-pulse shadow-[0_0_8px_rgba(192,38,255,0.8)]"></span>
+                        )}
                     </button>
 
                     <AnimatePresence>
@@ -129,24 +128,39 @@ const Navbar = ({ onToggleSidebar }) => {
                             >
                                 <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
                                     <h3 className="text-white font-semibold text-sm">Notifications</h3>
-                                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">3 New</span>
+                                    {unreadCount > 0 && (
+                                        <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">{unreadCount} New</span>
+                                    )}
                                 </div>
                                 <div className="max-h-[300px] overflow-y-auto">
-                                    {mockNotifications.map((notif) => (
-                                        <div key={notif.id} className="px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors flex items-start gap-3 border-b border-white/5 last:border-0">
-                                            <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.bg} ${notif.color}`}>
-                                                <notif.icon size={14} />
+                                    {notifications.length > 0 ? (
+                                        notifications.map((notif, index) => (
+                                            <div key={index} className="px-4 py-3 hover:bg-white/5 cursor-pointer transition-colors flex items-start gap-3 border-b border-white/5 last:border-0">
+                                                <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'live_session' ? 'bg-purple-500/10 text-purple-400' : 'bg-primary/10 text-primary'}`}>
+                                                    {notif.type === 'live_session' ? <Video size={14} /> : <Info size={14} />}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-white text-sm font-medium truncate">{notif.title}</p>
+                                                    <p className="text-slate-400 text-xs mt-0.5 line-clamp-2">{notif.message}</p>
+                                                    <p className="text-slate-500 text-[10px] mt-1">
+                                                        {notif.timestamp ? new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                                                    </p>
+                                                </div>
+                                                {!notif.read && (
+                                                    <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0 my-auto shadow-[0_0_8px_rgba(192,38,255,0.6)]"></div>
+                                                )}
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-white text-sm font-medium truncate">{notif.title}</p>
-                                                <p className="text-slate-400 text-xs mt-0.5 line-clamp-2">{notif.message}</p>
-                                                <p className="text-slate-500 text-[10px] mt-1">{notif.time}</p>
-                                            </div>
-                                            <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0 my-auto shadow-[0_0_8px_rgba(192,38,255,0.6)]"></div>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-8 text-center">
+                                            <p className="text-slate-500 text-xs font-medium">No new notifications</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
-                                <div className="px-4 py-2 mt-1 flex justify-center border-t border-white/5 bg-white/[0.02] hover:bg-white/5 cursor-pointer transition-colors">
+                                <div 
+                                    className="px-4 py-2 mt-1 flex justify-center border-t border-white/5 bg-white/[0.02] hover:bg-white/5 cursor-pointer transition-colors"
+                                    onClick={() => setUnreadCount(0)}
+                                >
                                     <p className="text-primary text-xs font-semibold">Mark all as read</p>
                                 </div>
                             </motion.div>

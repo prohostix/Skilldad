@@ -21,10 +21,9 @@ import {
 import GlassCard from '../../components/ui/GlassCard';
 import ChartCard from '../../components/ui/ChartCard';
 import ModernButton from '../../components/ui/ModernButton';
-import { useToast } from '../../context/ToastContext';
+import { toast } from 'react-hot-toast';
 
 const AdminDashboard = () => {
-    const { showToast } = useToast();
     // Pre-seed with demo values so the dashboard NEVER shows a blank/loading screen
     const [stats, setStats] = useState({
         totalUsers: 0, totalCourses: 0, totalStudents: 0,
@@ -187,6 +186,30 @@ const AdminDashboard = () => {
                     </motion.h1>
                 </div>
                 <div className="flex items-center space-x-3">
+                    <ModernButton
+                        variant="primary"
+                        size="sm"
+                        onClick={async () => {
+                            try {
+                                const rawInfo = localStorage.getItem('userInfo');
+                                if (!rawInfo) return;
+                                const userInfo = JSON.parse(rawInfo);
+                                const config = {
+                                    headers: { Authorization: `Bearer ${userInfo.token}` }
+                                };
+                                
+                                toast.loading('Sending test broadcast...', { id: 'test-notif' });
+                                await axios.post('/api/admin/test-notification', {}, config);
+                                toast.success('Test broadcast initiated!', { id: 'test-notif' });
+                            } catch (error) {
+                                console.error('Test notification failed:', error);
+                                toast.error('Failed to trigger notification', { id: 'test-notif' });
+                            }
+                        }}
+                    >
+                        <Zap size={16} className="mr-2" />
+                        Test Notification
+                    </ModernButton>
                     <div className="relative">
                         <ModernButton
                             variant="secondary"
@@ -287,14 +310,17 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
+                        className="bg-white/5 rounded-3xl p-1"
                     >
-                        <ChartCard
-                            title="Enrollment Momentum"
-                            subtitle="Last 7 Days"
-                            data={displayChartData}
-                            type="area"
-                            color="#5B5CFF"
-                        />
+                        <div className="h-[400px] w-full">
+                            <ChartCard
+                                title="Enrollment Momentum"
+                                subtitle="Last 7 Days"
+                                data={displayChartData}
+                                type="area"
+                                color="#5B5CFF"
+                            />
+                        </div>
                     </motion.div>
                 </div>
 
@@ -304,8 +330,9 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 }}
+                        className="h-full"
                     >
-                        <GlassCard className="h-full">
+                        <GlassCard className="h-full min-h-[350px] flex flex-col">
                             <div className="flex items-center justify-between mb-8">
                                 <h2 className="text-base font-semibold text-white font-poppins flex items-center">
                                     <Activity size={18} className="mr-2 text-primary" /> Live Pulse
@@ -337,7 +364,7 @@ const AdminDashboard = () => {
                             </div>
 
                             <button
-                                onClick={() => showToast('Activity logs fetched for the last 30 days', 'info')}
+                                onClick={() => toast.success('Activity logs fetched for the last 30 days')}
                                 className="w-full mt-8 py-3 text-xs font-bold text-primary hover:bg-primary/10 rounded-xl border border-dashed border-primary/30 transition-all uppercase tracking-widest"
                             >
                                 Comprehensive Logs

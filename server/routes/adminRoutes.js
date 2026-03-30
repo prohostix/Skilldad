@@ -40,7 +40,8 @@ const {
     uploadUniversityGalleryImages,
     uploadFacultyPhoto,
     uploadPartnerLogoImage,
-    uploadDirectorImage
+    uploadDirectorImage,
+    testNotification
 } = require('../controllers/adminController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -69,6 +70,7 @@ const checkAdmin = (req, res, next) => {
 
 router.get('/stats', protect, checkAdmin, getGlobalStats);
 router.get('/analytics', protect, checkAdmin, getPlatformAnalytics);
+router.post('/test-notification', protect, checkAdmin, testNotification);
 // All users without pagination — used by B2B management
 router.get('/users/all', protect, checkAdmin, async (req, res) => {
     try {
@@ -132,11 +134,11 @@ router.post('/partner-logos/seed', protect, checkAdmin, async (req, res) => {
             { name: 'Innovate Labs', logo: '/assets/logos/innovate-labs.png', type: 'corporate', order: 9 }
         ];
 
-        await dbQuery('DELETE FROM partner_logos');
+        await query('DELETE FROM partner_logos');
 
         for (const p of samplePartners) {
             const newId = crypto.randomUUID();
-            await dbQuery(
+            await query(
                 'INSERT INTO partner_logos (id, name, logo, type, "order", is_active) VALUES ($1, $2, $3, $4, $5, true)',
                 [newId, p.name, p.logo, p.type, p.order]
             );

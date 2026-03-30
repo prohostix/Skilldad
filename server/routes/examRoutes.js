@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { query } = require('../config/postgres');
 const auditLogService = require('../services/auditLogService');
+const socketService = require('../services/SocketService');
 const examController = require('../controllers/examController');
 const examSubmissionController = require('../controllers/examSubmissionController');
 const multer = require('multer');
@@ -28,6 +29,42 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
 });
+
+/**
+ * Helper to notify all students enrolled in a course or all students in a university
+ */
+const notifyEnrolledStudents = async (session, title, message) => {
+    try {
+        let studentIds = [];
+        
+        if (session.course_id) {
+            const res = await query(
+                "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'",
+                [session.course_id]
+            );
+            studentIds = res.rows.map(r => r.student_id);
+        } else if (session.university_id) {
+            const res = await query(
+                "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
+                [session.university_id]
+            );
+            studentIds = res.rows.map(r => r.id);
+        }
+
+        if (studentIds.length > 0) {
+            socketService.sendToUsers(studentIds, 'notification', {
+                type: 'exam_scheduled',
+                title,
+                message,
+                courseId: session.course_id,
+                startTime: session.scheduled_start,
+                timestamp: new Date()
+            });
+        }
+    } catch (error) {
+        console.error('[Notification] Failed to notify students:', error.message);
+    }
+};
 
 // Standardized PG implementation for Exam Routes
 
@@ -168,6 +205,13 @@ router.post('/admin/schedule', protect, authorize('admin', 'university'), async 
             isMockExam || false, instructions || null, mandatedSlotId || null,
             linkedPaper || null, answerKey || null
         ]);
+
+        // Notify students about scheduled exam
+        notifyEnrolledStudents(
+            { course_id: courseId, university_id: universityId, scheduled_start: scheduledStartTime },
+            'New Exam Scheduled 📝',
+            `A new exam "${title}" has been scheduled for your course.`
+        );
 
         await auditLogService.logAuditEvent({
             userId: req.user._id,

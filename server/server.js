@@ -32,6 +32,8 @@ const fs = require('fs');
 
 connectPostgres();
 
+const app = express();
+
 // Registry of upload paths
 const uploads = {
   ROOT: path.join(__dirname, 'uploads'),
@@ -68,7 +70,7 @@ Object.entries(uploads).forEach(([key, dirPath]) => {
 global.BASE_UPLOAD_PATH = uploads.ROOT;
 global.STORAGE_STATUS = { succeeded: uploadsSucceeded, failed: uploadsFailed };
 
-const app = express();
+// app correctly initialized at top for logging
 app.use(compression());
 app.use(cookieParser());
 const server = http.createServer(app);
@@ -84,6 +86,7 @@ examWebSocketService.init();
 setTimeout(() => {
   examWebSocketService.startTimersForOngoingExams();
 }, 2000); // Wait 2 seconds for DB connection to be ready
+
 
 // Middleware
 app.use(express.json({

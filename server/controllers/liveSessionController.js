@@ -1,5 +1,46 @@
 const asyncHandler = require('express-async-handler');
 const { query } = require('../config/postgres');
+const socketService = require('../services/SocketService');
+
+/**
+ * Helper to notify all students enrolled in a course or all students in a university
+ */
+const notifyEnrolledStudents = async (session, title, message) => {
+    try {
+        let studentIds = [];
+        
+        if (session.course_id) {
+            // Get all students enrolled in the specific course
+            const res = await query(
+                "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'",
+                [session.course_id]
+            );
+            studentIds = res.rows.map(r => r.student_id);
+        } else if (session.university_id) {
+            // Get all students in the university if it's a general session
+            const res = await query(
+                "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
+                [session.university_id]
+            );
+            studentIds = res.rows.map(r => r.id);
+        }
+
+        if (studentIds.length > 0) {
+            socketService.sendToUsers(studentIds, 'notification', {
+                type: 'live_session',
+                title,
+                message,
+                sessionId: session.id,
+                courseId: session.course_id,
+                startTime: session.start_time,
+                timestamp: new Date()
+            });
+            console.log(`[Notification] Sent live session update to ${studentIds.length} students`);
+        }
+    } catch (error) {
+        console.error('[Notification] Failed to notify students:', error.message);
+    }
+};
 
 // @desc    Create a live session
 const createSession = asyncHandler(async (req, res) => {
@@ -31,6 +72,13 @@ const createSession = asyncHandler(async (req, res) => {
         INSERT INTO live_sessions (id, topic, description, start_time, duration, timezone, instructor_id, university_id, course_id, zoom, status, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'scheduled', NOW(), NOW())
     `, [id, topic, description, startTime, duration, timezone || 'Asia/Kolkata', instructor || req.user.id, universityId, courseId || null, JSON.stringify(zoomData)]);
+
+    // Notify students about scheduled session
+    notifyEnrolledStudents(
+        { id, course_id: courseId, university_id: universityId, start_time: startTime },
+        'New Live Session Scheduled',
+        `A new session "${topic}" has been scheduled for your course.`
+    );
 
     res.status(201).json({ success: true, id, joinUrl: zoomData?.joinUrl });
 });
@@ -121,7 +169,22 @@ const getSession = asyncHandler(async (req, res) => {
 // @desc    Start session
 const startSession = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    await query("UPDATE live_sessions SET status = 'live', start_time = NOW() WHERE id = $1", [id]);
+    
+    // Get session details first to notify students
+    const resSet = await query("SELECT * FROM live_sessions WHERE id = $1", [id]);
+    const session = resSet.rows[0];
+    
+    if (session) {
+        await query("UPDATE live_sessions SET status = 'live', start_time = NOW() WHERE id = $1", [id]);
+        
+        // Notify students that session is now live
+        notifyEnrolledStudents(
+            session,
+            'Live Class Started! 🔴',
+            `The session "${session.topic}" is now live. Join now to participate!`
+        );
+    }
+    
     res.json({ success: true, message: 'Session is live' });
 });
 

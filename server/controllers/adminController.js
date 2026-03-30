@@ -101,55 +101,74 @@ const updateEntity = async (req, res) => {
 // @desc    Get Global Stats (Admin)
 const getGlobalStats = async (req, res) => {
     try {
-        const [userCount, courseCount, studentCount, partnerCount, ticketCount, revenueRes, dbSizeRes, chartRes, activityRes] = await Promise.all([
-            query('SELECT COUNT(*) FROM users'),
-            query('SELECT COUNT(*) FROM courses'),
-            query("SELECT COUNT(*) FROM users WHERE role = 'student'"),
-            query("SELECT COUNT(*) FROM users WHERE role = 'partner'"),
-            query("SELECT COUNT(*) FROM support_tickets WHERE status = 'open'"),
-            query("SELECT SUM(amount) as total FROM transactions WHERE status = 'success'"),
-            query("SELECT pg_database_size(current_database()) as size"),
-            query(`
-                WITH days AS (
-                    SELECT generate_series(
-                        CURRENT_DATE - INTERVAL '6 days',
-                        CURRENT_DATE,
-                        '1 day'::interval
-                    )::date as day
-                )
-                SELECT 
-                    TO_CHAR(d.day, 'Dy') as name,
-                    COUNT(e.id) as value
-                FROM days d
-                LEFT JOIN enrollments e ON d.day = e.created_at::date
-                GROUP BY d.day
-                ORDER BY d.day
-            `),
-            query(`
-                (SELECT 
-                    u.name as user, 
-                    'Enrolled in ' || c.title as action,
-                    e.created_at as time,
-                    u.name as initial
-                FROM enrollments e
-                JOIN users u ON e.student_id = u.id
-                JOIN courses c ON e.course_id = c.id
-                ORDER BY e.created_at DESC
-                LIMIT 5)
-                UNION ALL
-                (SELECT 
-                    name as user,
-                    'Joined the platform' as action,
-                    created_at as time,
-                    name as initial
-                FROM users
-                WHERE role = 'partner'
-                ORDER BY created_at DESC
-                LIMIT 5)
-                ORDER BY time DESC
-                LIMIT 10
-            `)
-        ]);
+        console.log('[getGlobalStats] Starting queries (v2 with intensive logs)...');
+        
+        console.log('[getGlobalStats] Querying userCount...');
+        const userCount = await query('SELECT COUNT(*) FROM users').catch(e => { console.error('userCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+        
+        console.log('[getGlobalStats] Querying courseCount...');
+        const courseCount = await query('SELECT COUNT(*) FROM courses').catch(e => { console.error('courseCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+        
+        console.log('[getGlobalStats] Querying studentCount...');
+        const studentCount = await query("SELECT COUNT(*) FROM users WHERE role = 'student'").catch(e => { console.error('studentCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+        
+        console.log('[getGlobalStats] Querying partnerCount...');
+        const partnerCount = await query("SELECT COUNT(*) FROM users WHERE role = 'partner'").catch(e => { console.error('partnerCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+        
+        console.log('[getGlobalStats] Querying ticketCount...');
+        const ticketCount = await query("SELECT COUNT(*) FROM support_tickets WHERE status = 'open'").catch(e => { console.error('ticketCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+        
+        console.log('[getGlobalStats] Querying revenueRes...');
+        const revenueRes = await query("SELECT SUM(final_amount) as total FROM transactions WHERE status = 'success'").catch(e => { console.error('revenueRes Error:', e.message); return { rows: [{ total: 0 }] }; });
+        
+        console.log('[getGlobalStats] Querying dbSizeRes...');
+        const dbSizeRes = await query("SELECT pg_database_size(current_database()) as size").catch(e => { console.error('dbSizeRes Error (falling back to 0):', e.message); return { rows: [{ size: 0 }] }; });
+        
+        console.log('[getGlobalStats] Querying chartRes...');
+        const chartRes = await query(`
+            WITH days AS (
+                SELECT generate_series(
+                    CURRENT_DATE - INTERVAL '6 days',
+                    CURRENT_DATE,
+                    '1 day'::interval
+                )::date as day
+            )
+            SELECT 
+                TO_CHAR(d.day, 'Dy') as name,
+                COUNT(e.id) as value
+            FROM days d
+            LEFT JOIN enrollments e ON d.day = e.created_at::date
+            GROUP BY d.day
+            ORDER BY d.day
+        `).catch(e => { console.error('chartRes Error:', e.message); return { rows: [] }; });
+        
+        console.log('[getGlobalStats] Querying activityRes...');
+        const activityRes = await query(`
+            (SELECT 
+                u.name as user, 
+                'Enrolled in ' || c.title as action,
+                e.created_at as time,
+                u.name as initial
+            FROM enrollments e
+            JOIN users u ON e.student_id = u.id
+            JOIN courses c ON e.course_id = c.id
+            ORDER BY e.created_at DESC
+            LIMIT 5)
+            UNION ALL
+            (SELECT 
+                name as user,
+                'Joined the platform' as action,
+                created_at as time,
+                name as initial
+            FROM users
+            WHERE role = 'partner'
+            ORDER BY created_at DESC
+            LIMIT 5)
+            ORDER BY time DESC
+            LIMIT 10
+        `).catch(e => { console.error('activityRes Error:', e.message); return { rows: [] }; });
+        
+        console.log('[getGlobalStats] All queries completed with fallbacks (v2).');
 
         const totalRevenue = revenueRes.rows[0].total ? parseFloat(revenueRes.rows[0].total) : 0;
         const dbSizeBytes = parseInt(dbSizeRes.rows[0].size);
@@ -297,15 +316,29 @@ const getPlatformAnalytics = async (req, res) => {
         let userStatsQuery = 'SELECT role as _id, COUNT(*) as count FROM users';
         const params = [];
 
-        if (startDate && endDate) {
-            userStatsQuery += ' WHERE created_at >= $1 AND created_at <= $2';
-            params.push(new Date(startDate), new Date(endDate));
+        // Simple validation: only add WHERE clause if both dates are present and non-empty
+        if (startDate && endDate && startDate.trim() !== '' && endDate.trim() !== '') {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            // Ensure dates are valid before adding to query
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+                userStatsQuery += ' WHERE created_at >= $1 AND created_at <= $2';
+                params.push(start, end);
+            }
         }
 
+        console.log('[getPlatformAnalytics] Starting queries (intensive logs)...');
+
         userStatsQuery += ' GROUP BY role';
-        const userStatsRes = await query(userStatsQuery, params);
+        console.log('[getPlatformAnalytics] Querying userStats...');
+        const userStatsRes = await query(userStatsQuery, params).catch(e => { 
+            console.error('userStats Error:', e.message); 
+            return { rows: [] }; 
+        });
 
         // Real enrollment sources
+        console.log('[getPlatformAnalytics] Querying enrollmentSources...');
         const sourcesRes = await query(`
             SELECT 
                 CASE 
@@ -317,9 +350,13 @@ const getPlatformAnalytics = async (req, res) => {
             FROM users
             WHERE role = 'student'
             GROUP BY 1
-        `);
+        `).catch(e => { 
+            console.error('enrollmentSources Error:', e.message); 
+            return { rows: [] }; 
+        });
 
         // Real revenue impact
+        console.log('[getPlatformAnalytics] Querying revenueImpact...');
         const revenueImpactRes = await query(`
             SELECT 
                 CASE 
@@ -327,12 +364,15 @@ const getPlatformAnalytics = async (req, res) => {
                     WHEN u.partner_code IS NOT NULL THEN 'Partner'
                     ELSE 'Direct'
                 END as source,
-                COALESCE(SUM(t.amount), 0) as amount
+                COALESCE(SUM(t.final_amount), 0) as amount
             FROM transactions t
             JOIN users u ON t.user_id = u.id
             WHERE t.status = 'success'
             GROUP BY 1
-        `);
+        `).catch(e => { 
+            console.error('revenueImpact Error:', e.message); 
+            return { rows: [] }; 
+        });
 
         // Convert revenue impact array to object
         const revenueImpact = {
@@ -340,10 +380,12 @@ const getPlatformAnalytics = async (req, res) => {
             partner: 0,
             university: 0
         };
-        revenueImpactRes.rows.forEach(row => {
-            const key = row.source.toLowerCase();
+        (revenueImpactRes.rows || []).forEach(row => {
+            const key = row.source ? row.source.toLowerCase() : 'direct';
             revenueImpact[key] = parseFloat(row.amount);
         });
+
+        console.log('[getPlatformAnalytics] Queries completed with fallbacks.');
 
         res.json({
             userStats: userStatsRes.rows,
@@ -352,6 +394,27 @@ const getPlatformAnalytics = async (req, res) => {
         });
     } catch (error) {
         console.error('getPlatformAnalytics Error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Test real-time notifications
+// @route   POST /api/admin/test-notification
+// @access  Private (Admin)
+const testNotification = async (req, res) => {
+    try {
+        console.log('[testNotification] Triggering test broadcast to admins...');
+        
+        socketService.broadcastToAdmins('admin_notification', {
+            title: 'System Test',
+            message: 'Real-time notification working perfectly! 🔥',
+            type: 'test',
+            timestamp: new Date()
+        });
+
+        res.json({ success: true, message: 'Test notification broadcasted' });
+    } catch (error) {
+        console.error('testNotification Error:', error);
         res.status(500).json({ message: error.message });
     }
 };

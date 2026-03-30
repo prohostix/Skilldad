@@ -63,8 +63,9 @@ const admin = (req, res, next) => {
     if (req.user && req.user.role?.toLowerCase() === 'admin') {
         next();
     } else {
-        res.status(401);
-        throw new Error('Not authorized as an admin');
+        return res.status(403).json({
+            message: 'Not authorized as an admin'
+        });
     }
 };
 
@@ -72,17 +73,19 @@ const university = (req, res, next) => {
     if (req.user && req.user.role?.toLowerCase() === 'university') {
         next();
     } else {
-        res.status(401);
-        throw new Error('Not authorized as a university');
+        return res.status(403).json({
+            message: 'Not authorized as a university'
+        });
     }
 };
 
 const partner = (req, res, next) => {
-    if (req.user && req.user.role?.toLowerCase() === 'partner') {
+    if (req.user && (req.user.role?.toLowerCase() === 'partner' || req.user.role?.toLowerCase() === 'admin')) {
         next();
     } else {
-        res.status(401);
-        throw new Error('Not authorized as a partner');
+        return res.status(403).json({
+            message: 'Not authorized as a partner'
+        });
     }
 };
 
