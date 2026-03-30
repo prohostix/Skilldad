@@ -1788,5 +1788,6 @@ module.exports = {
     uploadUniversityCoverImage,
     updateUniversityProfile,
     uploadUniversityGalleryImages,
-    uploadFacultyPhoto
+    uploadFacultyPhoto,
+    testNotification
 };

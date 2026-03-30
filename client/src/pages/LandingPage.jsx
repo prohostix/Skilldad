@@ -261,7 +261,6 @@ const LandingPage = () => {
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            crossOrigin="anonymous"
                                             className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
@@ -287,7 +286,6 @@ const LandingPage = () => {
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            crossOrigin="anonymous"
                                             className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
@@ -664,7 +662,6 @@ const LandingPage = () => {
                                                 <img 
                                                     src={uni.logo} 
                                                     alt={uni.name} 
-                                                    crossOrigin="anonymous"
                                                     className="w-full h-full object-contain" 
                                                 />
                                             ) : (
@@ -752,7 +749,6 @@ const LandingPage = () => {
                                             <img
                                                 src={director.imageUrl || director.image}
                                                 alt={director.name}
-                                                crossOrigin="anonymous"
                                                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                                                 onError={(e) => {
                                                     e.target.onerror = null;
