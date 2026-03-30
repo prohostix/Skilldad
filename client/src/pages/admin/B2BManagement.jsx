@@ -37,7 +37,7 @@ import { useToast } from '../../context/ToastContext';
 
 const B2BManagement = () => {
     const navigate = useNavigate();
-    const socket = useSocket();
+    const { socket } = useSocket();
     const [partners, setPartners] = useState([]);
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [openDiscount, setOpenDiscount] = useState(false);

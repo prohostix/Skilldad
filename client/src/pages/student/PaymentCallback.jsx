@@ -24,7 +24,7 @@ import { useSocket } from '../../context/SocketContext';
 const PaymentCallback = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const socket = useSocket();
+    const { socket } = useSocket();
     const [status, setStatus] = useState('processing'); // processing, success, failed, expired
     const [transactionData, setTransactionData] = useState(null);
     const [error, setError] = useState('');

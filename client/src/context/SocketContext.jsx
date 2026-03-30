@@ -10,6 +10,8 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider = ({ children }) => {
     const { user } = useUser();
     const [socket, setSocket] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         if (user && user.token) {
@@ -28,6 +30,16 @@ export const SocketProvider = ({ children }) => {
 
             newSocket.on('notification', (data) => {
                 console.log('[Socket] Received notification:', data);
+                
+                // Add to notifications list
+                const newNotif = {
+                    ...data,
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+                
+                setNotifications(prev => [newNotif, ...prev]);
+                setUnreadCount(prev => prev + 1);
 
                 // Show a premium toast notification
                 toast.success(
@@ -52,6 +64,17 @@ export const SocketProvider = ({ children }) => {
             // Admin specific notifications
             if (user.role === 'admin') {
                 newSocket.on('admin_notification', (data) => {
+                    // Also add admin notifications to the list
+                    const newNotif = {
+                        ...data,
+                        timestamp: new Date().toISOString(),
+                        read: false,
+                        isAdmin: true
+                    };
+                    
+                    setNotifications(prev => [newNotif, ...prev]);
+                    setUnreadCount(prev => prev + 1);
+
                     toast.error(
                         <div className="flex flex-col">
                             <span className="font-bold text-sm">{data.title}</span>
@@ -71,11 +94,24 @@ export const SocketProvider = ({ children }) => {
             setSocket(newSocket);
 
             return () => newSocket.close();
+        } else {
+            // Reset state if user logs out
+            setSocket(null);
+            setNotifications([]);
+            setUnreadCount(0);
         }
     }, [user]);
 
+    const value = {
+        socket,
+        notifications,
+        unreadCount,
+        setUnreadCount,
+        setNotifications
+    };
+
     return (
-        <SocketContext.Provider value={socket}>
+        <SocketContext.Provider value={value}>
             {children}
         </SocketContext.Provider>
     );

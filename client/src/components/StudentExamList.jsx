@@ -12,7 +12,7 @@ const StudentExamList = () => {
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
     const navigate = useNavigate();
-    const socket = useSocket();
+    const { socket } = useSocket();
 
     const getAuthConfig = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));

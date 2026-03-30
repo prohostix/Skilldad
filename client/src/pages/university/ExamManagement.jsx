@@ -47,7 +47,7 @@ const ExamManagement = () => {
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [courses, setCourses] = useState([]);
     const { showToast } = useToast();
-    const socket = useSocket();
+    const { socket } = useSocket();
     const navigate = useNavigate();
 
     const [examData, setExamData] = useState({

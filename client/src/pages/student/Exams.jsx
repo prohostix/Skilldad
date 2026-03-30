@@ -149,7 +149,7 @@ const Exams = () => {
     const [uploadingPaper, setUploadingPaper] = useState(null);
     const navigate = useNavigate();
     const { showToast } = useToast();
-    const socket = useSocket();
+    const { socket } = useSocket();
 
     const fetchExams = async () => {
         try {

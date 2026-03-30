@@ -29,7 +29,7 @@ import { useSocket } from '../../context/SocketContext';
 
 const PaymentMonitoringDashboard = () => {
     const { showToast } = useToast();
-    const socket = useSocket();
+    const { socket } = useSocket();
     const [timeRange, setTimeRange] = useState('24h');
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);

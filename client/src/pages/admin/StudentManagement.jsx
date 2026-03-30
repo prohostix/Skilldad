@@ -38,7 +38,7 @@ import autoTable from 'jspdf-autotable';
 
 const StudentManagement = () => {
     const { showToast } = useToast();
-    const socket = useSocket();
+    const { socket } = useSocket();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');

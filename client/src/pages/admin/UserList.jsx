@@ -20,7 +20,7 @@ import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useSocket } from '../../context/SocketContext';
 
 const UserList = () => {
-    const socket = useSocket();
+    const { socket } = useSocket();
     const [users, setUsers] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [showPermissionModal, setShowPermissionModal] = useState(false);
