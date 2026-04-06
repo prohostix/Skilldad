@@ -13,7 +13,7 @@ const getCourses = asyncHandler(async (req, res) => {
                 SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
                 FROM courses c
                 JOIN users u ON c.instructor_id = u.id
-                WHERE c.is_published = true AND c.instructor_id = $1
+                WHERE c.is_published = true AND c.instructor_id = $1 AND c.status = 'approved'
                 ORDER BY c.is_featured DESC, c.created_at DESC
             `, [universityId]);
         } else {
@@ -21,7 +21,7 @@ const getCourses = asyncHandler(async (req, res) => {
                 SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
                 FROM courses c
                 JOIN users u ON c.instructor_id = u.id
-                WHERE c.is_published = true
+                WHERE c.is_published = true AND c.status = 'approved'
                 ORDER BY c.is_featured DESC, c.created_at DESC
             `);
         }
@@ -143,11 +143,12 @@ const createCourse = asyncHandler(async (req, res) => {
 
     const finalInstructorId = req.user.role === 'admin' ? instructorId : req.user.id;
     const newId = `course_${Date.now()}`;
+    const initialStatus = req.user.role === 'admin' ? 'approved' : 'pending';
 
     await query(`
-        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
-    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '']);
+        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, status, submitted_by, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '', initialStatus, req.user.id]);
 
     // Auto-sync with University profile.assigned_courses
     try {
@@ -185,6 +186,11 @@ const updateCourse = asyncHandler(async (req, res) => {
     // Get old course to check for instructor changes
     const oldCourseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
     const oldInstructorId = oldCourseRes.rows[0]?.instructor_id;
+
+    if (req.user.role !== 'admin' && oldInstructorId !== req.user.id) {
+        res.status(403);
+        throw new Error('Not authorized to update this course');
+    }
 
     await query(`
         UPDATE courses 
@@ -246,8 +252,12 @@ const addModule = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { title } = req.body;
     
-    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
     
     const modules = courseRes.rows[0].modules || [];
     const newModule = {
@@ -266,8 +276,12 @@ const updateModule = asyncHandler(async (req, res) => {
     const { id, moduleId } = req.params;
     const { title } = req.body;
     
-    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
     
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
@@ -282,8 +296,12 @@ const updateModule = asyncHandler(async (req, res) => {
 const deleteModule = asyncHandler(async (req, res) => {
     const { id, moduleId } = req.params;
     
-    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
     
     let modules = courseRes.rows[0].modules || [];
     modules = modules.filter(m => m._id !== moduleId);
@@ -297,8 +315,12 @@ const addVideo = asyncHandler(async (req, res) => {
     const { id, moduleId } = req.params;
     const { title, url } = req.body;
     
-    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
     
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
@@ -322,8 +344,12 @@ const updateVideo = asyncHandler(async (req, res) => {
     const { id, moduleId, videoId } = req.params;
     const { title, url } = req.body;
     
-    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
     
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
@@ -343,8 +369,12 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     const { id, moduleId, videoId } = req.params;
     
-    const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
     
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
@@ -359,6 +389,12 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const uploadThumbnail = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const courseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
+
     if (!req.file) return res.status(400).json({ message: 'Please upload an image' });
     
     const imagePath = `/uploads/${req.file.filename}`;
@@ -369,6 +405,12 @@ const uploadThumbnail = asyncHandler(async (req, res) => {
 
 const uploadBrochure = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const courseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
+
     if (!req.file) return res.status(400).json({ message: 'Please upload a file' });
     
     const filePath = `/uploads/${req.file.filename}`;
@@ -377,17 +419,119 @@ const uploadBrochure = asyncHandler(async (req, res) => {
     res.json({ message: 'Brochure uploaded', brochure_url: filePath });
 });
 
+const saveModuleQuiz = asyncHandler(async (req, res) => {
+    const { id, moduleId } = req.params;
+    const { questions } = req.body;
+
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    let modules = courseRes.rows[0].modules || [];
+    const moduleIndex = modules.findIndex(m => m._id === moduleId);
+    if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+
+    // Validate questions structure
+    if (!Array.isArray(questions)) return res.status(400).json({ message: 'Questions must be an array' });
+
+    modules[moduleIndex].quiz = {
+        questions: questions.map((q, i) => ({
+            _id: q._id || `q_${Date.now()}_${i}`,
+            question: q.question,
+            options: q.options,
+            correctIndex: q.correctIndex,
+            explanation: q.explanation || ''
+        }))
+    };
+
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+    console.log(`[Server] Module quiz saved: ${questions.length} questions for module ${moduleId}`);
+    res.json({ message: 'Quiz saved successfully', quiz: modules[moduleIndex].quiz });
+});
+
+
 module.exports = {
     getCourses,
     getCourse,
     createCourse,
     updateCourse,
     getAdminCourses,
+    saveModuleQuiz,
+    uploadLessonVideo: asyncHandler(async (req, res) => {
+        const { id, moduleId, videoId } = req.params;
+        
+        const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
+        if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+        
+        if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+        
+        if (!req.file) return res.status(400).json({ message: 'Please upload a video file' });
+        
+        let modules = courseRes.rows[0].modules || [];
+        const moduleIndex = modules.findIndex(m => m._id === moduleId);
+        if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+        
+        const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
+        if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
+        
+        const videoPath = `/uploads/${req.file.filename}`;
+        modules[moduleIndex].videos[videoIndex].url = videoPath;
+        
+        await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+        
+        res.json({ message: 'Video uploaded successfully', url: videoPath });
+    }),
+    uploadLessonDocument: asyncHandler(async (req, res) => {
+        const { id, moduleId } = req.params;
+        const { title } = req.body;
+
+        const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
+        if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+
+        if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        if (!req.file) return res.status(400).json({ message: 'Please upload a document file' });
+        if (!title) return res.status(400).json({ message: 'Lesson title is required' });
+
+        let modules = courseRes.rows[0].modules || [];
+        const moduleIndex = modules.findIndex(m => m._id === moduleId);
+        if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+
+        const filePath = `/uploads/${req.file.filename}`;
+        const newLesson = {
+            _id: `lesson_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            title: title,
+            url: filePath,
+            contentType: 'document',
+            fileType: req.file.mimetype,
+            fileName: req.file.originalname,
+            duration: 0,
+            attachments: []
+        };
+
+        if (!modules[moduleIndex].videos) modules[moduleIndex].videos = [];
+        modules[moduleIndex].videos.push(newLesson);
+
+        await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+
+        console.log(`[Server] Document lesson created: ${title} -> ${filePath} in module ${moduleId}`);
+        res.status(201).json({ message: 'Document lesson uploaded successfully', lesson: newLesson });
+    }),
     deleteCourse: asyncHandler(async (req, res) => {
         const { id } = req.params;
-        const courseRes = await query('SELECT id FROM courses WHERE id = $1', [id]);
+        const courseRes = await query('SELECT id, instructor_id FROM courses WHERE id = $1', [id]);
         if (courseRes.rows.length === 0) {
             return res.status(404).json({ message: 'Course not found' });
+        }
+        
+        if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized' });
         }
         
         const client = await getPool().connect();
@@ -450,8 +594,12 @@ module.exports = {
         const { id, moduleId, videoId } = req.params;
         const { title, type, content } = req.body;
         
-        const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [id]);
+        const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
         if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+        
+        if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
         
         let modules = courseRes.rows[0].modules || [];
         const moduleIndex = modules.findIndex(m => m._id === moduleId);
@@ -474,5 +622,69 @@ module.exports = {
         
         await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
         res.status(201).json({ message: 'Exercise added', exercise: newExercise });
+    }),
+    approveCourse: asyncHandler(async (req, res) => {
+        const { id } = req.params;
+        const { status, isPublished } = req.body; // status: 'approved' | 'rejected'
+
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Only admins can approve courses' });
+        }
+
+        const result = await query(`
+            UPDATE courses 
+            SET status = $1, 
+                is_published = COALESCE($2, is_published),
+                updated_at = NOW()
+            WHERE id = $3
+            RETURNING *
+        `, [status, isPublished, id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Course not found' });
+        }
+
+        res.json(result.rows[0]);
+    }),
+    uploadLessonFile: asyncHandler(async (req, res) => {
+        const { id, moduleId, videoId } = req.params;
+        console.log(`[Server] Lesson File Upload Attempt: course=${id}, module=${moduleId}, video=${videoId}`);
+        
+        const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
+        if (courseRes.rows.length === 0) {
+            console.log(`[Server] Course not found: ${id}`);
+            return res.status(404).json({ message: 'Course not found' });
+        }
+        
+        console.log(`[Server] Found course. Instructor: ${courseRes.rows[0].instructor_id}, Current User: ${req.user.id}, Role: ${req.user.role}`);
+        
+        if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+            console.log(`[Server] NOT AUTHORIZED. Course belongs to: ${courseRes.rows[0].instructor_id}`);
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+        
+        if (!req.file) return res.status(400).json({ message: 'Please upload a file' });
+        
+        let modules = courseRes.rows[0].modules || [];
+        const moduleIndex = modules.findIndex(m => m._id === moduleId);
+        if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+        
+        const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
+        if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
+        
+        const filePath = `/uploads/${req.file.filename}`;
+        const newFile = {
+            _id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+            name: req.file.originalname,
+            url: filePath,
+            type: req.file.mimetype
+        };
+        
+        modules[moduleIndex].videos[videoIndex].attachments = modules[moduleIndex].videos[videoIndex].attachments || [];
+        modules[moduleIndex].videos[videoIndex].attachments.push(newFile);
+        
+        await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+        
+        res.status(201).json({ message: 'File uploaded successfully', file: newFile });
     })
 };
