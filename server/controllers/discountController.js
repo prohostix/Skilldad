@@ -20,13 +20,13 @@ const validateDiscount = async (req, res) => {
         const discount = result.rows[0];
 
         if (!discount) {
-            return res.status(404).json({ message: 'Invalid or expired discount code' });
+            return res.json({ valid: false, message: 'Invalid or expired discount code' });
         }
 
-        res.json(discount);
+        res.json({ ...discount, valid: true });
     } catch (error) {
         console.error('Discount validation error:', error);
-        res.status(500).json({ message: 'Server error validating discount code' });
+        res.status(500).json({ message: error.message || 'Server error validating discount code' });
     }
 };
 
@@ -35,6 +35,7 @@ const validateDiscount = async (req, res) => {
 // @access  Protected/Admin
 const createDiscount = async (req, res) => {
     try {
+        console.log('[Create Discount] Request Body:', req.body);
         const { code, type, value, expiryDate, partner } = req.body;
 
         const checkResult = await query('SELECT * FROM discounts WHERE code = $1', [code.toUpperCase()]);
@@ -43,17 +44,16 @@ const createDiscount = async (req, res) => {
             return res.status(400).json({ message: 'Discount code already exists' });
         }
 
-        const id = `disc_${Date.now()}`;
         const result = await query(`
-            INSERT INTO discounts (id, code, type, value, expiry_date, partner_id) 
-            VALUES ($1, $2, $3, $4, $5, $6) 
+            INSERT INTO discounts (code, type, value, expiry_date, partner_id, active, used_count, created_at) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) 
             RETURNING *
-        `, [id, code.toUpperCase(), type || 'percentage', value, expiryDate || null, partner || null]);
+        `, [code.toUpperCase(), type || 'percentage', value, expiryDate || null, partner || null, true, 0]);
 
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Create discount error:', error);
-        res.status(500).json({ message: 'Server error creating discount code' });
+        res.status(500).json({ message: error.message || 'Server error creating discount code' });
     }
 };
 
@@ -66,7 +66,7 @@ const getDiscounts = async (req, res) => {
         res.json(result.rows);
     } catch (error) {
         console.error('Get discounts error:', error);
-        res.status(500).json({ message: 'Server error fetching discounts' });
+        res.status(500).json({ message: error.message || 'Server error fetching discounts' });
     }
 };
 

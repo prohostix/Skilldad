@@ -47,6 +47,7 @@ const registerUser = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            discountRate: user.discount_rate || 0,
             token: generateToken(user.id)
         });
 
@@ -97,6 +98,8 @@ const loginUser = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            partnerCode: user.partner_code,
+            discountRate: user.discount_rate || 0,
             isVerified: user.is_verified,
             token: generateToken(user.id)
         });
@@ -109,7 +112,7 @@ const loginUser = async (req, res) => {
 // @desc    Get current user profile
 const getMe = async (req, res) => {
     try {
-        const userRes = await query('SELECT id, name, email, role, profile, is_verified as "isVerified" FROM users WHERE id = $1', [req.user.id]);
+        const userRes = await query('SELECT id, name, email, role, profile, partner_code, is_verified as "isVerified", discount_rate as "discountRate" FROM users WHERE id = $1', [req.user.id]);
         const user = userRes.rows[0];
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -119,6 +122,8 @@ const getMe = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            partnerCode: user.partner_code,
+            discountRate: user.discountRate || 0,
             profile: user.profile,
             isVerified: user.isVerified
         });
@@ -150,6 +155,7 @@ const updateProfile = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
+            discountRate: user.discount_rate || 0,
             bio: user.bio,
             profile: user.profile,
             token: generateToken(user.id)

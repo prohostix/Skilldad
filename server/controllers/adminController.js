@@ -4,6 +4,11 @@ const emailTemplates = require('../utils/emailTemplates');
 const socketService = require('../services/SocketService');
 const bcrypt = require('bcryptjs');
 
+const parseProfile = (profile) => {
+    if (typeof profile !== 'string') return profile || {};
+    try { return JSON.parse(profile) || {}; } catch (e) { return {}; }
+};
+
 
 // @desc    Update entity (partner/university) details + discount rate
 // @route   PUT /api/admin/entities/:id
@@ -20,7 +25,7 @@ const updateEntity = async (req, res) => {
         }
 
         let updatedName = user.name;
-        let updatedProfile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
+        let updatedProfile = parseProfile(user.profile);
         let updatedBio = bio !== undefined ? bio : user.bio;
         let updatedPassword = user.password;
         let updatedProfileImage = profileImage !== undefined ? profileImage : user.profile_image;
@@ -1362,15 +1367,19 @@ const adminEnrollStudent = async (req, res) => {
     try {
         const { courseId, universityId, note } = req.body;
         const studentId = req.params.id;
+        console.log(`[AdminEnroll] Start: student=${studentId}, course=${courseId}, university=${universityId}`);
 
         if (!courseId) {
             return res.status(400).json({ message: 'Course ID is required' });
         }
 
-        const studentRes = await query('SELECT * FROM users WHERE id = $1', [studentId]);
+        const studentRes = await query('SELECT id, name, email, role, university_id, registered_by, profile FROM users WHERE id = $1', [studentId]);
         const student = studentRes.rows[0];
-        if (!student || student.role !== 'student') {
+        if (!student) {
             return res.status(404).json({ message: 'Student not found' });
+        }
+        if (student.role !== 'student') {
+            return res.status(400).json({ message: `User is not a student (Role: ${student.role})` });
         }
 
         const courseRes = await query('SELECT * FROM courses WHERE id = $1', [courseId]);
@@ -1382,10 +1391,11 @@ const adminEnrollStudent = async (req, res) => {
         // Check if already enrolled
         const existingEnrollmentRes = await query('SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2', [studentId, courseId]);
         if (existingEnrollmentRes.rows.length > 0) {
+            console.log(`[AdminEnroll] Student already enrolled: ${studentId}`);
             return res.status(400).json({ message: `${student.name} is already enrolled in ${course.title}` });
         }
 
-        // Determine and update student's universityId
+        console.log(`[AdminEnroll] Determining university assignment...`);
         let assignedUniversityId = universityId;
 
         if (universityId) {
@@ -1403,13 +1413,12 @@ const adminEnrollStudent = async (req, res) => {
             }
         }
 
-        // Update student's universityId if we have one
-        if (assignedUniversityId && (!student.universityId || student.universityId !== assignedUniversityId)) {
+        if (assignedUniversityId && (student.university_id !== assignedUniversityId)) {
+            console.log(`[AdminEnroll] Updating university_id to ${assignedUniversityId}`);
             await query('UPDATE users SET university_id = $1, updated_at = NOW() WHERE id = $2', [assignedUniversityId, studentId]);
-            console.log(`[adminEnrollStudent] Updated student ${student.name} universityId to ${assignedUniversityId}`);
         }
 
-        // Create enrollment
+        console.log(`[AdminEnroll] Creating enrollment record...`);
         const newEnrollmentId = `enr_${Date.now()}`;
         const enrollmentRes = await query(`
             INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
@@ -1417,6 +1426,7 @@ const adminEnrollStudent = async (req, res) => {
         `, [newEnrollmentId, studentId, courseId]);
         const enrollment = enrollmentRes.rows[0];
 
+        console.log(`[AdminEnroll] Checking/Creating progress record...`);
         try {
             const existingProgressRes = await query('SELECT id FROM progress WHERE user_id = $1 AND course_id = $2', [studentId, courseId]);
             if (existingProgressRes.rows.length === 0) {
@@ -1427,65 +1437,51 @@ const adminEnrollStudent = async (req, res) => {
                 `, [newProgressId, studentId, courseId]);
             }
         } catch (progressError) {
-            console.error('[adminEnrollStudent] Error creating Progress record:', progressError.message);
+            console.error('[AdminEnroll] Error creating Progress record:', progressError.message);
         }
 
         const txnId = `ADM-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        console.log(`[AdminEnroll] Created Admin Transaction ID: ${txnId}`);
 
         let partnerId = null;
         let centerName = 'Admin Enrolled';
 
         if (universityId) {
             partnerId = universityId;
-            const uniUserRes = await query('SELECT name, profile FROM users WHERE id = $1', [universityId]);
-            const uniUser = uniUserRes.rows[0];
-            if (uniUser) {
-                centerName = uniUser.profile?.universityName || uniUser.name;
-            }
         } else if (student.registered_by) {
             partnerId = student.registered_by;
-            const partnerUserRes = await query('SELECT name, profile FROM users WHERE id = $1', [partnerId]);
-            const partnerUser = partnerUserRes.rows[0];
-            if (partnerUser) {
-                centerName = partnerUser.profile?.partnerName || partnerUser.profile?.universityName || partnerUser.name;
-            }
-        } else if (student.universityId) {
-            partnerId = student.universityId;
-            const uniUserRes = await query('SELECT name, profile FROM users WHERE id = $1', [partnerId]);
-            const uniUser = uniUserRes.rows[0];
-            if (uniUser) {
-                centerName = uniUser.profile?.universityName || uniUser.name;
+        } else if (student.university_id) {
+            partnerId = student.university_id;
+        }
+
+        // Validate partnerId existence to prevent Foreign Key Violation (e.g. corrupt legacy data)
+        if (partnerId) {
+            try {
+                const partnerExists = await query('SELECT id FROM users WHERE id = $1', [partnerId]);
+                if (partnerExists.rows.length === 0) {
+                    console.log(`[AdminEnroll] WARNING: Partner ID ${partnerId} not found in users table. Reverting to null for transaction.`);
+                    partnerId = null;
+                }
+            } catch (err) {
+                console.error('[AdminEnroll] Partner validation error:', err.message);
+                partnerId = null;
             }
         }
 
+        console.log(`[AdminEnroll] Inserting transaction... partnerId: ${partnerId}`);
         await query(`
             INSERT INTO transactions (id, student_id, course_id, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW(), NOW())
         `, [`txn_${Date.now()}`, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
 
+        console.log(`[AdminEnroll] Sending notifications...`);
         try {
             socketService.emitToUser(studentId, 'ENROLLMENT_CREATED', {
                 courseId,
                 courseTitle: course.title,
                 message: `You have been enrolled in ${course.title} by admin`
             });
-        } catch (e) { }
-
-        if (assignedUniversityId) {
-            try {
-                socketService.emitToUser(assignedUniversityId, 'STUDENT_ENROLLED', {
-                    studentId: student.id,
-                    studentName: student.name,
-                    studentEmail: student.email,
-                    courseId,
-                    courseTitle: course.title,
-                    enrollmentId: enrollment.id,
-                    message: `${student.name} has been enrolled in ${course.title}`
-                });
-            } catch (e) {
-                console.error('[adminEnrollStudent] University socket notification error:', e.message);
-            }
-        }
+        } catch (e) { console.error('[AdminEnroll] Socket error:', e.message); }
 
         try {
             const whatsAppService = require('../services/WhatsAppService');
@@ -1496,32 +1492,30 @@ const adminEnrollStudent = async (req, res) => {
                     email: student.email,
                     subject: `Course Enrollment Confirmed - ${course.title}`,
                     html: emailTemplates.adminEnrollment(student.name, course.title, enrolledBy)
-                }).catch(err => console.error('[adminEnrollStudent] Email error:', err.message));
+                }).catch(err => console.error('[AdminEnroll] Email error:', err.message));
             }
 
-            const studentPhone = student.phone || student.profile?.phone;
+            const studentPhone = student.phone || (typeof student.profile === 'object' ? student.profile?.phone : null);
             if (studentPhone) {
                 await whatsAppService.notifyAdminEnrollment(
                     student.name,
                     studentPhone,
                     course.title,
                     enrolledBy
-                ).catch(err => console.error('[adminEnrollStudent] WhatsApp error:', err.message));
+                ).catch(err => console.error('[AdminEnroll] WhatsApp error:', err.message));
             }
         } catch (notifError) {
-            console.error('[adminEnrollStudent] Notification error:', notifError.message);
+            console.error('[AdminEnroll] Notification service error:', notifError.message);
         }
 
+        console.log(`[AdminEnroll] Enrollment Successful!`);
         res.status(201).json({
             message: `${student.name} successfully enrolled in ${course.title}${universityId ? ' and assigned to university' : ''}`,
             enrollment,
             transactionId: txnId
         });
     } catch (error) {
-        console.error('[adminEnrollStudent] error:', error);
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Student is already enrolled in this course' });
-        }
+        console.error('[AdminEnroll] CRITICAL ERROR:', error);
         res.status(500).json({ message: error.message || 'Failed to enroll student' });
     }
 };
@@ -1597,7 +1591,7 @@ const uploadUniversityCoverImage = async (req, res) => {
         }
 
         const imagePath = `/uploads/${req.file.filename}`;
-        const updatedProfile = user.profile || {};
+        const updatedProfile = parseProfile(user.profile);
         updatedProfile.coverImage = imagePath;
 
         await query('UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2', [JSON.stringify(updatedProfile), req.params.id]);
@@ -1625,7 +1619,7 @@ const updateUniversityProfile = async (req, res) => {
             return res.status(404).json({ message: 'University not found' });
         }
 
-        const updatedProfile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
+        const updatedProfile = parseProfile(user.profile);
         const updatedBio = bio !== undefined ? bio : user.bio;
         const updatedProfileImage = profileImage !== undefined ? profileImage : user.profile_image;
 
@@ -1681,7 +1675,7 @@ const uploadUniversityGalleryImages = async (req, res) => {
         }
 
         const newImages = req.files.map(file => `/uploads/${file.filename}`);
-        const profile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
+        const profile = parseProfile(user.profile);
         const currentGallery = profile.gallery || [];
         
         const updatedGallery = [...currentGallery, ...newImages];
@@ -1717,7 +1711,7 @@ const uploadFacultyPhoto = async (req, res) => {
         }
 
         const imagePath = `/uploads/${req.file.filename}`;
-        const profile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
+        const profile = parseProfile(user.profile);
         
         if (!Array.isArray(profile.faculty)) {
             profile.faculty = [];

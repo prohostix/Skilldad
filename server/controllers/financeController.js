@@ -49,8 +49,20 @@ const getFinanceStats = async (req, res) => {
             totalRevenue,
             manualRevenue,
             gatewayRevenue,
-            pendingPayouts: pendingPayoutsRes.rows,
-            approvedPayouts: approvedPayoutsRes.rows,
+            pendingPayouts: pendingPayoutsRes.rows.map(r => ({
+                ...r,
+                partner: { name: r.partner_name, email: r.partner_email },
+                createdAt: r.created_at,
+                requestDate: r.request_date || r.created_at,
+                screenshotUrl: r.screenshot_url
+            })),
+            approvedPayouts: approvedPayoutsRes.rows.map(r => ({
+                ...r,
+                partner: { name: r.partner_name, email: r.partner_email },
+                createdAt: r.created_at,
+                payoutDate: r.payout_date,
+                screenshotUrl: r.screenshot_url
+            })),
             approvedPayoutsCount: approvedPayoutsRes.rows.length,
             totalPayoutsAmount: parseFloat(totalPayoutsAmountRes.rows[0].total) || 0,
             pendingPaymentsCount: parseInt(pendingPaymentsCountRes.rows[0].count),
@@ -203,7 +215,7 @@ const updatePaymentStatus = async (req, res) => {
 const approvePayout = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // 'approved' or 'rejected'
+        const { status, notes, screenshotUrl } = req.body; // 'approved' or 'rejected'
 
         if (!['approved', 'rejected'].includes(status)) {
             return res.status(400).json({ message: 'Invalid payout status' });
@@ -211,9 +223,9 @@ const approvePayout = async (req, res) => {
 
         const result = await query(
             `UPDATE payouts 
-             SET status = $1, reviewed_by = $2, reviewed_at = NOW(), payout_date = CASE WHEN $1 = 'approved' THEN NOW() ELSE payout_date END
-             WHERE id = $3 RETURNING *`,
-            [status, req.user.id, id]
+             SET status = $1, reviewed_by = $2, notes = COALESCE($3, notes), screenshot_url = COALESCE($4, screenshot_url), reviewed_at = NOW(), payout_date = CASE WHEN $1 = 'approved' THEN NOW() ELSE payout_date END
+             WHERE id = $5 RETURNING *`,
+            [status, req.user.id, notes, screenshotUrl, id]
         );
 
         if (result.rows.length === 0) {
@@ -252,7 +264,14 @@ const getPayoutHistory = async (req, res) => {
         sql += ` ORDER BY p.created_at DESC`;
 
         const result = await query(sql, params);
-        res.json(result.rows);
+        res.json(result.rows.map(r => ({
+            ...r,
+            partner: { name: r.partner_name, email: r.partner_email },
+            createdAt: r.created_at,
+            requestDate: r.request_date || r.created_at,
+            payoutDate: r.payout_date,
+            screenshotUrl: r.screenshot_url
+        })));
     } catch (error) {
         console.error('Error in getPayoutHistory:', error);
         res.status(500).json({ message: error.message });
@@ -263,7 +282,7 @@ const getPayoutHistory = async (req, res) => {
 const getFinancePartners = async (req, res) => {
     try {
         const result = await query(`
-            SELECT DISTINCT u.id, u.name, u.email 
+            SELECT DISTINCT u.id, u.id as _id, u.name, u.email 
             FROM users u
             JOIN payouts p ON u.id = p.partner_id
             WHERE u.role = 'partner'

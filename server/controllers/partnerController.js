@@ -48,7 +48,7 @@ const getDiscounts = async (req, res) => {
 
 // @desc    Register a student by Partner
 const registerStudent = async (req, res) => {
-    const { name, email, password, phone, partnerCode, course, university } = req.body;
+    const { name, email, password, phone, partnerCode, course, courses, university } = req.body;
     try {
         const userExists = await query('SELECT 1 FROM users WHERE email = $1', [email]);
         if (userExists.rows.length > 0) return res.status(400).json({ message: 'User already exists' });
@@ -57,21 +57,25 @@ const registerStudent = async (req, res) => {
         const userId = `user_${Date.now()}`;
 
         await query(`
-            INSERT INTO users (id, name, email, password, role, registered_by, partner_code, "universityId", is_verified, created_at, updated_at)
+            INSERT INTO users (id, name, email, password, role, registered_by, partner_code, university_id, is_verified, created_at, updated_at)
             VALUES ($1, $2, $3, $4, 'student', $5, $6, $7, true, NOW(), NOW())
         `, [userId, name, email, hashedPassword, req.user.id, partnerCode?.toUpperCase(), university || null]);
 
-        if (course) {
-            const enrollId = `enroll_${Date.now()}`;
+        // Support both single and multiple course enrollments
+        const coursesToEnroll = courses && Array.isArray(courses) ? courses : (course ? [course] : []);
+        
+        for (const courseId of coursesToEnroll) {
+            const enrollId = `enroll_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
             await query(`
-                INSERT INTO enrollments (id, student_id, course_id, status, created_at, updated_at)
-                VALUES ($1, $2, $3, 'active', NOW(), NOW())
-            `, [enrollId, userId, course]);
+                INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
+                VALUES ($1, $2, $3, 'active', 0, NOW(), NOW())
+            `, [enrollId, userId, courseId]);
         }
 
-        res.status(201).json({ success: true, message: 'Student registered' });
+        res.status(201).json({ success: true, message: 'Student registered and enrolled successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[registerStudent] error:', error);
+        res.status(500).json({ message: error.message || 'Error registering student' });
     }
 };
 
@@ -100,7 +104,7 @@ const getPartnerStudents = async (req, res) => {
 const getPayoutHistory = async (req, res) => {
     try {
         const payoutRes = await query(`
-            SELECT * FROM payouts 
+            SELECT *, id as _id FROM payouts 
             WHERE partner_id = $1 
             ORDER BY created_at DESC
         `, [req.user.id]);
@@ -112,18 +116,41 @@ const getPayoutHistory = async (req, res) => {
 
 // @desc    Request a new payout
 const requestPayout = async (req, res) => {
-    const { amount, method = 'bank_transfer' } = req.body;
+        const { amount, notes } = req.body;
     try {
         if (!amount || amount <= 0) return res.status(400).json({ message: 'Invalid amount' });
 
         const id = `payout_${Date.now()}`;
         await query(`
-            INSERT INTO payouts (id, partner_id, amount, status, method, created_at, updated_at)
+            INSERT INTO payouts (id, partner_id, amount, status, notes, created_at, updated_at)
             VALUES ($1, $2, $3, 'pending', $4, NOW(), NOW())
-        `, [id, req.user.id, amount, method]);
+        `, [id, req.user.id, amount, notes]);
 
         res.status(201).json({ success: true, message: 'Payout request submitted' });
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Delete a partner student
+const deletePartnerStudent = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const checkRes = await query(`
+            SELECT id FROM users 
+            WHERE id = $1 AND (registered_by = $2 OR partner_code IN (SELECT code FROM discounts WHERE partner_id = $2))
+        `, [id, req.user.id]);
+        
+        if (checkRes.rows.length === 0) {
+            return res.status(403).json({ message: 'Unauthorized to delete this student' });
+        }
+
+        await query('DELETE FROM enrollments WHERE student_id = $1', [id]);
+        await query('DELETE FROM users WHERE id = $1', [id]);
+
+        res.json({ success: true, message: 'Student deleted successfully' });
+    } catch (error) {
+        console.error('Delete student error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -135,5 +162,6 @@ module.exports = {
     registerStudent,
     requestPayout,
     getPartnerStudents,
-    getPayoutHistory
+    getPayoutHistory,
+    deletePartnerStudent
 };

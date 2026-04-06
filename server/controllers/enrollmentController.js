@@ -60,6 +60,8 @@ const getMyCourses = asyncHandler(async (req, res) => {
     const transformed = enrollRes.rows.map(row => ({
         ...row,
         _id: row.id,
+        completedVideos: Array.isArray(row.completed_videos) ? row.completed_videos : [],
+        completedExercises: Array.isArray(row.completed_exercises) ? row.completed_exercises : [],
         course: {
             _id: row.course_id,
             title: row.title,
@@ -76,14 +78,42 @@ const getMyCourses = asyncHandler(async (req, res) => {
  * @desc    Update progress
  */
 const updateProgress = asyncHandler(async (req, res) => {
-    const { courseId, progress } = req.body;
+    const { courseId, progress, videoId, exerciseScore } = req.body;
     const userId = req.user.id;
 
-    await query(`
-        UPDATE enrollments 
-        SET progress = $1, updated_at = NOW() 
-        WHERE student_id = $2 AND course_id = $3
-    `, [progress, userId, courseId]);
+    if (videoId && exerciseScore !== undefined) {
+        // Update both video and exercise progress
+        await query(`
+            UPDATE enrollments 
+            SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
+                completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $2::jsonb,
+                updated_at = NOW() 
+            WHERE student_id = $3 AND course_id = $4
+            AND NOT (completed_videos ? $5)
+        `, [
+            JSON.stringify([videoId]), 
+            JSON.stringify([{ video: videoId, score: exerciseScore }]), 
+            userId, 
+            courseId,
+            videoId
+        ]);
+    } else if (videoId) {
+        // Just update video completion
+        await query(`
+            UPDATE enrollments 
+            SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
+                updated_at = NOW() 
+            WHERE student_id = $2 AND course_id = $3
+            AND NOT (completed_videos ? $4)
+        `, [JSON.stringify([videoId]), userId, courseId, videoId]);
+    } else if (progress !== undefined) {
+        // Generic progress update
+        await query(`
+            UPDATE enrollments 
+            SET progress = $1, updated_at = NOW() 
+            WHERE student_id = $2 AND course_id = $3
+        `, [progress, userId, courseId]);
+    }
 
     res.json({ success: true, progress });
 });

@@ -49,29 +49,24 @@ const createSession = asyncHandler(async (req, res) => {
 
     const id = `sess_${Date.now()}`;
 
-    // Create Zoom meeting
-    let zoomData = null;
+    // Create Jitsi meeting
+    let jitsiData = null;
     try {
-        const { createZoomMeeting } = require('../utils/zoomUtils');
-        const meetingStartTime = new Date(startTime);
-        const meetingDuration = parseInt(duration) || 60;
-        const hostEmail = req.user.email;
-        const tz = timezone || 'Asia/Kolkata';
-
-        zoomData = await createZoomMeeting(topic, meetingStartTime, meetingDuration, hostEmail, tz);
-        console.log(`[Session] Zoom meeting created for session ${id}: Meeting ID ${zoomData.meetingId}`);
-    } catch (zoomError) {
-        console.error(`[Session] Failed to create Zoom meeting for session ${id}:`, zoomError.message);
+        const { createJitsiMeeting } = require('../utils/jitsiUtils');
+        jitsiData = createJitsiMeeting(topic, id);
+        console.log(`[Session] Jitsi meeting created for session ${id}: Room ${jitsiData.roomName}`);
+    } catch (jitsiError) {
+        console.error(`[Session] Failed to create Jitsi meeting for session ${id}:`, jitsiError.message);
         return res.status(500).json({ 
             success: false, 
-            message: `Failed to create Zoom meeting: ${zoomError.message}` 
+            message: `Failed to create Jitsi meeting: ${jitsiError.message}` 
         });
     }
 
     await query(`
         INSERT INTO live_sessions (id, topic, description, start_time, duration, timezone, instructor_id, university_id, course_id, zoom, status, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'scheduled', NOW(), NOW())
-    `, [id, topic, description, startTime, duration, timezone || 'Asia/Kolkata', instructor || req.user.id, universityId, courseId || null, JSON.stringify(zoomData)]);
+    `, [id, topic, description, startTime, duration, timezone || 'Asia/Kolkata', instructor || req.user.id, universityId, courseId || null, JSON.stringify(jitsiData)]);
 
     // Notify students about scheduled session
     notifyEnrolledStudents(
@@ -80,7 +75,7 @@ const createSession = asyncHandler(async (req, res) => {
         `A new session "${topic}" has been scheduled for your course.`
     );
 
-    res.status(201).json({ success: true, id, joinUrl: zoomData?.joinUrl });
+    res.status(201).json({ success: true, id, joinUrl: jitsiData?.joinUrl });
 });
 
 // @desc    Get all sessions for a user
@@ -121,7 +116,7 @@ const getSessions = asyncHandler(async (req, res) => {
         return {
             ...r,
             _id: r.id,
-            zoom,
+            meetingData: zoom,
             recording,
             startTime: r.start_time,
             instructor: { name: r.instructor_name },
@@ -151,12 +146,7 @@ const getSession = asyncHandler(async (req, res) => {
     // Ensure JSON fields are parsed
     if (session.zoom && typeof session.zoom === 'string') {
         try { 
-            session.zoom = JSON.parse(session.zoom);
-            // Ensure compatibility between meetingId and meeting_id
-            if (session.zoom) {
-                if (session.zoom.meeting_id && !session.zoom.meetingId) session.zoom.meetingId = session.zoom.meeting_id;
-                if (session.zoom.meetingId && !session.zoom.meeting_id) session.zoom.meeting_id = session.zoom.meetingId;
-            }
+            session.meetingData = JSON.parse(session.zoom);
         } catch (e) {}
     }
     if (session.recording && typeof session.recording === 'string') {
@@ -191,18 +181,10 @@ const startSession = asyncHandler(async (req, res) => {
 // @desc    End session
 const endSession = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    await query("UPDATE live_sessions SET status = 'ended', end_time = NOW() WHERE id = $1", [id]);
+    await query("UPDATE live_sessions SET status = 'ended' WHERE id = $1", [id]);
     
-    // Trigger recording sync from Zoom
-    try {
-        const { syncZoomRecordings } = require('../utils/zoomUtils');
-        // Run in background, don't await
-        syncZoomRecordings(id).catch(err => {
-            console.error(`[Session] Async recording sync failed for ${id}:`, err.message);
-        });
-    } catch (err) {
-        console.error(`[Session] Error initiating recording sync:`, err.message);
-    }
+    // Jitsi recording syncing logic will be handled via webhooks or manual trigger
+    // placeholder for future Jitsi recording sync integration
 
     res.json({ success: true, message: 'Session ended' });
 });
@@ -293,7 +275,7 @@ module.exports = {
 
         res.json({ playUrl });
     }),
-    getZoomSDKConfig: asyncHandler(async (req, res) => {
+    getJitsiSDKConfig: asyncHandler(async (req, res) => {
         const { id } = req.params;
         const resSet = await query("SELECT zoom, instructor_id FROM live_sessions WHERE id = $1 AND (is_deleted IS NULL OR is_deleted = false)", [id]);
 
@@ -302,41 +284,28 @@ module.exports = {
         }
 
         const session = resSet.rows[0];
-        const zoom = typeof session.zoom === 'string' ? JSON.parse(session.zoom || '{}') : (session.zoom || {});
+        const jitsiData = typeof session.zoom === 'string' ? JSON.parse(session.zoom || '{}') : (session.zoom || {});
 
-        const { generateZoomSignature, decryptPasscode } = require('../utils/zoomUtils');
-        const role = (req.user.id === session.instructor_id || req.user.role !== 'student') ? 1 : 0;
+        const { generateJitsiToken } = require('../utils/jitsiUtils');
+        const isInstructor = (req.user.id === session.instructor_id || req.user.role !== 'student');
 
-        let passWord = '';
-        if (zoom.passcode) {
-            try {
-                // Determine if we are in mock mode from env or if mock utility should be used
-                if (process.env.ZOOM_MOCK_MODE === 'true' || process.env.ZOOM_SDK_KEY?.startsWith('MOCK_')) {
-                    passWord = zoom.passcode;
-                } else {
-                    passWord = decryptPasscode(zoom.passcode);
-                }
-            } catch (e) {
-                // If it fails to decrypt, just use the raw value
-                passWord = zoom.passcode;
-            }
-        }
-
-        const meetingNumber = zoom.meeting_number || zoom.meetingNumber || zoom.meeting_id || zoom.meetingId;
-
-        if (!meetingNumber) {
-            return res.status(400).json({ message: 'No Zoom meeting associated with this session' });
+        let roomName = jitsiData.roomName;
+        if (!roomName) {
+            // Self-correction: If roomName is missing (e.g. legacy session), generate one
+            const { generateRoomName } = require('../utils/jitsiUtils');
+            roomName = generateRoomName(id);
+            console.log(`[Jitsi] Legacy Session Correction: Generated room name ${roomName} for session ${id}`);
         }
 
         try {
-            const signature = await generateZoomSignature(meetingNumber, role);
+            const token = generateJitsiToken(req.user, roomName, isInstructor);
             res.json({
-                sdkKey: process.env.ZOOM_SDK_KEY || process.env.ZOOM_CLIENT_ID || 'MOCK_SDK_KEY',
-                signature,
-                meetingNumber: meetingNumber.toString(),
-                passWord,
+                roomName: roomName,
+                domain: jitsiData.domain || process.env.JITSI_DOMAIN || 'meet.skilldad.com',
+                token,
                 userName: req.user.name || 'User',
-                userEmail: req.user.email
+                userEmail: req.user.email,
+                isInstructor
             });
         } catch (error) {
             res.status(500).json({ message: error.message });
