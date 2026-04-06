@@ -5,7 +5,7 @@ import axios from 'axios';
 import ModernButton from '../../components/ui/ModernButton';
 import GlassCard from '../../components/ui/GlassCard';
 
-const LinkZoomRecording = () => {
+const LinkRecording = () => {
     const { courseId, moduleIndex, videoIndex } = useParams();
     const navigate = useNavigate();
     const [course, setCourse] = useState(null);
@@ -29,8 +29,8 @@ const LinkZoomRecording = () => {
             const { data: courseData } = await axios.get(`/api/courses/${courseId}`, config);
             setCourse(courseData);
 
-            // Fetch available Zoom recordings
-            const { data: recordingsData } = await axios.get('/api/courses/zoom-recordings/available', config);
+            // Fetch available Jitsi/Session recordings
+            const { data: recordingsData } = await axios.get('/api/courses/recordings/available', config);
             setRecordings(recordingsData);
 
             setLoading(false);
@@ -51,12 +51,12 @@ const LinkZoomRecording = () => {
             };
 
             await axios.post(
-                `/api/courses/${courseId}/modules/${moduleIndex}/videos/${videoIndex}/link-zoom-recording`,
+                `/api/courses/${courseId}/modules/${moduleIndex}/videos/${videoIndex}/link-recording`,
                 { sessionId: selectedRecording.sessionId },
                 config
             );
 
-            alert('Zoom recording linked successfully!');
+            alert('Recording linked successfully!');
             navigate(`/dashboard/courses/${courseId}/edit`);
         } catch (error) {
             console.error('Error linking recording:', error);
@@ -81,7 +81,7 @@ const LinkZoomRecording = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-white mb-2">Link Zoom Recording</h1>
+                    <h1 className="text-2xl font-bold text-white mb-2">Link Session Recording</h1>
                     <p className="text-white/60">
                         Select a Zoom recording to link to: <span className="text-primary font-semibold">{currentVideo?.title}</span>
                     </p>
@@ -98,13 +98,13 @@ const LinkZoomRecording = () => {
             <div className="space-y-4">
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                     <Video className="w-5 h-5 text-primary" />
-                    Available Zoom Recordings ({recordings.length})
+                    Available Session Recordings ({recordings.length})
                 </h2>
 
                 {recordings.length === 0 ? (
                     <GlassCard className="text-center py-12">
                         <Video className="w-16 h-16 text-white/20 mx-auto mb-4" />
-                        <p className="text-white/60 mb-2">No Zoom recordings available</p>
+                        <p className="text-white/60 mb-2">No session recordings available</p>
                         <p className="text-white/40 text-sm">
                             Record a live session first, then link it to your course videos
                         </p>
@@ -192,4 +192,4 @@ const LinkZoomRecording = () => {
     );
 };
 
-export default LinkZoomRecording;
+export default LinkRecording;

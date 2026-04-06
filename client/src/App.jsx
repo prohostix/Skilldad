@@ -31,7 +31,7 @@ const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const HostRoom = lazy(() => import('./pages/HostRoom'));
 const StudentRoom = lazy(() => import('./pages/StudentRoom'));
 const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
-const LinkZoomRecording = lazy(() => import('./pages/university/LinkZoomRecording'));
+const LinkRecording = lazy(() => import('./pages/university/LinkRecording'));
 const MockPaymentGateway = lazy(() => import('./pages/MockPaymentGateway'));
 import { PrivacyPolicy, TermsOfService, CookiePolicy, RefundPolicy } from './pages/LegalPages';
 const UniversityPublicDetail = lazy(() => import('./pages/UniversityPublicDetail'));
@@ -75,6 +75,8 @@ const EditInteractiveContent = lazy(() => import('./pages/university/EditInterac
 const PartnerDashboard = lazy(() => import('./pages/partner/PartnerDashboard'));
 const CommissionWallet = lazy(() => import('./pages/partner/CommissionWallet'));
 const PartnerStudentManagement = lazy(() => import('./pages/partner/PartnerStudentManagement'));
+const PartnerCourseManager = lazy(() => import('./pages/partner/PartnerCourseManager'));
+const PartnerCourseEditor = lazy(() => import('./pages/partner/PartnerCourseEditor'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -202,6 +204,8 @@ function App() {
                   <Route path="/partner" element={<DashboardLayout />}>
                     <Route path="dashboard" element={<PartnerDashboard />} />
                     <Route path="students" element={<PartnerStudentManagement />} />
+                    <Route path="courses" element={<PartnerCourseManager />} />
+                    <Route path="courses/:id" element={<PartnerCourseEditor />} />
                     <Route path="commission" element={<CommissionWallet />} />
                     <Route path="support" element={<Support />} />
                     <Route path="settings" element={<Settings />} />
@@ -214,7 +218,7 @@ function App() {
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="courses" element={<CourseManager />} />
                     <Route path="courses/edit/:id" element={<CourseEditor />} />
-                    <Route path="courses/:courseId/modules/:moduleIndex/videos/:videoIndex/link-zoom" element={<LinkZoomRecording />} />
+                    <Route path="courses/:courseId/modules/:moduleIndex/videos/:videoIndex/link-recording" element={<LinkRecording />} />
                     <Route path="projects" element={<ProjectManager />} />
                     <Route path="exams" element={<ExamScheduler />} />
                     <Route path="users" element={<UserList />} />

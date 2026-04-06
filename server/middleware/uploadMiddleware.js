@@ -16,19 +16,20 @@ const storage = multer.diskStorage({
 });
 
 function checkFileType(file, cb) {
-    const filetypes = /jpg|jpeg|png/;
+    const filetypes = /jpg|jpeg|png|mp4|webm|mov|ogg|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
+    const mimetype = filetypes.test(file.mimetype.toLowerCase());
 
-    if (extname && mimetype) {
+    if (extname || mimetype) {
         return cb(null, true);
     } else {
-        cb('Images only!');
+        cb(new Error(`File type not supported. Current: ${file.mimetype}`));
     }
 }
 
 const upload = multer({
     storage,
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
     fileFilter: function (req, file, cb) {
         checkFileType(file, cb);
     },

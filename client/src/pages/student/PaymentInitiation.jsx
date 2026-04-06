@@ -56,6 +56,29 @@ const PaymentInitiation = () => {
             const { data } = await axios.get(`/api/courses/${courseId}`, config);
             setCourse(data);
             setLoading(false);
+
+            // Auto-apply partner code if exists
+            if (userInfo.partnerCode && !appliedDiscount) {
+                setDiscountCode(userInfo.partnerCode);
+                
+                setValidatingDiscount(true);
+                try {
+                    const discountRes = await axios.post(
+                        '/api/discount/validate',
+                        { code: userInfo.partnerCode.toUpperCase(), courseId },
+                        config
+                    );
+                    if (discountRes.data && discountRes.data.valid) {
+                        setAppliedDiscount(discountRes.data);
+                    } else {
+                        console.warn('Partner code auto-apply: Code invalid');
+                    }
+                } catch (err) {
+                    console.warn('Partner code auto-apply failed:', err);
+                } finally {
+                    setValidatingDiscount(false);
+                }
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to load course details');
             setLoading(false);
@@ -81,8 +104,13 @@ const PaymentInitiation = () => {
                 config
             );
 
-            setAppliedDiscount(data);
-            setDiscountError('');
+            if (data.valid) {
+                setAppliedDiscount(data);
+                setDiscountError('');
+            } else {
+                setDiscountError(data.message || 'Invalid or expired discount code');
+                setAppliedDiscount(null);
+            }
         } catch (err) {
             setDiscountError(err.response?.data?.message || 'Invalid discount code');
             setAppliedDiscount(null);

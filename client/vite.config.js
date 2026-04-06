@@ -26,10 +26,6 @@ export default defineConfig(({ mode }) => {
           secure: false,
         },
       },
-      headers: {
-        'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'credentialless',
-      },
     },
   }
 })

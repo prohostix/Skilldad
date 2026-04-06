@@ -12,13 +12,16 @@ import {
     Clock,
     Unlock,
     Video,
-    Calendar
+    Calendar,
+    Send,
+    Download,
+    HelpCircle
 } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
-import ZoomRecordingPlayer from '../../components/ZoomRecordingPlayer';
+import MeetingRecordingPlayer from '../../components/MeetingRecordingPlayer';
 
 const CoursePlayer = () => {
     const { courseId } = useParams();
@@ -29,9 +32,17 @@ const CoursePlayer = () => {
     const [showExercise, setShowExercise] = useState(false);
     const [selectedAnswer, setSelectedAnswer] = useState('');
     const [exerciseFeedback, setExerciseFeedback] = useState(null);
+    const [discussions, setDiscussions] = useState([]);
+    const [newComment, setNewComment] = useState('');
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [userProgress, setUserProgress] = useState({ completedVideos: [], completedExercises: [] });
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [liveSessions, setLiveSessions] = useState([]);
+    const [showQuiz, setShowQuiz] = useState(false);
+    const [quizIndex, setQuizIndex] = useState(0);
+    const [quizAnswers, setQuizAnswers] = useState({});
+    const [quizResult, setQuizResult] = useState(null);
 
     useEffect(() => {
         const fetchCourseAndProgress = async () => {
@@ -44,7 +55,13 @@ const CoursePlayer = () => {
                 // Fetch student progress for this course
                 const { data: progData } = await axios.get('/api/enrollment/my-courses', config);
                 const currentProg = progData.find(p => p.course._id === courseId);
-                if (currentProg) setUserProgress(currentProg);
+                if (currentProg) {
+                    setUserProgress({
+                        ...currentProg,
+                        completedVideos: Array.isArray(currentProg.completedVideos) ? currentProg.completedVideos : [],
+                        completedExercises: Array.isArray(currentProg.completedExercises) ? currentProg.completedExercises : []
+                    });
+                }
 
                 // Fetch live sessions for this course
                 try {
@@ -54,12 +71,72 @@ const CoursePlayer = () => {
                     console.error('Error loading live sessions:', sessionError);
                     // Don't fail the whole page if live sessions fail to load
                 }
+                // Fetch discussions for current video
+                const currentModule = courseData.modules?.[0];
+                const currentVideo = currentModule?.videos?.[0];
+                if (currentVideo?._id) {
+                    try {
+                        const { data: discData } = await axios.get(`/api/discussions/${courseId}/${currentVideo._id}`, config);
+                        setDiscussions(discData);
+                    } catch (err) {
+                        console.error('Failed to fetch discussions', err);
+                    }
+                }
             } catch (error) {
-                console.error('Error loading course/progress:', error);
+                console.error('Error fetching course player data:', error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchCourseAndProgress();
     }, [courseId]);
+
+    // Fetch discussions when video changes
+    useEffect(() => {
+        const fetchCurrentVideoDiscussions = async () => {
+            const currentModule = course?.modules?.[currentModuleIndex];
+            const currentVideo = currentModule?.videos?.[currentVideoIndex];
+            
+            if (currentVideo?._id) {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                try {
+                    const { data: discData } = await axios.get(`/api/discussions/${courseId}/${currentVideo._id}`, config);
+                    setDiscussions(discData);
+                } catch (err) {
+                    console.error('Failed to fetch discussions', err);
+                }
+            }
+        };
+
+        if (course) fetchCurrentVideoDiscussions();
+    }, [currentModuleIndex, currentVideoIndex, course]);
+
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+        if (!newComment.trim() || isSubmittingComment) return;
+
+        const currentModule = course.modules[currentModuleIndex];
+        const currentVideo = currentModule.videos[currentVideoIndex];
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+
+        setIsSubmittingComment(true);
+        try {
+            const { data } = await axios.post('/api/discussions', {
+                courseId,
+                videoId: currentVideo._id,
+                content: newComment
+            }, config);
+
+            setDiscussions(prev => [data, ...prev]);
+            setNewComment('');
+        } catch (err) {
+            console.error('Failed to post comment', err);
+        } finally {
+            setIsSubmittingComment(false);
+        }
+    };
 
     if (!course) return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -107,7 +184,7 @@ const CoursePlayer = () => {
                 }, config);
                 setUserProgress(prev => ({
                     ...prev,
-                    completedExercises: [...prev.completedExercises, { video: currentVideo._id, score: 100 }]
+                    completedExercises: [...(prev.completedExercises || []), { video: currentVideo._id, score: 100 }]
                 }));
             } catch (err) {
                 console.error('Progress update failed', err);
@@ -135,7 +212,7 @@ const CoursePlayer = () => {
             }, config);
             setUserProgress(prev => ({
                 ...prev,
-                completedVideos: [...prev.completedVideos, currentVideo._id]
+                completedVideos: [...(prev.completedVideos || []), currentVideo._id]
             }));
         } catch (err) {
             console.error('Video completion update failed', err);
@@ -156,19 +233,30 @@ const CoursePlayer = () => {
     const progressPercent = Math.round((completedCount / totalVideos) * 100) || 0;
 
     return (
-        <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-100px)] min-h-[calc(100vh-200px)] bg-[#050505] rounded-none lg:rounded-2xl border-0 lg:border border-white/10 overflow-hidden font-inter -mx-4 sm:-mx-6 lg:-mx-8 shadow-2xl">
+        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] bg-[#050505] lg:rounded-2xl border border-white/5 font-inter shadow-2xl relative">
             {/* Sidebar - Course Content */}
-            <div className={`${isSidebarOpen ? 'w-full lg:w-96' : 'w-0 lg:hidden'} transition-all duration-500 bg-[#0a0a0a] border-r border-white/10 flex flex-col z-20`}>
+            <div className={`${isSidebarOpen ? 'w-full lg:w-96' : 'w-0 overflow-hidden'} transition-all duration-500 bg-[#0a0a0a] border-r border-white/10 flex flex-col z-20 lg:sticky lg:top-0 lg:h-[calc(100vh-64px)]`}>
                 <div className="p-6 border-b border-white/10">
-                    <button
-                        onClick={() => navigate('/dashboard/my-courses')}
-                        className="flex items-center text-slate-500 hover:text-primary mb-4 transition-colors font-bold text-sm"
-                    >
-                        <ArrowLeft size={16} className="mr-2" /> Back to Dashboard
-                    </button>
+                    <div className="flex items-center justify-between mb-4">
+                        <button
+                            onClick={() => navigate('/dashboard/my-courses')}
+                            className="flex items-center text-slate-500 hover:text-primary transition-colors font-bold text-[10px] uppercase tracking-widest"
+                        >
+                            <ArrowLeft size={14} className="mr-2" /> Back
+                        </button>
+                        
+                        <button 
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="p-1.5 bg-white/5 hover:bg-red-500/10 text-slate-500 hover:text-red-500 rounded-lg transition-all"
+                            title="Hide Curriculum"
+                        >
+                            <Layout size={16} />
+                        </button>
+                    </div>
+
                     <DashboardHeading
                         title={course.title}
-                        className="!text-lg font-extrabold"
+                        className="!text-lg font-extrabold mb-6"
                     />
                     <div className="mt-6">
                         <div className="flex justify-between items-center text-xs font-bold text-slate-500 mb-2">
@@ -240,85 +328,260 @@ const CoursePlayer = () => {
                         )}
                     </div>
                 )}
-
                 <div className="flex-1 overflow-y-auto">
-                    {course.modules.map((module, mIndex) => (
-                        <div key={mIndex}>
-                            <div className="px-6 py-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
-                                <span className="text-sm font-bold text-[#B8C0FF] uppercase tracking-wide flex items-center">
-                                    <Layout size={14} className="mr-2 text-slate-400" /> {module.title}
-                                </span>
-                            </div>
-                            <div>
-                                {module.videos.map((video, vIndex) => (
-                                    <button
-                                        key={vIndex}
-                                        className={`w-full px-6 py-4 flex items-center justify-between transition-all group ${mIndex === currentModuleIndex && vIndex === currentVideoIndex
-                                            ? 'bg-primary/5 text-primary border-l-4 border-primary'
-                                            : 'hover:bg-white/5 text-[#B8C0FF] border-l-4 border-transparent'
-                                            }`}
-                                        onClick={() => {
-                                            setCurrentModuleIndex(mIndex);
-                                            setCurrentVideoIndex(vIndex);
-                                            setShowExercise(false);
-                                        }}
-                                    >
-                                        <div className="flex items-center space-x-3 text-left">
-                                            <div className="relative">
-                                                {userProgress.completedVideos?.includes(video._id) ? (
-                                                    <CheckCircle className="text-emerald-500" size={18} />
-                                                ) : (
-                                                    <Play className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex ? 'text-primary' : 'text-slate-300'}`} size={18} />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold font-poppins line-clamp-1">{video.title}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 flex items-center uppercase tracking-widest mt-1">
-                                                    <Clock size={10} className="mr-1" /> {video.duration}
-                                                </p>
-                                            </div>
+                    <ul className="divide-y divide-white/5">
+                        {course.modules.map((module, mIndex) => (
+                            <li key={mIndex}>
+                                <div className="px-6 py-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
+                                    <span className="text-[11px] font-black text-[#B8C0FF] uppercase tracking-[0.1em] flex items-center">
+                                        <div className="w-5 h-5 rounded-md bg-white/10 flex items-center justify-center mr-2 text-[10px] text-white">
+                                            {mIndex + 1}
                                         </div>
-                                        <ChevronRight size={14} className={`opacity-0 group-hover:opacity-100 transition-opacity ${mIndex === currentModuleIndex && vIndex === currentVideoIndex ? 'text-primary opacity-100' : 'text-slate-300'}`} />
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
+                                        {module.title}
+                                    </span>
+                                </div>
+                                <ul className="bg-black/20">
+                                    {module.videos.map((video, vIndex) => (
+                                        <li key={vIndex}>
+                                            <button
+                                                className={`w-full px-6 py-4 flex items-center justify-between transition-all group ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz
+                                                    ? 'bg-primary/5 text-primary border-l-4 border-primary'
+                                                    : 'hover:bg-white/5 text-slate-400 border-l-4 border-transparent'
+                                                    }`}
+                                                onClick={() => {
+                                                    setCurrentModuleIndex(mIndex);
+                                                    setCurrentVideoIndex(vIndex);
+                                                    setShowExercise(false);
+                                                    setShowQuiz(false);
+                                                }}
+                                            >
+                                                <div className="flex items-center space-x-3 text-left">
+                                                    <div className="relative">
+                                                        {userProgress.completedVideos?.includes(video._id) ? (
+                                                            <CheckCircle className="text-emerald-500" size={16} />
+                                                        ) : (
+                                                            <Play className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-primary' : 'text-slate-500/40'}`} size={16} />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className={`text-xs font-bold font-poppins line-clamp-1 ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-primary' : 'text-slate-300'}`}>
+                                                            {video.title}
+                                                        </p>
+                                                        <p className="text-[9px] font-black text-slate-500 flex items-center uppercase tracking-widest mt-1">
+                                                            <Clock size={8} className="mr-1" /> {video.duration}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight size={12} className={`opacity-0 group-hover:opacity-100 transition-opacity ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-primary opacity-100' : 'text-slate-600'}`} />
+                                            </button>
+                                        </li>
+                                    ))}
+
+                                    {module.quiz && (
+                                        <li>
+                                            <button
+                                                className={`w-full px-6 py-4 flex items-center justify-between transition-all group ${mIndex === currentModuleIndex && showQuiz
+                                                    ? 'bg-emerald-500/5 text-emerald-500 border-l-4 border-emerald-500'
+                                                    : 'hover:bg-white/5 text-slate-400 border-l-4 border-transparent'
+                                                    }`}
+                                                onClick={() => {
+                                                    setCurrentModuleIndex(mIndex);
+                                                    setShowQuiz(true);
+                                                    setQuizIndex(0);
+                                                    setQuizAnswers({});
+                                                    setQuizResult(null);
+                                                }}
+                                            >
+                                                <div className="flex items-center space-x-3 text-left">
+                                                    <div className="p-1 bg-emerald-500/10 rounded-lg">
+                                                        <HelpCircle className={mIndex === currentModuleIndex && showQuiz ? 'text-emerald-500' : 'text-emerald-400/60'} size={16} />
+                                                    </div>
+                                                    <div>
+                                                        <p className={`text-xs font-black font-poppins line-clamp-1 ${mIndex === currentModuleIndex && showQuiz ? 'text-emerald-400' : 'text-slate-300'}`}>Section Quiz</p>
+                                                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Final Assessment</p>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </li>
+                                    )}
+                                </ul>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </div>
 
             {/* Main Content - Player */}
-            <div className="flex-1 overflow-y-auto bg-transparent p-6 lg:p-10 relative">
-                {/* Mobile Header */}
-                <div className="lg:hidden flex items-center justify-between mb-6">
-                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 bg-white/10 rounded-lg shadow-sm">
-                        <Layout size={20} className="text-primary" />
-                    </button>
-                    <span className="font-bold text-[#B8C0FF] font-poppins text-sm uppercase">Curriculum</span>
-                </div>
-
-                <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-1000">
-                    <div className="space-y-2">
-                        <div className="inline-flex items-center space-x-2 text-primary font-bold text-xs uppercase tracking-[0.2em]">
-                            <span>Module {currentModuleIndex + 1}</span>
-                            <span className="text-slate-300">•</span>
-                            <span>Lesson {currentVideoIndex + 1}</span>
+            <div className="flex-1 bg-transparent relative">
+                    <div className="mx-auto animate-in fade-in duration-1000">
+                        <div className="flex items-center justify-between bg-white/[0.02] p-4 lg:px-8 border-b border-white/5">
+                            <div className="flex items-center space-x-4">
+                                {!isSidebarOpen && (
+                                    <button 
+                                        onClick={() => setIsSidebarOpen(true)}
+                                        className="p-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl hover:bg-primary hover:text-white transition-all group flex items-center shadow-xl shadow-primary/10"
+                                        title="Show Curriculum"
+                                    >
+                                        <Layout size={18} />
+                                    </button>
+                                )}
+                                <div className="space-y-1">
+                                    <div className="inline-flex items-center space-x-2 text-primary font-bold text-[10px] uppercase tracking-[0.2em]">
+                                        <span>Module {currentModuleIndex + 1}</span>
+                                        <span className="text-slate-500">•</span>
+                                        <span>{showQuiz ? 'Assessment' : `Lesson ${currentVideoIndex + 1}`}</span>
+                                    </div>
+                                    <h1 className="text-lg font-black text-white font-poppins">{showQuiz ? `${currentModule.title} - Final Quiz` : currentVideo.title}</h1>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-3">
+                                {isSidebarOpen && (
+                                    <button 
+                                        onClick={() => setIsSidebarOpen(false)}
+                                        className="hidden lg:flex items-center px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-all rounded-xl border border-white/10 font-bold text-[10px] uppercase tracking-widest"
+                                    >
+                                        <Layout size={14} className="mr-2" /> Hide Index
+                                    </button>
+                                )}
+                                <ModernButton onClick={handleVideoEnd} className="!py-2 !px-6 !text-xs">
+                                    Mark Done
+                                </ModernButton>
+                            </div>
                         </div>
-                        <h1 className="text-xl font-extrabold text-white font-poppins">{currentVideo.title}</h1>
-                    </div>
-
-                    {/* Video Container with Glow */}
-                    <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary-purple rounded-3xl blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
-                        <div className="relative aspect-video rounded-2xl bg-black shadow-2xl overflow-hidden border border-white/20">
-                            {/* Render based on video type */}
-                            {currentVideo.videoType === 'zoom-recording' && currentVideo.zoomRecording?.playUrl ? (
-                                <ZoomRecordingPlayer
-                                    recordingUrl={currentVideo.zoomRecording.playUrl}
-                                    sessionId={currentVideo.zoomSession}
+                        <div className="p-4 lg:p-8 space-y-8">
+                    {showQuiz ? (
+                        <div className="relative group mx-auto max-w-5xl">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-primary rounded-3xl blur opacity-10"></div>
+                            <GlassCard className="relative bg-[#0a0a0a] border-white/10 p-8 shadow-2xl">
+                                {quizResult ? (
+                                    <div className="text-center py-12 space-y-6 animate-in zoom-in-95 duration-500">
+                                        <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
+                                            <CheckCircle size={48} />
+                                        </div>
+                                        <h2 className="text-3xl font-black text-white font-poppins">Quiz Completed!</h2>
+                                        <p className="text-slate-400 font-inter max-w-md mx-auto">
+                                            Great job completing the assessment for "{currentModule.title}".
+                                        </p>
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 inline-block">
+                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Your Score</p>
+                                            <p className="text-5xl font-black text-emerald-400 font-poppins">{Math.round((quizResult.score / quizResult.total) * 100)}%</p>
+                                            <p className="text-sm font-bold text-slate-400 mt-2">{quizResult.score} / {quizResult.total} Correct</p>
+                                        </div>
+                                        <div className="pt-8">
+                                            <ModernButton 
+                                                onClick={() => {
+                                                    setShowQuiz(false);
+                                                    if (currentModuleIndex < course.modules.length - 1) {
+                                                        setCurrentModuleIndex(prev => prev + 1);
+                                                        setCurrentVideoIndex(0);
+                                                    }
+                                                }}
+                                                className="!px-12 !py-4"
+                                            >
+                                                {currentModuleIndex < course.modules.length - 1 ? 'Continue to Next Section' : 'Return to Course curriculum'}
+                                            </ModernButton>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                                        <div className="flex items-center justify-between mb-8">
+                                            <div className="px-4 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20">
+                                                Question {quizIndex + 1} of {currentModule.quiz.questions.length}
+                                            </div>
+                                            <div className="flex gap-1">
+                                                {currentModule.quiz.questions.map((_, i) => (
+                                                    <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i === quizIndex ? 'w-8 bg-emerald-500' : 'w-4 bg-white/10'}`}></div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        
+                                        <h3 className="text-2xl font-bold text-white mb-8 font-poppins leading-tight">
+                                            {currentModule.quiz.questions[quizIndex].question}
+                                        </h3>
+                                        
+                                        <div className="space-y-4 mb-12">
+                                            {currentModule.quiz.questions[quizIndex].options.map((opt, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setQuizAnswers(prev => ({ ...prev, [quizIndex]: opt }))}
+                                                    className={`w-full group relative flex items-center p-6 rounded-2xl border-2 transition-all duration-300 font-bold ${quizAnswers[quizIndex] === opt 
+                                                        ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400' 
+                                                        : 'border-white/10 hover:border-white/20 text-white/60 hover:text-white'}`}
+                                                >
+                                                    <div className={`w-6 h-6 rounded-lg border-2 mr-4 flex items-center justify-center transition-all ${quizAnswers[quizIndex] === opt ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-white/20'}`}>
+                                                        <span className="text-[10px]">{String.fromCharCode(65 + i)}</span>
+                                                    </div>
+                                                    {opt}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        
+                                        <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                                            <button 
+                                                disabled={quizIndex === 0}
+                                                onClick={() => setQuizIndex(prev => prev - 1)}
+                                                className="px-6 py-2 text-sm font-bold text-white/40 hover:text-white disabled:opacity-0 transition-all"
+                                            >
+                                                Previous
+                                            </button>
+                                            
+                                            {quizIndex === currentModule.quiz.questions.length - 1 ? (
+                                                <ModernButton 
+                                                    disabled={!quizAnswers[quizIndex]}
+                                                    onClick={() => {
+                                                        const score = currentModule.quiz.questions.reduce((acc, q, i) => {
+                                                            return acc + (quizAnswers[i] === q.correctAnswer ? 1 : 0);
+                                                        }, 0);
+                                                        setQuizResult({ score, total: currentModule.quiz.questions.length });
+                                                    }}
+                                                    className="!px-10 shadow-xl shadow-emerald-500/20 !bg-emerald-500"
+                                                >
+                                                    Finish Assessment
+                                                </ModernButton>
+                                            ) : (
+                                                <ModernButton 
+                                                    disabled={!quizAnswers[quizIndex]}
+                                                    onClick={() => setQuizIndex(prev => prev + 1)}
+                                                    className="!px-10"
+                                                >
+                                                    Next Question
+                                                </ModernButton>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </GlassCard>
+                        </div>
+                    ) : (
+                        <div className="relative group w-full mx-auto max-w-6xl">
+                            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-secondary-purple/20 rounded-3xl blur opacity-20 transition duration-1000"></div>
+                            <div className="relative aspect-video rounded-2xl bg-black shadow-2xl overflow-hidden border border-white/10">
+                                {/* Render based on video type */}
+                                {currentVideo.videoType === 'document' ? (
+                                <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8 text-center">
+                                    <FileText size={64} className="text-secondary-purple mb-4 animate-bounce" />
+                                    <h3 className="text-xl font-bold text-slate-800 mb-2">{currentVideo.title}</h3>
+                                    <p className="text-slate-500 mb-6 max-w-md">This lesson is a document resource. Click below to view or download it.</p>
+                                    <div className="flex space-x-4">
+                                        <ModernButton 
+                                            onClick={() => window.open(currentVideo.url, '_blank')}
+                                            className="!bg-secondary-purple"
+                                        >
+                                            View Document
+                                        </ModernButton>
+                                        <a href={currentVideo.url} download className="flex items-center px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition-all">
+                                            <Download size={18} className="mr-2" /> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            ) : (currentVideo.videoType === 'zoom-recording' || currentVideo.videoType === 'live-recording') && (currentVideo.zoomRecording?.playUrl || currentVideo.recordingUrl) ? (
+                                <MeetingRecordingPlayer
+                                    recordingUrl={currentVideo.recordingUrl || currentVideo.zoomRecording?.playUrl}
+                                    sessionId={currentVideo.zoomSession || currentVideo.sessionId}
                                     title={currentVideo.title}
                                     onEnded={handleVideoEnd}
-                                    onError={(error) => console.error('Zoom recording error:', error)}
+                                    onError={(error) => console.error('Recording playback error:', error)}
                                 />
                             ) : (
                                 <iframe
@@ -326,7 +589,6 @@ const CoursePlayer = () => {
                                     height="100%"
                                     src={(() => {
                                         let url = currentVideo.url || '';
-                                        // Convert YouTube watch URLs to embed format
                                         const watchMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
                                         if (watchMatch) {
                                             url = `https://www.youtube-nocookie.com/embed/${watchMatch[1]}`;
@@ -342,20 +604,10 @@ const CoursePlayer = () => {
                             )}
                         </div>
                     </div>
+                )}
 
                     <div className="flex flex-col lg:flex-row gap-8">
-                        {/* Control Panel & Exercise */}
                         <div className="flex-1 space-y-8">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <ModernButton onClick={handleVideoEnd} className="flex-1 !py-4 shadow-xl shadow-primary/20">
-                                    Mark as Completed
-                                </ModernButton>
-                                <ModernButton variant="secondary" className="px-6 py-4 sm:py-2 border-white/10 flex items-center justify-center">
-                                    <FileText size={20} className="text-slate-500 mr-2 sm:mr-0" />
-                                    <span className="sm:hidden font-bold text-sm text-slate-500">Resources</span>
-                                </ModernButton>
-                            </div>
-
                             {showExercise && currentExercise && (
                                 <GlassCard className="animate-in slide-in-from-bottom-6 duration-700 bg-black/40 shadow-xl border-emerald-500/20">
                                     <div className="flex items-center space-x-3 mb-6">
@@ -394,17 +646,62 @@ const CoursePlayer = () => {
                                 </GlassCard>
                             )}
 
-                            {/* Comments/Q&A Mockup */}
+                            {/* Discussion Hub Implementation */}
                             <div className="space-y-4">
                                 <h4 className="text-lg font-bold text-white font-poppins flex items-center">
                                     <MessageSquare size={18} className="mr-2 text-primary" /> Discussion Hub
                                 </h4>
+                                
                                 <GlassCard className="!p-4 bg-white/5 border-white/10">
-                                    <div className="flex items-center space-x-3 text-white/40 italic font-inter text-sm">
-                                        <div className="w-8 h-8 rounded-full bg-white/10"></div>
-                                        <span>Write your thought or question here...</span>
-                                    </div>
+                                    <form onSubmit={handleCommentSubmit} className="relative">
+                                        <textarea
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            placeholder="Write your thought or question here..."
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 text-sm focus:outline-none focus:border-primary/50 transition-all resize-none h-24"
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault();
+                                                    handleCommentSubmit(e);
+                                                }
+                                            }}
+                                        />
+                                        <button 
+                                            type="submit"
+                                            disabled={!newComment.trim() || isSubmittingComment}
+                                            className="absolute bottom-3 right-3 p-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <Send size={16} />
+                                        </button>
+                                    </form>
                                 </GlassCard>
+
+                                <div className="space-y-4 pt-2">
+                                    {discussions.length === 0 ? (
+                                        <p className="text-center text-white/30 text-sm py-4 italic">No discussions yet. Be the first to ask a question!</p>
+                                    ) : (
+                                        discussions.map((msg) => (
+                                            <div key={msg._id} className="flex space-x-3 group">
+                                                <div className="w-10 h-10 rounded-xl bg-white/10 flex-shrink-0 flex items-center justify-center text-white font-bold">
+                                                    {msg.user_profile_image ? (
+                                                        <img src={msg.user_profile_image} alt="" className="w-full h-full object-cover rounded-xl" />
+                                                    ) : (
+                                                        msg.user_name[0]
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 space-y-1">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm font-bold text-white">{msg.user_name}</span>
+                                                        <span className="text-[10px] text-white/40">{new Date(msg.created_at).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <p className="text-sm text-white/70 leading-relaxed bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/5">
+                                                        {msg.content}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -438,22 +735,42 @@ const CoursePlayer = () => {
                                 <div className="p-4 bg-white/5 border-b border-white/10">
                                     <p className="text-xs font-bold text-white/50 uppercase tracking-widest">Resources</p>
                                 </div>
-                                <div className="p-2">
-                                    <button className="w-full flex items-center p-3 text-sm font-bold text-[#B8C0FF] hover:bg-white/5 transition-colors rounded-lg group">
-                                        <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                                            <FileText size={16} />
-                                        </div>
-                                        Course_Notes_A1.pdf
-                                    </button>
-                                    <button className="w-full flex items-center p-3 text-sm font-bold text-white/70 hover:bg-white/5 transition-colors rounded-lg group">
-                                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                                            <FileText size={16} />
-                                        </div>
-                                        Resource_Manifesto.csv
-                                    </button>
+                                <div className="p-2 space-y-1">
+                                    {/* Lessons that are documents */}
+                                    {course.modules.flatMap(m => m.videos).filter(v => v.videoType === 'document').map(doc => (
+                                        <button 
+                                            key={doc._id}
+                                            onClick={() => window.open(doc.url, '_blank')}
+                                            className="w-full flex items-center p-3 text-[11px] font-bold text-[#B8C0FF] hover:bg-white/5 transition-all rounded-lg group"
+                                        >
+                                            <div className="w-7 h-7 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                                <FileText size={14} />
+                                            </div>
+                                            <span className="truncate">{doc.title}</span>
+                                        </button>
+                                    ))}
+
+                                    {/* Specific attachments for current video */}
+                                    {currentVideo.attachments?.map((file) => (
+                                        <button 
+                                            key={file._id}
+                                            onClick={() => window.open(file.url, '_blank')}
+                                            className="w-full flex items-center p-3 text-[11px] font-bold text-white/70 hover:bg-white/5 transition-all rounded-lg group"
+                                        >
+                                            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
+                                                <Download size={14} />
+                                            </div>
+                                            <span className="truncate">{file.name}</span>
+                                        </button>
+                                    ))}
+
+                                    {(!currentVideo.attachments?.length && !course.modules.some(m => m.videos.some(v => v.videoType === 'document'))) && (
+                                        <p className="text-center text-[10px] text-white/30 py-4 italic">No generic resources yet.</p>
+                                    )}
                                 </div>
                             </GlassCard>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>

@@ -131,10 +131,10 @@ const CapabilitiesSection = () => {
                         <motion.div
                             style={{
                                 scaleY,
-                                originY: 0
+                                originY: 0,
+                                willChange: 'transform'
                             }}
                             className="absolute inset-0 z-10 rounded-full overflow-hidden"
-                            willChange="transform"
                         >
                             <div className="absolute inset-0 bg-gradient-to-b from-[#6D28FF] via-[#C026FF] to-[#6D28FF]" />
                             {/* Static Glow instead of heavy Blur */}
@@ -145,10 +145,10 @@ const CapabilitiesSection = () => {
                         <motion.div
                             style={{
                                 top: sparkleTop,
-                                opacity: sparkleOpacity
+                                opacity: sparkleOpacity,
+                                willChange: 'top, opacity'
                             }}
                             className="absolute left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-white rounded-full z-20 shadow-[0_0_15px_#C026FF]"
-                            willChange="top, opacity"
                         />
                     </div>
 

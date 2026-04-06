@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ZoomMeeting from '../../components/ZoomMeeting';
-import ZoomRecordingPlayer from '../../components/ZoomRecordingPlayer';
+import JitsiMeeting from '../../components/JitsiMeeting';
+import MeetingRecordingPlayer from '../../components/MeetingRecordingPlayer';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
-import { ArrowLeft, Users, Clock, Calendar, Video } from 'lucide-react';
+import { ArrowLeft, Users, Clock, Calendar, Video, PenLine } from 'lucide-react';
+import Whiteboard from '../../components/Whiteboard';
+import { useSocket } from '../../context/SocketContext';
 
 /**
  * SessionDetail Page
- * Displays session information and embeds Zoom meeting for live sessions
+ * Displays session information and embeds Jitsi meeting for live sessions
  */
 
 const parseSafeDate = (dateish) => {
@@ -35,6 +37,16 @@ const SessionDetail = () => {
   const [error, setError] = useState(null);
   const [isHost, setIsHost] = useState(false);
   const [inMeeting, setInMeeting] = useState(false);
+  const [whiteboardOpen, setWhiteboardOpen] = useState(false);
+  const [studentCanDraw, setStudentCanDraw] = useState(true);
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+    const onPermission = ({ canStudentsDraw }) => setStudentCanDraw(canStudentsDraw !== false);
+    socket.on('whiteboard:permission', onPermission);
+    return () => socket.off('whiteboard:permission', onPermission);
+  }, [socket]);
 
   useEffect(() => {
     fetchSessionDetails();
@@ -167,17 +179,56 @@ const SessionDetail = () => {
     return null;
   }
 
-  // If in meeting, show full-screen Zoom component
+  // If in meeting, show full-screen Jitsi component
   if (inMeeting) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black overflow-visible">
-        <ZoomMeeting
-          key={sessionId}
-          sessionId={sessionId}
-          isHost={isHost}
-          onLeave={handleLeaveMeeting}
-          onError={handleMeetingError}
-        />
+      <div
+        className="fixed inset-0 z-[100] bg-black flex flex-col"
+        style={{ overflow: 'visible' }}
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 bg-[#1a1a1a] border-b border-white/10 px-6 py-3 z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-base font-bold text-white leading-tight">{session.topic}</h1>
+              <p className="text-white/40 text-xs mt-0.5">
+                {isHost ? 'Host' : 'Student'} &bull; {session.status}
+                {session.instructor?.name ? ` \u2022 ${session.instructor.name}` : ''}
+              </p>
+            </div>
+            
+          </div>
+        </div>
+
+        {/* Jitsi container — fills all remaining height after header */}
+        <div
+          style={{
+            flex: '1 1 0',
+            position: 'relative',
+            minHeight: 0,
+            height: 0,       /* flex-1 needs height:0 to actually shrink/grow */
+            width: '100%',
+            overflow: 'visible',
+          }}
+        >
+          <JitsiMeeting
+            key={sessionId}
+            sessionId={sessionId}
+            isHost={isHost}
+            onLeave={handleLeaveMeeting}
+            onError={handleMeetingError}
+          />
+        </div>
+
+        {/* Whiteboard Overlay */}
+        {whiteboardOpen && (
+          <Whiteboard
+            sessionId={sessionId}
+            isHost={isHost}
+            canDraw={isHost || studentCanDraw}
+            onClose={() => setWhiteboardOpen(false)}
+          />
+        )}
       </div>
     );
   }
@@ -346,7 +397,7 @@ const SessionDetail = () => {
                <div className="h-px flex-1 bg-white/5"></div>
             </h2>
             <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/5">
-              <ZoomRecordingPlayer
+              <MeetingRecordingPlayer
                 sessionId={sessionId}
                 onError={handleMeetingError}
               />

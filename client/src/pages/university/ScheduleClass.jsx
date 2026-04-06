@@ -155,7 +155,7 @@ const ScheduleClass = () => {
                                         value={formData.meetingLink}
                                         onChange={handleChange}
                                         className={`${inputClasses} pl-12`}
-                                        placeholder="https://zoom.us/j/..."
+                                        placeholder="https://meet.skilldad.com/your-room"
                                     />
                                 </div>
                             </div>

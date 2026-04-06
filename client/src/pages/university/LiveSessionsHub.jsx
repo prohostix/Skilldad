@@ -213,7 +213,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
             status: 'scheduled',
             instructor: { name: 'You' },
             enrolledStudents: [],
-            zoom: { meetingId: 'temp_' + Date.now(), joinUrl: form.meetingLink },
+            meetingData: { roomName: 'temp_' + Date.now(), joinUrl: form.meetingLink },
         };
 
         onScheduled(localSession);           // add to list immediately
@@ -388,7 +388,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
 
                         {/* Meeting Link */}
                         <div>
-                            <label className={labelCls}>Meeting Link (Optional - Zoom created automatically)</label>
+                            <label className={labelCls}>Direct Meeting Link (Optional)</label>
                             <div className="relative group">
                                 <Link size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
                                 <input
@@ -397,7 +397,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                                     value={form.meetingLink}
                                     onChange={handleChange}
                                     className={`${inputCls} pl-10`}
-                                    placeholder="https://zoom.us/j/..."
+                                    placeholder="https://meet.skilldad.com/..."
                                 />
                             </div>
                         </div>
@@ -551,18 +551,29 @@ const LiveSessionsHub = () => {
         }
     };
 
-    const handleEnterStudio = async (sessionId) => {
-        if (sessionId.startsWith('demo')) {
-            showToast('Studio is not available for demo sessions.', 'info');
-            return;
-        }
-        // Navigate to the session detail page with embedded Zoom
+    const handleEnterStudio = (sessionId) => {
+        // Navigate to the session detail page with embedded Jitsi
         navigate(`/university/session/${sessionId}`);
     };
 
     const handleJoinMeeting = (link) => {
         if (!link) { showToast('No meeting link available.', 'info'); return; }
         window.open(link, '_blank');
+    };
+
+    const handleEndSession = async (sessionId) => {
+        if (!window.confirm('Are you sure you want to end this live session for everyone?')) return;
+        
+        try {
+            const config = getAuthConfig();
+            await axios.put(`/api/sessions/${sessionId}/end`, {}, config);
+            showToast('Session ended successfully. Recording will be processed.', 'success');
+            // Update local state immediately
+            setLiveSessions(prev => prev.map(s => s.id === sessionId ? { ...s, status: 'ended' } : s));
+            setTimeout(() => fetchSessions(), 2000);
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to end session', 'error');
+        }
     };
 
     /* ── Partition sessions ── */
@@ -713,6 +724,15 @@ const LiveSessionsHub = () => {
                                                         >
                                                             {session.status === 'live' ? 'Studio' : (session.meetingLink ? 'Join' : 'Prepare')}
                                                         </ModernButton>
+                                                        
+                                                        {session.status === 'live' && (
+                                                            <button 
+                                                                onClick={() => handleEndSession(session.id)}
+                                                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 text-[11px] font-bold transition-all"
+                                                            >
+                                                                End
+                                                            </button>
+                                                        )}
                                                         <button className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/30 hover:text-white hover:bg-white/10 transition-all">
                                                             <MoreVertical size={18} />
                                                         </button>

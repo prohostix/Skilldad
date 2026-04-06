@@ -17,6 +17,7 @@ import {
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
+import { getMediaUrl } from '../utils/media';
 
 const Platform = () => {
     const navigate = useNavigate();
@@ -121,7 +122,7 @@ const Platform = () => {
             programs: u.courseCount > 0 ? `${u.courseCount}+` : '10+',
             established: u.profile?.foundedYear || u.profile?.established || '2020',
             rating: 4.8,
-            image: u.profileImage || `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`,
+            image: u.profileImage ? getMediaUrl(u.profileImage) : `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`,
             specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
             description: u.bio || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
         }))

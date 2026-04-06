@@ -1,5 +1,6 @@
 const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
+const { registerWhiteboardHandlers } = require('../whiteboard/whiteboardHandlers');
 
 class SocketService {
     constructor() {
@@ -88,6 +89,9 @@ class SocketService {
             socket.on('error', (error) => {
                 console.error(`[Socket] Error for user ${socket.userId}:`, error);
             });
+
+            // Register whiteboard handlers
+            registerWhiteboardHandlers(socket, this.io);
         });
 
         console.log('[Socket.IO] Socket.IO server initialized');

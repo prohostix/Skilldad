@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ZoomMeeting from '../components/ZoomMeeting';
+import JitsiMeeting from '../components/JitsiMeeting';
 import axios from 'axios';
+import { useSocket } from '../context/SocketContext';
 
 const HostRoom = () => {
     const { id } = useParams();
@@ -9,6 +10,8 @@ const HostRoom = () => {
     const [session, setSession] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { socket } = useSocket();
+
 
     useEffect(() => {
         const fetchSession = async () => {
@@ -82,30 +85,34 @@ const HostRoom = () => {
 
     return (
         <div className="fixed inset-0 bg-black flex flex-col">
-            {/* Header Bar */}
-            <div className="flex-shrink-0 bg-black/90 border-b border-white/10 px-6 py-3">
+            {/* Main header */}
+            <div className="flex-shrink-0 bg-[#1a1a1a] border-b border-white/10 px-6 py-3 z-10">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-lg font-bold text-white">{session.topic}</h1>
-                        <p className="text-white/40 text-xs">Host Room • {session.status}</p>
+                        <h1 className="text-base font-bold text-white leading-tight">{session.topic}</h1>
+                        <p className="text-white/40 text-xs mt-0.5">
+                            {session.status || 'Live Session'}
+                        </p>
                     </div>
-                    <button
-                        onClick={() => navigate('/dashboard')}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm transition-colors"
-                    >
-                        Exit
-                    </button>
+                    <div className="flex items-center space-x-4">
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            className="px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm transition-colors"
+                        >
+                            End / Exit
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* Zoom Meeting - Full Height */}
-            <div className="flex-1 overflow-hidden">
-                <ZoomMeeting
+            {/* Jitsi — fills remaining height */}
+            <div className="flex-1 relative min-h-0">
+                <JitsiMeeting
                     sessionId={id}
                     isHost={true}
                     onLeave={() => navigate('/dashboard')}
                     onError={(error) => {
-                        console.error('Zoom meeting error:', error);
+                        console.error('Jitsi meeting error:', error);
                         setError(error);
                     }}
                 />

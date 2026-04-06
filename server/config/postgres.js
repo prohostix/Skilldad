@@ -21,6 +21,11 @@ const connectPostgres = async () => {
             },
         });
 
+        // Handle pool errors to prevent app crashes on idle timing
+        pool.on('error', (err) => {
+            console.error('Unexpected database error on idle client:', err.message);
+        });
+
         // Test the connection
         const client = await pool.connect();
         console.log(`PostgreSQL Connected: ${process.env.PGHOST}`.cyan.underline);
@@ -36,6 +41,9 @@ const connectPostgres = async () => {
 const getPool = () => pool;
 
 const query = async (text, params) => {
+    if (!pool) {
+        throw new Error('PostgreSQL pool not initialized. Please wait for connection or check configuration.');
+    }
     const start = Date.now();
     const res = await pool.query(text, params);
     const duration = Date.now() - start;

@@ -32,19 +32,22 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    // Robust check for both common extensions and mimetypes
-    const allowedExts = /jpeg|jpg|png|pdf|doc|docx|zip|rar|txt/;
-    const allowedMimeKeywords = /jpeg|jpg|png|pdf|word|office|zip|octet-stream|text/;
+    // Robust check for common extensions and mimetypes
+    const allowedExts = /jpeg|jpg|png|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt|webp|mp4|webm|mov|ogg/;
+    const allowedMimeKeywords = /jpeg|jpg|png|pdf|word|office|excel|sheet|powerpoint|presentation|zip|octet-stream|text|webp|video/;
 
     const extName = allowedExts.test(path.extname(file.originalname).toLowerCase());
-    const mimeType = allowedMimeKeywords.test(file.mimetype.toLowerCase()) || file.mimetype.startsWith('application/');
+    const mimeType = allowedMimeKeywords.test(file.mimetype.toLowerCase()) || 
+                   file.mimetype.startsWith('image/') || 
+                   file.mimetype.startsWith('application/') ||
+                   file.mimetype.startsWith('video/');
 
-    if (extName) {
-        // If extension is allowed, we're generally safe, but verify mimetype isn't something totally alien
+    // If either the extension or a safe mimetype is present, allow it
+    if (extName || mimeType) {
         return cb(null, true);
     } else {
-        console.warn(`[Multer] Rejecting file: ${file.originalname} (${file.mimetype})`);
-        cb(new Error('File type not supported. Use PDF, DOC, DOCX, JPG, PNG, ZIP, RAR, or TXT.'));
+        console.error(`[Multer] Rejecting file! Filename: ${file.originalname}, Mimetype: ${file.mimetype}`);
+        cb(new Error(`File type not supported. Current: ${file.mimetype}`));
     }
 };
 
@@ -183,7 +186,7 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
 
         const fileName = req.file.originalname;
         const fileUrl = `uploads/documents/${req.file.filename}`;
-        const fileSize = req.file.size.toString();
+        const fileSize = req.file.size;
         const format = path.extname(fileName).substring(1).toUpperCase();
         const newId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
@@ -192,7 +195,7 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
                 id, title, description, type, format, file_name, file_url, file_size, 
                 status, uploaded_by_id, student_id, course_id, university_id, created_at, updated_at
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
-            RETURNING *, id as _id
+            RETURNING *, id as _id, file_url as "fileUrl"
         `, [
             newId,
             title || fileName,
@@ -212,8 +215,12 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
 
         res.status(201).json(insertResult.rows[0]);
     } catch (error) {
-        console.error('[Document Upload] Error:', error);
-        res.status(500).json({ message: error.message });
+        console.error('[Document Upload] CRITICAL ERROR:', error);
+        res.status(500).json({ 
+            message: 'Server error during document upload',
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 

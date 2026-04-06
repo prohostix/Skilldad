@@ -162,6 +162,18 @@ const CourseManager = () => {
         }
     };
 
+    const handleStatusUpdate = async (id, status, isPublished) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            await axios.put(`/api/courses/${id}/approve`, { status, isPublished }, config);
+            showToast(`Course ${status} successfully!`, 'success');
+            fetchCourses();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Error updating status', 'error');
+        }
+    };
+
     const filteredCourses = courses.filter(course =>
         course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         course.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,6 +218,7 @@ const CourseManager = () => {
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Price</th>
                                 <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4">Approval</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -259,6 +272,31 @@ const CourseManager = () => {
                                                 {course.isPublished ? 'Published' : 'Draft'}
                                             </span>
                                         </div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {course.status === 'pending' ? (
+                                            <div className="flex items-center space-x-2">
+                                                <button
+                                                    onClick={() => handleStatusUpdate(course._id, 'approved', true)}
+                                                    className="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-[10px] font-bold uppercase hover:bg-emerald-500 hover:text-white transition-all shadow-lg shadow-emerald-500/10 active:scale-95"
+                                                >
+                                                    Approve
+                                                </button>
+                                                <button
+                                                    onClick={() => handleStatusUpdate(course._id, 'rejected', false)}
+                                                    className="px-2 py-1 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded text-[10px] font-bold uppercase hover:bg-rose-500 hover:text-white transition-all shadow-lg shadow-rose-500/10 active:scale-95"
+                                                >
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center space-x-1.5">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${course.status === 'approved' ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+                                                <span className={`text-[10px] font-black uppercase tracking-widest ${course.status === 'approved' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                    {course.status || 'Approved'}
+                                                </span>
+                                            </div>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">

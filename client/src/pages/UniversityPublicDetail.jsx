@@ -23,6 +23,7 @@ import CourseCard from '../components/CourseCard';
 import ModernButton from '../components/ui/ModernButton';
 import { toast } from 'react-hot-toast';
 import GlassCard from '../components/ui/GlassCard';
+import { getMediaUrl } from '../utils/media';
 
 // Fallback data in case page is refreshed and state is lost
 const fallbackUniversities = [
@@ -201,7 +202,7 @@ const UniversityPublicDetail = () => {
                         initial={{ scale: 1.1, opacity: 0 }}
                         animate={{ scale: 1, opacity: 0.6 }}
                         transition={{ duration: 2 }}
-                        src={university.profile?.coverImage || 'https://images.unsplash.com/photo-1541339907198-e08756ebafe1?auto=format&fit=crop&q=80&w=2000'}
+                        src={university.profile?.coverImage ? getMediaUrl(university.profile.coverImage) : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe1?auto=format&fit=crop&q=80&w=2000'}
                         alt="University Cover"
                         className="w-full h-full object-cover grayscale-[20%]"
                     />
@@ -221,7 +222,7 @@ const UniversityPublicDetail = () => {
                             >
                                 <div className="aspect-square rounded-[36px] sm:rounded-[48px] overflow-hidden border border-white/20">
                                     <img
-                                        src={university.profileImage || university.profile?.profileImage || 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&q=80&w=400'}
+                                        src={(university.profileImage || university.profile?.profileImage) ? getMediaUrl(university.profileImage || university.profile?.profileImage) : 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&q=80&w=400'}
                                         alt={university.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
                                         onError={(e) => {

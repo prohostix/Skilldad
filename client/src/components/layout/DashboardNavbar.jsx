@@ -4,6 +4,7 @@ import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, Check
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
 import { useSocket } from '../../context/SocketContext';
+import { getMediaUrl } from '../../utils/media';
 
 const Navbar = ({ onToggleSidebar }) => {
     const navigate = useNavigate();
@@ -179,7 +180,7 @@ const Navbar = ({ onToggleSidebar }) => {
                         {userInfo.profileImage ? (
                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-900 overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all shadow-lg shrink-0">
                                 <img
-                                    src={`${userInfo.profileImage}`}
+                                    src={getMediaUrl(userInfo.profileImage)}
                                     alt="Profile"
                                     className="w-full h-full object-cover"
                                     onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-500"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>'; }}

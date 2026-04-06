@@ -9,7 +9,9 @@ import {
     ChevronRight,
     Loader2,
     Shield,
-    Home
+    Home,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
@@ -25,6 +27,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isFocused, setIsFocused] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from;
@@ -87,7 +90,7 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-black flex items-center justify-center p-4 pt-16 pb-8 relative overflow-hidden">
             <Navbar compact />
 
 
@@ -111,8 +114,8 @@ const Login = () => {
                 transition={{ duration: 0.6 }}
                 className="w-full max-w-md relative z-10"
             >
-                <div className="text-center mb-6 md:mb-8">
-                    <h1 className="text-lg md:text-xl font-black text-primary uppercase tracking-[0.4em] font-inter">Sync Terminal</h1>
+                <div className="text-center mb-3 md:mb-4">
+                    <h1 className="text-sm md:text-base font-black text-primary uppercase tracking-[0.4em] font-inter">Sync Terminal</h1>
                 </div>
 
                 <GlassCard className="!p-5 md:!p-7 shadow-glow-purple border-white/20">
@@ -158,7 +161,7 @@ const Login = () => {
                                     <Lock size={16} />
                                 </div>
                                 <input
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     name="password"
                                     required
                                     placeholder="••••••••••••"
@@ -166,8 +169,15 @@ const Login = () => {
                                     onBlur={() => setIsFocused('')}
                                     onChange={handleChange}
                                     value={formData.password}
-                                    className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-inter text-text-primary placeholder:text-text-muted text-sm font-medium backdrop-blur-sm"
+                                    className="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-inter text-text-primary placeholder:text-text-muted text-sm font-medium backdrop-blur-sm"
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute inset-y-0 right-4 flex items-center text-text-muted hover:text-primary transition-colors focus:outline-none"
+                                >
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
                             </div>
                         </div>
 

@@ -22,7 +22,7 @@ const DashboardLayout = () => {
     const backgroundClass = 'bg-[#04020a]';
 
     return (
-        <div className={`min-h-screen ${backgroundClass} flex flex-col relative overflow-hidden`}>
+        <div className={`min-h-screen ${backgroundClass} flex flex-col relative ${location.pathname.includes('/session/') ? 'overflow-visible' : 'overflow-hidden'}`}>
 
             <div className="flex flex-1 relative overflow-visible z-10">
                 <ModernSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
@@ -36,8 +36,8 @@ const DashboardLayout = () => {
                 </div>
             </div>
 
-            <Footer />
-            <BottomNav />
+            {!location.pathname.includes('/session/') && <Footer />}
+            {!location.pathname.includes('/session/') && <BottomNav />}
             <FloatingHelpWidget />
         </div>
     );

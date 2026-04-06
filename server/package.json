@@ -15,7 +15,6 @@
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
     "@socket.io/redis-adapter": "^8.3.0",
-    "@zoom/meetingsdk": "^5.1.2",
     "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
     "colors": "^1.4.0",
@@ -30,7 +29,6 @@
     "express-validator": "^7.3.1",
     "isomorphic-dompurify": "^3.0.0",
     "jsonwebtoken": "^9.0.3",
-    "jsrsasign": "^11.1.1",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^8.0.1",
@@ -39,12 +37,14 @@
     "rate-limit-redis": "^4.3.1",
     "razorpay": "^2.9.6",
     "redis": "^5.11.0",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
     "babel-jest": "^30.2.0",
+    "fast-check": "^4.6.0",
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
     "supertest": "^7.0.0"

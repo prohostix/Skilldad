@@ -484,10 +484,9 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
                         </div>
                     </label>
 
-                    {/* Zoom Meeting Info */}
                     <div className="px-4 py-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-300 flex items-center gap-2">
                         <Radio size={12} className="shrink-0" />
-                        A Zoom meeting will be auto-provisioned. Join link available after scheduling.
+                        A secure Jitsi meeting will be auto-provisioned. Join link available after scheduling.
                     </div>
 
                     <div className="flex gap-3 pt-1">
@@ -591,7 +590,7 @@ const SessionCard = ({
                             </div>
                         )}
 
-                        {/* RTMP key for live sessions - DEPRECATED: Zoom handles this now */}
+                        {/* Recording status */}
                     </div>
                 </div>
 
@@ -633,8 +632,8 @@ const SessionCard = ({
                         </button>
                     )}
 
-                    {/* Join as Host - Embedded Zoom */}
-                    {(session.status === 'scheduled' || session.status === 'live') && (session.zoom?.meetingId || session.zoom?.meeting_id) && (
+                    {/* Join as Host - Embedded Jitsi */}
+                    {(session.status === 'scheduled' || session.status === 'live') && session.meetingData?.roomName && (
                         <button
                             onClick={() => onJoinHost(session._id)}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold hover:bg-emerald-500/20 transition-colors"
@@ -644,8 +643,8 @@ const SessionCard = ({
                         </button>
                     )}
 
-                    {/* Join as Student - Embedded Zoom */}
-                    {(session.status === 'scheduled' || session.status === 'live') && (session.zoom?.meetingId || session.zoom?.meeting_id) && (
+                    {/* Join as Student - Embedded Jitsi */}
+                    {(session.status === 'scheduled' || session.status === 'live') && session.meetingData?.roomName && (
                         <button
                             onClick={() => onJoinStudent(session._id)}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold hover:bg-blue-500/20 transition-colors"
@@ -710,7 +709,7 @@ const DEMO_SESSIONS = [
         description: 'A masterclass on scaling distributed systems using modern orchestration tools.',
         instructor: { name: 'Dr. Elizabeth Thorne' },
         enrolledStudents: [],
-        zoom: { meetingId: 'demo_meeting_1', joinUrl: 'https://zoom.us/j/demo1' },
+        zoom: { roomName: 'demo_meeting_1', joinUrl: 'https://meet.skilldad.com/demo1' },
     },
     {
         _id: 'demo2',
@@ -722,7 +721,7 @@ const DEMO_SESSIONS = [
         description: 'Exploring gestalt principles and cognitive load in modern SaaS design.',
         instructor: { name: 'Marcus Sterling' },
         enrolledStudents: [],
-        zoom: { meetingId: 'demo_meeting_2', joinUrl: 'https://zoom.us/j/demo2' },
+        zoom: { roomName: 'demo_meeting_2', joinUrl: 'https://meet.skilldad.com/demo2' },
     },
     {
         _id: 'demo3',
@@ -734,7 +733,7 @@ const DEMO_SESSIONS = [
         description: 'Hands-on workshop on zero-trust security and identity-aware proxies.',
         instructor: { name: 'Sarah Connor' },
         enrolledStudents: [],
-        zoom: { meetingId: 'demo_meeting_3', joinUrl: 'https://zoom.us/j/demo3' },
+        zoom: { roomName: 'demo_meeting_3', joinUrl: 'https://meet.skilldad.com/demo3' },
     },
     {
         _id: 'demo4',
@@ -746,7 +745,7 @@ const DEMO_SESSIONS = [
         description: 'Statistical methods used in derivatives pricing.',
         instructor: { name: 'Prof. David Ramsey' },
         enrolledStudents: [],
-        zoom: { meetingId: 'demo_meeting_4', joinUrl: 'https://zoom.us/j/demo4' },
+        zoom: { roomName: 'demo_meeting_4', joinUrl: 'https://meet.skilldad.com/demo4' },
     },
 ];
 
@@ -905,7 +904,7 @@ const LiveSessionsTab = ({ students }) => {
         showToast(
             notified
                 ? '✅ Session scheduled & students notified via in-app + email!'
-                : '✅ Session scheduled! Zoom meeting created.',
+                : '✅ Session scheduled! Jitsi meeting created.',
             'success'
         );
         // Re-fetch after 2s to sync background auto-enroll
@@ -945,7 +944,7 @@ const LiveSessionsTab = ({ students }) => {
                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                         <Radio size={22} className="text-red-400" /> Live Streaming Hub
                     </h2>
-                    <p className="text-white/40 text-sm mt-1">Zoom powered · JWT-secured access · Real-time status</p>
+                    <p className="text-white/40 text-sm mt-1">Jitsi powered · JWT-secured access · Real-time status</p>
                 </div>
                 <div className="flex gap-3">
                     <button onClick={fetchSessions} className="p-2.5 rounded-lg bg-white/5 border border-white/10 text-white/40 hover:text-white transition-colors">
@@ -979,8 +978,8 @@ const LiveSessionsTab = ({ students }) => {
                 <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-white/50">
                     {[
                         { icon: Activity, label: 'Horizontal Scaling', desc: 'Redis cross-process rate limiting' },
-                        { icon: Radio, label: 'Zoom Integration', desc: 'Native meeting SDK · Cloud recordings' },
-                        { icon: Film, label: 'Auto Recording', desc: 'Zoom cloud recordings' },
+                        { icon: Radio, label: 'Jitsi Integration', desc: 'Secure meeting SDK · Room encryption' },
+                        { icon: Film, label: 'Room Cleanup', desc: 'Auto-detect session end' },
                         { icon: Bell, label: 'Smart Notifications', desc: 'Redis-deduped, per-student' },
                         { icon: BarChart3, label: 'Signed URLs', desc: 'JWT signatures · 2h TTL' },
                     ].map(({ icon: Icon, label, desc }) => (

@@ -13,10 +13,22 @@ const CommissionWallet = () => {
     // Form state
     const [studentCount, setStudentCount] = useState('');
     const [feePerStudent, setFeePerStudent] = useState('');
-    const [commissionRate] = useState(15); // e.g. 15% rate
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
     const config = { headers: { Authorization: `Bearer ${userInfo?.token}` } };
+    
+    const [commissionRate, setCommissionRate] = useState(userInfo?.discountRate || 15);
+
+    const fetchCommissionRate = async () => {
+        try {
+            const { data } = await axios.get('/api/users/me', config);
+            if (data.discountRate !== undefined) {
+                setCommissionRate(data.discountRate);
+            }
+        } catch (error) {
+            console.error('Error fetching commission rate:', error);
+        }
+    };
 
     const fetchPayouts = async () => {
         try {
@@ -33,6 +45,7 @@ const CommissionWallet = () => {
     useEffect(() => {
         if (userInfo) {
             fetchPayouts();
+            fetchCommissionRate();
         }
     }, []);
 
@@ -63,11 +76,11 @@ const CommissionWallet = () => {
 
     const pendingTotal = payouts
         .filter(p => p.status === 'pending')
-        .reduce((sum, p) => sum + p.amount, 0);
+        .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     const approvedTotal = payouts
         .filter(p => p.status === 'approved')
-        .reduce((sum, p) => sum + p.amount, 0);
+        .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20 max-w-7xl mx-auto">
@@ -202,16 +215,16 @@ const CommissionWallet = () => {
                                     </td>
                                 </tr>
                             ) : payouts.map((payout) => (
-                                <tr key={payout._id} className="hover:bg-white/5 transition-colors">
+                                <tr key={payout.id || payout._id} className="hover:bg-white/5 transition-colors">
                                     <td className="px-6 py-4 text-sm text-gray-400 hidden md:table-cell">
-                                        {new Date(payout.createdAt).toLocaleDateString()}
+                                        {new Date(payout.created_at || payout.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4">
                                         <p className="text-sm font-bold text-emerald-400 whitespace-nowrap">
-                                            ₹{payout.amount.toLocaleString()}
+                                            ₹{Number(payout.amount).toLocaleString()}
                                         </p>
                                         <p className="text-xs text-gray-500 md:hidden mt-0.5">
-                                            {new Date(payout.createdAt).toLocaleDateString()}
+                                            {new Date(payout.created_at || payout.createdAt).toLocaleDateString()}
                                         </p>
                                     </td>
                                     <td className="px-6 py-4 text-sm text-gray-300 hidden sm:table-cell">

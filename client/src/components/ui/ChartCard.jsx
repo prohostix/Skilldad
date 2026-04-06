@@ -128,7 +128,7 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
                 {subtitle && <p className="text-[10px] sm:text-xs text-text-muted mt-0.5 sm:mt-1 font-inter">{subtitle}</p>}
             </div>
             <div className="h-[220px] sm:h-[300px] w-full relative min-h-[220px]">
-                <ResponsiveContainer width="100%" height="100%" minHeight={220} aspect={window.innerWidth < 640 ? 1.2 : undefined}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} aspect={window.innerWidth < 640 ? 1.2 : undefined} debounce={200}>
                     {renderChart()}
                 </ResponsiveContainer>
             </div>

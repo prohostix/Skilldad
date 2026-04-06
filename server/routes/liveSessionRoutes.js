@@ -14,7 +14,7 @@ const {
     getRecordingStatus,
     getRecordingPlaybackUrl,
     getCourseLiveSessions,
-    getZoomSDKConfig,
+    getJitsiSDKConfig,
 } = require('../controllers/liveSessionController');
 
 const { protect, authorize } = require('../middleware/authMiddleware');
@@ -136,12 +136,12 @@ router.get(
     getRecordingPlaybackUrl
 );
 
-/* ── Zoom SDK configuration ────────────────────────────────── */
+/* ── Jitsi SDK configuration ────────────────────────────────── */
 router.get(
-    '/:id/zoom-config',
+    '/:id/jitsi-config',
     protect,
     authorize('university', 'admin', 'student'),
-    getZoomSDKConfig
+    getJitsiSDKConfig
 );
 
 /* ── Track session join (metrics) ──────────────────────────── */

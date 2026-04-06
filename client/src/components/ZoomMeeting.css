@@ -1,64 +1,1456 @@
-/* Zoom Meeting Container - Studio Mode */
+/* =============================================================
+   ZoomMeeting.css
+   Covers:
+     A) Real Zoom Embedded SDK container overrides
+     B) MockZoomMeeting custom UI classes
+     C) Loading / Error / Confirm UI
+     D) Responsive breakpoints
+   ============================================================= */
+
+/* ─────────────────────────────────────────────────────────────
+   A. ZOOM SDK WRAPPER & CONTAINER
+   ───────────────────────────────────────────────────────────── */
+
+/* Outer wrapper — fills parent */
+.zoom-sdk-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #1c1c1c;
+  /* overflow visible — SDK poppers (chat, emoji, settings) must not be clipped */
+  overflow: visible;
+}
+
+/* SDK mount point */
 .zoom-meeting-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: visible !important;
-  z-index: 10;
-  background: #000;
-  box-shadow: inset 0 0 100px rgba(79, 70, 229, 0.1);
-}
-
-/* Ensure Zoom's root container fills the space and doesn't hide overlays */
-.zoom-meeting-container>div {
-  width: 100%;
-  height: 100%;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #1c1c1c !important;
   overflow: visible !important;
 }
 
-/* Fix for Zoom internal overlays/modals to ensure they appear on top */
+/* SDK-injected root div */
+.zoom-meeting-container > div,
+.zoom-meeting-container #zmmtg-root {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #1c1c1c !important;
+  overflow: visible !important;
+  z-index: 1;
+}
+
+/* Main meeting layout containers */
+.zoom-meeting-container .meeting-app,
+.zoom-meeting-container .meeting-client,
+.zoom-meeting-container #wc-container-left,
+.zoom-meeting-container #wc-container-right {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #1c1c1c !important;
+}
+
+/* Force SDK's inner video wrapper to fill full width */
+.zoom-meeting-container [class*="video-container"],
+.zoom-meeting-container [class*="meeting-app"],
+.zoom-meeting-container [class*="webclient"],
+.zoom-meeting-container > div > div,
+.zoom-meeting-container > div > div > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── MuiPopper (chat, participants, emoji, settings, more) ── */
+/* The SDK renders all panels as MuiPopper floating overlays.  */
+/* They must be visible, on top, and positioned to the right.  */
+
+/* Ensure all poppers are above everything */
+.zoom-MuiPopper-root,
+[class*="MuiPopper-root"] {
+  z-index: 99999 !important;
+}
+
+/* Chat / participants panel — force to right side of screen */
+.zoom-MuiPopper-root[data-popper-placement],
+[class*="MuiPopper-root"][data-popper-placement] {
+  /* Override any left-side transform the SDK sets */
+  left: auto !important;
+  right: 0 !important;
+  transform: none !important;
+}
+
+/* Dark theme for all popper panels */
+.zoom-MuiPopper-root > div,
+[class*="MuiPopper-root"] > div,
+.zoom-MuiPaper-root,
+[class*="MuiPaper-root"] {
+  background: #1e1e1e !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+  color: #fff !important;
+}
+
+/* Text inside poppers */
+.zoom-MuiPopper-root *,
+[class*="MuiPopper-root"] * {
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* Input fields inside poppers */
+.zoom-MuiPopper-root input,
+[class*="MuiPopper-root"] input,
+.zoom-MuiPopper-root textarea,
+[class*="MuiPopper-root"] textarea {
+  background: #2a2a2a !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  border-radius: 6px !important;
+  color: #fff !important;
+  padding: 8px 12px !important;
+}
+.zoom-MuiPopper-root input:focus,
+[class*="MuiPopper-root"] input:focus {
+  border-color: rgba(14,114,237,0.5) !important;
+  outline: none !important;
+}
+
+/* Buttons inside poppers */
+.zoom-MuiPopper-root button,
+[class*="MuiPopper-root"] button {
+  background: transparent !important;
+  border-radius: 6px !important;
+  transition: background 0.15s !important;
+}
+.zoom-MuiPopper-root button:hover,
+[class*="MuiPopper-root"] button:hover {
+  background: rgba(255,255,255,0.08) !important;
+}
+
+/* Video canvas / elements */
+.zoom-meeting-container canvas,
+.zoom-meeting-container video {
+  display: block;
+  background: #1c1c1c;
+}
+
+/* Video tiles */
+.zoom-meeting-container .video-avatar,
+.zoom-meeting-container .video-avatar__video-wrap {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  background: #2d2d2d !important;
+}
+
+/* Active speaker ring */
+.zoom-meeting-container .video-avatar--speaking {
+  outline: 2px solid #0e72ed !important;
+  box-shadow: 0 0 0 3px rgba(14, 114, 237, 0.25) !important;
+}
+
+/* Gallery / video grid background */
+.zoom-meeting-container .gallery-video-container,
+.zoom-meeting-container .video-container {
+  background: #1c1c1c !important;
+}
+
+/* ── SDK toolbar: ALWAYS visible, including during screen share ──
+ * Previously hidden — now restored so audio/video/chat/leave
+ * remain accessible when the host shares their screen.
+ */
+.zoom-meeting-container .footer,
+.zoom-meeting-container .footer__btns-container,
+.zoom-meeting-container #wc-footer,
+.zoom-meeting-container .wc-footer,
+.zoom-meeting-container [class*="wc-footer"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: auto !important;
+  min-height: 64px !important;
+  overflow: visible !important;
+  background: rgba(20, 20, 20, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-top: 1px solid rgba(255,255,255,0.07) !important;
+  z-index: 1000 !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 16px !important;
+  flex-wrap: wrap !important;
+  position: relative !important;
+}
+
+/* Override any SDK inline style that hides the footer during share */
+.zoom-meeting-container .footer[style*="display: none"],
+.zoom-meeting-container .footer[style*="display:none"],
+.zoom-meeting-container .footer[style*="visibility: hidden"],
+.zoom-meeting-container #wc-footer[style*="display: none"],
+.zoom-meeting-container #wc-footer[style*="display:none"],
+.zoom-meeting-container [class*="wc-footer"][style*="display: none"],
+.zoom-meeting-container [class*="wc-footer"][style*="display:none"] {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* Toolbar buttons */
+.zoom-meeting-container .footer button,
+.zoom-meeting-container .footer__btns-container button,
+.zoom-meeting-container #wc-footer button,
+.zoom-meeting-container [class*="wc-footer"] button {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  color: rgba(255,255,255,0.75) !important;
+  background: transparent !important;
+  border-radius: 6px !important;
+  transition: background 0.15s, color 0.15s !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 6px 12px !important;
+  min-width: 56px !important;
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  border: none !important;
+}
+.zoom-meeting-container .footer button:hover,
+.zoom-meeting-container #wc-footer button:hover,
+.zoom-meeting-container [class*="wc-footer"] button:hover {
+  background: rgba(255,255,255,0.09) !important;
+  color: #fff !important;
+}
+.zoom-meeting-container .footer button:active { transform: scale(0.94) !important; }
+
+/* Muted / video-off */
+.zoom-meeting-container button[aria-label*="unmute" i],
+.zoom-meeting-container button[aria-label*="start video" i] { color: #f44 !important; }
+
+/* Leave / End */
+.zoom-meeting-container button[aria-label*="leave" i],
+.zoom-meeting-container button[aria-label*="end" i] {
+  background: #e02020 !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+}
+.zoom-meeting-container button[aria-label*="leave" i]:hover,
+.zoom-meeting-container button[aria-label*="end" i]:hover { background: #c01010 !important; }
+
+/* During screen share: shared content must not cover the toolbar */
+.zoom-meeting-container [class*="sharing-content"],
+.zoom-meeting-container [class*="screen-share-content"],
+.zoom-meeting-container [class*="share-view"],
+.zoom-meeting-container [class*="sharing-view"],
+.zoom-meeting-container [class*="receive-sharing"] {
+  bottom: 64px !important;
+  height: calc(100% - 64px) !important;
+}
+
+/* Hide only the non-toolbar elements that were previously hidden */
+.zoom-meeting-container [class*="footer-container"]:not(.footer):not([class*="wc-footer"]),
+.zoom-meeting-container [class*="meeting-footer"]:not(.footer),
+.zoom-meeting-container [class*="toolbar-container"]:not(.footer),
+.zoom-meeting-container [class*="bottom-bar"]:not(.footer),
+.zoom-meeting-container [class*="suspension-window__footer"],
+.zoom-meeting-container [class*="meeting-info-bar"] {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Name tags */
+.zoom-meeting-container .video-avatar__avatar-name,
+.zoom-meeting-container [class*="display-name"] {
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(4px) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+}
+
+/* Modals / dialogs / tooltips — must float above everything */
 .zoom-meeting-container .zm-modal,
 .zoom-meeting-container .zm-dialog,
-.zoom-meeting-container .chat-container,
-.zoom-meeting-container .settings-dialog,
 .zoom-meeting-container .zm-modal-container,
 .zoom-meeting-container .zm-context-menu,
 .zoom-meeting-container .zm-box,
 .zoom-meeting-container .zm-whiteboard,
 .zoom-meeting-container .zm-notation,
-.zoom-meeting-container .zm-tooltip,
 .zoom-meeting-container .zm-popover,
+.zoom-meeting-container .zm-tooltip,
 .zoom-meeting-container .ax-tooltip {
-  z-index: 20001 !important;
+  z-index: 99999 !important;
 }
 
-/* Ensure the zoom root itself has a clean stacking context */
-.zoom-meeting-container > div#zmmtg-root {
-  z-index: 10;
+/* Scrollbars */
+.zoom-meeting-container ::-webkit-scrollbar       { width: 4px; height: 4px; }
+.zoom-meeting-container ::-webkit-scrollbar-track { background: transparent; }
+.zoom-meeting-container ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+.zoom-meeting-container ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); }
+
+
+/* ─────────────────────────────────────────────────────────────
+   B. LOADING OVERLAY
+   ───────────────────────────────────────────────────────────── */
+
+.zm-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.zm-loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 48px;
+  background: #1e1e1e;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+  text-align: center;
+}
+
+.zm-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(14, 114, 237, 0.2);
+  border-top-color: #0e72ed;
+  border-radius: 50%;
+  animation: zmSpin 0.8s linear infinite;
+}
+
+@keyframes zmSpin {
+  to { transform: rotate(360deg); }
+}
+
+.zm-loading-title {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.zm-loading-step {
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  margin: 0;
+  min-height: 18px;
+  transition: opacity 0.3s;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   C. ERROR SCREEN
+   ───────────────────────────────────────────────────────────── */
+
+.zm-error-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  padding: 24px;
+}
+
+.zm-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+}
+
+.zm-error-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+  margin-bottom: 4px;
+}
+
+.zm-error-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.zm-error-msg {
+  color: rgba(255,255,255,0.45);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.zm-error-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.zm-btn-retry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 20px;
+  background: #0e72ed;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.zm-btn-retry:hover { background: #0a5bbf; }
+
+.zm-btn-leave {
+  padding: 9px 20px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.zm-btn-leave:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+
+/* ─────────────────────────────────────────────────────────────
+   D. END MEETING CONFIRM MODAL
+   ───────────────────────────────────────────────────────────── */
+
+.zm-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  animation: zmFadeIn 0.18s ease;
+}
+
+@keyframes zmFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.zm-confirm-card {
+  width: 100%;
+  max-width: 360px;
+  background: #1e1e1e;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 32px 28px;
+  box-shadow: 0 32px 64px rgba(0,0,0,0.6);
+  animation: zmScaleIn 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+@keyframes zmScaleIn {
+  from { transform: scale(0.94); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.zm-confirm-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+  margin-bottom: 4px;
+}
+
+.zm-confirm-title {
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.zm-confirm-msg {
+  color: rgba(255,255,255,0.45);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0 0 8px;
+}
+
+.zm-confirm-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.zm-confirm-cancel {
+  flex: 1;
+  padding: 10px;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.zm-confirm-cancel:hover:not(:disabled) { background: rgba(255,255,255,0.12); color: #fff; }
+.zm-confirm-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.zm-confirm-end {
+  flex: 1;
+  padding: 10px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, transform 0.1s;
+}
+.zm-confirm-end:hover:not(:disabled) { background: #b91c1c; }
+.zm-confirm-end:active:not(:disabled) { transform: scale(0.96); }
+.zm-confirm-end:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.zm-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: zmSpin 0.7s linear infinite;
+}
+
+
+/* ─────────────────────────────────────────────────────────────
+   E. MOCK ZOOM MEETING UI
+   ───────────────────────────────────────────────────────────── */
+
+.zoom-shell {
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  background: #1c1c1c;
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar */
+.zoom-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 40px;
+  min-height: 40px;
+  background: #242424;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+/* Sidebar */
+.zoom-sidebar {
+  width: 0;
+  flex-shrink: 0;
+  background: #242424;
+  border-left: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.zoom-sidebar--open { width: 280px; }
+
+/* Bottom control bar */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 64px;
+  min-height: 64px;
+  background: #242424;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+/* Control button */
+.zoom-ctrl-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.72);
+  cursor: pointer;
+  min-width: 60px;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.zoom-ctrl-btn:hover            { background: rgba(255,255,255,0.08); color: #fff; }
+.zoom-ctrl-btn:active           { transform: scale(0.93); }
+.zoom-ctrl-btn--danger          { color: #f55; }
+.zoom-ctrl-btn--danger:hover    { background: rgba(255,60,60,0.1); color: #ff6666; }
+.zoom-ctrl-btn--active          { color: #0e72ed; }
+.zoom-ctrl-btn--active:hover    { background: rgba(14,114,237,0.1); }
+.zoom-ctrl-btn__label           { font-size: 10px; font-weight: 500; line-height: 1; white-space: nowrap; }
+
+/* Thumbnail strip */
+.zoom-thumb-strip {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+.zoom-thumb-strip::-webkit-scrollbar       { height: 4px; }
+.zoom-thumb-strip::-webkit-scrollbar-track { background: transparent; }
+.zoom-thumb-strip::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* Video tile */
+.zoom-tile {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #2d2d2d;
+  transition: box-shadow 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+.zoom-tile--large {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 100%;
+  border-radius: 10px;
+}
+.zoom-tile--thumb {
+  width: 160px;
+  aspect-ratio: 16 / 9;
+  cursor: pointer;
+  outline: 1px solid rgba(255,255,255,0.08);
+}
+.zoom-tile--thumb:hover { transform: scale(1.03); outline-color: rgba(255,255,255,0.2); }
+.zoom-tile--active      { outline: 2px solid #0e72ed !important; box-shadow: 0 0 0 2px rgba(14,114,237,0.2); }
+
+.zoom-tile__name {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  padding: 2px 8px 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #fff;
+  max-width: calc(100% - 16px);
+  pointer-events: none;
+}
+
+.zoom-tile__speaker-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid #0e72ed;
+  animation: speakerPulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes speakerPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Sidebar scrollbar */
+.zoom-sidebar ::-webkit-scrollbar       { width: 4px; }
+.zoom-sidebar ::-webkit-scrollbar-track { background: transparent; }
+.zoom-sidebar ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+
+
+/* ─────────────────────────────────────────────────────────────
+   G. SCREEN SHARE — Zoom SDK suspension/sharing window
+   ───────────────────────────────────────────────────────────── */
+
+/*
+ * When screen sharing, the SDK renders a "suspension window" —
+ * a small floating bar with "You're sharing the screen" + Stop Share.
+ * We restyle it to look like a proper Zoom sharing indicator.
+ */
+
+/* ── Suspension window (the floating sharing bar) ── */
+.zoom-meeting-container [class*="suspension-window"],
+.zoom-meeting-container [class*="sharing-indicator"],
+.zoom-meeting-container [class*="screen-share-indicator"],
+.zoom-meeting-container [class*="sharing-bar"] {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: auto !important;
+  right: auto !important;
+  width: auto !important;
+  min-width: 320px !important;
+  max-width: 520px !important;
+  height: auto !important;
+  background: rgba(20, 20, 20, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) !important;
+  padding: 10px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  z-index: 99999 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+/* "You're sharing the screen" text */
+.zoom-meeting-container [class*="suspension-window"] [class*="sharing-text"],
+.zoom-meeting-container [class*="suspension-window"] span,
+.zoom-meeting-container [class*="sharing-indicator"] span {
+  color: rgba(255,255,255,0.9) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+}
+
+/* Screen preview thumbnail inside the bar */
+.zoom-meeting-container [class*="suspension-window"] canvas,
+.zoom-meeting-container [class*="suspension-window"] video,
+.zoom-meeting-container [class*="suspension-window"] img {
+  width: 80px !important;
+  height: 45px !important;
+  border-radius: 4px !important;
+  object-fit: cover !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  flex-shrink: 0 !important;
+}
+
+/* Stop Share button inside the bar */
+.zoom-meeting-container [class*="suspension-window"] button[class*="stop"],
+.zoom-meeting-container [class*="suspension-window"] button[class*="Stop"],
+.zoom-meeting-container [class*="suspension-window"] .stop-share-btn,
+.zoom-meeting-container [class*="sharing-indicator"] button {
+  background: #e02020 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 6px 16px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: background 0.15s !important;
+  flex-shrink: 0 !important;
+}
+.zoom-meeting-container [class*="suspension-window"] button[class*="stop"]:hover,
+.zoom-meeting-container [class*="suspension-window"] button[class*="Stop"]:hover {
+  background: #c01010 !important;
+}
+
+/* Pause button */
+.zoom-meeting-container [class*="suspension-window"] button[class*="pause"],
+.zoom-meeting-container [class*="suspension-window"] button[class*="Pause"] {
+  background: rgba(255,255,255,0.1) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 13px !important;
+  cursor: pointer !important;
+  transition: background 0.15s !important;
+}
+.zoom-meeting-container [class*="suspension-window"] button[class*="pause"]:hover {
+  background: rgba(255,255,255,0.18) !important;
+}
+
+/* ── Shared screen content area ── */
+/* When sharing, the SDK renders the shared content in a canvas/video */
+.zoom-meeting-container [class*="sharing-content"],
+.zoom-meeting-container [class*="screen-share-content"],
+.zoom-meeting-container [class*="share-view"],
+.zoom-meeting-container [class*="sharing-view"] {
   position: absolute !important;
-  top: 0;
-  left: 0;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: #0b0b0b !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.zoom-meeting-container [class*="sharing-content"] canvas,
+.zoom-meeting-container [class*="sharing-content"] video,
+.zoom-meeting-container [class*="screen-share-content"] canvas,
+.zoom-meeting-container [class*="screen-share-content"] video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: #0b0b0b !important;
+}
+
+/* ── Drag handle on the suspension window — hide it ── */
+.zoom-meeting-container [class*="suspension-window"] [class*="drag"],
+.zoom-meeting-container [class*="suspension-window"] [class*="handle"] {
+  display: none !important;
+}
+
+/* ── Emoji/reaction button in sharing bar ── */
+.zoom-meeting-container [class*="suspension-window"] [class*="emoji"],
+.zoom-meeting-container [class*="suspension-window"] [class*="reaction"] {
+  background: rgba(255,255,255,0.08) !important;
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  color: rgba(255,255,255,0.7) !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  transition: background 0.15s !important;
+}
+.zoom-meeting-container [class*="suspension-window"] [class*="emoji"]:hover {
+  background: rgba(255,255,255,0.15) !important;
+}
+
+/* ── Responsive: smaller sharing bar on mobile ── */
+@media (max-width: 480px) {
+  .zoom-meeting-container [class*="suspension-window"],
+  .zoom-meeting-container [class*="sharing-indicator"] {
+    min-width: 260px !important;
+    max-width: calc(100vw - 32px) !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+
+  .zoom-meeting-container [class*="suspension-window"] canvas,
+  .zoom-meeting-container [class*="suspension-window"] video {
+    display: none !important; /* hide thumbnail on mobile */
+  }
+}
+   ───────────────────────────────────────────────────────────── */
+
+/* Tablet (≤ 768px): collapse sidebar, smaller controls */
+@media (max-width: 768px) {
+  .zoom-sidebar--open {
+    width: 100%;
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+  }
+
+  .zoom-ctrl-btn {
+    min-width: 44px;
+    padding: 6px 8px;
+  }
+
+  .zoom-ctrl-btn__label {
+    display: none;
+  }
+
+  .zoom-controls {
+    padding: 0 10px;
+    height: 56px;
+    min-height: 56px;
+  }
+
+  .zoom-tile--thumb {
+    width: 120px;
+  }
+}
+
+/* Mobile (≤ 480px): stack layout, bottom controls */
+@media (max-width: 480px) {
+  .zoom-shell {
+    min-height: 100dvh;
+  }
+
+  .zoom-topbar {
+    height: 36px;
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .zoom-controls {
+    height: 52px;
+    min-height: 52px;
+    padding: 0 8px;
+    gap: 2px;
+  }
+
+  .zoom-ctrl-btn {
+    min-width: 36px;
+    padding: 4px 6px;
+  }
+
+  .zoom-tile--large {
+    border-radius: 6px;
+  }
+
+  .zoom-tile--thumb {
+    width: 96px;
+  }
+
+  /* SDK container responsive */
+  .zoom-meeting-container .footer,
+  .zoom-meeting-container .footer__btns-container {
+    height: auto !important;
+    min-height: 52px !important;
+    padding: 6px 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .zm-confirm-card {
+    margin: 16px;
+    padding: 24px 20px;
+  }
+
+  .zm-loading-card {
+    padding: 28px 24px;
+  }
+}
+
+
+/* =============================================================
+   ENHANCEMENTS — Active speaker, screen share glow,
+   control spacing, Zoom typography, micro-interactions
+   ============================================================= */
+
+/* ── 1. ACTIVE SPEAKER HIGHLIGHT ─────────────────────────── */
+
+/* SDK active speaker — animated green ring like real Zoom */
+.zoom-meeting-container .video-avatar--speaking,
+.zoom-meeting-container [class*="video-avatar--speaking"],
+.zoom-meeting-container [class*="active-speaker"] {
+  outline: none !important;
+  box-shadow:
+    0 0 0 2px #22c55e,
+    0 0 12px 2px rgba(34, 197, 94, 0.35) !important;
+  border-radius: 8px !important;
+  animation: zmActiveSpeaker 2s ease-in-out infinite !important;
+}
+
+@keyframes zmActiveSpeaker {
+  0%, 100% { box-shadow: 0 0 0 2px #22c55e, 0 0 10px 2px rgba(34,197,94,0.3); }
+  50%       { box-shadow: 0 0 0 2px #22c55e, 0 0 18px 4px rgba(34,197,94,0.5); }
+}
+
+/* Active speaker name tag — green accent */
+.zoom-meeting-container .video-avatar--speaking .video-avatar__avatar-name,
+.zoom-meeting-container [class*="active-speaker"] [class*="display-name"] {
+  background: rgba(34, 197, 94, 0.85) !important;
+  color: #fff !important;
+}
+
+/* Mock UI active tile — already handled by .zoom-tile--active,
+   enhance it with a glow pulse */
+.zoom-tile--active {
+  outline: 2px solid #22c55e !important;
+  box-shadow: 0 0 0 2px rgba(34,197,94,0.2), 0 0 16px 4px rgba(34,197,94,0.15) !important;
+  animation: zmActiveSpeaker 2s ease-in-out infinite;
+}
+
+
+/* ── 2. SCREEN SHARE GLOW ─────────────────────────────────── */
+
+/* Subtle green glow around the shared screen content area */
+.zoom-meeting-container [class*="sharing-content"],
+.zoom-meeting-container [class*="screen-share-content"],
+.zoom-meeting-container [class*="share-view"],
+.zoom-meeting-container [class*="receive-sharing"],
+.zoom-meeting-container [class*="sharing-view"] {
+  box-shadow: inset 0 0 0 2px rgba(14, 114, 237, 0.4),
+              0 0 40px 8px rgba(14, 114, 237, 0.08) !important;
+  border-radius: 4px !important;
+}
+
+/* Shared screen canvas/video — contain with glow */
+.zoom-meeting-container [class*="sharing-content"] canvas,
+.zoom-meeting-container [class*="sharing-content"] video,
+.zoom-meeting-container [class*="receive-sharing"] canvas,
+.zoom-meeting-container [class*="receive-sharing"] video {
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 1px rgba(14,114,237,0.3) !important;
+}
+
+/* "You are viewing" indicator bar — style it */
+.zoom-meeting-container [class*="sharing-indicator-bar"],
+.zoom-meeting-container [class*="viewing-indicator"] {
+  background: rgba(14, 114, 237, 0.15) !important;
+  border: 1px solid rgba(14, 114, 237, 0.3) !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 6px 14px !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+
+/* ── 3. CONTROL BAR — BETTER SPACING & ZOOM TYPOGRAPHY ───── */
+
+/* Toolbar container — more breathing room */
+.zoom-meeting-container .footer,
+.zoom-meeting-container .footer__btns-container,
+.zoom-meeting-container #wc-footer,
+.zoom-meeting-container [class*="wc-footer"] {
+  gap: 4px !important;
+  padding: 0 24px !important;
+}
+
+/* Each toolbar button — Zoom-like sizing */
+.zoom-meeting-container .footer button,
+.zoom-meeting-container #wc-footer button,
+.zoom-meeting-container [class*="wc-footer"] button {
+  min-width: 68px !important;
+  padding: 8px 10px !important;
+  gap: 4px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  border-radius: 8px !important;
+}
+
+/* Button icon size — match Zoom's 20px icons */
+.zoom-meeting-container .footer button svg,
+.zoom-meeting-container #wc-footer button svg,
+.zoom-meeting-container [class*="wc-footer"] button svg,
+.zoom-meeting-container .footer button img,
+.zoom-meeting-container #wc-footer button img {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Button label text */
+.zoom-meeting-container .footer button span,
+.zoom-meeting-container #wc-footer button span,
+.zoom-meeting-container [class*="wc-footer"] button span {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  color: rgba(255,255,255,0.8) !important;
+}
+
+
+/* ── 4. MICRO-INTERACTIONS ────────────────────────────────── */
+
+/* All toolbar buttons — smooth press + hover */
+.zoom-meeting-container .footer button,
+.zoom-meeting-container #wc-footer button,
+.zoom-meeting-container [class*="wc-footer"] button {
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.18s ease !important;
+  will-change: transform !important;
+}
+
+.zoom-meeting-container .footer button:hover,
+.zoom-meeting-container #wc-footer button:hover,
+.zoom-meeting-container [class*="wc-footer"] button:hover {
+  background: rgba(255,255,255,0.1) !important;
+  color: #fff !important;
+  transform: translateY(-1px) !important;
+}
+
+.zoom-meeting-container .footer button:active,
+.zoom-meeting-container #wc-footer button:active,
+.zoom-meeting-container [class*="wc-footer"] button:active {
+  transform: scale(0.93) translateY(0) !important;
+  background: rgba(255,255,255,0.06) !important;
+}
+
+/* Leave/End button — red with glow on hover */
+.zoom-meeting-container button[aria-label*="leave" i],
+.zoom-meeting-container button[aria-label*="end" i] {
+  background: #e02020 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(224,32,32,0.3) !important;
+  transition:
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+.zoom-meeting-container button[aria-label*="leave" i]:hover,
+.zoom-meeting-container button[aria-label*="end" i]:hover {
+  background: #c01010 !important;
+  box-shadow: 0 4px 16px rgba(224,32,32,0.5) !important;
+  transform: translateY(-1px) !important;
+}
+.zoom-meeting-container button[aria-label*="leave" i]:active,
+.zoom-meeting-container button[aria-label*="end" i]:active {
+  transform: scale(0.93) !important;
+}
+
+/* Muted state — red tint with subtle pulse */
+.zoom-meeting-container button[aria-label*="unmute" i],
+.zoom-meeting-container button[aria-label*="start video" i] {
+  color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.08) !important;
+}
+.zoom-meeting-container button[aria-label*="unmute" i]:hover,
+.zoom-meeting-container button[aria-label*="start video" i]:hover {
+  background: rgba(248, 113, 113, 0.15) !important;
+}
+
+/* Active/toggled button (e.g. chat open) — blue accent */
+.zoom-meeting-container button[aria-pressed="true"],
+.zoom-meeting-container button[class*="active"],
+.zoom-meeting-container button[class*="--active"] {
+  color: #60a5fa !important;
+  background: rgba(96, 165, 250, 0.1) !important;
+}
+
+
+/* ── 5. MOCK UI ENHANCEMENTS ──────────────────────────────── */
+
+/* Control buttons — spring animation */
+.zoom-ctrl-btn {
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  will-change: transform;
+}
+.zoom-ctrl-btn:hover  { transform: translateY(-1px) !important; }
+.zoom-ctrl-btn:active { transform: scale(0.91) translateY(0) !important; }
+
+/* Leave button in mock UI */
+.zoom-controls button[class*="bg-\[#e02020\]"],
+.zoom-controls button[class*="bg-red"] {
+  box-shadow: 0 2px 10px rgba(224,32,32,0.35) !important;
+  transition: box-shadow 0.18s ease, transform 0.12s cubic-bezier(0.34,1.56,0.64,1) !important;
+}
+.zoom-controls button[class*="bg-\[#e02020\]"]:hover,
+.zoom-controls button[class*="bg-red"]:hover {
+  box-shadow: 0 4px 18px rgba(224,32,32,0.55) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Video tile hover — subtle lift */
+.zoom-tile--thumb {
+  transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), outline-color 0.15s ease !important;
+}
+.zoom-tile--thumb:hover {
+  transform: scale(1.04) translateY(-2px) !important;
+}
+
+/* Sidebar items — smooth hover */
+.zoom-sidebar div[class*="hover"] {
+  transition: background 0.15s ease !important;
+}
+
+/* Chat send input — focus ring */
+.zoom-sidebar input:focus {
+  box-shadow: 0 0 0 2px rgba(14,114,237,0.4) !important;
+  outline: none !important;
+}
+
+
+/* ── 6. ZOOM-LIKE TYPOGRAPHY ──────────────────────────────── */
+
+/* All text inside the SDK container */
+.zoom-meeting-container * {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Name tags — clean Zoom style */
+.zoom-meeting-container .video-avatar__avatar-name,
+.zoom-meeting-container [class*="display-name"] {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  background: rgba(0,0,0,0.7) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+/* Participant count / status text */
+.zoom-meeting-container [class*="participant-count"],
+.zoom-meeting-container [class*="status-text"] {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.7) !important;
+}
+
+/* Mock UI typography */
+.zoom-shell {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.zoom-ctrl-btn__label {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+}
+.zoom-tile__name {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+}
+
+
+/* =============================================================
+   STUDENT SESSION — Full-width screen share fix
+   Only applies when SDK is in screen-share/receive-sharing mode.
+   Forces the shared content to fill the entire container.
+   ============================================================= */
+
+/* Force the SDK's main layout to fill 100% in all view modes */
+.zoom-meeting-container .meeting-app,
+.zoom-meeting-container .meeting-client,
+.zoom-meeting-container #wc-container-left {
+  position: absolute !important;
+  inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
 }
 
-/* Prevent any parent from clipping Zoom's absolute positioned modals */
-[class*="zoom-meeting-container"] {
-  overflow: visible !important;
+/* When receiving a shared screen, the SDK renders a split layout.
+   Force the shared content pane to take full width. */
+.zoom-meeting-container [class*="receive-sharing"],
+.zoom-meeting-container [class*="sharing-layout"],
+.zoom-meeting-container [class*="screen-share-layout"],
+.zoom-meeting-container [class*="sharing-container"] {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 100% !important;
 }
 
-/* Make video canvas fill available space */
-.zoom-meeting-container canvas {
-  max-width: 100%;
-  max-height: 100%;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+/* The shared screen video/canvas — fill and contain */
+.zoom-meeting-container [class*="receive-sharing"] canvas,
+.zoom-meeting-container [class*="receive-sharing"] video,
+.zoom-meeting-container [class*="sharing-layout"] canvas,
+.zoom-meeting-container [class*="sharing-layout"] video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: #0b0b0b !important;
 }
 
-/* Ensure video elements are sized properly */
-.zoom-meeting-container video {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+/* Participant strip shown alongside shared screen — keep it visible
+   but don't let it push the shared content off screen */
+.zoom-meeting-container [class*="video-share-layout"],
+.zoom-meeting-container [class*="sharing-video-container"] {
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 64px !important;
+  width: 180px !important;
+  z-index: 10 !important;
+  background: #1c1c1c !important;
+}
+
+/* Shared content takes remaining width when participant strip is shown */
+.zoom-meeting-container [class*="sharing-content-container"],
+.zoom-meeting-container [class*="share-content-wrap"] {
+  right: 180px !important;
+  left: 0 !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 64px !important;
+  width: calc(100% - 180px) !important;
+}
+
+/* If no participant strip, shared content fills everything */
+.zoom-meeting-container [class*="sharing-content-container"]:only-child,
+.zoom-meeting-container [class*="share-content-wrap"]:only-child {
+  right: 0 !important;
+  width: 100% !important;
+}
+
+/* "You are viewing" top bar — center it, don't let it take layout space */
+.zoom-meeting-container [class*="sharing-indicator"],
+.zoom-meeting-container [class*="viewing-bar"],
+.zoom-meeting-container [class*="share-bar"] {
+  position: absolute !important;
+  top: 8px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 200 !important;
+  width: auto !important;
+  max-width: 60% !important;
+}
+
+
+/* =============================================================
+   FORCE FULL VIEW — Hide minimized/suspension window
+   The SDK defaults to a small floating "suspension window" in
+   some scenarios. Hide it and force the full meeting layout.
+   ============================================================= */
+
+/* Hide the suspension/minimized floating window */
+.zoom-meeting-container [class*="suspension-window"],
+.zoom-meeting-container [class*="wc-mini"],
+.zoom-meeting-container [class*="mini-window"],
+.zoom-meeting-container [class*="minimized-window"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Force the main meeting app to always be visible and full size */
+.zoom-meeting-container .meeting-app,
+.zoom-meeting-container [class*="meeting-app"],
+.zoom-meeting-container [class*="wc-app"],
+.zoom-meeting-container [class*="webclient-app"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Force the video/sharing area to fill the container */
+.zoom-meeting-container [class*="main-layout"],
+.zoom-meeting-container [class*="meeting-layout"],
+.zoom-meeting-container [class*="video-layout"] {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+
+/* =============================================================
+   FILL HEIGHT — Force SDK internal layout to use full height
+   ============================================================= */
+
+/* The SDK root and all its direct children must fill 100% */
+.zoom-sdk-wrapper,
+.zoom-meeting-container,
+.zoom-meeting-container > div,
+.zoom-meeting-container #zmmtg-root {
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+/* SDK's internal layout boxes — fill height */
+.zoom-meeting-container .zoom-MuiBox-root,
+.zoom-meeting-container [class*="MuiBox-root"] {
+  /* Only apply to top-level layout boxes, not all boxes */
+}
+
+/* The main meeting layout wrapper */
+.zoom-meeting-container > div > div,
+.zoom-meeting-container > div > div > div {
+  height: 100% !important;
+}
+
+/* Video grid — fill available space */
+.zoom-meeting-container [class*="video-container"],
+.zoom-meeting-container [class*="gallery-container"],
+.zoom-meeting-container [class*="speaker-container"] {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+}
+
+
+/* =============================================================
+   STRETCH VIDEO AREA — fill space between header and toolbar
+   The SDK renders video in a flex column; force the video
+   section to grow and push the toolbar to the very bottom.
+   ============================================================= */
+
+/* SDK root flex column — fill full height */
+.zoom-meeting-container > div,
+.zoom-meeting-container #zmmtg-root,
+.zoom-meeting-container .meeting-app,
+.zoom-meeting-container .meeting-client {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 100% !important;
+}
+
+/* The video/content area — grow to fill all available space */
+.zoom-meeting-container .meeting-app > div:first-child,
+.zoom-meeting-container .meeting-client > div:first-child,
+.zoom-meeting-container #wc-container-left > div:first-child {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Toolbar — always at bottom, never grows */
+.zoom-meeting-container .zoom-MuiPaper-root,
+.zoom-meeting-container [class*="MuiPaper-root"],
+.zoom-meeting-container .footer,
+.zoom-meeting-container #wc-footer,
+.zoom-meeting-container [class*="wc-footer"] {
+  flex-shrink: 0 !important;
+  margin-top: auto !important;
 }

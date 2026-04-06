@@ -30,8 +30,6 @@ const socketService = require('./services/SocketService');
 const fs = require('fs');
 
 
-connectPostgres();
-
 const app = express();
 
 // Registry of upload paths
@@ -130,13 +128,6 @@ app.use(cors({
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Enable Cross-Origin Isolation for Zoom SDK
-app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
-  next();
-});
-
 // Routes
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/db-status', require('./routes/dbStatusRoutes'));
@@ -153,6 +144,7 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/admin/skilldad-universities', require('./routes/skillDadUniversityRoutes'));
 app.use('/api/admin/migrations', require('./routes/migrationRoutes'));
 app.use('/api/sessions', require('./routes/liveSessionRoutes'));
+app.use('/api/sessions', require('./whiteboard/whiteboardRoutes'));
 app.use('/api/finance', require('./routes/financeRoutes'));
 app.use('/api/enquiries', require('./routes/enquiryRoutes'));
 app.use('/api/exams', require('./routes/examRoutes'));
@@ -167,7 +159,9 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/webhooks', require('./routes/webhookRoutes'));
 app.use('/api/discount', require('./routes/discountRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
+app.use('/api/discussions', require('./routes/discussionRoutes'));
 app.use('/', require('./routes/seoRoutes'));
+
 
 // Payment Routes
 app.use('/api/payment', require('./routes/paymentRoutes'));
@@ -239,53 +233,43 @@ try {
 }
 
 const PORT = process.env.PORT || 3030;
-console.log('[Server] Attempting to start on port:', PORT);
 
-// Log warning if ZOOM_MOCK_MODE is enabled (Requirement 13.4)
-if (process.env.ZOOM_MOCK_MODE === 'true') {
-  console.warn('');
-  console.warn('⚠️  ═══════════════════════════════════════════════════════════════');
-  console.warn('⚠️  WARNING: ZOOM_MOCK_MODE IS ENABLED');
-  console.warn('⚠️  ═══════════════════════════════════════════════════════════════');
-  console.warn('⚠️  ');
-  console.warn('⚠️  Zoom integration is running in MOCK MODE for development.');
-  console.warn('⚠️  ');
-  console.warn('⚠️  - Mock Zoom meetings will be created (no real Zoom API calls)');
-  console.warn('⚠️  - Mock recording data will be generated automatically');
-  console.warn('⚠️  - Webhook simulator available for testing');
-  console.warn('⚠️  ');
-  console.warn('⚠️  DO NOT USE IN PRODUCTION!');
-  console.warn('⚠️  Set ZOOM_MOCK_MODE=false and configure real Zoom credentials.');
-  console.warn('⚠️  ');
-  console.warn('⚠️  ═══════════════════════════════════════════════════════════════');
-  console.warn('');
-}
+// Start Server with Database Connection
+const startServer = async () => {
+  try {
+    console.log('[Server] Initializing database connection...'.yellow);
+    await connectPostgres();
+    
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`.green.bold);
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
+      // Self-ping every 14 minutes to prevent Render free-tier cold starts
+      if (process.env.NODE_ENV === 'production') {
+        const pingUrl = process.env.RENDER_EXTERNAL_URL
+          ? `${process.env.RENDER_EXTERNAL_URL}/health`
+          : 'https://skilldad-server.onrender.com/health';
 
-  // Self-ping every 14 minutes to prevent Render free-tier cold starts
-  // Render spins down after 15 minutes of inactivity on the free plan
-  if (process.env.NODE_ENV === 'production') {
-    // Use RENDER_EXTERNAL_URL if set, otherwise fall back to the hardcoded Render URL
-    const pingUrl = process.env.RENDER_EXTERNAL_URL
-      ? `${process.env.RENDER_EXTERNAL_URL}/health`
-      : 'https://skilldad-server.onrender.com/health';
+        console.log(`[KeepAlive] Starting self-ping every 14 min -> ${pingUrl}`);
 
-    console.log(`[KeepAlive] Starting self-ping every 14 min -> ${pingUrl}`);
-
-    setInterval(() => {
-      const https = require('https');
-      const http = require('http');
-      const client = pingUrl.startsWith('https') ? https : http;
-      client.get(pingUrl, (res) => {
-        console.log(`[KeepAlive] Ping -> ${res.statusCode}`);
-      }).on('error', (err) => {
-        console.warn('[KeepAlive] Ping failed:', err.message);
-      });
-    }, 14 * 60 * 1000); // every 14 minutes
+        setInterval(() => {
+          const https = require('https');
+          const http = require('http');
+          const client = pingUrl.startsWith('https') ? https : http;
+          client.get(pingUrl, (res) => {
+            console.log(`[KeepAlive] Ping -> ${res.statusCode}`);
+          }).on('error', (err) => {
+            console.warn('[KeepAlive] Ping failed:', err.message);
+          });
+        }, 14 * 60 * 1000); 
+      }
+    });
+  } catch (error) {
+    console.error('[Server] Critical failure during startup:'.red.bold, error);
+    process.exit(1);
   }
-});
+};
+
+startServer();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

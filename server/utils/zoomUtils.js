@@ -447,9 +447,7 @@ if (ZOOM_MOCK_MODE) {
     }
 
     const payload = {
-      sdkKey: ZOOM_SDK_KEY,
-      appKey: ZOOM_SDK_KEY,
-      clientId: ZOOM_SDK_KEY, // Added back for maximum compatibility with all SDK warnings
+      appKey: ZOOM_SDK_KEY,   // preferred claim name since v5.0.0
       mn: meetingNumber.toString(),
       role: role,
       iat: iat,

@@ -1,353 +1,367 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
-import { Video, Mic, MicOff, VideoOff, Users, MessageSquare, Share2, Settings, X, Video as VideoIcon } from 'lucide-react';
+import {
+  Mic, MicOff, Video, VideoOff, Users, MessageSquare,
+  Monitor, Circle, PhoneOff, ChevronUp, X, Smile, StopCircle
+} from 'lucide-react';
 
-/**
- * MockZoomMeeting Component
- * Simulates a Zoom meeting interface for development/testing
- * 
- * @param {string} sessionId - The session ID
- * @param {boolean} isHost - Whether the user is the host
- * @param {function} onLeave - Callback when user leaves the meeting
- */
+const HIDE_DELAY = 3000; // ms before controls auto-hide
+
 const MockZoomMeeting = ({ sessionId, isHost = false, onLeave }) => {
-  const [loading, setLoading] = useState(true);
-  const [joined, setJoined] = useState(false);
-  const [videoEnabled, setVideoEnabled] = useState(true);
+  const [loading, setLoading]           = useState(true);
+  const [joined, setJoined]             = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(true);
-  const [showEndConfirm, setShowEndConfirm] = useState(false);
-  const [isEnding, setIsEnding] = useState(false);
-  const [participants, setParticipants] = useState([
-    { id: 1, name: 'You', isHost: isHost, video: true, audio: true }
+  const [videoEnabled, setVideoEnabled] = useState(true);
+  const [isRecording, setIsRecording]   = useState(false);
+  const [showChat, setShowChat]         = useState(false);
+  const [showParticipants, setShowParticipants] = useState(false);
+  const [showEndConfirm, setShowEndConfirm]     = useState(false);
+  const [isEnding, setIsEnding]         = useState(false);
+  const [controlsVisible, setControlsVisible]   = useState(true);
+  const [chatMessages, setChatMessages] = useState([
+    { id: 1, sender: 'Sarah M.', text: 'Hello everyone!', time: '10:01 AM' },
+    { id: 2, sender: 'John D.',  text: 'Can everyone hear me?', time: '10:02 AM' },
   ]);
+  const [chatInput, setChatInput]       = useState('');
+  const [participants, setParticipants] = useState([
+    { id: 1, name: 'You', isHost, video: true, audio: true }
+  ]);
+  const [activeSpeakerId, setActiveSpeakerId] = useState(null);
+  const [elapsed, setElapsed]           = useState(0);
+
+  const hideTimerRef  = useRef(null);
+  const timerRef      = useRef(null);
+  const chatEndRef    = useRef(null);
+  const containerRef  = useRef(null);
+
+  /* ── auto-hide controls on inactivity ── */
+  const resetHideTimer = useCallback(() => {
+    setControlsVisible(true);
+    clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setControlsVisible(false), HIDE_DELAY);
+  }, []);
 
   useEffect(() => {
-    // Simulate joining delay
-    const timer = setTimeout(() => {
+    resetHideTimer();
+    return () => clearTimeout(hideTimerRef.current);
+  }, [resetHideTimer]);
+
+  /* ── join + mock participants ── */
+  useEffect(() => {
+    const t = setTimeout(() => {
       setLoading(false);
       setJoined(true);
+      timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
 
-      // Emulate marking the session as live
       if (isHost) {
         try {
-          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-          const token = localStorage.getItem('token') || userInfo.token;
-          if (token) {
-            axios.put(`/api/sessions/${sessionId}/start`, {}, { headers: { Authorization: `Bearer ${token}` } })
-              .catch(e => console.warn('[MockZoom] Error starting mock session on backend:', e.message));
-          }
-        } catch (e) {
-          console.warn('[MockZoom] Error updating session start:', e.message);
-        }
+          const ui   = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const tok  = localStorage.getItem('token') || ui.token;
+          if (tok) axios.put(`/api/sessions/${sessionId}/start`, {}, { headers: { Authorization: `Bearer ${tok}` } })
+            .catch(() => {});
+        } catch (_) {}
       }
 
-      // Add mock participants after a delay
       setTimeout(() => {
-        if (!isHost) {
-          setParticipants(prev => [
-            ...prev,
-            { id: 2, name: 'Instructor', isHost: true, video: true, audio: true },
-            { id: 3, name: 'Student 1', isHost: false, video: true, audio: false },
-            { id: 4, name: 'Student 2', isHost: false, video: false, audio: true }
-          ]);
-        } else {
-          setParticipants(prev => [
-            ...prev,
-            { id: 2, name: 'Student 1', isHost: false, video: true, audio: true },
-            { id: 3, name: 'Student 2', isHost: false, video: true, audio: false }
-          ]);
-        }
+        setParticipants(prev => [
+          ...prev,
+          ...(isHost
+            ? [
+                { id: 2, name: 'Student A', isHost: false, video: true,  audio: true  },
+                { id: 3, name: 'Student B', isHost: false, video: false, audio: true  },
+                { id: 4, name: 'Student C', isHost: false, video: true,  audio: false },
+              ]
+            : [
+                { id: 2, name: 'Instructor', isHost: true,  video: true,  audio: true  },
+                { id: 3, name: 'Student A',  isHost: false, video: true,  audio: false },
+                { id: 4, name: 'Student B',  isHost: false, video: false, audio: true  },
+              ]),
+        ]);
       }, 2000);
     }, 1500);
 
-    return () => clearTimeout(timer);
-  }, [isHost]);
+    return () => { clearTimeout(t); clearInterval(timerRef.current); };
+  }, [isHost, sessionId]);
 
-  const handleLeave = async (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+  /* ── simulate active speaker ── */
+  useEffect(() => {
+    if (!joined) return;
+    const iv = setInterval(() => {
+      setParticipants(prev => {
+        const idx = Math.floor(Math.random() * prev.length);
+        setActiveSpeakerId(prev[idx]?.id ?? null);
+        return prev;
+      });
+    }, 3000);
+    return () => clearInterval(iv);
+  }, [joined]);
 
-    if (!isHost) {
-      exitMeeting();
-      return;
-    }
+  /* ── scroll chat to bottom ── */
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
 
+  const fmt = s => {
+    const h = String(Math.floor(s / 3600)).padStart(2, '0');
+    const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    const sc = String(s % 60).padStart(2, '0');
+    return `${h}:${m}:${sc}`;
+  };
+
+  const handleLeave = e => {
+    e?.preventDefault(); e?.stopPropagation();
+    if (!isHost) { exitMeeting(); return; }
     setShowEndConfirm(true);
   };
 
-  const confirmEndSession = async () => {
+  const confirmEnd = async () => {
     setIsEnding(true);
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      const token = localStorage.getItem('token') || userInfo.token;
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      
-      console.log(`[MockZoom] Ending session ${sessionId}...`);
-      await axios.put(`/api/sessions/${sessionId}/end`, {}, config);
-      console.log(`[MockZoom] Session ${sessionId} ended.`);
-      
-      exitMeeting();
-    } catch (error) {
-      console.error('[MockZoom] End session failed:', error.message);
-      setIsEnding(false);
-      setShowEndConfirm(false);
-      // Force exit if backend fails
-      exitMeeting();
-    }
+      const ui  = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const tok = localStorage.getItem('token') || ui.token;
+      await axios.put(`/api/sessions/${sessionId}/end`, {}, { headers: { Authorization: `Bearer ${tok}` } });
+    } catch (e) { console.error('[MockZoom]', e.message); }
+    finally { exitMeeting(); }
   };
 
   const exitMeeting = () => {
+    clearInterval(timerRef.current);
     setJoined(false);
-    if (onLeave) {
-      onLeave();
-    }
+    onLeave?.();
   };
 
-  const toggleVideo = () => {
-    setVideoEnabled(!videoEnabled);
-    setParticipants(prev =>
-      prev.map(p => p.id === 1 ? { ...p, video: !videoEnabled } : p)
-    );
+  const sendChat = e => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    setChatMessages(prev => [...prev, {
+      id: Date.now(), sender: 'You', text: chatInput.trim(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }]);
+    setChatInput('');
   };
 
-  const toggleAudio = () => {
-    setAudioEnabled(!audioEnabled);
-    setParticipants(prev =>
-      prev.map(p => p.id === 1 ? { ...p, audio: !audioEnabled } : p)
-    );
+  const toggleSidebar = panel => {
+    if (panel === 'chat') { setShowChat(v => !v); setShowParticipants(false); }
+    else                  { setShowParticipants(v => !v); setShowChat(false); }
   };
 
-  if (loading) {
-    return (
-      <div className="w-full h-full min-h-[600px] flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-primary/30 rounded-lg">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
-          <p className="text-white/60 text-sm">Connecting to mock meeting...</p>
-          <p className="text-white/40 text-xs mt-2">🧪 Development Mode</p>
+  /* ── loading / left screens ── */
+  if (loading) return (
+    <div className="zoom-shell flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 mx-auto mb-4 rounded-full border-4 border-[#0e72ed]/30 border-t-[#0e72ed] animate-spin" />
+        <p className="text-white/60 text-sm">Joining meeting…</p>
+      </div>
+    </div>
+  );
+
+  if (!joined) return (
+    <div className="zoom-shell flex items-center justify-center">
+      <div className="text-center p-8">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#0e72ed]/10 border border-[#0e72ed]/30 flex items-center justify-center">
+          <Video className="w-8 h-8 text-[#0e72ed]" />
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-2">You left the meeting</h3>
+        <button onClick={onLeave} className="mt-4 px-6 py-2 bg-[#0e72ed] hover:bg-[#0a5bbf] rounded text-white text-sm font-medium transition-colors">
+          Return to Dashboard
+        </button>
+      </div>
+    </div>
+  );
+
+  const sidebarOpen = showChat || showParticipants;
+  const spotlight   = participants.find(p => p.id === activeSpeakerId) || participants.find(p => p.isHost) || participants[0];
+  const thumbs      = participants.filter(p => p.id !== spotlight.id);
+
+  return (
+    <div
+      ref={containerRef}
+      className="zoom-shell flex flex-col"
+      onMouseMove={resetHideTimer}
+      onMouseEnter={resetHideTimer}
+      onTouchStart={resetHideTimer}
+    >
+      {/* ── top bar ── */}
+      <div className={`zoom-topbar transition-opacity duration-300 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className="flex items-center gap-3">
+          <span className="text-white/80 text-sm font-medium">SkillDad Meeting</span>
+          <span className="text-white/20">|</span>
+          <span className="text-white/40 text-xs font-mono tabular-nums">{fmt(elapsed)}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          {isRecording && (
+            <div className="flex items-center gap-1.5 text-red-400 text-xs font-semibold">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              REC
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 bg-red-600 px-2.5 py-0.5 rounded text-white text-[11px] font-semibold">
+            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+            LIVE
+          </div>
+          <span className="text-white/30 text-xs">{participants.length} participants</span>
         </div>
       </div>
-    );
-  }
 
-  if (!joined) {
-    return (
-      <div className="w-full h-full min-h-[600px] flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-primary/30 rounded-lg">
-        <div className="text-center p-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
-            <Video className="w-8 h-8 text-green-400" />
+      {/* ── main body ── */}
+      <div className="flex flex-1 overflow-hidden">
+
+        {/* video area */}
+        <div className="flex flex-col flex-1 overflow-hidden bg-[#1c1c1c] relative">
+
+          {/* spotlight */}
+          <div className="flex-1 flex items-center justify-center p-3 overflow-hidden">
+            <VideoTile
+              participant={spotlight}
+              isActive={activeSpeakerId === spotlight.id}
+              large
+            />
           </div>
-          <h3 className="text-lg font-bold text-white mb-2">Meeting Ended</h3>
-          <p className="text-white/60 text-sm mb-6">You have left the meeting</p>
+
+          {/* thumbnail strip */}
+          {thumbs.length > 0 && (
+            <div className="flex gap-2 px-3 pb-3 overflow-x-auto flex-shrink-0 zoom-thumb-strip">
+              {thumbs.map(p => (
+                <VideoTile key={p.id} participant={p} isActive={activeSpeakerId === p.id} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* sidebar */}
+        <div className={`zoom-sidebar ${sidebarOpen ? 'zoom-sidebar--open' : ''}`}>
+          {sidebarOpen && (
+            <>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0">
+                <span className="text-white font-semibold text-sm">
+                  {showChat ? 'In-Meeting Chat' : `Participants (${participants.length})`}
+                </span>
+                <button onClick={() => { setShowChat(false); setShowParticipants(false); }} className="text-white/40 hover:text-white transition-colors p-1 rounded hover:bg-white/10">
+                  <X size={15} />
+                </button>
+              </div>
+
+              {showParticipants && (
+                <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+                  {participants.map(p => (
+                    <div key={p.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors group">
+                      <div className="w-8 h-8 rounded-full bg-[#0e72ed] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        {p.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-white/80 text-sm flex-1 truncate">
+                        {p.name}{p.isHost ? <span className="text-white/30 text-xs ml-1">(Host)</span> : null}
+                      </span>
+                      <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                        {p.audio  ? <Mic size={13} className="text-white/50" /> : <MicOff size={13} className="text-red-400" />}
+                        {p.video  ? <Video size={13} className="text-white/50" /> : <VideoOff size={13} className="text-red-400" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {showChat && (
+                <>
+                  <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                    {chatMessages.map(msg => (
+                      <div key={msg.id}>
+                        <div className="flex items-baseline gap-2 mb-0.5">
+                          <span className="text-white text-xs font-semibold">{msg.sender}</span>
+                          <span className="text-white/25 text-[10px]">{msg.time}</span>
+                        </div>
+                        <p className="text-white/70 text-xs leading-relaxed">{msg.text}</p>
+                      </div>
+                    ))}
+                    <div ref={chatEndRef} />
+                  </div>
+                  <form onSubmit={sendChat} className="p-3 border-t border-white/10 flex-shrink-0">
+                    <div className="flex items-center gap-2 bg-[#333] rounded-lg px-3 py-2 focus-within:ring-1 focus-within:ring-[#0e72ed]/50 transition-all">
+                      <input
+                        value={chatInput}
+                        onChange={e => setChatInput(e.target.value)}
+                        placeholder="Type message here…"
+                        className="flex-1 bg-transparent text-white text-xs outline-none placeholder-white/25"
+                      />
+                      <button type="button" className="text-white/25 hover:text-white/60 transition-colors">
+                        <Smile size={14} />
+                      </button>
+                    </div>
+                    <p className="text-white/20 text-[10px] mt-1.5 text-center">Press Enter to send to everyone</p>
+                  </form>
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── bottom control bar ── */}
+      <div className={`zoom-controls transition-opacity duration-300 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        {/* left */}
+        <div className="flex items-center gap-1">
+          <CtrlBtn
+            icon={audioEnabled ? <Mic size={20} /> : <MicOff size={20} />}
+            label={audioEnabled ? 'Mute' : 'Unmute'}
+            danger={!audioEnabled}
+            onClick={() => setAudioEnabled(v => !v)}
+            chevron
+          />
+          <CtrlBtn
+            icon={videoEnabled ? <Video size={20} /> : <VideoOff size={20} />}
+            label={videoEnabled ? 'Stop Video' : 'Start Video'}
+            danger={!videoEnabled}
+            onClick={() => setVideoEnabled(v => !v)}
+            chevron
+          />
+        </div>
+
+        {/* center */}
+        <div className="flex items-center gap-1">
+          <CtrlBtn icon={<Users size={20} />}         label="Participants" active={showParticipants} badge={participants.length} onClick={() => toggleSidebar('participants')} />
+          <CtrlBtn icon={<MessageSquare size={20} />} label="Chat"         active={showChat}         onClick={() => toggleSidebar('chat')} />
+          <CtrlBtn icon={<Monitor size={20} />}       label="Share Screen" onClick={() => {}} />
+          {isHost && (
+            <CtrlBtn
+              icon={isRecording ? <StopCircle size={20} /> : <Circle size={20} />}
+              label={isRecording ? 'Stop Rec' : 'Record'}
+              danger={isRecording}
+              onClick={() => setIsRecording(v => !v)}
+            />
+          )}
+        </div>
+
+        {/* right */}
+        <div className="flex items-center">
           <button
-            onClick={onLeave}
-            className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm font-medium transition-colors"
+            onClick={handleLeave}
+            className="flex items-center gap-2 bg-[#e02020] hover:bg-[#c01010] active:scale-95 text-white px-5 py-2 rounded text-sm font-semibold transition-all duration-150"
           >
-            Go Back
+            <PhoneOff size={16} />
+            {isHost ? 'End' : 'Leave'}
           </button>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="relative w-full h-full min-h-[600px] bg-[#050505] rounded-xl overflow-hidden shadow-2xl border border-white/5">
-      {/* Premium Studio Background / Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 pointer-events-none z-10"></div>
-      
-      {/* Mock Mode Banner - Professional Style */}
-      <div className="absolute top-0 left-0 right-0 bg-amber-500/10 backdrop-blur-md border-b border-amber-500/20 px-4 py-1.5 z-[60]">
-        <p className="text-amber-500/80 text-[10px] text-center font-bold tracking-[0.2em] uppercase">
-          Studio Simulation Mode • {isHost ? 'Host Console' : 'Broadcasting View'}
-        </p>
-      </div>
-
-      {/* Main Broadcasting Area (Spotlight) */}
-      <div className="absolute inset-0 pt-10 pb-20 overflow-hidden flex items-center justify-center p-6">
-        <div className="relative w-full h-full max-w-5xl mx-auto rounded-2xl overflow-hidden bg-[#111] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] group">
-          {/* Main Video (Host) */}
-          {participants.find(p => p.isHost)?.video ? (
-            <div className="w-full h-full bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] flex items-center justify-center relative">
-              {/* Animated pulses for "Live" effect */}
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)] from-primary/40 leading-none"></div>
-              
-              <div className="w-40 h-40 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white text-5xl font-black shadow-2xl relative z-10">
-                {participants.find(p => p.isHost)?.name.charAt(0)}
-                <div className="absolute -inset-4 bg-primary/20 rounded-full animate-ping opacity-30"></div>
-              </div>
-              
-              {/* Studio Overlay Labels */}
-              <div className="absolute top-6 left-6 flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-md shadow-lg">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                  <span className="text-white text-[10px] font-black tracking-widest uppercase">LIVE</span>
-                </div>
-                <div className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-md border border-white/10">
-                  <span className="text-white/80 text-[10px] font-bold tracking-widest uppercase">REC 00:45:12</span>
-                </div>
-              </div>
-
-              {/* Speaker Identity Tag */}
-              <div className="absolute bottom-6 left-6">
-                <div className="bg-black/60 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-2xl flex flex-col">
-                  <span className="text-primary text-[10px] font-black tracking-widest uppercase mb-1">Speaker</span>
-                  <span className="text-white text-xl font-bold">{participants.find(p => p.isHost)?.name}</span>
-                  <span className="text-white/40 text-[10px] mt-1 font-medium tracking-wide uppercase italic">Lead Instructor @ SkillDad</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full h-full bg-[#0a0a0a] flex items-center justify-center">
-              <div className="text-center">
-                <VideoOff className="w-20 h-20 text-white/10 mx-auto mb-4" />
-                <p className="text-white/20 font-bold uppercase tracking-widest text-xs">Camera is Off</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Participants Sidebar/Ribbon (Minimized) */}
-      <div className="absolute top-24 right-10 flex flex-col gap-3 z-50">
-        <div className="bg-black/40 backdrop-blur-md p-2 rounded-2xl border border-white/10 flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group/p relative cursor-pointer hover:bg-white/10 transition-colors">
-            <Users size={16} className="text-white/40 group-hover/p:text-primary transition-colors" />
-            <div className="absolute left-0 top-0 translate-x-[-110%] bg-black/80 p-2 rounded-lg border border-white/10 opacity-0 group-hover/p:opacity-100 pointer-events-none transition-opacity whitespace-nowrap">
-              <span className="text-white text-[10px] font-bold uppercase">{participants.length} Active Participants</span>
-            </div>
-          </div>
-          <div className="w-px h-6 bg-white/10"></div>
-          {participants.filter(p => !p.isHost).slice(0, 3).map((p, i) => (
-             <div key={p.id} className="w-10 h-10 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer shadow-lg">
-                <span className="text-white/60 text-xs font-bold">{p.name.charAt(0)}</span>
-             </div>
-          ))}
-          {participants.length > 4 && (
-            <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-              <span className="text-white/40 text-[10px] font-bold">+{participants.length - 4}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Chat Preview Overlay (Bottom Left) */}
-      <div className="absolute bottom-28 left-10 z-50 pointer-events-none max-w-xs">
-        <div className="space-y-2 opacity-60">
-           <div className="bg-black/40 backdrop-blur-sm p-3 rounded-xl border border-white/10 flex gap-2 items-start">
-              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex-shrink-0 flex items-center justify-center text-[10px] text-blue-400 font-bold">S</div>
-              <div>
-                <p className="text-white/40 text-[9px] font-bold uppercase">Sarah M.</p>
-                <p className="text-white/90 text-[11px] leading-tight mt-0.5">This architecture is amazing! Love the Microservices approach.</p>
-              </div>
-           </div>
-        </div>
-      </div>
-
-      {/* Professional Studio Control Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black via-[#0a0a0b]/95 to-transparent border-t border-white/5 flex items-center justify-center px-10 z-[60]">
-        <div className="w-full max-w-5xl flex items-center justify-between">
-          {/* Left: AV Controls */}
-          <div className="flex items-center gap-4">
-             <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 mr-2">
-                <button
-                  onClick={toggleAudio}
-                  className={`p-3 rounded-lg transition-all ${audioEnabled
-                      ? 'text-white/60 hover:text-white hover:bg-white/10'
-                      : 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                    }`}
-                >
-                  {audioEnabled ? <Mic size={18} /> : <MicOff size={18} />}
-                </button>
-                <button
-                  onClick={toggleVideo}
-                  className={`p-3 rounded-lg transition-all ${videoEnabled
-                      ? 'text-white/60 hover:text-white hover:bg-white/10'
-                      : 'bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                    }`}
-                >
-                  {videoEnabled ? <Video size={18} /> : <VideoOff size={18} />}
-                </button>
-             </div>
-
-             {isHost && (
-               <button className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2.5 rounded-xl border border-primary/20 transition-all group">
-                 <Share2 size={16} />
-                 <span className="text-[11px] font-black tracking-widest uppercase">Share Stream</span>
-               </button>
-             )}
-          </div>
-
-          {/* Center: Main Broadcast Actions */}
-          <div className="flex items-center gap-6">
-            <button className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-1 group">
-              <MessageSquare size={18} />
-              <span className="text-[9px] font-bold tracking-widest uppercase group-hover:text-primary transition-colors">Chat</span>
-            </button>
-            <button className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-1 group">
-              <Users size={18} />
-              <span className="text-[9px] font-bold tracking-widest uppercase group-hover:text-primary transition-colors">Audience</span>
-            </button>
-            <div className="w-px h-8 bg-white/10 mx-2"></div>
-            <button className="text-white/40 hover:text-primary transition-colors flex flex-col items-center gap-1 group">
-              <Settings size={18} />
-              <span className="text-[9px] font-bold tracking-widest uppercase group-hover:text-primary transition-colors">Settings</span>
-            </button>
-          </div>
-
-          {/* Right: Exit Action */}
-          <div className="flex items-center gap-6">
-             {isHost && (
-               <div className="flex flex-col items-end mr-4">
-                 <span className="text-red-500 text-[10px] font-black tracking-[0.2em] uppercase mb-1">Broadcasting</span>
-                 <span className="text-white/40 text-[9px] font-semibold tabular-nums">01:14:45</span>
-               </div>
-             )}
-             <button
-                onClick={handleLeave}
-                className="group relative px-8 py-3 bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white text-[11px] font-black rounded-xl border border-red-500/30 hover:border-red-600 transition-all duration-300 tracking-[0.1em] shadow-[0_0_30px_rgba(239,68,68,0.1)] hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]"
-             >
-                {isHost ? 'END BROADCAST' : 'LEAVE STUDIO'}
-             </button>
-          </div>
-        </div>
-      </div>
-      {/* Custom Confirmation Modal using Portal to prevent flickering */}
+      {/* ── end confirm modal ── */}
       {showEndConfirm && createPortal(
-        <div 
-          className="fixed inset-0 z-[30000] flex items-center justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-300"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-        >
-          <div className="w-full max-w-sm p-10 bg-[#0a0a0b] border border-white/10 rounded-[2.5rem] shadow-2xl animate-in zoom-in-95 duration-500">
-            <div className="w-20 h-20 mx-auto mb-8 rounded-[1.5rem] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-inner">
-              <div className="w-4 h-4 bg-red-600 rounded-full animate-pulse shadow-[0_0_20px_rgba(220,38,38,0.8)]"></div>
-            </div>
-            <h3 className="text-2xl font-black text-white text-center mb-3 tracking-tight">End Session?</h3>
-            <p className="text-white/40 text-center text-xs mb-10 leading-relaxed font-medium px-4">
-              STUDIO SIMULATION: This will terminate the mock session and sync database state immediately.
+        <div className="fixed inset-0 z-[30000] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={e => { e.preventDefault(); e.stopPropagation(); }}>
+          <div className="w-full max-w-sm bg-[#2d2d2d] border border-white/10 rounded-xl shadow-2xl p-6 animate-in zoom-in-95 duration-200">
+            <h3 className="text-white text-base font-semibold mb-2">End Meeting for All?</h3>
+            <p className="text-white/50 text-sm mb-6 leading-relaxed">
+              This will end the meeting for all participants and cannot be undone.
             </p>
-            <div className="flex gap-4">
-              <button
-                disabled={isEnding}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowEndConfirm(false); }}
-                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all"
-              >
+            <div className="flex gap-3">
+              <button disabled={isEnding}
+                onClick={e => { e.preventDefault(); e.stopPropagation(); setShowEndConfirm(false); }}
+                className="flex-1 py-2.5 bg-white/10 hover:bg-white/15 text-white rounded text-sm font-medium transition-colors">
                 Cancel
               </button>
-              <button
-                disabled={isEnding}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); confirmEndSession(); }}
-                className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all flex items-center justify-center gap-3 active:scale-95 shadow-[0_15px_30px_rgba(220,38,38,0.3)]"
-              >
-                {isEnding ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <X size={16} />
-                    Confirm
-                  </>
-                )}
+              <button disabled={isEnding}
+                onClick={e => { e.preventDefault(); e.stopPropagation(); confirmEnd(); }}
+                className="flex-1 py-2.5 bg-[#e02020] hover:bg-[#c01010] text-white rounded text-sm font-semibold transition-colors flex items-center justify-center gap-2">
+                {isEnding
+                  ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : 'End Meeting for All'}
               </button>
             </div>
           </div>
@@ -357,5 +371,46 @@ const MockZoomMeeting = ({ sessionId, isHost = false, onLeave }) => {
     </div>
   );
 };
+
+/* ── VideoTile ── */
+const VideoTile = ({ participant: p, isActive, large = false }) => (
+  <div className={`
+    zoom-tile
+    ${large ? 'zoom-tile--large' : 'zoom-tile--thumb'}
+    ${isActive ? 'zoom-tile--active' : ''}
+  `}>
+    <div className={`w-full h-full flex items-center justify-center ${p.video ? 'bg-gradient-to-br from-[#2a2a3e] to-[#1a1a2e]' : 'bg-[#2d2d2d]'}`}>
+      <div className={`rounded-full flex items-center justify-center text-white font-bold shadow-lg
+        ${large ? 'w-24 h-24 text-4xl' : 'w-10 h-10 text-lg'}
+        ${p.isHost ? 'bg-[#0e72ed]' : 'bg-[#444]'}
+      `}>
+        {p.name.charAt(0).toUpperCase()}
+      </div>
+    </div>
+    {/* name tag */}
+    <div className="zoom-tile__name">
+      {!p.audio && <MicOff size={large ? 11 : 9} className="text-red-400 flex-shrink-0" />}
+      <span className="truncate">{p.name}{p.isHost ? ' (Host)' : ''}</span>
+    </div>
+    {/* active speaker pulse */}
+    {isActive && <div className="zoom-tile__speaker-ring" />}
+  </div>
+);
+
+/* ── CtrlBtn ── */
+const CtrlBtn = ({ icon, label, danger, active, onClick, chevron, badge }) => (
+  <button onClick={onClick} className={`zoom-ctrl-btn ${danger ? 'zoom-ctrl-btn--danger' : ''} ${active ? 'zoom-ctrl-btn--active' : ''}`}>
+    <span className="relative">
+      {icon}
+      {chevron && <ChevronUp size={9} className="absolute -right-3 -top-0.5 text-white/30" />}
+      {badge != null && (
+        <span className="absolute -top-2 -right-2 bg-[#0e72ed] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+          {badge}
+        </span>
+      )}
+    </span>
+    <span className="zoom-ctrl-btn__label">{label}</span>
+  </button>
+);
 
 export default MockZoomMeeting;

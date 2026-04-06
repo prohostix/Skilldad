@@ -36,6 +36,7 @@ import CountingNumber from '../components/ui/CountingNumber';
 import Animated3DShape from '../components/landing/Animated3DShape';
 import Animated3DSphere from '../components/landing/Animated3DSphere';
 import UniversityOrb3D from '../components/landing/UniversityOrb3D';
+import { getMediaUrl } from '../utils/media';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -191,8 +192,8 @@ const LandingPage = () => {
             location: u.profile?.location || 'Global',
             students: u.studentCount > 0 ? `${u.studentCount}+` : '1,200+',
             programs: u.courseCount > 0 ? `${u.courseCount}+` : '24+',
-            logo: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
-            image: u.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+            logo: u.profileImage ? getMediaUrl(u.profileImage) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+            image: u.profileImage ? getMediaUrl(u.profileImage) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
             description: u.bio || 'World-class institution providing excellence in global education through SkillDad.',
             established: u.profile?.foundedYear || u.profile?.established || (u.createdAt ? new Date(u.createdAt).getFullYear() : '2023'),
             rating: (4.8 + (Math.random() * 0.15)).toFixed(1), // Dynamic-ish rating
@@ -747,7 +748,7 @@ const LandingPage = () => {
                                         <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/40 group-hover:border-primary transition-all relative">
                                             <img
-                                                src={director.imageUrl || director.image}
+                                                src={(director.imageUrl || director.image) ? getMediaUrl(director.imageUrl || director.image) : ''}
                                                 alt={director.name}
                                                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
                                                 onError={(e) => {

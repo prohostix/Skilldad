@@ -4,15 +4,21 @@
  */
 export const getMediaUrl = (path) => {
     if (!path) return '';
-    if (path.startsWith('http')) return path;
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
     
-    // Ensure path starts with a slash
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    let normalizedPath = path;
     
-    // In production, use the current origin if not configured
+    if (!normalizedPath.startsWith('/') && !normalizedPath.startsWith('uploads/')) {
+        if (!normalizedPath.startsWith('assets/')) {
+             normalizedPath = `/uploads/${normalizedPath}`;
+        } else {
+             normalizedPath = `/${normalizedPath}`;
+        }
+    } else if (normalizedPath.startsWith('uploads/')) {
+        normalizedPath = `/${normalizedPath}`;
+    }
+    
     const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
-    
-    // Check if the path is already relative to the app (e.g., starts with /assets or /uploads)
     return `${baseUrl}${normalizedPath}`;
 };
 

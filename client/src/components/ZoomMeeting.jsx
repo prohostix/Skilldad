@@ -1,141 +1,138 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import ZoomMtgEmbedded from '@zoom/meetingsdk/embedded';
 import axios from 'axios';
-import { Video, Radio, X } from 'lucide-react';
+import { Radio, X, WifiOff, RefreshCw } from 'lucide-react';
 import MockZoomMeeting from './MockZoomMeeting';
 import './ZoomMeeting.css';
 
 /**
- * ZoomMeeting Component
- * Embeds Zoom Meeting SDK for joining live sessions
+ * ZoomMeeting
+ * Embeds the Zoom Meeting SDK Embedded client.
+ * All join/leave/end logic is preserved exactly.
+ * UI improvements: loading state, error fallback, cleanup on unmount,
+ * responsive wrapper, single Leave/End button via parent header.
  */
 const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onError }) => {
-  // refs to track initialization status and client to avoid re-render loops
   const initializationInProgress = useRef(false);
-  const isInitializedRef = useRef(false); // Renamed to avoid any potential shadowing/naming collision
-  const zoomClient = useRef(null);
-  const meetingSDKElement = useRef(null);
+  const isInitializedRef         = useRef(false);
+  const zoomClient               = useRef(null);
+  const meetingSDKElement        = useRef(null);
+  const mountedRef               = useRef(true);
 
-  const [useMockMode, setUseMockMode] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showEndConfirm, setShowEndConfirm] = useState(false);
-  const [isEnding, setIsEnding] = useState(false);
+  const [useMockMode,     setUseMockMode]     = useState(false);
+  const [loading,         setLoading]         = useState(true);
+  const [loadingStep,     setLoadingStep]      = useState('Connecting…');
+  const [error,           setError]           = useState(null);
+  const [showEndConfirm,  setShowEndConfirm]  = useState(false);
+  const [isEnding,        setIsEnding]        = useState(false);
 
+  const observerRef = useRef(null);
+
+  /* ── Cleanup on unmount ─────────────────────────────────── */
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        if (observerRef.current._intervalId) {
+          clearInterval(observerRef.current._intervalId);
+        }
+      }
+      if (zoomClient.current) {
+        try { zoomClient.current.leaveMeeting(); } catch (_) {}
+        zoomClient.current = null;
+      }
+    };
+  }, []);
+
+  /* ── SDK Initialization ─────────────────────────────────── */
+  useEffect(() => {
+    if (!sessionId || initializationInProgress.current || isInitializedRef.current) return;
 
     const initializeZoom = async () => {
-      // Prevent multiple initialization attempts
-      if (!sessionId || initializationInProgress.current || isInitializedRef.current) {
-        console.log('[Zoom] Skipping initialization - already in progress or initialized');
-        return;
-      }
-
-      console.log('[Zoom] Starting initialization...');
       initializationInProgress.current = true;
+      console.log('[Zoom] Starting initialization…');
 
-      // Small pre-flight delay to ensure DOM and libraries are fully ready
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 100)); // DOM settle
 
       try {
-        if (!mounted) return;
+        if (!mountedRef.current) return;
 
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-        const token = propToken || localStorage.getItem('token') || userInfo.token;
-
-        if (!token) {
-          throw new Error('Authentication required. Please log in.');
-        }
+        const token    = propToken || localStorage.getItem('token') || userInfo.token;
+        if (!token) throw new Error('Authentication required. Please log in.');
 
         const config = {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         };
 
-        const response = await axios.get(`/api/sessions/${sessionId}/zoom-config`, config);
-        const sdkConfig = response.data;
+        setLoadingStep('Fetching session config…');
+        const { data: sdkConfig } = await axios.get(`/api/sessions/${sessionId}/zoom-config`, config);
+        if (!mountedRef.current) return;
 
-        if (!mounted) return;
-
-        if (sdkConfig.sdkKey && sdkConfig.sdkKey.startsWith('MOCK_')) {
+        // Mock mode
+        if (sdkConfig.sdkKey?.startsWith('MOCK_')) {
           setUseMockMode(true);
           setLoading(false);
           initializationInProgress.current = false;
           return;
         }
 
-        // Wait for the DOM element to be ready
-        let retryCount = 0;
-        const maxRetries = 20; // Reduced retries
-        while (!meetingSDKElement.current && retryCount < maxRetries && mounted) {
-          retryCount++;
-          await new Promise(resolve => setTimeout(resolve, 50)); // Faster polling
+        // Wait for mount point
+        setLoadingStep('Preparing meeting room…');
+        let retries = 0;
+        while (!meetingSDKElement.current && retries < 20 && mountedRef.current) {
+          retries++;
+          await new Promise(r => setTimeout(r, 50));
+        }
+        if (!meetingSDKElement.current) throw new Error('Meeting container failed to initialize');
+        if (!mountedRef.current) return;
+
+        console.log('[Zoom] DOM ready, initializing SDK…');
+
+        // Destroy stale client
+        if (zoomClient.current) {
+          try { zoomClient.current.leaveMeeting(); } catch (_) {}
+          zoomClient.current = null;
         }
 
-        if (!meetingSDKElement.current) {
-          throw new Error('Meeting container failed to initialize');
-        }
-
-        if (!mounted) return;
-
-        console.log('[Zoom] DOM element ready, initializing SDK...');
-
-        // Create and store client in ref
         const client = ZoomMtgEmbedded.createClient();
         zoomClient.current = client;
 
+        setLoadingStep('Loading Zoom SDK…');
         await client.init({
           zoomAppRoot: meetingSDKElement.current,
           language: 'en-US',
           leaveOnPageUnload: true,
-          sdkKey: sdkConfig.sdkKey,
           customize: {
             video: {
-              isResizable: true,
-              viewSizes: {
-                default: { width: 1000, height: 600 },
-                ribbon: { width: 300, height: 700 }
-              },
-              popper: {
-                disableDraggable: true
-              }
+              isResizable: false,
+              defaultViewType: 'gallery',
+              popper: { disableDraggable: true },
             },
-            chat: {
-              isVisible: true,
-              isResizable: true,
-              anchor: 'right'
-            }
-          }
+            chat: { isVisible: true, anchor: 'right' },
+            meetingInfo: ['topic', 'host', 'mn', 'pwd', 'telPwd', 'invite', 'participant', 'dc', 'enctype'],
+          },
         });
 
-        // Optimized stabilization delay to remove perceived lag
-        console.log('[Zoom] SDK initialized. Stabilization delay (800ms)...');
-        if (!mounted) return;
+        console.log('[Zoom] SDK initialized. Stabilizing…');
+        if (!mountedRef.current) return;
         await new Promise(r => setTimeout(r, 800));
 
-        console.log('[Zoom] Joining meeting...');
-
-        // Clean modern join options avoiding deprecated keys and crash-inducing gallery limits
-        try {
-          await client.join({
-            signature: sdkConfig.signature,
-            meetingNumber: sdkConfig.meetingNumber,
-            password: sdkConfig.passWord,
-            userName: sdkConfig.userName,
-            userEmail: sdkConfig.userEmail
-          });
-        } catch (joinErr) {
-          console.warn('[Zoom] Initial join failed...', joinErr);
-          throw joinErr;
-        }
+        setLoadingStep('Joining meeting…');
+        console.log('[Zoom] Joining meeting…');
+        await client.join({
+          signature:     sdkConfig.signature,
+          meetingNumber: sdkConfig.meetingNumber,
+          password:      sdkConfig.passWord,
+          userName:      sdkConfig.userName,
+          userEmail:     sdkConfig.userEmail,
+        });
 
         console.log('[Zoom] Successfully joined meeting');
 
-        // Mark session as live in backend for students to join
         if (isHost) {
           try {
             await axios.put(`/api/sessions/${sessionId}/start`, {}, config);
@@ -145,222 +142,235 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
           }
         }
 
-        if (mounted) {
+        if (mountedRef.current) {
           isInitializedRef.current = true;
           setLoading(false);
+
+          // MutationObserver: re-show toolbar whenever SDK hides it via inline styles
+          // This handles screen share mode where SDK sets display:none on the footer
+          const startToolbarObserver = () => {
+            const root = meetingSDKElement.current;
+            if (!root) return;
+
+            // All selectors the SDK uses for its toolbar
+            const TOOLBAR_SELECTORS = [
+              '.footer',
+              '.footer__btns-container',
+              '#wc-footer',
+              '.wc-footer',
+              '[class*="wc-footer"]',
+              '[class*="meeting-footer"]',
+              '[class*="footer-container"]',
+            ];
+
+            const forceShowToolbar = () => {
+              TOOLBAR_SELECTORS.forEach(sel => {
+                root.querySelectorAll(sel).forEach(el => {
+                  // Always force visible regardless of current state
+                  el.style.setProperty('display', 'flex', 'important');
+                  el.style.setProperty('visibility', 'visible', 'important');
+                  el.style.setProperty('opacity', '1', 'important');
+                  el.style.setProperty('pointer-events', 'auto', 'important');
+                  el.style.setProperty('height', 'auto', 'important');
+                  el.style.setProperty('min-height', '64px', 'important');
+                  el.style.setProperty('overflow', 'visible', 'important');
+                  el.style.setProperty('position', 'relative', 'important');
+                  el.style.setProperty('z-index', '1000', 'important');
+                });
+              });
+            };
+
+            // MutationObserver as primary watcher
+            observerRef.current = new MutationObserver(() => {
+              forceShowToolbar();
+            });
+
+            observerRef.current.observe(root, {
+              subtree: true,
+              attributes: true,
+              attributeFilter: ['style', 'class'],
+              childList: true,
+            });
+
+            // setInterval as fallback — runs every 500ms to catch
+            // cases where SDK re-hides toolbar after observer fires
+            const intervalId = setInterval(() => {
+              if (!mountedRef.current) {
+                clearInterval(intervalId);
+                return;
+              }
+              forceShowToolbar();
+
+              // If SDK is in minimized/suspension mode, click the expand button
+              // to force it back to full view
+              const expandBtn = root.querySelector(
+                '[class*="suspension-window"] [class*="expand"], ' +
+                '[class*="suspension-window"] button[title*="expand" i], ' +
+                '[class*="suspension-window"] button[aria-label*="expand" i], ' +
+                '[class*="minimize"] button[class*="restore"], ' +
+                '[class*="wc-mini"] button'
+              );
+              if (expandBtn) {
+                expandBtn.click();
+                console.log('[Zoom] Clicked expand button to exit minimized mode');
+              }
+            }, 500);
+
+            // Store interval id for cleanup
+            observerRef.current._intervalId = intervalId;
+
+            // Run once immediately
+            forceShowToolbar();
+          };
+
+          startToolbarObserver();
         }
 
       } catch (err) {
-        // Advanced error serialization for better diagnostics
-        const errorDetails = {};
-        if (err) {
-          Object.getOwnPropertyNames(err).forEach(key => {
-            errorDetails[key] = err[key];
-          });
-        }
-        console.error('[Zoom] Error details:', errorDetails);
+        const details = {};
+        if (err) Object.getOwnPropertyNames(err).forEach(k => { details[k] = err[k]; });
+        console.error('[Zoom] Error details:', details);
 
-        if (!mounted) return;
+        if (!mountedRef.current) return;
 
-        const errorMessage = err.response?.data?.message || err.message || 'Failed to join meeting';
-        setError(errorMessage);
+        const msg = err.response?.data?.message || err.message || 'Failed to join meeting';
+        setError(msg);
         setLoading(false);
-
-        // Reset flags so user can try again without refresh
-        isInitializedRef.current = false;
+        isInitializedRef.current         = false;
         initializationInProgress.current = false;
-
-        if (onError) {
-          onError(errorMessage);
-        }
+        onError?.(msg);
       } finally {
         initializationInProgress.current = false;
       }
     };
 
-    if (sessionId && !isInitializedRef.current) {
-      initializeZoom();
-    }
+    initializeZoom();
+  }, [sessionId, propToken, onError, isHost]);
 
-    return () => {
-      mounted = false;
-      // Note: We don't automatically leave here to prevent re-render flickers, 
-      // the leaveMeeting() is handled by the manual Leave button or page unload.
-    };
-  }, [sessionId, propToken, onError]); // isHost removed from deps as it doesn't change init logic
-
-  const handleLeave = async (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    console.log('[Zoom] handleLeave triggered, isHost:', isHost);
-    
-    // If not host, just leave
-    if (!isHost) {
-      exitMeeting();
-      return;
-    }
-
-    // Show custom confirmation modal for host
+  /* ── Leave / End handlers ───────────────────────────────── */
+  const handleLeave = useCallback((e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!isHost) { exitMeeting(); return; }
     setShowEndConfirm(true);
-  };
+  }, [isHost]);
 
   const confirmEndSession = async () => {
     setIsEnding(true);
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      const token = propToken || localStorage.getItem('token') || userInfo.token;
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
-      
-      console.log(`[Zoom] Host is ending session ${sessionId}...`);
-      await axios.put(`/api/sessions/${sessionId}/end`, {}, config);
-      console.log(`[Zoom] Session ${sessionId} marked as ended in database.`);
-      
+      const token    = propToken || localStorage.getItem('token') || userInfo.token;
+      await axios.put(`/api/sessions/${sessionId}/end`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      console.log(`[Zoom] Session ${sessionId} ended.`);
       exitMeeting();
     } catch (err) {
-      console.error('[Zoom] Failed to update session status on leave:', err.message);
+      console.error('[Zoom] Failed to end session:', err.message);
       setIsEnding(false);
       setShowEndConfirm(false);
-      // Fallback: still let them leave if it's really stuck
-      if (window.confirm("Backend update failed. Force exit studio?")) {
-        exitMeeting();
-      }
+      if (window.confirm('Backend update failed. Force exit?')) exitMeeting();
     }
   };
 
   const exitMeeting = () => {
     if (zoomClient.current) {
-      try {
-        zoomClient.current.leaveMeeting();
-      } catch (err) {
-        console.error('[Zoom] Error leaving meeting:', err);
-      }
+      try { zoomClient.current.leaveMeeting(); } catch (e) { console.error('[Zoom] leaveMeeting error:', e); }
     }
-    if (onLeave) {
-      onLeave();
-    }
+    onLeave?.();
   };
 
+  /* ── Retry ──────────────────────────────────────────────── */
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    setLoadingStep('Connecting…');
+    isInitializedRef.current         = false;
+    initializationInProgress.current = false;
+  };
+
+  /* ── Mock mode ──────────────────────────────────────────── */
   if (useMockMode) {
     return <MockZoomMeeting sessionId={sessionId} isHost={isHost} onLeave={handleLeave} />;
   }
 
+  /* ── Error state ────────────────────────────────────────── */
   if (error) {
     return (
-      <div className="w-full h-full min-h-[600px] flex items-center justify-center bg-[#0a0a0b] border border-red-500/30 rounded-xl overflow-hidden">
-        <div className="text-center p-8 max-w-md">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-            <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <div className="zm-error-screen">
+        <div className="zm-error-card">
+          <div className="zm-error-icon">
+            <WifiOff size={32} />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Studio Connection Failed</h3>
-          <p className="text-white/40 text-sm mb-8 leading-relaxed">{error}</p>
-          <button
-            onClick={onLeave}
-            className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white text-xs font-black tracking-widest uppercase transition-all"
-          >
-            Return to Dashboard
-          </button>
+          <h3 className="zm-error-title">Unable to Join Meeting</h3>
+          <p className="zm-error-msg">{error}</p>
+          <div className="zm-error-actions">
+            <button className="zm-btn-retry" onClick={handleRetry}>
+              <RefreshCw size={15} />
+              Try Again
+            </button>
+            <button className="zm-btn-leave" onClick={onLeave}>
+              Return to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  /* ── Main render ────────────────────────────────────────── */
   return (
-    <div className="relative w-full h-full min-h-[600px] bg-black rounded-xl overflow-hidden shadow-2xl">
+    <div
+      className="zoom-sdk-wrapper"
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+    >
+      {/* SDK mount point */}
       <div
+        id="zoom-sdk-root"
         ref={meetingSDKElement}
-        className="w-full h-full zoom-meeting-container"
-        style={{ width: '100%', height: '100%', position: 'relative' }}
+        className="zoom-meeting-container"
       />
 
+      {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
-          <div className="text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-            <p className="text-white font-black tracking-[0.3em] uppercase text-sm">Connecting to Live Studio</p>
-            <p className="text-white/40 text-[10px] mt-2 font-medium tracking-widest uppercase">Initializing Secure Broadcast Stream...</p>
+        <div className="zm-loading-overlay">
+          <div className="zm-loading-card">
+            <div className="zm-loading-spinner" />
+            <p className="zm-loading-title">Joining Meeting</p>
+            <p className="zm-loading-step">{loadingStep}</p>
           </div>
         </div>
       )}
 
-      {isInitializedRef.current && (
-        <>
-          {/* Top Bar Indicator - Professional Studio Style */}
-          <div className="absolute top-6 left-8 z-[10003] pointer-events-none animate-in fade-in slide-in-from-top-4 duration-1000">
-            <div className="flex items-center gap-4 bg-black/60 backdrop-blur-xl px-5 py-2.5 rounded-2xl border border-white/10 shadow-2xl">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 bg-red-600 rounded-full animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.8)]"></div>
-                <span className="text-white text-[11px] font-black uppercase tracking-[0.25em]">Live Studio</span>
-              </div>
-              <div className="w-px h-4 bg-white/10"></div>
-              <div className="flex items-center gap-2">
-                 <Video size={14} className="text-primary" />
-                 <span className="text-white/60 text-[10px] font-bold tracking-widest uppercase">{sessionId}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Premium Leave/End Button */}
-          <div className="absolute top-6 right-8 z-[10003] animate-in fade-in slide-in-from-top-4 duration-1000">
-            <button
-              onClick={handleLeave}
-              className="group relative px-8 py-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white text-[11px] font-black rounded-2xl border border-red-500/30 hover:border-red-600 transition-all duration-300 flex items-center gap-3 overflow-hidden shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-red-600 opacity-0 group-hover:opacity-10 transition-opacity"></div>
-              <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span className="tracking-[0.15em]">{isHost ? 'END BROADCAST' : 'LEAVE STUDIO'}</span>
-            </button>
-          </div>
-
-          {/* Bottom Branding Watermark */}
-          <div className="absolute bottom-6 right-8 z-[10003] pointer-events-none opacity-40">
-            <p className="text-white text-[10px] font-black tracking-[0.4em] uppercase">SkillDad Studio Pro</p>
-          </div>
-        </>
-      )}
-      {/* Custom Confirmation Modal using Portal to prevent flickering/blinking */}
+      {/* End meeting confirmation modal */}
       {showEndConfirm && createPortal(
-        <div 
-          className="fixed inset-0 z-[30000] flex items-center justify-center bg-black/80 backdrop-blur-xl animate-in fade-in duration-300"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        <div
+          className="zm-confirm-backdrop"
+          onClick={e => { e.preventDefault(); e.stopPropagation(); }}
         >
-          <div className="w-full max-w-md p-10 bg-[#0a0a0b] border border-white/10 rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] animate-in zoom-in-95 duration-500">
-            <div className="w-20 h-20 mx-auto mb-8 rounded-[1.5rem] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-inner">
-              <Radio size={40} className="animate-pulse" />
+          <div className="zm-confirm-card">
+            <div className="zm-confirm-icon">
+              <Radio size={28} className="animate-pulse" />
             </div>
-            <h3 className="text-2xl font-black text-white text-center mb-3 tracking-tight">End Broadcast?</h3>
-            <p className="text-white/40 text-center text-sm mb-10 leading-relaxed font-medium">
-              This will disconnect all audience members and immediately begin the recording archival process in your dashboard.
+            <h3 className="zm-confirm-title">End Meeting for All?</h3>
+            <p className="zm-confirm-msg">
+              This will disconnect all participants and archive the recording.
             </p>
-            <div className="flex gap-5">
+            <div className="zm-confirm-actions">
               <button
                 disabled={isEnding}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowEndConfirm(false); }}
-                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all border border-white/5 hover:border-white/10"
+                className="zm-confirm-cancel"
+                onClick={e => { e.preventDefault(); e.stopPropagation(); setShowEndConfirm(false); }}
               >
                 Cancel
               </button>
               <button
                 disabled={isEnding}
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); confirmEndSession(); }}
-                className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white rounded-[1.25rem] text-[11px] font-black tracking-widest uppercase transition-all shadow-[0_15px_30px_rgba(220,38,38,0.4)] flex items-center justify-center gap-3 active:scale-95"
+                className="zm-confirm-end"
+                onClick={e => { e.preventDefault(); e.stopPropagation(); confirmEndSession(); }}
               >
-                {isEnding ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <X size={16} />
-                    Confirm End
-                  </>
-                )}
+                {isEnding
+                  ? <div className="zm-btn-spinner" />
+                  : <><X size={14} /> End for All</>
+                }
               </button>
             </div>
           </div>

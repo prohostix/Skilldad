@@ -68,6 +68,10 @@ const FinanceDashboard = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [selectedReportType, setSelectedReportType] = useState(null);
+    const [selectedPayout, setSelectedPayout] = useState(null);
+    const [payoutReviewNotes, setPayoutReviewNotes] = useState('');
+    const [payoutProofUrl, setPayoutProofUrl] = useState('');
+    const [uploadingProof, setUploadingProof] = useState(false);
 
     // Set active tab based on path
     useEffect(() => {
@@ -193,13 +197,8 @@ const FinanceDashboard = () => {
         }
     };
 
-    const handlePayoutAction = async (id, status) => {
+    const handlePayoutAction = async (id, status, notes, screenshotUrl) => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const notes = prompt(`Enter notes for ${status}:`);
-        let screenshotUrl = '';
-        if (status === 'approved') {
-            screenshotUrl = prompt('Enter Screenshot/Payment Proof URL:');
-        }
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             await axios.put(`/api/finance/payouts/${id}`, {
@@ -210,9 +209,38 @@ const FinanceDashboard = () => {
             showToast?.(`Payout ${status} successfully`, 'success');
             fetchStats();
             fetchPayoutHistory();
+            setSelectedPayout(null);
         } catch (error) {
             console.error('Error updating payout:', error);
             showToast?.('Failed to update payout', 'error');
+        }
+    };
+
+    const handlePayoutProofUpload = async (file) => {
+        if (!file) return;
+        setUploadingProof(true);
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const formData = new FormData();
+        formData.append('document', file);
+        formData.append('title', `Payout Proof - ${selectedPayout?.partner?.name}`);
+        formData.append('type', 'receipt');
+
+        try {
+            const config = { 
+                headers: { 
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'multipart/form-data'
+                } 
+            };
+            const { data } = await axios.post('/api/documents/upload', formData, config);
+            const finalUrl = data.fileUrl || data.file_url || data.url;
+            setPayoutProofUrl(finalUrl);
+            showToast?.('Proof uploaded successfully', 'success');
+        } catch (error) {
+            console.error('Error uploading proof:', error);
+            showToast?.('Failed to upload proof', 'error');
+        } finally {
+            setUploadingProof(false);
         }
     };
 
@@ -665,7 +693,7 @@ const FinanceDashboard = () => {
                                             ? (partner.profile?.universityName || partner.name)
                                             : partner.name;
                                         return (
-                                            <option key={partner._id} value={partner._id} className="text-black">
+                                            <option key={partner.id || partner._id} value={partner.id || partner._id} className="text-black">
                                                 {name} ({partner.role})
                                             </option>
                                         );
@@ -839,13 +867,21 @@ const FinanceDashboard = () => {
                                                 <td className="px-6 py-4 text-right">
                                                     <div className="flex items-center justify-end space-x-2">
                                                         <button
-                                                            onClick={() => handlePayoutAction(payout._id, 'approved')}
+                                                            onClick={() => {
+                                                                setSelectedPayout({ ...payout, _action: 'approved' });
+                                                                setPayoutReviewNotes('');
+                                                                setPayoutProofUrl('');
+                                                            }}
                                                             className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors"
                                                         >
                                                             <CheckCircle2 size={16} />
                                                         </button>
                                                         <button
-                                                            onClick={() => handlePayoutAction(payout._id, 'rejected')}
+                                                            onClick={() => {
+                                                                setSelectedPayout({ ...payout, _action: 'rejected' });
+                                                                setPayoutReviewNotes('');
+                                                                setPayoutProofUrl('');
+                                                            }}
                                                             className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
                                                         >
                                                             <XCircle size={16} />
@@ -890,7 +926,7 @@ const FinanceDashboard = () => {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <button
-                                                        onClick={() => window.open(payout.screenshotUrl || 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?q=80&w=1000&auto=format&fit=crop', '_blank')}
+                                                        onClick={() => window.open(payout.screenshotUrl ? `/${payout.screenshotUrl}` : 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?q=80&w=1000&auto=format&fit=crop', '_blank')}
                                                         className="flex items-center space-x-1 text-primary hover:text-primary-light transition-colors ml-auto"
                                                     >
                                                         <Eye size={16} />
@@ -946,6 +982,103 @@ const FinanceDashboard = () => {
                 )}
             </div>
 
+            {/* Payout Review Modal */}
+            {selectedPayout && (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-slate-900 rounded-2xl p-8 max-w-lg w-full border border-white/10 shadow-2xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className={`text-xl font-bold ${selectedPayout._action === 'approved' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {selectedPayout._action === 'approved' ? 'Approve' : 'Reject'} Payout Request
+                            </h3>
+                            <button
+                                onClick={() => setSelectedPayout(null)}
+                                className="text-gray-400 hover:text-white p-2 hover:bg-white/5 rounded-lg"
+                            >
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                                <div className="flex justify-between text-sm mb-2">
+                                    <span className="text-gray-400 font-medium">Partner:</span>
+                                    <span className="text-white font-bold">{selectedPayout.partner?.name}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400 font-medium">Amount:</span>
+                                    <span className="text-emerald-400 font-black">₹{selectedPayout.amount.toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-wider">Review Notes</label>
+                                <textarea
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-white/10 transition-all font-medium min-h-[100px]"
+                                    placeholder="Enter reason for approval or rejection..."
+                                    value={payoutReviewNotes}
+                                    onChange={(e) => setPayoutReviewNotes(e.target.value)}
+                                />
+                            </div>
+
+                            {selectedPayout._action === 'approved' && (
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-wider">Payment Proof / Screenshot</label>
+                                    <div className="relative group">
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            id="payout-proof-upload"
+                                            accept="image/*"
+                                            onChange={(e) => handlePayoutProofUpload(e.target.files[0])}
+                                        />
+                                        <label
+                                            htmlFor="payout-proof-upload"
+                                            className="flex flex-col items-center justify-center w-full h-32 bg-white/5 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:bg-white/10 hover:border-primary/50 transition-all"
+                                        >
+                                            {uploadingProof ? (
+                                                <div className="flex flex-col items-center">
+                                                    <div className="w-8 h-8 border-3 border-primary/20 border-t-primary rounded-full animate-spin mb-2"></div>
+                                                    <span className="text-xs text-gray-400">Uploading...</span>
+                                                </div>
+                                            ) : payoutProofUrl ? (
+                                                <div className="flex flex-col items-center">
+                                                    <CheckCircle2 className="text-emerald-400 mb-2" size={28} />
+                                                    <span className="text-xs text-emerald-400 font-bold">Proof Uploaded Successfully</span>
+                                                    <span className="text-[10px] text-gray-500 mt-1 truncate max-w-[200px]">{payoutProofUrl}</span>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center">
+                                                    <Upload className="mx-auto text-gray-400 group-hover:text-primary transition-colors mb-2" size={28} />
+                                                    <p className="text-sm text-gray-400">Click to upload payment screenshot</p>
+                                                    <p className="text-[10px] text-gray-500 mt-1">Supports JPG, PNG (Max 5MB)</p>
+                                                </div>
+                                            )}
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex pt-4 space-x-3">
+                                <ModernButton
+                                    variant="secondary"
+                                    className="flex-1"
+                                    onClick={() => setSelectedPayout(null)}
+                                >
+                                    Cancel
+                                </ModernButton>
+                                <ModernButton
+                                    className={`flex-1 ${selectedPayout._action === 'approved' ? 'bg-emerald-500 hover:bg-emerald-600' : 'bg-red-500 hover:bg-red-600'}`}
+                                    onClick={() => handlePayoutAction(selectedPayout._id, selectedPayout._action, payoutReviewNotes, payoutProofUrl)}
+                                    disabled={uploadingProof || (selectedPayout._action === 'approved' && !payoutProofUrl)}
+                                >
+                                    Confirm {selectedPayout._action === 'approved' ? 'Approval' : 'Rejection'}
+                                </ModernButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Payment Screenshot Modal */}
             {selectedPayment && (
                 <div className="fixed inset-0 bg-black/80 flex items-start justify-center z-50 p-4 pt-20 overflow-y-auto">
@@ -984,7 +1117,7 @@ const FinanceDashboard = () => {
                             </div>
                             <div className="border border-white/10 rounded-lg overflow-hidden bg-white/5">
                                 <img
-                                    src={selectedPayment.screenshotUrl || 'https://images.unsplash.com/photo-1554224155-1696413565d3?q=80&w=1000&auto=format&fit=crop'}
+                                    src={selectedPayment.screenshotUrl ? (selectedPayment.screenshotUrl.startsWith('http') ? selectedPayment.screenshotUrl : `/${selectedPayment.screenshotUrl}`) : 'https://images.unsplash.com/photo-1554224155-1696413565d3?q=80&w=1000&auto=format&fit=crop'}
                                     alt="Payment proof"
                                     className="w-full h-auto max-h-[400px] object-contain mx-auto"
                                     onError={(e) => {

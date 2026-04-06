@@ -195,7 +195,7 @@ const CouponManager = () => {
                                 </tr>
                             ) : (
                                 filteredCoupons.map((coupon) => (
-                                    <tr key={coupon._id} className="group hover:bg-white/5 transition-all">
+                                    <tr key={coupon.id} className="group hover:bg-white/5 transition-all">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center space-x-3">
                                                 <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
@@ -234,7 +234,7 @@ const CouponManager = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                onClick={() => handleDeleteCoupon(coupon._id, coupon.code)}
+                                                onClick={() => handleDeleteCoupon(coupon.id, coupon.code)}
                                                 className="p-2 hover:bg-red-500/10 text-white/20 hover:text-red-500 rounded-xl transition-all"
                                             >
                                                 <Trash2 size={18} />
