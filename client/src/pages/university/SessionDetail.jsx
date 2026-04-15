@@ -306,23 +306,23 @@ const SessionDetail = () => {
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                   <div className="text-center md:text-left">
                     <h2 className="text-2xl font-bold text-white mb-2">
-                       {session.status === 'live' ? (isHost ? 'Ready to Broadcast?' : 'The Studio is Live!') : 'Scheduled for Broadcast'}
+                       {session.status === 'live' ? (isHost ? 'Studio is Live' : 'The Broadcast is Live!') : (isHost ? 'Ready to Broadcast?' : 'Scheduled for Broadcast')}
                     </h2>
                     <p className="text-white/40 text-sm max-w-md">
                       {session.status === 'live' 
-                        ? (isHost ? 'Your audience is waiting. Enter the studio to begin your session.' : 'Join now to participate in this interactive learning experience.')
-                        : `This session will go live at ${formatTime(session.startTime)}. Please return 5 minutes before the start time.`
+                        ? (isHost ? 'Your audience is watching. Enter the studio to resume your session.' : 'Join now to participate in this interactive learning experience.')
+                        : (isHost ? 'Enter the studio to prepare your camera. Your students will be notified the second you join!' : `This session will go live at ${formatTime(session.startTime)}. Please return 5 minutes before the start time.`)
                       }
                     </p>
                   </div>
                   
-                  {session.status === 'live' ? (
+                  {(session.status === 'live' || (session.status === 'scheduled' && isHost)) ? (
                     <button
                       onClick={handleStartMeeting}
                       className="whitespace-nowrap px-10 py-4 bg-primary hover:bg-primary/90 text-white text-[11px] font-black tracking-widest uppercase rounded-2xl shadow-[0_10px_30px_rgba(79,70,229,0.4)] transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3"
                     >
                       <Video size={18} />
-                      {isHost ? 'Enter Studio' : 'Watch Broadcast'}
+                      {session.status === 'live' ? (isHost ? 'Back to Studio' : 'Watch Broadcast') : 'Start Broadcast'}
                     </button>
                   ) : (
                     <div className="px-10 py-4 bg-white/5 border border-white/10 text-white/40 text-[10px] font-black tracking-widest uppercase rounded-2xl cursor-not-allowed italic">

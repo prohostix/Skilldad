@@ -159,6 +159,8 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/webhooks', require('./routes/webhookRoutes'));
 app.use('/api/discount', require('./routes/discountRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
+app.use('/api/study-abroad', require('./routes/studyAbroadRoutes'));
+app.use('/api/admin/study-abroad', require('./routes/adminStudyAbroadRoutes'));
 app.use('/api/discussions', require('./routes/discussionRoutes'));
 app.use('/', require('./routes/seoRoutes'));
 

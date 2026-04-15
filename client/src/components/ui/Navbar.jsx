@@ -34,7 +34,7 @@ const Navbar = ({ compact = false }) => {
         { name: 'Home', href: '/' },
         { name: 'Courses', href: '/courses' },
         { name: 'Universities', href: '/platform' },
-        { name: 'Partners', href: '/partners' },
+        { name: 'Study Abroad', href: '/study-abroad' },
         { name: 'Support', href: '/support' },
         { name: 'Services', href: '/services' },
         { name: 'About Us', href: '/about' },

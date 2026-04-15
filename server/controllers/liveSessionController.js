@@ -153,7 +153,21 @@ const getSession = asyncHandler(async (req, res) => {
         try { session.recording = JSON.parse(session.recording); } catch (e) {}
     }
 
-    res.json({ ...session, _id: session.id });
+    res.json({
+        ...session,
+        _id: session.id,
+        instructor: {
+            _id: session.instructor_id,
+            id: session.instructor_id,
+            name: session.instructor_name,
+            email: session.instructor_email
+        },
+        university: {
+            _id: session.university_id,
+            id: session.university_id,
+            name: session.university_name
+        }
+    });
 });
 
 // @desc    Start session

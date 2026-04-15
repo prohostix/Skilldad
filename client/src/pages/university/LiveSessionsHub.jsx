@@ -386,19 +386,18 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                             )}
                         </div>
 
-                        {/* Meeting Link */}
+                        {/* Meeting Link (Auto-Generated) */}
                         <div>
-                            <label className={labelCls}>Direct Meeting Link (Optional)</label>
-                            <div className="relative group">
-                                <Link size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
-                                <input
-                                    type="url"
-                                    name="meetingLink"
-                                    value={form.meetingLink}
-                                    onChange={handleChange}
-                                    className={`${inputCls} pl-10`}
-                                    placeholder="https://meet.skilldad.com/..."
-                                />
+                            <label className={labelCls}>Secure Video Meeting</label>
+                            <div className="flex items-center gap-3 p-3.5 bg-primary/10 border border-primary/20 rounded-xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/20 blur-2xl group-hover:bg-primary/30 transition-all pointer-events-none" />
+                                <div className="p-2 bg-primary/20 rounded-lg shrink-0">
+                                    <Video size={16} className="text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-[13px] font-bold text-white mb-0.5">Jitsi Meet Room</p>
+                                    <p className="text-[11px] text-white/50">A secure meeting link will be automatically generated upon scheduling.</p>
+                                </div>
                             </div>
                         </div>
 

@@ -116,24 +116,28 @@ const JitsiMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, on
         jwt={config.token}
         onApiReady={handleApiReady}
         configOverwrite={{
-          startWithAudioMuted: false,
-          startWithVideoMuted: false,
-          disableModeratorIndicator: false,
+          startWithAudioMuted: !isHost,
+          startWithVideoMuted: !isHost,
+          disableModeratorIndicator: !isHost,
           startScreenSharing: false,
           enableEmailInStats: false,
           prejoinPageEnabled: false,
-          fileRecordingsEnabled: true,
+          fileRecordingsEnabled: isHost,
           localRecording: {
-            enabled: true,
+            enabled: isHost,
             format: 'ogg'
           },
           // Suppress the unrecognised 'speaker-selection' browser feature warning
           disabledSounds: [],
-          toolbarButtons: [
+          toolbarButtons: isHost ? [
             'microphone', 'camera', 'desktop', 'fullscreen',
             'fodeviceselection', 'hangup', 'chat', 'recording',
             'settings', 'raisehand', 'videoquality', 'filmstrip',
             'tileview', 'help', 'mute-everyone', 'security', 'whiteboard'
+          ] : [
+            'fullscreen', 'hangup', 'chat',
+            'settings', 'raisehand', 'videoquality', 'filmstrip',
+            'tileview', 'help'
           ],
         }}
         interfaceConfigOverwrite={{

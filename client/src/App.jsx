@@ -26,6 +26,7 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Support = lazy(() => import('./pages/Support'));
 const AboutUs = lazy(() => import('./pages/AboutUs'));
 const Partners = lazy(() => import('./pages/Partners'));
+const StudyAbroad = lazy(() => import('./pages/StudyAbroad'));
 const Settings = lazy(() => import('./pages/Settings'));
 const CourseDetail = lazy(() => import('./pages/CourseDetail'));
 const HostRoom = lazy(() => import('./pages/HostRoom'));
@@ -103,6 +104,7 @@ const CommunicationHub = lazy(() => import('./pages/admin/CommunicationHub'));
 const CouponManager = lazy(() => import('./pages/admin/CouponManager'));
 const UniversityDetail = lazy(() => import('./pages/admin/UniversityDetail'));
 const ServicesManagement = lazy(() => import('./pages/admin/ServicesManagement'));
+const StudyAbroadManagement = lazy(() => import('./pages/admin/StudyAbroadManagement'));
 
 
 // Finance Pages
@@ -134,6 +136,7 @@ function App() {
                 <Route path="/services" element={<Services />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/partners" element={<Partners />} />
+                <Route path="/study-abroad" element={<StudyAbroad />} />
                 <Route path="/course/:courseId" element={<CourseDetail />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -240,6 +243,7 @@ function App() {
                     <Route path="support" element={<SupportManagement />} />
                     <Route path="faqs" element={<FAQManagement />} />
                     <Route path="services" element={<ServicesManagement />} />
+                    <Route path="study-abroad" element={<StudyAbroadManagement />} />
                     <Route path="settings" element={<Settings />} />
 
                   </Route>
