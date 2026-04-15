@@ -37,10 +37,9 @@ cd ../server
 # List PM2 processes to verify
 pm2 list
 
-# Restarting the service (assuming the PM2 process name exists)
-# If 'pm2 restart all' is too aggressive, you can use 'pm2 restart <app_name>'
-pm2 restart all
+# Restarting the service with increased memory limits
+pm2 restart skilldad-backend --node-args="--max-old-space-size=1024" || pm2 restart all --node-args="--max-old-space-size=1024"
 
 echo "✅ Update Complete!"
-echo "🌐 Verify the Admin Dashboard at: http://13.233.85.18/admin"
+echo "🌐 Verify the Admin Dashboard at: http://13.234.186.48/admin"
 echo "💡 Use 'pm2 logs' to monitor for any startup issues."

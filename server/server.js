@@ -244,26 +244,24 @@ const startServer = async () => {
     
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`.green.bold);
+      
+      const heapLimit = require('v8').getHeapStatistics().heap_size_limit;
+      console.log(`[Server] Memory Heap Limit: ${(heapLimit / 1024 / 1024).toFixed(2)} MB`.cyan);
 
-      // Self-ping every 14 minutes to prevent Render free-tier cold starts
-      if (process.env.NODE_ENV === 'production') {
-        const pingUrl = process.env.RENDER_EXTERNAL_URL
-          ? `${process.env.RENDER_EXTERNAL_URL}/health`
-          : 'https://skilldad-server.onrender.com/health';
+      // Self-ping every 14 minutes to prevent cold starts (primarily for Render, but kept for reliability)
+      const pingUrl = `http://localhost:${PORT}/health`;
+      console.log(`[KeepAlive] Starting self-ping every 14 min -> ${pingUrl}`);
 
-        console.log(`[KeepAlive] Starting self-ping every 14 min -> ${pingUrl}`);
-
-        setInterval(() => {
-          const https = require('https');
-          const http = require('http');
-          const client = pingUrl.startsWith('https') ? https : http;
-          client.get(pingUrl, (res) => {
-            console.log(`[KeepAlive] Ping -> ${res.statusCode}`);
-          }).on('error', (err) => {
-            console.warn('[KeepAlive] Ping failed:', err.message);
-          });
-        }, 14 * 60 * 1000); 
-      }
+      setInterval(() => {
+        const http = require('http');
+        http.get(pingUrl, (res) => {
+          if (res.statusCode !== 200) {
+            console.warn(`[KeepAlive] Ping received non-200 status: ${res.statusCode}`);
+          }
+        }).on('error', (err) => {
+          console.warn('[KeepAlive] Ping failed:', err.message);
+        });
+      }, 14 * 60 * 1000); 
     });
   } catch (error) {
     console.error('[Server] Critical failure during startup:'.red.bold, error);
