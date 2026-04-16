@@ -1,6 +1,6 @@
 
 const asyncHandler = require('express-async-handler');
-const { query } = require('../config/db');
+const { query } = require('../config/postgres');
 const crypto = require('crypto');
 
 // @desc    Get CMS content by page
