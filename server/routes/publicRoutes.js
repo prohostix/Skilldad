@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { query } = require('../config/postgres');
+const { getPageContent } = require('../controllers/cmsController');
 
 // @desc    Get active partner logos for landing page
 // @route   GET /api/public/partner-logos
@@ -21,7 +22,7 @@ router.get('/partner-logos', async (req, res) => {
 // @access  Public
 router.get('/directors', async (req, res) => {
     try {
-        const directorsRes = await query(`SELECT id as _id, name, title as role, image as "imageUrl", "order", category, bio, linkedin_url as "linkedinUrl", is_active as "isActive" FROM directors WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        const directorsRes = await query(`SELECT id as _id, name, title as role, image as "imageUrl", "order", category, bio, linkedin_url as "linkedinUrl", display_target, is_active as "isActive" FROM directors WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
         res.json(directorsRes.rows || []);
     } catch (error) {
         // Log error for debugging database connection issues
@@ -160,6 +161,11 @@ router.post('/demo-notification', require('../controllers/demoController').sendD
 // @route   GET /api/public/notification-logs
 // @access  Public
 router.get('/notification-logs', require('../controllers/demoController').getNotificationLogs);
+
+// @desc    Get CMS content by page
+// @route   GET /api/public/cms/:page
+// @access  Public
+router.get('/cms/:page', getPageContent);
 
 module.exports = router;
 

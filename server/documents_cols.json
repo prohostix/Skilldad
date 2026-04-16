@@ -1,0 +1,90 @@
+[
+  {
+    "column_name": "file_size",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "reviewed_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "is_required",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "deadline",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "tags",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "uploaded_by_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "student_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "university_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "file_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "column_name": "reviewed_by_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "rejection_reason",
+    "data_type": "text"
+  },
+  {
+    "column_name": "file_url",
+    "data_type": "text"
+  },
+  {
+    "column_name": "title",
+    "data_type": "text"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "type",
+    "data_type": "text"
+  },
+  {
+    "column_name": "format",
+    "data_type": "text"
+  },
+  {
+    "column_name": "max_size",
+    "data_type": "text"
+  },
+  {
+    "column_name": "course_id",
+    "data_type": "text"
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "project_submissions",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "is_completed",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "completed_videos",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "completed_exercises",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "completed_practices",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "completed_quizzes",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "user_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "course_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "id",
+    "data_type": "text"
+  }
+]

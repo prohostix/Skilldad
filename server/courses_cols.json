@@ -1,0 +1,78 @@
+[
+  {
+    "column_name": "is_published",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "is_featured",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "price",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "university_tools",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "modules",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "projects",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "brochure_url",
+    "data_type": "text"
+  },
+  {
+    "column_name": "status",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "submitted_by",
+    "data_type": "character varying"
+  },
+  {
+    "column_name": "title",
+    "data_type": "text"
+  },
+  {
+    "column_name": "description",
+    "data_type": "text"
+  },
+  {
+    "column_name": "thumbnail",
+    "data_type": "text"
+  },
+  {
+    "column_name": "category",
+    "data_type": "text"
+  },
+  {
+    "column_name": "instructor_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "instructor_name",
+    "data_type": "text"
+  },
+  {
+    "column_name": "university_name",
+    "data_type": "text"
+  }
+]

@@ -95,7 +95,7 @@ const ExamScheduler = lazy(() => import('./pages/admin/ExamScheduler'));
 const PayoutManager = lazy(() => import('./pages/admin/PayoutManager'));
 const SupportManagement = lazy(() => import('./pages/admin/SupportManagement'));
 const FAQManagement = lazy(() => import('./pages/admin/FAQManagement'));
-const PartnerLogoManager = lazy(() => import('./pages/admin/PartnerLogoManager'));
+const SiteContentManager = lazy(() => import('./pages/admin/SiteContentManager'));
 const AdminRefundPanel = lazy(() => import('./pages/admin/AdminRefundPanel'));
 const GatewayConfigPanel = lazy(() => import('./pages/admin/GatewayConfigPanel'));
 const ReconciliationDashboard = lazy(() => import('./pages/admin/ReconciliationDashboard'));
@@ -234,7 +234,7 @@ function App() {
                     <Route path="analytics" element={<PlatformAnalytics />} />
                     <Route path="coupons" element={<CouponManager />} />
                     <Route path="payouts" element={<PayoutManager />} />
-                    <Route path="partner-logos" element={<PartnerLogoManager />} />
+                    <Route path="partner-logos" element={<SiteContentManager />} />
                     <Route path="refunds" element={<AdminRefundPanel />} />
                     <Route path="gateway-config" element={<GatewayConfigPanel />} />
                     <Route path="reconciliation" element={<ReconciliationDashboard />} />

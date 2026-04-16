@@ -1,7 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Rocket, Globe, Award, Users, Book, Target, Linkedin } from 'lucide-react';
+import { Rocket, Globe, Award, Users, Book, Target, Linkedin, Loader2, Activity } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
@@ -65,21 +66,44 @@ const TeamCard = ({ member, delay }) => (
 );
 const AboutUs = () => {
     const [team, setTeam] = React.useState([]);
+    const [cms, setCms] = React.useState({});
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        const fetchTeam = async () => {
+        const fetchData = async () => {
             try {
-                const res = await axios.get('/api/public/directors');
-                setTeam(res.data);
+                setLoading(true);
+                const [teamRes, cmsRes] = await Promise.all([
+                    axios.get('/api/public/directors'),
+                    axios.get('/api/public/cms/about_us')
+                ]);
+                setTeam(teamRes.data);
+                setCms(cmsRes.data);
+                setLoading(false);
             } catch (err) {
-                console.error('Failed to fetch team members:', err);
+                console.error('Failed to fetch data:', err);
+                setLoading(false);
             }
         };
-        fetchTeam();
+        fetchData();
     }, []);
 
-    const directors = team.filter(m => m.category === 'DIRECTOR' || !m.category);
-    const advisory = team.filter(m => m.category === 'ADVISORY');
+    // Helper to resolve icon components from strings
+    const getIcon = (iconName, fallback = LucideIcons.Rocket) => {
+        const Icon = LucideIcons[iconName];
+        return Icon || fallback;
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#05030B] flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            </div>
+        );
+    }
+
+    const directors = team.filter(m => m.display_target === 'ABOUT_DIRECTOR' || (!m.display_target && (m.category === 'DIRECTOR' || !m.category)));
+    const advisory = team.filter(m => m.display_target === 'ABOUT_ADVISORY' || (!m.display_target && m.category === 'ADVISORY'));
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A]">
@@ -94,11 +118,20 @@ const AboutUs = () => {
                         transition={{ duration: 0.8 }}
                     >
                         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-8 font-space">
-                            <span className="text-gray-400">Our</span>{' '}
-                            <span className="text-white">Story</span>
+                            {cms.hero?.title ? (
+                                <>
+                                    <span className="text-gray-400">{cms.hero.title.split(' ')[0]}</span>{' '}
+                                    <span className="text-white">{cms.hero.title.split(' ').slice(1).join(' ')}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="text-gray-400">Our</span>{' '}
+                                    <span className="text-white">Story</span>
+                                </>
+                            )}
                         </h1>
                         <p className="text-lg md:text-2xl text-gray-300 mb-6 max-w-4xl mx-auto font-inter px-4 leading-relaxed">
-                            We are on a mission to revolutionize the educational landscape by bridging the gap between talent, institutions, and industry leaders through high-fidelity digital learning experiences.
+                            {cms.hero?.story || 'We are on a mission to revolutionize the educational landscape...'}
                         </p>
                     </motion.div>
                 </div>
@@ -111,22 +144,16 @@ const AboutUs = () => {
                     <div className="grid md:grid-cols-3 gap-8 mb-20">
                         {[
                             {
-                                title: 'Our Mission',
-                                description: 'To democratize quality education and make advanced learning accessible to everyone, everywhere, regardless of their background.',
-                                icon: Rocket,
-                                color: '#5B5CFF'
+                                ...cms.mission,
+                                Icon: getIcon(cms.mission?.icon, Rocket)
                             },
                             {
-                                title: 'Our Vision',
-                                description: 'Creating a global ecosystem where knowledge flows seamlessly between world-class institutions and ambitious learners.',
-                                icon: Globe,
-                                color: '#7A5CFF'
+                                ...cms.vision,
+                                Icon: getIcon(cms.vision?.icon, Globe)
                             },
                             {
-                                title: 'Our Values',
-                                description: 'Innovation, accessibility, excellence, and continuous growth drive every decision we make at SkillDad.',
-                                icon: Award,
-                                color: '#B05CFF'
+                                ...cms.values,
+                                Icon: getIcon(cms.values?.icon, Award)
                             }
                         ].map((item, i) => (
                             <motion.div
@@ -137,8 +164,8 @@ const AboutUs = () => {
                                 transition={{ delay: i * 0.1, duration: 0.5 }}
                             >
                                 <GlassCard className="h-full group hover:bg-white/[0.05] transition-all duration-300">
-                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 shadow-lg border border-white/10" style={{ backgroundColor: `${item.color}20`, color: item.color }}>
-                                        <item.icon size={28} strokeWidth={2.5} />
+                                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 shadow-lg border border-white/10" style={{ backgroundColor: `${item.color || '#5B5CFF'}20`, color: item.color || '#5B5CFF' }}>
+                                        <item.Icon size={28} strokeWidth={2.5} />
                                     </div>
                                     <h3 className="text-2xl font-bold text-white mb-4 font-space">{item.title}</h3>
                                     <p className="text-gray-300 font-inter leading-relaxed">{item.description}</p>
@@ -159,11 +186,22 @@ const AboutUs = () => {
                             viewport={{ once: true }}
                         >
                             <h2 className="text-xl md:text-3xl font-black text-white mb-6 font-jakarta">
-                                High-Fidelity <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Educational Matrix</span>
+                                {cms.impact_hero?.title ? (
+                                    <>
+                                        {cms.impact_hero.title.split(' ').slice(0, -1).join(' ')} <br />
+                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">
+                                            {cms.impact_hero.title.split(' ').slice(-1)}
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        High-Fidelity <br />
+                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Educational Matrix</span>
+                                    </>
+                                )}
                             </h2>
                             <p className="text-lg text-gray-400 mb-8 leading-relaxed">
-                                Behind SkillDad is a team of educators, technologists, and industry experts dedicated to building the most advanced learning management system in the world. We don't just host courses; we engineer success paths.
+                                {cms.impact_hero?.subtitle || "Behind SkillDad is a team of educators..."}
                             </p>
                             <div className="space-y-4">
                                 {[

@@ -1,0 +1,62 @@
+[
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "total_modules",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "completed_videos",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "completed_exercises",
+    "data_type": "jsonb"
+  },
+  {
+    "column_name": "final_score",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "certificate_issued",
+    "data_type": "boolean"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "progress",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "completed_modules",
+    "data_type": "integer"
+  },
+  {
+    "column_name": "student_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "course_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "column_name": "certificate_url",
+    "data_type": "text"
+  },
+  {
+    "column_name": "id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "grade",
+    "data_type": "text"
+  }
+]

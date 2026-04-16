@@ -1,0 +1,119 @@
+﻿[dotenv@17.3.1] injecting env (46) from .env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+[4m[36mPostgreSQL Connected: skilldad.cj0mo4q44gde.ap-south-1.rds.amazonaws.com[39m[24m
+[PG] Executed query {
+  text: "SELECT column_name, is_nullable, column_default FROM information_schema.columns WHERE table_name = 'documents'",
+  duration: 43,
+  rows: 22
+}
+[
+  {
+    "column_name": "file_size",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "reviewed_at",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "is_required",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "column_name": "deadline",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "tags",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "created_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "column_name": "updated_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "column_name": "uploaded_by_id",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "student_id",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "university_id",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "id",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "file_name",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "status",
+    "is_nullable": "YES",
+    "column_default": "'pending'::text"
+  },
+  {
+    "column_name": "reviewed_by_id",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "rejection_reason",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "file_url",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "title",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "description",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "type",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "format",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "max_size",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "course_id",
+    "is_nullable": "YES",
+    "column_default": null
+  }
+]

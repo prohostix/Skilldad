@@ -1,0 +1,57 @@
+﻿[dotenv@17.3.1] injecting env (46) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[4m[36mPostgreSQL Connected: skilldad.cj0mo4q44gde.ap-south-1.rds.amazonaws.com[39m[24m
+[PG] Executed query {
+  text: "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'payouts'",
+  duration: 188,
+  rows: 12
+}
+[
+  {
+    "column_name": "reviewed_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "amount",
+    "data_type": "numeric"
+  },
+  {
+    "column_name": "request_date",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "payout_date",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "column_name": "reviewed_by",
+    "data_type": "text"
+  },
+  {
+    "column_name": "partner_id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "id",
+    "data_type": "text"
+  },
+  {
+    "column_name": "status",
+    "data_type": "text"
+  },
+  {
+    "column_name": "notes",
+    "data_type": "text"
+  },
+  {
+    "column_name": "screenshot_url",
+    "data_type": "text"
+  }
+]

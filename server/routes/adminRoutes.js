@@ -43,6 +43,7 @@ const {
     uploadDirectorImage,
     testNotification
 } = require('../controllers/adminController');
+const { updatePageContent } = require('../controllers/cmsController');
 const { protect } = require('../middleware/authMiddleware');
 
 const checkAdmin = (req, res, next) => {
@@ -164,5 +165,8 @@ router.post('/directors', protect, checkAdmin, createDirector);
 router.put('/directors/:id', protect, checkAdmin, updateDirector);
 router.post('/directors/:id/upload', protect, checkAdmin, upload.single('image'), uploadDirectorImage);
 router.delete('/directors/:id', protect, checkAdmin, deleteDirector);
+
+// CMS Content Management Routes
+router.put('/cms/:page/:section', protect, checkAdmin, updatePageContent);
 
 module.exports = router;

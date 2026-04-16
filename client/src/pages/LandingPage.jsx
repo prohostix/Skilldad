@@ -146,7 +146,8 @@ const LandingPage = () => {
         }
     ];
 
-    const directors = dynamicDirectors.length > 0 ? dynamicDirectors : staticDirectors;
+    const landingDirectors = dynamicDirectors.filter(d => d.display_target === 'LANDING');
+    const directors = landingDirectors.length > 0 ? landingDirectors : staticDirectors;
 
     // Split dynamic logos into types
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');

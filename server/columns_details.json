@@ -1,0 +1,63 @@
+﻿[dotenv@17.3.1] injecting env (46) from .env -- tip: ΓÜÖ∩╕Å  override existing env vars with { override: true }
+[4m[36mPostgreSQL Connected: skilldad.cj0mo4q44gde.ap-south-1.rds.amazonaws.com[39m[24m
+[PG] Executed query {
+  text: '\n' +
+    '        SELECT column_name, is_nullable, column_default \n' +
+    '        FROM information_schema.columns \n' +
+    "        WHERE table_name = 'discounts'\n" +
+    '    ',
+  duration: 55,
+  rows: 10
+}
+[
+  {
+    "column_name": "updated_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "column_name": "expiry_date",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "created_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "column_name": "id",
+    "is_nullable": "NO",
+    "column_default": "nextval('discounts_id_seq'::regclass)"
+  },
+  {
+    "column_name": "value",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "active",
+    "is_nullable": "YES",
+    "column_default": "true"
+  },
+  {
+    "column_name": "used_count",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "column_name": "code",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "type",
+    "is_nullable": "NO",
+    "column_default": "'percentage'::text"
+  },
+  {
+    "column_name": "partner_id",
+    "is_nullable": "YES",
+    "column_default": null
+  }
+]
