@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Edit2, Trash2, Save, X, Building2, User as UserIcon,
     Image as ImageIcon, LayoutGrid, List, Heart, Upload, Loader2,
-    Target, Rocket, Globe, Award, Activity
+    Target, Rocket, Globe, Award, Activity, GraduationCap
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import DashboardHeading from '../../components/ui/DashboardHeading';
