@@ -18,7 +18,7 @@ const PartnerLogoManager = () => {
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [bulkNames, setBulkNames] = useState('');
     const [editingItem, setEditingItem] = useState(null);
-    const [formData, setFormData] = useState({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: 'corporate' });
+    const [formData, setFormData] = useState({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: 'corporate', category: 'DIRECTOR' });
     const [uploading, setUploading] = useState(null);
     const { showToast } = useToast();
 
@@ -60,7 +60,7 @@ const PartnerLogoManager = () => {
 
             showToast(`${activeTab === 'directors' ? 'Director' : 'Asset'} added successfully`, 'success');
             setShowAddModal(false);
-            setFormData({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: activeTab });
+            setFormData({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: activeTab, category: 'DIRECTOR' });
             fetchAll();
         } catch (error) {
             showToast('Submission failed', 'error');
@@ -523,13 +523,18 @@ const PartnerLogoManager = () => {
                                         <button onClick={() => handleDelete(director._id)} className="p-2 bg-red-500/20 text-red-400 rounded-xl"><Trash2 size={14} /></button>
                                     </div>
 
-                                    <button
-                                        onClick={() => toggleActive(director)}
-                                        className={`absolute top-4 left-4 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${director.isActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/50'
-                                            }`}
-                                    >
-                                        {director.isActive ? 'Active' : 'Inactive'}
-                                    </button>
+                                    <div className="absolute top-4 left-4 flex flex-col gap-1 items-start">
+                                        <button
+                                            onClick={() => toggleActive(director)}
+                                            className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${director.isActive ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/10 text-white/50'
+                                                }`}
+                                        >
+                                            {director.isActive ? 'Active' : 'Inactive'}
+                                        </button>
+                                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter ${director.category === 'ADVISORY' ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                            {director.category === 'ADVISORY' ? 'Advisory' : 'Director'}
+                                        </span>
+                                    </div>
 
                                     <div className="relative mb-6 mt-4">
                                         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity animate-pulse"></div>
@@ -562,6 +567,17 @@ const PartnerLogoManager = () => {
                                                 className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-xs text-center focus:outline-none focus:border-primary"
                                                 placeholder="Title"
                                             />
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-white/40 font-black uppercase block text-left ml-1">Category</label>
+                                                <select
+                                                    value={editingItem.category || 'DIRECTOR'}
+                                                    onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                                                >
+                                                    <option value="DIRECTOR" className="bg-[#0B0F1A]">Director / CEO</option>
+                                                    <option value="ADVISORY" className="bg-[#0B0F1A]">Advisory Board</option>
+                                                </select>
+                                            </div>
                                             <div className="flex gap-2 pt-2">
                                                 <button onClick={() => handleUpdate(director._id)} className="flex-1 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl text-[10px] font-black uppercase">Save</button>
                                                 <button onClick={() => setEditingItem(null)} className="flex-1 py-2 bg-white/10 text-white rounded-xl text-[10px] font-black uppercase">Cancel</button>
@@ -637,6 +653,17 @@ const PartnerLogoManager = () => {
                                             onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                                             className="w-full px-6 py-3 bg-white/[0.03] border border-white/10 rounded-[20px] text-white text-sm focus:outline-none focus:border-primary/50 transition-all"
                                         />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-white/50 text-[10px] font-black uppercase tracking-widest block ml-1">Category</label>
+                                        <select
+                                            value={formData.category}
+                                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                            className="w-full px-6 py-3 bg-white/[0.03] border border-white/10 rounded-[20px] text-white text-sm focus:outline-none focus:border-primary/50 transition-all"
+                                        >
+                                            <option value="DIRECTOR" className="bg-[#0B0F1A]">Director / CEO</option>
+                                            <option value="ADVISORY" className="bg-[#0B0F1A]">Advisory Board</option>
+                                        </select>
                                     </div>
                                 </>
                             ) : (

@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Rocket, Globe, Award, Users, Book, Target } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
@@ -6,7 +7,23 @@ import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 
-const AboutUs = () => {
+    const [team, setTeam] = React.useState([]);
+
+    React.useEffect(() => {
+        const fetchTeam = async () => {
+            try {
+                const res = await axios.get('/api/public/directors');
+                setTeam(res.data);
+            } catch (err) {
+                console.error('Failed to fetch team members:', err);
+            }
+        };
+        fetchTeam();
+    }, []);
+
+    const directors = team.filter(m => m.category === 'DIRECTOR' || !m.category);
+    const advisory = team.filter(m => m.category === 'ADVISORY');
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A]">
             <Navbar />
@@ -128,6 +145,101 @@ const AboutUs = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Directors Section */}
+            {directors.length > 0 && (
+                <section className="py-24 px-6 relative">
+                    <div className="max-w-7xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-center mb-16"
+                        >
+                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase">Directors <span className="text-primary">&</span> CEO</h2>
+                            <div className="h-1 w-20 bg-primary mx-auto rounded-full"></div>
+                        </motion.div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {directors.map((member, i) => (
+                                <motion.div
+                                    key={member._id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                >
+                                    <GlassCard className="text-center p-8 group hover:border-primary/50 transition-all duration-300">
+                                        <div className="relative mb-6 inline-block">
+                                            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <div className="w-32 h-32 rounded-full border-2 border-white/10 p-1 group-hover:border-primary transition-all relative z-10 mx-auto">
+                                                <img
+                                                    src={member.imageUrl}
+                                                    alt={member.name}
+                                                    className="w-full h-full object-cover rounded-full"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=5B5CFF&color=fff&bold=true`;
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-white mb-2 font-poppins">{member.name}</h3>
+                                        <p className="text-xs text-primary font-black uppercase tracking-widest">{member.role}</p>
+                                    </GlassCard>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Advisory Board Section */}
+            {advisory.length > 0 && (
+                <section className="py-24 px-6 bg-white/[0.01]">
+                    <div className="max-w-7xl mx-auto">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-center mb-16"
+                        >
+                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase">Advisory <span className="text-primary">Board</span></h2>
+                            <div className="h-1 w-20 bg-primary mx-auto rounded-full text-center"></div>
+                        </motion.div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {advisory.map((member, i) => (
+                                <motion.div
+                                    key={member._id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                >
+                                    <GlassCard className="text-center p-8 group hover:border-primary/50 transition-all duration-300 !bg-white/[0.03]">
+                                        <div className="relative mb-6 inline-block">
+                                            <div className="w-24 h-24 rounded-2xl border-2 border-white/10 p-1 group-hover:border-primary transition-all relative z-10 mx-auto transform -rotate-3 group-hover:rotate-0">
+                                                <img
+                                                    src={member.imageUrl}
+                                                    alt={member.name}
+                                                    className="w-full h-full object-cover rounded-xl"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=5B5CFF&color=fff&bold=true`;
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <h3 className="text-lg font-bold text-white mb-1 font-poppins">{member.name}</h3>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{member.role}</p>
+                                    </GlassCard>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* CTA Section */}
             <section className="py-32 px-6">

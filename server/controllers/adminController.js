@@ -891,13 +891,13 @@ async function getDirectors(req, res) {
 // @access  Private (Admin)
 async function createDirector(req, res) {
     try {
-        const { name, title, image, order } = req.body;
+        const { name, title, image, order, category } = req.body;
         const crypto = require('crypto');
         const newId = crypto.randomUUID();
         const result = await query(`
-            INSERT INTO directors (id, name, title, image, "order", is_active)
-            VALUES ($1, $2, $3, $4, $5, true) RETURNING *
-        `, [newId, name, title, image, order || 0]);
+            INSERT INTO directors (id, name, title, image, "order", category, is_active)
+            VALUES ($1, $2, $3, $4, $5, $6, true) RETURNING *
+        `, [newId, name, title, image, order || 0, category || 'DIRECTOR']);
 
         res.status(201).json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
@@ -911,13 +911,14 @@ async function createDirector(req, res) {
 // @access  Private (Admin)
 async function updateDirector(req, res) {
     try {
-        const { name, title, image, order, isActive } = req.body;
+        const { name, title, image, order, isActive, category } = req.body;
         const result = await query(`
             UPDATE directors 
             SET name = COALESCE($1, name), title = COALESCE($2, title), image = COALESCE($3, image), 
-                "order" = COALESCE($4, "order"), is_active = COALESCE($5, is_active), updated_at = NOW()
-            WHERE id = $6 RETURNING *
-        `, [name, title, image, order, isActive, req.params.id]);
+                "order" = COALESCE($4, "order"), is_active = COALESCE($5, is_active), 
+                category = COALESCE($6, category), updated_at = NOW()
+            WHERE id = $7 RETURNING *
+        `, [name, title, image, order, isActive, category, req.params.id]);
 
         if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Director not found' });
