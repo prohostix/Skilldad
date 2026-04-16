@@ -6,7 +6,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
-
+const AboutUs = () => {
     const [team, setTeam] = React.useState([]);
 
     React.useEffect(() => {
