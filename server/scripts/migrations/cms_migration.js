@@ -82,6 +82,20 @@ async function migrate() {
           title: 'High-Fidelity Educational Matrix',
           subtitle: 'Behind SkillDad is a team of educators, technologists, and industry experts dedicated to building the most advanced learning management system in the world. We don\'t just host courses; we engineer success paths.'
         }
+      },
+      {
+        section: 'directors_header',
+        content: {
+          title: 'SKILLDAD Cordinates With',
+          subtitle: 'Visionary leadership guiding the nexus of global institutional excellence.'
+        }
+      },
+      {
+        section: 'advisory_header',
+        content: {
+          title: 'Advisory Board',
+          description: 'A global network of advisors and industry veterans providing strategic oversight.'
+        }
       }
     ];
 

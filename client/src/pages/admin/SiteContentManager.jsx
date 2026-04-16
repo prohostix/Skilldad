@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Plus, Edit2, Trash2, Save, X, Building2, User as UserIcon,
+    Plus, Edit2, Trash2, Save, X, Building2, User as UserIcon, Users,
     Image as ImageIcon, LayoutGrid, List, Heart, Upload, Loader2,
     Target, Rocket, Globe, Award, Activity, GraduationCap
 } from 'lucide-react';
@@ -455,6 +455,27 @@ const AboutCmsEditor = ({ data, onUpdate }) => {
                     { key: 'color', label: 'Theme Color (Hex)', value: data.values?.color },
                 ]}
                 onSave={(content) => onUpdate('values', content)}
+            />
+
+            {/* Team Headers */}
+            <CmsSectionCard 
+                title="Directors Section Header" 
+                icon={Users}
+                fields={[
+                    { key: 'title', label: 'Section Title', value: data.directors_header?.title },
+                    { key: 'subtitle', label: 'Section Subtitle', type: 'textarea', value: data.directors_header?.subtitle },
+                ]}
+                onSave={(content) => onUpdate('directors_header', content)}
+            />
+
+            <CmsSectionCard 
+                title="Advisory Section Header" 
+                icon={List}
+                fields={[
+                    { key: 'title', label: 'Section Title', value: data.advisory_header?.title },
+                    { key: 'description', label: 'Section Subtitle', type: 'textarea', value: data.advisory_header?.description },
+                ]}
+                onSave={(content) => onUpdate('advisory_header', content)}
             />
         </div>
     );

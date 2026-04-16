@@ -251,7 +251,20 @@ const AboutUs = () => {
                             viewport={{ once: true }}
                             className="text-center mb-16"
                         >
-                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">Directors <span className="text-primary">&</span> CEO</h2>
+                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">
+                                {cms.directors_header?.title ? (
+                                    <>
+                                        {cms.directors_header.title.split(' ').slice(0, -1).join(' ')} <span className="text-primary">{cms.directors_header.title.split(' ').slice(-1)}</span>
+                                    </>
+                                ) : (
+                                    <>Directors <span className="text-primary">&</span> CEO</>
+                                )}
+                            </h2>
+                            {cms.directors_header?.subtitle && (
+                                <p className="text-lg text-gray-400 font-inter max-w-3xl mx-auto mb-6 italic opacity-80 leading-relaxed">
+                                    "{cms.directors_header.subtitle}"
+                                </p>
+                            )}
                             <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent mx-auto rounded-full"></div>
                         </motion.div>
 
@@ -266,7 +279,7 @@ const AboutUs = () => {
 
             {/* Advisory Board Section */}
             {advisory.length > 0 && (
-                <section className="py-24 px-6 relative border-t border-white/5">
+                <section className="py-24 px-6 relative border-t border-white/5 bg-white/[0.01]">
                     <div className="max-w-7xl mx-auto">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -274,7 +287,20 @@ const AboutUs = () => {
                             viewport={{ once: true }}
                             className="text-center mb-16"
                         >
-                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">Advisory <span className="text-primary">Board</span></h2>
+                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">
+                                {cms.advisory_header?.title ? (
+                                    <>
+                                        {cms.advisory_header.title.split(' ').slice(0, -1).join(' ')} <span className="text-primary">{cms.advisory_header.title.split(' ').slice(-1)}</span>
+                                    </>
+                                ) : (
+                                    <>Advisory <span className="text-primary">Board</span></>
+                                )}
+                            </h2>
+                            {cms.advisory_header?.description && (
+                                <p className="text-lg text-gray-400 font-inter max-w-3xl mx-auto mb-6 italic opacity-80 leading-relaxed">
+                                    "{cms.advisory_header.description}"
+                                </p>
+                            )}
                             <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent mx-auto rounded-full"></div>
                         </motion.div>
 
