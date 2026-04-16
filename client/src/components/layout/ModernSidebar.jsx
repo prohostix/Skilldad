@@ -22,7 +22,8 @@ import {
     Wallet,
     MessageCircle,
     ChevronDown,
-    ChevronRight
+    ChevronRight,
+    Globe
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
