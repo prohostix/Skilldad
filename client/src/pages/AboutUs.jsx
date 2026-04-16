@@ -1,11 +1,68 @@
 import React from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Rocket, Globe, Award, Users, Book, Target } from 'lucide-react';
+import { Rocket, Globe, Award, Users, Book, Target, Linkedin } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
+
+const TeamCard = ({ member, delay }) => (
+    <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay }}
+    >
+        <GlassCard className="relative group overflow-hidden flex flex-col items-center text-center p-10 !bg-[#0A0A10] border-[#C026FF]/20 hover:border-[#C026FF]/50 transition-all duration-500 rounded-[40px] shadow-2xl hover:shadow-[#C026FF]/10">
+            {/* Image Section */}
+            <div className="relative mb-8">
+                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                <div className="w-36 h-36 rounded-full p-1 border-2 border-white/5 group-hover:border-primary transition-all duration-500 relative z-10 mx-auto overflow-hidden">
+                    <img
+                        src={member.imageUrl}
+                        alt={member.name}
+                        className="w-full h-full object-cover rounded-full transform group-hover:scale-110 transition-transform duration-700"
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=200&background=5B5CFF&color=fff&bold=true`;
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Info Section */}
+            <div className="relative z-10 w-full mb-4">
+                <h3 className="text-2xl font-black text-white mb-2 font-space tracking-tight leading-tight group-hover:text-primary transition-colors">
+                    {member.name}
+                </h3>
+                <p className="text-[11px] text-primary font-black uppercase tracking-[0.3em] mb-4 opacity-80">
+                    {member.role}
+                </p>
+                
+                {member.bio && (
+                    <p className="text-sm text-gray-400 font-inter leading-relaxed px-4 line-clamp-3 group-hover:line-clamp-none transition-all duration-500">
+                        {member.bio}
+                    </p>
+                )}
+            </div>
+
+            {/* Social Link */}
+            {member.linkedinUrl && (
+                <div className="mt-auto pt-6 w-full flex justify-center border-t border-white/5">
+                    <a 
+                        href={member.linkedinUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-3 bg-white/5 rounded-2xl text-white/40 hover:text-[#0077B5] hover:bg-[#0077B5]/10 transition-all duration-300"
+                    >
+                        <Linkedin size={20} fill="currentColor" stroke="none" />
+                    </a>
+                </div>
+            )}
+        </GlassCard>
+    </motion.div>
+);
 const AboutUs = () => {
     const [team, setTeam] = React.useState([]);
 
@@ -156,38 +213,13 @@ const AboutUs = () => {
                             viewport={{ once: true }}
                             className="text-center mb-16"
                         >
-                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase">Directors <span className="text-primary">&</span> CEO</h2>
-                            <div className="h-1 w-20 bg-primary mx-auto rounded-full"></div>
+                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">Directors <span className="text-primary">&</span> CEO</h2>
+                            <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent mx-auto rounded-full"></div>
                         </motion.div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                             {directors.map((member, i) => (
-                                <motion.div
-                                    key={member._id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.1 }}
-                                >
-                                    <GlassCard className="text-center p-8 group hover:border-primary/50 transition-all duration-300">
-                                        <div className="relative mb-6 inline-block">
-                                            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                            <div className="w-32 h-32 rounded-full border-2 border-white/10 p-1 group-hover:border-primary transition-all relative z-10 mx-auto">
-                                                <img
-                                                    src={member.imageUrl}
-                                                    alt={member.name}
-                                                    className="w-full h-full object-cover rounded-full"
-                                                    onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=5B5CFF&color=fff&bold=true`;
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <h3 className="text-xl font-bold text-white mb-2 font-poppins">{member.name}</h3>
-                                        <p className="text-xs text-primary font-black uppercase tracking-widest">{member.role}</p>
-                                    </GlassCard>
-                                </motion.div>
+                                <TeamCard key={member._id} member={member} delay={i * 0.1} />
                             ))}
                         </div>
                     </div>
@@ -196,7 +228,7 @@ const AboutUs = () => {
 
             {/* Advisory Board Section */}
             {advisory.length > 0 && (
-                <section className="py-24 px-6 bg-white/[0.01]">
+                <section className="py-24 px-6 relative border-t border-white/5">
                     <div className="max-w-7xl mx-auto">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -204,37 +236,13 @@ const AboutUs = () => {
                             viewport={{ once: true }}
                             className="text-center mb-16"
                         >
-                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase">Advisory <span className="text-primary">Board</span></h2>
-                            <div className="h-1 w-20 bg-primary mx-auto rounded-full text-center"></div>
+                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">Advisory <span className="text-primary">Board</span></h2>
+                            <div className="h-1 w-20 bg-gradient-to-r from-primary to-transparent mx-auto rounded-full"></div>
                         </motion.div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                             {advisory.map((member, i) => (
-                                <motion.div
-                                    key={member._id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.1 }}
-                                >
-                                    <GlassCard className="text-center p-8 group hover:border-primary/50 transition-all duration-300 !bg-white/[0.03]">
-                                        <div className="relative mb-6 inline-block">
-                                            <div className="w-24 h-24 rounded-2xl border-2 border-white/10 p-1 group-hover:border-primary transition-all relative z-10 mx-auto transform -rotate-3 group-hover:rotate-0">
-                                                <img
-                                                    src={member.imageUrl}
-                                                    alt={member.name}
-                                                    className="w-full h-full object-cover rounded-xl"
-                                                    onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=5B5CFF&color=fff&bold=true`;
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-white mb-1 font-poppins">{member.name}</h3>
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{member.role}</p>
-                                    </GlassCard>
-                                </motion.div>
+                                <TeamCard key={member._id} member={member} delay={i * 0.1} />
                             ))}
                         </div>
                     </div>

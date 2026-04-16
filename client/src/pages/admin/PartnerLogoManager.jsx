@@ -18,7 +18,7 @@ const PartnerLogoManager = () => {
     const [showBulkModal, setShowBulkModal] = useState(false);
     const [bulkNames, setBulkNames] = useState('');
     const [editingItem, setEditingItem] = useState(null);
-    const [formData, setFormData] = useState({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: 'corporate', category: 'DIRECTOR' });
+    const [formData, setFormData] = useState({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: 'corporate', category: 'DIRECTOR', bio: '', linkedin_url: '' });
     const [uploading, setUploading] = useState(null);
     const { showToast } = useToast();
 
@@ -60,7 +60,7 @@ const PartnerLogoManager = () => {
 
             showToast(`${activeTab === 'directors' ? 'Director' : 'Asset'} added successfully`, 'success');
             setShowAddModal(false);
-            setFormData({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: activeTab, category: 'DIRECTOR' });
+            setFormData({ name: '', title: '', image: '', logo: '', location: '', students: '', programs: '', order: 0, type: activeTab, category: 'DIRECTOR', bio: '', linkedin_url: '' });
             fetchAll();
         } catch (error) {
             showToast('Submission failed', 'error');
@@ -578,6 +578,25 @@ const PartnerLogoManager = () => {
                                                     <option value="ADVISORY" className="bg-[#0B0F1A]">Advisory Board</option>
                                                 </select>
                                             </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-white/40 font-black uppercase block text-left ml-1">LinkedIn URL</label>
+                                                <input
+                                                    type="text"
+                                                    value={editingItem.linkedin_url || ''}
+                                                    onChange={(e) => setEditingItem({ ...editingItem, linkedin_url: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                                                    placeholder="https://linkedin.com/in/..."
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label className="text-[10px] text-white/40 font-black uppercase block text-left ml-1">Biography / Description</label>
+                                                <textarea
+                                                    value={editingItem.bio || ''}
+                                                    onChange={(e) => setEditingItem({ ...editingItem, bio: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-xs focus:outline-none focus:border-primary h-20 resize-none"
+                                                    placeholder="A brief bio..."
+                                                />
+                                            </div>
                                             <div className="flex gap-2 pt-2">
                                                 <button onClick={() => handleUpdate(director._id)} className="flex-1 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl text-[10px] font-black uppercase">Save</button>
                                                 <button onClick={() => setEditingItem(null)} className="flex-1 py-2 bg-white/10 text-white rounded-xl text-[10px] font-black uppercase">Cancel</button>
@@ -664,6 +683,25 @@ const PartnerLogoManager = () => {
                                             <option value="DIRECTOR" className="bg-[#0B0F1A]">Director / CEO</option>
                                             <option value="ADVISORY" className="bg-[#0B0F1A]">Advisory Board</option>
                                         </select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-white/50 text-[10px] font-black uppercase tracking-widest block ml-1">LinkedIn URL</label>
+                                        <input
+                                            type="text"
+                                            value={formData.linkedin_url}
+                                            onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                                            className="w-full px-6 py-3 bg-white/[0.03] border border-white/10 rounded-[20px] text-white text-sm focus:outline-none focus:border-primary/50 transition-all"
+                                            placeholder="LinkedIn URL"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-white/50 text-[10px] font-black uppercase tracking-widest block ml-1">Bio</label>
+                                        <textarea
+                                            value={formData.bio}
+                                            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                                            className="w-full px-6 py-3 bg-white/[0.03] border border-white/10 rounded-[20px] text-white text-sm focus:outline-none focus:border-primary/50 transition-all h-24"
+                                            placeholder="Write a brief bio..."
+                                        />
                                     </div>
                                 </>
                             ) : (
