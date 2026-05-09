@@ -79,6 +79,8 @@ const FinanceDashboard = () => {
             setActiveTab('payouts');
         } else if (location.pathname.includes('/payments')) {
             setActiveTab('payments');
+        } else if (location.pathname.includes('/reports')) {
+            setActiveTab('reports');
         }
     }, [location]);
 
@@ -254,11 +256,10 @@ const FinanceDashboard = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const reportTypeMap = {
-                'revenue-report': 'revenue',
-                'payment-summary': 'payments',
-                'partner-payouts': 'payouts',
-                'enrollment-analytics': 'enrollments',
-                'financial-summary': 'revenue'
+                'revenue-analytics': 'revenue',
+                'student-payment-ledger': 'payments',
+                'partner-settlement-report': 'payouts',
+                'institutional-enrollment': 'enrollments'
             };
 
             const frontendType = reportTitle.toLowerCase().replace(/ /g, '-');
@@ -298,36 +299,34 @@ const FinanceDashboard = () => {
         let tableHead = [];
         let tableData = [];
 
-        if (frontendType === 'revenue-report') {
-            tableHead = [['Date', 'Total Revenue', 'Transaction Count']];
-            tableData = data.data.map(row => [row._id, `₹${row.totalRevenue}`, row.count]);
-        } else if (frontendType === 'payment-summary') {
-            tableHead = [['Student', 'Email', 'Course', 'Amount', 'Status', 'Date']];
-            tableData = data.data.map(p => [
-                p.student?.name || 'N/A',
-                p.student?.email || 'N/A',
-                p.course?.title || 'N/A',
-                `₹${p.amount}`,
-                p.status.toUpperCase(),
-                new Date(p.createdAt).toLocaleDateString()
+        if (frontendType === 'revenue-analytics' || frontendType === 'student-payment-ledger') {
+            tableHead = [['Date', 'Student', 'Course', 'Amount', 'Method', 'Status', 'Transaction ID']];
+            tableData = data.map(item => [
+                new Date(item.Date).toLocaleDateString(),
+                item.Student,
+                item.Course,
+                `₹${item.Amount}`,
+                item.Method,
+                item.Status.toUpperCase(),
+                item.TransactionID
             ]);
-        } else if (frontendType === 'partner-payouts') {
-            tableHead = [['Partner', 'Email', 'Amount', 'Status', 'Date']];
-            tableData = data.data.map(p => [
-                p.partner?.name || 'N/A',
-                p.partner?.email || 'N/A',
-                `₹${p.amount}`,
-                p.status.toUpperCase(),
-                new Date(p.createdAt).toLocaleDateString()
+        } else if (frontendType === 'partner-settlement-report') {
+            tableHead = [['Request Date', 'Settlement Date', 'Partner', 'Amount', 'Status', 'Reference']];
+            tableData = data.map(item => [
+                new Date(item.RequestDate).toLocaleDateString(),
+                item.SettlementDate ? new Date(item.SettlementDate).toLocaleDateString() : 'N/A',
+                item.Partner,
+                `₹${item.Amount}`,
+                item.Status.toUpperCase(),
+                item.Reference || 'N/A'
             ]);
-        } else if (frontendType === 'enrollment-analytics') {
-            tableHead = [['Center', 'Total Enrollments', 'Amount', 'Pending', 'Approved']];
-            tableData = data.data.map(row => [
-                row._id || 'Direct',
-                row.totalEnrollments,
-                `₹${row.totalAmount}`,
-                row.pendingCount,
-                row.approvedCount
+        } else if (frontendType === 'institutional-enrollment') {
+            tableHead = [['Center', 'Course', 'Enrollment Count', 'Revenue Generated']];
+            tableData = data.map(item => [
+                item.Center,
+                item.Course,
+                item.EnrollmentCount,
+                `₹${item.RevenueGenerated}`
             ]);
         }
 
@@ -352,45 +351,41 @@ const FinanceDashboard = () => {
         worksheetData.push([`System: SkillDad Finance Architecture`]);
         worksheetData.push([]); // Empty row
 
-        if (frontendType === 'revenue-report') {
-            worksheetData.push(['Date', 'Total Revenue', 'Transaction Count']);
-            data.data.forEach(row => {
-                worksheetData.push([row._id, row.totalRevenue, row.count]);
-            });
-        } else if (frontendType === 'payment-summary') {
-            worksheetData.push(['Student', 'Email', 'Course', 'Amount', 'Status', 'Date']);
-            data.data.forEach(p => {
-                worksheetData.push([
-                    p.student?.name || 'N/A',
-                    p.student?.email || 'N/A',
-                    p.course?.title || 'N/A',
-                    p.amount,
-                    p.status.toUpperCase(),
-                    new Date(p.createdAt).toLocaleDateString()
-                ]);
-            });
-        } else if (frontendType === 'partner-payouts') {
-            worksheetData.push(['Partner', 'Email', 'Amount', 'Status', 'Date']);
-            data.data.forEach(p => {
-                worksheetData.push([
-                    p.partner?.name || 'N/A',
-                    p.partner?.email || 'N/A',
-                    p.amount,
-                    p.status.toUpperCase(),
-                    new Date(p.createdAt).toLocaleDateString()
-                ]);
-            });
-        } else if (frontendType === 'enrollment-analytics') {
-            worksheetData.push(['Center', 'Total Enrollments', 'Amount', 'Pending', 'Approved']);
-            data.data.forEach(row => {
-                worksheetData.push([
-                    row._id || 'Direct',
-                    row.totalEnrollments,
-                    row.totalAmount,
-                    row.pendingCount,
-                    row.approvedCount
-                ]);
-            });
+        if (frontendType === 'revenue-analytics' || frontendType === 'student-payment-ledger') {
+            worksheetData.push(
+                ['Date', 'Student', 'Course', 'Amount', 'Method', 'Status', 'Transaction ID'],
+                ...data.map(item => [
+                    new Date(item.Date).toLocaleDateString(),
+                    item.Student,
+                    item.Course,
+                    item.Amount,
+                    item.Method,
+                    item.Status.toUpperCase(),
+                    item.TransactionID
+                ])
+            );
+        } else if (frontendType === 'partner-settlement-report') {
+            worksheetData.push(
+                ['Request Date', 'Settlement Date', 'Partner', 'Amount', 'Status', 'Reference'],
+                ...data.map(item => [
+                    new Date(item.RequestDate).toLocaleDateString(),
+                    item.SettlementDate ? new Date(item.SettlementDate).toLocaleDateString() : 'N/A',
+                    item.Partner,
+                    item.Amount,
+                    item.Status.toUpperCase(),
+                    item.Reference || 'N/A'
+                ])
+            );
+        } else if (frontendType === 'institutional-enrollment') {
+            worksheetData.push(
+                ['Center', 'Course', 'Enrollment Count', 'Revenue Generated'],
+                ...data.map(item => [
+                    item.Center,
+                    item.Course,
+                    item.EnrollmentCount,
+                    item.RevenueGenerated
+                ])
+            );
         }
 
         const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
@@ -566,12 +561,22 @@ const FinanceDashboard = () => {
         return matchesSearch && matchesStatus && matchesPartner;
     });
 
+    const isPayoutsPage = location.pathname.includes('/payouts');
+    const isReportsPage = location.pathname.includes('/reports');
+    const isMainDashboard = location.pathname.includes('/dashboard');
+
     const tabs = [
         { id: 'payments', label: 'Student Payments', icon: CreditCard },
         { id: 'summaries', label: 'Enrollment Summaries', icon: BarChart3 },
         { id: 'payouts', label: 'B2B Payouts', icon: Wallet },
         { id: 'reports', label: 'Financial Reports', icon: FileText }
     ];
+
+    const displayTabs = isPayoutsPage 
+        ? tabs.filter(t => t.id === 'payouts')
+        : isReportsPage
+        ? tabs.filter(t => t.id === 'reports')
+        : tabs.filter(t => t.id !== 'payouts' && t.id !== 'reports');
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -583,14 +588,18 @@ const FinanceDashboard = () => {
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div>
-                    <motion.h1
+                <div className="flex flex-col gap-1">
+                    <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="text-sm font-semibold text-white font-inter text-left"
+                        className="text-xl font-semibold text-white tracking-tight"
                     >
-                        Finance Department Panel
-                    </motion.h1>
+                        {isPayoutsPage ? 'Payout Management' : isReportsPage ? 'Financial Intelligence Reports' : 'Finance Dashboard'}
+                    </motion.div>
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span className="text-[10px] text-slate-400 uppercase tracking-widest font-medium">System Active</span>
+                    </div>
                 </div>
                 <div className="flex items-center space-x-3">
                     <ModernButton variant="secondary" onClick={() => {
@@ -602,54 +611,58 @@ const FinanceDashboard = () => {
                 </div>
             </div>
 
-            {/* Compact Stats Grid */}
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                {[
-                    { label: 'Revenue', val: `₹${stats.totalRevenue?.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: '+22.5%' },
-                    { label: 'Pending', val: stats.pendingPaymentsCount, icon: Clock, color: 'amber', trend: 'Active' },
-                    { label: 'Payouts', val: `₹${stats.totalPayoutsAmount?.toLocaleString()}`, icon: Wallet, color: 'primary', trend: '+12.1%' },
-                    { label: 'Enrollments', val: stats.totalEnrollments || 0, icon: Users, color: 'purple', trend: '+8.3%' },
-                ].map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                    >
-                        <GlassCard className="group hover:border-primary/40 transition-colors relative overflow-hidden h-full p-4 sm:p-6">
-                            <div className="flex justify-between items-start mb-3 sm:mb-4">
-                                <div className={`p-2 sm:p-3 bg-${stat.color}-500/10 text-${stat.color === 'emerald' ? 'emerald-400' : stat.color === 'amber' ? 'amber-400' : stat.color === 'primary' ? 'primary' : 'purple-400'} rounded-xl group-hover:scale-110 transition-transform`}>
-                                    <stat.icon size={window.innerWidth < 640 ? 22 : 28} />
+            {/* Compact Stats Grid - Only show on main dashboard */}
+            {!isPayoutsPage && !isReportsPage && (
+                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {[
+                        { label: 'Revenue', val: `₹${stats.totalRevenue?.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: '+22.5%' },
+                        { label: 'Pending', val: stats.pendingPaymentsCount, icon: Clock, color: 'amber', trend: 'Active' },
+                        { label: 'Payouts', val: `₹${stats.totalPayoutsAmount?.toLocaleString()}`, icon: Wallet, color: 'primary', trend: '+12.1%' },
+                        { label: 'Enrollments', val: stats.totalEnrollments || 0, icon: Users, color: 'purple', trend: '+8.3%' },
+                    ].map((stat, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                        >
+                            <GlassCard className="group hover:border-white/10 transition-all relative overflow-hidden h-full p-4 bg-slate-900/10">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className={`p-2 bg-${stat.color}-500/10 text-${stat.color === 'emerald' ? 'emerald-400' : stat.color === 'amber' ? 'amber-400' : stat.color === 'primary' ? 'primary' : 'purple-400'} rounded-lg group-hover:bg-${stat.color}-500/20 transition-colors`}>
+                                        <stat.icon size={18} />
+                                    </div>
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded bg-${stat.color}-500/10 text-${stat.color}-400 border border-${stat.color}-500/20 uppercase tracking-tighter`}>
+                                        {stat.trend}
+                                    </span>
                                 </div>
-                                <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-lg ${stat.trend.includes('+') ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 bg-slate-500/10'}`}>
-                                    {stat.trend}
-                                </span>
-                            </div>
-                            <div className="text-left">
-                                <h3 className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">{stat.label}</h3>
-                                <p className="text-xl sm:text-3xl font-black text-white leading-tight">{stat.val}</p>
-                            </div>
-                        </GlassCard>
-                    </motion.div>
-                ))}
-            </div>
+                                <div className="text-left space-y-0.5">
+                                    <div className="text-slate-500 text-[10px] font-semibold uppercase tracking-widest">{stat.label}</div>
+                                    <div className="text-xl font-bold text-white tracking-tight">{stat.val}</div>
+                                </div>
+                            </GlassCard>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
 
-            {/* Navigation Tabs */}
-            <div className="flex flex-wrap gap-2 border-b border-white/10 overflow-x-auto">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 rounded-t-lg font-medium transition-all whitespace-nowrap text-xs sm:text-sm ${activeTab === tab.id
-                            ? 'bg-primary/20 text-primary border-b-2 border-primary'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        <tab.icon size={window.innerWidth < 640 ? 14 : 16} className="sm:w-[18px] sm:h-[18px]" />
-                        <span className="text-[11px] sm:text-sm">{window.innerWidth < 640 ? tab.label.split(' ')[0] : tab.label}</span>
-                    </button>
-                ))}
-            </div>
+            {/* Navigation Tabs - Only show on main dashboard */}
+            {!isPayoutsPage && !isReportsPage && (
+                <div className="flex flex-wrap gap-2 border-b border-white/10 overflow-x-auto">
+                    {displayTabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 rounded-t-lg font-medium transition-all whitespace-nowrap text-xs sm:text-sm ${activeTab === tab.id
+                                ? 'bg-primary/20 text-primary border-b-2 border-primary'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <tab.icon size={window.innerWidth < 640 ? 14 : 16} className="sm:w-[18px] sm:h-[18px]" />
+                            <span className="text-[11px] sm:text-sm">{window.innerWidth < 640 ? tab.label.split(' ')[0] : tab.label}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* Tab Content */}
             <div className="mt-6">
@@ -708,14 +721,14 @@ const FinanceDashboard = () => {
                                 <table className="w-full min-w-[800px] responsive-table">
                                     <thead className="bg-white/5 border-b border-white/10">
                                         <tr>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Student</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Course</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Amount</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider hidden md:table-cell">Partner</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Center</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">Proof</th>
-                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] font-medium text-white/40 uppercase tracking-widest">Student</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] font-medium text-white/40 uppercase tracking-widest">Course</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] font-medium text-white/40 uppercase tracking-widest">Amount</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] font-medium text-white/40 uppercase tracking-widest">Status</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] font-medium text-white/40 uppercase tracking-widest hidden md:table-cell">Partner</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] font-medium text-white/40 uppercase tracking-widest hidden sm:table-cell">Center</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-[10px] font-medium text-white/40 uppercase tracking-widest hidden lg:table-cell">Proof</th>
+                                            <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-[10px] font-medium text-white/40 uppercase tracking-widest">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/10">
@@ -728,9 +741,9 @@ const FinanceDashboard = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-white truncate max-w-[150px]">{payment.course?.title || 'N/A'}</td>
-                                                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-emerald-400">₹{payment.amount}</td>
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-emerald-400">₹{payment.amount}</td>
                                                 <td className="px-3 sm:px-6 py-3 sm:py-4">
-                                                    <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${payment.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                    <span className={`inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-tighter ${payment.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
                                                         payment.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
                                                             'bg-red-500/20 text-red-400'
                                                         }`}>
@@ -827,20 +840,20 @@ const FinanceDashboard = () => {
                     >
                         {/* B2B Partner Payout Requests */}
                         <GlassCard className="overflow-hidden">
-                            <div className="p-6 border-b border-white/10">
-                                <h2 className="text-base font-bold text-white flex items-center">
-                                    <Clock size={20} className="mr-2 text-primary" /> B2B Partner Payout Requests
-                                </h2>
+                            <div className="px-6 py-4 border-b border-white/5 bg-white/[0.01]">
+                                <div className="text-sm font-semibold text-slate-200 flex items-center">
+                                    <Clock size={16} className="mr-2 text-slate-400" /> B2B Partner Payout Requests
+                                </div>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full responsive-table">
-                                    <thead className="bg-white/5 border-b border-white/10">
+                                    <thead className="bg-slate-900/50 border-b border-white/5">
                                         <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Partner</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Amount</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Notes</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Request Date</th>
-                                            <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase">Actions</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Partner Entity</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Amount</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Description</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Date</th>
+                                            <th className="px-6 py-3 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/10">
@@ -848,20 +861,20 @@ const FinanceDashboard = () => {
                                             <tr key={payout._id} className="hover:bg-white/5 transition-colors">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center space-x-3">
-                                                        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">
+                                                        <div className="w-8 h-8 rounded bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold">
                                                             {payout.partner?.name ? payout.partner.name[0] : 'P'}
                                                         </div>
                                                         <div>
-                                                            <div className="text-sm font-medium text-white">{payout.partner?.name}</div>
-                                                            <div className="text-sm text-gray-400">{payout.partner?.email}</div>
+                                                            <div className="text-xs font-medium text-white">{payout.partner?.name}</div>
+                                                            <div className="text-[10px] text-slate-500">{payout.partner?.email}</div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm font-bold text-emerald-400">₹{payout.amount.toLocaleString()}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-300 max-w-[200px] truncate" title={payout.notes || 'No notes'}>
+                                                <td className="px-6 py-4 text-xs font-medium text-emerald-400">₹{payout.amount.toLocaleString()}</td>
+                                                <td className="px-6 py-4 text-[11px] text-slate-400 max-w-[200px] truncate" title={payout.notes || 'No notes'}>
                                                     {payout.notes || 'N/A'}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-300">
+                                                <td className="px-6 py-4 text-[11px] text-slate-500">
                                                     {payout.requestDate ? new Date(payout.requestDate).toLocaleDateString() : 'N/A'}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -897,27 +910,27 @@ const FinanceDashboard = () => {
 
                         {/* Payout History */}
                         <GlassCard className="overflow-hidden">
-                            <div className="p-6 border-b border-white/10">
-                                <h2 className="text-base font-bold text-white flex items-center">
-                                    <History size={20} className="mr-2 text-emerald-400" /> Payout History & Status
-                                </h2>
+                            <div className="px-6 py-4 border-b border-white/5 bg-white/[0.01]">
+                                <div className="text-sm font-semibold text-slate-200 flex items-center">
+                                    <History size={16} className="mr-2 text-slate-400" /> Payout History & Settlement
+                                </div>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full responsive-table">
-                                    <thead className="bg-white/5 border-b border-white/10">
+                                    <thead className="bg-slate-900/50 border-b border-white/5">
                                         <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Partner</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Amount</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Notes</th>
-                                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Payout Date</th>
-                                            <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase">Proof</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Recipient</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Amount</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Reference</th>
+                                            <th className="px-6 py-3 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Settlement Date</th>
+                                            <th className="px-6 py-3 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Attachment</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/10">
                                         {stats.approvedPayouts.map((payout) => (
-                                            <tr key={payout._id} className="hover:bg-white/5 transition-colors">
-                                                <td className="px-6 py-4 text-sm font-medium text-white">{payout.partner?.name}</td>
-                                                <td className="px-6 py-4 text-sm font-bold text-emerald-400">₹{payout.amount.toLocaleString()}</td>
+                                            <tr key={payout._id} className="hover:bg-white/5 transition-colors text-xs">
+                                                <td className="px-6 py-4 font-medium text-white">{payout.partner?.name}</td>
+                                                <td className="px-6 py-4 font-semibold text-emerald-400">₹{payout.amount.toLocaleString()}</td>
                                                 <td className="px-6 py-4 text-sm text-gray-300 max-w-[200px] truncate" title={payout.notes || 'No notes'}>
                                                     {payout.notes || 'N/A'}
                                                 </td>
@@ -948,33 +961,52 @@ const FinanceDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
-                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {[
-                                { title: 'Revenue Report', description: 'Comprehensive revenue analysis', icon: TrendingUp, type: 'revenue' },
-                                { title: 'Payment Summary', description: 'Student payment breakdown', icon: Receipt, type: 'payments' },
-                                { title: 'Partner Payouts', description: 'B2B payout history', icon: Wallet, type: 'payouts' },
-                                { title: 'Enrollment Analytics', description: 'Center-wise enrollment data', icon: BarChart3, type: 'enrollments' }
+                                { title: 'Revenue Analytics', description: 'Full breakdown of monthly revenue, taxes, and net income.', icon: TrendingUp, formats: ['PDF', 'Excel', 'Word'], frequency: 'Real-time' },
+                                { title: 'Student Payment Ledger', description: 'Complete transaction history including pending and failed attempts.', icon: Receipt, formats: ['PDF', 'Excel'], frequency: 'Daily' },
+                                { title: 'Partner Settlement Report', description: 'Consolidated B2B payout history and pending settlement status.', icon: Wallet, formats: ['Excel', 'Word'], frequency: 'Weekly' },
+                                { title: 'Institutional Enrollment', description: 'Center-wise performance metrics and student acquisition data.', icon: BarChart3, formats: ['PDF', 'Excel'], frequency: 'Real-time' }
                             ].map((report, index) => (
-                                <GlassCard key={index} className="!p-8 hover:border-primary/40 transition-all duration-300 cursor-pointer group hover:bg-white/[0.02]">
-                                    <div className="flex flex-col items-center text-center space-y-4 mb-6">
-                                        <div className="p-5 bg-primary/20 text-primary rounded-2xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-lg shadow-primary/20">
-                                            <report.icon size={40} />
+                                <GlassCard key={index} className="!p-0 overflow-hidden hover:border-slate-700 transition-all group bg-slate-900/20 border-white/5">
+                                    <div className="p-6 flex items-start gap-5">
+                                        <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-slate-700 transition-colors">
+                                            <report.icon size={24} />
                                         </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold text-white mb-2">{report.title}</h3>
-                                            <p className="text-sm text-gray-400 leading-relaxed px-4">{report.description}</p>
+                                        <div className="flex-1 space-y-1">
+                                            <div className="flex items-center justify-between">
+                                                <div className="text-base font-semibold text-white tracking-tight">{report.title}</div>
+                                                <span className="text-[10px] font-bold text-emerald-500/80 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 uppercase tracking-tighter">
+                                                    {report.frequency}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-slate-400 leading-relaxed max-w-[300px]">
+                                                {report.description}
+                                            </p>
+                                            <div className="flex items-center gap-2 pt-3">
+                                                <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Formats:</span>
+                                                <div className="flex gap-1">
+                                                    {report.formats.map(f => (
+                                                        <span key={f} className="text-[9px] px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/5">
+                                                            {f}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <ModernButton
-                                        className="w-full text-sm py-3.5 font-bold tracking-wide"
-                                        onClick={() => {
-                                            setSelectedReportType(report.title);
-                                            setShowExportModal(true);
-                                        }}
-                                    >
-                                        <Download size={18} className="mr-2" />
-                                        Export {report.title}
-                                    </ModernButton>
+                                    <div className="px-6 py-4 bg-white/[0.02] border-t border-white/5 flex justify-end">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedReportType(report.title);
+                                                setShowExportModal(true);
+                                            }}
+                                            className="flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors"
+                                        >
+                                            <Download size={14} />
+                                            Generate Report
+                                        </button>
+                                    </div>
                                 </GlassCard>
                             ))}
                         </div>

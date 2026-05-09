@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info } from 'lucide-react';
+import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info, Wallet, Video } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
 import { useSocket } from '../../context/SocketContext';
@@ -13,8 +13,8 @@ const Navbar = ({ onToggleSidebar }) => {
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     
     // Get user info and logout method from context
-    const { user, logout } = useUser();
-    const { notifications, unreadCount, setUnreadCount } = useSocket();
+    const { user, logout, rewardPoints } = useUser();
+    const { notifications, unreadCount, setUnreadCount, markAllRead } = useSocket();
     const userInfo = user || JSON.parse(localStorage.getItem('userInfo') || '{}');
     const userName = userInfo.name || 'User';
     const userRole = userInfo.role || 'student';
@@ -106,6 +106,28 @@ const Navbar = ({ onToggleSidebar }) => {
 
             <div className="flex items-center space-x-3 sm:space-x-4">
                 
+                {/* Reward Points Persistent Display */}
+                {userRole === 'student' && (
+                    <motion.div 
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] border border-white/10 rounded-xl hover:bg-white/5 transition-all cursor-pointer group"
+                        onClick={() => navigate('/dashboard/reward-wallet')}
+                    >
+                        <div className="p-1 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                            <Wallet size={14} />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[11px] font-black text-white leading-none">
+                                {rewardPoints?.total?.toLocaleString() || 0}
+                            </span>
+                            <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest mt-0.5 font-mono">
+                                Points
+                            </span>
+                        </div>
+                    </motion.div>
+                )}
+                
                 {/* Notification Bell Dropdown */}
                 <div className="relative" ref={notifRef}>
                     <button 
@@ -160,7 +182,7 @@ const Navbar = ({ onToggleSidebar }) => {
                                 </div>
                                 <div 
                                     className="px-4 py-2 mt-1 flex justify-center border-t border-white/5 bg-white/[0.02] hover:bg-white/5 cursor-pointer transition-colors"
-                                    onClick={() => setUnreadCount(0)}
+                                    onClick={() => { markAllRead(); setIsNotifOpen(false); }}
                                 >
                                     <p className="text-primary text-xs font-semibold">Mark all as read</p>
                                 </div>

@@ -55,7 +55,7 @@ const sendDemoNotification = async (req, res) => {
  */
 const getNotificationLogs = async (req, res) => {
     try {
-        const result = await query('SELECT * FROM notification_logs ORDER BY created_at DESC LIMIT 10');
+        const result = await query('SELECT *, delivery_status as status FROM notification_logs ORDER BY created_at DESC LIMIT 10');
         res.json(result.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });

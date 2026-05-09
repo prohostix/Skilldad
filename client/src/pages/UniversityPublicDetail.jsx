@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     MapPin,
     Users,
@@ -24,6 +24,8 @@ import ModernButton from '../components/ui/ModernButton';
 import { toast } from 'react-hot-toast';
 import GlassCard from '../components/ui/GlassCard';
 import { getMediaUrl } from '../utils/media';
+import { useUser } from '../context/UserContext';
+import { Camera, Upload as UploadIcon, ShieldCheck } from 'lucide-react';
 
 // Fallback data in case page is refreshed and state is lost
 const fallbackUniversities = [
@@ -109,8 +111,33 @@ const UniversityPublicDetail = () => {
 
     const [courses, setCourses] = useState([]);
     const [loadingCourses, setLoadingCourses] = useState(true);
+    const { user: currentUser, updateUser } = useUser();
     const [university, setUniversity] = useState(location.state?.university || null);
     const [loadingProfile, setLoadingProfile] = useState(!location.state?.university);
+    const [isUploading, setIsUploading] = useState(false);
+    const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+    const [isHoveringVideo, setIsHoveringVideo] = useState(false);
+
+    useEffect(() => {
+        const videos = (university?.profile?.videos?.length > 0 ? university.profile.videos : [university?.profile?.youtubeUrl]).filter(url => !!url);
+        if (!videos || videos.length <= 1 || isHoveringVideo) return;
+        
+        const interval = setInterval(() => {
+            setCurrentVideoIndex(prev => (prev + 1) % videos.length);
+        }, 4000);
+        return () => clearInterval(interval);
+    }, [university, isHoveringVideo]);
+    
+    // Check if current user owns this profile
+    const isOwner = currentUser && (currentUser._id === university?._id || currentUser.role === 'admin');
+
+    useEffect(() => {
+        if (university) {
+            console.log('[Profile Debug] Current User ID:', currentUser?._id);
+            console.log('[Profile Debug] University ID:', university?._id);
+            console.log('[Profile Debug] Is Owner:', isOwner);
+        }
+    }, [currentUser, university, isOwner]);
 
     const universityName = decodeURIComponent(name);
 
@@ -152,6 +179,67 @@ const UniversityPublicDetail = () => {
         fetchProfile();
         fetchCourses();
     }, [universityName]);
+
+    const handleLogoUpdate = async (e) => {
+        const file = e.target.files[0];
+        console.log('[Logo Upload] File selected:', file?.name);
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Image size must be less than 2MB');
+            return;
+        }
+
+        setIsUploading(true);
+        const loadingToast = toast.loading('Calibrating institutional logo...');
+
+        try {
+            const formData = new FormData();
+            formData.append('profileImage', file);
+            
+            // If admin or different ID, specify target
+            if (currentUser._id !== university._id) {
+                formData.append('targetUserId', university._id);
+            }
+
+            const { data } = await axios.post('/api/users/upload-profile-image', formData, {
+                headers: {
+                    Authorization: `Bearer ${currentUser.token}`
+                }
+            });
+
+            if (data.success) {
+                // Update local university state thoroughly
+                setUniversity(prev => ({
+                    ...prev,
+                    profileImage: data.imageUrl,
+                    profile: {
+                        ...(prev.profile || {}),
+                        profileImage: data.imageUrl
+                    }
+                }));
+
+                // If currently logged in user is this university, update their context too
+                if (currentUser._id === university._id) {
+                    updateUser({ 
+                        ...currentUser, 
+                        profileImage: data.imageUrl,
+                        profile: {
+                            ...(currentUser.profile || {}),
+                            profileImage: data.imageUrl
+                        }
+                    });
+                }
+
+                toast.success('Institutional logo updated successfully!', { id: loadingToast });
+            }
+        } catch (error) {
+            console.error('Logo upload error:', error);
+            toast.error(error.response?.data?.message || 'Failed to update logo', { id: loadingToast });
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     if (loadingProfile) {
         return (
@@ -198,17 +286,43 @@ const UniversityPublicDetail = () => {
             {/* Cinematic Hero Section */}
             <section className="relative min-h-[70vh] sm:min-h-[85vh] flex items-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
-                    <motion.img
-                        initial={{ scale: 1.1, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 0.6 }}
-                        transition={{ duration: 2 }}
-                        src={university.profile?.coverImage ? getMediaUrl(university.profile.coverImage) : 'https://images.unsplash.com/photo-1541339907198-e08756ebafe1?auto=format&fit=crop&q=80&w=2000'}
-                        alt="University Cover"
-                        className="w-full h-full object-cover grayscale-[20%]"
-                    />
+                    {(() => {
+                        const coverImg = university.profile?.coverImage;
+                        const defaultImg = 'https://images.unsplash.com/photo-1541339907198-e08756ebafe1?auto=format&fit=crop&q=80&w=2000';
+                        const heroSrc = coverImg
+                            ? getMediaUrl(coverImg)
+                            : defaultImg;
+                        return (
+                            <motion.img
+                                initial={{ scale: 1.1, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 0.6 }}
+                                transition={{ duration: 2 }}
+                                src={heroSrc}
+                                alt="University Cover"
+                                className="w-full h-full object-cover grayscale-[20%]"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = defaultImg;
+                                }}
+                            />
+                        );
+                    })()}
                     <div className="absolute inset-0 bg-gradient-to-b from-[#05030B]/40 via-[#05030B]/80 to-[#05030B]"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#05030B] via-transparent to-[#05030B]/20"></div>
                 </div>
+
+                {/* Change Cover Button (Owner only) */}
+                {isOwner && (
+                    <div className="absolute top-24 right-6 z-30">
+                        <ModernButton 
+                            variant="secondary"
+                            className="!px-6 !py-2.5 bg-[#05030B]/60 backdrop-blur-md border-white/10 hover:border-primary/50 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 group/cover"
+                            onClick={() => toast.error('Cover image editing is being finalized. For now, please use the Logo edit feature.')}
+                        >
+                            <ImageIcon size={14} className="group-hover/cover:text-primary transition-colors" /> Change Cover
+                        </ModernButton>
+                    </div>
+                )}
 
                 <div className="max-w-7xl mx-auto px-6 relative z-10 w-full pt-32 pb-12">
                     <div className="flex flex-col lg:flex-row items-center lg:items-start lg:grid lg:grid-cols-12 gap-10 lg:gap-16">
@@ -218,19 +332,42 @@ const UniversityPublicDetail = () => {
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
-                                className="relative group p-2.5 sm:p-4 bg-white/5 border border-white/10 rounded-[48px] sm:rounded-[64px] backdrop-blur-xl w-48 sm:w-64 lg:w-full max-w-[280px]"
+                                className={`relative group p-2 sm:p-3 bg-white/5 border border-white/10 rounded-[48px] sm:rounded-[64px] backdrop-blur-xl w-48 sm:w-64 lg:w-full max-w-[280px]`}
                             >
-                                <div className="aspect-square rounded-[36px] sm:rounded-[48px] overflow-hidden border border-white/20">
+                                <div className="aspect-square rounded-[36px] sm:rounded-[48px] overflow-hidden border border-white/20 relative">
                                     <img
-                                        src={(university.profileImage || university.profile?.profileImage) ? getMediaUrl(university.profileImage || university.profile?.profileImage) : 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&q=80&w=400'}
+                                        src={(university.profileImage || university.profile?.profileImage || university.profile_image) ? getMediaUrl(university.profileImage || university.profile?.profileImage || university.profile_image) : 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&q=80&w=400'}
                                         alt={university.name}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                                        className={`w-full h-full object-cover transition-all duration-1000 ${isUploading ? 'blur-sm grayscale' : 'group-hover:scale-110'}`}
                                         onError={(e) => {
                                             e.target.src = 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800';
                                         }}
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-[#05030B]/60 to-transparent"></div>
+                                    
+                                    {isOwner && (
+                                        <div 
+                                            className="absolute inset-0 bg-[#05030B]/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm cursor-pointer"
+                                            onClick={() => document.getElementById('university-logo-upload').click()}
+                                        >
+                                            <div className="bg-primary/20 p-4 rounded-full border border-primary/40 mb-3 animate-pulse">
+                                                <Camera size={28} className="text-white" />
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Update Logo</span>
+                                        </div>
+                                    )}
+
                                 </div>
+
+                                {isOwner && (
+                                    <input
+                                        type="file"
+                                        id="university-logo-upload"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleLogoUpdate}
+                                        disabled={isUploading}
+                                    />
+                                )}
                             </motion.div>
                         </div>
 
@@ -280,7 +417,7 @@ const UniversityPublicDetail = () => {
             </section>
 
             {/* Quick Intelligence Matrix */}
-            <section className="relative mt-4 sm:-mt-20 z-20 px-4 sm:px-6">
+            <section className="relative mt-4 sm:-mt-14 z-20 px-4 sm:px-6">
                 <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     {[
                         { label: 'Specialized Courses', val: courses.length || university.courseCount || '45+', icon: BookOpen, color: 'text-primary' },
@@ -290,11 +427,11 @@ const UniversityPublicDetail = () => {
                     ].map((stat, i) => (
                         <div key={i} className="group relative">
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-600/20 rounded-3xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                            <GlassCard className="relative !p-4 sm:!p-8 flex flex-col justify-between h-full border-white/5 hover:border-primary/20 transition-all">
-                                <stat.icon className={`${stat.color} mb-4 sm:mb-6`} size={24} />
+                            <GlassCard className="relative !p-4 sm:!p-5 flex flex-col justify-center border-white/5 hover:border-primary/20 transition-all">
+                                <stat.icon className={`${stat.color} mb-3 sm:mb-4`} size={24} />
                                 <div>
-                                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white/30 mb-1 sm:mb-2">{stat.label}</p>
-                                    <p className="text-lg sm:text-2xl font-black text-white group-hover:text-primary transition-colors">{stat.val}</p>
+                                    <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-white/30 mb-1">{stat.label}</p>
+                                    <p className="text-lg sm:text-xl font-black text-white group-hover:text-primary transition-colors">{stat.val}</p>
                                 </div>
                             </GlassCard>
                         </div>
@@ -316,7 +453,7 @@ const UniversityPublicDetail = () => {
                             <h2 className="text-4xl md:text-5xl font-black text-white font-jakarta tracking-tight">
                                 Pioneering Knowledge & <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400 italic font-medium">Innovation</span>
                             </h2>
-                            <p className="text-xl text-white/60 leading-relaxed font-inter font-medium">
+                            <p className="text-base sm:text-lg text-white/60 leading-relaxed font-inter font-medium">
                                 {university.bio || university.profile?.bio || university.description || "As a premier global knowledge hub, our institution is dedicated to fostering an environment of intellectual rigor, creative innovation, and cross-cultural leadership."}
                             </p>
                         </section>
@@ -402,30 +539,56 @@ const UniversityPublicDetail = () => {
                 {/* Media & Accreditations Matrix */}
                 <div className="grid lg:grid-cols-2 gap-16 items-start">
                     {/* Media Spotlights */}
-                    {(university.profile?.videos?.length > 0 || university.profile?.youtubeUrl) ? (
-                        <div className="space-y-6 sm:space-y-10">
-                            <h3 className="text-xl sm:text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
-                                <div className="w-2 h-8 bg-red-600 rounded-full"></div>
-                                Experience Spotlight
-                            </h3>
-                            <div className="space-y-4 sm:space-y-6">
-                                {(university.profile?.videos?.length > 0 ? university.profile.videos : [university.profile?.youtubeUrl]).filter(url => !!url).map((url, vIdx) => (
-                                    <div key={vIdx} className="relative aspect-video rounded-[32px] sm:rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl">
-                                        <iframe
-                                            className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
-                                            src={`https://www.youtube.com/embed/${getYoutubeId(url)}?autoplay=0&controls=1`}
-                                            title={`Experience Spotlight ${vIdx + 1}`}
-                                            frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                        ></iframe>
-                                    </div>
-                                ))}
+                    {(() => {
+                        const videos = (university.profile?.videos?.length > 0 ? university.profile.videos : [university.profile?.youtubeUrl]).filter(url => !!url);
+                        return videos.length > 0 ? (
+                            <div className="space-y-6 sm:space-y-10">
+                                <h3 className="text-xl sm:text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
+                                    <div className="w-2 h-8 bg-red-600 rounded-full"></div>
+                                    Success Story
+                                </h3>
+                                <div 
+                                    className="relative aspect-video rounded-[32px] sm:rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl"
+                                    onMouseEnter={() => setIsHoveringVideo(true)}
+                                    onMouseLeave={() => setIsHoveringVideo(false)}
+                                >
+                                    <AnimatePresence mode="wait">
+                                        <motion.div
+                                            key={currentVideoIndex}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.5 }}
+                                            className="absolute inset-0"
+                                        >
+                                            <iframe
+                                                className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
+                                                src={`https://www.youtube.com/embed/${getYoutubeId(videos[currentVideoIndex])}?autoplay=0&controls=1`}
+                                                title={`Success Story ${currentVideoIndex + 1}`}
+                                                frameBorder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        </motion.div>
+                                    </AnimatePresence>
+                                    
+                                    {/* Carousel Indicators */}
+                                    {videos.length > 1 && (
+                                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 pointer-events-none">
+                                            {videos.map((_, idx) => (
+                                                <div 
+                                                    key={idx} 
+                                                    className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentVideoIndex ? 'w-6 bg-primary' : 'w-2 bg-white/30'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[48px] flex items-center justify-center text-white/20 italic">No Media Spotlight Available</div>
-                    )}
+                        ) : (
+                            <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[48px] flex items-center justify-center text-white/20 italic">No Success Story Available</div>
+                        );
+                    })()}
 
                     {/* Elite Accreditations Section */}
                     <section className="space-y-10">
@@ -534,9 +697,13 @@ const UniversityPublicDetail = () => {
                                         <div className="absolute -inset-2 bg-gradient-to-tr from-primary to-purple-600 rounded-full blur-xl opacity-0 group-hover:opacity-30 transition duration-500"></div>
                                         <div className="relative w-40 h-40 rounded-[32px] overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all">
                                             <img
-                                                src={person.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=101010&color=fff&bold=true`}
+                                                src={person.image ? getMediaUrl(person.image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=101010&color=fff&bold=true`}
                                                 alt={person.name}
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(person.name)}&background=1a0a2e&color=a78bfa&bold=true&size=200`;
+                                                }}
                                             />
                                         </div>
                                     </div>

@@ -47,6 +47,7 @@ const StudentManagement = () => {
     const [editData, setEditData] = useState({});
     const [documents, setDocuments] = useState([]);
     const [enrollments, setEnrollments] = useState([]);
+    const [rewardWallet, setRewardWallet] = useState({ total: 0, history: [] });
     const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState('all');
     const [universities, setUniversities] = useState([]);
@@ -163,6 +164,10 @@ const StudentManagement = () => {
             // Fetch student enrollments
             const enrollResponse = await axios.get(`/api/admin/students/${studentId}/enrollments`, config);
             setEnrollments(enrollResponse.data);
+
+            // Fetch student reward wallet
+            const walletResponse = await axios.get(`/api/admin/students/${studentId}/reward-points`, config);
+            setRewardWallet(walletResponse.data);
         } catch (error) {
             console.error('Error fetching student details:', error);
             showToast?.('Failed to fetch student details', 'error');
@@ -171,8 +176,9 @@ const StudentManagement = () => {
 
     const handleViewStudent = async (student) => {
         setSelectedStudent(student);
-        setEditData(student);
+        setEditData({ ...student, phone: student.profile?.phone || '' });
         setEditMode(false);
+
         await fetchStudentDetails(student._id);
     };
 
@@ -331,7 +337,14 @@ const StudentManagement = () => {
     };
 
     const [addStudentOpen, setAddStudentOpen] = useState(false);
-    const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'student', universityId: '' });
+    const [newStudentData, setNewStudentData] = useState({ 
+        name: '', 
+        email: '', 
+        password: '', 
+        phone: '', 
+        role: 'student', 
+        universityId: '' 
+    });
 
     const handleAddStudent = async (e) => {
         e.preventDefault();
@@ -341,7 +354,7 @@ const StudentManagement = () => {
             await axios.post('/api/users', newStudentData, config);
             showToast?.('Student added successfully', 'success');
             setAddStudentOpen(false);
-            setNewStudentData({ name: '', email: '', password: '', role: 'student', universityId: '' });
+            setNewStudentData({ name: '', email: '', password: '', phone: '', role: 'student', universityId: '' });
             fetchStudents();
         } catch (error) {
             console.error('Error adding student:', error);
@@ -428,31 +441,30 @@ const StudentManagement = () => {
             </div>
 
             {/* Search & Filter Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <GlassCard className="p-4 md:col-span-2">
+            <div className="flex flex-col sm:flex-row gap-2">
+                <GlassCard className="!p-2 flex-1">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                         <input
                             type="text"
                             placeholder="Search students by name or email..."
-                            className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            className="w-full pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                 </GlassCard>
-                <GlassCard className="p-4 flex flex-col sm:flex-row gap-4">
+                <GlassCard className="!p-2 flex flex-row gap-2 shrink-0">
                     <select
                         value={selectedCourseId}
                         onChange={(e) => setSelectedCourseId(e.target.value)}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-lg text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
                     >
                         <option value="all" className="bg-slate-900">All Courses</option>
                         {courses.map(c => (
                             <option key={c._id} value={c._id} className="bg-slate-900">{c.title}</option>
                         ))}
                     </select>
-
                     <select
                         value={selectedUniversityId}
                         onChange={(e) => {
@@ -467,7 +479,7 @@ const StudentManagement = () => {
                                 return prev;
                             });
                         }}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-lg text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
                     >
                         <option value="all" className="bg-slate-900">All Universities</option>
                         {universities.map(u => (
@@ -670,6 +682,17 @@ const StudentManagement = () => {
                                 />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">WhatsApp Phone Number</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. 919999999999"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-primary focus:outline-none font-mono"
+                                    value={newStudentData.phone}
+                                    onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
+                                />
+                                <p className="text-[10px] text-white/30 mt-1">Include country code without + (e.g., 91 for India)</p>
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-1">University / Institution</label>
                                 <select
                                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-primary focus:outline-none appearance-none cursor-pointer"
@@ -755,6 +778,21 @@ const StudentManagement = () => {
                                         )}
                                     </div>
                                     <div>
+                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Phone Number</label>
+                                        {editMode ? (
+                                            <input
+                                                type="text"
+                                                value={editData.phone || ''}
+                                                onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                                className="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                                placeholder="e.g. 919999999999"
+                                            />
+                                        ) : (
+                                            <p className="text-white mt-1">{selectedStudent.profile?.phone || 'No phone number'}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
                                         <label className="text-xs text-gray-400 uppercase tracking-wider">Bio</label>
                                         {editMode ? (
                                             <textarea
@@ -777,6 +815,15 @@ const StudentManagement = () => {
                                                 {selectedStudent.isVerified ? 'Verified' : 'Pending'}
                                             </span>
                                         </p>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Reward Wallet</label>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <div className="px-2 py-1 bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-black">
+                                                {rewardWallet.total} PTS
+                                            </div>
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">Balance</span>
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase tracking-wider">Institution / University</label>

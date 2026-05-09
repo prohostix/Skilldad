@@ -1,21 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
     Users,
     Search,
     Filter,
     Plus,
-    Eye,
     Edit,
     Mail,
     Phone,
     BookOpen,
     FileText,
+    Trophy,
+    CheckCircle2,
+    XCircle,
+    Clock,
+    Eye,
+    X,
+    ShieldCheck,
     Download,
-    UserPlus,
-    Trash2
+    GraduationCap,
+    AlertCircle
 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -42,6 +50,12 @@ const PartnerStudentManagement = () => {
     const [partnerCodes, setPartnerCodes] = useState([]);
     const [availableCourses, setAvailableCourses] = useState([]);
     const [availableUniversities, setAvailableUniversities] = useState([]);
+    const [selectedStudentForDocs, setSelectedStudentForDocs] = useState(null);
+    const [selectedStudentForCerts, setSelectedStudentForCerts] = useState(null);
+    const [studentDocs, setStudentDocs] = useState([]);
+    const [studentCerts, setStudentCerts] = useState([]);
+    const [assetsLoading, setAssetsLoading] = useState(false);
+    const [reviewing, setReviewing] = useState(false);
     const { showToast } = useToast();
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -165,6 +179,52 @@ const PartnerStudentManagement = () => {
         }
     };
 
+    const fetchStudentDocs = async (studentId) => {
+        try {
+            setAssetsLoading(true);
+            const { data } = await axios.get('/api/documents', {
+                ...config,
+                params: { student: studentId }
+            });
+            setStudentDocs(data);
+        } catch (error) {
+            console.error('Error fetching student documents:', error);
+            showToast('Failed to fetch documents', 'error');
+        } finally {
+            setAssetsLoading(false);
+        }
+    };
+
+    const fetchStudentCerts = async (studentId) => {
+        try {
+            setAssetsLoading(true);
+            const { data } = await axios.get('/api/certificates/admin/all', {
+                ...config,
+                params: { studentId }
+            });
+            setStudentCerts(data);
+        } catch (error) {
+            console.error('Error fetching student certificates:', error);
+            showToast('Failed to fetch certificates', 'error');
+        } finally {
+            setAssetsLoading(false);
+        }
+    };
+
+    const handleDocumentReview = async (id, status, reason = '') => {
+        setReviewing(true);
+        try {
+            await axios.put(`/api/documents/${id}/review`, { status, rejectionReason: reason }, config);
+            showToast(`Document ${status} successfully!`, 'success');
+            // Refresh documents for current student
+            if (selectedStudentForDocs) fetchStudentDocs(selectedStudentForDocs._id || selectedStudentForDocs.id);
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to review document', 'error');
+        } finally {
+            setReviewing(false);
+        }
+    };
+
     const filteredStudents = students.filter(student => {
         const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -187,6 +247,10 @@ const PartnerStudentManagement = () => {
                 <div>
                     <DashboardHeading title="Student Management" />
                 </div>
+                <ModernButton onClick={() => setShowRegisterStudentModal(true)} className="group shadow-lg shadow-primary/20">
+                    <Plus size={18} className="mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                    Register New Student
+                </ModernButton>
             </div>
 
             {/* Search and Filter */}
@@ -252,6 +316,28 @@ const PartnerStudentManagement = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => {
+                                                    setSelectedStudentForDocs(student);
+                                                    fetchStudentDocs(student._id || student.id);
+                                                }}
+                                                className="p-2 bg-white/5 hover:bg-primary/20 text-white/60 hover:text-primary rounded-lg transition-all"
+                                                title="View Documents"
+                                            >
+                                                <FileText size={16} />
+                                            </button>
+                                            <button 
+                                                onClick={() => {
+                                                    setSelectedStudentForCerts(student);
+                                                    fetchStudentCerts(student._id || student.id);
+                                                }}
+                                                className="p-2 bg-white/5 hover:bg-primary/20 text-white/60 hover:text-primary rounded-lg transition-all"
+                                                title="View Certificates"
+                                            >
+                                                <Trophy size={16} />
+                                            </button>
+                                        </div>
                                         <div className="text-right">
                                             <p className="text-sm font-bold text-white">Status</p>
                                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${student.isVerified ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
@@ -366,7 +452,6 @@ const PartnerStudentManagement = () => {
                                 <select
                                     value={newStudentData.university}
                                     onChange={(e) => {
-                                        console.log('University selected:', e.target.value);
                                         setNewStudentData({ ...newStudentData, university: e.target.value });
                                     }}
                                     className="w-full px-4 py-2 bg-[#0B0F1A] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
@@ -383,9 +468,6 @@ const PartnerStudentManagement = () => {
                                         <option value="" disabled>Loading universities...</option>
                                     )}
                                 </select>
-                                {availableUniversities.length === 0 && (
-                                    <p className="text-xs text-white/40 mt-1">No approved universities found</p>
-                                )}
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-white/70 mb-2">Affiliation Code *</label>
@@ -450,8 +532,195 @@ const PartnerStudentManagement = () => {
                     </motion.div>
                 </div>
             )}
+
+            {/* Student Documents Modal */}
+            <AnimatePresence>
+                {selectedStudentForDocs && (
+                    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedStudentForDocs(null)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-md"
+                        />
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-4xl max-h-[85vh] bg-[#0B0F1A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <FileText className="text-primary" /> Documents: {selectedStudentForDocs.name}
+                                    </h3>
+                                    <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-black">Student ID: {selectedStudentForDocs._id || selectedStudentForDocs.id}</p>
+                                </div>
+                                <button onClick={() => setSelectedStudentForDocs(null)} className="p-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-xl transition-all">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                                {assetsLoading ? (
+                                    <div className="flex flex-col items-center justify-center py-20">
+                                        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                                        <p className="text-white/40 text-sm">Loading documents...</p>
+                                    </div>
+                                ) : studentDocs.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {studentDocs.map((doc, idx) => (
+                                            <GlassCard key={doc.id || doc._id} className="p-4 flex flex-col border-white/5 hover:border-primary/20 transition-all">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                                                        <FileText size={18} />
+                                                    </div>
+                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                                        doc.status === 'submitted' ? 'bg-amber-500/10 text-amber-400' :
+                                                        doc.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                                                    }`}>
+                                                        {doc.status}
+                                                    </span>
+                                                </div>
+                                                <h4 className="font-bold text-white text-sm mb-1 truncate">{doc.title}</h4>
+                                                <div className="flex justify-between text-[10px] text-white/30 uppercase font-black mb-4">
+                                                    <span>{doc.type}</span>
+                                                    <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                                <div className="flex gap-2 mt-auto pt-3 border-t border-white/5">
+                                                    <button 
+                                                        onClick={() => window.open(`/${doc.fileUrl}`, '_blank')}
+                                                        className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1.5"
+                                                    >
+                                                        <Eye size={12} /> View
+                                                    </button>
+                                                    {doc.status === 'submitted' && (
+                                                        <div className="flex flex-1 gap-1">
+                                                            <button 
+                                                                onClick={() => handleDocumentReview(doc.id || doc._id, 'approved')}
+                                                                className="flex-1 py-1.5 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-lg text-[10px] font-bold transition-all"
+                                                            >
+                                                                Approve
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => {
+                                                                    const reason = prompt('Reason for rejection:');
+                                                                    if (reason) handleDocumentReview(doc.id || doc._id, 'rejected', reason);
+                                                                }}
+                                                                className="flex-1 py-1.5 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-lg text-[10px] font-bold transition-all"
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </GlassCard>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-20 text-center text-white/20">
+                                        <FileText size={48} className="mx-auto mb-4 opacity-10" />
+                                        <p className="font-bold">No documents uploaded yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Student Certificates Modal */}
+            <AnimatePresence>
+                {selectedStudentForCerts && (
+                    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedStudentForCerts(null)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-md"
+                        />
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-4xl max-h-[85vh] bg-[#0B0F1A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+                        >
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                        <Trophy className="text-primary" /> Certificates: {selectedStudentForCerts.name}
+                                    </h3>
+                                    <p className="text-xs text-white/40 mt-1 uppercase tracking-widest font-black">Student ID: {selectedStudentForCerts._id || selectedStudentForCerts.id}</p>
+                                </div>
+                                <button onClick={() => setSelectedStudentForCerts(null)} className="p-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-xl transition-all">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                                {assetsLoading ? (
+                                    <div className="flex flex-col items-center justify-center py-20">
+                                        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                                        <p className="text-white/40 text-sm">Loading certificates...</p>
+                                    </div>
+                                ) : studentCerts.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {studentCerts.map((req, idx) => (
+                                            <GlassCard key={req.id} className="p-4 flex flex-col border-white/5">
+                                                <div className="flex items-center gap-3 mb-4">
+                                                    <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                                                        <GraduationCap size={20} />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <h4 className="font-bold text-white text-sm truncate">{req.course_title}</h4>
+                                                        <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded ${
+                                                            req.status === 'ISSUED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                                                        }`}>
+                                                            {req.status}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-1.5 mb-4 text-[10px]">
+                                                    <div className="flex justify-between text-white/30 uppercase font-black">
+                                                        <span>Applied</span>
+                                                        <span className="text-white/60">{new Date(req.apply_date).toLocaleDateString()}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-white/30 uppercase font-black">
+                                                        <span>University</span>
+                                                        <span className="text-white/60 truncate ml-4">{req.university_name}</span>
+                                                    </div>
+                                                </div>
+                                                {req.status === 'ISSUED' ? (
+                                                    <button 
+                                                        onClick={() => window.open(req.file_url, '_blank')}
+                                                        className="w-full py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1.5"
+                                                    >
+                                                        <Eye size={12} /> View Certificate
+                                                    </button>
+                                                ) : (
+                                                    <div className="w-full py-2 bg-white/5 text-white/30 rounded-lg text-[10px] font-bold text-center flex items-center justify-center gap-1.5">
+                                                        <Clock size={12} /> Processing by Uni
+                                                    </div>
+                                                )}
+                                            </GlassCard>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-20 text-center text-white/20">
+                                        <Trophy size={48} className="mx-auto mb-4 opacity-10" />
+                                        <p className="font-bold">No certificates earned yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
 
 export default PartnerStudentManagement;
+

@@ -117,8 +117,9 @@ const ExamResult = () => {
             let correctAns = 'N/A';
             
             if (ans.questionType === 'mcq') {
-                studentAns = ans.question?.options[ans.selectedOption]?.text || 'Not answered';
-                correctAns = ans.question?.options.find(opt => opt.isCorrect)?.text || 'N/A';
+                const opts = Array.isArray(ans.question?.options) ? ans.question.options : [];
+                studentAns = opts[ans.selectedOption]?.text || 'Not answered';
+                correctAns = opts.find(opt => opt.isCorrect)?.text || 'N/A';
             } else {
                 studentAns = ans.textAnswer || 'Not answered';
                 correctAns = 'Subjective';
@@ -432,15 +433,23 @@ const ExamResult = () => {
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-white/40 font-bold w-28">Your Answer:</span>
                                                                 <span className={`font-bold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                                    {answer.question?.options[answer.selectedOption]?.text || 'Not answered'}
+                                                                    {(Array.isArray(answer.question?.options) && answer.question.options[answer.selectedOption]?.text) || 'Not answered'}
                                                                 </span>
                                                             </div>
                                                             {!isCorrect && (
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-white/40 font-bold w-28">Correct Answer:</span>
                                                                     <span className="font-bold text-emerald-400">
-                                                                        {answer.question?.options.find(opt => opt.isCorrect)?.text || 'N/A'}
+                                                                        {(Array.isArray(answer.question?.options) && answer.question.options.find(opt => opt.isCorrect)?.text) || 'N/A'}
                                                                     </span>
+                                                                </div>
+                                                            )}
+                                                            {answer.feedback && (
+                                                                <div className="mt-3 pt-3 border-t border-white/5">
+                                                                    <p className="text-[10px] text-primary/60 font-black uppercase tracking-widest mb-1.5">Instructor Feedback</p>
+                                                                    <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl text-white/70 text-xs leading-relaxed">
+                                                                        {answer.feedback}
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                         </div>

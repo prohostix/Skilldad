@@ -169,7 +169,7 @@ const PlatformAnalytics = () => {
                         </div>
                         <h3 className="text-lg font-bold text-white">User Demographics</h3>
                     </div>
-                    <div className="flex-1 w-full relative min-h-[280px]">
+                    <div className="flex-1 w-full relative min-h-[280px]" style={{ minWidth: 0 }}>
                         <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280} aspect={window.innerWidth < 640 ? 1.1 : undefined} debounce={200}>
                             <PieChart>
                                 <Pie
@@ -221,7 +221,7 @@ const PlatformAnalytics = () => {
                     </div>
                     <h3 className="text-lg font-bold text-white">Strategic Growth Map</h3>
                 </div>
-                <div className="h-[400px] w-full min-h-[300px]">
+                <div className="h-[400px] w-full min-h-[300px]" style={{ minWidth: 0 }}>
                     <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300} aspect={window.innerWidth < 1024 ? 1.5 : undefined} debounce={200}>
                         <BarChart data={enrollmentData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />

@@ -31,3 +31,14 @@ server/uploads/
 .vscode/
 .idea/
 client/android/
+
+# AI Scratch and temporary scripts
+scratch/
+server/scratch/
+check_*.js
+test_*.js
+remove_nidha.js
+view_recent_logs.js
+find_student_test.js
+list_tables.js
+inspect_schema.js

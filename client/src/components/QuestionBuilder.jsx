@@ -18,6 +18,8 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
     });
     const [editingIndex, setEditingIndex] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [uploadingExcel, setUploadingExcel] = useState(false);
+    const [excelFile, setExcelFile] = useState(null);
     const { showToast } = useToast();
 
     const fetchQuestions = useCallback(async () => {
@@ -236,6 +238,52 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
         }
     };
 
+    const handleDownloadTemplate = () => {
+        const headers = ["Question", "Option A", "Option B", "Option C", "Option D", "Correct Option (A/B/C/D)", "Marks", "Negative Marks"];
+        const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" +
+            "What is React?,A Javascript library,A Database,A CSS framework,A Server,A,1,0.25\n" +
+            "Which is not a hook?,useEffect,useMemo,useSelect,useCallback,C,2,0.5";
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "mcq_template.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('MCQ Template downloaded', 'success');
+    };
+
+    const handleBulkUpload = async () => {
+        if (!excelFile) {
+            showToast('Please select a CSV/Excel file first', 'error');
+            return;
+        }
+
+        setUploadingExcel(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            const formData = new FormData();
+            formData.append('excel', excelFile);
+
+            await axios.post(`/api/exams/${examId}/bulk-upload-questions`, formData, config);
+            showToast('Questions uploaded successfully!', 'success');
+            setExcelFile(null);
+            fetchQuestions();
+        } catch (err) {
+            console.error('Bulk upload error:', err);
+            showToast(err.response?.data?.message || 'Failed to upload questions', 'error');
+        } finally {
+            setUploadingExcel(false);
+        }
+    };
+
     const handleOptionChange = (index, value) => {
         const newOptions = [...currentQuestion.options];
         newOptions[index] = value;
@@ -263,24 +311,66 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
+            {/* Bulk Actions */}
+            <GlassCard className="p-4 border-primary/20 bg-primary/5">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h3 className="text-sm font-bold text-white">Bulk Question Import</h3>
+                        <p className="text-[10px] text-white/50">Upload multiple MCQ questions using our standard Excel/CSV template.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={handleDownloadTemplate}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-white/10 hover:text-white transition-all"
+                        >
+                            <Save size={14} />
+                            Download Template
+                        </button>
+                        <div className="h-6 w-px bg-white/10" />
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="file" 
+                                id="bulk-excel" 
+                                className="hidden" 
+                                accept=".csv, .xlsx"
+                                onChange={(e) => setExcelFile(e.target.files[0])}
+                            />
+                            <label 
+                                htmlFor="bulk-excel"
+                                className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/40 cursor-pointer hover:bg-white/10"
+                            >
+                                {excelFile ? excelFile.name.substring(0, 15) + '...' : 'Choose File'}
+                            </label>
+                            <ModernButton
+                                size="sm"
+                                onClick={handleBulkUpload}
+                                disabled={uploadingExcel || !excelFile}
+                            >
+                                {uploadingExcel ? 'Uploading...' : 'Import'}
+                            </ModernButton>
+                        </div>
+                    </div>
+                </div>
+            </GlassCard>
+
             {/* Question Form */}
-            <GlassCard className="p-6">
-                <h3 className="text-xl font-bold text-white mb-6">
+            <GlassCard className="p-4">
+                <h3 className="text-lg font-bold text-white mb-4">
                     {editingIndex !== null ? 'Edit Question' : 'Add New Question'}
                 </h3>
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {/* Question Type */}
                     <div>
-                        <label className="block text-sm font-semibold text-white/70 mb-2">
+                        <label className="block text-xs font-semibold text-white/70 mb-1.5">
                             Question Type
                         </label>
                         <div className="flex gap-4">
                             <button
                                 type="button"
                                 onClick={() => setCurrentQuestion({ ...currentQuestion, questionType: 'mcq' })}
-                                className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                                className={`flex-1 py-1.5 px-3 rounded-xl font-semibold transition-all ${
                                     currentQuestion.questionType === 'mcq'
                                         ? 'bg-primary text-white'
                                         : 'bg-white/5 text-white/50 hover:bg-white/10'
@@ -291,7 +381,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                             <button
                                 type="button"
                                 onClick={() => setCurrentQuestion({ ...currentQuestion, questionType: 'descriptive' })}
-                                className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                                className={`flex-1 py-1.5 px-3 rounded-xl font-semibold transition-all ${
                                     currentQuestion.questionType === 'descriptive'
                                         ? 'bg-primary text-white'
                                         : 'bg-white/5 text-white/50 hover:bg-white/10'
@@ -304,23 +394,23 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
 
                     {/* Question Text */}
                     <div>
-                        <label className="block text-sm font-semibold text-white/70 mb-2">
+                        <label className="block text-xs font-semibold text-white/70 mb-1.5">
                             Question Text *
                         </label>
                         <textarea
                             value={currentQuestion.questionText}
                             onChange={(e) => setCurrentQuestion({ ...currentQuestion, questionText: e.target.value })}
                             placeholder="Enter your question here..."
-                            rows={4}
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-primary transition-all resize-none"
+                            rows={3}
+                            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary transition-all resize-none"
                         />
                     </div>
 
                     {/* MCQ Options */}
                     {currentQuestion.questionType === 'mcq' && (
                         <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="block text-sm font-semibold text-white/70">
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block text-xs font-semibold text-white/70">
                                     Options (Select correct answer)
                                 </label>
                                 {currentQuestion.options.length < 6 && (
@@ -334,7 +424,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                                     </button>
                                 )}
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 {currentQuestion.options.map((option, index) => (
                                     <div key={index} className="flex items-center gap-3">
                                         <input
@@ -349,7 +439,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                                             value={option}
                                             onChange={(e) => handleOptionChange(index, e.target.value)}
                                             placeholder={`Option ${index + 1}`}
-                                            className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-primary transition-all"
+                                            className="flex-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary transition-all"
                                         />
                                         {currentQuestion.options.length > 2 && (
                                             <button
@@ -369,7 +459,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                     {/* Marks */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-semibold text-white/70 mb-2">
+                            <label className="block text-xs font-semibold text-white/70 mb-1.5">
                                 Marks *
                             </label>
                             <input
@@ -381,12 +471,12 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                                     const value = parseFloat(e.target.value);
                                     setCurrentQuestion({ ...currentQuestion, marks: isNaN(value) ? 1 : value });
                                 }}
-                                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-primary transition-all"
                             />
                         </div>
                         {currentQuestion.questionType === 'mcq' && (
                             <div>
-                                <label className="block text-sm font-semibold text-white/70 mb-2">
+                                <label className="block text-xs font-semibold text-white/70 mb-1.5">
                                     Negative Marks
                                 </label>
                                 <input
@@ -398,7 +488,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                                         const value = parseFloat(e.target.value);
                                         setCurrentQuestion({ ...currentQuestion, negativeMarks: isNaN(value) ? 0 : value });
                                     }}
-                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                    className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-primary transition-all"
                                 />
                             </div>
                         )}
@@ -438,9 +528,9 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
 
             {/* Questions List */}
             {questions.length > 0 && (
-                <GlassCard className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold text-white">
+                <GlassCard className="p-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-white">
                             Questions List ({questions.length})
                         </h3>
                         <ModernButton
@@ -452,7 +542,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                         </ModernButton>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         <AnimatePresence>
                             {questions.map((question, index) => (
                                 <motion.div
@@ -460,7 +550,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
-                                    className="p-5 bg-white/[0.02] border border-white/10 rounded-2xl hover:bg-white/[0.05] transition-all"
+                                    className="p-3 bg-white/[0.02] border border-white/10 rounded-2xl hover:bg-white/[0.05] transition-all"
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
@@ -484,7 +574,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-white mb-3">{question.questionText}</p>
+                                            <p className="text-sm text-white mb-2">{question.questionText}</p>
                                             {question.questionType === 'mcq' && question.options && (
                                                 <div className="space-y-2">
                                                     {question.options.map((option, optIndex) => {

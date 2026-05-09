@@ -40,8 +40,8 @@ async function checkExamAccess(examId, studentId) {
 
     // 4. Check time window
     const now = new Date();
-    const startTime = new Date(exam.scheduled_start);
-    const endTime = new Date(exam.scheduled_end);
+    const startTime = exam.scheduled_start ? new Date(exam.scheduled_start) : new Date(0);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
 
     if (now < startTime) {
       const minutesUntilStart = Math.floor((startTime - now) / 60000);
@@ -96,13 +96,13 @@ module.exports = {
   // Other methods if needed can be added here or kept as stubs
   isExamActive: (exam) => {
     const now = new Date();
-    const startTime = new Date(exam.scheduled_start);
-    const endTime = new Date(exam.scheduled_end);
+    const startTime = exam.scheduled_start ? new Date(exam.scheduled_start) : new Date(0);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
     return now >= startTime && now <= endTime;
   },
   calculateTimeRemaining: (exam) => {
     const now = new Date();
-    const endTime = new Date(exam.scheduled_end);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
     const effectiveEndTime = exam.allow_late_submission && exam.late_submission_deadline
       ? new Date(exam.late_submission_deadline)
       : endTime;
@@ -110,7 +110,7 @@ module.exports = {
   },
   hasExamEnded: (exam) => {
     const now = new Date();
-    const endTime = new Date(exam.scheduled_end);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
     const effectiveEndTime = exam.allow_late_submission && exam.late_submission_deadline
       ? new Date(exam.late_submission_deadline)
       : endTime;

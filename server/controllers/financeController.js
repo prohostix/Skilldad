@@ -293,13 +293,113 @@ const getFinancePartners = async (req, res) => {
     }
 };
 
+// @desc    Get Enrollment Summaries by Center/Partner
+const getEnrollmentSummaries = async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                p.name as partner_name, 
+                p.profile as partner_profile,
+                COUNT(DISTINCT e.id) as total_enrollments,
+                COALESCE(SUM(t.final_amount), 0) as total_amount,
+                COUNT(DISTINCT CASE WHEN t.status = 'pending' THEN t.id END) as pending_payments
+            FROM users p
+            JOIN users s ON s.registered_by = p.id
+            JOIN enrollments e ON e.student_id = s.id
+            LEFT JOIN transactions t ON (e.student_id = t.student_id AND e.course_id = t.course_id)
+            WHERE p.role = 'partner'
+            GROUP BY p.id, p.name, p.profile
+            HAVING COUNT(DISTINCT e.id) > 0
+        `;
+        const result = await query(sql);
+        
+        res.json(result.rows.map(r => {
+            let profile = {};
+            try {
+                profile = typeof r.partner_profile === 'string' ? JSON.parse(r.partner_profile) : (r.partner_profile || {});
+            } catch (e) { profile = {}; }
+
+            return {
+                partnerName: r.partner_name,
+                center: profile.partnerName || r.partner_name,
+                totalEnrollments: parseInt(r.total_enrollments),
+                totalAmount: parseFloat(r.total_amount) || 0,
+                pendingPayments: parseInt(r.pending_payments)
+            };
+        }));
+    } catch (error) {
+        console.error('Error in getEnrollmentSummaries (PG):', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Export Financial Data for Reports
+const exportReport = async (req, res) => {
+    try {
+        const { type } = req.params; // revenue, payments, payouts, enrollments
+        let data = [];
+
+        if (type === 'revenue' || type === 'payments') {
+            const result = await query(`
+                SELECT 
+                    t.created_at as "Date",
+                    u.name as "Student",
+                    c.title as "Course",
+                    t.final_amount as "Amount",
+                    t.payment_method as "Method",
+                    t.status as "Status",
+                    t.transaction_id as "TransactionID"
+                FROM transactions t
+                JOIN users u ON t.student_id = u.id
+                JOIN courses c ON t.course_id = c.id
+                ORDER BY t.created_at DESC
+            `);
+            data = result.rows;
+        } else if (type === 'payouts') {
+            const result = await query(`
+                SELECT 
+                    p.request_date as "RequestDate",
+                    p.payout_date as "SettlementDate",
+                    u.name as "Partner",
+                    p.amount as "Amount",
+                    p.status as "Status",
+                    p.notes as "Reference"
+                FROM payouts p
+                JOIN users u ON p.partner_id = u.id
+                ORDER BY p.created_at DESC
+            `);
+            data = result.rows;
+        } else if (type === 'enrollments') {
+            const result = await query(`
+                SELECT 
+                    p.name as "Center",
+                    c.title as "Course",
+                    COUNT(e.id) as "EnrollmentCount",
+                    SUM(t.final_amount) as "RevenueGenerated"
+                FROM enrollments e
+                JOIN courses c ON e.course_id = c.id
+                JOIN users p ON c.instructor_id = p.id
+                LEFT JOIN transactions t ON (e.student_id = t.student_id AND e.course_id = t.course_id AND t.status = 'success')
+                GROUP BY p.name, c.title
+                ORDER BY p.name, c.title
+            `);
+            data = result.rows;
+        }
+
+        res.json(data);
+    } catch (error) {
+        console.error('Error in exportReport:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getFinanceStats,
     getStudentPayments,
     updatePaymentStatus,
-    getEnrollmentSummaries: async (req, res) => res.json([]),
+    getEnrollmentSummaries,
     approvePayout,
     getPayoutHistory,
-    exportReport: async (req, res) => res.json({}),
+    exportReport,
     getFinancePartners
 };

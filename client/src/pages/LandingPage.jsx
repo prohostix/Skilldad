@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
     Rocket,
@@ -44,34 +44,53 @@ const LandingPage = () => {
     const [dynamicLogos, setDynamicLogos] = useState([]);
     const [featuredCourses, setFeaturedCourses] = useState([]);
     const [dynamicUniversities, setDynamicUniversities] = useState([]);
+    const [dynamicSuccessStories, setDynamicSuccessStories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [activeVideo, setActiveVideo] = useState(null); // { url, name }
+    const [successIndex, setSuccessIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setSuccessIndex(prev => prev + 1);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         const fetchPublicData = async () => {
             try {
-                const [directorsRes, logosRes, coursesRes, universitiesRes] = await Promise.all([
+                setLoading(true);
+                const [directorsRes, logosRes, coursesRes, universitiesRes, storiesRes] = await Promise.all([
                     axios.get('/api/public/directors'),
                     axios.get('/api/public/partner-logos'),
                     axios.get('/api/courses'),
-                    axios.get('/api/public/universities')
+                    axios.get('/api/public/universities'),
+                    axios.get('/api/public/success-stories')
                 ]);
 
-                if (directorsRes.data && directorsRes.data.length > 0) {
+                if (directorsRes.data) {
                     setDynamicDirectors(directorsRes.data);
                 }
 
-                if (logosRes.data && logosRes.data.length > 0) {
+                if (logosRes.data) {
                     setDynamicLogos(logosRes.data);
                 }
 
-                if (coursesRes.data && coursesRes.data.length > 0) {
+                if (coursesRes.data) {
                     setFeaturedCourses(coursesRes.data.slice(0, 3));
                 }
 
-                if (universitiesRes.data && universitiesRes.data.length > 0) {
+                if (universitiesRes.data) {
                     setDynamicUniversities(universitiesRes.data);
+                }
+
+                if (storiesRes.data) {
+                    setDynamicSuccessStories(storiesRes.data);
                 }
             } catch (error) {
                 console.error('Failed to fetch public data:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -147,6 +166,7 @@ const LandingPage = () => {
     ];
 
     const landingDirectors = dynamicDirectors.filter(d => d.display_target === 'LANDING');
+    const iitanLeads = dynamicDirectors.filter(d => d.display_target === 'IIT_LEADERSHIP');
     const directors = landingDirectors.length > 0 ? landingDirectors : staticDirectors;
 
     // Split dynamic logos into types
@@ -193,8 +213,8 @@ const LandingPage = () => {
             location: u.profile?.location || 'Global',
             students: u.studentCount > 0 ? `${u.studentCount}+` : '1,200+',
             programs: u.courseCount > 0 ? `${u.courseCount}+` : '24+',
-            logo: u.profileImage ? getMediaUrl(u.profileImage) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
-            image: u.profileImage ? getMediaUrl(u.profileImage) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+            logo: (u.profileImage || u.profile?.profileImage || u.profile_image) ? getMediaUrl(u.profileImage || u.profile?.profileImage || u.profile_image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+            image: (u.profileImage || u.profile?.profileImage || u.profile_image) ? getMediaUrl(u.profileImage || u.profile?.profileImage || u.profile_image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
             description: u.bio || 'World-class institution providing excellence in global education through SkillDad.',
             established: u.profile?.foundedYear || u.profile?.established || (u.createdAt ? new Date(u.createdAt).getFullYear() : '2023'),
             rating: (4.8 + (Math.random() * 0.15)).toFixed(1), // Dynamic-ish rating
@@ -708,6 +728,268 @@ const LandingPage = () => {
                     </div>
                 </div>
             </section>
+
+            {/* ── Managed by IITans Section ── */}
+            <section className="relative py-16 md:py-24 px-6 z-10 bg-black overflow-hidden section-optimize">
+                <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+                
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-12 mb-16">
+                        <div className="text-center lg:text-left space-y-4 flex-1">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                                className="inline-flex items-center space-x-2 px-4 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest"
+                            >
+                                <Zap size={14} />
+                                <span>Innovation Leadership</span>
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.1 }}
+                                className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-jakarta tracking-tight leading-tight"
+                            >
+                                Managed by <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-primary to-primary-dark">IITans in INDIA</span>
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.2 }}
+                                className="text-text-secondary max-w-xl mx-auto lg:mx-0 font-inter text-base"
+                            >
+                                Our platform is architected and operated by elite graduates from India’s premier institutes, bringing industry-standard functional expertise to global education.
+                            </motion.p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {(iitanLeads.length > 0 ? iitanLeads : [
+                            { name: 'Arpit Jain', alumni: 'IIT Delhi', role: 'Chief Executive Architect', image: '/assets/leadership/ceo.png', color: 'primary' },
+                            { name: 'Neeraj Sharma', alumni: 'IIT Kanpur', role: 'Head of Technology Sync', image: '/assets/leadership/cto.png', color: 'emerald-400' },
+                            { name: 'Priyanka Chopra', alumni: 'IIT Madras', role: 'Head of Operations & Excellence', image: '/assets/leadership/ops.png', color: 'amber-400' }
+                        ]).map((lead, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true, margin: "-50px" }}
+                                transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 100 }}
+                                whileHover={{ y: -12, scale: 1.02 }}
+                                className="h-full group"
+                            >
+                                <GlassCard className="!bg-white/[0.02] border-white/5 group-hover:border-primary/40 transition-all duration-500 h-full p-0 overflow-hidden text-left hover:shadow-2xl hover:shadow-primary/10">
+                                    <div className="aspect-[4/5] overflow-hidden relative">
+                                        <img 
+                                            src={getMediaUrl(lead.image || lead.imageUrl || lead.img)} 
+                                            alt={lead.name} 
+                                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" 
+                                            onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.name)}&background=5B5CFF&color=fff&bold=true`; }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                                        <div className="absolute bottom-6 left-6 right-6">
+                                            <div className="inline-flex items-center space-x-2 px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-[9px] font-black uppercase tracking-widest text-white mb-2">
+                                                <span className={`w-1.5 h-1.5 rounded-full bg-${lead.accent_color || lead.color || 'primary'}`} />
+                                                <span>{lead.university || lead.alumni} alumni</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold text-white mb-1 font-jakarta">{lead.name}</h3>
+                                            <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">{lead.title || lead.role}</p>
+                                        </div>
+                                    </div>
+                                    <div className="p-6">
+                                        <p className="text-xs text-text-muted leading-relaxed font-inter opacity-80 group-hover:opacity-100 transition-opacity">
+                                            {lead.bio || "Driving the core functional strategy and system reliability for SkillDad’s pan-India academic operations."}
+                                        </p>
+                                        <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
+                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Functional Leadership</span>
+                                            <Activity size={14} className="text-primary/40 group-hover:text-primary transition-colors" />
+                                        </div>
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── Student Success & Videos Section ── */}
+            <section className="relative py-16 md:py-24 px-6 z-10 bg-transparent section-optimize">
+                <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
+                
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16 space-y-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
+                        >
+                            <Play size={14} />
+                            <span>Campus Impact</span>
+                        </motion.div>
+                        <motion.h2
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.7, delay: 0.1 }}
+                            className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-jakarta tracking-tight"
+                        >
+                            Student <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Success Stories</span>
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.7, delay: 0.2 }}
+                            className="text-text-secondary max-w-2xl mx-auto font-inter text-base"
+                        >
+                            Witness the transformative journey of students from partnered campuses into high-growth corporate roles.
+                        </motion.p>
+                    </div>
+
+                    <div className="overflow-hidden">
+                        <AnimatePresence mode="popLayout">
+                            <motion.div
+                                key={successIndex}
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -50 }}
+                                transition={{ duration: 0.5 }}
+                                className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                            >
+                                {(() => {
+                                    const allStories = dynamicSuccessStories.length > 0 ? dynamicSuccessStories : [
+                                        { name: 'Rahul Kumar', campus: 'CIT Campus', package: '18 LPA', role: 'Full Stack Dev', imageUrl: '/assets/success/student1.png', story: 'Transformed his technical core within 6 months.' },
+                                        { name: 'Sanya Sharma', campus: 'Global University', package: '24 LPA', role: 'AI Researcher', imageUrl: '/assets/success/student2.png', story: 'Mastered neural architectures and secured top ranking.' },
+                                        { name: 'Arjun Mehta', campus: 'Tech Institute', package: '15 LPA', role: 'Product Manager', imageUrl: '/assets/success/student3.png', story: 'Achieved career momentum through strategic sync.' },
+                                        { name: 'Priya Singh', campus: 'Data Institute', package: '14 LPA', role: 'Data Scientist', imageUrl: '/assets/success/student1.png', story: 'Built predictive models for global finance platforms.' },
+                                        { name: 'Vikram Patel', campus: 'Cloud Academy', package: '20 LPA', role: 'Cloud Engineer', imageUrl: '/assets/success/student2.png', story: 'Architected scalable microservices for enterprise clients.' },
+                                        { name: 'Anita Desai', campus: 'Cyber Hub', package: '16 LPA', role: 'Cyber Security', imageUrl: '/assets/success/student3.png', story: 'Secured critical infrastructure using modern cryptographic standards.' }
+                                    ];
+                                    
+                                    const num = allStories.length;
+                                    if (num === 0) return null;
+                                    
+                                    const visibleStories = [
+                                        allStories[successIndex % num],
+                                        allStories[(successIndex + 1) % num],
+                                        allStories[(successIndex + 2) % num],
+                                    ];
+
+                                    return visibleStories.map((student, i) => {
+                                        const videoSrc = student.videoUrl || student.video_url;
+                                        return (
+                                        <motion.div
+                                            key={student.name + i}
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true, margin: "-50px" }}
+                                            transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 100 }}
+                                            whileHover={{ y: -12, scale: 1.02 }}
+                                            className="group cursor-pointer"
+                                            onMouseEnter={(e) => {
+                                                const vid = e.currentTarget.querySelector('video');
+                                                if (vid) { vid.currentTime = 0; vid.play().catch(() => {}); }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                const vid = e.currentTarget.querySelector('video');
+                                                if (vid) { vid.pause(); vid.currentTime = 0; }
+                                            }}
+                                            onClick={() => videoSrc && setActiveVideo({ url: videoSrc, name: student.name })}
+                                        >
+                                            <GlassCard className="p-4 !bg-white/[0.03] border-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden hover:shadow-glow-purple">
+                                                <div className="aspect-video rounded-xl overflow-hidden mb-5 relative group-hover:shadow-2xl transition-all">
+                                                    <img
+                                                        src={getMediaUrl(student.imageUrl || student.image || student.img)}
+                                                        alt={student.name}
+                                                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
+                                                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=5B5CFF&color=fff&bold=true`; }}
+                                                    />
+                                                    {videoSrc && (
+                                                        <video
+                                                            src={videoSrc.startsWith('http') ? videoSrc : getMediaUrl(videoSrc)}
+                                                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                            muted
+                                                            playsInline
+                                                            loop
+                                                            preload="metadata"
+                                                        />
+                                                    )}
+                                                    <div className={`absolute inset-0 bg-black/40 transition-all duration-500 flex items-center justify-center ${videoSrc ? 'group-hover:bg-transparent' : 'group-hover:bg-black/20'}`}>
+                                                        <div className={`w-12 h-12 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-glow-primary transform scale-90 group-hover:scale-100 transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : ''}`}>
+                                                            <Play size={20} fill="currentColor" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white uppercase tracking-widest">
+                                                        Success Story
+                                                    </div>
+                                                </div>
+                                                <div className="px-2">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <h3 className="text-lg font-bold text-white font-jakarta">{student.name}</h3>
+                                                        <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded border border-emerald-500/30">
+                                                            {student.package}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mb-4">{student.campus} · {student.role}</p>
+                                                    <p className="text-xs text-text-muted leading-relaxed font-inter mb-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                        {student.story} Leveraging SkillDad’s neural learning path to master advanced industry modules.
+                                                    </p>
+                                                    <div className="pt-4 border-t border-white/5 flex items-center gap-2">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                                                        <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Hired by Global HQ</span>
+                                                    </div>
+                                                </div>
+                                            </GlassCard>
+                                        </motion.div>
+                                        );
+                                    });
+                                })()}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                    
+
+                </div>
+            </section>
+
+            {/* Video Modal */}
+            {activeVideo && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4" onClick={() => setActiveVideo(null)}>
+                    <div className="absolute inset-0 bg-black/90 backdrop-blur-md" />
+                    <div className="relative w-full max-w-3xl" onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setActiveVideo(null)}
+                            className="absolute -top-10 right-0 text-white/60 hover:text-white text-sm font-bold flex items-center gap-1"
+                        >
+                            ✕ Close
+                        </button>
+                        <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black aspect-video">
+                            {activeVideo.url.startsWith('http') ? (
+                                // External URL — embed in iframe (YouTube/Vimeo) or video tag
+                                activeVideo.url.includes('youtube.com') || activeVideo.url.includes('youtu.be') ? (
+                                    <iframe
+                                        src={`https://www.youtube.com/embed/${activeVideo.url.split('v=')[1]?.split('&')[0] || activeVideo.url.split('/').pop()}`}
+                                        className="w-full h-full"
+                                        allow="autoplay; fullscreen"
+                                        allowFullScreen
+                                    />
+                                ) : (
+                                    <video src={activeVideo.url} controls autoPlay className="w-full h-full" />
+                                )
+                            ) : (
+                                <video src={getMediaUrl(activeVideo.url)} controls autoPlay className="w-full h-full" />
+                            )}
+                        </div>
+                        <p className="text-center text-white/60 text-sm mt-3 font-jakarta">{activeVideo.name}'s Success Story</p>
+                    </div>
+                </div>
+            )}
 
             {/* SkillDad Directors Section */}
             <section className="relative py-16 md:py-24 px-6 z-10 bg-transparent section-optimize">

@@ -22,7 +22,8 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
         setIsMounted(true);
     }, []);
 
-    if (!isMounted) return <div className="h-[250px] sm:h-[300px] w-full bg-white/5 animate-pulse rounded-2xl" />;
+    // Note: Removed early return for !isMounted to prevent container jump
+    // which often causes Recharts dimension calculation errors (-1 width/height)
 
     // Custom tooltip with Alyra dark theme
     const CustomTooltip = ({ active, payload }) => {
@@ -127,10 +128,14 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
                 <h3 className="text-base sm:text-lg font-bold text-text-primary font-poppins">{title}</h3>
                 {subtitle && <p className="text-[10px] sm:text-xs text-text-muted mt-0.5 sm:mt-1 font-inter">{subtitle}</p>}
             </div>
-            <div className="h-[220px] sm:h-[300px] w-full relative min-h-[220px]">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={220} aspect={window.innerWidth < 640 ? 1.2 : undefined} debounce={200}>
-                    {renderChart()}
-                </ResponsiveContainer>
+            <div className="h-[220px] sm:h-[300px] w-full relative min-h-[220px]" style={{ minWidth: 0 }}>
+                {isMounted ? (
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200} debounce={200}>
+                        {renderChart()}
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="w-full h-full bg-white/5 animate-pulse rounded-2xl" />
+                )}
             </div>
         </GlassCard>
     );

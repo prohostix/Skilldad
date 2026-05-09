@@ -35,7 +35,7 @@ async function autoGradeMCQSubmission(submissionId) {
     if (question && question.question_type === 'mcq') {
       mcqCount++;
       const options = question.options; // This is a JSONB array
-      const correctOptionIndex = options.findIndex(opt => opt.isCorrect);
+      const correctOptionIndex = options.findIndex(opt => opt.isCorrect === true || opt.isCorrect === 'true' || opt.isCorrect === 1);
 
       if (answer.selectedOption === correctOptionIndex) {
         answer.isCorrect = true;
@@ -51,20 +51,24 @@ async function autoGradeMCQSubmission(submissionId) {
   }
 
   obtainedMarks = Math.max(0, obtainedMarks);
-  const totalMarks = parseFloat(exam.total_points || 100);
+  const totalMarks = parseFloat(exam.total_marks || 100);
   const percentage = (obtainedMarks / totalMarks) * 100;
+
+  const passingScore = parseFloat(exam.passing_score || 40);
+  const passed = percentage >= passingScore;
 
   // Update PG
   await query(`
     UPDATE exam_submissions_new 
     SET obtained_marks = $1, 
         percentage = $2, 
-        status = CASE WHEN $3 = $4 THEN 'graded' ELSE status END,
-        graded_at = CASE WHEN $3 = $4 THEN NOW() ELSE graded_at END,
-        answers = $5,
-        total_marks = $6
-    WHERE id = $7
-  `, [obtainedMarks, percentage, mcqCount, answers.length, JSON.stringify(answers), totalMarks, submissionId]);
+        passed = $3,
+        status = CASE WHEN $4 = $5 THEN 'graded' ELSE status END,
+        graded_at = CASE WHEN $4 = $5 THEN NOW() ELSE graded_at END,
+        answers = $6,
+        total_marks = $7
+    WHERE id = $8
+  `, [obtainedMarks, percentage, passed, mcqCount, answers.length, JSON.stringify(answers), totalMarks, submissionId]);
 
   return {
     submissionId,

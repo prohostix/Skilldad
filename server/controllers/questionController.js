@@ -35,10 +35,10 @@ const createOnlineQuestions = async (req, res) => {
         }
 
         // Validate exam type supports online questions
+        // If it was pdf-based, we'll automatically convert it to online-mcq when they add questions
         if (exam.exam_type === 'pdf-based') {
-            return res.status(400).json({ 
-                message: 'Cannot add online questions to PDF-based exam' 
-            });
+            console.log(`[Exam] Converting ${examId} from pdf-based to online-mcq as questions are being added.`);
+            await query("UPDATE exams SET exam_type = 'online-mcq' WHERE id = $1", [examId]);
         }
 
         // Get existing questions from PG to check for order conflicts
@@ -298,14 +298,27 @@ const getExamQuestions = async (req, res) => {
         const { examId } = req.params;
 
         const questionsRes = await query('SELECT * FROM questions WHERE exam_id = $1 ORDER BY "order" ASC', [examId]);
-        const questions = questionsRes.rows.map(q => ({ 
-            ...q, 
-            _id: q.id, 
-            questionText: q.question_text,
-            questionType: q.question_type,
-            marks: parseFloat(q.marks) || 0,
-            negativeMarks: parseFloat(q.negative_marks) || 0
-        }));
+        const questions = questionsRes.rows.map(q => {
+            let parsedOptions = q.options;
+            try {
+                if (typeof q.options === 'string') {
+                    parsedOptions = JSON.parse(q.options);
+                }
+            } catch (e) {
+                console.error(`[Questions] Failed to parse options for ${q.id}:`, e.message);
+                parsedOptions = [];
+            }
+
+            return {
+                ...q,
+                _id: q.id,
+                questionText: q.question_text,
+                questionType: q.question_type,
+                marks: parseFloat(q.marks) || 0,
+                negativeMarks: parseFloat(q.negative_marks) || 0,
+                options: parsedOptions
+            };
+        });
 
         res.json({
             examId: examId,

@@ -22,11 +22,24 @@ router.get('/partner-logos', async (req, res) => {
 // @access  Public
 router.get('/directors', async (req, res) => {
     try {
-        const directorsRes = await query(`SELECT id as _id, name, title as role, image as "imageUrl", "order", category, bio, linkedin_url as "linkedinUrl", display_target, is_active as "isActive" FROM directors WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        const directorsRes = await query(`SELECT id as _id, name, title as role, image as "imageUrl", "order", category, bio, university, linkedin_url as "linkedinUrl", display_target, is_active as "isActive" FROM directors WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
         res.json(directorsRes.rows || []);
     } catch (error) {
         // Log error for debugging database connection issues
         console.error('Error fetching directors:', error.message);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @desc    Get active success stories for landing page
+// @route   GET /api/public/success-stories
+// @access  Public
+router.get('/success-stories', async (req, res) => {
+    try {
+        const storiesRes = await query(`SELECT id as _id, name, campus, package, role, image as "imageUrl", story, video_url as "videoUrl", "order", is_active as "isActive" FROM student_success_stories WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        res.json(storiesRes.rows || []);
+    } catch (error) {
+        console.error('Error fetching success stories:', error.message);
         res.status(500).json({ message: error.message });
     }
 });

@@ -1,114 +1,69 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
-    FileText,
-    Download,
-    Upload,
-    Eye,
-    Calendar,
-    AlertCircle,
-    CheckCircle,
-    Clock,
-    Filter,
-    Search,
-    Trash2
+    FileText, Download, Upload, Eye,
+    AlertCircle, CheckCircle, Clock,
+    Search, Trash2, Calendar, Trophy
 } from 'lucide-react';
-import GlassCard from '../../components/ui/GlassCard';
-import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const Documents = () => {
     const [documents, setDocuments] = useState([]);
+    const [certificates, setCertificates] = useState([]);
+    const [enrollments, setEnrollments] = useState([]);
     const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFiles, setSelectedFiles] = useState({});
     const [uploadProgress, setUploadProgress] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [requesting, setRequesting] = useState(null);
+    const navigate = useNavigate();
 
-    // Mock document data
-    const mockDocuments = [
-        {
-            id: 1,
-            title: "Course Completion Certificate",
-            type: "certificate",
-            format: "PDF",
-            maxSize: "5MB",
-            status: "pending",
-            description: "Upload your course completion certificate for verification",
-            deadline: "2024-03-30",
-            required: true,
-            uploadedFile: null
-        },
-        {
-            id: 2,
-            title: "Identity Verification",
-            type: "identity",
-            format: "PDF, JPG, PNG",
-            maxSize: "10MB",
-            status: "submitted",
-            description: "Government-issued ID for identity verification",
-            deadline: "2024-03-15",
-            required: true,
-            uploadedFile: {
-                name: "passport_scan.pdf",
-                uploadedAt: "2024-02-15",
-                size: "2.3MB"
-            }
-        },
-        {
-            id: 3,
-            title: "Academic Transcript",
-            type: "academic",
-            format: "PDF",
-            maxSize: "15MB",
-            status: "approved",
-            description: "Official academic transcript from previous institution",
-            deadline: "2024-04-01",
-            required: false,
-            uploadedFile: {
-                name: "transcript_official.pdf",
-                uploadedAt: "2024-02-10",
-                size: "5.7MB"
-            }
-        },
-        {
-            id: 4,
-            title: "Portfolio Submission",
-            type: "portfolio",
-            format: "ZIP, PDF",
-            maxSize: "50MB",
-            status: "rejected",
-            description: "Portfolio showcasing your previous work and projects",
-            deadline: "2024-03-25",
-            required: false,
-            uploadedFile: {
-                name: "portfolio_v1.zip",
-                uploadedAt: "2024-02-20",
-                size: "23.4MB"
-            },
-            rejectionReason: "Portfolio must include at least 3 completed projects with detailed descriptions"
+    const fetchData = async () => {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (!userInfo) {
+            navigate('/login');
+            return;
         }
-    ];
 
-    useEffect(() => {
-        setDocuments(mockDocuments);
-    }, []);
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'approved': return 'text-emerald-600 bg-emerald-50';
-            case 'submitted': return 'text-purple-600 bg-purple-50';
-            case 'rejected': return 'text-red-600 bg-red-50';
-            case 'pending': return 'text-orange-600 bg-orange-50';
-            default: return 'text-slate-600 bg-slate-50';
+        try {
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const [docsRes, certsRes, enrollRes] = await Promise.all([
+                axios.get('/api/documents/my-documents', config).catch(() => ({ data: [] })),
+                axios.get('/api/certificates/my', config).catch(() => ({ data: [] })),
+                axios.get('/api/enrollment/my-courses', config).catch(() => ({ data: [] }))
+            ]);
+            
+            setDocuments(Array.isArray(docsRes.data) ? docsRes.data : []);
+            setCertificates(Array.isArray(certsRes.data) ? certsRes.data : []);
+            setEnrollments(Array.isArray(enrollRes.data) ? enrollRes.data : []);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching documents:', error);
+            setLoading(false);
         }
     };
 
-    const getStatusIcon = (status) => {
-        switch (status) {
-            case 'approved': return <CheckCircle size={16} className="text-emerald-500" />;
-            case 'submitted': return <Clock size={16} className="text-purple-500" />;
-            case 'rejected': return <AlertCircle size={16} className="text-red-500" />;
-            case 'pending': return <Upload size={16} className="text-orange-500" />;
-            default: return <FileText size={16} className="text-slate-500" />;
+    useEffect(() => {
+        fetchData();
+    }, [navigate]);
+
+    const handleApplyCertificate = async (courseId) => {
+        try {
+            setRequesting(courseId);
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            await axios.post('/api/certificates/apply', { courseId }, config);
+            alert('Graduation request submitted successfully to the University!');
+            fetchData();
+        } catch (error) {
+            const msg = error.response?.data?.message || 'Failed to submit request';
+            alert(`Application Error: ${msg}`);
+        } finally {
+            setRequesting(null);
         }
     };
 
@@ -120,274 +75,368 @@ const Documents = () => {
     };
 
     const handleFileUpload = async (docId) => {
-        const files = selectedFiles[docId];
-        if (!files || files.length === 0) return;
-
-        setUploadProgress(prev => ({ ...prev, [docId]: 0 }));
-
-        // Simulate upload progress
-        const interval = setInterval(() => {
-            setUploadProgress(prev => {
-                const currentProgress = prev[docId] || 0;
-                if (currentProgress >= 100) {
-                    clearInterval(interval);
-                    // Update document status
-                    setDocuments(prevDocs =>
-                        prevDocs.map(doc =>
-                            doc.id === docId
-                                ? {
-                                    ...doc,
-                                    status: 'submitted',
-                                    uploadedFile: {
-                                        name: files[0].name,
-                                        uploadedAt: new Date().toISOString().split('T')[0],
-                                        size: `${(files[0].size / 1024 / 1024).toFixed(1)}MB`
-                                    }
-                                }
-                                : doc
-                        )
-                    );
-                    setSelectedFiles(prev => ({ ...prev, [docId]: [] }));
-                    return prev;
-                }
-                return { ...prev, [docId]: currentProgress + 10 };
-            });
-        }, 200);
+        // Implementation for general document upload if needed
     };
 
-    const handleDownload = (fileName) => {
-        // Create a mock download - in production, this would fetch from server
-        const link = document.createElement('a');
-        link.href = '#'; // In production, this would be the actual file URL
-        link.download = fileName;
-        link.click();
-
-        // Show a message since we're using mock data
-        alert(`Download started: ${fileName}\n\nNote: This is a demo. In production, the actual file would be downloaded from the server.`);
+    const handleDownload = (fileName, url) => {
+        if (url) {
+            window.open(url, '_blank');
+        } else {
+            alert(`Download started: ${fileName}`);
+        }
     };
 
-    const filteredDocuments = documents.filter(doc => {
-        const matchesFilter = filter === 'all' || doc.status === filter;
-        const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            doc.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const eligibleCourses = enrollments.filter(e => {
+        const progress = parseFloat(e.progress) || 0;
+        const hasCert = certificates.some(c => c.course_id === e.course_id);
+        return progress >= 100 && !hasCert;
+    });
+
+    const pendingRequests = certificates.filter(c => c.status === 'PENDING');
+
+    const displayItems = [
+        ...documents.map(d => ({ ...d, isCertificate: false })),
+        ...certificates.filter(c => c.status === 'ISSUED').map(c => ({
+            id: `cert-${c.id}`,
+            title: `${c.course_title} Certificate`,
+            description: `Official completion certificate issued by ${c.university_id || 'SkillDad Partner'}.`,
+            status: 'approved',
+            format: 'PDF',
+            maxSize: 'N/A',
+            deadline: c.issue_date,
+            isCertificate: true,
+            file_url: c.file_url,
+            fileName: `${c.course_title}_Certificate.pdf`
+        }))
+    ];
+
+    const filteredItems = displayItems.filter(item => {
+        const matchesFilter = filter === 'all' || 
+            (filter === 'certificates' && item.isCertificate) || 
+            (!item.isCertificate && item.status === filter);
+        const matchesSearch = (item.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (item.description || '').toLowerCase().includes(searchTerm.toLowerCase());
         return matchesFilter && matchesSearch;
     });
 
     const filterOptions = [
-        { value: 'all', label: 'All Documents', count: documents.length },
-        { value: 'pending', label: 'Pending', count: documents.filter(d => d.status === 'pending').length },
-        { value: 'submitted', label: 'Submitted', count: documents.filter(d => d.status === 'submitted').length },
-        { value: 'approved', label: 'Approved', count: documents.filter(d => d.status === 'approved').length },
-        { value: 'rejected', label: 'Rejected', count: documents.filter(d => d.status === 'rejected').length }
+        { value: 'all', label: 'All', count: displayItems.length },
+        { value: 'certificates', label: 'Certificates', count: certificates.filter(c => c.status === 'ISSUED').length },
+        { value: 'pending', label: 'Requests', count: documents.filter(d => d.status === 'pending').length },
+        { value: 'approved', label: 'Verified', count: documents.filter(d => d.status === 'approved').length },
     ];
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="space-y-4">
+        <div className="space-y-6 pb-12 animate-in fade-in duration-500">
+            {/* Page Header */}
+            <div className="pb-3 border-b border-white/5">
                 <DashboardHeading title="Document Management" />
-                <p className="text-white/40 font-inter text-sm max-w-2xl">Securely manage and track your academic credentials and verification files.</p>
+                <p className="text-xs text-white/40 mt-0.5 font-medium">Securely manage and track your academic credentials and verification files.</p>
             </div>
 
-            {/* Filters and Search */}
-            <div className="flex flex-col lg:flex-row gap-4">
-                <div className="flex-1">
-                    <div className="relative">
-                        <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Search documents..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-slate-800/50 border border-purple-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-primary"
-                        />
+            {/* Graduation & Certification Section (Compact) */}
+            {enrollments.length > 0 && (
+                <div className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
+                    <div className="px-4 py-1.5 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                             <Trophy size={10} className="text-white/10" />
+                             <h2 style={{ fontSize: '7.5px', fontWeight: '500', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.3em' }}>
+                                Requisition Tracking
+                             </h2>
+                        </div>
+                        <div className="text-[8px] font-bold text-white/10 uppercase tracking-widest">{eligibleCourses.length + pendingRequests.length} Tasks</div>
+                    </div>
+                    
+                    <div className="p-1 space-y-1">
+                        {/* Eligible for Certificate */}
+                        {eligibleCourses.map(course => (
+                            <motion.div 
+                                key={course.course_id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="bg-white/[0.02] hover:bg-white/[0.04] p-3 rounded-lg border border-white/5 flex items-center justify-between group transition-all"
+                            >
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                                        <CheckCircle size={14} className="text-emerald-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="text-xs font-bold text-white truncate">{course.title || 'Course Completed'}</h3>
+                                        <p className="text-[9px] text-white/30 font-medium mt-0.5 truncate uppercase tracking-widest">Status: Ready • Awarded by {course.university_name || 'SkillDad Partner'}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleApplyCertificate(course.course_id)}
+                                    disabled={requesting === course.course_id}
+                                    className="px-4 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-white text-[9px] font-black uppercase tracking-widest rounded-md transition-all border border-primary/20"
+                                >
+                                    {requesting === course.course_id ? 'WAITING...' : 'APPLY NOW'}
+                                </button>
+                            </motion.div>
+                        ))}
+
+                        {/* Pending Requests */}
+                        {pendingRequests.map(request => (
+                            <motion.div 
+                                key={request.id}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="bg-white/[0.01] p-3 rounded-lg border border-white/5 flex items-center justify-between"
+                            >
+                                <div className="flex items-center gap-3 min-w-0 pr-4">
+                                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 border border-amber-500/20">
+                                        <Clock size={14} className="text-amber-400" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="text-xs font-bold text-white truncate">{request.course_title}</h3>
+                                        <p className="text-[9px] text-amber-400/60 font-medium mt-0.5 uppercase tracking-widest italic">Application in review by {request.university_name || 'University Provider'}</p>
+                                    </div>
+                                </div>
+                                <div className="shrink-0 px-3 py-1 bg-white/5 border border-white/10 rounded-md text-white/30 text-[9px] font-bold uppercase tracking-widest">
+                                    PENDING
+                                </div>
+                            </motion.div>
+                        ))}
+
+                        {/* Empty Graduation State (Minimal) */}
+                        {eligibleCourses.length === 0 && pendingRequests.length === 0 && (
+                            <div className="py-2 flex flex-col items-center justify-center gap-1 opacity-40">
+                                <Trophy size={14} className="text-white/20" />
+                                <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.1em]">Complete a course (100%) to unlock certification</p>
+                            </div>
+                        )}
                     </div>
                 </div>
+            )}
 
-                <div className="flex gap-2 overflow-x-auto">
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-4">
+                <div className="flex bg-white/5 p-0.5 rounded-lg border border-white/10 w-full sm:w-auto overflow-x-auto hide-scrollbar">
                     {filterOptions.map(option => (
                         <button
                             key={option.value}
                             onClick={() => setFilter(option.value)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${filter === option.value
-                                ? 'bg-primary text-white'
-                                : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50'
-                                }`}
+                            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
+                                filter === option.value
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'text-white/50 hover:text-white'
+                            }`}
                         >
-                            {option.label} ({option.count})
+                            {option.label}
+                            {option.count > 0 && (
+                                <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                                    filter === option.value ? 'bg-white/20' : 'bg-white/10'
+                                }`}>
+                                    {option.count}
+                                </span>
+                            )}
                         </button>
                     ))}
                 </div>
+
+                <div className="relative w-full sm:w-56 shrink-0">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30" size={13} />
+                    <input
+                        type="text"
+                        placeholder="Search docs..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-primary/40 transition-colors"
+                    />
+                </div>
             </div>
 
-            {/* Documents Grid */}
-            <div className="grid gap-6">
-                {filteredDocuments.map((doc) => {
+            {/* Results count */}
+            <p className="text-[11px] text-white/30 font-medium tracking-wide">
+                {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} found
+            </p>
+
+            {/* Documents List */}
+            <div className="flex flex-col gap-4">
+                {filteredItems.map((doc, idx) => {
+                    const statusStyles = {
+                        approved: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', icon: <CheckCircle size={16} /> },
+                        submitted: { bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', text: 'text-indigo-400', icon: <Clock size={16} /> },
+                        rejected: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', icon: <AlertCircle size={16} /> },
+                        pending: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-400', icon: <Upload size={16} /> },
+                    };
+                    const sc = statusStyles[doc.status] || { bg: 'bg-white/5', border: 'border-white/10', text: 'text-white/40', icon: <FileText size={16} /> };
+
                     const files = selectedFiles[doc.id] || [];
                     const progress = uploadProgress[doc.id] || 0;
                     const isUploading = progress > 0 && progress < 100;
 
                     return (
-                        <GlassCard key={doc.id} className="p-6 space-y-6">
-                            {/* Document Header */}
-                            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-3">
-                                        <h3 className="text-sm font-semibold text-white">{doc.title}</h3>
-                                        {doc.required && (
-                                            <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">
-                                                Required
-                                            </span>
-                                        )}
-                                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(doc.status)}`}>
-                                            {getStatusIcon(doc.status)}
-                                            <span className="capitalize">{doc.status}</span>
+                        <motion.div
+                            key={doc.id}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.04 }}
+                        >
+                            <div className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all flex flex-col lg:flex-row items-stretch lg:items-center gap-6 p-5 sm:p-6 group">
+                                
+                                {/* Left Info Column */}
+                                <div className="flex flex-col gap-3 flex-1 min-w-0">
+                                    <div className="flex items-start gap-4">
+                                        <div className={`shrink-0 mt-1 flex items-center justify-center w-10 h-10 rounded-lg border ${sc.bg} ${sc.border} ${sc.text}`}>
+                                            {sc.icon}
                                         </div>
-                                    </div>
-                                    <p className="text-slate-300">{doc.description}</p>
-                                    <div className="flex flex-wrap gap-4 text-sm text-slate-400">
-                                        <span>Format: {doc.format}</span>
-                                        <span>Max size: {doc.maxSize}</span>
-                                        <span>Deadline: {new Date(doc.deadline).toLocaleDateString()}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Rejection Reason */}
-                            {doc.status === 'rejected' && doc.rejectionReason && (
-                                <div className="bg-red-50/10 border border-red-200/20 rounded-lg p-4">
-                                    <div className="flex items-start gap-3">
-                                        <AlertCircle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <h4 className="font-medium text-red-400 mb-1 text-sm">Document Rejected</h4>
-                                            <p className="text-sm text-red-300">{doc.rejectionReason}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Current File */}
-                            {doc.uploadedFile && (
-                                <div className="bg-slate-800/30 rounded-lg p-4">
-                                    <h4 className="font-medium text-white mb-3 text-sm">Current Submission</h4>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <FileText size={20} className="text-slate-400" />
-                                            <div>
-                                                <p className="text-sm font-medium text-white">{doc.uploadedFile.name}</p>
-                                                <p className="text-xs text-slate-400">
-                                                    Uploaded on {new Date(doc.uploadedFile.uploadedAt).toLocaleDateString()} • {doc.uploadedFile.size}
-                                                </p>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <h3 className="text-base font-semibold text-white group-hover:text-primary transition-colors truncate max-w-full">
+                                                    {doc.title}
+                                                </h3>
+                                                {doc.required && (
+                                                    <span className="shrink-0 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide bg-red-500/10 text-red-500 border border-red-500/20">
+                                                        Required
+                                                    </span>
+                                                )}
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 ${sc.text}`}>
+                                                    {doc.status}
+                                                </span>
                                             </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <button
-                                                className="text-slate-400 hover:text-white transition-colors"
-                                                onClick={() => alert(`Viewing: ${doc.uploadedFile.name}`)}
-                                            >
-                                                <Eye size={16} />
-                                            </button>
-                                            <button
-                                                className="text-slate-400 hover:text-white transition-colors"
-                                                onClick={() => handleDownload(doc.uploadedFile.name)}
-                                            >
-                                                <Download size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Upload Section */}
-                            {(doc.status === 'pending' || doc.status === 'rejected') && (
-                                <div className="space-y-4">
-                                    <h4 className="font-medium text-white text-sm">
-                                        {doc.uploadedFile ? 'Replace Document' : 'Upload Document'}
-                                    </h4>
-
-                                    {/* File Drop Zone */}
-                                    <div className="border-2 border-dashed border-slate-300/30 rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                                        <input
-                                            type="file"
-                                            onChange={(e) => handleFileSelect(doc.id, e.target.files)}
-                                            className="hidden"
-                                            id={`file-upload-${doc.id}`}
-                                            accept={doc.format.toLowerCase().split(', ').map(f => `.${f}`).join(',')}
-                                        />
-                                        <label htmlFor={`file-upload-${doc.id}`} className="cursor-pointer">
-                                            <Upload size={32} className="mx-auto text-slate-400 mb-3" />
-                                            <p className="text-slate-300 mb-1">Click to upload or drag and drop</p>
-                                            <p className="text-sm text-slate-400">
-                                                {doc.format} up to {doc.maxSize}
+                                            <p className="text-sm text-white/50 leading-relaxed mt-1.5 line-clamp-2 pr-4">
+                                                {doc.description}
                                             </p>
-                                        </label>
+                                            {doc.deadline && (
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 border-t border-white/5 pt-3">
+                                                    <span className="flex items-center gap-1.5 text-xs text-white/60 font-medium font-inter">
+                                                        <FileText size={14} className="text-white/40" /> {doc.format || 'PDF'}
+                                                    </span>
+                                                    <span className="hidden sm:inline text-white/10">|</span>
+                                                    <span className="text-xs text-white/60 font-medium font-inter">
+                                                        Max: {doc.maxSize || '10MB'}
+                                                    </span>
+                                                    <span className="hidden sm:inline text-white/10">|</span>
+                                                    <span className="flex items-center gap-1.5 text-xs text-white/60 font-medium font-inter">
+                                                        <Calendar size={14} className="text-white/40" />
+                                                        Due: <span className={`${new Date(doc.deadline) < new Date() && doc.status === 'pending' ? 'text-red-400 font-semibold' : 'text-white'}`}>
+                                                            {new Date(doc.deadline).toLocaleDateString(undefined, {month:'long', day:'numeric', year: 'numeric'})}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
+                                    
+                                    {doc.status === 'rejected' && doc.rejectionReason && (
+                                        <div className="mt-2 lg:ml-14 p-3 bg-red-500/5 border border-red-500/10 rounded-lg border-l-2 border-l-red-500">
+                                            <p className="text-xs text-red-400 leading-relaxed font-medium">
+                                                <AlertCircle size={14} className="inline mr-1.5 -mt-0.5" />
+                                                <strong className="font-bold text-red-300">Rejected:</strong> {doc.rejectionReason}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
 
-                                    {/* Selected Files */}
-                                    {files.length > 0 && (
-                                        <div className="space-y-2">
-                                            {files.map((file, index) => (
-                                                <div key={index} className="flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <FileText size={16} className="text-slate-400" />
-                                                        <div>
-                                                            <p className="text-sm font-medium text-white">{file.name}</p>
-                                                            <p className="text-xs text-slate-400">
-                                                                {(file.size / 1024 / 1024).toFixed(2)} MB
-                                                            </p>
+                                {/* Right Action Column */}
+                                <div className="flex flex-col items-center justify-center w-full lg:w-[280px] shrink-0 pt-4 lg:pt-0 mt-4 lg:mt-0 border-t lg:border-t-0 lg:border-l border-white/5 lg:pl-6">
+                                    {(doc.status === 'pending' || doc.status === 'rejected') ? (
+                                        <div className="w-full">
+                                            {files.length === 0 ? (
+                                                <div className="relative h-[88px]">
+                                                    <input
+                                                        type="file"
+                                                        onChange={(e) => handleFileSelect(doc.id, e.target.files)}
+                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                        accept={doc.format?.toLowerCase().split(', ').map(f => `.${f}`).join(',')}
+                                                    />
+                                                    <div className="absolute inset-0 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center gap-1.5 bg-white/[0.01] hover:bg-white/[0.04] hover:border-primary/50 transition-all group/upload">
+                                                        <div className="p-2 bg-white/5 rounded-full group-hover/upload:bg-primary/20 transition-colors">
+                                                            <Upload size={16} className="text-white/30 group-hover/upload:text-primary transition-colors" />
                                                         </div>
+                                                        <p className="text-[11px] font-semibold text-white/50 group-hover/upload:text-primary transition-colors">Click or drag to upload</p>
                                                     </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-3 w-full">
+                                                    <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg group/file">
+                                                        <div className="min-w-0 pr-3 flex items-center gap-2">
+                                                            <FileText size={16} className="text-primary/70 shrink-0" />
+                                                            <div className="min-w-0">
+                                                                <p className="text-xs font-semibold text-white truncate">{files[0].name}</p>
+                                                                <p className="text-[10px] font-medium text-white/40 mt-0.5">{(files[0].size / 1024 / 1024).toFixed(2)} MB</p>
+                                                            </div>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => setSelectedFiles(prev => ({ ...prev, [doc.id]: [] }))}
+                                                            className="p-1.5 text-red-400/80 hover:bg-red-500/10 hover:text-red-400 rounded-lg shrink-0 transition-colors opacity-80 group-hover/file:opacity-100"
+                                                            title="Remove file"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    {isUploading && (
+                                                        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-primary transition-all duration-200" style={{ width: `${progress}%` }} />
+                                                        </div>
+                                                    )}
+
                                                     <button
-                                                        onClick={() => setSelectedFiles(prev => ({
-                                                            ...prev,
-                                                            [doc.id]: prev[doc.id].filter((_, i) => i !== index)
-                                                        }))}
-                                                        className="text-red-400 hover:text-red-300 transition-colors"
+                                                        onClick={() => handleFileUpload(doc.id)}
+                                                        disabled={isUploading}
+                                                        className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-wide rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                                                     >
-                                                        <Trash2 size={16} />
+                                                        {isUploading ? <><Clock size={14} className="animate-pulse" /> UPLOADING {progress}%</> : <><Upload size={14} /> SUBMIT FILE</>}
                                                     </button>
                                                 </div>
-                                            ))}
+                                            )}
+                                        </div>
+                                    ) : doc.file_url ? (
+                                        <div className="w-full flex flex-col gap-3">
+                                            <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                                                        <FileText size={16} className="text-primary" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-semibold text-white truncate" title={doc.fileName}>{doc.fileName || 'Document File'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => window.open(doc.file_url, '_blank')} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">
+                                                    <Eye size={14} /> View
+                                                </button>
+                                                <button onClick={() => handleDownload(doc.fileName, doc.file_url)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">
+                                                    <Download size={14} /> Save
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <p className="text-xs text-white/30 italic">No action required</p>
                                         </div>
                                     )}
-
-                                    {/* Upload Progress */}
-                                    {isUploading && (
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-300">Uploading...</span>
-                                                <span className="text-primary">{progress}%</span>
-                                            </div>
-                                            <div className="w-full bg-slate-700 rounded-full h-2">
-                                                <div
-                                                    className="bg-primary h-2 rounded-full transition-all duration-300"
-                                                    style={{ width: `${progress}%` }}
-                                                ></div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Upload Button */}
-                                    <ModernButton
-                                        onClick={() => handleFileUpload(doc.id)}
-                                        disabled={files.length === 0 || isUploading}
-                                        className="w-full lg:w-auto"
-                                    >
-                                        {isUploading ? 'Uploading...' : 'Upload Document'}
-                                    </ModernButton>
                                 </div>
-                            )}
-                        </GlassCard>
+                            </div>
+                        </motion.div>
                     );
                 })}
             </div>
 
-            {filteredDocuments.length === 0 && (
-                <GlassCard className="p-12 text-center">
-                    <FileText size={64} className="mx-auto text-slate-400 mb-4" />
-                    <h3 className="text-lg font-semibold text-white font-inter mb-2">No Documents Found</h3>
-                    <p className="text-white/70 text-sm">No documents match your current filter criteria.</p>
-                </GlassCard>
+            {/* Empty State */}
+            {filteredItems.length === 0 && (
+                <div className="py-14 text-center flex flex-col items-center gap-3">
+                    <div className="p-3.5 bg-white/5 rounded-full">
+                        <FileText size={22} className="text-white/20" />
+                    </div>
+                    <p className="text-sm font-semibold text-white/35">No items match criteria.</p>
+                    {filter !== 'all' && (
+                        <button onClick={() => setFilter('all')} className="text-xs text-primary/70 hover:text-primary transition-colors mt-1">
+                            Clear filters
+                        </button>
+                    )}
+                </div>
             )}
         </div>
     );

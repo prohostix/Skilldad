@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Video, Clock, Calendar, Users, Play, AlertCircle, RefreshCw } from 'lucide-react';
+import { Video, Clock, Calendar, Users, Play, AlertCircle, RefreshCw, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import GlassCard from '../../components/ui/GlassCard';
-import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const parseSafeDate = (dateish) => {
     if (!dateish) return new Date();
-    // If it's already an ISO string with Z or an offset, new Date() is safe
     if (typeof dateish === 'string' && (dateish.includes('Z') || /[\+\-]\d{2}:\d{2}$/.test(dateish))) {
         return new Date(dateish);
     }
-    // If it's a T-string without timezone (e.g. 2026-03-04T10:02), parse manually as LOCAL
     if (typeof dateish === 'string' && dateish.includes('T')) {
         const [d, t] = dateish.split('T');
         const [y, m, day] = d.split('-').map(Number);
@@ -29,6 +25,7 @@ const LiveClasses = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedCourse, setSelectedCourse] = useState('all');
+    const [activeTab, setActiveTab] = useState('active'); // 'active' or 'recorded'
     const navigate = useNavigate();
 
     const fetchSessions = async () => {
@@ -103,7 +100,7 @@ const LiveClasses = () => {
     const formatDate = (dateString) => {
         const date = parseSafeDate(dateString);
         return {
-            day: date.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' }),
+            day: date.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }),
             time: date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
         };
     };
@@ -119,101 +116,145 @@ const LiveClasses = () => {
     const renderSessionCard = (session, index) => {
         const { day, time } = formatDate(session.startTime);
         const isCompleted = session.status === 'ended' || session.status === 'archived';
+        const isLive = session.status === 'live';
+        
+        const sc = {
+            bg: isLive ? 'bg-red-500/10' : isCompleted ? 'bg-white/5' : 'bg-emerald-500/10',
+            border: isLive ? 'border-red-500/20' : isCompleted ? 'border-white/10' : 'border-emerald-500/20',
+            text: isLive ? 'text-red-500' : isCompleted ? 'text-white/40' : 'text-emerald-400',
+            icon: isLive ? null : <Video size={10} />
+        };
         
         return (
             <motion.div
                 key={session._id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.04 }}
+                className="h-full"
             >
-                <GlassCard className={`h-full flex flex-col group hover:border-primary/50 transition-all duration-500 overflow-hidden ${isCompleted ? 'grayscale-[0.5] opacity-80' : ''}`}>
-                    <div className="p-4 pb-0 flex justify-between items-start">
-                        <div className={`px-3 py-1 rounded-full ${isCompleted ? 'bg-white/5 border-white/10' : 'bg-primary/10 border-primary/20'} border`}>
-                            <span className={`text-[10px] font-bold uppercase tracking-widest ${isCompleted ? 'text-white/40' : 'text-primary'}`}>
-                                {session.category || 'General'}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-white/40">
-                            <Clock size={14} />
-                            <span>{session.duration}m</span>
-                        </div>
-                    </div>
-
-                    <div className="p-4 pt-3 flex-1">
-                        <h3 className={`text-lg font-bold text-white mb-1 leading-tight transition-colors ${!isCompleted && 'group-hover:text-primary'}`}>{session.topic}</h3>
-                        {session.course?.title && (
-                            <p className="text-primary/90 text-xs font-semibold mb-2">
-                                📚 {session.course.title}
+                <div className={`rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all overflow-hidden flex flex-col h-full min-h-[190px] group ${isCompleted ? 'grayscale-[0.5] opacity-80' : ''}`}>
+                    <div className="p-5 flex flex-col gap-2.5 flex-1">
+                        {/* Title + Category */}
+                        <div className="flex items-start justify-between gap-2">
+                            <p className="text-sm font-semibold text-white group-hover:text-primary transition-colors line-clamp-2 leading-snug flex-1">
+                                {session.topic}
                             </p>
-                        )}
-                        <p className="text-white/50 text-xs line-clamp-2 mb-3">{session.description}</p>
+                            {session.category && (
+                                <span className={`shrink-0 mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide border ${isCompleted ? 'bg-white/5 border-white/10 text-white/40' : 'bg-primary/10 border-primary/20 text-primary'}`}>
+                                    {session.category}
+                                </span>
+                            )}
+                        </div>
 
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2.5 p-2 bg-white/5 rounded-lg border border-white/5">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-primary/20 text-primary'}`}>
-                                    <Calendar size={16} />
+                        {/* Course & Description */}
+                        <div className="flex flex-col gap-1.5">
+                            {session.course?.title && (
+                                <div className="flex items-center gap-1.5 text-xs text-primary/70">
+                                    <BookOpen size={11} className="shrink-0" />
+                                    <span className="font-semibold truncate">{session.course.title}</span>
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="text-[9px] text-white/40 uppercase font-bold tracking-wider">Date & Time</p>
-                                    <p className="text-xs text-white font-semibold truncate">{day} @ {time}</p>
-                                </div>
-                            </div>
+                            )}
+                            {session.description && (
+                                <p className="text-[11px] text-white/40 line-clamp-2 leading-relaxed">
+                                    {session.description}
+                                </p>
+                            )}
+                        </div>
 
-                            <div className="flex items-center gap-2.5 p-2 bg-white/5 rounded-lg border border-white/5">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isCompleted ? 'bg-white/5 text-white/20' : 'bg-emerald-500/20 text-emerald-400'}`}>
-                                    <Users size={16} />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-[9px] text-white/40 uppercase font-bold tracking-wider">Instructor</p>
-                                    <p className="text-xs text-white font-semibold leading-tight truncate">{session.instructor?.name}</p>
-                                </div>
-                            </div>
+                        {/* Badges/Stats */}
+                        <div className="flex flex-wrap gap-1.5 mt-auto pt-2 text-[10px] font-medium">
+                            <span className="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 rounded text-white/50">
+                                <Clock size={9} />{session.duration}m
+                            </span>
+                            <span className="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 rounded text-white/50">
+                                <Calendar size={9} />{day} @ {time}
+                            </span>
+                            {session.instructor?.name && (
+                                <span className="flex items-center gap-1 px-2 py-0.5 bg-white/5 border border-white/10 rounded text-white/50 truncate max-w-[120px]">
+                                    <Users size={9} className="shrink-0" /> <span className="truncate">{session.instructor.name}</span>
+                                </span>
+                            )}
                         </div>
                     </div>
 
-                    <div className="p-4 pt-0">
-                        <ModernButton
-                            onClick={() => handleJoin(session)}
-                            className="w-full !flex !items-center !justify-center group/btn"
-                            variant={session.status === 'live' ? 'primary' : 'secondary'}
-                            disabled={isCompleted}
-                        >
+                    {/* Footer actions */}
+                    <div className="px-4 py-2.5 border-t border-white/5 bg-white/[0.015] flex items-center justify-between gap-3 min-h-[44px]">
+                        {/* Left: Status / Info */}
+                        <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-wider ${sc.bg} ${sc.border} ${sc.text}`}>
+                            {isLive ? <><div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse mr-0.5" /> LIVE</> : <>{sc.icon} {isCompleted ? 'Ended' : 'Upcoming'}</>}
+                        </div>
+
+                        {/* Right: Actions */}
+                        <div className="flex items-center shrink-0">
                             {isCompleted ? (
-                                <span>Completed</span>
+                                session.recording && session.recording.status === 'available' ? (
+                                    <button
+                                        onClick={() => window.open(session.recording.playUrl || session.recording.play_url, '_blank')}
+                                        className="text-[10px] font-bold px-3 py-1 rounded border transition-all flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 shadow-sm"
+                                    >
+                                        <Play size={10} /> Watch Recording
+                                    </button>
+                                ) : (
+                                    <span className="text-[9px] text-white/30 font-bold uppercase tracking-wide">Recording N/A</span>
+                                )
                             ) : (
-                                <>
-                                    <Play size={16} className="fill-white group-hover/btn:scale-110 transition-transform" />
-                                    <span className="ml-2">{session.status === 'live' ? 'Watch Live Stream' : 'Join Session'}</span>
-                                </>
+                                <button
+                                    onClick={() => handleJoin(session)}
+                                    className={`text-[10px] font-bold px-3 py-1 rounded border transition-all flex items-center gap-1 ${
+                                        isLive 
+                                        ? 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white hover:border-red-500 shadow-sm' 
+                                        : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-white hover:border-primary shadow-sm'
+                                    }`}
+                                >
+                                    <Play size={10} /> {isLive ? 'Watch Session' : 'Join Link'}
+                                </button>
                             )}
-                        </ModernButton>
+                        </div>
                     </div>
-                </GlassCard>
+                </div>
             </motion.div>
         );
     };
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
-            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         </div>
     );
 
     return (
-        <div className="space-y-8 pb-20 animate-in fade-in duration-700">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <DashboardHeading title="Live Learning Hub" />
-                    <p className="text-white/50 mt-1">Join interactive sessions with world-class instructors.</p>
+        <div className="space-y-4 pb-6 animate-in fade-in duration-500">
+            {/* Page Header */}
+            <div className="pb-1 border-b border-white/5">
+                <DashboardHeading title="Live Learning Hub" />
+                <p className="text-xs text-white/40 mt-0.5 font-medium mb-3">Join interactive sessions and masterclasses with world-class instructors.</p>
+                
+                {/* Tabs */}
+                <div className="flex gap-6 mt-4 relative top-[1px]">
+                    <button 
+                        onClick={() => setActiveTab('active')} 
+                        className={`pb-3 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-all ${activeTab === 'active' ? 'text-primary border-primary' : 'text-white/40 border-transparent hover:text-white/80 hover:border-white/20'}`}
+                    >
+                        Active Live Classes
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('recorded')} 
+                        className={`pb-3 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-all ${activeTab === 'recorded' ? 'text-primary border-primary' : 'text-white/40 border-transparent hover:text-white/80 hover:border-white/20'}`}
+                    >
+                        Recorded Classes
+                    </button>
                 </div>
-                <div className="flex gap-4 flex-wrap items-center">
-                    {/* Course Filter */}
+            </div>
+
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
                     {uniqueCourses.length > 0 && (
                         <select
                             value={selectedCourse}
                             onChange={(e) => setSelectedCourse(e.target.value)}
-                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-semibold hover:border-primary/50 transition-all focus:outline-none focus:border-primary"
+                            className="w-full sm:w-auto bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-primary/40 transition-colors"
                         >
                             <option value="all" className="bg-[#0a0a0a]">All Courses</option>
                             {uniqueCourses.map((course, index) => (
@@ -223,81 +264,94 @@ const LiveClasses = () => {
                             ))}
                         </select>
                     )}
-                    
-                    <GlassCard className="px-4 py-2 flex items-center gap-2 border-primary/30">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span className="text-white text-xs font-bold uppercase tracking-wider">
-                            {filteredSessions.filter(s => s.status === 'live').length > 0
-                                ? `Live Now: ${filteredSessions.filter(s => s.status === 'live').length} Session`
-                                : 'No Live Sessions'}
+                </div>
+
+                <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg">
+                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                        <span className="text-[10px] text-white/70 font-bold uppercase tracking-wider">
+                            {filteredSessions.filter(s => s.status === 'live').length} Live
                         </span>
-                    </GlassCard>
+                    </div>
                     <button
                         onClick={fetchSessions}
-                        className="p-2 bg-white/5 border border-white/10 rounded-xl text-white/40 hover:text-primary hover:border-primary/50 transition-all"
+                        className="p-1.5 bg-white/5 border border-white/10 rounded-lg text-white/40 hover:text-primary hover:border-primary/40 transition-all flex items-center justify-center"
                         title="Refresh sessions"
                     >
-                        <RefreshCw size={16} />
+                        <RefreshCw size={13} />
                     </button>
                 </div>
             </div>
 
             {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400">
-                    <AlertCircle size={18} className="shrink-0" />
-                    <p className="text-sm font-medium">{error}</p>
-                    <button onClick={() => setError(null)} className="ml-auto text-red-400/60 hover:text-red-400 text-xs font-bold uppercase tracking-wider">Dismiss</button>
+                <div className="flex items-center gap-2 p-3 bg-red-500/5 border border-red-500/10 rounded-xl text-red-400">
+                    <AlertCircle size={14} className="shrink-0" />
+                    <p className="text-[11px] font-medium leading-relaxed flex-1">{error}</p>
+                    <button onClick={() => setError(null)} className="shrink-0 p-1 hover:bg-red-500/10 rounded ml-2">
+                        <span className="sr-only">Dismiss</span>
+                        Dismiss
+                    </button>
                 </div>
             )}
 
-            {/* Upcoming & Live Sessions */}
-            <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                    <h2 className="text-xs font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-                        Upcoming & Live
-                    </h2>
-                    <div className="h-px flex-1 bg-gradient-to-r from-primary/30 to-transparent"></div>
-                    {selectedCourse !== 'all' && (
-                        <span className="text-xs text-white/40">
-                            Filtered by: <span className="text-primary font-semibold">{selectedCourse}</span>
-                        </span>
-                    )}
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {filteredSessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
-                        <GlassCard className="col-span-full p-12 text-center border-dashed border-white/10">
-                            <Video size={32} className="text-white/10 mx-auto mb-3" />
-                            <p className="text-white/40 text-sm">
-                                {selectedCourse === 'all' 
-                                    ? 'No upcoming or live sessions at the moment.' 
-                                    : `No upcoming or live sessions for ${selectedCourse}.`}
-                            </p>
-                        </GlassCard>
-                    ) : (
-                        filteredSessions
-                            .filter(s => s.status !== 'ended' && s.status !== 'archived')
-                            .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-                            .map((session, index) => renderSessionCard(session, index))
-                    )}
-                </div>
-            </div>
+            {/* Results count */}
+            <p className="text-[11px] text-white/30 font-medium tracking-wide">
+                {filteredSessions.length} {filteredSessions.length === 1 ? 'session' : 'sessions'} found
+            </p>
 
-            {/* Completed Sessions */}
-            {filteredSessions.filter(s => s.status === 'ended' || s.status === 'archived').length > 0 && (
-                <div className="space-y-6 pt-10">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-xs font-black text-white/40 uppercase tracking-[0.3em] flex items-center gap-2">
-                            <Clock size={14} />
-                            Completed Sessions
+            {/* Upcoming & Live Sessions Grid (Visible in ACTIVE tab) */}
+            {activeTab === 'active' && (
+                <div className="space-y-2.5">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                            Upcoming & Live
                         </h2>
-                        <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                        <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent"></div>
                     </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {filteredSessions
-                            .filter(s => s.status === 'ended' || s.status === 'archived')
-                            .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
-                            .map((session, index) => renderSessionCard(session, index))}
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                        {filteredSessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
+                            <div className="col-span-full py-10 text-center flex flex-col items-center gap-3">
+                                <div className="p-3.5 bg-white/5 rounded-full">
+                                    <Video size={20} className="text-white/20" />
+                                </div>
+                                <p className="text-[11px] font-semibold text-white/35">No upcoming sessions available.</p>
+                            </div>
+                        ) : (
+                            filteredSessions
+                                .filter(s => s.status !== 'ended' && s.status !== 'archived')
+                                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                                .map((session, index) => renderSessionCard(session, index))
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Completed/Recorded Sessions Grid (Visible in RECORDED tab) */}
+            {activeTab === 'recorded' && (
+                <div className="space-y-2.5 pt-2">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                            <Clock size={10} />
+                            Recorded Sessions
+                        </h2>
+                        <div className="h-px flex-1 bg-gradient-to-r from-emerald-400/20 to-transparent"></div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                        {filteredSessions.filter(s => s.status === 'ended' || s.status === 'archived').length === 0 ? (
+                            <div className="col-span-full py-10 text-center flex flex-col items-center gap-3">
+                                <div className="p-3.5 bg-white/5 rounded-full">
+                                    <Video size={20} className="text-white/20" />
+                                </div>
+                                <p className="text-[11px] font-semibold text-white/35">No recorded sessions available yet.</p>
+                            </div>
+                        ) : (
+                            filteredSessions
+                                .filter(s => s.status === 'ended' || s.status === 'archived')
+                                .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+                                .map((session, index) => renderSessionCard(session, index))
+                        )}
                     </div>
                 </div>
             )}

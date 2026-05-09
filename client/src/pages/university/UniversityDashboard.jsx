@@ -35,13 +35,15 @@ import {
     Trash2,
     Share2,
     Sparkles,
-    ShieldCheck
+    ShieldCheck,
+    Image as ImageIcon
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import CountingNumber from '../../components/ui/CountingNumber';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import LiveSessionsTab from './LiveSessionsTab';
+import CertificateRequestsTab from './CertificateRequestsTab';
 
 
 const UniversityDashboard = () => {
@@ -66,10 +68,15 @@ const UniversityDashboard = () => {
         enrollmentDate: new Date().toISOString().split('T')[0]
     });
     const [receivedDocuments, setReceivedDocuments] = useState([]);
+    const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
 
     useEffect(() => {
         if (location.pathname.includes('analytics')) {
             setActiveTab('analytics');
+        } else if (location.pathname.includes('certificates')) {
+            setActiveTab('certificates');
+        } else if (location.pathname.includes('courses')) {
+            setActiveTab('courses');
         } else {
             setActiveTab('students');
         }
@@ -311,6 +318,28 @@ const UniversityDashboard = () => {
         }
     };
 
+    const handleCreateCourse = async (courseData) => {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        try {
+            await axios.post('/api/courses', courseData, config);
+            alert("Course created successfully! It will appear in your list once approved by SkillDad Admin.");
+            
+            // Refresh courses
+            const coursesRes = await axios.get('/api/university/courses', config);
+            if (Array.isArray(coursesRes.data)) {
+                setCourses(coursesRes.data);
+            } else if (coursesRes.data && Array.isArray(coursesRes.data.courses)) {
+                setCourses(coursesRes.data.courses);
+            }
+            
+            setShowCreateCourseModal(false);
+        } catch (error) {
+            console.error('Error creating course:', error);
+            alert(error.response?.data?.message || 'Failed to create course');
+        }
+    };
+
     const handleDeleteStudent = (id) => {
         if (window.confirm("Are you sure you want to remove this student?")) {
             setStudents(students.filter(s => (s._id || s.id) !== id));
@@ -379,8 +408,7 @@ const UniversityDashboard = () => {
                             { id: 'students', label: 'Student Management', icon: Users },
                             { id: 'courses', label: 'Our Courses', icon: BookOpen },
                             { id: 'sessions', label: 'Live Sessions', icon: Video },
-                            { id: 'assets', label: 'Secure Assets', icon: ShieldCheck },
-                            { id: 'analytics', label: 'Analytics', icon: TrendingUp }
+                            { id: 'assets', label: 'Secure Assets', icon: ShieldCheck }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -404,6 +432,10 @@ const UniversityDashboard = () => {
                     <div className="text-white/50 text-center py-20">
                         Select a tab to view details
                     </div>
+                )}
+
+                {activeTab === 'certificates' && (
+                    <CertificateRequestsTab />
                 )}
 
                 {activeTab === 'students' && (
@@ -524,6 +556,13 @@ const UniversityDashboard = () => {
                                 <h2 className="text-xl font-semibold text-white">Courses We Provide</h2>
                                 <p className="text-white/40 text-sm">Manage courses assigned to your institution and view enrolled students.</p>
                             </div>
+                            <ModernButton 
+                                onClick={() => setShowCreateCourseModal(true)}
+                                className="flex items-center gap-2"
+                            >
+                                <Plus size={18} />
+                                Create New Course
+                            </ModernButton>
                         </div>
                         <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {courses.length > 0 ? courses.map((course) => (
@@ -915,7 +954,179 @@ const UniversityDashboard = () => {
                     </div>
                 )
             }
+
+            {/* Create Course Modal */}
+            {showCreateCourseModal && (
+                <CreateCourseModal
+                    onClose={() => setShowCreateCourseModal(false)}
+                    onSave={handleCreateCourse}
+                />
+            )}
         </div >
+    );
+};
+
+// Create Course Modal Component
+const CreateCourseModal = ({ onClose, onSave }) => {
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        category: '',
+        price: '',
+        level: 'Beginner',
+        thumbnail: ''
+    });
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = React.useRef(null);
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formDataUpload = new FormData();
+        formDataUpload.append('thumbnail', file);
+        setUploading(true);
+
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+            
+            // Note: Since we don't have a course ID yet, we can't use the standard upload endpoint
+            // unless the backend supports temporary uploads or generic uploads.
+            // For now, I'll recommend the user to save first or use a URL.
+            // OR I can check if the backend has a generic upload endpoint.
+            // Given the current implementation, I'll stick to URL or alert that upload is available after creation.
+            
+            alert("File upload is available after the course is created. For now, please provide a direct image URL or leave it blank to add later.");
+            setUploading(false);
+        } catch (error) {
+            console.error('Thumbnail upload error:', error);
+            alert('Failed to upload thumbnail');
+            setUploading(false);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave({ ...formData, price: Number(formData.price) });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[200] p-4 overflow-y-auto">
+            <GlassCard className="w-full max-w-2xl p-8 relative animate-in zoom-in duration-300">
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h3 className="text-2xl font-bold text-white">Create New Course</h3>
+                        <p className="text-white/40 text-sm mt-1">Submit your course proposal for review.</p>
+                    </div>
+                    <button onClick={onClose} className="text-white/60 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                {/* Thumbnail Preview */}
+                <div className="mb-8 p-5 bg-white/5 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center gap-6">
+                    <div className="w-48 h-28 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner group">
+                        {formData.thumbnail ? (
+                            <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                            <ImageIcon size={32} className="text-white/10" />
+                        )}
+                    </div>
+                    <div className="flex-1 w-full space-y-3">
+                        <label className="block text-[10px] font-black text-primary uppercase tracking-[0.2em]">Course Thumbnail URL</label>
+                        <input
+                            type="text"
+                            placeholder="https://images.unsplash.com/your-image.jpg"
+                            className="w-full px-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary transition-all"
+                            value={formData.thumbnail}
+                            onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                        />
+                        <p className="text-[10px] text-white/30 italic">Tip: You can upload local files after the course is created.</p>
+                    </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2">
+                            <label className="block text-white/80 text-sm font-medium mb-2">Course Title *</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                placeholder="e.g., Master UX/UI Design Fundamentals"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-white/80 text-sm font-medium mb-2">Description *</label>
+                            <textarea
+                                required
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all resize-none"
+                                rows="3"
+                                placeholder="What will students learn in this course?"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-white/80 text-sm font-medium mb-2">Category *</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.category}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                placeholder="e.g., Design, Programming"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-white/80 text-sm font-medium mb-2">Level *</label>
+                            <select
+                                value={formData.level}
+                                onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                                className="w-full px-4 py-[13px] bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all appearance-none"
+                            >
+                                <option value="Beginner" className="bg-black">Beginner</option>
+                                <option value="Intermediate" className="bg-black">Intermediate</option>
+                                <option value="Advanced" className="bg-black">Advanced</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-white/80 text-sm font-medium mb-2">Price (₹) *</label>
+                            <input
+                                type="number"
+                                required
+                                min="0"
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                placeholder="e.g., 4999"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4 pt-4">
+                        <ModernButton type="submit" className="flex-1 justify-center py-4 text-base font-bold">
+                            Submit Course for Approval
+                        </ModernButton>
+                        <ModernButton type="button" variant="secondary" onClick={onClose} className="px-8">
+                            Cancel
+                        </ModernButton>
+                    </div>
+                </form>
+            </GlassCard>
+        </div>
     );
 };
 

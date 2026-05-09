@@ -548,6 +548,24 @@ const handleCallback = async (req, res) => {
         await query('UPDATE users SET "universityId" = $1 WHERE id = $2', [transaction.instructor_id, transaction.student_id]);
       }
 
+      // Unified Notification (WhatsApp + Email)
+      setImmediate(async () => {
+        try {
+          const notificationService = require('../services/NotificationService');
+          const studentRes = await query('SELECT id, name, email, profile FROM users WHERE id = $1', [transaction.student_id]);
+          if (studentRes.rows.length > 0) {
+            const student = studentRes.rows[0];
+            await notificationService.send(
+              { ...student, phone: student.profile?.phone }, 
+              'enrollment', 
+              { courseTitle: transaction.course_title, enrolledBy: transaction.instructor_name || 'SkillDad' }
+            );
+          }
+        } catch (err) {
+          console.error('[PaymentCallback] Enrollment notification failed:', err.message);
+        }
+      });
+
       // Real-time notification
       socketService.sendToUser(transaction.student_id, 'notification', {
         type: 'payment_success',
@@ -732,6 +750,24 @@ const handleWebhook = async (req, res) => {
         status: 'success',
         courseId: transaction.course_id,
         message: 'Payment confirmed successfully'
+      });
+
+      // Unified Notification (WhatsApp + Email)
+      setImmediate(async () => {
+        try {
+          const notificationService = require('../services/NotificationService');
+          const studentRes = await query('SELECT u.id, u.name, u.email, u.profile, c.title as course_title, inst.name as instructor_name FROM users u JOIN transactions t ON t.student_id = u.id JOIN courses c ON t.course_id = c.id LEFT JOIN users inst ON c.instructor_id = inst.id WHERE t.id = $1', [transaction.id]);
+          if (studentRes.rows.length > 0) {
+            const s = studentRes.rows[0];
+            await notificationService.send(
+              { ...s, phone: s.profile?.phone }, 
+              'enrollment', 
+              { courseTitle: s.course_title, enrolledBy: s.instructor_name || 'SkillDad' }
+            );
+          }
+        } catch (err) {
+          console.error('[PaymentWebhook] Enrollment notification failed:', err.message);
+        }
       });
 
     } else if (status === 'failed' && transaction.status === 'pending') {

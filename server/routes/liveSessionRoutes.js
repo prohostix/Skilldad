@@ -18,6 +18,27 @@ const {
 } = require('../controllers/liveSessionController');
 
 const { protect, authorize } = require('../middleware/authMiddleware');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Configure multer for recording uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const dest = path.join(__dirname, '../uploads/recordings');
+        if (!fs.existsSync(dest)) {
+            fs.mkdirSync(dest, { recursive: true });
+        }
+        cb(null, dest);
+    },
+    filename: function (req, file, cb) {
+        cb(null, `rec_${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+const upload = multer({ 
+    storage, 
+    limits: { fileSize: 500 * 1024 * 1024 } // 500MB limit for recordings
+});
 
 const {
     apiLimiter,
@@ -50,14 +71,14 @@ router.use(apiLimiter);
 router.route('/')
     .post(
         protect,
-        authorize('university', 'admin'),
+        authorize('university', 'admin', 'partner'),
         createSessionLimiter,
         redisRateLimiter('session_create', 15 * 60 * 1000, 10), // 10/15min cross-process
         createSession
     )
     .get(
         protect,
-        authorize('university', 'admin', 'student'),
+        authorize('university', 'admin', 'partner', 'student'),
         getSessions
     );
 
@@ -65,17 +86,17 @@ router.route('/')
 router.route('/:id')
     .get(
         protect,
-        authorize('university', 'admin', 'student'),
+        authorize('university', 'admin', 'partner', 'student'),
         getSession
     )
     .put(
         protect,
-        authorize('university', 'admin'),
+        authorize('university', 'admin', 'partner'),
         updateSession
     )
     .delete(
         protect,
-        authorize('university', 'admin'),
+        authorize('university', 'admin', 'partner'),
         deleteSession
     );
 
@@ -83,14 +104,14 @@ router.route('/:id')
 router.put(
     '/:id/start',
     protect,
-    authorize('university', 'admin', 'student'),
+    authorize('university', 'admin', 'partner', 'student'),
     startSession
 );
 
 router.put(
     '/:id/end',
     protect,
-    authorize('university', 'admin', 'student'),
+    authorize('university', 'admin', 'partner', 'student'),
     endSession
 );
 
@@ -98,7 +119,7 @@ router.put(
 router.get(
     '/:id/status',
     protect,
-    authorize('university', 'admin', 'student'),
+    authorize('university', 'admin', 'partner', 'student'),
     getSessionStatusRoute
 );
 
@@ -106,7 +127,7 @@ router.get(
 router.post(
     '/:id/notify',
     protect,
-    authorize('university', 'admin'),
+    authorize('university', 'admin', 'partner'),
     notifLimiter,
     redisRateLimiter('session_notify', 24 * 60 * 60 * 1000, 5), // 5/day cross-process
     sendNotification
@@ -116,15 +137,23 @@ router.post(
 // router.get(
 //     '/:id/host-link',
 //     protect,
-//     authorize('university', 'admin', 'student'),
+//     authorize('university', 'admin', 'partner', 'student'),
 //     generateHostLink
 // );
 
-/* ── Recording status ──────────────────────────────────────── */
+/* ── Recording status and Upload ───────────────────────────── */
+router.post(
+    '/:id/recording',
+    protect,
+    authorize('university', 'admin', 'partner'),
+    upload.single('recording'), // Field name for file upload
+    require('../controllers/liveSessionController').uploadSessionRecording
+);
+
 router.get(
     '/:id/recording',
     protect,
-    authorize('university', 'admin', 'student'),
+    authorize('university', 'admin', 'partner', 'student'),
     getRecordingStatus
 );
 
@@ -132,7 +161,7 @@ router.get(
 router.get(
     '/:id/recording/playback',
     protect,
-    authorize('university', 'admin', 'student'),
+    authorize('university', 'admin', 'partner', 'student'),
     getRecordingPlaybackUrl
 );
 

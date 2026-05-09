@@ -13,19 +13,26 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 
 const SiteContentManager = () => {
-    const [activeTab, setActiveTab] = useState('corporate'); // 'corporate', 'university', 'directors', 'about_cms'
+    const [activeTab, setActiveTab] = useState('corporate'); 
+    const [directorSubTab, setDirectorSubTab] = useState('BOARD'); // 'BOARD', 'IIT_LEADERSHIP'
     const [logos, setLogos] = useState([]);
     const [directors, setDirectors] = useState([]);
+    const [stories, setStories] = useState([]);
     const [cmsData, setCmsData] = useState({});
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [editingItem, setEditingItem] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({ 
         name: '', title: '', image: '', logo: '', location: '', 
         students: '', programs: '', order: 0, type: 'corporate', 
         category: 'DIRECTOR', bio: '', linkedin_url: '',
-        display_target: 'ABOUT_DIRECTOR' 
+        display_target: 'ABOUT_DIRECTOR',
+        university: '',
+        accent_color: 'primary',
+        campus: '', package: '', video_url: '', story: '', role: ''
     });
+    const [videoUploading, setVideoUploading] = useState(null);
     const [uploading, setUploading] = useState(null);
     const { showToast } = useToast();
 
@@ -40,13 +47,15 @@ const SiteContentManager = () => {
             const config = {
                 headers: { Authorization: `Bearer ${userInfo?.token}` }
             };
-            const [logosRes, directorsRes, cmsRes] = await Promise.all([
+            const [logosRes, directorsRes, storiesRes, cmsRes] = await Promise.all([
                 axios.get('/api/admin/partner-logos', config),
                 axios.get('/api/admin/directors', config),
+                axios.get('/api/admin/success-stories', config),
                 axios.get('/api/public/cms/about_us')
             ]);
             setLogos(logosRes.data);
             setDirectors(directorsRes.data);
+            setStories(storiesRes.data);
             setCmsData(cmsRes.data);
             setLoading(false);
         } catch (error) {
@@ -55,7 +64,7 @@ const SiteContentManager = () => {
         }
     };
 
-    const handleCreate = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -63,11 +72,20 @@ const SiteContentManager = () => {
                 headers: { Authorization: `Bearer ${userInfo?.token}` }
             };
 
-            const url = activeTab === 'directors' ? '/api/admin/directors' : '/api/admin/partner-logos';
-            const payload = activeTab === 'directors' ? formData : { ...formData, type: activeTab };
-            await axios.post(url, payload, config);
+            let url = '';
+            if (activeTab === 'directors') url = isEditing ? `/api/admin/directors/${editingId}` : '/api/admin/directors';
+            else if (activeTab === 'success_stories') url = isEditing ? `/api/admin/success-stories/${editingId}` : '/api/admin/success-stories';
+            else url = isEditing ? `/api/admin/partner-logos/${editingId}` : '/api/admin/partner-logos';
 
-            showToast(`${activeTab === 'directors' ? 'Team Member' : 'Asset'} added successfully`, 'success');
+            const payload = (activeTab === 'directors' || activeTab === 'success_stories') ? formData : { ...formData, type: activeTab };
+            
+            if (isEditing) {
+                await axios.put(url, payload, config);
+            } else {
+                await axios.post(url, payload, config);
+            }
+
+            showToast(`${activeTab === 'directors' ? 'Team Member' : activeTab === 'success_stories' ? 'Success Story' : 'Asset'} ${isEditing ? 'updated' : 'added'} successfully`, 'success');
             setShowAddModal(false);
             resetForm();
             fetchAll();
@@ -76,24 +94,15 @@ const SiteContentManager = () => {
         }
     };
 
-    const handleUpdate = async (id) => {
-        try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-            const config = {
-                headers: { Authorization: `Bearer ${userInfo?.token}` }
-            };
-
-            const url = activeTab === 'directors'
-                ? `/api/admin/directors/${id}`
-                : `/api/admin/partner-logos/${id}`;
-
-            await axios.put(url, editingItem, config);
-            showToast('Updated successfully', 'success');
-            setEditingItem(null);
-            fetchAll();
-        } catch (error) {
-            showToast('Update failed', 'error');
-        }
+    const handleEditStart = (item) => {
+        setIsEditing(true);
+        setEditingId(item._id);
+        setFormData({
+            ...formData,
+            ...item,
+            _id: item._id // ensures ID is preserved
+        });
+        setShowAddModal(true);
     };
 
     const handleDelete = async (id) => {
@@ -105,9 +114,10 @@ const SiteContentManager = () => {
                 headers: { Authorization: `Bearer ${userInfo?.token}` }
             };
 
-            const url = activeTab === 'directors'
-                ? `/api/admin/directors/${id}`
-                : `/api/admin/partner-logos/${id}`;
+            let url = '';
+            if (activeTab === 'directors') url = `/api/admin/directors/${id}`;
+            else if (activeTab === 'success_stories') url = `/api/admin/success-stories/${id}`;
+            else url = `/api/admin/partner-logos/${id}`;
 
             await axios.delete(url, config);
             showToast('Deleted successfully', 'success');
@@ -145,11 +155,13 @@ const SiteContentManager = () => {
             };
 
             const uploadFormData = new FormData();
-            uploadFormData.append(activeTab === 'directors' ? 'image' : 'logo', file);
+            const fieldName = (activeTab === 'directors' || activeTab === 'success_stories') ? 'image' : 'logo';
+            uploadFormData.append(fieldName, file);
 
-            const url = activeTab === 'directors' 
-                ? `/api/admin/directors/${id}/upload` 
-                : `/api/admin/partner-logos/${id}/upload`;
+            let url = '';
+            if (activeTab === 'directors') url = `/api/admin/directors/${id}/upload`;
+            else if (activeTab === 'success_stories') url = `/api/admin/success-stories/${id}/upload`;
+            else url = `/api/admin/partner-logos/${id}/upload`;
 
             await axios.post(url, uploadFormData, config);
             showToast('Image uploaded successfully', 'success');
@@ -161,12 +173,46 @@ const SiteContentManager = () => {
         }
     };
 
+    const handleVideoUpload = async (id, file) => {
+        if (!file) return;
+        const validTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
+        if (!validTypes.includes(file.type)) {
+            showToast('Invalid video format. Use MP4, WEBM, MOV, or OGG.', 'error');
+            return;
+        }
+        try {
+            setVideoUploading(id);
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const uploadFormData = new FormData();
+            uploadFormData.append('video', file);
+            await axios.post(`/api/admin/success-stories/${id}/upload-video`, uploadFormData, {
+                headers: {
+                    Authorization: `Bearer ${userInfo?.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            showToast('Video uploaded successfully', 'success');
+            fetchAll();
+        } catch (error) {
+            showToast('Video upload failed', 'error');
+        } finally {
+            setVideoUploading(null);
+        }
+    };
+
     const resetForm = () => {
+        setIsEditing(false);
+        setEditingId(null);
         setFormData({ 
             name: '', title: '', image: '', logo: '', location: '', 
             students: '', programs: '', order: 0, type: activeTab, 
             category: 'DIRECTOR', bio: '', linkedin_url: '',
-            display_target: activeTab === 'directors' ? 'ABOUT_DIRECTOR' : 'LANDING'
+            display_target: activeTab === 'directors' 
+                ? (directorSubTab === 'IIT_LEADERSHIP' ? 'IIT_LEADERSHIP' : 'ABOUT_DIRECTOR')
+                : 'LANDING',
+            university: '',
+            accent_color: 'primary',
+            campus: '', package: '', video_url: '', story: '', role: ''
         });
     };
 
@@ -174,6 +220,7 @@ const SiteContentManager = () => {
         { id: 'corporate', label: 'Corporate Partners', icon: Building2 },
         { id: 'university', label: 'University Partners', icon: GraduationCap },
         { id: 'directors', label: 'Team & Advisory', icon: UserIcon },
+        { id: 'success_stories', label: 'Success Stories', icon: Heart },
         { id: 'about_cms', label: 'About Page CMS', icon: ImageIcon },
     ];
 
@@ -222,13 +269,46 @@ const SiteContentManager = () => {
                                 {tabs.find(t => t.id === activeTab)?.label}
                             </h2>
                             <ModernButton onClick={() => { resetForm(); setShowAddModal(true); }}>
-                                <Plus size={18} className="mr-2" />
-                                Add {activeTab === 'directors' ? 'Member' : 'Logo'}
+                                Add {activeTab === 'directors' ? 'Member' : activeTab === 'success_stories' ? 'Story' : 'Logo'}
                             </ModernButton>
                         </div>
+                        
+                        {activeTab === 'directors' && (
+                            <div className="flex space-x-2 mb-6 p-1 bg-white/5 rounded-xl w-fit">
+                                <button
+                                    onClick={() => setDirectorSubTab('BOARD')}
+                                    className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                                        directorSubTab === 'BOARD' 
+                                        ? 'bg-white/10 text-white shadow-sm' 
+                                        : 'text-white/30 hover:text-white/60'
+                                    }`}
+                                >
+                                    BOARD & ADVISORY
+                                </button>
+                                <button
+                                    onClick={() => setDirectorSubTab('IIT_LEADERSHIP')}
+                                    className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                                        directorSubTab === 'IIT_LEADERSHIP' 
+                                        ? 'bg-primary/20 text-primary border border-primary/30' 
+                                        : 'text-white/30 hover:text-white/60'
+                                    }`}
+                                >
+                                    IIT LEADERSHIP PANEL
+                                </button>
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {(activeTab === 'directors' ? directors : logos.filter(l => l.type === activeTab)).map(item => (
+                            {(
+                                activeTab === 'directors' 
+                                    ? directors.filter(d => 
+                                        directorSubTab === 'IIT_LEADERSHIP' 
+                                            ? d.display_target === 'IIT_LEADERSHIP' 
+                                            : d.display_target !== 'IIT_LEADERSHIP'
+                                      )
+                                    : activeTab === 'success_stories' ? stories 
+                                    : logos.filter(l => l.type === activeTab)
+                            ).map(item => (
                                 <GlassCard key={item._id} className="relative group overflow-hidden border-white/5 hover:border-primary/30 transition-all duration-500">
                                     <div className="flex flex-col items-center text-center p-6">
                                         <div className="relative mb-4">
@@ -255,58 +335,52 @@ const SiteContentManager = () => {
                                             )}
                                         </div>
 
-                                        {editingItem?._id === item._id ? (
-                                            <div className="w-full space-y-3 mt-4">
-                                                <input 
-                                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm"
-                                                    value={editingItem.name}
-                                                    onChange={e => setEditingItem({ ...editingItem, name: e.target.value })}
-                                                />
+                                        <div className="w-full">
+                                            <h3 className="text-sm font-bold text-white mb-1 text-center">{item.name}</h3>
+                                            <p className="text-[10px] text-white/50 uppercase tracking-widest text-center">{item.title || item.role || item.type || item.package}</p>
+                                            
+                                            <div className="text-center mt-2">
                                                 {activeTab === 'directors' && (
-                                                    <>
-                                                        <input 
-                                                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm"
-                                                            value={editingItem.title || ''}
-                                                            placeholder="Role/Title"
-                                                            onChange={e => setEditingItem({ ...editingItem, title: e.target.value })}
-                                                        />
-                                                        <select
-                                                            className="w-full px-4 py-2 bg-[#1A1A1A] border border-white/10 rounded-xl text-white text-sm"
-                                                            value={editingItem.display_target}
-                                                            onChange={e => setEditingItem({ ...editingItem, display_target: e.target.value })}
-                                                        >
-                                                            <option value="LANDING">Landing Page</option>
-                                                            <option value="ABOUT_DIRECTOR">About Us (Director)</option>
-                                                            <option value="ABOUT_ADVISORY">About Us (Advisory)</option>
-                                                        </select>
-                                                    </>
-                                                )}
-                                                <div className="flex space-x-2">
-                                                    <button onClick={() => handleUpdate(item._id)} className="flex-1 py-2 bg-primary rounded-xl text-xs font-bold">Save</button>
-                                                    <button onClick={() => setEditingItem(null)} className="flex-1 py-2 bg-white/5 rounded-xl text-xs font-bold">Cancel</button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="w-full">
-                                                <h3 className="text-sm font-bold text-white mb-1">{item.name}</h3>
-                                                <p className="text-[10px] text-white/50 uppercase tracking-widest">{item.title || item.role || item.type}</p>
-                                                
-                                                {activeTab === 'directors' && (
-                                                    <div className="mt-2 text-[8px] font-black px-2 py-0.5 bg-primary/20 text-primary border border-primary/30 rounded-full inline-block">
+                                                    <div className="text-[8px] font-black px-2 py-0.5 bg-primary/20 text-primary border border-primary/30 rounded-full inline-block">
                                                         {item.display_target || 'ABOUT_DIRECTOR'}
                                                     </div>
                                                 )}
-
-                                                <div className="flex items-center justify-center space-x-2 mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button onClick={() => setEditingItem(item)} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white/50 hover:text-white">
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button onClick={() => handleDelete(item._id)} className="p-2 hover:bg-red-500/10 rounded-xl transition-colors text-white/50 hover:text-red-500">
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
+                                                {activeTab === 'success_stories' && (
+                                                    <div className="space-y-1">
+                                                        <div className="text-[8px] font-black px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full inline-block">
+                                                            {item.campus}
+                                                        </div>
+                                                        {/* Video upload button for success stories */}
+                                                        <div className="flex items-center justify-center mt-2">
+                                                            <label className={`flex items-center gap-1 px-3 py-1.5 rounded-xl cursor-pointer text-[9px] font-black uppercase tracking-widest transition-all ${item.video_url || item.videoUrl ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'}`}>
+                                                                {videoUploading === item._id ? (
+                                                                    <Loader2 size={10} className="animate-spin" />
+                                                                ) : (
+                                                                    <Upload size={10} />
+                                                                )}
+                                                                {item.video_url || item.videoUrl ? 'Change Video' : 'Upload Video'}
+                                                                <input
+                                                                    type="file"
+                                                                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                                                                    className="hidden"
+                                                                    onChange={(e) => handleVideoUpload(item._id, e.target.files[0])}
+                                                                    disabled={videoUploading === item._id}
+                                                                />
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+
+                                            <div className="flex items-center justify-center space-x-2 mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => handleEditStart(item)} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white/50 hover:text-white">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button onClick={() => handleDelete(item._id)} className="p-2 hover:bg-red-500/10 rounded-xl transition-colors text-white/50 hover:text-red-500">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </GlassCard>
                             ))}
@@ -322,69 +396,194 @@ const SiteContentManager = () => {
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAddModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-lg bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
                             <div className="flex justify-between items-center mb-8">
-                                <h3 className="text-xl font-black text-white">Add New {activeTab === 'directors' ? 'Team Member' : 'Partner'}</h3>
+                                <h3 className="text-xl font-black text-white">{isEditing ? 'Edit' : 'Add New'} {activeTab === 'directors' ? 'Team Member' : activeTab === 'success_stories' ? 'Success Story' : 'Partner'}</h3>
                                 <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/5 rounded-xl text-white/50"><X size={20} /></button>
                             </div>
 
-                            <form onSubmit={handleCreate} className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Name / Company</label>
-                                    <input 
-                                        required
-                                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
-                                        value={formData.name}
-                                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    />
-                                </div>
+                                     <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">{activeTab === 'success_stories' ? 'Student Name' : 'Name / Company'}</label>
+                                     <input 
+                                         required
+                                         className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                         value={formData.name}
+                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                     />
+                                 </div>
 
-                                {activeTab === 'directors' ? (
-                                    <>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Role / Title</label>
-                                            <input 
-                                                required
-                                                className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
-                                                value={formData.title}
-                                                onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Display Location</label>
-                                            <select
-                                                className="w-full px-6 py-4 bg-[#1A1A1A] border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
-                                                value={formData.display_target}
-                                                onChange={e => setFormData({ ...formData, display_target: e.target.value })}
-                                            >
-                                                <option value="LANDING">Landing Page</option>
-                                                <option value="ABOUT_DIRECTOR">About Us (Director/CEO)</option>
-                                                <option value="ABOUT_ADVISORY">About Us (Advisory Board)</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Bio (Optional)</label>
-                                            <textarea 
-                                                className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all h-24"
-                                                value={formData.bio}
-                                                onChange={e => setFormData({ ...formData, bio: e.target.value })}
-                                            />
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Order Index</label>
-                                        <input 
-                                            type="number"
-                                            className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
-                                            value={formData.order}
-                                            onChange={e => setFormData({ ...formData, order: e.target.value })}
-                                        />
-                                    </div>
-                                )}
+                                 {activeTab === 'directors' && (
+                                     <>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Role / Title</label>
+                                             <input 
+                                                 required
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.title}
+                                                 onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Display Location</label>
+                                             <select
+                                                 className="w-full px-6 py-4 bg-[#1A1A1A] border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.display_target}
+                                                 onChange={e => setFormData({ ...formData, display_target: e.target.value })}
+                                             >
+                                                 <option value="LANDING">Landing Page (Directors)</option>
+                                                 <option value="IIT_LEADERSHIP">Managed by IITans</option>
+                                                 <option value="ABOUT_DIRECTOR">About Us (Director/CEO)</option>
+                                                 <option value="ABOUT_ADVISORY">About Us (Advisory Board)</option>
+                                             </select>
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">University / Alumni (Internal Notes)</label>
+                                             <input 
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.university}
+                                                 placeholder="e.g. IIT Delhi"
+                                                 onChange={e => setFormData({ ...formData, university: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Bio / Description (Displayed on Landing)</label>
+                                             <textarea 
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all h-24"
+                                                 value={formData.bio}
+                                                 placeholder="Short description for the IIT Leadership section..."
+                                                 onChange={e => setFormData({ ...formData, bio: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Accent Dot Color (Theme)</label>
+                                             <select
+                                                 className="w-full px-6 py-4 bg-[#1A1A1A] border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.accent_color}
+                                                 onChange={e => setFormData({ ...formData, accent_color: e.target.value })}
+                                             >
+                                                 <option value="primary">SkillDad Indigo (Default)</option>
+                                                 <option value="emerald-400">Success Green</option>
+                                                 <option value="amber-400">Notice Yellow</option>
+                                                 <option value="sky-400">Deep Sky Blue</option>
+                                                 <option value="rose-500">Alert Rose</option>
+                                             </select>
+                                         </div>
+                                     </>
+                                 )}
 
-                                <ModernButton type="submit" className="w-full !py-5 uppercase font-black tracking-widest">
-                                    Confirm Addition
-                                </ModernButton>
-                            </form>
+                                 {activeTab === 'success_stories' && (
+                                     <>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Campus / University</label>
+                                             <input 
+                                                 required
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.campus}
+                                                 placeholder="e.g. CIT Campus"
+                                                 onChange={e => setFormData({ ...formData, campus: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Role / Job Title</label>
+                                             <input 
+                                                 required
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.role}
+                                                 placeholder="e.g. Full Stack Dev"
+                                                 onChange={e => setFormData({ ...formData, role: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Package (LPA)</label>
+                                             <input 
+                                                 required
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.package}
+                                                 placeholder="e.g. 18 LPA"
+                                                 onChange={e => setFormData({ ...formData, package: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Story / Testimonial</label>
+                                             <textarea 
+                                                 required
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all h-24"
+                                                 value={formData.story}
+                                                 onChange={e => setFormData({ ...formData, story: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Video URL (YouTube / External Link)</label>
+                                             <input 
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.video_url}
+                                                 placeholder="https://youtube.com/watch?v=..."
+                                                 onChange={e => setFormData({ ...formData, video_url: e.target.value })}
+                                             />
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Or Upload Video from Device</label>
+                                             {isEditing ? (
+                                                 <label className={`flex items-center justify-center gap-2 w-full px-6 py-4 border border-dashed rounded-2xl cursor-pointer transition-all ${videoUploading === editingId ? 'border-primary/40 bg-primary/5' : 'border-white/10 bg-white/5 hover:border-primary/40 hover:bg-primary/5'}`}>
+                                                     {videoUploading === editingId ? (
+                                                         <>
+                                                             <Loader2 size={16} className="animate-spin text-primary" />
+                                                             <span className="text-sm text-primary font-bold">Uploading...</span>
+                                                         </>
+                                                     ) : (
+                                                         <>
+                                                             <Upload size={16} className="text-white/40" />
+                                                             <span className="text-sm text-white/40">{formData.video_url && !formData.video_url.startsWith('http') ? 'Change video file' : 'Choose video file (MP4, WEBM, MOV)'}</span>
+                                                         </>
+                                                     )}
+                                                     <input
+                                                         type="file"
+                                                         accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                                                         className="hidden"
+                                                         disabled={videoUploading === editingId}
+                                                         onChange={async (e) => {
+                                                             const file = e.target.files[0];
+                                                             if (!file) return;
+                                                             await handleVideoUpload(editingId, file);
+                                                             // refresh formData video_url after upload
+                                                             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                                                             const res = await axios.get('/api/admin/success-stories', { headers: { Authorization: `Bearer ${userInfo?.token}` } });
+                                                             const updated = res.data.find(s => s._id === editingId || s.id === editingId);
+                                                             if (updated) setFormData(f => ({ ...f, video_url: updated.video_url || '' }));
+                                                         }}
+                                                     />
+                                                 </label>
+                                             ) : (
+                                                 <p className="text-[9px] text-white/30 px-1 py-2">Save the story first, then upload a video file from the card or re-open edit.</p>
+                                             )}
+                                         </div>
+                                         <div className="space-y-2">
+                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Display Order</label>
+                                             <input 
+                                                 type="number"
+                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 value={formData.order}
+                                                 onChange={e => setFormData({ ...formData, order: e.target.value })}
+                                             />
+                                         </div>
+                                     </>
+                                 )}
+
+                                 {activeTab !== 'directors' && activeTab !== 'success_stories' && (
+                                     <div className="space-y-2">
+                                         <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Order Index</label>
+                                         <input 
+                                             type="number"
+                                             className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                             value={formData.order}
+                                             onChange={e => setFormData({ ...formData, order: e.target.value })}
+                                         />
+                                     </div>
+                                 )}
+
+                                 <ModernButton type="submit" className="w-full !py-5 uppercase font-black tracking-widest">
+                                     {isEditing ? 'Save Changes' : 'Confirm Addition'}
+                                 </ModernButton>
+                             </form>
                         </motion.div>
                     </div>
                 )}

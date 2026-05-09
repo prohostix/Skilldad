@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BookOpen, Plus, Edit2, Trash2, Video, FileText, ArrowLeft, Save, X, ClipboardList, Settings } from 'lucide-react';
+import { BookOpen, Plus, Edit2, Trash2, Video, FileText, ArrowLeft, Save, X, ClipboardList, Settings, Upload, Image } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -608,10 +608,39 @@ const EditCourseModal = ({ course, onClose, onSave }) => {
     const [price, setPrice] = useState(course.price || '');
     const [category, setCategory] = useState(course.category || '');
     const [level, setLevel] = useState(course.level || 'Beginner');
+    const [thumbnail, setThumbnail] = useState(course.thumbnail || '');
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = React.useRef(null);
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('thumbnail', file);
+        setUploading(true);
+
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+            const { data } = await axios.post(`/api/courses/${course._id}/upload-thumbnail`, formData, config);
+            setThumbnail(data.thumbnail);
+        } catch (error) {
+            console.error('Thumbnail upload error:', error);
+            alert('Failed to upload thumbnail');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ title, description, price: Number(price), category, level });
+        onSave({ title, description, price: Number(price), category, level, thumbnail });
     };
 
     return (
@@ -623,6 +652,49 @@ const EditCourseModal = ({ course, onClose, onSave }) => {
                         <X size={24} />
                     </button>
                 </div>
+
+                {/* Thumbnail Section */}
+                <div className="mb-8 flex flex-col md:flex-row items-center gap-6 p-5 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="w-56 h-32 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner">
+                        {thumbnail ? (
+                            <img src={thumbnail} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <Image size={32} className="text-white/10" />
+                        )}
+                    </div>
+                    <div className="flex-1 w-full space-y-3">
+                        <div>
+                            <label className="block text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1.5">Course Cover Image</label>
+                            <p className="text-[11px] text-white/40 mb-3 leading-relaxed">This image will be displayed on the course card in the catalog. Recommended size: 1280x720px.</p>
+                        </div>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                placeholder="Paste image URL here..."
+                                className="flex-1 px-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary transition-all"
+                                value={thumbnail}
+                                onChange={(e) => setThumbnail(e.target.value)}
+                            />
+                            <input
+                                type="file"
+                                className="hidden"
+                                accept="image/*"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current.click()}
+                                disabled={uploading}
+                                className={`px-4 rounded-xl border flex items-center gap-2 text-sm font-bold transition-all ${uploading ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed' : 'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 hover:border-primary/50 active:scale-95'}`}
+                            >
+                                <Upload size={16} className={uploading ? "animate-bounce" : ""} />
+                                {uploading ? '...' : 'Upload'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-white/80 text-sm mb-2">Course Title *</label>

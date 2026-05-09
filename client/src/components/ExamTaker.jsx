@@ -439,7 +439,7 @@ const ExamTaker = () => {
                                 {/* MCQ Options */}
                                 {isMCQ && (
                                     <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
-                                        {question.options.map((option, index) => {
+                                        {question.options && Array.isArray(question.options) && question.options.map((option, index) => {
                                             const isSelected = answers[question._id]?.selectedOption === index || answers[question._id] === index;
                                             const optText = typeof option === 'object' ? option.text : option;
                                             return (

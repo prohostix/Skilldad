@@ -16,11 +16,11 @@ const FAQManagement = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({
-        question: '', answer: '', category: 'Getting Started', help_link: '', demo_video_link: ''
+        question: '', answer: '', category: 'Technical Issues', help_link: '', demo_video_link: ''
     });
 
     const categories = [
-        'Getting Started', 'Account & Login', 'Course Enrollment', 'Live Classes', 'Payments', 'Technical Issues', 'Certificates & Graduation', 'Refunds & Cancellations', 'Mobile & Compatibility', 'Universities', 'Courses'
+        'Career & Placements', 'Rewards & Referrals', 'Course Enrollment', 'Live Classes', 'Payments', 'Technical Issues', 'Certificates & Graduation', 'Account & Login', 'Universities', 'Courses'
     ];
 
     const fetchData = async () => {
@@ -49,6 +49,10 @@ const FAQManagement = () => {
         e.preventDefault();
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            if (!userInfo?.token) {
+                showToast("Not authenticated. Please log in again.", "error");
+                return;
+            }
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
             if (editingId) {
@@ -60,10 +64,12 @@ const FAQManagement = () => {
             }
             setShowModal(false);
             setEditingId(null);
-            setFormData({ question: '', answer: '', category: 'Getting Started', help_link: '', demo_video_link: '' });
+            setFormData({ question: '', answer: '', category: 'Technical Issues', help_link: '', demo_video_link: '' });
             fetchData();
         } catch (error) {
-            showToast("Error saving FAQ", "error");
+            const msg = error?.response?.data?.message || error.message || "Error saving FAQ";
+            console.error("[FAQ Save Error]", error?.response?.data || error.message);
+            showToast(msg, "error");
         }
     };
 
@@ -107,7 +113,7 @@ const FAQManagement = () => {
 
     const openCreate = () => {
         setEditingId(null);
-        setFormData({ question: '', answer: '', category: 'Getting Started', help_link: '', demo_video_link: '' });
+        setFormData({ question: '', answer: '', category: 'Technical Issues', help_link: '', demo_video_link: '' });
         setShowModal(true);
     };
 
@@ -147,8 +153,8 @@ const FAQManagement = () => {
                         <span className="flex items-center"><BarChart2 size={18} className="mr-2 text-[#7C3AED]" /> Top Searches</span>
                     </h2>
                     {chartData.length > 0 ? (
-                        <div className="h-[200px] w-full">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={200} debounce={50}>
+                        <div className="h-[200px] w-full" style={{ minWidth: 100, minHeight: 200 }}>
+                            <ResponsiveContainer width="99%" height={200} debounce={100}>
                                 <BarChart data={chartData} layout="vertical" margin={{ left: -20, right: 20 }}>
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#A78BFA', fontSize: 10 }} width={80} />
@@ -296,7 +302,7 @@ const FAQManagement = () => {
                             <div>
                                 <label className="block text-xs font-bold text-[#A78BFA] uppercase mb-2">Category</label>
                                 <select
-                                    Required value={formData.category}
+                                    required value={formData.category}
                                     onChange={e => setFormData({ ...formData, category: e.target.value })}
                                     className="w-full bg-[#020005] border border-white/10 rounded-lg p-3 text-white focus:border-[#7C3AED] outline-none"
                                 >

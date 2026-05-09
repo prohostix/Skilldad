@@ -195,6 +195,15 @@ class SocketService {
     }
 
     /**
+     * Send a targeted notification to a single user by their ID
+     */
+    notifyUser(userId, event, data) {
+        if (this.io && userId) {
+            this.io.to(userId.toString()).emit(event, data);
+        }
+    }
+
+    /**
      * Notify admins of user list changes
      */
     notifyUserListUpdate(action, user) {

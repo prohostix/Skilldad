@@ -138,8 +138,7 @@ const AnimatedLogoSection = () => {
                             <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-primary/50" />
                         </div>
                         <p className="text-text-muted text-base md:text-xl leading-relaxed font-inter font-medium opacity-70">
-                            Experience the evolution of learning through our intelligent 3D neural engine,
-                            synchronizing global institutions with professional success.
+                            Aquire skills from European universities with EU credits and placed globally - one of its kind for the first time India (PLACEMENT GURANTEED EUROPEAN UNIVERSITY SKILLS PROGRAMS WITH 'EU' CREDITS)
                         </p>
                     </motion.div>
                 </div>

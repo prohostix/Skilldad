@@ -83,7 +83,7 @@ const Login = () => {
 
             navigate(from || redirectToDashboard(data.role));
         } catch (err) {
-            setError(err.response?.data?.message || 'Check your neural credentials and try again.');
+            setError(err.response?.data?.message || 'Check your credentials and try again.');
         } finally {
             setLoading(false);
         }
@@ -115,7 +115,7 @@ const Login = () => {
                 className="w-full max-w-md relative z-10"
             >
                 <div className="text-center mb-3 md:mb-4">
-                    <h1 className="text-sm md:text-base font-black text-primary uppercase tracking-[0.4em] font-inter">Sync Terminal</h1>
+                    <h1 className="text-sm md:text-base font-black text-primary uppercase tracking-[0.4em] font-inter">Sign In</h1>
                 </div>
 
                 <GlassCard className="!p-5 md:!p-7 shadow-glow-purple border-white/20">
@@ -132,7 +132,7 @@ const Login = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-3">
                         <div className="space-y-2 text-left">
-                            <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] ml-1 font-inter">Email Architecture</label>
+                            <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] ml-1 font-inter">Email Address</label>
                             <div className={`relative transition-all duration-300 ${isFocused === 'email' ? 'scale-[1.02]' : ''}`}>
                                 <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'email' ? 'text-primary' : 'text-text-muted'}`}>
                                     <Mail size={16} />
@@ -152,9 +152,9 @@ const Login = () => {
                         </div>
 
                         <div className="space-y-2 text-left">
-                            <div className="flex justify-between items-center ml-1">
-                                <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] font-inter">Neural Passphrase</label>
-                                <Link to="/forgot-password" title="Recover Access" className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-widest">Reset Sync</Link>
+                            <div className="flex justify-between items-center ml-1 mb-1">
+                                <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] font-inter">Password</label>
+                                <Link to="/forgot-password" title="Recover Access" className="text-[10px] font-bold text-primary hover:text-primary-dark transition-colors uppercase tracking-widest">Forgot Password?</Link>
                             </div>
                             <div className={`relative transition-all duration-300 ${isFocused === 'password' ? 'scale-[1.02]' : ''}`}>
                                 <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'password' ? 'text-primary' : 'text-text-muted'}`}>
@@ -174,7 +174,8 @@ const Login = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute inset-y-0 right-4 flex items-center text-text-muted hover:text-primary transition-colors focus:outline-none"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    className="absolute inset-y-0 right-4 flex items-center text-text-muted hover:text-primary transition-colors focus:outline-none z-10"
                                 >
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
@@ -193,7 +194,7 @@ const Login = () => {
                                 </div>
                             ) : (
                                 <div className="flex items-center justify-center">
-                                    <span>Establish Connection</span>
+                                    <span>Sign In</span>
                                     <ChevronRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
                                 </div>
                             )}
@@ -204,8 +205,8 @@ const Login = () => {
                         <div className="flex flex-wrap justify-center gap-2">
                             {[
                                 { role: 'Admin', email: 'admin@skilldad.com' },
-                                { role: 'Finance', email: 'finance@skilldad.com' },
-                                { role: 'Partner', email: 'partner@techcorp.com' },
+                                { role: 'Finance', email: 'fin@gmail.com' },
+                                { role: 'Partner', email: 'iits@gmail.com' },
                                 { role: 'Student', email: 'john.smith@student.com' }
                             ].map((demo) => (
                                 <button

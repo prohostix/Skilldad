@@ -54,12 +54,12 @@ const CoursePlayer = () => {
 
                 // Fetch student progress for this course
                 const { data: progData } = await axios.get('/api/enrollment/my-courses', config);
-                const currentProg = progData.find(p => p.course._id === courseId);
+                const currentProg = progData.find(p => (p.course?._id || p.course_id) === courseId);
                 if (currentProg) {
                     setUserProgress({
                         ...currentProg,
-                        completedVideos: Array.isArray(currentProg.completedVideos) ? currentProg.completedVideos : [],
-                        completedExercises: Array.isArray(currentProg.completedExercises) ? currentProg.completedExercises : []
+                        completedVideos: Array.isArray(currentProg.completedVideos) ? currentProg.completedVideos : (currentProg.completed_videos || []),
+                        completedExercises: Array.isArray(currentProg.completedExercises) ? currentProg.completedExercises : (currentProg.completed_exercises || [])
                     });
                 }
 
@@ -176,15 +176,16 @@ const CoursePlayer = () => {
 
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const vidId = currentVideo._id || currentVideo.id;
             try {
                 await axios.put('/api/enrollment/progress', {
                     courseId,
-                    videoId: currentVideo._id,
+                    videoId: vidId,
                     exerciseScore: 100
                 }, config);
                 setUserProgress(prev => ({
                     ...prev,
-                    completedExercises: [...(prev.completedExercises || []), { video: currentVideo._id, score: 100 }]
+                    completedExercises: [...(prev.completedExercises || []), { video: vidId, score: 100 }]
                 }));
             } catch (err) {
                 console.error('Progress update failed', err);
@@ -205,17 +206,28 @@ const CoursePlayer = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
+        const vidId = currentVideo._id || currentVideo.id;
+        if (!vidId) {
+            console.error('No video ID found for current video');
+            return;
+        }
+
         try {
-            await axios.put('/api/enrollment/progress', {
+            const resp = await axios.put('/api/enrollment/progress', {
                 courseId,
-                videoId: currentVideo._id,
+                videoId: vidId,
             }, config);
+            
             setUserProgress(prev => ({
                 ...prev,
-                completedVideos: [...(prev.completedVideos || []), currentVideo._id]
+                completedVideos: [...(prev.completedVideos || []), vidId],
+                progress: resp.data.progress
             }));
+            
+            console.log('Progress updated:', resp.data);
         } catch (err) {
-            console.error('Video completion update failed', err);
+            console.error('Video completion update failed:', err);
+            alert(`Progress Sync Error: ${err.response?.data?.message || err.message}`);
         }
 
         if (currentVideoIndex < currentModule.videos.length - 1) {

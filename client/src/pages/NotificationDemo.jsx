@@ -213,11 +213,11 @@ const NotificationDemo = () => {
                                     ) : (
                                         logs.map((log) => (
                                             <motion.div
-                                                key={log._id}
+                                                key={log.id}
                                                 initial={{ opacity: 0, x: 20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 exit={{ opacity: 0, scale: 0.95 }}
-                                                className={`p-6 rounded-2xl border transition-all ${activeLog?._id === log._id ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20' : 'bg-slate-800/30 border-white/5'
+                                                className={`p-6 rounded-2xl border transition-all ${activeLog?.id === log.id ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20' : 'bg-slate-800/30 border-white/5'
                                                     }`}
                                             >
                                                 <div className="flex justify-between items-start mb-4">
@@ -234,26 +234,26 @@ const NotificationDemo = () => {
                                                 </div>
 
                                                 <div className="grid grid-cols-2 gap-3 mt-4">
-                                                    <div className={`flex items-center gap-2 p-2 rounded-lg bg-slate-950/50 border ${log.status.email.state === 'sent' ? 'border-green-500/20 text-green-400' :
-                                                        log.status.email.state === 'failed' ? 'border-red-500/20 text-red-400' :
+                                                    <div className={`flex items-center gap-2 p-2 rounded-lg bg-slate-950/50 border ${(log.status?.email?.state || log.delivery_status?.email?.state) === 'sent' ? 'border-green-500/20 text-green-400' :
+                                                        (log.status?.email?.state || log.delivery_status?.email?.state) === 'failed' ? 'border-red-500/20 text-red-400' :
                                                             'border-white/5 text-slate-600'
                                                         }`}>
                                                         <Mail className="w-3.5 h-3.5" />
-                                                        <span className="text-[10px] font-bold uppercase">{log.status.email.state}</span>
+                                                        <span className="text-[10px] font-bold uppercase">{(log.status?.email?.state || log.delivery_status?.email?.state) || 'skipped'}</span>
                                                     </div>
-                                                    <div className={`flex items-center gap-2 p-2 rounded-lg bg-slate-950/50 border ${log.status.whatsapp.state === 'sent' ? 'border-green-500/20 text-green-400' :
-                                                        log.status.whatsapp.state === 'failed' ? 'border-red-500/20 text-red-400' :
+                                                    <div className={`flex items-center gap-2 p-2 rounded-lg bg-slate-950/50 border ${(log.status?.whatsapp?.state || log.delivery_status?.whatsapp?.state) === 'sent' ? 'border-green-500/20 text-green-400' :
+                                                        (log.status?.whatsapp?.state || log.delivery_status?.whatsapp?.state) === 'failed' ? 'border-red-500/20 text-red-400' :
                                                             'border-white/5 text-slate-600'
                                                         }`}>
                                                         <MessageCircle className="w-3.5 h-3.5" />
-                                                        <span className="text-[10px] font-bold uppercase">{log.status.whatsapp.state}</span>
+                                                        <span className="text-[10px] font-bold uppercase">{(log.status?.whatsapp?.state || log.delivery_status?.whatsapp?.state) || 'skipped'}</span>
                                                     </div>
                                                 </div>
 
                                                 {/* Error info if failed */}
-                                                {(log.status.email.error || log.status.whatsapp.error) && (
+                                                {((log.status?.email?.error || log.delivery_status?.email?.error) || (log.status?.whatsapp?.error || log.delivery_status?.whatsapp?.error)) && (
                                                     <div className="mt-3 text-[9px] text-red-400/80 bg-red-400/5 p-2 rounded-md border border-red-500/10 italic">
-                                                        {log.status.email.error || log.status.whatsapp.error}
+                                                        {(log.status?.email?.error || log.delivery_status?.email?.error) || (log.status?.whatsapp?.error || log.delivery_status?.whatsapp?.error)}
                                                     </div>
                                                 )}
                                             </motion.div>

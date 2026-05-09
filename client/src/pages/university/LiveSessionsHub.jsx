@@ -4,7 +4,7 @@ import axios from 'axios';
 import {
     Video, Calendar, Clock, Users, Plus, MoreVertical,
     Sparkles, ArrowRight, VideoOff, Radio, Bell, X,
-    Link, BookOpen, Target, Send, CheckCircle2, AlertCircle, Info
+    Link, BookOpen, Target, Send, CheckCircle2, AlertCircle, Info, UploadCloud, Film
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -112,12 +112,20 @@ const parseSafeDate = (dateish) => {
     return new Date(dateish);
 };
 
-const formatSession = (s) => {
+const formatSession = (s, currentUserId) => {
     const startObj = parseSafeDate(s.startTime);
     // Use en-IN for Indian users, but keep it robust
     const locale = 'en-IN';
+    
+    // Ownership check
+    const isOwner = currentUserId && (
+        (s.instructor?._id || s.instructor?.id || s.instructor_id) === currentUserId ||
+        (s.university?._id || s.university?.id || s.university_id) === currentUserId ||
+        (s.partner?._id || s.partner?.id || s.partner_id) === currentUserId
+    );
+
     return {
-        id: s._id,
+        id: s._id || s.id,
         title: s.topic,
         course: s.course?.title || s.category || 'General',
         instructor: s.instructor?.profile?.universityName || s.instructor?.name || 'Institution Faculty',
@@ -128,6 +136,8 @@ const formatSession = (s) => {
         status: s.status || (startObj > new Date() ? 'scheduled' : 'completed'),
         description: s.description,
         meetingLink: s.meetingLink,
+        isOwner,
+        startTime: s.startTime
     };
 };
 
@@ -311,11 +321,13 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                                         onChange={handleCourseChange}
                                         className={`${inputCls} pl-10 cursor-pointer text-white`}
                                     >
-                                        <option value="" className="bg-[#0B0F1A] text-white">University-wide (All Students)</option>
+                                        <option value="" className="bg-[#0B0F1A] text-white">
+                                            {JSON.parse(localStorage.getItem('userInfo') || '{}').role === 'partner' ? 'All Partner Students' : 'University-wide (All Students)'}
+                                        </option>
 
                                         {Array.isArray(courses) && courses.length > 0 ? (
-                                            courses.map(c => (
-                                                <option key={c._id} value={c._id} className="bg-[#0B0F1A] text-white">
+                                            courses.map((c, idx) => (
+                                                 <option key={c._id || `course-${idx}`} value={c._id} className="bg-[#0B0F1A] text-white">
                                                     {c.title}
                                                 </option>
                                             ))
@@ -418,7 +430,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                         <div className="flex items-start gap-3 p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
                             <Bell size={15} className="text-emerald-400 mt-0.5 shrink-0" />
                             <p className="text-[11px] text-white/55 leading-relaxed">
-                                <span className="text-emerald-400 font-bold">Smart-Notify Enabled:</span> {form.courseId ? 'Only students enrolled in this course' : 'All university students'} will receive an
+                                <span className="text-emerald-400 font-bold">Smart-Notify Enabled:</span> {form.courseId ? 'Only students enrolled in this course' : (JSON.parse(localStorage.getItem('userInfo') || '{}').role === 'partner' ? 'All your registered students' : 'All university students')} will receive an
                                 email and WhatsApp notification immediately.
                             </p>
                         </div>
@@ -453,6 +465,86 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
 };
 
 /* ═══════════════════════════════════════════════════════════════
+   Recording Upload Modal
+═══════════════════════════════════════════════════════════════*/
+const RecordingUploadModal = ({ session, onClose, onUpload, onToast }) => {
+    const [submitting, setSubmitting] = useState(false);
+    const [uploadType, setUploadType] = useState('link'); // 'link' or 'file'
+    const [recordingUrl, setRecordingUrl] = useState('');
+    const [file, setFile] = useState(null);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (uploadType === 'link' && !recordingUrl.trim()) return onToast('Please provide a URL', 'error');
+        if (uploadType === 'file' && !file) return onToast('Please select a video file', 'error');
+        
+        setSubmitting(true);
+        try {
+            const formData = new FormData();
+            if (uploadType === 'link') {
+                formData.append('recordingUrl', recordingUrl);
+            } else {
+                formData.append('recording', file);
+            }
+
+            const rawInfo = localStorage.getItem('userInfo');
+            const { token } = JSON.parse(rawInfo);
+            const { data } = await axios.post(`/api/sessions/${session.id}/recording`, formData, {
+                headers: { 
+                    Authorization: `Bearer ${token}`, 
+                    'Content-Type': uploadType === 'file' ? 'multipart/form-data' : 'application/json' 
+                }
+            });
+            onUpload(session.id, data.recording);
+            onToast('Recording successfully uploaded!', 'success');
+            onClose();
+        } catch (err) {
+            onToast(err.response?.data?.message || 'Upload failed', 'error');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
+            <div className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+                <GlassCard className="border-primary/20 p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 className="text-lg font-bold text-white flex items-center gap-2"><Film size={18} className="text-primary" /> Session Recording</h3>
+                            <p className="text-[11px] font-medium text-white/50">{session.title}</p>
+                        </div>
+                        <button onClick={onClose} className="p-2 text-white/30 hover:text-white rounded-lg transition-all"><X size={18} /></button>
+                    </div>
+                    
+                    <div className="flex bg-white/5 rounded-xl p-1 mb-6">
+                        <button onClick={() => setUploadType('link')} className={`flex-1 py-2 text-[11px] font-bold rounded-lg uppercase tracking-wider transition-all ${uploadType === 'link' ? 'bg-primary text-white shadow-md' : 'text-white/40 hover:text-white'}`}>External Link</button>
+                        <button onClick={() => setUploadType('file')} className={`flex-1 py-2 text-[11px] font-bold rounded-lg uppercase tracking-wider transition-all ${uploadType === 'file' ? 'bg-primary text-white shadow-md' : 'text-white/40 hover:text-white'}`}>Upload Video</button>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {uploadType === 'link' ? (
+                            <div>
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 ml-0.5">Link (Google Drive/YouTube/Others)</label>
+                                <input type="url" required value={recordingUrl} onChange={e => setRecordingUrl(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary/60 outline-none placeholder:text-white/20 text-sm font-medium" placeholder="https://..." />
+                            </div>
+                        ) : (
+                            <div>
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 ml-0.5">MP4 Video File</label>
+                                <input type="file" required accept="video/*" onChange={e => setFile(e.target.files[0])} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/70 focus:border-primary/60 outline-none text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-primary/20 file:text-primary hover:file:bg-primary/30" />
+                            </div>
+                        )}
+                        <ModernButton type="submit" disabled={submitting} className="w-full justify-center !mt-6 shadow-lg shadow-primary/20">
+                            {submitting ? 'Processing Upload...' : 'Save Recording to Session'}
+                        </ModernButton>
+                    </form>
+                </GlassCard>
+            </div>
+        </div>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════
    Main Page Component
 ═══════════════════════════════════════════════════════════════*/
 const LiveSessionsHub = () => {
@@ -462,6 +554,7 @@ const LiveSessionsHub = () => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true); // Indicate loading initially
     const [showModal, setShowModal] = useState(false);
+    const [recordModalData, setRecordModalData] = useState(null);
     const [notifyingId, setNotifyingId] = useState(null);
     const [toasts, setToasts] = useState([]);
 
@@ -486,14 +579,22 @@ const LiveSessionsHub = () => {
         try {
             const config = getAuthConfig(15000);
             if (!config) return;
+            
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const uId = userInfo._id || userInfo.id;
+
             const { data } = await axios.get('/api/sessions', config);
             if (Array.isArray(data)) {
-                setLiveSessions(data.map(formatSession));
+                setLiveSessions(data.map(s => formatSession(s, uId)));
             }
         } catch (err) {
             console.warn('[LiveSessionsHub] background fetch sessions failed:', err.message);
+            
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const uId = userInfo._id || userInfo.id;
+            
             // Fallback to demo data ONLY if fetch fails completely and we have nothing
-            setLiveSessions(DEMO_SESSIONS.map(formatSession));
+            setLiveSessions(DEMO_SESSIONS.map(s => formatSession(s, uId)));
         } finally {
             setLoading(false);
         }
@@ -519,7 +620,10 @@ const LiveSessionsHub = () => {
 
     /* ── Actions ── */
     const handleScheduled = (newSession, replaceId = null) => {
-        const formatted = formatSession(newSession);
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        const uId = userInfo._id || userInfo.id;
+        
+        const formatted = formatSession(newSession, uId);
         if (replaceId) {
             // Replace the optimistic local entry with the real DB entry
             setLiveSessions(prev => prev.map(s => s.id === replaceId ? formatted : s));
@@ -552,7 +656,8 @@ const LiveSessionsHub = () => {
 
     const handleEnterStudio = (sessionId) => {
         // Navigate to the session detail page with embedded Jitsi
-        navigate(`/university/session/${sessionId}`);
+        const role = JSON.parse(localStorage.getItem('userInfo') || '{}').role;
+        navigate(`/${role}/session/${sessionId}`);
     };
 
     const handleJoinMeeting = (link) => {
@@ -638,7 +743,7 @@ const LiveSessionsHub = () => {
                         { label: 'Upcoming', value: upcoming.length, color: 'text-amber-400', bg: 'from-amber-500/10 to-amber-500/5' },
                         { label: 'Completed', value: past.length, color: 'text-emerald-400', bg: 'from-emerald-500/10 to-emerald-500/5' },
                     ].map((stat, i) => (
-                        <GlassCard key={i} className={`p-4 bg-gradient-to-br ${stat.bg} border-white/10`}>
+                        <GlassCard key={`stat-${i}`} className={`p-4 bg-gradient-to-br ${stat.bg} border-white/10`}>
                             <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">{stat.label}</p>
                             <p className={`text-3xl font-black ${stat.color}`}>{stat.value}</p>
                         </GlassCard>
@@ -653,8 +758,8 @@ const LiveSessionsHub = () => {
 
                         <section className="space-y-6">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-sm font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
-                                    <span className="w-2 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(124,58,237,0.5)] inline-block" />
+                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <Video size={20} className="text-primary" />
                                     All Live Sessions
                                 </h2>
                                 <button
@@ -685,56 +790,85 @@ const LiveSessionsHub = () => {
                                 <div className="grid gap-5">
                                     {liveSessions
                                         .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-                                        .map(session => (
-                                            <GlassCard key={session.id} className={`p-5 group relative overflow-hidden transition-all duration-400 border-white/10 hover:border-primary/30 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/20' : ''}`}>
-                                                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 group-hover:bg-primary/10 transition-all pointer-events-none" />
-                                                <div className="flex flex-col sm:flex-row justify-between gap-5 relative z-10">
-                                                    <div className="flex gap-4">
-                                                        <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-400 group-hover:scale-110 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/20 text-red-500' : 'bg-primary/10 border-primary/20 text-primary'}`}>
-                                                            {session.status === 'live' ? <Radio size={22} className="animate-pulse" /> : <Video size={22} />}
+                                        .map((session, idx) => (
+                                            <GlassCard key={session.id || `sess-${idx}`} className={`p-5 md:p-6 group relative overflow-hidden transition-all duration-400 border-white/10 hover:border-primary/30 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/30' : ''}`}>
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/10 transition-all pointer-events-none" />
+                                                
+                                                <div className="relative z-10 flex flex-col gap-6">
+                                                    {/* Top Section: Icon + Title + Status */}
+                                                    <div className="flex items-start gap-4 md:gap-5 min-w-0">
+                                                        <div className={`h-12 w-12 md:h-14 md:w-14 rounded-2xl flex items-center justify-center shrink-0 border shadow-lg transition-all duration-400 group-hover:scale-110 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/30 text-red-500' : 'bg-primary/10 border-primary/20 text-primary'}`}>
+                                                            {session.status === 'live' ? <Radio size={24} className="animate-pulse" /> : <Video size={24} />}
                                                         </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h4 className="font-bold text-white text-lg group-hover:text-primary transition-colors">{session.title}</h4>
+                                                        
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center flex-wrap gap-2 mb-1">
+                                                                <h4 className="font-black text-white text-lg md:text-xl group-hover:text-primary transition-colors truncate uppercase tracking-tight">{session.title}</h4>
                                                                 {session.status === 'live' && (
-                                                                    <span className="px-2 py-0.5 rounded-md bg-red-500 text-[9px] font-black text-white uppercase animate-pulse">Live</span>
+                                                                    <span className="px-2 py-0.5 rounded-full bg-red-500 text-[9px] font-black text-white uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.4)]">Live</span>
                                                                 )}
                                                             </div>
-                                                            <p className="text-white/40 text-xs mb-3">{session.course} · <span className="text-primary/70">{session.instructor}</span></p>
-                                                            <div className="flex flex-wrap gap-2.5">
-                                                                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/5 text-[11px] font-bold text-white/50">
-                                                                    <Calendar size={12} className="text-primary" /> {session.date}
-                                                                </span>
-                                                                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/5 text-[11px] font-bold text-white/50">
-                                                                    <Clock size={12} className="text-primary" /> {session.time} · {session.duration}
-                                                                </span>
-                                                                <span className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/5 text-[11px] font-bold text-white/50">
-                                                                    <Users size={12} className="text-primary" /> {session.enrolledStudents} enrolled
-                                                                </span>
+                                                            <div className="flex items-center gap-2 text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-widest">
+                                                                <span className="text-primary/70">{session.course}</span>
+                                                                <span className="w-1 h-1 bg-white/20 rounded-full" />
+                                                                <span className="truncate">{session.instructor}</span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex gap-2 self-center shrink-0">
-                                                        {notifyBtn(session.id)}
-                                                        <ModernButton
-                                                            variant="primary"
-                                                            className="text-xs px-5 py-2 h-10 shadow-lg shadow-primary/20"
-                                                            onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
-                                                        >
-                                                            {session.status === 'live' ? 'Studio' : (session.meetingLink ? 'Join' : 'Prepare')}
-                                                        </ModernButton>
-                                                        
-                                                        {session.status === 'live' && (
-                                                            <button 
-                                                                onClick={() => handleEndSession(session.id)}
-                                                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 text-[11px] font-bold transition-all"
+
+                                                    {/* Middle/Bottom: Metadata & Actions Grid-like Flex */}
+                                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pt-2 border-t border-white/5">
+                                                        {/* Metadata Row */}
+                                                        <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                                                            <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/10 text-[10px] md:text-[11px] font-bold text-white/60">
+                                                                <Calendar size={12} className="text-primary" />
+                                                                {session.date}
+                                                            </div>
+                                                            <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/10 text-[10px] md:text-[11px] font-bold text-white/60">
+                                                                <Clock size={12} className="text-primary" />
+                                                                {session.time} <span className="opacity-20 mx-0.5">|</span> {session.duration}
+                                                            </div>
+                                                            <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/10 text-[10px] md:text-[11px] font-bold text-white/60">
+                                                                <Users size={12} className="text-primary" />
+                                                                {session.enrolledStudents} Enrolled
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Action Group */}
+                                                        <div className="flex flex-wrap items-center gap-2 shrink-0">
+                                                            {notifyBtn(session.id)}
+                                                            
+                                                            <ModernButton
+                                                                variant={session.status === 'live' ? 'primary' : 'secondary'}
+                                                                className={`text-[10px] md:text-xs px-4 md:px-5 py-2 h-10 font-bold shadow-lg tracking-wider uppercase transition-all ${session.status === 'live' ? '!bg-red-500 !border-red-500 !text-white' : ''}`}
+                                                                onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
                                                             >
-                                                                End
+                                                                {session.status === 'live' ? 'Studio' : (session.isOwner && !session.meetingLink ? 'Start Session' : (session.meetingLink ? 'Join' : 'Prepare'))}
+                                                            </ModernButton>
+                                                            
+                                                            {session.status === 'live' && (
+                                                                <button 
+                                                                    onClick={() => handleEndSession(session.id)}
+                                                                    className="h-10 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+                                                                >
+                                                                    End
+                                                                </button>
+                                                            )}
+
+                                                            {(session.status === 'completed' || session.status === 'ended') && (
+                                                                <button 
+                                                                    onClick={() => setRecordModalData(session)}
+                                                                    className={`h-10 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${session.recording && session.recording.status === 'available' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white' : 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10'}`}
+                                                                >
+                                                                    <UploadCloud size={14} className="mr-1.5 inline-block" /> 
+                                                                    Rec
+                                                                </button>
+                                                            )}
+
+                                                            <button className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/30 hover:text-white hover:bg-white/10 transition-all focus:ring-1 focus:ring-primary/40">
+                                                                <MoreVertical size={18} />
                                                             </button>
-                                                        )}
-                                                        <button className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/30 hover:text-white hover:bg-white/10 transition-all">
-                                                            <MoreVertical size={18} />
-                                                        </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </GlassCard>
@@ -774,7 +908,7 @@ const LiveSessionsHub = () => {
                         {/* Spotlight cards */}
                         {upcoming.slice(0, 2).map((session, i) => (
                             <GlassCard
-                                key={session.id}
+                                key={session.id || `spotlight-${i}`}
                                 className={`p-5 border-l-4 overflow-hidden relative ${i === 0 ? 'border-primary' : 'border-amber-500'}`}
                             >
                                 <div className={`absolute top-0 right-0 p-1.5 ${i === 0 ? 'bg-primary/10' : 'bg-amber-500/10'} rounded-bl-xl`}>
@@ -839,6 +973,17 @@ const LiveSessionsHub = () => {
 
             {/* ── Inline Toast Notifications ── */}
             <InlineToast toasts={toasts} onRemove={removeToast} />
+
+            {recordModalData && (
+                <RecordingUploadModal
+                    session={recordModalData}
+                    onClose={() => setRecordModalData(null)}
+                    onToast={showToast}
+                    onUpload={(sessionId, recordingData) => {
+                        setLiveSessions(prev => prev.map(s => s.id === sessionId ? { ...s, recording: recordingData } : s));
+                    }}
+                />
+            )}
         </>
     );
 };

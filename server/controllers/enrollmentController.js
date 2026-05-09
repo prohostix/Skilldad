@@ -81,31 +81,54 @@ const updateProgress = asyncHandler(async (req, res) => {
     const { courseId, progress, videoId, exerciseScore } = req.body;
     const userId = req.user.id;
 
-    if (videoId && exerciseScore !== undefined) {
-        // Update both video and exercise progress
-        await query(`
-            UPDATE enrollments 
-            SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
-                completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $2::jsonb,
-                updated_at = NOW() 
-            WHERE student_id = $3 AND course_id = $4
-            AND NOT (completed_videos ? $5)
-        `, [
-            JSON.stringify([videoId]), 
-            JSON.stringify([{ video: videoId, score: exerciseScore }]), 
-            userId, 
-            courseId,
-            videoId
-        ]);
-    } else if (videoId) {
-        // Just update video completion
-        await query(`
-            UPDATE enrollments 
-            SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
-                updated_at = NOW() 
-            WHERE student_id = $2 AND course_id = $3
-            AND NOT (completed_videos ? $4)
-        `, [JSON.stringify([videoId]), userId, courseId, videoId]);
+    if (videoId) {
+        const userId = req.user.id;
+        console.log(`[Progress] Updating progress for User: ${userId}, Course: ${courseId}, Video: ${videoId}`);
+        
+        // 1. Update completion arrays
+        if (exerciseScore !== undefined) {
+             await query(`
+                UPDATE enrollments 
+                SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
+                    completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $2::jsonb,
+                    updated_at = NOW() 
+                WHERE student_id = $3 AND course_id = $4
+                AND NOT (completed_videos ? $5)
+            `, [
+                JSON.stringify([videoId]), 
+                JSON.stringify([{ video: videoId, score: exerciseScore }]), 
+                userId, 
+                courseId,
+                videoId
+            ]);
+        } else {
+            await query(`
+                UPDATE enrollments 
+                SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
+                    updated_at = NOW() 
+                WHERE student_id = $2 AND course_id = $3
+                AND NOT (completed_videos ? $4)
+            `, [JSON.stringify([videoId]), userId, courseId, videoId]);
+        }
+
+        // 2. Recalculate and update the progress percentage
+        // We fetch the course to get total videos count
+        const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [courseId]);
+        if (courseRes.rows[0]) {
+            const modules = courseRes.rows[0].modules || [];
+            const totalVideos = modules.reduce((acc, m) => acc + (m.videos?.length || 0), 0) || 1;
+            
+            const enrollData = await query('SELECT completed_videos FROM enrollments WHERE student_id = $1 AND course_id = $2', [userId, courseId]);
+            if (enrollData.rows[0]) {
+                const completed = Array.isArray(enrollData.rows[0].completed_videos) ? enrollData.rows[0].completed_videos.length : 0;
+                const newProgress = Math.min(100, Math.round((completed / totalVideos) * 100));
+                
+                await query('UPDATE enrollments SET progress = $1 WHERE student_id = $2 AND course_id = $3', [newProgress, userId, courseId]);
+                console.log(`[Progress Update] Student ${userId} course ${courseId} is now ${newProgress}%`);
+                
+                return res.json({ success: true, progress: newProgress });
+            }
+        }
     } else if (progress !== undefined) {
         // Generic progress update
         await query(`
@@ -113,9 +136,11 @@ const updateProgress = asyncHandler(async (req, res) => {
             SET progress = $1, updated_at = NOW() 
             WHERE student_id = $2 AND course_id = $3
         `, [progress, userId, courseId]);
+        
+        return res.json({ success: true, progress });
     }
 
-    res.json({ success: true, progress });
+    res.json({ success: true });
 });
 
 module.exports = {

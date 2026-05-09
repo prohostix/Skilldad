@@ -18,7 +18,15 @@ const publishResults = asyncHandler(async (req, res) => {
   }
 
   const userRole = req.user.role?.toLowerCase();
-  if (userRole !== 'admin' && exam.university_id !== req.user._id.toString()) {
+  const userId = req.user._id?.toString() || req.user.id?.toString();
+  
+  const isAuthorized = 
+    userRole === 'admin' || 
+    userRole === 'partner' || 
+    exam.university_id === userId || 
+    exam.created_by_id === userId;
+
+  if (!isAuthorized) {
     res.status(403);
     throw new Error('Not authorized to publish results for this exam');
   }
@@ -111,8 +119,8 @@ const getStudentResult = asyncHandler(async (req, res) => {
         question: question ? {
           questionText: question.question_text,
           marks: question.marks,
-          options: question.options, // Assuming options is already JSONB
-          questionType: question.question_type
+          options: typeof question.options === 'string' ? JSON.parse(question.options) : question.options,
+          questionType: (question.question_type === 'online-mcq' || question.question_type === 'mcq') ? 'mcq' : 'descriptive'
         } : null
       };
     });

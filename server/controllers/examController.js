@@ -65,13 +65,26 @@ const getStudentExams = asyncHandler(async (req, res) => {
       duration: exam.duration,
       totalMarks: exam.total_marks,
       status: exam.status,
-      questions: examQuestions.map(q => ({ 
-        ...q, 
-        _id: q.id, 
-        question: q.question_text,
-        questionText: q.question_text,
-        questionType: q.question_type
-      })),
+      questions: examQuestions.map(q => {
+        let parsedOptions = q.options;
+        try {
+          if (typeof q.options === 'string') {
+            parsedOptions = JSON.parse(q.options);
+          }
+        } catch (e) {
+          console.error(`[Exams] Failed to parse options for question ${q.id}:`, e.message);
+          parsedOptions = [];
+        }
+
+        return { 
+          ...q, 
+          _id: q.id, 
+          question: q.question_text,
+          questionText: q.question_text,
+          questionType: q.question_type,
+          options: parsedOptions
+        };
+      }),
       submission: sub ? { ...sub, _id: sub.id } : null,
       hasSubmitted: sub && sub.status !== 'in-progress',
       linkedPaperId: exam.linked_paper_id,
@@ -129,9 +142,21 @@ const startExam = asyncHandler(async (req, res) => {
     });
   }
 
+  // 4. Fetch questions for this exam
+  const qRes = await query('SELECT * FROM questions WHERE exam_id = $1 ORDER BY "order" ASC', [examId]);
+  const questions = qRes.rows.map(q => ({
+    ...q,
+    _id: q.id,
+    question: q.question_text,
+    questionText: q.question_text,
+    questionType: q.question_type,
+    options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options
+  }));
+
   res.json({
     success: true,
     submission: { ...submission, _id: submission.id },
+    questions,
     exam: {
       _id: exam.id,
       title: exam.title,
@@ -140,8 +165,10 @@ const startExam = asyncHandler(async (req, res) => {
       totalMarks: exam.total_marks,
       instructions: exam.instructions,
       linkedPaperId: exam.linked_paper_id,
-      answerKeyId: exam.answer_key_id
+      answerKeyId: exam.answer_key_id,
+      questionPaperUrl: exam.exam_type === 'pdf-based' ? `/api/exams/${exam.id}/download-paper` : null
     },
+    questionPaperUrl: exam.exam_type === 'pdf-based' ? `/api/exams/${exam.id}/download-paper` : null,
     timeRemaining: accessResult.timeRemaining
   });
 });
@@ -271,10 +298,137 @@ const downloadQuestionPaper = asyncHandler(async (req, res) => {
   res.download(filePath, document.file_name);
 });
 
+/**
+ * @desc    Bulk upload questions via Excel
+ * @access  Private (Admin/University/Partner)
+ */
+const bulkUploadQuestions = asyncHandler(async (req, res) => {
+  const { examId } = req.params;
+  if (!req.file) {
+    res.status(400);
+    throw new Error('Please upload an Excel file');
+  }
+
+  const xlsx = require('xlsx');
+  const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const data = xlsx.utils.sheet_to_json(worksheet);
+
+  if (data.length === 0) {
+    res.status(400);
+    throw new Error('Excel sheet is empty');
+  }
+
+  // Question structure:
+  // Question, Option A, Option B, Option C, Option D, Correct Option (A/B/C/D), Marks
+  
+  const questions = data.map((row, index) => {
+    const correctChar = (row['Correct Option (A/B/C/D)'] || '').toString().trim().toUpperCase();
+    const options = [
+      { text: (row['Option A'] || '').toString().trim(), isCorrect: correctChar === 'A' },
+      { text: (row['Option B'] || '').toString().trim(), isCorrect: correctChar === 'B' },
+      { text: (row['Option C'] || '').toString().trim(), isCorrect: correctChar === 'C' },
+      { text: (row['Option D'] || '').toString().trim(), isCorrect: correctChar === 'D' },
+    ];
+
+    const correctIndex = options.findIndex(o => o.isCorrect);
+    console.log(`[BulkUpload] Question ${index + 1}: Correct Index identified as ${correctIndex} (${correctChar})`);
+
+    return {
+      id: `q_${Date.now()}_${index}`,
+      exam_id: examId,
+      question_text: row['Question'] || '',
+      question_type: 'mcq',
+      options: JSON.stringify(options),
+      marks: parseInt(row['Marks']) || 1,
+      negative_marks: parseFloat(row['Negative Marks']) || 0,
+      order: index + 1
+    };
+  });
+
+  // Insert into DB
+  for (const q of questions) {
+    await query(`
+      INSERT INTO questions (id, exam_id, question_text, question_type, options, marks, "order", negative_marks)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `, [q.id, q.exam_id, q.question_text, q.question_type, q.options, q.marks, q.order, q.negative_marks]);
+  }
+
+  res.status(201).json({ success: true, message: `${questions.length} questions uploaded successfully` });
+});
+
+/**
+ * @desc    Upload question paper (PDF) and link to exam
+ * @access  Private (Admin/University/Partner)
+ */
+const uploadQuestionPaper = asyncHandler(async (req, res) => {
+  const { examId } = req.params;
+  
+  if (!req.file) {
+    res.status(400);
+    throw new Error('Please upload a PDF file');
+  }
+
+  // 1. Check if exam exists
+  const examRes = await query('SELECT * FROM exams WHERE id = $1', [examId]);
+  const exam = examRes.rows[0];
+  if (!exam) {
+    res.status(404);
+    throw new Error('Exam not found');
+  }
+
+  // 2. Upload file via Service
+  const uploadResult = await FileUploadService.uploadQuestionPaper(req.file, examId);
+
+  // 3. Create document record (so it shows in Question Bank)
+  const docId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+  await query(`
+    INSERT INTO documents (
+      id, title, description, type, file_url, file_name, file_size, 
+      uploaded_by_id, university_id, course_id, status, created_at
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'approved', NOW())
+  `, [
+    docId,
+    `Question Paper: ${exam.title}`,
+    `Uploaded for exam: ${examId}`,
+    'exam_paper',
+    uploadResult.url,
+    uploadResult.filename,
+    uploadResult.size,
+    req.user._id.toString(),
+    exam.university_id,
+    exam.course_id
+  ]);
+
+  // 4. Link document to exam
+  await query('UPDATE exams SET linked_paper_id = $1 WHERE id = $2', [docId, examId]);
+
+  // 5. Log audit
+  await auditLogService.logAuditEvent({
+    userId: req.user._id,
+    action: 'question_paper_uploaded',
+    resource: 'exam',
+    resourceId: examId,
+    details: { docId, fileName: uploadResult.filename },
+    ipAddress: req.ip || req.connection.remoteAddress,
+    userAgent: req.get('user-agent') || 'unknown'
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Question paper uploaded and linked successfully',
+    docId,
+    url: uploadResult.url
+  });
+});
+
 module.exports = {
   getStudentExams,
   startExam,
   getExam,
   autoGradeExam,
-  downloadQuestionPaper
+  downloadQuestionPaper,
+  bulkUploadQuestions,
+  uploadQuestionPaper
 };

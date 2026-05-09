@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const ModernButton = ({ children, onClick, variant = 'primary', className = '', disabled, type = 'button' }) => {
-    const baseStyles = 'px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-poppins font-semibold transition-all flex items-center justify-center space-x-2 touch-manipulation min-h-[44px]';
+    const baseStyles = 'px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl font-poppins font-semibold text-sm transition-all flex items-center justify-center space-x-2 touch-manipulation min-h-[36px]';
 
     const variants = {
         primary: 'bg-gradient-to-r from-primary-dark via-primary to-primary-light text-white hover:shadow-glow-gradient hover:scale-[1.02] shadow-glow-purple',

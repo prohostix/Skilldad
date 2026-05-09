@@ -101,53 +101,74 @@ const CourseCatalog = () => {
             <div className="absolute top-1/2 right-1/4 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-primary-dark/2 blur-[150px] rounded-full pointer-events-none gpu-accelerated" />
 
             {/* Main Content Sections */}
-            <main className="pt-16 md:pt-20 pb-20 px-4 md:px-6 lg:px-12 relative z-10">
-                {/* Hero Header */}
-                <div className="max-w-[1300px] mx-auto text-center mb-6 md:mb-8 space-y-4 px-4">
-                    {/* Back Button */}
-                    <div className="flex justify-start mb-2">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200"
+            <main className="pt-20 md:pt-24 pb-20 px-4 md:px-6 lg:px-12 relative z-10">
+                {/* Hero Header - Conditionally hidden when searching */}
+                <AnimatePresence>
+                    {!(isSearchFocused || filter) && (
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="max-w-[1300px] mx-auto text-center space-y-4 px-4 overflow-hidden"
                         >
-                            <ArrowLeft size={16} />
-                            <span className="text-sm font-medium">Go Back</span>
-                        </button>
-                    </div>
+                            {/* Back Button */}
+                            <div className="flex justify-start mb-2">
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200"
+                                >
+                                    <ArrowLeft size={16} />
+                                    <span className="text-sm font-medium">Go Back</span>
+                                </button>
+                            </div>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black font-space tracking-[-0.04em] leading-none"
-                    >
-                        {universityName ? (
-                            <><span className="text-gray-400">Courses by</span> <span className="text-white">{universityName}</span></>
-                        ) : (
-                            <><span className="text-gray-400">Expand Your</span> <span className="text-white">Horizon</span></>
-                        )}
-                    </motion.h1>
-                    {universityName && (
-                        <p className="text-white/40 text-sm mt-2">Showing all courses provided by your university</p>
+                            <motion.h1
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black font-space tracking-[-0.04em] leading-none"
+                            >
+                                {universityName ? (
+                                    <><span className="opacity-40">Courses by</span> <span className="premium-gradient-text">{universityName}</span></>
+                                ) : (
+                                    <><span className="opacity-40">Expand Your</span> <span className="premium-gradient-text">Horizon</span></>
+                                )}
+                            </motion.h1>
+                            {universityName && (
+                                <p className="text-white/40 text-sm mt-2">Showing all courses provided by your university</p>
+                            )}
+                        </motion.div>
                     )}
-                </div>
+                </AnimatePresence>
+
+
 
                 {/* Controls Section */}
                 <div className="max-w-[1300px] mx-auto mb-6 px-4">
                     <div className="flex flex-col gap-4 items-stretch">
                         {/* Search & Mobile Filter Toggle */}
                         <div className="flex items-center gap-3 w-full">
-                            <div className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1`}>
+                            <div 
+                                className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1 cursor-text`}
+                                onClick={() => document.getElementById('catalog-search')?.focus()}
+                            >
                                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
                                     <Search size={16} />
                                 </div>
                                 <input
+                                    id="catalog-search"
                                     type="text"
                                     placeholder="Search by tech, track, or instructor..."
-                                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/50 transition-all font-inter text-white placeholder:text-white/20 font-medium text-sm md:text-base"
+                                    className="w-full pl-10 pr-4 py-2.5 md:py-3.5 bg-white/[0.04] backdrop-blur-2xl shadow-2xl rounded-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-inter text-white placeholder:text-white/20 font-medium text-xs md:text-sm"
                                     value={filter}
                                     onChange={(e) => setFilter(e.target.value)}
                                     onFocus={() => setIsSearchFocused(true)}
-                                    onBlur={() => setIsSearchFocused(false)}
+                                    onBlur={() => {
+                                        // Delay blurring to allow Clear Search button to be clicked
+                                        setTimeout(() => {
+                                            if (!filter) setIsSearchFocused(false);
+                                        }, 200);
+                                    }}
                                 />
                             </div>
                             <button

@@ -96,15 +96,14 @@ const Settings = () => {
 
             const config = {
                 headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                    'Content-Type': 'multipart/form-data'
+                    Authorization: `Bearer ${userInfo.token}`
                 }
             };
 
             const { data } = await axios.post('/api/users/upload-profile-image', formData, config);
 
             // Update user context and localStorage
-            const updatedUser = { ...userInfo, profileImage: data.profileImage };
+            const updatedUser = { ...userInfo, profileImage: data.imageUrl };
             updateUser(updatedUser);
 
             showToast('Profile image updated successfully!', 'success');

@@ -491,6 +491,12 @@ const UserList = () => {
                                                 <p className="text-xs text-white/50 flex items-center font-medium mt-1">
                                                     <Mail size={12} className="mr-1" /> {user.email}
                                                 </p>
+                                                {user.profile?.phone && (
+                                                    <p className="text-[10px] text-white/40 flex items-center mt-1">
+                                                        <span className="mr-1.5 opacity-50">📞</span> {user.profile.phone}
+                                                    </p>
+                                                )}
+
                                             </div>
                                         </div>
                                     </td>

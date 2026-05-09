@@ -19,7 +19,15 @@ class NotificationService {
         const _id = user._id || user.id;
         const name = user.name;
         const email = user.email;
-        const phone = user.phone || user.profile?.phone;
+        
+        let phone = user.phone;
+        if (!phone && user.profile) {
+            let p = user.profile;
+            if (typeof p === 'string') {
+                try { p = JSON.parse(p); } catch(e) { p = {}; }
+            }
+            phone = p.phone;
+        }
 
         const newLogId = `nl_${Date.now()}`;
         const deliveryStatus = {
@@ -73,7 +81,10 @@ class NotificationService {
         try {
             switch (type) {
                 case 'welcome':
-                    log.status.email = await this._execEmail(user, 'Integration Successful', emailTemplates.welcome(user.name, user.role || 'Student'));
+                    log.status.email = await this._execEmail(user, 'Welcome to SkillDad!', emailTemplates.welcome(user.name, user.role || 'Student'));
+                    break;
+                case 'enrollment':
+                    log.status.email = await this._execEmail(user, `Enrollment Confirmed: ${data.courseTitle}`, emailTemplates.enrollmentConfirmed(user.name, data.courseTitle, data.enrolledBy));
                     break;
                 case 'liveSession':
                     log.status.email = await this._execEmail(user, 'New Live Session Scheduled', emailTemplates.liveSessionScheduled(user.name, data.topic, data.startTime, data.description));
@@ -81,6 +92,7 @@ class NotificationService {
                 case 'liveSessionUpdate':
                     log.status.email = await this._execEmail(user, 'Session Recalibration', emailTemplates.sessionUpdate(user.name, data.topic, data.startTime, data.changes));
                     break;
+                case 'exam_scheduled':
                 case 'exam':
                     log.status.email = await this._execEmail(user, `Exam Protocol: ${data.examTitle}`, emailTemplates.examScheduledStudent(user.name, data.examTitle, data.courseTitle, data.scheduledDate));
                     break;
@@ -128,40 +140,46 @@ class NotificationService {
     }
 
     async _executeWhatsApp(log, user, type, data) {
+        const phone = user.phone || user.profile?.phone;
         try {
+
             let result;
             switch (type) {
                 case 'welcome':
-                    result = await whatsAppService.sendTemplateMessage(user.phone, process.env.GUPSHUP_TEMPLATE_WELCOME || 'welcome_onboarding', [user.name]);
+                    // common_status [Item, Status]
+                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_WELCOME || 'common_status', [`Welcome ${user.name}`, 'Account Active']);
+                    break;
+                case 'enrollment':
+                    // common_status [Item, Status]
+                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_ENROLL || 'common_status', [`Course: ${data.courseTitle}`, 'Enrollment Confirmed']);
                     break;
                 case 'liveSession':
-                    result = await whatsAppService.notifyLiveSessionScheduled(user.name, user.phone, data.topic, data.startTime);
+                    result = await whatsAppService.notifyLiveSessionScheduled(user.name, phone, data.topic, data.startTime);
                     break;
                 case 'liveSessionUpdate':
                     const updateMsg = `Session "${data.topic}" has been recalibrated.`;
-                    result = await whatsAppService.sendTemplateMessage(user.phone, 'live_session_updated', [user.name, data.topic, updateMsg]);
+                    result = await whatsAppService.sendTemplateMessage(phone, 'live_session_updated', [user.name, data.topic, updateMsg]);
                     break;
+                case 'exam_scheduled':
                 case 'exam':
-                    result = await whatsAppService.notifyExamScheduled(user.name, user.phone, data.examTitle, data.courseTitle, data.scheduledDate);
+                    result = await whatsAppService.notifyExamScheduled(user.name, phone, data.examTitle, data.courseTitle, data.scheduledDate);
                     break;
                 case 'examResult':
-                    result = await whatsAppService.notifyExamResult(user.name, user.phone, data.examTitle, data.score, data.percentage, data.passed);
+                    result = await whatsAppService.notifyExamResult(user.name, phone, data.examTitle, data.score, data.percentage, data.passed);
                     break;
                 case 'examReminder':
-                    // WhatsApp reminder can use a simple template message
-                    result = await whatsAppService.sendTemplateMessage(user.phone, 'exam_reminder', [user.name, data.examTitle, new Date(data.startTime).toLocaleString()]);
+                    result = await whatsAppService.sendTemplateMessage(phone, 'exam_reminder', [user.name, data.examTitle, new Date(data.startTime).toLocaleString()]);
                     break;
                 case 'examCancelled':
-                    // WhatsApp cancellation notification
-                    result = await whatsAppService.sendTemplateMessage(user.phone, 'exam_cancelled', [user.name, data.examTitle, data.reason || 'No reason provided']);
+                    result = await whatsAppService.sendTemplateMessage(phone, 'exam_cancelled', [user.name, data.examTitle, data.reason || 'No reason provided']);
                     break;
                 case 'submissionConfirmation':
-                    // WhatsApp submission confirmation
-                    result = await whatsAppService.sendTemplateMessage(user.phone, 'exam_submitted', [user.name, data.examTitle]);
+                    result = await whatsAppService.sendTemplateMessage(phone, 'exam_submitted', [user.name, data.examTitle]);
                     break;
                 default:
                     result = null;
             }
+
 
             log.status.whatsapp = {
                 state: result ? 'sent' : 'failed',

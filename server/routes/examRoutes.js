@@ -9,6 +9,7 @@ const examSubmissionController = require('../controllers/examSubmissionControlle
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { uploadQuestionPaper: uploadPaper, handleUploadError } = require('../middleware/examUploadMiddleware');
 
 // Configure multer for student answer sheet uploads
 const storage = multer.diskStorage({
@@ -28,6 +29,11 @@ const storage = multer.diskStorage({
 const upload = multer({ 
     storage: storage,
     limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit
+});
+
+const excelUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
 /**
@@ -52,6 +58,7 @@ const notifyEnrolledStudents = async (session, title, message) => {
         }
 
         if (studentIds.length > 0) {
+            // Real-time socket notification
             socketService.sendToUsers(studentIds, 'notification', {
                 type: 'exam_scheduled',
                 title,
@@ -60,6 +67,33 @@ const notifyEnrolledStudents = async (session, title, message) => {
                 startTime: session.scheduled_start,
                 timestamp: new Date()
             });
+
+            // Multi-channel notifications (WhatsApp + Email)
+            const notificationService = require('../services/NotificationService');
+            const studentsRes = await query(
+                'SELECT id, name, email, profile FROM users WHERE id = ANY($1)',
+                [studentIds]
+            );
+
+            // Fetch course title if not provided
+            let courseTitle = 'Your Course';
+            if (session.course_id) {
+                const cRes = await query('SELECT title FROM courses WHERE id = $1', [session.course_id]);
+                if (cRes.rows.length > 0) courseTitle = cRes.rows[0].title;
+            }
+
+            for (const student of studentsRes.rows) {
+                const phone = student.profile?.phone || null;
+                notificationService.send(
+                    { ...student, phone }, 
+                    'exam_scheduled', 
+                    { 
+                        examTitle: title.replace('📝', '').trim(), 
+                        courseTitle: courseTitle,
+                        scheduledDate: new Date(session.scheduled_start).toLocaleString()
+                    }
+                ).catch(err => console.error(`[ExamNotify] Failed for student ${student.id}:`, err.message));
+            }
         }
     } catch (error) {
         console.error('[Notification] Failed to notify students:', error.message);
@@ -69,7 +103,7 @@ const notifyEnrolledStudents = async (session, title, message) => {
 // Standardized PG implementation for Exam Routes
 
 // @desc    Get all exams (Admin/University)
-router.get('/', protect, authorize('admin', 'university'), async (req, res) => {
+router.get('/', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
     try {
         const userRole = req.user.role?.toLowerCase();
         let queryStr = `
@@ -110,7 +144,7 @@ router.get('/', protect, authorize('admin', 'university'), async (req, res) => {
 });
 
 // @desc    Get all exams for admin (explicitly requested by frontend)
-router.get('/admin/all', protect, authorize('admin', 'university'), async (req, res) => {
+router.get('/admin/all', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
     try {
         const queryStr = `
             SELECT e.id as _id, e.*, 
@@ -144,35 +178,54 @@ router.get('/admin/all', protect, authorize('admin', 'university'), async (req, 
 });
 
 // @desc    Get single exam for admin
-router.get('/admin/:id', protect, authorize('admin', 'university'), examController.getExam);
+router.get('/admin/:id', protect, authorize('admin', 'university', 'partner'), examController.getExam);
 
-// @desc    Delete an exam (Admin)
-router.delete('/admin/:id', protect, authorize('admin'), async (req, res) => {
+// @desc    Delete an exam (Admin/University/Partner)
+router.delete('/admin/:id', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
     try {
         const examId = req.params.id;
+        const userRole = req.user.role?.toLowerCase();
+        const userId = req.user._id?.toString();
 
-        // Use a transaction or sequential deletes due to FK constraints
-        // 1. Delete results
+        // Partners and universities can only delete their own exams
+        if (userRole === 'partner' || userRole === 'university') {
+            const examCheck = await query('SELECT created_by_id, university_id FROM exams WHERE id = $1', [examId]);
+            if (examCheck.rows.length === 0) return res.status(404).json({ message: 'Exam not found' });
+            const exam = examCheck.rows[0];
+            if (exam.created_by_id !== userId && exam.university_id !== userId) {
+                return res.status(403).json({ message: 'Not authorized to delete this exam' });
+            }
+        }
+
+        // Sequential deletes due to FK constraints
         await query('DELETE FROM results WHERE exam_id = $1', [examId]);
-
-        // 2. Delete submissions
         await query('DELETE FROM exam_submissions_new WHERE exam_id = $1', [examId]);
-
-        // 3. Delete questions
         await query('DELETE FROM questions WHERE exam_id = $1', [examId]);
-
-        // 4. Finally delete the exam
         await query('DELETE FROM exams WHERE id = $1', [examId]);
 
-        res.json({ success: true, message: 'Exam and all associated data deleted successfully' });
+        res.json({ success: true, message: 'Exam deleted successfully' });
     } catch (error) {
         console.error('[PG EXAM] Error deleting exam:', error);
         res.status(500).json({ message: error.message });
     }
 });
 
+// @desc    Assign linked paper to an existing exam
+router.put('/admin/:id/link-paper', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
+    try {
+        const examId = req.params.id;
+        const { linkedPaperId } = req.body;
+        
+        await query('UPDATE exams SET linked_paper_id = $1 WHERE id = $2', [linkedPaperId, examId]);
+        res.json({ success: true, message: 'Paper successfully linked to exam.' });
+    } catch (error) {
+        console.error('[PG EXAM] Error linking paper:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // @desc    Schedule a new exam
-router.post('/admin/schedule', protect, authorize('admin', 'university'), async (req, res) => {
+router.post('/admin/schedule', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
     try {
         const {
             title, description, course, university,
@@ -231,7 +284,7 @@ router.post('/admin/schedule', protect, authorize('admin', 'university'), async 
 });
 
 // Alias for university deployment
-router.post('/', protect, authorize('admin', 'university'), async (req, res, next) => {
+router.post('/', protect, authorize('admin', 'university', 'partner'), async (req, res, next) => {
     // We just re-use the same logic by calling the existing handler or redirecting
     // For simplicity, we just duplicate the handler or call it. 
     // I'll just copy the logic here or wrap it in a function if I had more time, 
@@ -244,6 +297,7 @@ router.get('/student/my-exams', protect, examController.getStudentExams);
 router.get('/:id', protect, examController.getExam);
 router.post('/:examId/start', protect, examController.startExam);
 router.get('/:id/question-paper', protect, examController.downloadQuestionPaper);
+router.post('/:examId/question-paper', protect, authorize('admin', 'university', 'partner'), uploadPaper, handleUploadError, examController.uploadQuestionPaper);
 
 // Submission related routes
 router.post('/:submissionId/answer', protect, examSubmissionController.submitAnswer);
@@ -252,7 +306,10 @@ router.post('/:examId/upload-answer', protect, upload.single('document'), examSu
 router.get('/exam/:examId/my-submission', protect, examSubmissionController.getMySubmission);
 
 // Admin/University Result/Grading routes
-router.get('/:submissionId/for-grading', protect, authorize('admin', 'university'), examSubmissionController.getSubmissionForGrading);
-router.get('/exam-submissions/:submissionId', protect, authorize('admin', 'university'), examSubmissionController.getSubmissionForGrading);
+router.get('/:submissionId/for-grading', protect, authorize('admin', 'university', 'partner'), examSubmissionController.getSubmissionForGrading);
+router.get('/exam-submissions/:submissionId', protect, authorize('admin', 'university', 'partner'), examSubmissionController.getSubmissionForGrading);
+
+// Bulk upload questions
+router.post('/:examId/bulk-upload-questions', protect, authorize('admin', 'university', 'partner'), excelUpload.single('excel'), examController.bulkUploadQuestions);
 
 module.exports = router;

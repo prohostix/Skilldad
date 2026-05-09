@@ -159,9 +159,12 @@ app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/webhooks', require('./routes/webhookRoutes'));
 app.use('/api/discount', require('./routes/discountRoutes'));
 app.use('/api/services', require('./routes/serviceRoutes'));
+app.use('/api/referrals', require('./routes/referralRoutes'));
 app.use('/api/study-abroad', require('./routes/studyAbroadRoutes'));
 app.use('/api/admin/study-abroad', require('./routes/adminStudyAbroadRoutes'));
 app.use('/api/discussions', require('./routes/discussionRoutes'));
+app.use('/api/career', require('./routes/careerRoutes'));
+app.use('/api/certificates', require('./routes/certificateRoutes'));
 app.use('/', require('./routes/seoRoutes'));
 
 
@@ -241,6 +244,46 @@ const startServer = async () => {
   try {
     console.log('[Server] Initializing database connection...'.yellow);
     await connectPostgres();
+
+    // Auto-migrate: ensure faqs table has all required columns
+    try {
+        const { query } = require('./config/postgres');
+        const colRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['faqs']);
+        const cols = colRes.rows.map(r => r.column_name);
+        if (!cols.includes('help_link')) await query('ALTER TABLE faqs ADD COLUMN help_link TEXT');
+        if (!cols.includes('demo_video_link')) await query('ALTER TABLE faqs ADD COLUMN demo_video_link TEXT');
+        if (!cols.includes('views')) await query('ALTER TABLE faqs ADD COLUMN views INTEGER DEFAULT 0');
+        if (!cols.includes('upvotes')) await query('ALTER TABLE faqs ADD COLUMN upvotes INTEGER DEFAULT 0');
+        if (!cols.includes('downvotes')) await query('ALTER TABLE faqs ADD COLUMN downvotes INTEGER DEFAULT 0');
+        if (!cols.includes('updated_at')) await query('ALTER TABLE faqs ADD COLUMN updated_at TIMESTAMP DEFAULT NOW()');
+        await query(`CREATE TABLE IF NOT EXISTS faq_search_analytics (id SERIAL PRIMARY KEY, query TEXT UNIQUE NOT NULL, count INTEGER DEFAULT 1, updated_at TIMESTAMP DEFAULT NOW())`);
+
+        // Seed default FAQs if table is empty
+        const countRes = await query('SELECT COUNT(*) FROM faqs');
+        if (parseInt(countRes.rows[0].count) === 0) {
+            const crypto = require('crypto');
+            const defaults = [
+                { question: 'How to apply for job and internship', answer: 'Navigate to the Career & Placements portal. Browse the available vacancies in the "Jobs" or "Internships" tabs. Click on any listing to view details, then click "Apply" to submit your profile and resume. We suggest having a complete profile for a better chance of selection.', category: 'Career & Placements', help_link: '/dashboard/placements' },
+                { question: 'How does the Refer & Earn program work?', answer: 'Share your unique referral code with friends. When they join SkillDad using your link, you earn 100 reward points instantly. These points are tracked in your Reward Wallet and can be redeemed for course discounts or exclusive certificates.', category: 'Rewards & Referrals', help_link: '/dashboard/reward-wallet' },
+            ];
+            for (const faq of defaults) {
+                await query('INSERT INTO faqs (id, question, answer, category, help_link) VALUES ($1, $2, $3, $4, $5)', [crypto.randomUUID(), faq.question, faq.answer, faq.category, faq.help_link]);
+            }
+            console.log('[Migration] Seeded default FAQs'.green);
+        }
+
+        console.log('[Migration] FAQs table columns verified/updated'.green);
+
+        // Auto-migrate: ensure live_sessions table has partner_id
+        const sessColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['live_sessions']);
+        const sessCols = sessColRes.rows.map(r => r.column_name);
+        if (!sessCols.includes('partner_id')) {
+            await query('ALTER TABLE live_sessions ADD COLUMN partner_id VARCHAR(255) REFERENCES users(id)');
+            console.log('[Migration] Added partner_id to live_sessions'.green);
+        }
+    } catch (migErr) {
+        console.warn('[Migration] Database migration warning:', migErr.message);
+    }
     
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`.green.bold);

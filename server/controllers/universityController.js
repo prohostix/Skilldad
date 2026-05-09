@@ -116,6 +116,35 @@ const registerStudentByUniversity = async (req, res) => {
             email: student.email
         });
 
+        // 5. Send Notifications (Awaited for reliability)
+        setImmediate(async () => {
+            try {
+                const notificationService = require('../services/NotificationService');
+                const adminName = req.user.name || 'University Administrator';
+
+                // Send Welcome
+                await notificationService.send(
+                    { id: student.id, name: student.name, email: student.email, phone }, 
+                    'welcome'
+                );
+
+                // Send Enrollment if course provided
+                if (courseId) {
+                    const courseRes = await query('SELECT title FROM courses WHERE id = $1', [courseId]);
+                    const courseTitle = courseRes.rows[0]?.title || 'New Course';
+                    
+                    await notificationService.send(
+                        { id: student.id, name: student.name, email: student.email, phone },
+                        'enrollment',
+                        { courseTitle, enrolledBy: adminName }
+                    );
+                }
+            } catch (err) {
+                console.error('[Uni Registration] Notification failed:', err.message);
+            }
+        });
+
+
     } catch (error) {
         console.error('[Uni Registration] Error:', error);
         res.status(500).json({ message: error.message });

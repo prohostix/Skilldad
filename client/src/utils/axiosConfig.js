@@ -1,5 +1,25 @@
 import axios from 'axios';
 
+// Add a request interceptor to attach the auth token
+axios.interceptors.request.use(
+    (config) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const token = userInfo?.token || localStorage.getItem('token');
+            
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        } catch (error) {
+            console.error('[Axios Request Interceptor] Error accessing auth data:', error.message);
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 // Setup axios interceptor to handle 401 errors globally
 axios.interceptors.response.use(
     (response) => response,

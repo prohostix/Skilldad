@@ -9,21 +9,21 @@ const resultController = require('../controllers/resultController');
 
 // @desc    Publish results for an exam
 // @route   POST /api/results/exams/:examId/publish-results
-// @access  Private (University/Admin)
+// @access  Private (University/Admin/Partner)
 router.post(
     '/exams/:examId/publish-results',
     protect,
-    authorize('university', 'admin'),
+    authorize('university', 'admin', 'partner'),
     resultController.publishResults
 );
 
 // @desc    Get all results for an exam with statistics
 // @route   GET /api/results/exam/:examId
-// @access  Private (University/Admin)
+// @access  Private (University/Admin/Partner)
 router.get(
     '/exam/:examId',
     protect,
-    authorize('university', 'admin'),
+    authorize('university', 'admin', 'partner'),
     resultController.getExamResults
 );
 

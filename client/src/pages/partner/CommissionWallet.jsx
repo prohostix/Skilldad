@@ -3,7 +3,7 @@ import { Box, Typography, Button, TextField, Dialog, DialogTitle, DialogContent,
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
-import { Wallet, History, Users, DollarSign, Calculator, Plus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Wallet, History, Users, DollarSign, Calculator, Plus, CheckCircle2, AlertCircle, Percent } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const CommissionWallet = () => {
@@ -149,21 +149,21 @@ const CommissionWallet = () => {
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                                    Average Fee per Student (₹)
-                                </label>
-                                <div className="relative">
-                                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        required
-                                        className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-gray-600"
-                                        placeholder="e.g. 500"
-                                        value={feePerStudent}
-                                        onChange={e => setFeePerStudent(e.target.value)}
-                                    />
-                                </div>
-                            </div>
+                                     Average Fee per Student (₹)
+                                 </label>
+                                 <div className="relative">
+                                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                                     <input
+                                         type="number"
+                                         min="0"
+                                         required
+                                         className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-gray-600"
+                                         placeholder="e.g. 500"
+                                         value={feePerStudent}
+                                         onChange={e => setFeePerStudent(e.target.value)}
+                                     />
+                                 </div>
+                             </div>
                         </div>
 
                         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4">

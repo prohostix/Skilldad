@@ -32,6 +32,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import { getMediaUrl } from '../../utils/media';
 
 const UniversityManagement = () => {
     const [partners, setPartners] = useState([]);
@@ -221,7 +222,12 @@ const UniversityManagement = () => {
                 }
             };
 
-            await axios.post(`/api/admin/universities/${selectedPartner._id}/upload-image`, formData, config);
+            const { data } = await axios.post(`/api/admin/universities/${selectedPartner._id}/upload-image`, formData, config);
+            
+            setSelectedPartner(prev => ({
+                ...prev,
+                profileImage: data.profileImage || `/uploads/${file.name}`
+            }));
 
             showToast('Logo updated successfully', 'success');
             fetchPartners(); // Refresh list to show new logo
@@ -434,7 +440,7 @@ const UniversityManagement = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="h-[300px] w-full relative">
+                    <div className="h-[300px] w-full relative" style={{ minWidth: 0 }}>
                         <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={250} debounce={50}>
                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
@@ -558,8 +564,12 @@ const UniversityManagement = () => {
                                 <tr key={partner._id} className="hover:bg-white/5 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white font-poppins cursor-pointer hover:bg-primary/20 transition-colors" onClick={() => navigate(`/admin/university/${partner._id}`)}>
-                                                {partner.name?.charAt(0)}
+                                            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white font-poppins cursor-pointer hover:bg-primary/20 transition-colors overflow-hidden" onClick={() => navigate(`/admin/university/${partner._id}`)}>
+                                                {partner.profileImage ? (
+                                                    <img src={getMediaUrl(partner.profileImage)} alt={partner.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    partner.name?.charAt(0)
+                                                )}
                                             </div>
                                             <span
                                                 className="font-bold text-white cursor-pointer hover:text-primary transition-colors"
@@ -674,8 +684,12 @@ const UniversityManagement = () => {
                             <div key={partner._id} className="p-4 space-y-4 hover:bg-white/5 transition-colors" onClick={() => navigate(`/admin/university/${partner._id}`)}>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
-                                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white font-poppins shrink-0">
-                                            {partner.name?.charAt(0)}
+                                        <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white font-poppins shrink-0 overflow-hidden">
+                                            {partner.profileImage ? (
+                                                <img src={getMediaUrl(partner.profileImage)} alt={partner.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                partner.name?.charAt(0)
+                                            )}
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <p className="font-bold text-white truncate">{partner.name}</p>
@@ -800,7 +814,7 @@ const UniversityManagement = () => {
                             >
                                 {selectedPartner.profileImage ? (
                                     <img
-                                        src={selectedPartner.profileImage}
+                                        src={getMediaUrl(selectedPartner.profileImage)}
                                         alt={selectedPartner.name}
                                         className="w-full h-full object-cover"
                                     />

@@ -276,46 +276,61 @@ const HeroSection = () => {
 
             {/* Hero Content */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 w-full relative z-[20]">
-                <div className="max-w-[850px] py-12 md:py-24 text-center mx-auto">
+                <div className="max-w-[900px] py-16 md:py-28 text-center mx-auto flex flex-col items-center">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8 }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.9, ease: 'easeOut' }}
+                        className="w-full flex flex-col items-center"
                     >
-                        <div role="heading" aria-level="1" className="text-[28px] xs:text-[36px] sm:text-[42px] md:text-[62px] lg:text-[76px] font-bold leading-[1.15] xs:leading-[1.1] tracking-[-0.03em] mb-6 md:mb-10 font-space px-4 sm:px-0">
-                            <span className="text-white/30 block mb-2">Transform Your</span>
-                            <span className="text-white block">
-                                Skills with{' '}
+                        {/* Eyebrow — subtle tag line */}
+                        <span className="inline-block text-[13px] xs:text-[15px] sm:text-[17px] font-semibold tracking-[0.35em] uppercase mb-5 md:mb-7">
+                            <span className="text-white/40">For the first time in </span><span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary" style={{ backgroundSize: '200% auto', animation: 'hero-text-gradient 5s linear infinite' }}>India</span>
+                        </span>
+
+                        {/* Main Heading */}
+                        <div
+                            role="heading"
+                            aria-level="1"
+                            className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-10 md:mb-14 font-space px-2 sm:px-0 text-center"
+                        >
+                            <span className="text-white">
                                 <span
-                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary inline-block"
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
                                     style={{
-                                        backgroundSize: "200% auto",
+                                        backgroundSize: '200% auto',
                                         animation: 'hero-text-gradient 5s linear infinite'
                                     }}
                                 >
-                                    SkillDad
-                                </span>
+                                    Placement
+                                </span>{' '}Guaranteed{' '}
+                                <span
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
+                                    style={{
+                                        backgroundSize: '200% auto',
+                                        animation: 'hero-text-gradient 5s linear infinite'
+                                    }}
+                                >
+                                    European
+                                </span>{' '}
+                                University Skill Programs with EU Credits
                             </span>
                         </div>
 
-
-                        <p className="text-sm sm:text-lg md:text-2xl text-[#B8B8D0] mb-8 md:mb-10 max-w-[700px] mx-auto leading-relaxed font-inter font-medium px-4 sm:px-6 opacity-90">
-                            Smart learning automation for students, professionals, and companies.
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-5 px-6">
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="w-full sm:w-auto px-7 md:px-10 py-3 md:py-4 rounded-full bg-gradient-to-r from-[#8A2BE2] to-[#FF2FD1] text-white font-black text-[10px] md:text-[12px] uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2 group hover:shadow-[0_0_40px_rgba(255,47,209,0.4)] hover:scale-[1.03] active:scale-95 shadow-lg"
+                                className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-gradient-to-r from-[#8A2BE2] to-[#FF2FD1] text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-2 group hover:shadow-[0_0_50px_rgba(255,47,209,0.5)] hover:scale-[1.04] active:scale-95 shadow-xl"
                             >
                                 {user ? 'Go to Dashboard' : 'Start Learning Today'}
-                                <ChevronRight className="group-hover:translate-x-1 transition-transform" size={18} />
+                                <ChevronRight className="group-hover:translate-x-1.5 transition-transform" size={18} />
                             </button>
 
                             {!user && (
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="w-full sm:w-auto px-7 md:px-10 py-3 md:py-4 rounded-full bg-black/40 backdrop-blur-md border-[1.5px] border-white/20 text-white font-black text-[10px] md:text-[12px] uppercase tracking-[0.15em] transition-all hover:bg-white/10 hover:border-white active:scale-95"
+                                    className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-black/40 backdrop-blur-md border-[1.5px] border-white/20 text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:bg-white/10 hover:border-white/60 active:scale-95"
                                 >
                                     Login Now
                                 </button>

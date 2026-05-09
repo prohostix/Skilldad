@@ -80,10 +80,8 @@ router.get('/my-documents', protect, async (req, res) => {
     }
 });
 
-// @desc    Get all documents (Admin/University view)
-// @route   GET /api/documents
-// @access  Private (Admin/University)
-router.get('/', protect, authorize('admin', 'university'), async (req, res) => {
+// @access  Private (Admin/University/Partner)
+router.get('/', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
     try {
         const { status, type, student, university_id } = req.query;
         let whereClauses = [];
@@ -111,6 +109,13 @@ router.get('/', protect, authorize('admin', 'university'), async (req, res) => {
             const uId = req.user.id || req.user._id;
             params.push(uId);
             whereClauses.push(`(d.university_id = $${params.length} OR d.uploaded_by_id = $${params.length} OR d.reviewed_by_id = $${params.length})`);
+        }
+
+        // Restriction for partner role - show docs they uploaded
+        if (req.user.role === 'partner') {
+            const pId = req.user.id || req.user._id;
+            params.push(pId);
+            whereClauses.push(`d.uploaded_by_id = $${params.length}`);
         }
 
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
@@ -224,10 +229,8 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
     }
 });
 
-// @desc    Review document (Approve/Reject)
-// @route   PUT /api/documents/:id/review
-// @access  Private (Admin/University)
-router.put('/:id/review', protect, authorize('admin', 'university'), async (req, res) => {
+// @access  Private (Admin/University/Partner)
+router.put('/:id/review', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
     try {
         const { status, rejectionReason } = req.body;
         const userId = req.user.id || req.user._id;

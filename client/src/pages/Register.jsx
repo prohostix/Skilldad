@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     User,
@@ -14,13 +14,70 @@ import {
     Sparkles,
     AlertCircle,
     Home,
-    Smartphone
+    Smartphone,
+    ChevronDown,
+    Eye,
+    EyeOff,
+    Check
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 import Navbar from '../components/ui/Navbar';
 import { useUser } from '../context/UserContext';
+import CountrySelector from '../components/ui/CountrySelector';
 
+
+
+const countryCodes = [
+    { code: '+91', name: 'India', flag: '🇮🇳', iso: 'in' },
+    { code: '+1', name: 'USA/Canada', flag: '🇺🇸', iso: 'us' },
+    { code: '+44', name: 'UK', flag: '🇬🇧', iso: 'gb' },
+    { code: '+971', name: 'UAE', flag: '🇦🇪', iso: 'ae' },
+    { code: '+61', name: 'Australia', flag: '🇦🇺', iso: 'au' },
+    { code: '+65', name: 'Singapore', flag: '🇸🇬', iso: 'sg' },
+    { code: '+49', name: 'Germany', flag: '🇩🇪', iso: 'de' },
+    { code: '+33', name: 'France', flag: '🇫🇷', iso: 'fr' },
+    { code: '+81', name: 'Japan', flag: '🇯🇵', iso: 'jp' },
+    { code: '+86', name: 'China', flag: '🇨🇳', iso: 'cn' },
+    { code: '+966', name: 'Saudi Arabia', flag: '🇸🇦', iso: 'sa' },
+    { code: '+974', name: 'Qatar', flag: '🇶🇦', iso: 'qa' },
+    { code: '+965', name: 'Kuwait', flag: '🇰🇼', iso: 'kw' },
+    { code: '+968', name: 'Oman', flag: '🇴🇲', iso: 'om' },
+    { code: '+973', name: 'Bahrain', flag: '🇧🇭', iso: 'bh' },
+    { code: '+20', name: 'Egypt', flag: '🇪🇬', iso: 'eg' },
+    { code: '+27', name: 'South Africa', flag: '🇿🇦', iso: 'za' },
+    { code: '+234', name: 'Nigeria', flag: '🇳🇬', iso: 'ng' },
+    { code: '+254', name: 'Kenya', flag: '🇰🇪', iso: 'ke' },
+    { code: '+60', name: 'Malaysia', flag: '🇲🇾', iso: 'my' },
+    { code: '+66', name: 'Thailand', flag: '🇹🇭', iso: 'th' },
+    { code: '+62', name: 'Indonesia', flag: '🇮🇩', iso: 'id' },
+    { code: '+63', name: 'Philippines', flag: '🇵🇭', iso: 'ph' },
+    { code: '+84', name: 'Vietnam', flag: '🇻🇳', iso: 'vn' },
+    { code: '+82', name: 'South Korea', flag: '🇰🇷', iso: 'kr' },
+    { code: '+7', name: 'Russia', flag: '🇷🇺', iso: 'ru' },
+    { code: '+39', name: 'Italy', flag: '🇮🇹', iso: 'it' },
+    { code: '+34', name: 'Spain', flag: '🇪🇸', iso: 'es' },
+    { code: '+31', name: 'Netherlands', flag: '🇳🇱', iso: 'nl' },
+    { code: '+41', name: 'Switzerland', flag: '🇨🇭', iso: 'ch' },
+    { code: '+46', name: 'Sweden', flag: '🇸🇪', iso: 'se' },
+    { code: '+47', name: 'Norway', flag: '🇳🇴', iso: 'no' },
+    { code: '+45', name: 'Denmark', flag: '🇩🇰', iso: 'dk' },
+    { code: '+358', name: 'Finland', flag: '🇫🇮', iso: 'fi' },
+    { code: '+353', name: 'Ireland', flag: '🇮🇪', iso: 'ie' },
+    { code: '+351', name: 'Portugal', flag: '🇵🇹', iso: 'pt' },
+    { code: '+30', name: 'Greece', flag: '🇬🇷', iso: 'gr' },
+    { code: '+90', name: 'Turkey', flag: '🇹🇷', iso: 'tr' },
+    { code: '+55', name: 'Brazil', flag: '🇧🇷', iso: 'br' },
+    { code: '+52', name: 'Mexico', flag: '🇲🇽', iso: 'mx' },
+    { code: '+54', name: 'Argentina', flag: '🇦🇷', iso: 'ar' },
+    { code: '+56', name: 'Chile', flag: '🇨🇱', iso: 'cl' },
+    { code: '+57', name: 'Colombia', flag: '🇨🇴', iso: 'co' },
+    { code: '+51', name: 'Peru', flag: '🇵🇪', iso: 'pe' },
+    { code: '+92', name: 'Pakistan', flag: '🇵🇰', iso: 'pk' },
+    { code: '+880', name: 'Bangladesh', flag: '🇧🇩', iso: 'bd' },
+    { code: '+94', name: 'Sri Lanka', flag: '🇱🇰', iso: 'lk' },
+    { code: '+977', name: 'Nepal', flag: '🇳🇵', iso: 'np' },
+];
 
 const Register = () => {
     const { user, updateUser } = useUser();
@@ -30,12 +87,16 @@ const Register = () => {
         password: '',
         role: 'student',
         phone: '',
+        countryCode: '+91',
     });
     const [error, setError] = useState('');
     const [alreadyExists, setAlreadyExists] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [step, setStep] = useState(1);
     const [isFocused, setIsFocused] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [searchParams] = useSearchParams();
+    const referralCode = searchParams.get('ref');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -53,9 +114,39 @@ const Register = () => {
         setIsSubmitting(true);
         setError('');
         setAlreadyExists(false);
+
+        const requirements = [
+            { regex: /.{8,}/, message: 'Minimum 8 characters' },
+            { regex: /[A-Z]/, message: 'Include uppercase' },
+            { regex: /[0-9]/, message: 'Include number' },
+            { regex: /[^A-Za-z0-9]/, message: 'Include special character' }
+        ];
+
+        for (let req of requirements) {
+            if (!req.regex.test(formData.password)) {
+                setIsSubmitting(false);
+                return setError(req.message);
+            }
+        }
         try {
-            const { data } = await axios.post('/api/users', formData);
+            // Combine country code and phone number for backend
+            const submissionData = {
+                ...formData,
+                phone: `${formData.countryCode}${formData.phone.replace(/\D/g, '')}`
+            };
+            const { data } = await axios.post('/api/users', submissionData);
             updateUser(data); // updates context + localStorage so Navbar re-renders
+            
+            // If referral code exists, apply it
+            if (referralCode) {
+                try {
+                    const config = { headers: { Authorization: `Bearer ${data.token}` } };
+                    await axios.post('/api/referrals/apply', { code: referralCode }, config);
+                } catch (applyErr) {
+                    console.error('Failed to apply referral:', applyErr.response?.data?.message || applyErr.message);
+                }
+            }
+
             // Navigate to home page — Dashboard button is in Navbar
             navigate('/');
         } catch (err) {
@@ -176,21 +267,28 @@ const Register = () => {
 
                                         <div className="space-y-1.5 text-left">
                                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 font-inter">WhatsApp Number</label>
-                                            <div className={`relative transition-all duration-300 ${isFocused === 'phone' ? 'scale-[1.01]' : ''}`}>
-                                                <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'phone' ? 'text-primary' : 'text-slate-400'}`}>
-                                                    <Smartphone size={16} />
-                                                </div>
-                                                <input
-                                                    type="tel"
-                                                    name="phone"
-                                                    required
-                                                    placeholder="+91 98765 43210"
-                                                    onFocus={() => setIsFocused('phone')}
-                                                    onBlur={() => setIsFocused('')}
-                                                    onChange={handleChange}
-                                                    value={formData.phone}
-                                                    className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white placeholder:text-slate-500 text-sm font-medium"
+                                            <div className={`flex items-center gap-2 transition-all duration-300 ${isFocused === 'phone' ? 'scale-[1.01]' : ''}`}>
+                                                <CountrySelector 
+                                                    countryCodes={countryCodes} 
+                                                    selectedCode={formData.countryCode} 
+                                                    onSelect={(code) => setFormData({ ...formData, countryCode: code })} 
                                                 />
+                                                <div className="relative flex-1">
+                                                    <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'phone' ? 'text-primary' : 'text-slate-400'}`}>
+                                                        <Smartphone size={16} />
+                                                    </div>
+                                                    <input
+                                                        type="tel"
+                                                        name="phone"
+                                                        required
+                                                        placeholder="98765 43210"
+                                                        onFocus={() => setIsFocused('phone')}
+                                                        onBlur={() => setIsFocused('')}
+                                                        onChange={handleChange}
+                                                        value={formData.phone}
+                                                        className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white placeholder:text-slate-500 text-sm font-medium"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -211,13 +309,13 @@ const Register = () => {
                                     className="space-y-4"
                                 >
                                     <div className="space-y-1.5 text-left">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 font-inter">Neural Password</label>
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 font-inter">Password</label>
                                         <div className={`relative transition-all duration-300 ${isFocused === 'password' ? 'scale-[1.01]' : ''}`}>
                                             <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'password' ? 'text-primary' : 'text-slate-400'}`}>
                                                 <Lock size={16} />
                                             </div>
                                             <input
-                                                type="password"
+                                                type={showPassword ? "text" : "password"}
                                                 name="password"
                                                 required
                                                 placeholder="••••••••••••"
@@ -225,10 +323,49 @@ const Register = () => {
                                                 onBlur={() => setIsFocused('')}
                                                 onChange={handleChange}
                                                 value={formData.password}
-                                                className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white placeholder:text-text-muted/50 text-sm font-medium"
+                                                className="w-full pl-11 pr-12 py-2.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white placeholder:text-text-muted/50 text-sm font-medium"
                                             />
+                                            <button
+                                                type="button"
+                                                onMouseDown={(e) => e.preventDefault()}
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute inset-y-0 right-4 flex items-center text-slate-400 hover:text-primary transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
                                         </div>
                                     </div>
+
+                                    <AnimatePresence>
+                                        {isFocused === 'password' && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl space-y-3">
+                                                    <div className="flex items-center space-x-2 text-primary">
+                                                        <ShieldCheck size={16} />
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Security Protocol</span>
+                                                    </div>
+                                                    <ul className="space-y-1.5">
+                                                        {[
+                                                            'Minimum 8 characters',
+                                                            'Include uppercase & lowercase',
+                                                            'Include at least one number',
+                                                            'Include a special character'
+                                                        ].map((req, i) => (
+                                                            <li key={i} className="flex items-center space-x-2 text-[11px] text-slate-400 font-medium">
+                                                                <div className="w-1 h-1 rounded-full bg-primary/50" />
+                                                                <span>{req}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
 
                                     {/* Institutional review alert removed */}
 
@@ -255,7 +392,7 @@ const Register = () => {
                                             disabled={isSubmitting}
                                             className="flex-1 !py-3.5 font-bold shadow-xl shadow-primary/30"
                                         >
-                                            {isSubmitting ? 'Creating account...' : 'Complete Initialization'}
+                                            {isSubmitting ? 'Creating account...' : 'Complete Registration'}
                                         </ModernButton>
                                     </div>
                                 </motion.div>

@@ -75,7 +75,8 @@ const SessionDetail = () => {
 
       const isInstructor = instId && uId && instId.toString() === uId.toString();
       const isUniversity = uniId && uId && uniId.toString() === uId.toString();
-      setIsHost(!!(isInstructor || isUniversity));
+      const isPartner = data.partner_id && uId && data.partner_id.toString() === uId.toString();
+      setIsHost(!!(isInstructor || isUniversity || isPartner));
 
       setLoading(false);
     } catch (err) {
@@ -91,7 +92,9 @@ const SessionDetail = () => {
 
   const handleLeaveMeeting = () => {
     setInMeeting(false);
-    navigate('/university/live-sessions');
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    const role = userInfo.role || 'student';
+    navigate(`/${role}/live-sessions`);
   };
 
   const handleMeetingError = (errorMessage) => {
@@ -164,7 +167,11 @@ const SessionDetail = () => {
           <h2 className="text-xl font-bold text-white mb-2">Error Loading Session</h2>
           <p className="text-white/60 mb-6">{error}</p>
           <ModernButton
-            onClick={() => navigate('/university/live-sessions')}
+            onClick={() => {
+              const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+              const role = userInfo.role || 'student';
+              navigate(`/${role}/live-sessions`);
+            }}
             variant="secondary"
           >
             <ArrowLeft size={16} />
@@ -239,7 +246,11 @@ const SessionDetail = () => {
       <div className="max-w-5xl mx-auto">
         {/* Back Button */}
         <button
-          onClick={() => navigate('/university/live-sessions')}
+          onClick={() => {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const role = userInfo.role || 'student';
+            navigate(`/${role}/live-sessions`);
+          }}
           className="group flex items-center gap-3 text-white/40 hover:text-primary mb-10 transition-all"
         >
           <div className="p-2 rounded-xl bg-white/5 border border-white/5 group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
