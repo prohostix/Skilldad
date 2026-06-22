@@ -261,9 +261,6 @@ const CourseDetail = () => {
                                 </div>
                                 
                                 <div className="p-5">
-                                    <div className="text-2xl font-bold mb-5 text-white">
-                                        ₹{Number(course.price)?.toFixed(2) || '0.00'}
-                                    </div>
                                     
 
                                     <div className="space-y-3">
