@@ -104,6 +104,7 @@ const registerStudent = async (req, res) => {
             email, 
             hashedPassword, 
             'student',
+
             req.user.id || req.user._id, 
             partnerCode?.toUpperCase(), 
             university || null,
@@ -111,14 +112,15 @@ const registerStudent = async (req, res) => {
         ]);
 
         // Support both single and multiple course enrollments
+        const { batchId } = req.body;
         const coursesToEnroll = courses && Array.isArray(courses) ? courses : (course ? [course] : []);
         
         for (const courseId of coursesToEnroll) {
             const enrollId = `enroll_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
             await query(`
-                INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
-                VALUES ($1, $2, $3, 'active', 0, NOW(), NOW())
-            `, [enrollId, userId, courseId]);
+                INSERT INTO enrollments (id, student_id, course_id, status, progress, batch_id, created_at, updated_at)
+                VALUES ($1, $2, $3, 'active', 0, $4, NOW(), NOW())
+            `, [enrollId, userId, courseId, batchId || null]);
         }
 
         // Background Notifications
@@ -160,10 +162,29 @@ const getPartnerStudents = async (req, res) => {
         const studentsRes = await query(`
             SELECT 
                 u.id as _id, u.name, u.email, u.profile, u.partner_code, u.created_at,
-                (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = u.id) as enrollments_count
+                u.is_verified,
+                CASE 
+                    WHEN u.registered_by = $1 THEN 'Directly Registered'
+                    WHEN u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1) THEN 'Discount Code'
+                    ELSE 'Course Enrolled'
+                END as connection_type,
+                json_agg(json_build_object(
+                    'course_id', e.course_id,
+                    'course_title', c.title,
+                    'batch_id', e.batch_id,
+                    'batch_name', b.name
+                )) FILTER (WHERE e.id IS NOT NULL) as enrollments
             FROM users u
-            WHERE (u.registered_by = $1 OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1))
+            LEFT JOIN enrollments e ON u.id = e.student_id
+            LEFT JOIN courses c ON e.course_id = c.id
+            LEFT JOIN batches b ON e.batch_id = b.id
+            WHERE (
+                u.registered_by = $1 
+                OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1)
+                OR c.instructor_id = $1
+            )
             AND u.role = 'student'
+            GROUP BY u.id
             ORDER BY u.created_at DESC
         `, [partnerId]);
 
@@ -194,7 +215,12 @@ const requestPayout = async (req, res) => {
     const partnerId = req.user.id || req.user._id;
 
     try {
-        if (!amount || amount <= 0) return res.status(400).json({ message: 'Invalid amount' });
+        console.log(`[requestPayout] Request from ${partnerId}:`, { amount, notes });
+
+        if (!amount || Number(amount) <= 0) {
+            console.warn(`[requestPayout] Invalid amount: ${amount}`);
+            return res.status(400).json({ message: `Invalid amount received: ${amount}` });
+        }
 
         // Calculate current withdrawable balance
         const userRes = await query('SELECT discount_rate FROM users WHERE id = $1', [partnerId]);
@@ -227,10 +253,14 @@ const requestPayout = async (req, res) => {
         }
 
         const id = `payout_${Date.now()}`;
+        console.log(`[requestPayout] Creating payout record: ${id}`);
+        
         await query(`
             INSERT INTO payouts (id, partner_id, amount, status, notes, created_at, updated_at)
             VALUES ($1, $2, $3, 'pending', $4, NOW(), NOW())
         `, [id, partnerId, amount, notes || 'Payout request from dashboard']);
+
+        console.log(`[requestPayout] Success: ${id}`);
 
         res.status(201).json({ success: true, message: 'Payout request submitted successfully' });
     } catch (error) {

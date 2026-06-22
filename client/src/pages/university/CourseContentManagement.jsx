@@ -4,6 +4,7 @@ import { BookOpen, Plus, Edit2, Trash2, Video, FileText, ArrowLeft, Save, X, Cli
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import BatchManagement from '../../components/ui/BatchManagement';
 
 const CourseContentManagement = () => {
     const { courseId } = useParams();
@@ -15,6 +16,7 @@ const CourseContentManagement = () => {
     const [showAddModule, setShowAddModule] = useState(false);
     const [showAddVideo, setShowAddVideo] = useState(null);
     const [showEditCourse, setShowEditCourse] = useState(false);
+    const [activeTab, setActiveTab] = useState('content'); // 'content' or 'batches'
 
     useEffect(() => {
         fetchCourse();
@@ -195,115 +197,136 @@ const CourseContentManagement = () => {
                     </div>
                 </div>
 
-                {/* Modules List */}
-                <div className="space-y-6">
-                    {course.modules && course.modules.length > 0 ? (
-                        course.modules.map((module, moduleIndex) => (
-                            <GlassCard key={module._id || moduleIndex} className="p-6">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white mb-2">
-                                            Module {moduleIndex + 1}: {module.title}
-                                        </h3>
-                                        {module.description && (
-                                            <p className="text-white/60 text-sm">{module.description}</p>
+                {/* Tabs */}
+                <div className="flex gap-1 p-1 bg-white/5 border border-white/10 rounded-xl mb-8 w-fit">
+                    <button
+                        onClick={() => setActiveTab('content')}
+                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'content' ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                    >
+                        Course Content
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('batches')}
+                        className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'batches' ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                    >
+                        Student Batches
+                    </button>
+                </div>
+
+                {/* Main Content Area */}
+                {activeTab === 'content' ? (
+                    /* Modules List */
+                    <div className="space-y-6">
+                        {course.modules && course.modules.length > 0 ? (
+                            course.modules.map((module, moduleIndex) => (
+                                <GlassCard key={module._id || moduleIndex} className="p-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-white mb-2">
+                                                Module {moduleIndex + 1}: {module.title}
+                                            </h3>
+                                            {module.description && (
+                                                <p className="text-white/60 text-sm">{module.description}</p>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => navigate(`/university/courses/${courseId}/modules/${module._id}/content/manage`)}
+                                                className="p-2 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg transition-colors"
+                                                title="Manage Interactive Content"
+                                            >
+                                                <ClipboardList size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => navigate(`/university/courses/${courseId}/modules/${module._id}/content/create`)}
+                                                className="p-2 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors"
+                                                title="Add Interactive Content"
+                                            >
+                                                <Plus size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => setShowAddVideo(module._id)}
+                                                className="p-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-colors"
+                                                title="Add Video"
+                                            >
+                                                <Video size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => setEditingModule(module)}
+                                                className="p-2 bg-white/5 text-white/60 hover:bg-white/10 rounded-lg transition-colors"
+                                                title="Edit Module"
+                                            >
+                                                <Edit2 size={18} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteModule(module._id)}
+                                                className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
+                                                title="Delete Module"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Videos List */}
+                                    <div className="space-y-3 mt-4">
+                                        {module.videos && module.videos.length > 0 ? (
+                                            module.videos.map((video, videoIndex) => (
+                                                <div
+                                                    key={video._id || videoIndex}
+                                                    className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                                                            <Video size={20} className="text-primary" />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="text-white font-medium">{video.title}</h4>
+                                                            {video.duration && (
+                                                                <p className="text-white/40 text-sm">{video.duration}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => setEditingVideo({ ...video, moduleId: module._id })}
+                                                            className="p-2 bg-white/5 text-white/60 hover:bg-white/10 rounded-lg transition-colors"
+                                                        >
+                                                            <Edit2 size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDeleteVideo(module._id, video._id)}
+                                                            className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-center py-8 text-white/40">
+                                                No videos added yet. Click the + button to add videos.
+                                            </div>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => navigate(`/university/courses/${courseId}/modules/${module._id}/content/manage`)}
-                                            className="p-2 bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 rounded-lg transition-colors"
-                                            title="Manage Interactive Content"
-                                        >
-                                            <ClipboardList size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => navigate(`/university/courses/${courseId}/modules/${module._id}/content/create`)}
-                                            className="p-2 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors"
-                                            title="Add Interactive Content"
-                                        >
-                                            <Plus size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => setShowAddVideo(module._id)}
-                                            className="p-2 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg transition-colors"
-                                            title="Add Video"
-                                        >
-                                            <Video size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => setEditingModule(module)}
-                                            className="p-2 bg-white/5 text-white/60 hover:bg-white/10 rounded-lg transition-colors"
-                                            title="Edit Module"
-                                        >
-                                            <Edit2 size={18} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteModule(module._id)}
-                                            className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
-                                            title="Delete Module"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Videos List */}
-                                <div className="space-y-3 mt-4">
-                                    {module.videos && module.videos.length > 0 ? (
-                                        module.videos.map((video, videoIndex) => (
-                                            <div
-                                                key={video._id || videoIndex}
-                                                className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
-                                                        <Video size={20} className="text-primary" />
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-white font-medium">{video.title}</h4>
-                                                        {video.duration && (
-                                                            <p className="text-white/40 text-sm">{video.duration}</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => setEditingVideo({ ...video, moduleId: module._id })}
-                                                        className="p-2 bg-white/5 text-white/60 hover:bg-white/10 rounded-lg transition-colors"
-                                                    >
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteVideo(module._id, video._id)}
-                                                        className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center py-8 text-white/40">
-                                            No videos added yet. Click the + button to add videos.
-                                        </div>
-                                    )}
-                                </div>
+                                </GlassCard>
+                            ))
+                        ) : (
+                            <GlassCard className="p-12 text-center">
+                                <BookOpen size={48} className="mx-auto text-white/20 mb-4" />
+                                <h3 className="text-lg font-bold text-white/70 mb-2">No Modules Yet</h3>
+                                <p className="text-white/40 text-sm mb-6">
+                                    Start building your course by adding modules and content.
+                                </p>
+                                <ModernButton onClick={() => setShowAddModule(true)}>
+                                    Add First Module
+                                </ModernButton>
                             </GlassCard>
-                        ))
-                    ) : (
-                        <GlassCard className="p-12 text-center">
-                            <BookOpen size={48} className="mx-auto text-white/20 mb-4" />
-                            <h3 className="text-lg font-bold text-white/70 mb-2">No Modules Yet</h3>
-                            <p className="text-white/40 text-sm mb-6">
-                                Start building your course by adding modules and content.
-                            </p>
-                            <ModernButton onClick={() => setShowAddModule(true)}>
-                                Add First Module
-                            </ModernButton>
-                        </GlassCard>
-                    )}
-                </div>
+                        )}
+                    </div>
+                ) : (
+                    <BatchManagement courseId={courseId} />
+                )}
             </div>
 
             {/* Add Module Modal */}

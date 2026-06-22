@@ -9,11 +9,11 @@ const questionController = require('../controllers/questionController');
 
 // @desc    Create online questions for an exam (bulk creation)
 // @route   POST /api/exams/:examId/questions
-// @access  Private (University/Admin)
+// @access  Private (University/Admin/Partner)
 router.post(
     '/exams/:examId/questions',
     protect,
-    authorize('university', 'admin'),
+    authorize('university', 'admin', 'partner'),
     questionController.createOnlineQuestions
 );
 
@@ -28,21 +28,21 @@ router.get(
 
 // @desc    Update a question
 // @route   PUT /api/questions/:questionId
-// @access  Private (University/Admin)
+// @access  Private (University/Admin/Partner)
 router.put(
     '/questions/:questionId',
     protect,
-    authorize('university', 'admin'),
+    authorize('university', 'admin', 'partner'),
     questionController.updateQuestion
 );
 
 // @desc    Delete a question
 // @route   DELETE /api/questions/:questionId
-// @access  Private (University/Admin)
+// @access  Private (University/Admin/Partner)
 router.delete(
     '/questions/:questionId',
     protect,
-    authorize('university', 'admin'),
+    authorize('university', 'admin', 'partner'),
     questionController.deleteQuestion
 );
 

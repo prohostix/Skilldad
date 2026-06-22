@@ -115,6 +115,8 @@ const UniversityPublicDetail = () => {
     const [university, setUniversity] = useState(location.state?.university || null);
     const [loadingProfile, setLoadingProfile] = useState(!location.state?.university);
     const [isUploading, setIsUploading] = useState(false);
+    const [isUploadingCover, setIsUploadingCover] = useState(false);
+
     const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
     const [isHoveringVideo, setIsHoveringVideo] = useState(false);
 
@@ -129,7 +131,10 @@ const UniversityPublicDetail = () => {
     }, [university, isHoveringVideo]);
     
     // Check if current user owns this profile
-    const isOwner = currentUser && (currentUser._id === university?._id || currentUser.role === 'admin');
+    // university._id may be undefined on first render when data comes from location.state (which uses `id`)
+    const universityOwnerId = university?._id || university?.id;
+    const isOwner = currentUser && (currentUser._id === universityOwnerId || currentUser.role === 'admin');
+
 
     useEffect(() => {
         if (university) {
@@ -241,6 +246,46 @@ const UniversityPublicDetail = () => {
         }
     };
 
+    const handleCoverUpdate = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('Cover image must be less than 5MB');
+            return;
+        }
+
+        setIsUploadingCover(true);
+        const loadingToast = toast.loading('Updating cover image...');
+
+        try {
+            const formData = new FormData();
+            formData.append('coverImage', file);
+
+            if (currentUser._id !== universityOwnerId) {
+                formData.append('targetUserId', universityOwnerId);
+            }
+
+            const { data } = await axios.post('/api/users/upload-cover-image', formData, {
+                headers: { Authorization: `Bearer ${currentUser.token}` }
+            });
+
+            if (data.success) {
+                setUniversity(prev => ({
+                    ...prev,
+                    profile: { ...(prev.profile || {}), coverImage: data.imageUrl }
+                }));
+                toast.success('Cover image updated!', { id: loadingToast });
+            }
+        } catch (error) {
+            console.error('Cover upload error:', error);
+            toast.error(error.response?.data?.message || 'Failed to update cover image', { id: loadingToast });
+        } finally {
+            setIsUploadingCover(false);
+        }
+    };
+
+
     if (loadingProfile) {
         return (
             <div className="min-h-screen bg-[#05030B] flex items-center justify-center">
@@ -314,12 +359,23 @@ const UniversityPublicDetail = () => {
                 {/* Change Cover Button (Owner only) */}
                 {isOwner && (
                     <div className="absolute top-24 right-6 z-30">
-                        <ModernButton 
+                        <input
+                            type="file"
+                            id="university-cover-upload"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleCoverUpdate}
+                            disabled={isUploadingCover}
+                        />
+                        <ModernButton
                             variant="secondary"
                             className="!px-6 !py-2.5 bg-[#05030B]/60 backdrop-blur-md border-white/10 hover:border-primary/50 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 group/cover"
-                            onClick={() => toast.error('Cover image editing is being finalized. For now, please use the Logo edit feature.')}
+                            onClick={() => document.getElementById('university-cover-upload').click()}
+                            disabled={isUploadingCover}
                         >
-                            <ImageIcon size={14} className="group-hover/cover:text-primary transition-colors" /> Change Cover
+                            <ImageIcon size={14} className="group-hover/cover:text-primary transition-colors" />
+                            {isUploadingCover ? 'Uploading...' : 'Change Cover'}
+
                         </ModernButton>
                     </div>
                 )}
@@ -563,7 +619,8 @@ const UniversityPublicDetail = () => {
                                         >
                                             <iframe
                                                 className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
-                                                src={`https://www.youtube.com/embed/${getYoutubeId(videos[currentVideoIndex])}?autoplay=0&controls=1`}
+                                                src={`https://www.youtube.com/embed/${getYoutubeId(videos[currentVideoIndex])}?autoplay=0&controls=1&modestbranding=1&rel=0&iv_load_policy=3`}
+
                                                 title={`Success Story ${currentVideoIndex + 1}`}
                                                 frameBorder="0"
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

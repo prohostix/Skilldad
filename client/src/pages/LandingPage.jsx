@@ -974,7 +974,8 @@ const LandingPage = () => {
                                 // External URL — embed in iframe (YouTube/Vimeo) or video tag
                                 activeVideo.url.includes('youtube.com') || activeVideo.url.includes('youtu.be') ? (
                                     <iframe
-                                        src={`https://www.youtube.com/embed/${activeVideo.url.split('v=')[1]?.split('&')[0] || activeVideo.url.split('/').pop()}`}
+                                        src={`https://www.youtube.com/embed/${activeVideo.url.split('v=')[1]?.split('&')[0] || activeVideo.url.split('/').pop()}?modestbranding=1&rel=0&iv_load_policy=3`}
+
                                         className="w-full h-full"
                                         allow="autoplay; fullscreen"
                                         allowFullScreen

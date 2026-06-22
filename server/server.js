@@ -165,6 +165,8 @@ app.use('/api/admin/study-abroad', require('./routes/adminStudyAbroadRoutes'));
 app.use('/api/discussions', require('./routes/discussionRoutes'));
 app.use('/api/career', require('./routes/careerRoutes'));
 app.use('/api/certificates', require('./routes/certificateRoutes'));
+app.use('/api/batches', require('./routes/batchRoutes'));
+
 app.use('/', require('./routes/seoRoutes'));
 
 
@@ -273,6 +275,43 @@ const startServer = async () => {
         }
 
         console.log('[Migration] FAQs table columns verified/updated'.green);
+        
+        // Auto-migrate: Batch Management
+        console.log('[Migration] Verifying Batch Management schema...'.yellow);
+        await query(`
+            CREATE TABLE IF NOT EXISTS batches (
+                id SERIAL PRIMARY KEY,
+                course_id VARCHAR(255) REFERENCES courses(id) ON DELETE CASCADE,
+                name VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        
+        const tablesToUpdate = ['enrollments', 'live_sessions'];
+        for (const table of tablesToUpdate) {
+            const colCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1 AND column_name = 'batch_id'", [table]);
+            if (colCheck.rows.length === 0) {
+                await query(`ALTER TABLE ${table} ADD COLUMN batch_id INTEGER REFERENCES batches(id)`);
+                console.log(`[Migration] Added batch_id to ${table}`.green);
+            }
+        }
+
+        // Special handling for exams: batch_ids (array)
+        const examColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'exams' AND column_name = 'batch_ids'");
+        if (examColCheck.rows.length === 0) {
+            await query("ALTER TABLE exams ADD COLUMN batch_ids INTEGER[] DEFAULT NULL");
+            console.log("[Migration] Added batch_ids (array) to exams".green);
+        }
+
+        // Ensure university_id exists in enrollments for cohort scoping
+        const uniColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'enrollments' AND column_name = 'university_id'");
+        if (uniColCheck.rows.length === 0) {
+            await query('ALTER TABLE enrollments ADD COLUMN university_id VARCHAR(255) REFERENCES users(id)');
+            console.log('[Migration] Added university_id to enrollments'.green);
+        }
+        
+        console.log('[Migration] Batch Management schema verified'.green);
+
 
         // Auto-migrate: ensure live_sessions table has partner_id
         const sessColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['live_sessions']);

@@ -250,12 +250,16 @@ const B2BManagement = () => {
     const handleOnboardEntity = async () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.post('/api/users', newEntity, config);
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            const { data } = await axios.post('/api/admin/users/invite', newEntity, config);
             showToast(`Successfully onboarded ${newEntity.name}`, 'success');
             setOpenOnboard(false);
             setNewEntity({ name: '', email: '', password: '', phone: '', role: 'partner', discountRate: 0 });
-            // Immediately refresh the partners list
             await fetchPartners();
         } catch (error) {
             showToast(`Failed to onboard entity: ${error.response?.data?.message || error.message}`, 'error');

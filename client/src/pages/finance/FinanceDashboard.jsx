@@ -72,6 +72,16 @@ const FinanceDashboard = () => {
     const [payoutReviewNotes, setPayoutReviewNotes] = useState('');
     const [payoutProofUrl, setPayoutProofUrl] = useState('');
     const [uploadingProof, setUploadingProof] = useState(false);
+    const [proofModalUrl, setProofModalUrl] = useState(null); // for viewing attachment proof images
+
+    // Helper to build correct image URL from DB path (handles with/without leading slash)
+    const buildProofUrl = (rawUrl) => {
+        if (!rawUrl) return null;
+        if (rawUrl.startsWith('http')) return rawUrl;
+        // Normalize: ensure single leading slash, then prepend backend origin
+        const normalized = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
+        return `http://localhost:3030${normalized}`;
+    };
 
     // Set active tab based on path
     useEffect(() => {
@@ -938,13 +948,17 @@ const FinanceDashboard = () => {
                                                     {new Date(payout.payoutDate).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
-                                                    <button
-                                                        onClick={() => window.open(payout.screenshotUrl ? `/${payout.screenshotUrl}` : 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?q=80&w=1000&auto=format&fit=crop', '_blank')}
-                                                        className="flex items-center space-x-1 text-primary hover:text-primary-light transition-colors ml-auto"
-                                                    >
-                                                        <Eye size={16} />
-                                                        <span className="text-xs">View Proof</span>
-                                                    </button>
+                                                    {payout.screenshotUrl ? (
+                                                        <button
+                                                            onClick={() => setProofModalUrl(buildProofUrl(payout.screenshotUrl))}
+                                                            className="flex items-center space-x-1 text-primary hover:text-primary-light transition-colors ml-auto"
+                                                        >
+                                                            <Eye size={16} />
+                                                            <span className="text-xs">View Proof</span>
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-600 italic">No attachment</span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -1106,6 +1120,69 @@ const FinanceDashboard = () => {
                                     Confirm {selectedPayout._action === 'approved' ? 'Approval' : 'Rejection'}
                                 </ModernButton>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Proof Image Preview Modal (Payout Attachment) */}
+            {proofModalUrl && (
+                <div
+                    className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+                    onClick={() => setProofModalUrl(null)}
+                >
+                    <div
+                        className="relative max-w-3xl w-full bg-slate-900 rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                            <h3 className="text-base font-bold text-white flex items-center">
+                                <Image size={18} className="mr-2 text-primary" />
+                                Payment Proof / Screenshot
+                            </h3>
+                            <button
+                                onClick={() => setProofModalUrl(null)}
+                                className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                            >
+                                <XCircle size={20} />
+                            </button>
+                        </div>
+                        <div className="p-4 bg-black/30">
+                            <img
+                                src={proofModalUrl}
+                                alt="Payment proof"
+                                className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                }}
+                            />
+                            <div
+                                style={{ display: 'none' }}
+                                className="w-full h-40 flex-col items-center justify-center text-gray-400 rounded-lg bg-white/5 border border-white/10"
+                            >
+                                <AlertCircle size={32} className="mb-2 text-red-400" />
+                                <p className="text-sm">Image could not be loaded</p>
+                                <a
+                                    href={proofModalUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs text-primary mt-1 hover:underline"
+                                >
+                                    Open directly
+                                </a>
+                            </div>
+                        </div>
+                        <div className="px-5 py-3 border-t border-white/10 flex justify-between items-center">
+                            <span className="text-xs text-gray-500 truncate max-w-[300px]">{proofModalUrl}</span>
+                            <a
+                                href={proofModalUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex items-center text-xs text-primary hover:text-primary-light transition-colors"
+                            >
+                                <Eye size={14} className="mr-1" /> Open Full Size
+                            </a>
                         </div>
                     </div>
                 </div>

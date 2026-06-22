@@ -67,8 +67,10 @@ const ExamManagement = () => {
         mandatedSlotId: '',
         linkedPaper: '',
         answerKey: '',
-        examType: 'pdf-based'
+        examType: 'pdf-based',
+        batchIds: []
     });
+    const [availableBatches, setAvailableBatches] = useState([]);
 
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [uploadData, setUploadData] = useState({
@@ -317,7 +319,8 @@ const ExamManagement = () => {
                 mandatedSlotId: '',
                 linkedPaper: '',
                 answerKey: '',
-                examType: 'pdf-based'
+                examType: 'pdf-based',
+                batchIds: []
             });
             fetchData();
         } catch (err) {
@@ -873,12 +876,55 @@ const ExamManagement = () => {
                                                         required
                                                         className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white text-xs"
                                                         value={examData.course}
-                                                        onChange={(e) => setExamData({ ...examData, course: e.target.value })}
+                                                        onChange={async (e) => {
+                                                            const courseId = e.target.value;
+                                                            setExamData({ ...examData, course: courseId, batchIds: [] });
+                                                            if (courseId) {
+                                                                try {
+                                                                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                                                                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                                                                    const { data } = await axios.get(`/api/batches/course/${courseId}`, config);
+                                                                    setAvailableBatches(data);
+                                                                } catch (err) {
+                                                                    console.error('Error fetching batches:', err);
+                                                                    setAvailableBatches([]);
+                                                                }
+                                                            } else {
+                                                                setAvailableBatches([]);
+                                                            }
+                                                        }}
+
                                                     >
                                                         <option value="">Select Course</option>
                                                         {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
                                                     </select>
                                                 </div>
+                                                {examData.course && availableBatches.length > 0 && (
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Target Batches (Optional - Leave empty for all)</label>
+                                                        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-3 bg-slate-900 border border-white/10 rounded-2xl custom-scrollbar">
+                                                            {availableBatches.map((batch) => (
+                                                                <label key={batch.id} className="flex items-center space-x-2 cursor-pointer group p-1 hover:bg-white/5 rounded transition-colors">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-500/50"
+                                                                        checked={examData.batchIds.includes(batch.id)}
+                                                                        onChange={(e) => {
+                                                                            const newBatchIds = e.target.checked
+                                                                                ? [...examData.batchIds, batch.id]
+                                                                                : examData.batchIds.filter(id => id !== batch.id);
+                                                                            setExamData({ ...examData, batchIds: newBatchIds });
+                                                                        }}
+                                                                    />
+                                                                    <span className="text-xs text-white/70 group-hover:text-white transition-colors">
+                                                                        {batch.name}
+                                                                    </span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 <div>
                                                     <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Attached Material (Optional)</label>
                                                     <select

@@ -62,7 +62,7 @@ const saveWhiteboardSnapshot = async (req, res) => {
     }
 
     // Relative path for DB storage
-    const relPath = `uploads/whiteboards/${filename}`;
+    const relPath = `/uploads/whiteboards/${filename}`;
 
     // Insert DB record
     const insertResult = await query(
@@ -76,7 +76,7 @@ const saveWhiteboardSnapshot = async (req, res) => {
 
     return res.status(201).json({
       snapshotId,
-      url:       `/${relPath}`,
+      url:       relPath,
       createdAt,
     });
 

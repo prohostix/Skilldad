@@ -59,7 +59,7 @@ const ExamResult = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
         // Header - Branding
-        doc.setFillColor(79, 70, 229); // Primary color
+        doc.setFillColor(124, 58, 237); // Primary color
         doc.rect(0, 0, 210, 40, 'F');
         
         doc.setTextColor(255, 255, 255);
@@ -92,7 +92,7 @@ const ExamResult = () => {
         doc.setFillColor(248, 250, 252);
         doc.roundedRect(140, 50, 55, 45, 3, 3, 'FD');
         
-        doc.setTextColor(79, 70, 229);
+        doc.setTextColor(124, 58, 237);
         doc.setFontSize(22);
         doc.setFont('helvetica', 'bold');
         doc.text(`${result.obtainedMarks}/${result.totalMarks}`, 150, 65);
@@ -139,7 +139,7 @@ const ExamResult = () => {
             head: [['#', 'Question', 'Your Answer', 'Status', 'Marks']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255], fontStyle: 'bold' },
+            headStyles: { fillColor: [124, 58, 237], textColor: [255, 255, 255], fontStyle: 'bold' },
             styles: { fontSize: 9, cellPadding: 3 },
             columnStyles: {
                 0: { cellWidth: 10 },

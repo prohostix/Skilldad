@@ -59,6 +59,115 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
+// @desc    Get all documents (Admin)
+// @route   GET /api/documents/admin/all
+// @access  Private (Admin)
+router.get('/admin/all', protect, authorize('admin'), async (req, res) => {
+    try {
+        const { status, type, studentId } = req.query;
+        let queryStr = `
+            SELECT d.*, d.id as _id, u.name as student_name, u.email as student_email,
+                   uni.name as university_name
+            FROM documents d
+            LEFT JOIN users u ON d.student_id = u.id
+            LEFT JOIN users uni ON d.university_id = uni.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (status) {
+            params.push(status);
+            queryStr += ` AND d.status = $${params.length}`;
+        }
+        if (type) {
+            params.push(type);
+            queryStr += ` AND d.type = $${params.length}`;
+        }
+        if (studentId) {
+            params.push(studentId);
+            queryStr += ` AND d.student_id = $${params.length}`;
+        }
+
+        queryStr += ' ORDER BY d.created_at DESC';
+        const result = await query(queryStr, params);
+
+        const docs = result.rows;
+        const processedDocs = docs.filter(doc => {
+            if (doc.status === 'pending') {
+                const isFulfilled = docs.some(d => 
+                    d.student_id === doc.student_id &&
+                    d.title === doc.title && 
+                    (d.status === 'submitted' || d.status === 'approved' || d.status === 'rejected')
+                );
+                return !isFulfilled;
+            }
+            return true;
+        });
+
+        res.json(processedDocs);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @desc    Get university documents
+// @route   GET /api/documents/university/all
+// @access  Private (University)
+router.get('/university/all', protect, authorize('university'), async (req, res) => {
+    try {
+        const uniId = req.user.id || req.user._id;
+        const { status } = req.query;
+        
+        let queryStr = `
+            SELECT d.*, d.id as _id, u.name as student_name, u.email as student_email
+            FROM documents d
+            LEFT JOIN users u ON d.student_id = u.id
+            WHERE (
+                d.university_id = $1 OR 
+                d.uploaded_by_id = $1 OR
+                d.student_id IN (
+                    SELECT id FROM users WHERE university_id = $1
+                    UNION
+                    SELECT student_id FROM enrollments e 
+                    JOIN courses c ON e.course_id = c.id 
+                    WHERE c.instructor_id = $1
+                )
+            )
+        `;
+        const params = [uniId];
+
+        if (status) {
+            params.push(status);
+            queryStr += ` AND d.status = $2`;
+        }
+
+        queryStr += ' ORDER BY d.created_at DESC';
+        const result = await query(queryStr, params);
+
+        const docs = result.rows;
+        const processedDocs = docs.filter(doc => {
+            if (doc.status === 'pending') {
+                const isFulfilled = docs.some(d => 
+                    d.student_id === doc.student_id &&
+                    d.title === doc.title && 
+                    (d.status === 'submitted' || d.status === 'approved' || d.status === 'rejected')
+                );
+                return !isFulfilled;
+            }
+            return true;
+        });
+
+        res.json(processedDocs);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// @desc    Review document
+// @route   PUT /api/documents/:id/review
+// @access  Private (Admin/University)
+// Unified Review Route moved below with partner support
+
 // @desc    Get all documents for a student
 // @route   GET /api/documents/my-documents
 // @access  Private (Student)
@@ -108,7 +217,38 @@ router.get('/', protect, authorize('admin', 'university', 'partner'), async (req
         if (req.user.role === 'university') {
             const uId = req.user.id || req.user._id;
             params.push(uId);
-            whereClauses.push(`(d.university_id = $${params.length} OR d.uploaded_by_id = $${params.length} OR d.reviewed_by_id = $${params.length})`);
+            const pIdx = params.length;
+            whereClauses.push(`(
+                d.university_id = $${pIdx} OR 
+                d.uploaded_by_id = $${pIdx} OR 
+                d.reviewed_by_id = $${pIdx} OR
+                d.student_id IN (
+                    SELECT id FROM users WHERE university_id = $${pIdx}
+                    UNION
+                    SELECT student_id FROM enrollments e 
+                    JOIN courses c ON e.course_id = c.id 
+                    WHERE c.instructor_id = $${pIdx}
+                )
+            )`);
+        }
+
+        // Restriction for partner role - show docs for students linked to their codes or enrolled in their courses
+        if (req.user.role === 'partner') {
+            const pId = req.user.id || req.user._id;
+            params.push(pId);
+            const pIdx = params.length;
+            whereClauses.push(`(
+                d.uploaded_by_id = $${pIdx} OR
+                d.student_id IN (
+                    SELECT id FROM users WHERE registered_by = $${pIdx} OR partner_code IN (
+                        SELECT code FROM discounts WHERE partner_id = $${pIdx}
+                    )
+                    UNION
+                    SELECT student_id FROM enrollments e 
+                    JOIN courses c ON e.course_id = c.id 
+                    WHERE c.instructor_id = $${pIdx}
+                )
+            )`);
         }
 
         // Restriction for partner role - show docs they uploaded
@@ -134,7 +274,20 @@ router.get('/', protect, authorize('admin', 'university', 'partner'), async (req
             ORDER BY d.created_at DESC
         `, params);
 
-        res.json(result.rows);
+        const docs = result.rows;
+        const processedDocs = docs.filter(doc => {
+            if (doc.status === 'pending') {
+                const isFulfilled = docs.some(d => 
+                    d.student_id === doc.student_id &&
+                    d.title === doc.title && 
+                    (d.status === 'submitted' || d.status === 'approved' || d.status === 'rejected')
+                );
+                return !isFulfilled;
+            }
+            return true;
+        });
+
+        res.json(processedDocs);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -190,7 +343,7 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
         const { title, description, type, course, student, university_id } = req.body;
 
         const fileName = req.file.originalname;
-        const fileUrl = `uploads/documents/${req.file.filename}`;
+        const fileUrl = `/uploads/documents/${req.file.filename}`;
         const fileSize = req.file.size;
         const format = path.extname(fileName).substring(1).toUpperCase();
         const newId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
@@ -229,6 +382,9 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
     }
 });
 
+// @desc    Review document
+// @route   PUT /api/documents/:id/review
+
 // @access  Private (Admin/University/Partner)
 router.put('/:id/review', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
     try {
@@ -239,16 +395,59 @@ router.put('/:id/review', protect, authorize('admin', 'university', 'partner'), 
             return res.status(400).json({ message: 'Invalid status' });
         }
 
+        // Security Check: Verify Relationship
+        if (req.user.role !== 'admin') {
+            const docCheck = await query(`
+                SELECT d.university_id, d.uploaded_by_id, d.student_id 
+                FROM documents d WHERE d.id = $1
+            `, [req.params.id]);
+
+            if (docCheck.rows.length === 0) {
+                return res.status(404).json({ message: 'Document not found' });
+            }
+
+            const doc = docCheck.rows[0];
+            let hasAccess = false;
+
+            if (req.user.role === 'university') {
+                // Check if university is direct owner or has student relationship
+                if (doc.university_id === userId || doc.uploaded_by_id === userId) {
+                    hasAccess = true;
+                } else {
+                    const relCheck = await query(`
+                        SELECT id FROM users WHERE id = $1 AND university_id = $2
+                        UNION
+                        SELECT student_id FROM enrollments e 
+                        JOIN courses c ON e.course_id = c.id 
+                        WHERE student_id = $1 AND c.instructor_id = $2
+                    `, [doc.student_id, userId]);
+                    if (relCheck.rows.length > 0) hasAccess = true;
+                }
+            } else if (req.user.role === 'partner') {
+                // Check if partner is direct owner or has student relationship
+                if (doc.uploaded_by_id === userId) {
+                    hasAccess = true;
+                } else {
+                    const relCheck = await query(`
+                        SELECT id FROM users WHERE id = $1 AND partner_code IN (
+                            SELECT code FROM discounts WHERE partner_id = $2
+                        )
+                    `, [doc.student_id, userId]);
+                    if (relCheck.rows.length > 0) hasAccess = true;
+                }
+            }
+
+            if (!hasAccess) {
+                return res.status(403).json({ message: 'Unauthorized to review this document' });
+            }
+        }
+
         const result = await query(`
             UPDATE documents 
             SET status = $1, rejection_reason = $2, reviewed_by_id = $3, reviewed_at = NOW(), updated_at = NOW()
             WHERE id = $4
             RETURNING *, id as _id
         `, [status, rejectionReason || null, userId, req.params.id]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'Document not found' });
-        }
 
         res.json(result.rows[0]);
     } catch (error) {

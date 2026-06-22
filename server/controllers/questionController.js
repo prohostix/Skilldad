@@ -24,13 +24,14 @@ const createOnlineQuestions = async (req, res) => {
             return res.status(404).json({ message: 'Exam not found' });
         }
 
-        // Check authorization - user must be the exam creator or admin
+        // Check authorization - admin, partner, or the exam creator/university
         const userId = req.user.id || req.user._id;
-        if (exam.university_id?.toString() !== userId.toString() && 
-            exam.created_by_id?.toString() !== userId.toString() &&
-            req.user.role?.toLowerCase() !== 'admin') {
-            return res.status(403).json({ 
-                message: 'Not authorized to add questions to this exam' 
+        const role = req.user.role?.toLowerCase();
+        if (role !== 'admin' && role !== 'partner' &&
+            exam.university_id?.toString() !== userId.toString() &&
+            exam.created_by_id?.toString() !== userId.toString()) {
+            return res.status(403).json({
+                message: 'Not authorized to add questions to this exam'
             });
         }
 

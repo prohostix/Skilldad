@@ -112,6 +112,9 @@ const ServicesManagement = lazy(() => import('./pages/admin/ServicesManagement')
 const StudyAbroadManagement = lazy(() => import('./pages/admin/StudyAbroadManagement'));
 const CareerManager = lazy(() => import('./pages/admin/CareerManager'));
 const CertificateManagement = lazy(() => import('./pages/admin/CertificateManagement'));
+const DocumentReview = lazy(() => import('./pages/admin/DocumentReview'));
+const UniversityDocumentReview = lazy(() => import('./pages/university/UniversityDocumentReview'));
+
 
 
 // Finance Pages
@@ -208,6 +211,8 @@ function App() {
                     <Route path="exams" element={<ExamManagement />} />
                     <Route path="exams/:examId/questions" element={<ExamQuestionManager />} />
                     <Route path="certificates" element={<UniversityDashboard />} />
+                    <Route path="student-documents" element={<UniversityDocumentReview />} />
+
                     <Route path="analytics" element={<UniversityDashboard />} />
                     <Route path="support" element={<Support />} />
                     <Route path="settings" element={<Settings />} />
@@ -263,6 +268,8 @@ function App() {
                     <Route path="services" element={<ServicesManagement />} />
                     <Route path="study-abroad" element={<StudyAbroadManagement />} />
                     <Route path="certificates" element={<CertificateManagement />} />
+                    <Route path="document-review" element={<DocumentReview />} />
+
                     <Route path="settings" element={<Settings />} />
 
                   </Route>

@@ -27,15 +27,17 @@ const getStudentExams = asyncHandler(async (req, res) => {
     return res.json({ success: true, data: [] });
   }
 
-  // 2. Fetch exams for these courses from PG
+  // 2. Fetch exams for these courses from PG, filtered by batch
   const examsRes = await query(`
       SELECT e.*, c.title as course_title, u.name as university_name
       FROM exams e
-      JOIN courses c ON e.course_id = c.id
+      JOIN enrollments en ON e.course_id = en.course_id
+      LEFT JOIN courses c ON e.course_id = c.id
       LEFT JOIN users u ON e.university_id = u.id
-      WHERE e.course_id = ANY($1)
+      WHERE en.student_id = $1 
+      AND (e.batch_ids IS NULL OR CARDINALITY(e.batch_ids) = 0 OR en.batch_id = ANY(e.batch_ids))
       ORDER BY e.created_at DESC
-  `, [courseIds]);
+  `, [studentId]);
   const exams = examsRes.rows;
 
   console.log(`[Exams] Exams found for courses: ${exams.length}`);
@@ -153,6 +155,12 @@ const startExam = asyncHandler(async (req, res) => {
     options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options
   }));
 
+  if (questions.length === 0 && exam.exam_type !== 'pdf-based') {
+    res.status(400);
+    throw new Error('This exam has no questions yet. Please contact your instructor.');
+  }
+
+
   res.json({
     success: true,
     submission: { ...submission, _id: submission.id },
@@ -223,7 +231,7 @@ const getExam = asyncHandler(async (req, res) => {
   const examRes = await query(`
     SELECT e.*, c.title as course_title, u.name as university_name
     FROM exams e
-    JOIN courses c ON e.course_id = c.id
+    LEFT JOIN courses c ON e.course_id = c.id
     LEFT JOIN users u ON e.university_id = u.id
     WHERE e.id = $1
   `, [id]);
@@ -355,7 +363,16 @@ const bulkUploadQuestions = asyncHandler(async (req, res) => {
     `, [q.id, q.exam_id, q.question_text, q.question_type, q.options, q.marks, q.order, q.negative_marks]);
   }
 
-  res.status(201).json({ success: true, message: `${questions.length} questions uploaded successfully` });
+  // Update exam type to online-mcq and recalculate total marks
+  const totalMarksRes = await query('SELECT COALESCE(SUM(marks), 0) as total FROM questions WHERE exam_id = $1', [examId]);
+  const totalMarks = parseFloat(totalMarksRes.rows[0].total) || 0;
+  await query(
+    "UPDATE exams SET exam_type = 'online-mcq', total_marks = $1 WHERE id = $2",
+    [totalMarks, examId]
+  );
+
+  res.status(201).json({ success: true, message: `${questions.length} questions uploaded successfully`, totalMarks });
+
 });
 
 /**

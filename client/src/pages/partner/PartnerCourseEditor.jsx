@@ -12,6 +12,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import BatchManagement from '../../components/ui/BatchManagement';
 
 const PartnerCourseEditor = () => {
     const { id } = useParams();
@@ -35,6 +36,7 @@ const PartnerCourseEditor = () => {
     const [expandedModules, setExpandedModules] = useState({});
     const [lessonMode, setLessonMode] = useState('link'); // 'link' | 'video' | 'document'
     const [selectedDocFile, setSelectedDocFile] = useState(null);
+    const [activeTab, setActiveTab] = useState('curriculum'); // 'curriculum' or 'batches'
 
     // Quiz editor state
     const [openQuizEditor, setOpenQuizEditor] = useState(false);
@@ -432,135 +434,155 @@ const PartnerCourseEditor = () => {
                     </GlassCard>
                 </div>
 
-                {/* Main: Curriculum Builder */}
-                <div className="lg:col-span-2">
-                    <GlassCard className="p-1 overflow-hidden h-fit">
-                        <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                    <Layout size={20} className="text-primary" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-white text-lg">Curriculum Builder</h3>
-                                    <p className="text-xs text-white/40">Manage sections and learning materials</p>
-                                </div>
-                            </div>
-                            <ModernButton 
-                                variant="secondary" 
-                                className="!py-2 !px-4 h-auto text-xs border border-white/10 hover:bg-white/5" 
-                                onClick={() => setOpenAddModule(true)}
-                            >
-                                <Plus size={16} className="mr-1.5" /> ADD SECTION
-                            </ModernButton>
-                        </div>
+                {/* Main Content Area */}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Tabs */}
+                    <div className="flex gap-1 p-1 bg-white/5 border border-white/10 rounded-xl w-fit">
+                        <button
+                            onClick={() => setActiveTab('curriculum')}
+                            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'curriculum' ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                        >
+                            Curriculum Builder
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('batches')}
+                            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'batches' ? 'bg-primary text-black shadow-lg shadow-primary/20' : 'text-white/60 hover:text-white hover:bg-white/5'}`}
+                        >
+                            Student Batches
+                        </button>
+                    </div>
 
-                        <div className="p-6 space-y-4">
-                            {course.modules?.length === 0 ? (
-                                <div className="text-center py-20 px-4 bg-white/[0.02] rounded-3xl border-2 border-dashed border-white/5">
-                                    <Play size={48} className="text-white/10 mx-auto mb-4" />
-                                    <h4 className="text-white/60 font-bold mb-2">Build Your Curriculum</h4>
-                                    <p className="text-white/30 text-xs mb-6 max-w-xs mx-auto">Create sections and add your instructional videos or documents to build the course path.</p>
-                                    <ModernButton onClick={() => setOpenAddModule(true)} size="sm" variant="secondary" className="border border-white/10">
-                                        Start with First Section
-                                    </ModernButton>
-                                </div>
-                            ) : course.modules?.map((mod, idx) => (
-                                <div key={mod._id} className="overflow-hidden bg-white/5 rounded-2xl border border-white/10 group">
-                                    <div 
-                                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all"
-                                        onClick={() => toggleModule(mod._id)}
-                                    >
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className="w-8 h-8 rounded-lg bg-black text-xs font-black text-white/50 flex items-center justify-center">
-                                                {(idx + 1).toString().padStart(2, '0')}
-                                            </div>
-                                            <h4 className="text-sm font-bold text-white truncate">{mod.title}</h4>
-                                        </div>
-                                <div className="flex items-center gap-4 shrink-0">
-                                            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest leading-none">{mod.videos?.length || 0} Lessons</span>
-                                            {mod.quiz?.questions?.length > 0 && (
-                                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                                                    ✓ {mod.quiz.questions.length}Q Quiz
-                                                </span>
-                                            )}
-                                            <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button 
-                                                    className="p-1.5 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all mr-1"
-                                                    onClick={(e) => { e.stopPropagation(); handleDeleteModule(mod._id); }}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                                <div className="text-white/40">
-                                                    {expandedModules[mod._id] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                                                </div>
-                                            </div>
-                                        </div>
+                    {activeTab === 'curriculum' ? (
+                        <GlassCard className="p-1 overflow-hidden h-fit">
+                            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                        <Layout size={20} className="text-primary" />
                                     </div>
-
-                                    {expandedModules[mod._id] && (
-                                        <div className="px-10 pb-4 space-y-1.5 border-t border-white/5 pt-4 bg-black/20 animate-in slide-in-from-top-4 duration-300">
-                                            {mod.videos?.map((vid, vidx) => (
-                                                <div key={vid._id} className="space-y-2">
-                                                    <div 
-                                                        className="p-3 bg-white/5 rounded-xl border border-transparent hover:border-white/10 flex items-center justify-between transition-all group/item"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <Video size={16} className="text-white/30 group-hover/item:text-primary transition-colors" />
-                                                            <span className="text-xs text-white/60 group-hover/item:text-white font-medium">{vid.title}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <label className="p-1.5 text-white/10 hover:text-primary-light hover:bg-white/5 rounded-lg transition-all cursor-pointer" title="Upload Attachment">
-                                                                <Upload size={14} />
-                                                                <input type="file" className="hidden" onChange={(e) => handleLessonFileUpload(mod._id, vid._id, e)} />
-                                                            </label>
-                                                            <button 
-                                                                className="p-1.5 text-white/10 group-hover/item:text-red-500/50 hover:!text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                                                                onClick={() => handleDeleteVideo(mod._id, vid._id)}
-                                                            >
-                                                                <Trash2 size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {/* Attachments List */}
-                                                    {vid.attachments?.length > 0 && (
-                                                        <div className="ml-8 space-y-1">
-                                                            {vid.attachments.map(file => (
-                                                                <div key={file._id} className="flex items-center justify-between p-2 bg-white/[0.02] border border-white/5 rounded-lg group/file">
-                                                                    <div className="flex items-center gap-2 overflow-hidden">
-                                                                        <FileText size={12} className="text-white/20" />
-                                                                        <span className="text-[10px] text-white/40 truncate max-w-[150px]">{file.name}</span>
-                                                                    </div>
-                                                                    <button 
-                                                                        className="p-1 text-white/10 hover:text-red-500 opacity-0 group-file/file:opacity-100 transition-all"
-                                                                        onClick={() => handleDeleteFile(mod._id, vid._id, file._id)}
-                                                                    >
-                                                                        <X size={10} />
-                                                                    </button>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                            <button 
-                                                className="w-full p-3 border-2 border-dashed border-white/5 rounded-xl text-[10px] font-black text-white/30 uppercase tracking-widest hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all flex items-center justify-center gap-2"
-                                                onClick={() => { setActiveModuleId(mod._id); setOpenAddVideo(true); }}
-                                            >
-                                                <Plus size={14} /> Add Lesson to Section
-                                            </button>
-                                            <button
-                                                className="w-full p-3 border-2 border-dashed border-white/5 rounded-xl text-[10px] font-black text-white/30 uppercase tracking-widest hover:border-emerald-500/20 hover:bg-emerald-500/5 hover:text-emerald-400 transition-all flex items-center justify-center gap-2"
-                                                onClick={() => handleOpenQuizEditor(mod)}
-                                            >
-                                                <HelpCircle size={14} /> {mod.quiz?.questions?.length ? `Edit Quiz (${mod.quiz.questions.length} Q)` : 'Add Quiz Exercise'}
-                                            </button>
-                                        </div>
-                                    )}
+                                    <div>
+                                        <h3 className="font-bold text-white text-lg">Curriculum Builder</h3>
+                                        <p className="text-xs text-white/40">Manage sections and learning materials</p>
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    </GlassCard>
+                                <ModernButton 
+                                    variant="secondary" 
+                                    className="!py-2 !px-4 h-auto text-xs border border-white/10 hover:bg-white/5" 
+                                    onClick={() => setOpenAddModule(true)}
+                                >
+                                    <Plus size={16} className="mr-1.5" /> ADD SECTION
+                                </ModernButton>
+                            </div>
+
+                            <div className="p-6 space-y-4">
+                                {course.modules?.length === 0 ? (
+                                    <div className="text-center py-20 px-4 bg-white/[0.02] rounded-3xl border-2 border-dashed border-white/5">
+                                        <Play size={48} className="text-white/10 mx-auto mb-4" />
+                                        <h4 className="text-white/60 font-bold mb-2">Build Your Curriculum</h4>
+                                        <p className="text-white/30 text-xs mb-6 max-w-xs mx-auto">Create sections and add your instructional videos or documents to build the course path.</p>
+                                        <ModernButton onClick={() => setOpenAddModule(true)} size="sm" variant="secondary" className="border border-white/10">
+                                            Start with First Section
+                                        </ModernButton>
+                                    </div>
+                                ) : course.modules?.map((mod, idx) => (
+                                    <div key={mod._id} className="overflow-hidden bg-white/5 rounded-2xl border border-white/10 group">
+                                        <div 
+                                            className="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-all"
+                                            onClick={() => toggleModule(mod._id)}
+                                        >
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className="w-8 h-8 rounded-lg bg-black text-xs font-black text-white/50 flex items-center justify-center">
+                                                    {(idx + 1).toString().padStart(2, '0')}
+                                                </div>
+                                                <h4 className="text-sm font-bold text-white truncate">{mod.title}</h4>
+                                            </div>
+                                    <div className="flex items-center gap-4 shrink-0">
+                                                <span className="text-[10px] font-black text-white/20 uppercase tracking-widest leading-none">{mod.videos?.length || 0} Lessons</span>
+                                                {mod.quiz?.questions?.length > 0 && (
+                                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                                                        ✓ {mod.quiz.questions.length}Q Quiz
+                                                    </span>
+                                                )}
+                                                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button 
+                                                        className="p-1.5 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all mr-1"
+                                                        onClick={(e) => { e.stopPropagation(); handleDeleteModule(mod._id); }}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                    <div className="text-white/40">
+                                                        {expandedModules[mod._id] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {expandedModules[mod._id] && (
+                                            <div className="px-10 pb-4 space-y-1.5 border-t border-white/5 pt-4 bg-black/20 animate-in slide-in-from-top-4 duration-300">
+                                                {mod.videos?.map((vid, vidx) => (
+                                                    <div key={vid._id} className="space-y-2">
+                                                        <div 
+                                                            className="p-3 bg-white/5 rounded-xl border border-transparent hover:border-white/10 flex items-center justify-between transition-all group/item"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <Video size={16} className="text-white/30 group-hover/item:text-primary transition-colors" />
+                                                                <span className="text-xs text-white/60 group-hover/item:text-white font-medium">{vid.title}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <label className="p-1.5 text-white/10 hover:text-primary-light hover:bg-white/5 rounded-lg transition-all cursor-pointer" title="Upload Attachment">
+                                                                    <Upload size={14} />
+                                                                    <input type="file" className="hidden" onChange={(e) => handleLessonFileUpload(mod._id, vid._id, e)} />
+                                                                </label>
+                                                                <button 
+                                                                    className="p-1.5 text-white/10 group-hover/item:text-red-500/50 hover:!text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                    onClick={() => handleDeleteVideo(mod._id, vid._id)}
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Attachments List */}
+                                                        {vid.attachments?.length > 0 && (
+                                                            <div className="ml-8 space-y-1">
+                                                                {vid.attachments.map(file => (
+                                                                    <div key={file._id} className="flex items-center justify-between p-2 bg-white/[0.02] border border-white/5 rounded-lg group/file">
+                                                                        <div className="flex items-center gap-2 overflow-hidden">
+                                                                            <FileText size={12} className="text-white/20" />
+                                                                            <span className="text-[10px] text-white/40 truncate max-w-[150px]">{file.name}</span>
+                                                                        </div>
+                                                                        <button 
+                                                                            className="p-1 text-white/10 hover:text-red-500 opacity-0 group-file/file:opacity-100 transition-all"
+                                                                            onClick={() => handleDeleteFile(mod._id, vid._id, file._id)}
+                                                                        >
+                                                                            <X size={10} />
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                                <button 
+                                                    className="w-full p-3 border-2 border-dashed border-white/5 rounded-xl text-[10px] font-black text-white/30 uppercase tracking-widest hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all flex items-center justify-center gap-2"
+                                                    onClick={() => { setActiveModuleId(mod._id); setOpenAddVideo(true); }}
+                                                >
+                                                    <Plus size={14} /> Add Lesson to Section
+                                                </button>
+                                                <button
+                                                    className="w-full p-3 border-2 border-dashed border-white/5 rounded-xl text-[10px] font-black text-white/30 uppercase tracking-widest hover:border-emerald-500/20 hover:bg-emerald-500/5 hover:text-emerald-400 transition-all flex items-center justify-center gap-2"
+                                                    onClick={() => handleOpenQuizEditor(mod)}
+                                                >
+                                                    <HelpCircle size={14} /> {mod.quiz?.questions?.length ? `Edit Quiz (${mod.quiz.questions.length} Q)` : 'Add Quiz Exercise'}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </GlassCard>
+                    ) : (
+                        <BatchManagement courseId={id} />
+                    )}
                 </div>
             </div>
 

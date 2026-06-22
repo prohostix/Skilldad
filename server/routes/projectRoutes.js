@@ -51,6 +51,12 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
                 p_def->>'title' as title,
                 p_def->>'description' as description,
                 p_def->>'deadline' as deadline,
+                p_def->>'points' as points,
+                p_def->>'difficulty' as difficulty,
+                p_def->'requirements' as requirements,
+                p_def->>'submissionGuidelines' as "submissionGuidelines",
+                p_def->>'maxFileSize' as "maxFileSize",
+                p_def->'allowedFormats' as "allowedFormats",
                 p_def->>'universityId' as "universityId",
                 u.name as "instructorName",
                 u.email as "instructorEmail"
@@ -82,6 +88,13 @@ router.get('/course/:courseId', protect, async (req, res) => {
                 p_def->>'title' as title,
                 p_def->>'description' as description,
                 p_def->>'deadline' as deadline,
+                p_def->>'points' as points,
+                p_def->>'difficulty' as difficulty,
+                p_def->'requirements' as requirements,
+                p_def->>'submissionGuidelines' as "submissionGuidelines",
+                p_def->>'maxFileSize' as "maxFileSize",
+                p_def->'allowedFormats' as "allowedFormats",
+                p_def->>'rubric' as rubric,
                 u.name as "instructorName",
                 u.email as "instructorEmail",
                 ps.status,
@@ -93,7 +106,7 @@ router.get('/course/:courseId', protect, async (req, res) => {
             FROM courses c
             LEFT JOIN users u ON c.instructor_id = u.id
             CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
-            LEFT JOIN projects ps ON ps.course_id = c.id AND ps.student_id = $2 AND ps.id = p_def->>'_id'
+            LEFT JOIN projects ps ON ps.course_id = c.id AND ps.student_id = $2 AND (ps.project_id = p_def->>'_id' OR ps.id = p_def->>'_id')
             WHERE c.id = $1 AND c.is_published = true
             ORDER BY p_def->>'deadline' ASC
         `, [req.params.courseId, studentId]);
@@ -120,6 +133,10 @@ router.get('/my-projects', protect, async (req, res) => {
                 p_def->>'title' as title,
                 p_def->>'description' as description,
                 p_def->>'deadline' as deadline,
+                p_def->>'points' as points,
+                p_def->>'difficulty' as difficulty,
+                p_def->'requirements' as requirements,
+                p_def->>'submissionGuidelines' as "submissionGuidelines",
                 u.name as "instructorName",
                 ps.status,
                 ps.id as "submissionId",
@@ -133,7 +150,7 @@ router.get('/my-projects', protect, async (req, res) => {
             JOIN courses c ON e.course_id = c.id
             LEFT JOIN users u ON c.instructor_id = u.id
             CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
-            LEFT JOIN projects ps ON ps.id = p_def->>'_id' AND ps.student_id = e.student_id AND ps.course_id = c.id
+            LEFT JOIN projects ps ON (ps.project_id = p_def->>'_id' OR ps.id = p_def->>'_id') AND ps.student_id = e.student_id AND ps.course_id = c.id
             WHERE e.student_id = $1 AND e.status = 'active' AND c.is_published = true
             ORDER BY p_def->>'deadline' ASC
         `, [studentId]);
@@ -162,6 +179,12 @@ router.get('/:id', protect, async (req, res) => {
                 p_def->>'title' as title,
                 p_def->>'description' as description,
                 p_def->>'deadline' as deadline,
+                p_def->>'points' as points,
+                p_def->>'difficulty' as difficulty,
+                p_def->'requirements' as requirements,
+                p_def->>'submissionGuidelines' as "submissionGuidelines",
+                p_def->>'maxFileSize' as "maxFileSize",
+                p_def->'allowedFormats' as "allowedFormats",
                 p_def->>'rubric' as rubric,
                 u.id as "instructorId",
                 u.name as "instructorName",
@@ -191,7 +214,7 @@ router.get('/:id', protect, async (req, res) => {
                     ps.grade,
                     ps.feedback
                 FROM projects ps
-                WHERE ps.id = $1 AND ps.student_id = $2
+                WHERE (ps.project_id = $1 OR ps.id = $1) AND ps.student_id = $2
             `, [projectId, studentId]);
 
             project.submission = submissionResult.rows.length > 0 ? submissionResult.rows[0] : null;
@@ -342,7 +365,7 @@ router.delete('/:id', protect, authorize('university', 'admin'), async (req, res
         }
         
         // Also delete any submitted files attached to this project
-        await query('DELETE FROM projects WHERE id = $1', [projectId]);
+        await query('DELETE FROM projects WHERE project_id = $1 OR id = $1', [projectId]);
 
         res.json({ message: 'Project deleted successfully' });
     } catch (error) {
@@ -358,6 +381,7 @@ router.post('/:id/submit', protect, upload.array('files', 10), async (req, res) 
     try {
         const studentId = req.user.id || req.user._id;
         const projectId = req.params.id;
+        const crypto = require('crypto');
         console.log(`[Project Submit] User: ${req.user.email}, Project ID: ${projectId}`);
 
         // Find the project definition and course
@@ -379,23 +403,24 @@ router.post('/:id/submit', protect, upload.array('files', 10), async (req, res) 
             // return res.status(400).json({ message: 'Project deadline has passed' });
         }
 
-        const fileUrl = req.files && req.files.length > 0 ? `uploads/projects/${req.files[0].filename}` : null;
+        const fileUrl = req.files && req.files.length > 0 ? `/uploads/projects/${req.files[0].filename}` : null;
         const githubUrl = req.body.githubUrl || '';
 
-        // Check for existing submission
-        const existingSub = await query('SELECT id FROM projects WHERE id = $1 AND student_id = $2', [projectId, studentId]);
+        // Check for existing submission using project_id or legacy id
+        const existingSub = await query('SELECT id FROM projects WHERE (project_id = $1 OR id = $1) AND student_id = $2', [projectId, studentId]);
 
         if (existingSub.rows.length > 0) {
             await query(`
                 UPDATE projects 
-                SET file_url = $1, github_url = $2, status = 'submitted', submission_date = NOW(), updated_at = NOW()
-                WHERE id = $3 AND student_id = $4
-            `, [fileUrl, githubUrl, projectId, studentId]);
+                SET file_url = $1, github_url = $2, status = 'submitted', submission_date = NOW(), updated_at = NOW(), project_id = $3
+                WHERE id = $4
+            `, [fileUrl, githubUrl, projectId, existingSub.rows[0].id]);
         } else {
+            const submissionId = crypto.randomUUID();
             await query(`
-                INSERT INTO projects (id, student_id, course_id, title, description, file_url, github_url, status, submission_date, created_at, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, 'submitted', NOW(), NOW(), NOW())
-            `, [projectId, studentId, courseId, projectDef.title, projectDef.description, fileUrl, githubUrl]);
+                INSERT INTO projects (id, student_id, course_id, project_id, title, description, file_url, github_url, status, submission_date, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'submitted', NOW(), NOW(), NOW())
+            `, [submissionId, studentId, courseId, projectId, projectDef.title, projectDef.description, fileUrl, githubUrl]);
         }
 
         res.status(201).json({ success: true, message: 'Project submitted successfully' });
@@ -416,7 +441,7 @@ router.get('/:id/submissions', protect, authorize('university', 'admin'), async 
             SELECT ps.*, u.name as "studentName", u.email as "studentEmail"
             FROM projects ps
             JOIN users u ON ps.student_id = u.id
-            WHERE ps.id = $1
+            WHERE ps.project_id = $1 OR ps.id = $1
             ORDER BY ps.submission_date DESC
         `, [projectId]);
 
@@ -459,7 +484,7 @@ router.get('/:id/my-submission', protect, async (req, res) => {
         const studentId = req.user.id || req.user._id;
         const result = await query(`
             SELECT * FROM projects 
-            WHERE id = $1 AND student_id = $2
+            WHERE (project_id = $1 OR id = $1) AND student_id = $2
         `, [req.params.id, studentId]);
 
         if (result.rows.length === 0) {

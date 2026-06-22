@@ -301,29 +301,57 @@ const LiveClasses = () => {
 
             {/* Upcoming & Live Sessions Grid (Visible in ACTIVE tab) */}
             {activeTab === 'active' && (
-                <div className="space-y-2.5">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-                            Upcoming & Live
-                        </h2>
-                        <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent"></div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                        {filteredSessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
-                            <div className="col-span-full py-10 text-center flex flex-col items-center gap-3">
-                                <div className="p-3.5 bg-white/5 rounded-full">
-                                    <Video size={20} className="text-white/20" />
+                <div className="space-y-8">
+                    {/* Upcoming & Live Section */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-1.5">
+                                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                                Upcoming & Live
+                            </h2>
+                            <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent"></div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                            {filteredSessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length === 0 ? (
+                                <div className="col-span-full py-10 text-center flex flex-col items-center gap-3">
+                                    <div className="p-3.5 bg-white/5 rounded-full">
+                                        <Video size={20} className="text-white/20" />
+                                    </div>
+                                    <p className="text-[11px] font-semibold text-white/35">No upcoming sessions available.</p>
                                 </div>
-                                <p className="text-[11px] font-semibold text-white/35">No upcoming sessions available.</p>
-                            </div>
-                        ) : (
-                            filteredSessions
-                                .filter(s => s.status !== 'ended' && s.status !== 'archived')
-                                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
-                                .map((session, index) => renderSessionCard(session, index))
-                        )}
+                            ) : (
+                                filteredSessions
+                                    .filter(s => s.status !== 'ended' && s.status !== 'archived')
+                                    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                                    .map((session, index) => renderSessionCard(session, index))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Complete Sessions Section */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
+                                <Clock size={10} />
+                                Complete Sessions
+                            </h2>
+                            <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                            {filteredSessions.filter(s => s.status === 'ended' || s.status === 'archived').length === 0 ? (
+                                <div className="col-span-full py-6 text-center text-[10px] text-white/20 italic">
+                                    No completed sessions yet.
+                                </div>
+                            ) : (
+                                filteredSessions
+                                    .filter(s => s.status === 'ended' || s.status === 'archived')
+                                    .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+                                    .map((session, index) => renderSessionCard(session, index))
+                            )}
+                        </div>
+
                     </div>
                 </div>
             )}

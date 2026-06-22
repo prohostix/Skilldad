@@ -64,9 +64,11 @@ const UniversityDashboard = () => {
         name: '',
         email: '',
         phone: '',
-        course: 'Computer Science',
-        enrollmentDate: new Date().toISOString().split('T')[0]
+        course: '',
+        enrollmentDate: new Date().toISOString().split('T')[0],
+        batch_id: ''
     });
+    const [availableBatches, setAvailableBatches] = useState([]);
     const [receivedDocuments, setReceivedDocuments] = useState([]);
     const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
 
@@ -178,6 +180,7 @@ const UniversityDashboard = () => {
 
                 // Align course fetching with ScheduleClass.jsx for robustness
                 const courseData = coursesRes.data;
+                console.log('[UniversityDashboard] Courses fetched:', courseData);
                 if (Array.isArray(courseData)) {
                     setCourses(courseData);
                 } else if (courseData && Array.isArray(courseData.courses)) {
@@ -266,7 +269,7 @@ const UniversityDashboard = () => {
             name: '',
             email: '',
             phone: '',
-            course: 'Computer Science',
+            course: '',
             enrollmentDate: new Date().toISOString().split('T')[0]
         });
         setShowStudentModal(true);
@@ -279,9 +282,33 @@ const UniversityDashboard = () => {
             email: student.email,
             phone: student.phone,
             course: student.course,
-            enrollmentDate: student.enrollmentDate
+            enrollmentDate: student.enrollmentDate,
+            batch_id: student.batch_id || ''
         });
         setShowStudentModal(true);
+    };
+
+    const handleCourseChange = async (courseName) => {
+        const selectedCourse = courses.find(c => (c.title || c) === courseName);
+        setNewStudentData(prev => ({
+            ...prev,
+            course: courseName,
+            batch_id: '' // Reset batch when course changes
+        }));
+
+        if (selectedCourse && selectedCourse._id) {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                const { data } = await axios.get(`/api/batches/course/${selectedCourse._id}`, config);
+                setAvailableBatches(data);
+            } catch (err) {
+                console.error('Error fetching batches:', err);
+                setAvailableBatches([]);
+            }
+        } else {
+            setAvailableBatches([]);
+        }
     };
 
     const handleSaveStudent = async (e) => {
@@ -302,7 +329,8 @@ const UniversityDashboard = () => {
                     email: newStudentData.email,
                     phone: newStudentData.phone,
                     password: 'Student@' + Math.random().toString(36).slice(-6), // Generate default password
-                    courseId: courses.find(c => c.title === newStudentData.course)?._id
+                    courseId: courses.find(c => (c.title || c) === newStudentData.course)?._id,
+                    batchId: newStudentData.batch_id
                 }, config);
 
                 alert(data.message || "New student registered successfully!");
@@ -910,7 +938,7 @@ const UniversityDashboard = () => {
                                     <label className="block text-sm font-medium text-white/60 mb-1.5">Course Enrolled</label>
                                     <select
                                         value={newStudentData.course}
-                                        onChange={(e) => setNewStudentData({ ...newStudentData, course: e.target.value })}
+                                        onChange={(e) => handleCourseChange(e.target.value)}
                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary appearance-none"
                                     >
                                         <option value="" className="bg-[#0B0F1A] text-white">Select Course</option>
@@ -930,6 +958,23 @@ const UniversityDashboard = () => {
                                         </p>
                                     )}
                                 </div>
+                                {availableBatches.length > 0 && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-white/60 mb-1.5">Assigned Batch</label>
+                                        <select
+                                            value={newStudentData.batch_id}
+                                            onChange={(e) => setNewStudentData({ ...newStudentData, batch_id: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-primary appearance-none"
+                                        >
+                                            <option value="" className="bg-[#0B0F1A] text-white">No Batch (Global)</option>
+                                            {availableBatches.map(batch => (
+                                                <option key={batch.id} value={batch.id} className="bg-[#0B0F1A] text-white">
+                                                    {batch.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                                 <div>
                                     <label className="block text-sm font-medium text-white/60 mb-1.5">Enrollment Date</label>
                                     <input

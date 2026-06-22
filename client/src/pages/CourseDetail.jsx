@@ -265,6 +265,7 @@ const CourseDetail = () => {
                                         ₹{Number(course.price)?.toFixed(2) || '0.00'}
                                     </div>
                                     
+
                                     <div className="space-y-3">
                                         <ModernButton
                                             className="w-full justify-center !py-3 text-[15px] font-semibold"

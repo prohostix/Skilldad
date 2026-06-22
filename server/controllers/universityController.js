@@ -94,12 +94,13 @@ const registerStudentByUniversity = async (req, res) => {
         const student = newUser.rows[0];
 
         // 4. Enroll in course if provided
+        const { batchId } = req.body;
         if (courseId) {
             const enrollId = `enroll_${Date.now()}`;
             await query(`
-                INSERT INTO enrollments (id, student_id, course_id, university_id, status, created_at)
-                VALUES ($1, $2, $3, $4, 'active', NOW())
-            `, [enrollId, student.id, courseId, universityId]);
+                INSERT INTO enrollments (id, student_id, course_id, university_id, status, batch_id, created_at)
+                VALUES ($1, $2, $3, $4, 'active', $5, NOW())
+            `, [enrollId, student.id, courseId, universityId, batchId || null]);
 
             // Add progress record
             const progId = `prog_${Date.now()}`;

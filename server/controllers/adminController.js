@@ -595,9 +595,12 @@ const getAllStudents = async (req, res) => {
             SELECT 
                 u.id as _id, u.name, u.email, u.role, u.profile, 
                 u.university_id as "universityId", u.registered_by as "registeredBy", 
-                u.is_verified as "isVerified", u.created_at as "createdAt",
+                u.is_verified as "isVerified", u.created_at as "createdAt", u.partner_code,
                 COALESCE(e_count.count, 0) as "enrollmentCount",
-                c.title as "course"
+                c.title as "course",
+                reg.name as "registeredByName", reg.role as "registeredByRole",
+                p.name as "partnerName",
+                uni.name as "universityName"
             FROM users u
             LEFT JOIN (
                 SELECT student_id, COUNT(*) as count, MAX(created_at) as last_enrollment
@@ -606,6 +609,10 @@ const getAllStudents = async (req, res) => {
             ) e_count ON u.id = e_count.student_id
             LEFT JOIN enrollments e_latest ON u.id = e_latest.student_id AND e_latest.created_at = e_count.last_enrollment
             LEFT JOIN courses c ON e_latest.course_id = c.id
+            LEFT JOIN users reg ON u.registered_by = reg.id
+            LEFT JOIN discounts d ON u.partner_code = d.code
+            LEFT JOIN users p ON d.partner_id = p.id
+            LEFT JOIN users uni ON u.university_id = uni.id
             WHERE u.role = 'student'
         `;
         const params = [];
@@ -628,11 +635,29 @@ const getAllStudents = async (req, res) => {
         studentsQuery += ' ORDER BY u.created_at DESC';
 
         const studentsRes = await query(studentsQuery, params);
-        res.json(studentsRes.rows.map(s => ({
-            ...s,
-            enrollmentCount: parseInt(s.enrollmentCount),
-            course: s.course || 'No Enrollment'
-        })));
+        res.json(studentsRes.rows.map(s => {
+            let connectionType = 'Self-registered';
+            let registeredByObj = null;
+
+            if (s.registeredBy) {
+                connectionType = 'Directly Registered';
+                registeredByObj = { name: s.registeredByName, role: s.registeredByRole };
+            } else if (s.partner_code && s.partnerName) {
+                connectionType = 'Discount Code';
+                registeredByObj = { name: s.partnerName, role: 'partner' };
+            } else if (s.universityId && s.universityName) {
+                connectionType = 'University Affiliated';
+                registeredByObj = { name: s.universityName, role: 'university' };
+            }
+
+            return {
+                ...s,
+                enrollmentCount: parseInt(s.enrollmentCount),
+                course: s.course || 'No Enrollment',
+                connectionType,
+                registeredBy: registeredByObj
+            };
+        }));
     } catch (error) {
         console.error('Error in getAllStudents (PG):', error);
         res.status(500).json({ message: error.message });
@@ -645,7 +670,21 @@ const getAllStudents = async (req, res) => {
 const getStudentDocuments = async (req, res) => {
     try {
         const docsRes = await query('SELECT * FROM documents WHERE student_id = $1', [req.params.id]);
-        res.json(docsRes.rows.map(d => ({ ...d, _id: d.id })));
+        
+        const docs = docsRes.rows;
+        const processedDocs = docs.filter(doc => {
+            if (doc.status === 'pending') {
+                const isFulfilled = docs.some(d => 
+                    d.student_id === doc.student_id &&
+                    d.title === doc.title && 
+                    (d.status === 'submitted' || d.status === 'approved' || d.status === 'rejected')
+                );
+                return !isFulfilled;
+            }
+            return true;
+        });
+
+        res.json(processedDocs.map(d => ({ ...d, _id: d.id })));
     } catch (error) {
         console.error('Error in getStudentDocuments (PG):', error);
         res.status(500).json({ message: error.message });
@@ -670,6 +709,7 @@ const getStudentEnrollments = async (req, res) => {
             ...e,
             _id: e.id,
             course: {
+                _id: e.course_id,
                 title: e.course_title,
                 thumbnail: e.course_thumbnail,
                 category: e.course_category,
@@ -761,23 +801,61 @@ const updateStudent = async (req, res) => {
 // @route   DELETE /api/admin/students/:id
 // @access  Private (Admin)
 const deleteStudent = async (req, res) => {
+    const { id } = req.params;
+    const pool = getPool();
+    const client = await pool.connect();
+
     try {
-        const studentRes = await query('SELECT role FROM users WHERE id = $1', [req.params.id]);
+        const studentRes = await client.query('SELECT role, name FROM users WHERE id = $1', [id]);
         const student = studentRes.rows[0];
 
         if (!student) {
+            client.release();
             return res.status(404).json({ message: 'Student not found' });
         }
 
         if (student.role !== 'student') {
+            client.release();
             return res.status(400).json({ message: 'User is not a student' });
         }
 
-        await query('DELETE FROM users WHERE id = $1', [req.params.id]);
+        console.log(`[CascadeDelete] Starting cleanup for student: ${student.name} (${id})`);
 
-        res.json({ message: 'Student deleted successfully' });
+        await client.query('BEGIN');
+        try {
+            // 1. Delete dependent data in order
+            await client.query('DELETE FROM results WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM exam_submissions_new WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM progress WHERE user_id = $1', [id]);
+            await client.query('DELETE FROM submissions WHERE user_id = $1', [id]);
+            await client.query('DELETE FROM enrollments WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM projects WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM transactions WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
+            
+            // Handle documents (could be uploaded by student)
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
+
+            // Finally delete the user
+            await client.query('DELETE FROM users WHERE id = $1', [id]);
+
+            await client.query('COMMIT');
+            
+            // Notify via WebSocket
+            if (socketService.notifyUserListUpdate) {
+                socketService.notifyUserListUpdate('deleted', { _id: id, role: 'student' });
+            }
+
+            res.json({ success: true, message: 'Student and all associated data deleted successfully' });
+        } catch (dbError) {
+            await client.query('ROLLBACK');
+            throw dbError;
+        } finally {
+            client.release();
+        }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[deleteStudent] CRITICAL Cascade Error:', error);
+        res.status(500).json({ message: error.message || 'Server error during student deletion' });
     }
 };
 
@@ -785,26 +863,63 @@ const deleteStudent = async (req, res) => {
 // @route   DELETE /api/admin/users/:id
 // @access  Private (Admin)
 const deleteUser = async (req, res) => {
+    const { id } = req.params;
+    const pool = getPool();
+    const client = await pool.connect();
+
     try {
-        const userRes = await query('SELECT id, name, email FROM users WHERE id = $1', [req.params.id]);
+        const userRes = await client.query('SELECT id, name, email, role FROM users WHERE id = $1', [id]);
         const user = userRes.rows[0];
 
         if (!user) {
+            client.release();
             return res.status(404).json({ message: 'User not found' });
         }
 
         // Prevent deleting yourself
         if (user.id.toString() === req.user.id.toString()) {
+            client.release();
             return res.status(400).json({ message: 'You cannot delete your own account' });
         }
 
-        await query('DELETE FROM users WHERE id = $1', [req.params.id]);
+        console.log(`[CascadeDelete] Deleting user: ${user.name} (Role: ${user.role})`);
 
-        // Notify via WebSocket
-        socketService.notifyUserListUpdate('deleted', { ...user, _id: user.id });
+        await client.query('BEGIN');
+        try {
+            // If it's a student, clean up student data first
+            if (user.role === 'student') {
+                await client.query('DELETE FROM results WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM exam_submissions_new WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM progress WHERE user_id = $1', [id]);
+                await client.query('DELETE FROM submissions WHERE user_id = $1', [id]);
+                await client.query('DELETE FROM enrollments WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM projects WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM transactions WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
+            }
+            
+            // Cleanup documents uploaded by this user
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
 
-        res.json({ message: 'User deleted successfully', user: { _id: user.id, name: user.name, email: user.email } });
+            // Finally delete user
+            await client.query('DELETE FROM users WHERE id = $1', [id]);
+
+            await client.query('COMMIT');
+            
+            // Notify via WebSocket
+            if (socketService.notifyUserListUpdate) {
+                socketService.notifyUserListUpdate('deleted', { ...user, _id: user.id });
+            }
+
+            res.json({ message: 'User deleted successfully', user: { _id: user.id, name: user.name, email: user.email } });
+        } catch (dbError) {
+            await client.query('ROLLBACK');
+            throw dbError;
+        } finally {
+            client.release();
+        }
     } catch (error) {
+        console.error('[deleteUser] CRITICAL Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -1008,9 +1123,10 @@ async function uploadDirectorImage(req, res) {
 // @access  Private (Admin)
 async function inviteUser(req, res) {
     try {
-        const { name, email, password, role, universityId, phone } = req.body;
-        console.log('[inviteUser] Request Payload:', { name, email, role, universityId, phone, hasPassword: !!password });
-        
+        const { name, email, password, role, universityId, phone, discountRate } = req.body;
+        console.log('[inviteUser] Request Payload:', { name, email, role, universityId, phone, discountRate, hasPassword: !!password });
+
+
         const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
         // Check if user exists in PG
@@ -1026,31 +1142,44 @@ async function inviteUser(req, res) {
 
         console.log('[inviteUser] Inserting into DB...');
         await query(`
-            INSERT INTO users (id, name, email, password, role, university_id, is_verified, profile, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, true, $7, NOW(), NOW())
+            INSERT INTO users (id, name, email, password, role, university_id, discount_rate, is_verified, profile, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, NOW(), NOW())
         `, [
-            newId, 
-            name, 
-            normalizedEmail, 
-            hashedPassword, 
-            role, 
+            newId,
+            name,
+            normalizedEmail,
+            hashedPassword,
+            role,
             universityId || null,
+            Number(discountRate) || 0,
             JSON.stringify({ phone: phone || '' })
         ]);
 
-        console.log('[inviteUser] DB Insert successful. Sending notifications...');
-        
-        // Email notification
-        try {
-            await sendEmail({
-                email: normalizedEmail,
-                subject: 'Account Created - SkillDad',
-                html: emailTemplates.invitation(name, role, normalizedEmail, password)
-            });
-            console.log('[inviteUser] Email sent successfully to:', normalizedEmail);
-        } catch (err) {
-            console.error('[inviteUser] Invite email failed:', err.message);
-        }
+        console.log('[inviteUser] DB Insert successful. Sending notifications in background...');
+
+        // Fire-and-forget: email + optional WhatsApp — never block the response
+        setImmediate(async () => {
+            try {
+                await sendEmail({
+                    email: normalizedEmail,
+                    subject: 'Account Created - SkillDad',
+                    html: emailTemplates.invitation(name, role, normalizedEmail, password)
+                });
+                console.log('[inviteUser] Email sent to:', normalizedEmail);
+            } catch (err) {
+                console.error('[inviteUser] Invite email failed:', err.message);
+            }
+
+            if (phone) {
+                try {
+                    const notificationService = require('../services/NotificationService');
+                    await notificationService.send({ name, email: normalizedEmail, phone }, 'welcome');
+                } catch (err) {
+                    console.error('[inviteUser] WhatsApp notification failed:', err.message);
+                }
+            }
+        });
+
 
         // WhatsApp/Welcome notification
         if (phone) {
@@ -1479,11 +1608,12 @@ const adminEnrollStudent = async (req, res) => {
         }
 
         console.log(`[AdminEnroll] Creating enrollment record...`);
+        const { batchId } = req.body;
         const newEnrollmentId = `enr_${Date.now()}`;
         const enrollmentRes = await query(`
-            INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
-            VALUES ($1, $2, $3, 'active', 0, NOW(), NOW()) RETURNING *
-        `, [newEnrollmentId, studentId, courseId]);
+            INSERT INTO enrollments (id, student_id, course_id, status, progress, batch_id, created_at, updated_at)
+            VALUES ($1, $2, $3, 'active', 0, $4, NOW(), NOW()) RETURNING *
+        `, [newEnrollmentId, studentId, courseId, batchId || null]);
         const enrollment = enrollmentRes.rows[0];
 
         console.log(`[AdminEnroll] Checking/Creating progress record...`);
@@ -1531,9 +1661,10 @@ const adminEnrollStudent = async (req, res) => {
         console.log(`[AdminEnroll] Inserting transaction... partnerId: ${partnerId}`);
         try {
             await query(`
-                INSERT INTO transactions (id, student_id, course_id, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW(), NOW())
-            `, [`txn_${Date.now()}`, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
+                INSERT INTO transactions (id, transaction_id, student_id, course_id, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), NOW())
+            `, [`txn_${Date.now()}`, txnId, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
+
         } catch (dbErr) {
             console.error('[AdminEnroll] Transaction INSERT failed:', dbErr);
             throw new Error(`Database transaction log failed: ${dbErr.message}`);

@@ -219,9 +219,10 @@ const getUsers = async (req, res) => {
         const users = usersRes.rows;
         if (role === 'student' || !role) {
             const enrollmentsRes = await query(`
-                SELECT e.student_id, c.title as course_title
+                SELECT e.student_id, e.course_id, c.title as course_title, e.batch_id, b.name as batch_name
                 FROM enrollments e
                 JOIN courses c ON e.course_id = c.id
+                LEFT JOIN batches b ON e.batch_id = b.id
             `);
             
             const studentEnrollments = {};
@@ -229,14 +230,20 @@ const getUsers = async (req, res) => {
                 if (!studentEnrollments[r.student_id]) {
                     studentEnrollments[r.student_id] = [];
                 }
-                studentEnrollments[r.student_id].push(r.course_title);
+                studentEnrollments[r.student_id].push({
+                    courseId: r.course_id,
+                    courseTitle: r.course_title,
+                    batchId: r.batch_id,
+                    batchName: r.batch_name
+                });
             });
 
             const enriched = users.map(u => ({
                 ...u,
                 enrollmentCount: studentEnrollments[u._id]?.length || 0,
-                courses: studentEnrollments[u._id] || [],
-                course: studentEnrollments[u._id]?.[0] || 'No Enrollment' // Maintain backward compatibility
+                enrollments: studentEnrollments[u._id] || [],
+                courses: (studentEnrollments[u._id] || []).map(en => en.courseTitle),
+                course: studentEnrollments[u._id]?.[0]?.courseTitle || 'No Enrollment'
             }));
             return res.json(enriched);
         }
@@ -394,7 +401,8 @@ module.exports = {
             }
 
             let userId = req.user.id;
-            
+
+
             // Allow admin to upload for someone else
             if (req.user.role === 'admin' && req.body.targetUserId) {
                 userId = req.body.targetUserId;
@@ -408,7 +416,8 @@ module.exports = {
             if (userRes.rows.length === 0) {
                 return res.status(404).json({ message: 'Target user not found' });
             }
-            
+
+
             const currentProfile = userRes.rows[0]?.profile || {};
 
             // Update profile JSON
@@ -418,7 +427,8 @@ module.exports = {
             };
 
             // Update BOTH column and JSON for maximum compatibility
-            await query('UPDATE users SET profile_image = $1, profile = $2, updated_at = NOW() WHERE id = $3', 
+            await query('UPDATE users SET profile_image = $1, profile = $2, updated_at = NOW() WHERE id = $3',
+
                 [imageUrl, JSON.stringify(updatedProfile), userId]);
 
             res.json({
@@ -430,5 +440,39 @@ module.exports = {
             console.error('Upload Error:', error);
             res.status(500).json({ message: error.message });
         }
+    },
+
+    uploadCoverImage: async (req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ message: 'No file uploaded' });
+            }
+
+            let userId = req.user.id;
+
+            // Allow admin to upload for someone else
+            if (req.user.role === 'admin' && req.body.targetUserId) {
+                userId = req.body.targetUserId;
+            }
+
+            const imageUrl = `/uploads/${req.file.filename}`;
+
+            const userRes = await query('SELECT profile FROM users WHERE id = $1', [userId]);
+            if (userRes.rows.length === 0) {
+                return res.status(404).json({ message: 'Target user not found' });
+            }
+
+            const currentProfile = userRes.rows[0]?.profile || {};
+            const updatedProfile = { ...currentProfile, coverImage: imageUrl };
+
+            await query('UPDATE users SET profile = $1, updated_at = NOW() WHERE id = $2',
+                [JSON.stringify(updatedProfile), userId]);
+
+            res.json({ success: true, message: 'Cover image uploaded', imageUrl });
+        } catch (error) {
+            console.error('Cover Upload Error:', error);
+            res.status(500).json({ message: error.message });
+        }
+
     }
 };

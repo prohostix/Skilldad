@@ -45,11 +45,18 @@ const TeamCard = ({ member }) => (
             {/* Image Section */}
             <div className="relative mb-6 w-full flex justify-center">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-primary/30 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full p-1 border-2 border-white/10 group-hover:border-primary transition-all duration-500 relative z-10 overflow-hidden bg-[#0A0A10]">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full p-1 border-2 border-white/10 group-hover:border-primary/50 transition-all duration-500 relative z-10 overflow-hidden bg-[#0A0A10]">
                     <img
-                        src={member.imageUrl}
+                        src={
+                            (member.imageUrl || member.image) 
+                                ? ( (member.imageUrl || member.image).startsWith('http') 
+                                    ? (member.imageUrl || member.image) 
+                                    : `${axios.defaults.baseURL || ''}${member.imageUrl || member.image}` )
+                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=200&background=5B5CFF&color=fff&bold=true`
+                        }
                         alt={member.name}
-                        className="w-full h-full object-cover rounded-full transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-700"
+                        className="w-full h-full object-cover rounded-full transform group-hover:scale-105 transition-all duration-700"
+
                         onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=200&background=5B5CFF&color=fff&bold=true`;
@@ -160,17 +167,16 @@ const AboutUs = () => {
                         animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                         transition={{ duration: 1, ease: "easeOut" }}
                     >
-                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6 font-space tracking-tight leading-tight">
-                            {cms.hero?.title ? (
+                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-8 font-space tracking-tight leading-tight">
+                            {cms.hero?.title && cms.hero.title.includes(' ') ? (
+
                                 <>
                                     <span className="opacity-40">{cms.hero.title.split(' ')[0]}</span>{' '}
                                     <span className="premium-gradient-text">{cms.hero.title.split(' ').slice(1).join(' ')}</span>
                                 </>
                             ) : (
-                                <>
-                                    <span className="opacity-40">Our</span>{' '}
-                                    <span className="premium-gradient-text">Story</span>
-                                </>
+                                <span className="premium-gradient-text">{cms.hero?.title || 'Our Story'}</span>
+
                             )}
                         </h1>
                         <motion.p 
@@ -226,7 +232,8 @@ const AboutUs = () => {
                             transition={{ duration: 0.8, ease: "easeOut" }}
                         >
                             <h2 className="text-2xl md:text-4xl font-black text-white mb-6 font-jakarta leading-tight">
-                                {cms.impact_hero?.title ? (
+                                {cms.impact_hero?.title && cms.impact_hero.title.includes(' ') ? (
+
                                     <>
                                         {cms.impact_hero.title.split(' ').slice(0, -1).join(' ')} <br />
                                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">
@@ -234,10 +241,10 @@ const AboutUs = () => {
                                         </span>
                                     </>
                                 ) : (
-                                    <>
-                                        High-Fidelity <br />
-                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Educational Matrix</span>
-                                    </>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">
+                                        {cms.impact_hero?.title || 'Educational Matrix'}
+                                    </span>
+
                                 )}
                             </h2>
                             <p className="text-sm md:text-base text-gray-400 mb-5 leading-relaxed max-w-lg">
@@ -306,12 +313,14 @@ const AboutUs = () => {
                             className="text-center mb-8"
                         >
                             <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">
-                                {cms.directors_header?.title ? (
+                                {cms.directors_header?.title && cms.directors_header.title.includes(' ') ? (
+
                                     <>
                                         {cms.directors_header.title.split(' ').slice(0, -1).join(' ')} <span className="text-primary">{cms.directors_header.title.split(' ').slice(-1)}</span>
                                     </>
                                 ) : (
-                                    <>Directors <span className="text-primary">&</span> CEO</>
+                                    <span className="text-primary">{cms.directors_header?.title || 'Directors & CEO'}</span>
+
                                 )}
                             </h2>
                             {cms.directors_header?.subtitle && (
@@ -349,12 +358,14 @@ const AboutUs = () => {
                             className="text-center mb-8"
                         >
                             <h2 className="text-3xl md:text-5xl font-black text-white font-space mb-4 uppercase tracking-tighter">
-                                {cms.advisory_header?.title ? (
+                                {cms.advisory_header?.title && cms.advisory_header.title.includes(' ') ? (
+
                                     <>
                                         {cms.advisory_header.title.split(' ').slice(0, -1).join(' ')} <span className="text-primary">{cms.advisory_header.title.split(' ').slice(-1)}</span>
                                     </>
                                 ) : (
-                                    <>Advisory <span className="text-primary">Board</span></>
+                                    <span className="text-primary">{cms.advisory_header?.title || 'Advisory Board'}</span>
+
                                 )}
                             </h2>
                             {cms.advisory_header?.description && (

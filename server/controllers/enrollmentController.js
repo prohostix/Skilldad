@@ -26,17 +26,18 @@ const enrollInCourse = asyncHandler(async (req, res) => {
     }
 
     // 3. Create enrollment in PG
+    const { batchId } = req.body;
     const enrollmentId = `enroll_${Date.now()}`;
     await query(`
-        INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
-        VALUES ($1, $2, $3, 'active', 0, NOW(), NOW())
-    `, [enrollmentId, userId, courseId]);
+        INSERT INTO enrollments (id, student_id, course_id, status, progress, batch_id, created_at, updated_at)
+        VALUES ($1, $2, $3, 'active', 0, $4, NOW(), NOW())
+    `, [enrollmentId, userId, courseId, batchId || null]);
 
     // 4. Update student's universityId if course has instructor
     if (course.instructor_id) {
         const instRes = await query('SELECT role FROM users WHERE id = $1', [course.instructor_id]);
         if (instRes.rows[0]?.role === 'university') {
-            await query('UPDATE users SET "universityId" = $1 WHERE id = $2', [course.instructor_id, userId]);
+            await query('UPDATE users SET university_id = $1 WHERE id = $2', [course.instructor_id, userId]);
         }
     }
 
@@ -50,10 +51,11 @@ const getMyCourses = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
     const enrollRes = await query(`
-        SELECT e.*, c.title, c.thumbnail, c.category, u.name as instructor_name
+        SELECT e.*, c.title, c.thumbnail, c.category, u.name as instructor_name, b.name as batch_name
         FROM enrollments e
         JOIN courses c ON e.course_id = c.id
         LEFT JOIN users u ON c.instructor_id = u.id
+        LEFT JOIN batches b ON e.batch_id = b.id
         WHERE e.student_id = $1
     `, [userId]);
 
@@ -93,7 +95,8 @@ const updateProgress = asyncHandler(async (req, res) => {
                     completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $2::jsonb,
                     updated_at = NOW() 
                 WHERE student_id = $3 AND course_id = $4
-                AND NOT (completed_videos ? $5)
+                AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $5)
+
             `, [
                 JSON.stringify([videoId]), 
                 JSON.stringify([{ video: videoId, score: exerciseScore }]), 
@@ -107,7 +110,8 @@ const updateProgress = asyncHandler(async (req, res) => {
                 SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
                     updated_at = NOW() 
                 WHERE student_id = $2 AND course_id = $3
-                AND NOT (completed_videos ? $4)
+                AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $4)
+
             `, [JSON.stringify([videoId]), userId, courseId, videoId]);
         }
 
@@ -143,8 +147,43 @@ const updateProgress = asyncHandler(async (req, res) => {
     res.json({ success: true });
 });
 
+/**
+ * @desc    Assign a student to a batch
+ * @route   PUT /api/enrollment/assign-batch
+ * @access  Private (Admin/University/Partner)
+ */
+const assignBatch = asyncHandler(async (req, res) => {
+    const { studentId, courseId, batchId } = req.body;
+
+    if (!studentId || !courseId) {
+        res.status(400);
+        throw new Error('Please provide studentId and courseId');
+    }
+
+    // Verify if enrollment exists
+    const enrollRes = await query(
+        'SELECT id FROM enrollments WHERE student_id = $1 AND course_id = $2',
+        [studentId, courseId]
+    );
+
+    if (enrollRes.rows.length === 0) {
+        res.status(404);
+        throw new Error('Enrollment not found');
+    }
+
+    // Update batch_id
+    await query(
+        'UPDATE enrollments SET batch_id = $1, updated_at = NOW() WHERE student_id = $2 AND course_id = $3',
+        [batchId || null, studentId, courseId]
+    );
+
+    res.json({ success: true, message: 'Batch assigned successfully' });
+
+});
+
 module.exports = {
     enrollInCourse,
     getMyCourses,
-    updateProgress
+    updateProgress,
+    assignBatch
 };

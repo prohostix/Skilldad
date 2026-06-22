@@ -261,9 +261,11 @@ const Exams = () => {
 
     const startExam = async (exam) => {
         try {
-            console.log('[startExam] Starting exam:', exam.title);
-            console.log('[startExam] Exam has questions:', exam.questions?.length || 0);
-            console.log('[startExam] Questions array:', exam.questions);
+            // Block non-PDF exams with no questions
+            if (exam.examType !== 'pdf-based' && (!exam.questions || exam.questions.length === 0)) {
+                showToast('This exam has no questions yet. Please contact your instructor.', 'error');
+                return;
+            }
 
             const rawInfo = localStorage.getItem('userInfo');
             const userInfo = JSON.parse(rawInfo);
@@ -294,7 +296,7 @@ const Exams = () => {
             setExamStarted(true);
         } catch (err) {
             console.error('Failed to initialize exam session:', err);
-            alert(err.response?.data?.message || 'Could not start the assessment. Please verify your enrollment.');
+            showToast(err.response?.data?.message || 'Could not start the assessment. Please verify your enrollment.', 'error');
         }
     };
 

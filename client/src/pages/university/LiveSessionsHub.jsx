@@ -155,23 +155,40 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
         meetingLink: '',
         description: '',
         duration: 60,
+        batchId: '',
     });
+    const [availableBatches, setAvailableBatches] = useState([]);
 
-    const handleCourseChange = (e) => {
+    const handleCourseChange = async (e) => {
         const val = e.target.value;
-        if (val.length === 24) {
+        if (val) {
             const course = courses.find(c => c._id === val);
             setForm(prev => ({
                 ...prev,
                 courseId: val,
-                category: course ? course.category : prev.category
+                category: course ? course.category : prev.category,
+                batchId: ''
             }));
+            
+            // Fetch batches for the selected course
+            try {
+                const rawInfo = localStorage.getItem('userInfo');
+                const { token } = JSON.parse(rawInfo);
+                const config = { headers: { Authorization: `Bearer ${token}` } };
+                const { data } = await axios.get(`/api/batches/course/${val}`, config);
+                setAvailableBatches(data);
+            } catch (err) {
+                console.error('Error fetching batches:', err);
+                setAvailableBatches([]);
+            }
         } else {
             setForm(prev => ({
                 ...prev,
                 courseId: '',
-                category: val || 'General'
+                category: val || 'General',
+                batchId: ''
             }));
+            setAvailableBatches([]);
         }
     };
 
@@ -352,6 +369,32 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                             </div>
                         </div>
 
+                        {/* Batch Selection */}
+                        {form.courseId && (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                <label className={labelCls}>Target Batch (Optional)</label>
+                                <div className="relative group">
+                                    <Users size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
+                                    <select
+                                        name="batchId"
+                                        value={form.batchId}
+                                        onChange={handleChange}
+                                        className={`${inputCls} pl-10 cursor-pointer text-white`}
+                                    >
+                                        <option value="" className="bg-[#0B0F1A] text-white">All Students in Course</option>
+                                        {availableBatches.map((b) => (
+                                            <option key={b.id || b._id} value={b.id || b._id} className="bg-[#0B0F1A] text-white">
+                                                {b.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <p className="text-[10px] text-white/30 mt-1.5 ml-1">
+                                    Restricts the session to students belonging to this specific batch.
+                                </p>
+                            </div>
+                        )}
+
                         {/* Start Date & Time — two separate inputs for reliable cross-browser UX */}
                         <div>
                             <label className={labelCls}>Start Date & Time *</label>
@@ -430,7 +473,8 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                         <div className="flex items-start gap-3 p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
                             <Bell size={15} className="text-emerald-400 mt-0.5 shrink-0" />
                             <p className="text-[11px] text-white/55 leading-relaxed">
-                                <span className="text-emerald-400 font-bold">Smart-Notify Enabled:</span> {form.courseId ? 'Only students enrolled in this course' : (JSON.parse(localStorage.getItem('userInfo') || '{}').role === 'partner' ? 'All your registered students' : 'All university students')} will receive an
+                                <span className="text-emerald-400 font-bold">Smart-Notify Enabled:</span> {form.batchId ? 'Only students in the selected batch' : (form.courseId ? 'Only students enrolled in this course' : (JSON.parse(localStorage.getItem('userInfo') || '{}').role === 'partner' ? 'All your registered students' : 'All university students'))} will receive an
+
                                 email and WhatsApp notification immediately.
                             </p>
                         </div>
@@ -810,6 +854,13 @@ const LiveSessionsHub = () => {
                                                             </div>
                                                             <div className="flex items-center gap-2 text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-widest">
                                                                 <span className="text-primary/70">{session.course}</span>
+                                                                {session.batchName && (
+                                                                    <>
+                                                                        <span className="w-1 h-1 bg-white/20 rounded-full" />
+                                                                        <span className="text-amber-500/80">Batch: {session.batchName}</span>
+                                                                    </>
+                                                                )}
+
                                                                 <span className="w-1 h-1 bg-white/20 rounded-full" />
                                                                 <span className="truncate">{session.instructor}</span>
                                                             </div>

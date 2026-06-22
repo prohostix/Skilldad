@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Bot, ChevronRight } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, ChevronRight, Trash2, ThumbsUp, ThumbsDown, Sparkles } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -102,26 +103,33 @@ const FloatingHelpWidget = () => {
     const [inputValue, setInputValue] = useState('');
     const [messages, setMessages] = useState([]);
     const [isTyping, setIsTyping] = useState(false);
+    const [feedbackSent, setFeedbackSent] = useState({}); // To track which messages have received feedback
     const messagesEndRef = useRef(null);
     const navigate = useNavigate();
+
+    const resetChat = () => {
+        setMessages([
+            {
+                id: 'welcome_1',
+                isBot: true,
+                type: 'options',
+                text: "Welcome to SkillDad! How can I help you today? Select a topic or type your question.",
+                options: [
+                    { label: 'Course Access', action: 'course_access' },
+                    { label: 'Live Classes', action: 'live_class' },
+                    { label: 'Exams & Certificates', action: 'exams_certs' },
+                    { label: 'Account Help', action: 'account_help' },
+                ]
+            }
+        ]);
+        setFeedbackSent({});
+    };
 
     // Initialize messages on open if empty
     useEffect(() => {
         if (isOpen && messages.length === 0) {
-            setMessages([
-                {
-                    id: 'welcome_1',
-                    isBot: true,
-                    type: 'options',
-                    text: "Welcome to SkillDad! How can I help you today? Select a topic or type your question.",
-                    options: [
-                        { label: 'Course Access', action: 'course_access' },
-                        { label: 'Live Classes', action: 'live_class' },
-                        { label: 'Exams & Certificates', action: 'exams_certs' },
-                        { label: 'Account Help', action: 'account_help' },
-                    ]
-                }
-            ]);
+            resetChat();
+
         }
     }, [isOpen]);
 
@@ -150,11 +158,24 @@ const FloatingHelpWidget = () => {
     });
 
     const followUp = () => ({
-        id: (Date.now() + 2).toString(),
+        id: 'followup_' + Date.now().toString(),
+
         isBot: true,
         type: 'text',
         text: 'Is there anything else I can help you with?',
     });
+
+    const handleFeedback = async (messageId, faqId, isHelpful) => {
+        if (feedbackSent[messageId]) return;
+
+        try {
+            await axios.post(`/api/faqs/${faqId}/feedback`, { isHelpful });
+            setFeedbackSent(prev => ({ ...prev, [messageId]: isHelpful ? 'up' : 'down' }));
+        } catch (err) {
+            console.error('Feedback failed:', err);
+        }
+    };
+
 
     const handleSend = async (e) => {
         if (e) e.preventDefault();
@@ -203,6 +224,7 @@ const FloatingHelpWidget = () => {
                         isBot: true,
                         type: extras.length > 0 ? 'options' : 'text',
                         text: best.answer,
+                        faqId: best.id, // Store ID for feedback
                         options: extras.length > 0 ? extras : undefined,
                     }, followUp()]);
                     setIsTyping(false);
@@ -245,16 +267,31 @@ const FloatingHelpWidget = () => {
             }
 
             // 4. Final fallback
-            setMessages(prev => [...prev, {
-                id: (Date.now() + 1).toString(),
-                isBot: true,
-                type: 'options',
-                text: "I couldn't find a specific answer to that. You can browse our help center or raise a support ticket.",
-                options: [
-                    { label: 'Visit Help Center', link: '/support' },
-                    { label: 'Raise a Ticket', link: '/support#ticket-form' },
-                ]
-            }]);
+            const isCourseRelated = query.includes('course') || query.includes('learn') || query.includes('program') || query.includes('detail');
+            
+            if (isCourseRelated) {
+                setMessages(prev => [...prev, {
+                    id: (Date.now() + 1).toString(),
+                    isBot: true,
+                    type: 'options',
+                    text: "We offer a wide variety of premium courses across disciplines like Artificial Intelligence, Digital Marketing, Software Engineering, Web Development, and Business Management. I recommend exploring our full course catalog to find the perfect program for your career goals.",
+                    options: [
+                        { label: 'Explore Courses', link: '/courses' },
+                        { label: 'Visit Help Center', link: '/support' }
+                    ]
+                }]);
+            } else {
+                setMessages(prev => [...prev, {
+                    id: (Date.now() + 1).toString(),
+                    isBot: true,
+                    type: 'options',
+                    text: "I couldn't find a specific answer to that. You can browse our help center or raise a support ticket.",
+                    options: [
+                        { label: 'Visit Help Center', link: '/support' },
+                        { label: 'Raise a Ticket', link: '/support#ticket-form' },
+                    ]
+                }]);
+            }
             setIsTyping(false);
         }, 700);
     };
@@ -298,6 +335,7 @@ const FloatingHelpWidget = () => {
     };
 
 
+
     return (
         <div className="fixed bottom-6 right-6 z-[100]">
             <AnimatePresence>
@@ -306,28 +344,45 @@ const FloatingHelpWidget = () => {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-4 right-6 w-[340px] sm:w-[380px] bg-[#0B071A] border border-[#7C3AED]/30 rounded-2xl shadow-2xl overflow-hidden shadow-[#7C3AED]/10 flex flex-col h-[510px] max-h-[85vh] z-[101]"
+                        className="fixed bottom-4 right-6 w-[350px] sm:w-[400px] bg-[#0B071A]/80 backdrop-blur-xl border border-[#7C3AED]/40 rounded-2xl shadow-2xl overflow-hidden shadow-[#7C3AED]/20 flex flex-col h-[550px] max-h-[85vh] z-[101]"
                     >
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-[#7C3AED] to-[#E879F9] px-4 py-2.5 text-white flex justify-between items-center shrink-0 shadow-md z-10">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                                    <img src={logoImg} alt="SkillDad" className="w-5 h-5 object-contain" />
+                        <div className="bg-gradient-to-r from-[#7C3AED] via-[#9333EA] to-[#E879F9] px-4 py-3 text-white flex justify-between items-center shrink-0 shadow-lg z-10 relative overflow-hidden">
+                            <div className="absolute inset-0 opacity-20 pointer-events-none">
+                                <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_0%,transparent_70%)] animate-pulse"></div>
+                            </div>
+                            <div className="flex items-center gap-3 relative z-10">
+                                <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
+                                    <img src={logoImg} alt="SkillDad" className="w-6 h-6 object-contain" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-xs leading-tight">SkillDad AI</h3>
-                                    <p className="text-[9px] text-white/80 flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Online
+                                    <div className="flex items-center gap-1.5">
+                                        <h3 className="font-bold text-sm tracking-tight">SkillDad AI</h3>
+                                        <Sparkles size={12} className="text-yellow-300 animate-pulse" />
+                                    </div>
+                                    <p className="text-[10px] text-white/80 flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]"></span>
+                                        Available Now
                                     </p>
                                 </div>
                             </div>
-                            <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors bg-white/10 hover:bg-white/20 p-1.5 rounded-full">
-                                <X size={15} />
-                            </button>
+                            <div className="flex items-center gap-1 relative z-10">
+                                <button 
+                                    onClick={resetChat} 
+                                    title="Clear Chat"
+                                    className="text-white/70 hover:text-white transition-all bg-white/5 hover:bg-white/10 p-2 rounded-lg"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                                <button onClick={() => setIsOpen(false)} className="text-white/70 hover:text-white transition-all bg-white/5 hover:bg-white/10 p-2 rounded-lg">
+                                    <X size={18} />
+                                </button>
+                            </div>
+
                         </div>
 
                         {/* Chat Body */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4 text-white bg-gradient-to-b from-[#0B071A] to-[#160E3A]">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-5 text-white bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.05),transparent),linear-gradient(to_bottom,#0B071A,#160E3A)]">
                             {messages.map((msg) => (
                                 <div key={msg.id} className={`flex flex-col max-w-[85%] ${msg.isBot ? 'self-start' : 'self-end'}`}>
                                     <div className="flex gap-2 items-end">
@@ -337,10 +392,11 @@ const FloatingHelpWidget = () => {
                                             </div>
                                         )}
                                         <div className={`
-                                            p-2.5 rounded-2xl text-[11px] leading-relaxed shadow-sm
+                                            p-3 rounded-2xl text-[13px] sm:text-sm leading-relaxed shadow-lg
+
                                             ${msg.isBot
-                                                ? 'bg-white/10 border border-white/5 rounded-bl-none text-white/90'
-                                                : 'bg-gradient-to-r from-[#7C3AED] to-[#E879F9] rounded-br-none text-white'}
+                                                ? 'bg-white/10 border border-white/5 rounded-bl-none text-white/95'
+                                                : 'bg-gradient-to-r from-[#7C3AED] to-[#E879F9] rounded-br-none text-white shadow-[#7C3AED]/20'}
                                         `}>
                                             {msg.isBot ? (
                                                 <div className="space-y-1.5">
@@ -388,16 +444,41 @@ const FloatingHelpWidget = () => {
                                                             onClick={() => {
                                                                 if (opt.link) navigate(opt.link);
                                                                 if (opt.action) handleOptionAction(opt.action);
-                                                                if (opt.text) setMessages(prev => [...prev, { id: Date.now().toString(), isBot: true, text: opt.text }]);
+                                                                if (opt.text) setMessages(prev => [...prev, { id: 'msg_' + Date.now().toString(), isBot: true, text: opt.text }]);
                                                             }}
-                                                            className="text-left w-full text-[10px] py-1.5 px-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors flex items-center justify-between group"
+                                                            className="text-left w-full text-[12px] sm:text-[13px] py-2 px-3 bg-white/5 hover:bg-[#7C3AED]/20 border border-white/10 hover:border-[#7C3AED]/50 rounded-xl transition-all flex items-center justify-between group shadow-sm"
+
                                                         >
-                                                            <span>{opt.label}</span>
-                                                            <ChevronRight size={14} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                                                            <span className="group-hover:text-white transition-colors">{opt.label}</span>
+                                                            <ChevronRight size={14} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-[#A78BFA]" />
                                                         </button>
                                                     ))}
                                                 </div>
                                             )}
+
+                                            {/* Feedback for FAQ responses */}
+                                            {msg.isBot && msg.faqId && (
+                                                <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+                                                    <span className="text-[10px] text-white/40 italic">Was this helpful?</span>
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => handleFeedback(msg.id, msg.faqId, true)}
+                                                            className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'up' ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80'}`}
+                                                            disabled={feedbackSent[msg.id]}
+                                                        >
+                                                            <ThumbsUp size={12} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleFeedback(msg.id, msg.faqId, false)}
+                                                            className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'down' ? 'bg-red-500/20 text-red-400' : 'bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80'}`}
+                                                            disabled={feedbackSent[msg.id]}
+                                                        >
+                                                            <ThumbsDown size={12} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
 
                                             {/* FAQ Results Type - simple flat display */}
                                             {msg.type === 'faq_results' && (
@@ -460,7 +541,7 @@ const FloatingHelpWidget = () => {
                                 <button
                                     type="submit"
                                     disabled={!inputValue.trim() || isTyping}
-                                    className="absolute right-1.5 w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-r from-[#7C3AED] to-[#E879F9] text-white disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform"
+                                    className="absolute right-1.5 w-9 h-9 flex items-center justify-center rounded-full bg-gradient-to-r from-[#7C3AED] to-[#E879F9] text-white disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#7C3AED]/20"
                                 >
                                     <Send size={16} className="ml-0.5" />
                                 </button>
@@ -474,15 +555,21 @@ const FloatingHelpWidget = () => {
             {!isOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="group relative w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 shadow-[#7C3AED]/30 bg-gradient-to-r from-[#7C3AED] to-[#E879F9] hover:scale-110 text-white border border-white/20 z-50 overflow-visible"
+                    className="group relative w-16 h-16 rounded-full flex items-center justify-center shadow-[0_8px_32px_rgba(124,58,237,0.4)] transition-all duration-500 bg-gradient-to-tr from-[#7C3AED] via-[#9333EA] to-[#E879F9] hover:scale-110 active:scale-95 text-white border border-white/20 z-50 overflow-visible"
                 >
+                    {/* Pulsing ring */}
+                    <div className="absolute inset-0 rounded-full bg-[#7C3AED] animate-ping opacity-20 pointer-events-none"></div>
+                    
                     {/* Tooltip */}
-                    <div className="absolute right-full mr-4 bg-black/80 backdrop-blur-md border border-[#7C3AED]/30 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none transform -translate-y-1 group-hover:translate-y-0">
-                        Ask AI Assistant
-                        <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-black/80 border-t border-r border-[#7C3AED]/30 rotate-45" />
+                    <div className="absolute right-full mr-5 bg-[#0B071A]/90 backdrop-blur-md border border-[#7C3AED]/30 text-white text-xs px-4 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform translate-x-4 group-hover:translate-x-0 shadow-xl">
+                        <div className="flex items-center gap-2">
+                            <Sparkles size={14} className="text-yellow-400" />
+                            <span>Ask SkillDad AI</span>
+                        </div>
+                        <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#0B071A]/90 border-t border-r border-[#7C3AED]/30 rotate-45" />
                     </div>
-                    <MessageCircle size={24} />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-[#0B071A]"></div>
+                    <MessageCircle size={28} className="group-hover:rotate-12 transition-transform duration-300" />
+                    <div className="absolute top-0 right-0 w-4 h-4 bg-green-400 rounded-full border-3 border-[#0B071A] shadow-lg shadow-green-400/20"></div>
                 </button>
             )}
         </div>

@@ -207,7 +207,9 @@ const Login = () => {
                                 { role: 'Admin', email: 'admin@skilldad.com' },
                                 { role: 'Finance', email: 'fin@gmail.com' },
                                 { role: 'Partner', email: 'iits@gmail.com' },
-                                { role: 'Student', email: 'john.smith@student.com' }
+                                { role: 'University', email: 'info@cit.edu.al' },
+                                { role: 'Student', email: 'rinsnac4@gmail.com' }
+
                             ].map((demo) => (
                                 <button
                                     key={demo.role}

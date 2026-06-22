@@ -75,7 +75,116 @@ const Documents = () => {
     };
 
     const handleFileUpload = async (docId) => {
-        // Implementation for general document upload if needed
+        console.log('Starting file upload for docId:', docId);
+        // Debug alert to confirm function call
+        window.alert('Upload triggered for requirement ID: ' + docId); 
+        
+        const files = selectedFiles[docId];
+        if (!files || files.length === 0) {
+            console.warn('No files selected for docId:', docId);
+            alert('Please select a file first.');
+            return;
+        }
+
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            if (!userInfo || !userInfo.token) {
+                console.error('No user info or token found');
+                alert('Session expired. Please login again.');
+                navigate('/login');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('document', files[0]);
+            
+            // Add metadata from the document requirement if it exists
+            // Use String comparison to avoid type mismatch issues
+            const docReq = documents.find(d => String(d.id) === String(docId) || String(d._id) === String(docId));
+            
+            if (docReq) {
+                console.log('Found document requirement:', docReq.title);
+                formData.append('title', docReq.title || '');
+                formData.append('type', docReq.type || '');
+                if (docReq.course_id) formData.append('course', docReq.course_id);
+                if (docReq.university_id) formData.append('university_id', docReq.university_id);
+            } else {
+                console.warn('Could not find document requirement for ID:', docId);
+                // Fallback: if we can't find the req, at least try to send the ID
+                formData.append('docId', docId);
+            }
+
+            const config = {
+                headers: { 
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                },
+                onUploadProgress: (progressEvent) => {
+                    const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    console.log(`Upload progress for ${docId}: ${progress}%`);
+                    setUploadProgress(prev => ({ ...prev, [docId]: progress }));
+                }
+            };
+
+            console.log('Sending POST request to /api/documents/upload');
+            const response = await axios.post('/api/documents/upload', formData, config);
+            console.log('Upload response:', response.data);
+            
+            alert('Document uploaded successfully!');
+            fetchData();
+            
+            // Reset state
+            setSelectedFiles(prev => ({ ...prev, [docId]: [] }));
+            setUploadProgress(prev => ({ ...prev, [docId]: 0 }));
+        } catch (error) {
+            console.error('Upload failed:', error);
+            const msg = error.response?.data?.message || error.message || 'Failed to upload document';
+            alert(`Upload Error: ${msg}`);
+            setUploadProgress(prev => ({ ...prev, [docId]: 0 }));
+        }
+    };
+
+    const handleDeleteDocument = async (docId) => {
+        if (!window.confirm('Are you sure you want to remove this document?')) return;
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            await axios.delete(`/api/documents/${docId}`, config);
+            alert('Document removed successfully');
+            fetchData();
+        } catch (error) {
+            const msg = error.response?.data?.message || 'Failed to remove document';
+            alert(`Remove Error: ${msg}`);
+        }
+    };
+
+    const handleGenericUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const formData = new FormData();
+            formData.append('document', file);
+            formData.append('title', file.name.split('.')[0]); // Use filename as title
+            formData.append('type', 'other');
+
+            const config = {
+                headers: { 
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            await axios.post('/api/documents/upload', formData, config);
+            alert('Extra document uploaded successfully!');
+            fetchData();
+        } catch (error) {
+            alert(`Upload Error: ${error.response?.data?.message || error.message}`);
+        }
+        // Reset input so the same file can be uploaded again if needed
+        event.target.value = null;
+
     };
 
     const handleDownload = (fileName, url) => {
@@ -94,8 +203,20 @@ const Documents = () => {
 
     const pendingRequests = certificates.filter(c => c.status === 'PENDING');
 
+    const processedDocuments = documents.filter(doc => {
+        if (doc.status === 'pending') {
+            const isFulfilled = documents.some(d => 
+                d.title === doc.title && 
+                (d.status === 'submitted' || d.status === 'approved')
+            );
+            return !isFulfilled;
+        }
+        return true;
+    });
+
     const displayItems = [
-        ...documents.map(d => ({ ...d, isCertificate: false })),
+        ...processedDocuments.map(d => ({ ...d, isCertificate: false })),
+
         ...certificates.filter(c => c.status === 'ISSUED').map(c => ({
             id: `cert-${c.id}`,
             title: `${c.course_title} Certificate`,
@@ -242,15 +363,23 @@ const Documents = () => {
                     ))}
                 </div>
 
-                <div className="relative w-full sm:w-56 shrink-0">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30" size={13} />
-                    <input
-                        type="text"
-                        placeholder="Search docs..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-primary/40 transition-colors"
-                    />
+                <div className="flex gap-3 w-full sm:w-auto mt-3 sm:mt-0">
+                    <div className="relative flex-1 sm:w-56 shrink-0">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/30" size={13} />
+                        <input
+                            type="text"
+                            placeholder="Search docs..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-primary/40 transition-colors"
+                        />
+                    </div>
+                    <label className="flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-1.5 bg-primary/20 hover:bg-primary/30 border border-primary/30 text-primary text-xs font-semibold rounded-lg transition-colors cursor-pointer">
+                        <Upload size={14} />
+                        <span>Add File</span>
+                        <input type="file" onChange={handleGenericUpload} className="hidden" />
+                    </label>
+
                 </div>
             </div>
 
@@ -374,20 +503,29 @@ const Documents = () => {
                                                             <Trash2 size={16} />
                                                         </button>
                                                     </div>
-                                                    
-                                                    {isUploading && (
+                                                                                                       {isUploading && (
+
                                                         <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                                                             <div className="h-full bg-primary transition-all duration-200" style={{ width: `${progress}%` }} />
                                                         </div>
                                                     )}
 
                                                     <button
-                                                        onClick={() => handleFileUpload(doc.id)}
-                                                        disabled={isUploading}
-                                                        className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-wide rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                                                    >
-                                                        {isUploading ? <><Clock size={14} className="animate-pulse" /> UPLOADING {progress}%</> : <><Upload size={14} /> SUBMIT FILE</>}
-                                                    </button>
+                                                         type="button"
+                                                         onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            console.log('--- BUTTON CLICKED ---');
+                                                            console.log('doc.id:', doc.id);
+                                                            window.alert('Button Clicked for ID: ' + doc.id);
+                                                            handleFileUpload(doc.id);
+                                                         }}
+                                                         disabled={isUploading}
+                                                         className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-wide rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 relative z-50"
+                                                     >
+                                                         {isUploading ? <><Clock size={14} className="animate-pulse" /> UPLOADING {progress}%</> : <><Upload size={14} /> SUBMIT FILE ({doc.id || 'NO ID'})</>}
+                                                     </button>
+
                                                 </div>
                                             )}
                                         </div>
@@ -410,6 +548,12 @@ const Documents = () => {
                                                 <button onClick={() => handleDownload(doc.fileName, doc.file_url)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors">
                                                     <Download size={14} /> Save
                                                 </button>
+                                                {doc.status !== 'approved' && !doc.isCertificate && (
+                                                    <button onClick={() => handleDeleteDocument(doc.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-semibold text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors">
+                                                        <Trash2 size={14} /> Remove
+                                                    </button>
+                                                )}
+
                                             </div>
                                         </div>
                                     ) : (

@@ -314,9 +314,15 @@ const SiteContentManager = () => {
                                         <div className="relative mb-4">
                                             <div className="w-24 h-24 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all bg-black/40">
                                                 <img 
-                                                    src={item.imageUrl || item.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'N/A')}&background=5B5CFF&color=fff&bold=true`} 
+                                                    src={
+                                                        (item.imageUrl || item.image || item.logo) 
+                                                            ? ( (item.imageUrl || item.image || item.logo).startsWith('http') 
+                                                                ? (item.imageUrl || item.image || item.logo) 
+                                                                : `${axios.defaults.baseURL || ''}${item.imageUrl || item.image || item.logo}` )
+                                                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'N/A')}&background=5B5CFF&color=fff&bold=true`
+                                                    } 
                                                     alt={item.name}
-                                                    className="w-full h-full object-contain p-2"
+                                                    className="w-full h-full object-cover"
                                                 />
                                             </div>
                                             <label className="absolute -bottom-2 -right-2 p-2 bg-primary rounded-xl cursor-pointer hover:scale-110 transition-all shadow-lg">

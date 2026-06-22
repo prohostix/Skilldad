@@ -111,6 +111,8 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             { name: 'Students', icon: GraduationCap, path: '/admin/students' },
             { name: 'Career Manager', icon: Briefcase, path: '/admin/career-manager' },
             { name: 'Certificates', icon: Trophy, path: '/admin/certificates' },
+            { name: 'Document Review', icon: FileText, path: '/admin/document-review' },
+
             {
                 name: 'Universities', icon: Building2, hasDropdown: true,
                 subItems: [
@@ -138,6 +140,8 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             { name: 'Live Sessions', icon: Video, path: '/university/live-sessions' },
             { name: 'Exam Management', icon: FileText, path: '/university/exams' },
             { name: 'Certificates', icon: Trophy, path: '/university/certificates' },
+            { name: 'Student Documents', icon: FileText, path: '/university/student-documents' },
+
             { name: 'Analytics', icon: BarChart3, path: '/university/analytics' },
             { name: 'Support', icon: LifeBuoy, path: '/university/support' },
             { name: 'Settings', icon: Settings, path: '/university/settings' },

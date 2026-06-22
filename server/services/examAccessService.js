@@ -22,14 +22,20 @@ async function checkExamAccess(examId, studentId) {
       return { canAccess: false, reason: 'Exam not found' };
     }
 
-    // 2. Verify student enrollment in course from PG
+    // 2. Verify student enrollment and batch access from PG
     const enrollRes = await query(`
         SELECT * FROM enrollments 
         WHERE student_id = $1 AND course_id = $2 AND status = 'active'
     `, [studentId.toString(), exam.course_id]);
 
-    if (enrollRes.rows.length === 0) {
+    const enrollment = enrollRes.rows[0];
+    if (!enrollment) {
       return { canAccess: false, reason: 'Not enrolled in course' };
+    }
+
+    // 2b. Batch access check
+    if (exam.batch_ids && exam.batch_ids.length > 0 && !exam.batch_ids.includes(enrollment.batch_id)) {
+      return { canAccess: false, reason: 'This exam is restricted to another batch' };
     }
 
     // 3. Check exam status

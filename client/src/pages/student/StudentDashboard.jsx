@@ -343,8 +343,9 @@ const StudentDashboard = () => {
                             <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 font-mono">
                                 <FileText size={8} /> Project Pipeline
                             </div>
-                            <button onClick={() => navigate('/dashboard/course/1/projects')} className="text-[9px] font-bold text-white/20 hover:text-white uppercase tracking-widest transition-colors flex items-center">
-                                All Work <ChevronRight size={10} className="ml-0.5" />
+                            <button onClick={() => navigate('/dashboard/my-courses')} className="text-[9px] font-bold text-white/20 hover:text-white uppercase tracking-widest transition-colors flex items-center">
+                                View Courses <ChevronRight size={10} className="ml-0.5" />
+
                             </button>
                         </div>
 
@@ -353,7 +354,8 @@ const StudentDashboard = () => {
                                 <div
                                     key={project._id}
                                     className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-emerald-500/30 hover:bg-white/[0.04] transition-all overflow-hidden flex flex-col h-full group cursor-pointer relative"
-                                    onClick={() => navigate(`/dashboard/course/${project.course?._id || '1'}/projects`)}
+                                    onClick={() => project.courseId || project.course?._id ? navigate(`/dashboard/course/${project.courseId || project.course?._id}/projects`) : navigate('/dashboard/my-courses')}
+
                                 >
                                     <div className="p-4 flex flex-col gap-2 flex-1">
                                         <div className="flex justify-between items-start mb-1">

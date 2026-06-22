@@ -44,15 +44,26 @@ const notifyEnrolledStudents = async (session, title, message) => {
         let studentIds = [];
         
         if (session.course_id) {
-            const res = await query(
-                "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'",
-                [session.course_id]
-            );
+            let q = "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'";
+            let params = [session.course_id];
+            
+            if (session.batch_ids && session.batch_ids.length > 0) {
+                q += " AND batch_id = ANY($2)";
+                params.push(session.batch_ids);
+            }
+            
+            const res = await query(q, params);
             studentIds = res.rows.map(r => r.student_id);
         } else if (session.university_id) {
             const res = await query(
                 "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
                 [session.university_id]
+            );
+            studentIds = res.rows.map(r => r.id);
+        } else if (session.partner_id) {
+            const res = await query(
+                "SELECT id FROM users WHERE registered_by = $1 AND role = 'student'",
+                [session.partner_id]
             );
             studentIds = res.rows.map(r => r.id);
         }
@@ -231,7 +242,7 @@ router.post('/admin/schedule', protect, authorize('admin', 'university', 'partne
             title, description, course, university,
             examType, scheduledStartTime, scheduledEndTime,
             duration, totalMarks, passingScore, isMockExam, instructions,
-            mandatedSlotId, linkedPaper, answerKey
+            mandatedSlotId, linkedPaper, answerKey, batchIds
         } = req.body;
 
         const newId = `exam_${Date.now()}`;
@@ -247,8 +258,8 @@ router.post('/admin/schedule', protect, authorize('admin', 'university', 'partne
                 exam_type, scheduled_start, scheduled_end, 
                 duration, total_marks, passing_score, created_by_id, 
                 is_mock_exam, instructions, status, mandated_slot_id,
-                linked_paper_id, answer_key_id
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'scheduled', $15, $16, $17)
+                linked_paper_id, answer_key_id, batch_ids
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'scheduled', $15, $16, $17, $18)
         `, [
             newId, title, description, courseId, universityId,
             examType || 'online-mcq',
@@ -256,12 +267,13 @@ router.post('/admin/schedule', protect, authorize('admin', 'university', 'partne
             scheduledEndTime || null,
             duration, totalMarks || 100, passingScore || 40, createdById,
             isMockExam || false, instructions || null, mandatedSlotId || null,
-            linkedPaper || null, answerKey || null
+            linkedPaper || null, answerKey || null,
+            batchIds || null
         ]);
 
         // Notify students about scheduled exam
         notifyEnrolledStudents(
-            { course_id: courseId, university_id: universityId, scheduled_start: scheduledStartTime },
+            { course_id: courseId, university_id: universityId, scheduled_start: scheduledStartTime, batch_ids: batchIds },
             'New Exam Scheduled 📝',
             `A new exam "${title}" has been scheduled for your course.`
         );
