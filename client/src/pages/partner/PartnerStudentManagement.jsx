@@ -26,7 +26,6 @@ import {
     ExternalLink
 
 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
