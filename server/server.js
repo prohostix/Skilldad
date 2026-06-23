@@ -343,6 +343,14 @@ const startServer = async () => {
             )
         `);
         console.log('[Migration] sales_applications table verified/created'.green);
+
+        // Auto-migrate: ensure sales_applications has student_dob
+        const salesColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['sales_applications']);
+        const salesCols = salesColRes.rows.map(r => r.column_name);
+        if (!salesCols.includes('student_dob')) {
+            await query('ALTER TABLE sales_applications ADD COLUMN student_dob VARCHAR(50)');
+            console.log('[Migration] Added student_dob to sales_applications'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

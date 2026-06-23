@@ -290,6 +290,9 @@ const SalesDashboard = () => {
                                                 <span className="font-bold text-white/50">Father's Name:</span> {app.father_name}
                                             </div>
                                             <div>
+                                                <span className="font-bold text-white/50">DOB:</span> {app.student_dob || 'N/A'}
+                                            </div>
+                                            <div>
                                                 <span className="font-bold text-white/50">Email:</span> {app.student_email}
                                             </div>
                                             <div>

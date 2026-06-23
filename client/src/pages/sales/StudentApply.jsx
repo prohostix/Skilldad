@@ -30,6 +30,7 @@ const StudentApply = () => {
     const [fatherName, setFatherName] = useState('');
     const [studentEmail, setStudentEmail] = useState('');
     const [studentPhone, setStudentPhone] = useState('');
+    const [studentDob, setStudentDob] = useState('');
     const [studentAddress, setStudentAddress] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
@@ -59,7 +60,7 @@ const StudentApply = () => {
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
-        if (!studentName || !fatherName || !studentEmail || !studentPhone || !studentAddress) {
+        if (!studentName || !fatherName || !studentEmail || !studentPhone || !studentAddress || !studentDob) {
             setError('Please fill in all details');
             return;
         }
@@ -72,7 +73,8 @@ const StudentApply = () => {
                 fatherName,
                 studentEmail,
                 studentPhone,
-                studentAddress
+                studentAddress,
+                studentDob
             };
             const { data } = await axios.post(`/api/sales/applications/${id}/submit`, payload);
             setCheckoutDetails(data);
@@ -137,6 +139,7 @@ const StudentApply = () => {
                     <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-left text-xs space-y-1 mb-6 text-white/70">
                         <div><strong className="text-white">University:</strong> {appConfig?.university_name}</div>
                         <div><strong className="text-white">Preferred Course:</strong> {appConfig?.course_name}</div>
+                        <div><strong className="text-white">Date of Birth:</strong> {studentDob || appConfig?.student_dob || 'N/A'}</div>
                         {appConfig?.razorpay_payment_id && <div><strong className="text-white">Receipt Ref:</strong> {appConfig.razorpay_payment_id}</div>}
                     </div>
                     <ModernButton onClick={() => window.close()} className="w-full">
@@ -244,18 +247,34 @@ const StudentApply = () => {
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-xs font-semibold text-white/70 mb-2">Father's Name *</label>
-                                        <div className="relative">
-                                            <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
-                                            <input
-                                                type="text"
-                                                placeholder="e.g. Robert Doe"
-                                                value={fatherName}
-                                                onChange={(e) => setFatherName(e.target.value)}
-                                                className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary text-sm"
-                                                required
-                                            />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-white/70 mb-2">Father's Name *</label>
+                                            <div className="relative">
+                                                <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                                                <input
+                                                    type="text"
+                                                    placeholder="e.g. Robert Doe"
+                                                    value={fatherName}
+                                                    onChange={(e) => setFatherName(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary text-sm"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-semibold text-white/70 mb-2">Date of Birth *</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="date"
+                                                    value={studentDob}
+                                                    onChange={(e) => setStudentDob(e.target.value)}
+                                                    className="w-full px-4 py-[7px] bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary text-sm"
+                                                    style={{ colorScheme: 'dark' }}
+                                                    required
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 

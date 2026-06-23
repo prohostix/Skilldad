@@ -101,9 +101,9 @@ const uploadUniversityLogo = async (req, res) => {
 const submitStudentDetails = async (req, res) => {
     try {
         const { id } = req.params;
-        const { studentName, fatherName, studentAddress, studentEmail, studentPhone } = req.body;
+        const { studentName, fatherName, studentAddress, studentEmail, studentPhone, studentDob } = req.body;
 
-        if (!studentName || !fatherName || !studentAddress || !studentEmail || !studentPhone) {
+        if (!studentName || !fatherName || !studentAddress || !studentEmail || !studentPhone || !studentDob) {
             return res.status(400).json({ message: 'All student details are required' });
         }
 
@@ -131,14 +131,14 @@ const submitStudentDetails = async (req, res) => {
             gstAmount: 0
         });
 
-        // Update sales application with student details and order_id
+        // Update sales application with student details, dob and order_id
         await query(`
             UPDATE sales_applications
             SET student_name = $1, father_name = $2, student_address = $3,
                 student_email = $4, student_phone = $5, razorpay_order_id = $6,
-                updated_at = NOW()
-            WHERE id = $7
-        `, [studentName, fatherName, studentAddress, studentEmail, studentPhone, orderData.orderId, id]);
+                student_dob = $7, updated_at = NOW()
+            WHERE id = $8
+        `, [studentName, fatherName, studentAddress, studentEmail, studentPhone, orderData.orderId, studentDob, id]);
 
         res.json({
             success: true,
@@ -150,7 +150,8 @@ const submitStudentDetails = async (req, res) => {
             courseName: appData.course_name,
             studentName,
             studentEmail,
-            studentPhone
+            studentPhone,
+            studentDob
         });
     } catch (error) {
         console.error('Error submitting student details & initiating order:', error);
@@ -219,18 +220,22 @@ const confirmPayment = async (req, res) => {
                         <td style="padding: 10px; border: 1px solid #eee;">INR ${parseFloat(appData.fee_amount).toFixed(2)}</td>
                     </tr>
                     <tr>
+                        <td style="padding: 10px; border: 1px solid #eee; font-weight: bold;">Student DOB:</td>
+                        <td style="padding: 10px; border: 1px solid #eee;">${appData.student_dob || 'N/A'}</td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9;">
                         <td style="padding: 10px; border: 1px solid #eee; font-weight: bold;">Father's Name:</td>
                         <td style="padding: 10px; border: 1px solid #eee;">${appData.father_name}</td>
                     </tr>
-                    <tr style="background-color: #f9f9f9;">
+                    <tr>
                         <td style="padding: 10px; border: 1px solid #eee; font-weight: bold;">Phone Number:</td>
                         <td style="padding: 10px; border: 1px solid #eee;">${appData.student_phone}</td>
                     </tr>
-                    <tr>
+                    <tr style="background-color: #f9f9f9;">
                         <td style="padding: 10px; border: 1px solid #eee; font-weight: bold;">Address:</td>
                         <td style="padding: 10px; border: 1px solid #eee;">${appData.student_address}</td>
                     </tr>
-                    <tr style="background-color: #f9f9f9;">
+                    <tr>
                         <td style="padding: 10px; border: 1px solid #eee; font-weight: bold;">Payment ID:</td>
                         <td style="padding: 10px; border: 1px solid #eee; font-family: monospace;">${razorpay_payment_id}</td>
                     </tr>
