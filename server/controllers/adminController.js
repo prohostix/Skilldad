@@ -834,7 +834,7 @@ const deleteStudent = async (req, res) => {
             await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
             
             // Handle documents (could be uploaded by student)
-            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1 OR student_id = $1', [id]);
 
             // Finally delete the user
             await client.query('DELETE FROM users WHERE id = $1', [id]);
@@ -899,7 +899,7 @@ const deleteUser = async (req, res) => {
             }
             
             // Cleanup documents uploaded by this user
-            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1 OR student_id = $1', [id]);
 
             // Finally delete user
             await client.query('DELETE FROM users WHERE id = $1', [id]);
