@@ -511,7 +511,7 @@ const grantPermission = async (req, res) => {
             return res.status(400).json({ message: 'Role is required' });
         }
 
-        const validRoles = ['student', 'university', 'partner', 'admin', 'finance'];
+        const validRoles = ['student', 'university', 'partner', 'admin', 'finance', 'sales'];
         if (!validRoles.includes(role)) {
             return res.status(400).json({ message: 'Invalid role specified' });
         }
