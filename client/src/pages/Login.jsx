@@ -44,6 +44,7 @@ const Login = () => {
                     case 'university': return '/university/dashboard';
                     case 'partner': return '/partner/dashboard';
                     case 'finance': return '/finance/dashboard';
+                    case 'sales': return '/sales/dashboard';
                     case 'student': return '/dashboard';
                     default: return '/';
                 }
@@ -76,6 +77,7 @@ const Login = () => {
                     case 'university': return '/university/dashboard';
                     case 'partner': return '/partner/dashboard';
                     case 'finance': return '/finance/dashboard';
+                    case 'sales': return '/sales/dashboard';
                     case 'student': return '/dashboard';
                     default: return '/';
                 }

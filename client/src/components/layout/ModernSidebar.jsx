@@ -166,6 +166,12 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             { name: 'Settings', icon: Settings, path: '/finance/settings' },
         ];
 
+        if (userRole === 'sales') return [
+            { name: 'Dashboard', icon: LayoutDashboard, path: '/sales/dashboard' },
+            { name: 'Support Tickets', icon: LifeBuoy, path: '/sales/support' },
+            { name: 'Settings', icon: Settings, path: '/sales/settings' },
+        ];
+
         // Student (default)
         return [
             { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },

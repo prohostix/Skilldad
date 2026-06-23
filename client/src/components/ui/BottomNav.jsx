@@ -22,6 +22,7 @@ const BottomNav = () => {
             case 'university': return '/university/dashboard';
             case 'partner': return '/partner/dashboard';
             case 'finance': return '/finance/dashboard';
+            case 'sales': return '/sales/dashboard';
             default: return '/dashboard';
         }
     };
