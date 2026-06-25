@@ -43,9 +43,12 @@ const ExamManagement = () => {
     const [questionPapers, setQuestionPapers] = useState([]);
     const [answerKeys, setAnswerKeys] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [fetchingSubmissionsId, setFetchingSubmissionsId] = useState(null);
     const [openSchedule, setOpenSchedule] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [courses, setCourses] = useState([]);
+    const [excelFile, setExcelFile] = useState(null);
+    const [uploadingExcel, setUploadingExcel] = useState(false);
     const { showToast } = useToast();
     const { socket } = useSocket();
     const navigate = useNavigate();
@@ -64,8 +67,10 @@ const ExamManagement = () => {
         mandatedSlotId: '',
         linkedPaper: '',
         answerKey: '',
-        examType: 'pdf-based'
+        examType: 'pdf-based',
+        batchIds: []
     });
+    const [availableBatches, setAvailableBatches] = useState([]);
 
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [uploadData, setUploadData] = useState({
@@ -114,17 +119,25 @@ const ExamManagement = () => {
 
     const fetchSubmissions = async (examId) => {
         try {
+            setFetchingSubmissionsId(examId);
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
             const { data } = await axios.get(`/api/submissions/exam/${examId}`, config);
             console.log('[Submissions] Fetched:', data);
+            
+            // Clear individual grading view if open
+            setSelectedSubmission(null);
+            
             setSubmissions(data.submissions || []);
             setSelectedExamForGrading(examId);
+            setActiveTab('grading');
         } catch (err) {
             console.error('Error fetching submissions:', err);
             showToast('Failed to fetch submissions', 'error');
             setSubmissions([]);
+        } finally {
+            setFetchingSubmissionsId(null);
         }
     };
 
@@ -306,11 +319,53 @@ const ExamManagement = () => {
                 mandatedSlotId: '',
                 linkedPaper: '',
                 answerKey: '',
-                examType: 'pdf-based'
+                examType: 'pdf-based',
+                batchIds: []
             });
             fetchData();
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to schedule exam', 'error');
+        }
+    };
+
+    const handleDownloadTemplate = () => {
+        const headers = ["Question", "Option A", "Option B", "Option C", "Option D", "Correct Option (A/B/C/D)", "Marks", "Negative Marks"];
+        const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" +
+            "What is React?,A Javascript library,A Database,A CSS framework,A Server,A,1,0.25";
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "exam_questions_template.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('Template downloaded. Please fill and upload.', 'success');
+    };
+
+    const handleExcelUpload = async (examId) => {
+        if (!excelFile) return showToast('Please select an Excel/CSV file', 'error');
+
+        setUploadingExcel(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const formData = new FormData();
+            formData.append('excel', excelFile);
+
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            await axios.post(`/api/exams/${examId}/bulk-upload-questions`, formData, config);
+            showToast('Questions uploaded successfully!', 'success');
+            setExcelFile(null);
+            fetchData();
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to upload questions', 'error');
+        } finally {
+            setUploadingExcel(false);
         }
     };
 
@@ -330,17 +385,390 @@ const ExamManagement = () => {
         document.body.removeChild(link);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to remove this document?")) {
-            try {
-                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                await axios.delete(`/api/documents/${id}`, config);
-                showToast('Document removed', 'success');
-                fetchData();
-            } catch (err) {
-                showToast('Failed to delete', 'error');
-            }
+    const renderGradingTab = () => {
+        if (!selectedSubmission) {
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h5 className="text-sm font-black text-white/60 uppercase tracking-widest">
+                            {selectedExamForGrading 
+                                ? `Managing: ${exams.find(e => e._id === selectedExamForGrading)?.title || 'Exam'}`
+                                : 'Select Exam to Grade'
+                            }
+                        </h5>
+                        {selectedExamForGrading && (
+                            <div className="flex gap-3">
+                                {(() => {
+                                    const allGraded = submissions.every(s => s.status === 'graded');
+                                    const hasSubmissions = submissions.length > 0;
+                                    const currentExam = exams.find(e => e._id === selectedExamForGrading);
+                                    const resultsPublished = currentExam?.resultsPublished;
+
+                                    return (
+                                        <>
+                                            {hasSubmissions && allGraded && !resultsPublished && (
+                                                <ModernButton
+                                                    size="sm"
+                                                    onClick={() => handlePublishResults(selectedExamForGrading)}
+                                                    className="!bg-emerald-500 !text-white hover:!bg-emerald-600"
+                                                >
+                                                    <CheckCircle size={16} className="mr-2" />
+                                                    Publish Results
+                                                </ModernButton>
+                                            )}
+                                            {resultsPublished && (
+                                                <span className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-bold uppercase tracking-wider border border-emerald-500/30">
+                                                    <CheckCircle size={14} className="inline mr-2" />
+                                                    Results Published
+                                                </span>
+                                            )}
+                                            <ModernButton
+                                                size="sm"
+                                                variant="secondary"
+                                                onClick={() => {
+                                                    setSelectedExamForGrading(null);
+                                                    setSubmissions([]);
+                                                }}
+                                            >
+                                                Back to Exams
+                                            </ModernButton>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        )}
+                    </div>
+
+                    {!selectedExamForGrading ? (
+                        <div className="py-20 text-center text-white/20">
+                            <Edit size={48} className="mx-auto mb-4 opacity-50" />
+                            <p className="font-bold uppercase tracking-widest text-sm">Go to "Conduct Exams" tab, then click "Manage" on an exam to begin grading.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {submissions.length > 0 && (() => {
+                                const gradedCount = submissions.filter(s => s.status === 'graded').length;
+                                const totalCount = submissions.length;
+                                const allGraded = gradedCount === totalCount;
+                                const percentage = (gradedCount / totalCount) * 100;
+
+                                return (
+                                    <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl mb-2">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div>
+                                                <p className="text-xs font-black text-white/40 uppercase tracking-widest">Grading Progress</p>
+                                                <p className="text-2xl font-black text-white mt-1">{gradedCount} / {totalCount}</p>
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${allGraded ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-500'}`}>
+                                                {allGraded ? 'Ready to Publish' : 'In Progress'}
+                                            </span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                            <div className={`h-full transition-all duration-500 ${allGraded ? 'bg-emerald-500' : 'bg-primary'}`} style={{ width: `${percentage}%` }} />
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+
+                            <div className="flex flex-col gap-2">
+                                {submissions.map((submission) => (
+                                    <div key={submission._id} className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group">
+                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${submission.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                {submission.status === 'graded' ? <CheckCircle size={16} /> : <Clock size={16} />}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h4 className="font-bold text-white text-sm truncate">{submission.student?.name || 'Student'}</h4>
+                                                <p className="text-[10px] text-white/40 truncate">{submission.student?.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-right">
+                                                <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Score</p>
+                                                <p className="text-xs font-bold text-white">{submission.status === 'graded' ? `${submission.obtainedMarks}/${submission.totalMarks}` : 'Pending'}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => viewSubmissionForGrading(submission)}
+                                                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${submission.status === 'graded' ? 'bg-white/5 text-white/40' : 'bg-primary text-white'}`}
+                                            >
+                                                {submission.status === 'graded' ? 'Review' : 'Grade'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        } else {
+            return (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h5 className="text-lg font-black text-white">Grading: {selectedSubmission.student?.name}</h5>
+                            <p className="text-xs text-white/40 mt-1">{selectedSubmission.student?.email}</p>
+                        </div>
+                        <ModernButton size="sm" variant="secondary" onClick={() => { setSelectedSubmission(null); setGradingData({}); }}>
+                            Back to Submissions
+                        </ModernButton>
+                    </div>
+
+                    <div className="space-y-4">
+                        {(!selectedSubmission.answers || selectedSubmission.answers.length === 0) ? (
+                            <div className="p-10 bg-white/[0.02] border border-white/5 rounded-2xl text-center">
+                                <p className="text-white/40 text-sm">No answers found or PDF submission.</p>
+                                {selectedSubmission.answer_sheet_url && (
+                                    <ModernButton size="sm" className="mt-4" onClick={() => window.open(selectedSubmission.answer_sheet_url.startsWith('http') ? selectedSubmission.answer_sheet_url : `${import.meta.env.VITE_API_URL}/${selectedSubmission.answer_sheet_url}`, '_blank')}>
+                                        Download PDF
+                                    </ModernButton>
+                                )}
+                            </div>
+                        ) : (
+                            selectedSubmission.answers.map((answer, idx) => {
+                                const questionId = answer.question?._id || answer.questionId;
+                                return (
+                                    <div key={questionId || idx} className="p-4 bg-white/[0.02] border border-white/5 rounded-xl space-y-4">
+                                        <div className="flex justify-between">
+                                            <p className="text-xs font-bold text-white/60">Q{idx + 1}: {answer.question?.questionText || 'Custom Question'}</p>
+                                            <span className="text-[10px] text-white/30">{answer.question?.marks || 0} pts</span>
+                                        </div>
+                                        <div className="p-3 bg-white/[0.03] rounded-lg text-sm text-white">
+                                            {answer.questionType === 'mcq' ? `Selected: ${answer.selectedOption + 1}` : (answer.textAnswer || 'No answer')}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <input 
+                                                type="number" 
+                                                placeholder="Marks" 
+                                                className="px-3 py-2 bg-white/5 rounded-lg text-sm text-white border border-white/10"
+                                                value={gradingData[questionId]?.marks ?? answer.marksAwarded ?? 0}
+                                                onChange={e => setGradingData({ ...gradingData, [questionId]: { ...gradingData[questionId], marks: parseFloat(e.target.value) || 0 }})}
+                                            />
+                                            <input 
+                                                type="text" 
+                                                placeholder="Feedback" 
+                                                className="px-3 py-2 bg-white/5 rounded-lg text-sm text-white border border-white/10"
+                                                value={gradingData[questionId]?.feedback || ''}
+                                                onChange={e => setGradingData({ ...gradingData, [questionId]: { ...gradingData[questionId], feedback: e.target.value }})}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+
+                    <div className="flex justify-end gap-4 pt-4 border-t border-white/5">
+                        <ModernButton variant="secondary" onClick={() => setSelectedSubmission(null)}>Cancel</ModernButton>
+                        <ModernButton onClick={() => handleGradeSubmission(selectedSubmission._id)}>Publish Grade</ModernButton>
+                    </div>
+                </div>
+            );
+        }
+    };
+
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'grading':
+                return renderGradingTab();
+
+            case 'questions':
+                return (
+                    <div className="flex flex-col gap-2">
+                        {questionPapers.length > 0 ? questionPapers.map((paper) => (
+                            <div key={paper._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0 border border-indigo-500/10">
+                                        <FileText size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h4 className="font-bold text-white text-sm truncate">{paper.title}</h4>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Institutional Asset</span>
+                                            <span className="text-white/10">|</span>
+                                            <span className="text-[9px] text-white/30 font-bold uppercase tracking-wider">{new Date(paper.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedDoc(paper);
+                                            setExamData(prev => ({ ...prev, title: paper.title, linkedPaper: paper._id }));
+                                            setOpenSchedule(true);
+                                        }}
+                                        className="px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
+                                    >
+                                        Deploy
+                                    </button>
+                                    <div className="flex items-center bg-white/5 rounded-lg p-0.5 ml-2">
+                                        <button onClick={() => handleView(paper)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="View"><Eye size={14} /></button>
+                                        <button onClick={() => handleDownload(paper)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="Download"><Download size={14} /></button>
+                                        <button onClick={() => handleDelete(paper._id)} className="p-1.5 text-white/30 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={14} /></button>
+                                    </div>
+                                </div>
+                            </div>
+                        )) : (
+                            <div className="py-20 text-center text-white/20">
+                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
+                                <p className="font-bold uppercase tracking-widest text-sm">No Question Papers Received</p>
+                            </div>
+                        )}
+                    </div>
+                );
+
+            case 'answers':
+                return (
+                    <div className="flex flex-col gap-2">
+                        {answerKeys.length > 0 ? answerKeys.map((key) => (
+                            <div key={key._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0 border border-emerald-500/10">
+                                        <CheckCircle size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h4 className="font-bold text-white text-sm truncate">{key.title}</h4>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Solution Shield</span>
+                                            <span className="text-white/10">|</span>
+                                            <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase tracking-widest rounded">Official Key</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedDoc(key);
+                                            setExamData(prev => ({ ...prev, title: key.title, answerKey: key._id }));
+                                            setOpenSchedule(true);
+                                        }}
+                                        className="px-3 py-1.5 bg-emerald-500/10 border border-indigo-500/20 text-indigo-400 rounded-lg hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
+                                    >
+                                        Deploy
+                                    </button>
+                                    <div className="flex items-center bg-white/5 rounded-lg p-0.5 ml-2">
+                                        <button onClick={() => handleView(key)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="View"><Eye size={14} /></button>
+                                        <button onClick={() => handleDownload(key)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="Download"><Download size={14} /></button>
+                                        <button onClick={() => handleDelete(key._id)} className="p-1.5 text-white/30 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={14} /></button>
+                                    </div>
+                                </div>
+                            </div>
+                        )) : (
+                            <div className="py-20 text-center text-white/20">
+                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
+                                <p className="font-bold uppercase tracking-widest text-sm">No Answer Sheets Received</p>
+                            </div>
+                        )}
+                    </div>
+                );
+
+            case 'conduct':
+                return (
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between px-1">
+                            <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Active Examination Deployment</h5>
+                            <button
+                                onClick={handleDownloadTemplate}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all"
+                            >
+                                <Download size={14} />
+                                Download MCQ Template
+                            </button>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                        {exams.length > 0 ? exams.map((exam) => (
+                            <div key={exam._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0 border border-emerald-500/10">
+                                        <Calendar size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h4 className="font-bold text-white text-sm truncate">{exam.title}</h4>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleDateString()}</span>
+                                            <span className="text-white/10">|</span>
+                                            <div className="flex gap-2">
+                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${exam.linkedPaper ? 'bg-indigo-500/10 text-indigo-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                    {exam.linkedPaper ? 'Paper Active' : 'No Paper'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={() => fetchSubmissions(exam._id)}
+                                        disabled={fetchingSubmissionsId === exam._id}
+                                        className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+                                    >
+                                        {fetchingSubmissionsId === exam._id ? 'Syncing...' : 'Manage'}
+                                    </button>
+                                    <button 
+                                        onClick={() => navigate(`/university/exams/${exam._id}/questions`)}
+                                        className="px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all"
+                                    >
+                                        Questions
+                                    </button>
+                                </div>
+                            </div>
+                        )) : (
+                            <div className="py-20 text-center text-white/20">
+                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
+                                <p className="font-bold uppercase tracking-widest text-sm">No Active Exams</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                );
+
+            case 'schedule':
+                return (
+                    <div className="flex flex-col gap-2">
+                        {exams.filter(ex => ex.createdBy?.role === 'university').length > 0 ? exams.filter(ex => ex.createdBy?.role === 'university').map((exam) => (
+                            <div key={exam._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
+                                <div className="flex items-center gap-4 flex-1 min-w-0">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/10">
+                                        <Calendar size={20} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h4 className="font-bold text-white text-sm truncate">{exam.title}</h4>
+                                        <div className="flex items-center gap-3 mt-0.5">
+                                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleDateString()}</span>
+                                            <span className="text-white/10">|</span>
+                                            <div className="flex gap-2">
+                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${exam.linkedPaper ? 'bg-indigo-500/10 text-indigo-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                    {exam.linkedPaper ? 'Paper' : 'No Paper'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <button 
+                                        onClick={() => navigate('/university/exams')}
+                                        className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black uppercase tracking-widest text-white/60 hover:bg-white/10 hover:text-white transition-all"
+                                    >
+                                        View Report
+                                    </button>
+                                    <button onClick={() => handleDelete(exam._id)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )) : (
+                            <div className="py-20 text-center text-white/20">
+                                <p className="font-bold uppercase tracking-widest text-sm">No University-scheduled History</p>
+                            </div>
+                        )}
+                    </div>
+                );
+
+            default:
+                return (
+                    <div className="py-20 text-center text-white/20">
+                        <p className="font-bold uppercase tracking-widest text-sm">Select a tab to view content</p>
+                    </div>
+                );
         }
     };
 
@@ -402,585 +830,10 @@ const ExamManagement = () => {
                         />
                     </div>
                 </div>
-
                 <div className="grid gap-4">
-                    {activeTab === 'grading' ? (
-                        !selectedSubmission ? (
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <h5 className="text-sm font-black text-white/60 uppercase tracking-widest">Select Exam to Grade</h5>
-                                    {selectedExamForGrading && (
-                                        <div className="flex gap-3">
-                                            {(() => {
-                                                const allGraded = submissions.every(s => s.status === 'graded');
-                                                const hasSubmissions = submissions.length > 0;
-                                                const currentExam = exams.find(e => e._id === selectedExamForGrading);
-                                                const resultsPublished = currentExam?.resultsPublished;
-
-                                                return (
-                                                    <>
-                                                        {hasSubmissions && allGraded && !resultsPublished && (
-                                                            <ModernButton
-                                                                size="sm"
-                                                                onClick={() => handlePublishResults(selectedExamForGrading)}
-                                                                className="!bg-emerald-500 !text-white hover:!bg-emerald-600"
-                                                            >
-                                                                <CheckCircle size={16} className="mr-2" />
-                                                                Publish Results
-                                                            </ModernButton>
-                                                        )}
-                                                        {resultsPublished && (
-                                                            <span className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-xs font-bold uppercase tracking-wider border border-emerald-500/30">
-                                                                <CheckCircle size={14} className="inline mr-2" />
-                                                                Results Published
-                                                            </span>
-                                                        )}
-                                                        <ModernButton
-                                                            size="sm"
-                                                            variant="secondary"
-                                                            onClick={() => {
-                                                                setSelectedExamForGrading(null);
-                                                                setSubmissions([]);
-                                                            }}
-                                                        >
-                                                            Back to Exams
-                                                        </ModernButton>
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {!selectedExamForGrading ? (
-                                    // Show list of exams
-                                    exams.length > 0 ? exams.map((exam) => (
-                                        <div key={exam._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all">
-                                            <div className="flex items-center gap-5">
-                                                <div className="p-4 bg-purple-500/10 rounded-2xl text-purple-400">
-                                                    <FileText size={28} />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-white text-lg">{exam.title}</h4>
-                                                    <p className="text-xs text-white/40 mt-1">{exam.course?.title}</p>
-                                                    <div className="flex items-center gap-3 text-[10px] mt-2 font-bold uppercase tracking-wider text-white/30">
-                                                        <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleDateString()}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <ModernButton
-                                                size="sm"
-                                                onClick={() => fetchSubmissions(exam._id)}
-                                            >
-                                                <Users size={16} className="mr-2" />
-                                                View Submissions
-                                            </ModernButton>
-                                        </div>
-                                    )) : (
-                                        <div className="py-20 text-center text-white/20">
-                                            <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                            <p className="font-bold uppercase tracking-widest text-sm">No Exams Found</p>
-                                        </div>
-                                    )
-                                ) : (
-                                    // Show submissions for selected exam
-                                    <>
-                                        {/* Grading Progress Indicator */}
-                                        {submissions.length > 0 && (() => {
-                                            const gradedCount = submissions.filter(s => s.status === 'graded').length;
-                                            const totalCount = submissions.length;
-                                            const allGraded = gradedCount === totalCount;
-                                            const percentage = (gradedCount / totalCount) * 100;
-
-                                            return (
-                                                <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl mb-4">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <div>
-                                                            <p className="text-xs font-black text-white/40 uppercase tracking-widest">Grading Progress</p>
-                                                            <p className="text-2xl font-black text-white mt-1">
-                                                                {gradedCount} / {totalCount} <span className="text-sm text-white/40">Graded</span>
-                                                            </p>
-                                                        </div>
-                                                        {allGraded ? (
-                                                            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
-                                                                <CheckCircle size={20} />
-                                                                <span className="text-xs font-black uppercase tracking-wider">Ready to Publish</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 text-amber-500 rounded-xl border border-amber-500/30">
-                                                                <Clock size={20} />
-                                                                <span className="text-xs font-black uppercase tracking-wider">{totalCount - gradedCount} Pending</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                                        <div
-                                                            className={`h-full transition-all duration-500 ${allGraded ? 'bg-emerald-500' : 'bg-primary'}`}
-                                                            style={{ width: `${percentage}%` }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-
-                                        {submissions.map((submission) => (
-                                            <div key={submission._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-all">
-                                                <div className="flex items-center gap-5">
-                                                    <div className={`p-4 rounded-2xl ${submission.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400' :
-                                                        'bg-amber-500/10 text-amber-500'
-                                                        }`}>
-                                                        {submission.status === 'graded' ? <CheckCircle size={28} /> : <Clock size={28} />}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-white text-lg">{submission.student?.name || 'Student'}</h4>
-                                                        <p className="text-xs text-white/40 mt-1">{submission.student?.email}</p>
-                                                        <div className="flex items-center gap-3 text-[10px] mt-2 font-bold uppercase tracking-wider">
-                                                            <span className={`px-2 py-0.5 rounded ${submission.status === 'graded' ? 'bg-emerald-500/20 text-emerald-400' :
-                                                                'bg-amber-500/20 text-amber-500'
-                                                                }`}>
-                                                                {submission.status}
-                                                            </span>
-                                                            {submission.status === 'graded' && (
-                                                                <span className="text-white/60">
-                                                                    Score: {submission.obtainedMarks}/{submission.totalMarks} ({(Number(submission.percentage) || 0).toFixed(1)}%)
-                                                                </span>
-                                                            )}
-                                                            <span className="text-white/30">
-                                                                Submitted: {new Date(submission.submittedAt).toLocaleString()}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <ModernButton
-                                                    size="sm"
-                                                    variant={submission.status === 'graded' ? 'secondary' : 'primary'}
-                                                    onClick={() => viewSubmissionForGrading(submission)}
-                                                >
-                                                    <Edit size={16} className="mr-2" />
-                                                    {submission.status === 'graded' ? 'Review' : 'Grade Now'}
-                                                </ModernButton>
-                                            </div>
-                                        ))}
-
-                                        {submissions.length === 0 && (
-                                            <div className="py-20 text-center text-white/20">
-                                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                                <p className="font-bold uppercase tracking-widest text-sm">No Submissions Yet</p>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        ) : (
-                            // Grading interface
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h5 className="text-lg font-black text-white">Grading: {selectedSubmission.student?.name}</h5>
-                                        <p className="text-xs text-white/40 mt-1">{selectedSubmission.student?.email}</p>
-                                    </div>
-                                    <ModernButton
-                                        size="sm"
-                                        variant="secondary"
-                                        onClick={() => {
-                                            setSelectedSubmission(null);
-                                            setGradingData({});
-                                        }}
-                                    >
-                                        Back to Submissions
-                                    </ModernButton>
-                                </div>
-
-                                {/* Auto-grading Summary */}
-                                {(() => {
-                                    const mcqCount = selectedSubmission.answers?.filter(a => a.questionType === 'mcq').length || 0;
-                                    const descriptiveCount = selectedSubmission.answers?.filter(a => a.questionType === 'descriptive').length || 0;
-                                    const autoGradedCount = selectedSubmission.answers?.filter(a => a.questionType === 'mcq' && a.marksAwarded !== undefined).length || 0;
-
-                                    return (
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Auto-Graded (MCQ)</p>
-                                                <p className="text-2xl font-black text-white">{autoGradedCount} / {mcqCount}</p>
-                                            </div>
-                                            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-                                                <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Manual Grading Needed</p>
-                                                <p className="text-2xl font-black text-white">{descriptiveCount}</p>
-                                            </div>
-                                            <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl">
-                                                <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Total Questions</p>
-                                                <p className="text-2xl font-black text-white">{selectedSubmission.answers?.length || 0}</p>
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-
-                                {/* Answers to grade */}
-                                <div className="space-y-4">
-                                    {console.log('[Grading UI] Selected submission:', selectedSubmission)}
-                                    {console.log('[Grading UI] Answers:', selectedSubmission.answers)}
-                                    {(!selectedSubmission.answers || selectedSubmission.answers.length === 0) ? (
-                                        <div className="p-8 bg-white/[0.02] border border-white/5 rounded-2xl text-center">
-                                            {selectedSubmission.answer_sheet_url ? (
-                                                <div className="space-y-4">
-                                                    <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
-                                                        <FileText size={32} className="text-emerald-400" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-white font-bold">Answer Sheet Uploaded</p>
-                                                        <p className="text-white/40 text-xs mt-1">{selectedSubmission.answer_sheet_name || 'paper-submission.pdf'}</p>
-                                                    </div>
-                                                    <ModernButton 
-                                                        size="sm" 
-                                                        onClick={() => {
-                                                            const url = selectedSubmission.answer_sheet_url.startsWith('http') 
-                                                                ? selectedSubmission.answer_sheet_url 
-                                                                : `${import.meta.env.VITE_API_URL || ''}/${selectedSubmission.answer_sheet_url}`;
-                                                            window.open(url, '_blank');
-                                                        }}
-                                                    >
-                                                        <Download size={16} className="mr-2" />
-                                                        Download Answer Sheet
-                                                    </ModernButton>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <p className="text-white/40 text-sm">No answers found in this submission</p>
-                                                    <p className="text-white/20 text-xs mt-2">This might be a PDF-based exam or the submission is incomplete</p>
-                                                </>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        selectedSubmission.answers.map((answer, idx) => {
-                                            const questionId = answer.question?._id || answer.questionId;
-                                            const question = answer.question;
-
-                                            console.log(`[Grading UI] Question ${idx + 1}:`, {
-                                                questionId,
-                                                question,
-                                                answer,
-                                                questionType: answer.questionType,
-                                                selectedOption: answer.selectedOption,
-                                                textAnswer: answer.textAnswer
-                                            });
-
-                                            return (
-                                                <div key={questionId || idx} className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl space-y-4">
-                                                    <div>
-                                                        <div className="flex items-start justify-between mb-3">
-                                                            <h6 className="text-sm font-bold text-white">Question {idx + 1}</h6>
-                                                            <span className="text-xs text-white/40">Max: {question?.marks || 0} marks</span>
-                                                        </div>
-                                                        <p className="text-white/80 text-sm mb-4">{question?.questionText || 'Question text not available'}</p>
-                                                    </div>
-
-                                                    <div className="p-4 bg-white/[0.03] rounded-xl">
-                                                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">Student's Answer</p>
-                                                        {answer.questionType === 'mcq' ? (
-                                                            <p className="text-white text-sm">
-                                                                Selected: {question?.options?.[answer.selectedOption]?.text || `Option ${answer.selectedOption + 1}`}
-                                                                {answer.marksAwarded !== undefined && (
-                                                                    <span className={`ml-3 px-2 py-0.5 rounded text-xs ${answer.marksAwarded > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
-                                                                        }`}>
-                                                                        {answer.marksAwarded > 0 ? 'Correct' : 'Incorrect'}
-                                                                    </span>
-                                                                )}
-                                                            </p>
-                                                        ) : (
-                                                            <p className="text-white text-sm whitespace-pre-wrap">{answer.textAnswer || 'No answer provided'}</p>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Grading inputs */}
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div>
-                                                            <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">
-                                                                Marks Awarded {answer.questionType === 'mcq' && answer.marksAwarded !== undefined && (
-                                                                    <span className="text-emerald-400">(Auto-graded)</span>
-                                                                )}
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                min="0"
-                                                                max={question?.marks || 100}
-                                                                step="0.5"
-                                                                value={gradingData[questionId]?.marks ?? answer.marksAwarded ?? 0}
-                                                                onChange={(e) => setGradingData({
-                                                                    ...gradingData,
-                                                                    [questionId]: {
-                                                                        ...gradingData[questionId],
-                                                                        marks: parseFloat(e.target.value) || 0
-                                                                    }
-                                                                })}
-                                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                disabled={answer.questionType === 'mcq' && answer.marksAwarded !== undefined}
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-2">
-                                                                Feedback (Optional)
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={gradingData[questionId]?.feedback || ''}
-                                                                onChange={(e) => setGradingData({
-                                                                    ...gradingData,
-                                                                    [questionId]: {
-                                                                        ...gradingData[questionId],
-                                                                        feedback: e.target.value
-                                                                    }
-                                                                })}
-                                                                placeholder="Add feedback..."
-                                                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-primary transition-all"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    )}
-                                </div>
-
-                                {/* Submit grading */}
-                                <div className="flex justify-end gap-4 pt-4">
-                                    <ModernButton
-                                        variant="secondary"
-                                        onClick={() => {
-                                            setSelectedSubmission(null);
-                                            setGradingData({});
-                                        }}
-                                    >
-                                        Cancel
-                                    </ModernButton>
-                                    <ModernButton
-                                        onClick={() => handleGradeSubmission(selectedSubmission.id || selectedSubmission._id)}
-                                    >
-                                        <Award size={16} className="mr-2" />
-                                        Submit Grades & Publish
-                                    </ModernButton>
-                                </div>
-                            </div>
-                        )
-                    ) : activeTab === 'questions' ? (
-                        questionPapers.length > 0 ? questionPapers.map((paper) => (
-                            <div key={paper._id} className="group relative flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
-                                <div className="flex items-center gap-5">
-                                    <div className="p-4 bg-indigo-500/10 rounded-2xl text-indigo-400 group-hover:scale-110 transition-transform duration-300">
-                                        <FileText size={28} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white text-lg tracking-tight">{paper.title}</h4>
-                                        <div className="flex items-center gap-4 text-xs text-white/40 mt-1.5 font-medium">
-                                            <span className="flex items-center gap-1.5 uppercase tracking-wider"><BookOpen size={14} className="text-white/20" /> Institutional Asset</span>
-                                            <span className="flex items-center gap-1.5"><Calendar size={14} className="text-white/20" /> {new Date(paper.createdAt).toLocaleDateString()}</span>
-                                            <span className="px-2 py-0.5 bg-white/10 rounded text-white/60 text-[10px] font-black uppercase tracking-widest">Admin Verified</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedDoc(paper);
-                                            setExamData(prev => ({ ...prev, title: paper.title, linkedPaper: paper._id }));
-                                            setOpenSchedule(true);
-                                        }}
-                                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500/20 text-indigo-400 rounded-xl hover:bg-indigo-500 text-white transition-all duration-300 text-xs font-black uppercase tracking-widest"
-                                    >
-                                        <Plus size={16} /> Deploy Question
-                                    </button>
-                                    <div className="flex items-center bg-white/5 rounded-xl p-1 ml-2">
-                                        <button onClick={() => handleView(paper)} className="p-2 text-white/40 hover:text-white transition-colors" title="View"><Eye size={18} /></button>
-                                        <button onClick={() => handleDownload(paper)} className="p-2 text-white/40 hover:text-white transition-colors" title="Download"><Download size={18} /></button>
-                                        <button onClick={() => handleDelete(paper._id)} className="p-2 text-white/40 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={18} /></button>
-                                    </div>
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="py-20 text-center text-white/20">
-                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                <p className="font-bold uppercase tracking-widest text-sm">No Question Papers Received</p>
-                            </div>
-                        )
-                    ) : activeTab === 'answers' ? (
-                        answerKeys.length > 0 ? answerKeys.map((key) => (
-                            <div key={key._id} className="group relative flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300">
-                                <div className="flex items-center gap-5">
-                                    <div className="p-4 bg-emerald-500/10 rounded-2xl text-emerald-400 group-hover:scale-110 transition-transform duration-300">
-                                        <CheckCircle size={28} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white text-lg tracking-tight">{key.title}</h4>
-                                        <div className="flex items-center gap-4 text-xs text-white/40 mt-1.5 font-medium">
-                                            <span className="flex items-center gap-1.5 uppercase tracking-wider"><ShieldCheck size={14} className="text-white/20" /> Solution Shield</span>
-                                            <span className="flex items-center gap-1.5"><Calendar size={14} className="text-white/20" /> {new Date(key.createdAt).toLocaleDateString()}</span>
-                                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded">Official Key</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedDoc(key);
-                                            setExamData(prev => ({ ...prev, title: key.title, answerKey: key._id }));
-                                            setOpenSchedule(true);
-                                        }}
-                                        className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-xl hover:bg-emerald-500 text-white transition-all duration-300 text-xs font-black uppercase tracking-widest"
-                                    >
-                                        <Plus size={16} /> Deploy Solution
-                                    </button>
-                                    <div className="flex items-center bg-white/5 rounded-xl p-1 ml-2">
-                                        <button onClick={() => handleView(key)} className="p-2 text-white/40 hover:text-white transition-colors" title="View"><Eye size={18} /></button>
-                                        <button onClick={() => handleDownload(key)} className="p-2 text-white/40 hover:text-white transition-colors" title="Download"><Download size={18} /></button>
-                                        <button onClick={() => handleDelete(key._id)} className="p-2 text-white/40 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={18} /></button>
-                                    </div>
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="py-20 text-center text-white/20">
-                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                <p className="font-bold uppercase tracking-widest text-sm">No Answer Sheets Received</p>
-                            </div>
-                        )
-                    ) : activeTab === 'conduct' ? (
-                        <div className="space-y-6">
-                            {(() => {
-                                const mandatedSlots = exams.filter(ex => ex.createdBy?.role === 'admin');
-                                const now = new Date();
-                                const liveExams = exams.filter(ex => {
-                                    const start = new Date(ex.scheduledStartTime);
-                                    const end = new Date(ex.scheduledEndTime);
-                                    return now >= start && now <= end;
-                                });
-
-                                return (
-                                    <>
-                                        {liveExams.length > 0 && (
-                                            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl animate-pulse">
-                                                <p className="flex items-center gap-2 text-emerald-400 font-black text-xs uppercase tracking-widest mb-4">
-                                                    <span className="w-2 h-2 bg-emerald-400 rounded-full inline-block"></span> Ongoing Live Assessments
-                                                </p>
-                                                {liveExams.map(ex => (
-                                                    <div key={ex._id} className="flex justify-between items-center bg-black/40 p-3 rounded-xl border border-white/5 mb-2">
-                                                        <div>
-                                                            <p className="text-white text-sm font-bold">{ex.title}</p>
-                                                            <p className="text-white/40 text-[10px]">{ex.course?.title}</p>
-                                                        </div>
-                                                        <span className="px-3 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg">LIVE NOW</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Mandated Admin Slots - Deployment Required</h5>
-                                        {mandatedSlots.length > 0 ? mandatedSlots.map(slot => {
-                                            const isDeployed = exams.some(ex => ex.mandatedSlotId === slot._id || (ex.scheduledStartTime === slot.scheduledStartTime && ex.createdBy?.role === 'university'));
-                                            return (
-                                                <div key={slot._id} className="flex items-center justify-between p-5 bg-white/[0.03] border border-white/10 rounded-2xl relative overflow-hidden group">
-                                                    {!isDeployed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500"></div>}
-                                                    <div className="flex items-center gap-5">
-                                                        <div className={`p-4 rounded-2xl ${isDeployed ? 'bg-indigo-500/10 text-indigo-400' : 'bg-amber-500/10 text-amber-500'}`}>
-                                                            {isDeployed ? <CheckCircle size={28} /> : <AlertCircle size={28} />}
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-bold text-white text-lg">{new Date(slot.scheduledStartTime).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })} • Session</h4>
-                                                            <div className="flex items-center gap-4 text-[10px] mt-2 font-bold uppercase tracking-wider">
-                                                                <span className="text-white/60">Module: {slot.course?.title || 'Unknown'}</span>
-                                                                <span className="text-indigo-400 flex items-center gap-1"><Clock size={12} /> {new Date(slot.scheduledStartTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-black ${slot.examType === 'online-mcq' ? 'bg-emerald-500/20 text-emerald-400' :
-                                                                    slot.examType === 'pdf-based' ? 'bg-purple-500/20 text-purple-400' :
-                                                                        slot.examType === 'online-descriptive' ? 'bg-blue-500/20 text-blue-400' :
-                                                                            'bg-indigo-500/20 text-indigo-400'
-                                                                    }`}>
-                                                                    {slot.examType?.replace('-', ' ').toUpperCase() || 'EXAM'}
-                                                                </span>
-                                                                {isDeployed ? (
-                                                                    <span className="text-emerald-400 flex items-center gap-1 uppercase tracking-tighter"><ShieldCheck size={10} /> Material Deployed</span>
-                                                                ) : (
-                                                                    <span className="text-amber-500 flex items-center gap-1 animate-pulse">Action Required • No Material</span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        {(slot.examType === 'online-mcq' || slot.examType === 'online-descriptive' || slot.examType === 'mixed') && (
-                                                            <ModernButton
-                                                                size="sm"
-                                                                variant="primary"
-                                                                onClick={() => navigate(`/university/exams/${slot._id}/questions`)}
-                                                            >
-                                                                <FileText size={16} className="mr-1" />
-                                                                Manage Questions
-                                                            </ModernButton>
-                                                        )}
-                                                        {slot.examType === 'pdf-based' && (
-                                                            <ModernButton
-                                                                size="sm"
-                                                                variant={isDeployed ? "secondary" : "primary"}
-                                                                onClick={() => {
-                                                                    setActiveTab('questions');
-                                                                    setExamData(prev => ({
-                                                                        ...prev,
-                                                                        mandatedSlotId: slot._id,
-                                                                        course: slot.course?._id || slot.course,
-                                                                        scheduledStartTime: slot.scheduledStartTime ? new Date(slot.scheduledStartTime).toISOString().slice(0, 16) : '',
-                                                                        scheduledEndTime: slot.scheduledEndTime ? new Date(slot.scheduledEndTime).toISOString().slice(0, 16) : '',
-                                                                        duration: slot.duration,
-                                                                        totalMarks: slot.totalMarks || 100,
-                                                                        examType: slot.examType || 'pdf-based'
-                                                                    }));
-                                                                    showToast("Pick a question paper for this slot", "info");
-                                                                }}
-                                                            >
-                                                                {isDeployed ? "Manage Deploy" : "Assign Paper"}
-                                                            </ModernButton>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        }) : (
-                                            <div className="py-20 text-center text-white/20">
-                                                <p className="font-bold uppercase tracking-widest text-sm">No Upcoming Mandated Slots from Admin</p>
-                                            </div>
-                                        )}
-                                    </>
-                                );
-                            })()}
-                        </div>
-                    ) : (
-                        exams.filter(ex => ex.createdBy?.role === 'university').length > 0 ? exams.filter(ex => ex.createdBy?.role === 'university').map((exam) => (
-                            <div key={exam._id} className="flex items-center justify-between p-5 bg-white/[0.02] border border-white/5 rounded-2xl">
-                                <div className="flex items-center gap-5">
-                                    <div className="p-4 bg-primary/10 rounded-2xl text-primary">
-                                        <Calendar size={28} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-white text-lg">{exam.title}</h4>
-                                        <p className="text-xs text-white/40">{exam.course?.title}</p>
-                                        <div className="flex items-center gap-4 text-[10px] mt-2 font-bold uppercase tracking-wider">
-                                            <span className="text-emerald-400 flex items-center gap-1"><Clock size={12} /> {new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleString()}</span>
-                                            <span className="text-white/30">•</span>
-                                            <span className="text-white/30">{exam.duration} Minutes</span>
-                                            <span className={`px-2 py-0.5 rounded ${exam.linkedPaper ? 'bg-indigo-500/20 text-indigo-400' : 'bg-red-500/20 text-red-400'}`}>
-                                                {exam.linkedPaper ? 'Paper Attached' : 'MISSING PAPER'}
-                                            </span>
-                                            <span className={`px-2 py-0.5 rounded ${exam.answerKey ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-500/70'}`}>
-                                                {exam.answerKey ? 'Solution Attached' : 'MISSING SOLUTION'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <ModernButton size="sm" variant="secondary" onClick={() => navigate('/university/exams')}>View Report</ModernButton>
-                                    <button onClick={() => handleDelete(exam._id)} className="p-2 text-white/20 hover:text-red-500 transition-colors"><Trash2 size={18} /></button>
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="py-20 text-center text-white/20">
-                                <p className="font-bold uppercase tracking-widest text-sm">No University-scheduled History</p>
-                            </div>
-                        )
-                    )}
+                    {renderTabContent()}
                 </div>
+
             </GlassCard>
 
             {/* Schedule Exam Modal */}
@@ -1005,51 +858,73 @@ const ExamManagement = () => {
                                 <form onSubmit={handleScheduleExam} className="space-y-6">
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Assessment Title</label>
+                                            <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Exam Title</label>
                                             <input
                                                 type="text"
                                                 required
-                                                className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white focus:outline-none focus:border-indigo-500 transition-all font-inter text-sm"
+                                                placeholder="e.g. Mid-Term Assessment"
+                                                className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-indigo-500 transition-all font-inter text-sm"
                                                 value={examData.title}
-                                                onChange={e => setExamData({ ...examData, title: e.target.value })}
+                                                onChange={(e) => setExamData({ ...examData, title: e.target.value })}
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Assign to Admin Slot</label>
-                                                <select
-                                                    className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-indigo-500 transition-all font-inter text-sm"
-                                                    onChange={(e) => {
-                                                        const slot = exams.find(ex => ex._id === e.target.value);
-                                                        if (slot) {
-                                                            setExamData({
-                                                                ...examData,
-                                                                course: slot.course?._id || slot.course,
-                                                                scheduledStartTime: toLocalDateTimeString(slot.scheduledStartTime),
-                                                                scheduledEndTime: toLocalDateTimeString(slot.scheduledEndTime),
-                                                                duration: slot.duration,
-                                                                passingScore: slot.passingScore || 70,
-                                                                maxAttempts: slot.maxAttempts || 1,
-                                                                totalMarks: slot.totalMarks || 100,
-                                                                mandatedSlotId: slot._id,
-                                                                examType: slot.examType || 'pdf-based'
-                                                            });
-                                                        }
-                                                    }}
-                                                >
-                                                    <option value="">Select Mandated Slot</option>
-                                                    {exams.filter(ex => ex.createdBy?.role === 'admin').map(slot => (
-                                                        <option key={slot._id} value={slot._id}>
-                                                            {new Date(slot.scheduledStartTime).toLocaleDateString()} - {slot.course?.title || 'Course Details'}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                <p className="text-[9px] text-amber-500 mt-2 font-black uppercase tracking-tighter">Note: SkillDad Policy enforces matching Admin-defined slots.</p>
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Attached Material</label>
-                                                <div className="grid grid-cols-1 gap-2">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Target Course</label>
+                                                    <select
+                                                        required
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white text-xs"
+                                                        value={examData.course}
+                                                        onChange={async (e) => {
+                                                            const courseId = e.target.value;
+                                                            setExamData({ ...examData, course: courseId, batchIds: [] });
+                                                            if (courseId) {
+                                                                try {
+                                                                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                                                                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                                                                    const { data } = await axios.get(`/api/batches/course/${courseId}`, config);
+                                                                    setAvailableBatches(data);
+                                                                } catch (err) {
+                                                                    console.error('Error fetching batches:', err);
+                                                                    setAvailableBatches([]);
+                                                                }
+                                                            } else {
+                                                                setAvailableBatches([]);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <option value="">Select Course</option>
+                                                        {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+                                                    </select>
+                                                </div>
+                                                {examData.course && availableBatches.length > 0 && (
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Target Batches (Optional - Leave empty for all)</label>
+                                                        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-3 bg-slate-900 border border-white/10 rounded-2xl custom-scrollbar">
+                                                            {availableBatches.map((batch) => (
+                                                                <label key={batch.id} className="flex items-center space-x-2 cursor-pointer group p-1 hover:bg-white/5 rounded transition-colors">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-indigo-500 focus:ring-indigo-500/50"
+                                                                        checked={examData.batchIds.includes(batch.id)}
+                                                                        onChange={(e) => {
+                                                                            const newBatchIds = e.target.checked
+                                                                                ? [...examData.batchIds, batch.id]
+                                                                                : examData.batchIds.filter(id => id !== batch.id);
+                                                                            setExamData({ ...examData, batchIds: newBatchIds });
+                                                                        }}
+                                                                    />
+                                                                    <span className="text-xs text-white/70 group-hover:text-white transition-colors">
+                                                                        {batch.name}
+                                                                    </span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Attached Material (Optional)</label>
                                                     <select
                                                         className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white text-xs"
                                                         value={examData.linkedPaper}
@@ -1058,94 +933,91 @@ const ExamManagement = () => {
                                                         <option value="">Select Question Paper</option>
                                                         {questionPapers.map(p => <option key={p._id} value={p._id}>{p.title}</option>)}
                                                     </select>
-                                                    <select
-                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white text-xs"
-                                                        value={examData.answerKey}
-                                                        onChange={e => setExamData({ ...examData, answerKey: e.target.value })}
-                                                    >
-                                                        <option value="">Select Answer Key (Optional)</option>
-                                                        {answerKeys.map(k => <option key={k._id} value={k._id}>{k.title}</option>)}
-                                                    </select>
                                                 </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Target Course (Inherited)</label>
-                                                <select
-                                                    required
-                                                    disabled
-                                                    className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white opacity-50 cursor-not-allowed text-xs"
-                                                    value={examData.course}
-                                                >
-                                                    <option value="">Select Course</option>
-                                                    {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
-                                                </select>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Start Time</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        required
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white [color-scheme:dark]"
+                                                        value={examData.scheduledStartTime}
+                                                        onChange={(e) => setExamData({ ...examData, scheduledStartTime: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Expiry Time</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        required
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white [color-scheme:dark]"
+                                                        value={examData.scheduledEndTime}
+                                                        onChange={(e) => setExamData({ ...examData, scheduledEndTime: e.target.value })}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Duration (Mins)</label>
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    readOnly
-                                                    className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 font-inter text-sm"
-                                                    value={examData.duration}
-                                                />
+
+                                            <div className="grid grid-cols-3 gap-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Duration (Min)</label>
+                                                    <input
+                                                        type="number"
+                                                        required
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white font-inter text-sm"
+                                                        value={examData.duration}
+                                                        onChange={(e) => setExamData({ ...examData, duration: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Max Marks</label>
+                                                    <input
+                                                        type="number"
+                                                        required
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white font-inter text-sm"
+                                                        value={examData.totalMarks}
+                                                        onChange={(e) => setExamData({ ...examData, totalMarks: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Pass %</label>
+                                                    <input
+                                                        type="number"
+                                                        required
+                                                        className="w-full px-5 py-3.5 bg-slate-900 border border-white/10 rounded-2xl text-white font-inter text-sm"
+                                                        value={examData.passingScore}
+                                                        onChange={(e) => setExamData({ ...examData, passingScore: e.target.value })}
+                                                    />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Total Marks (Inherited)</label>
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    readOnly
-                                                    className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 font-inter text-sm"
-                                                    value={examData.totalMarks}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Passing Score % (Inherited)</label>
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    readOnly
-                                                    className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 font-inter text-sm"
-                                                    value={examData.passingScore}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Max Attempts (Inherited)</label>
-                                                <input
-                                                    type="number"
-                                                    required
-                                                    readOnly
-                                                    className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 font-inter text-sm"
-                                                    value={examData.maxAttempts}
-                                                />
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Exam Mode</label>
+                                                    <select
+                                                        required
+                                                        value={examData.examType}
+                                                        onChange={(e) => setExamData({ ...examData, examType: e.target.value })}
+                                                        className="w-full px-4 py-3 bg-slate-900 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all font-inter appearance-none"
+                                                    >
+                                                        <option value="online-mcq" className="bg-slate-900">Online MCQ (Automatic Grading)</option>
+                                                        <option value="pdf-based" className="bg-slate-900">PDF Question + Paper Answer (Manual Grading)</option>
+                                                        <option value="hybrid" className="bg-slate-900">Online Descriptive (Manual Grading)</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Instructions (Optional)</label>
+                                                    <input
+                                                        type="text"
+                                                        placeholder="e.g. Use blue pen only"
+                                                        value={examData.instructions || ''}
+                                                        onChange={(e) => setExamData({ ...examData, instructions: e.target.value })}
+                                                        className="w-full px-4 py-3 bg-slate-900 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all font-inter"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">Activation (Inherited)</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    required
-                                                    readOnly
-                                                    className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 [color-scheme:dark]"
-                                                    value={examData.scheduledStartTime}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-2">End Time (Inherited)</label>
-                                                <input
-                                                    type="datetime-local"
-                                                    required
-                                                    readOnly
-                                                    className="w-full px-5 py-3.5 bg-white/[0.03] border border-white/10 rounded-2xl text-white opacity-50 [color-scheme:dark]"
-                                                    value={examData.scheduledEndTime}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     <div className="flex gap-4 pt-4">
                                         <button
                                             type="button"

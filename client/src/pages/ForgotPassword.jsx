@@ -60,7 +60,7 @@ const ForgotPassword = () => {
                         <ShieldCheck size={32} />
                     </div>
                     <h1 className="text-sm font-black text-primary uppercase tracking-[0.4em] font-inter">Security Protocol</h1>
-                    <p className="text-2xl font-bold text-white font-jakarta tracking-tight">Recover Neural Sync</p>
+                    <p className="text-2xl font-bold text-white font-jakarta tracking-tight">Recover Password</p>
                 </div>
 
                 <GlassCard className="!p-6 md:!p-8 shadow-glow-purple border-white/20">
@@ -83,7 +83,7 @@ const ForgotPassword = () => {
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <p className="text-sm text-text-secondary text-center font-inter leading-relaxed px-2">
-                                Enter your registered email address and we will dispatch a secure link to reset your Neural Passphrase.
+                                Enter your registered email address and we will dispatch a secure link to reset your Password.
                             </p>
 
                             {error && (

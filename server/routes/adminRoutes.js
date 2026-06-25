@@ -17,6 +17,7 @@ const {
     getAllStudents,
     getStudentDocuments,
     getStudentEnrollments,
+    getStudentRewardPoints,
     updateStudent,
     deleteStudent,
     deleteUser,
@@ -28,6 +29,12 @@ const {
     createDirector,
     updateDirector,
     deleteDirector,
+    getSuccessStories,
+    createSuccessStory,
+    updateSuccessStory,
+    deleteSuccessStory,
+    uploadSuccessStoryImage,
+    uploadSuccessStoryVideo,
     getUniversities,
     deleteUniversity,
     assignCoursesToUniversity,
@@ -41,7 +48,9 @@ const {
     uploadFacultyPhoto,
     uploadPartnerLogoImage,
     uploadDirectorImage,
-    testNotification
+    testNotification,
+    getAllPayouts,
+    updatePayoutStatus
 } = require('../controllers/adminController');
 const { updatePageContent } = require('../controllers/cmsController');
 const { protect } = require('../middleware/authMiddleware');
@@ -78,7 +87,8 @@ router.get('/users/all', protect, checkAdmin, async (req, res) => {
         const { query } = require('../config/postgres');
         const result = await query(
             `SELECT id as _id, name, email, role, is_verified as "isVerified",
-                    profile_image as "profileImage", created_at as "createdAt"
+                    profile_image as "profileImage", created_at as "createdAt",
+                    discount_rate as "discountRate"
              FROM users ORDER BY created_at DESC`
         );
         res.json({ users: result.rows });
@@ -112,6 +122,7 @@ router.delete('/users/:id', protect, checkAdmin, deleteUser);
 router.get('/students', protect, checkAdmin, getAllStudents);
 router.get('/students/:id/documents', protect, checkAdmin, getStudentDocuments);
 router.get('/students/:id/enrollments', protect, checkAdmin, getStudentEnrollments);
+router.get('/students/:id/reward-points', protect, checkAdmin, getStudentRewardPoints);
 router.post('/students/:id/enroll', protect, checkAdmin, adminEnrollStudent);
 router.delete('/students/:id/enroll/:courseId', protect, checkAdmin, adminUnenrollStudent);
 router.put('/students/:id', protect, checkAdmin, updateStudent);
@@ -166,7 +177,19 @@ router.put('/directors/:id', protect, checkAdmin, updateDirector);
 router.post('/directors/:id/upload', protect, checkAdmin, upload.single('image'), uploadDirectorImage);
 router.delete('/directors/:id', protect, checkAdmin, deleteDirector);
 
+// Success Story Management Routes
+router.get('/success-stories', protect, checkAdmin, getSuccessStories);
+router.post('/success-stories', protect, checkAdmin, createSuccessStory);
+router.put('/success-stories/:id', protect, checkAdmin, updateSuccessStory);
+router.post('/success-stories/:id/upload', protect, checkAdmin, upload.single('image'), uploadSuccessStoryImage);
+router.post('/success-stories/:id/upload-video', protect, checkAdmin, upload.single('video'), uploadSuccessStoryVideo);
+router.delete('/success-stories/:id', protect, checkAdmin, deleteSuccessStory);
+
 // CMS Content Management Routes
 router.put('/cms/:page/:section', protect, checkAdmin, updatePageContent);
+
+// Payout Management
+router.get('/payouts', protect, checkAdmin, getAllPayouts);
+router.put('/payouts/:id', protect, checkAdmin, updatePayoutStatus);
 
 module.exports = router;

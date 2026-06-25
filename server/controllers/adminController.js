@@ -126,6 +126,9 @@ const getGlobalStats = async (req, res) => {
         console.log('[getGlobalStats] Querying revenueRes...');
         const revenueRes = await query("SELECT SUM(final_amount) as total FROM transactions WHERE status = 'success'").catch(e => { console.error('revenueRes Error:', e.message); return { rows: [{ total: 0 }] }; });
         
+        console.log('[getGlobalStats] Querying careerAppCount...');
+        const careerAppCount = await query('SELECT COUNT(*) FROM skilldad_applications').catch(e => { console.error('careerAppCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+
         console.log('[getGlobalStats] Querying dbSizeRes...');
         const dbSizeRes = await query("SELECT pg_database_size(current_database()) as size").catch(e => { console.error('dbSizeRes Error (falling back to 0):', e.message); return { rows: [{ size: 0 }] }; });
         
@@ -161,13 +164,15 @@ const getGlobalStats = async (req, res) => {
             LIMIT 5)
             UNION ALL
             (SELECT 
-                name as user,
-                'Joined the platform' as action,
-                created_at as time,
-                name as initial
-            FROM users
-            WHERE role = 'partner'
-            ORDER BY created_at DESC
+                COALESCE(s."studentName", u.name) as user,
+                'Applied for ' || v.title as action,
+                a.applied_at as time,
+                COALESCE(s."studentName", u.name) as initial
+            FROM skilldad_applications a
+            LEFT JOIN students s ON a.student_id = s.id
+            LEFT JOIN users u ON a.student_id = u.id
+            JOIN skilldad_vacancies v ON a.vacancy_id = v.id
+            ORDER BY a.applied_at DESC
             LIMIT 5)
             ORDER BY time DESC
             LIMIT 10
@@ -193,6 +198,7 @@ const getGlobalStats = async (req, res) => {
             totalStudents: parseInt(studentCount.rows[0].count),
             totalPartners: parseInt(partnerCount.rows[0].count),
             totalTickets: parseInt(ticketCount.rows[0].count),
+            totalApplications: parseInt(careerAppCount.rows[0].count),
             totalRevenue: totalRevenue,
             dbSize: `${dbSizeMB} MB`,
             chartData: chartRes.rows,
@@ -589,9 +595,12 @@ const getAllStudents = async (req, res) => {
             SELECT 
                 u.id as _id, u.name, u.email, u.role, u.profile, 
                 u.university_id as "universityId", u.registered_by as "registeredBy", 
-                u.is_verified as "isVerified", u.created_at as "createdAt",
+                u.is_verified as "isVerified", u.created_at as "createdAt", u.partner_code,
                 COALESCE(e_count.count, 0) as "enrollmentCount",
-                c.title as "course"
+                c.title as "course",
+                reg.name as "registeredByName", reg.role as "registeredByRole",
+                p.name as "partnerName",
+                uni.name as "universityName"
             FROM users u
             LEFT JOIN (
                 SELECT student_id, COUNT(*) as count, MAX(created_at) as last_enrollment
@@ -600,6 +609,10 @@ const getAllStudents = async (req, res) => {
             ) e_count ON u.id = e_count.student_id
             LEFT JOIN enrollments e_latest ON u.id = e_latest.student_id AND e_latest.created_at = e_count.last_enrollment
             LEFT JOIN courses c ON e_latest.course_id = c.id
+            LEFT JOIN users reg ON u.registered_by = reg.id
+            LEFT JOIN discounts d ON u.partner_code = d.code
+            LEFT JOIN users p ON d.partner_id = p.id
+            LEFT JOIN users uni ON u.university_id = uni.id
             WHERE u.role = 'student'
         `;
         const params = [];
@@ -622,11 +635,29 @@ const getAllStudents = async (req, res) => {
         studentsQuery += ' ORDER BY u.created_at DESC';
 
         const studentsRes = await query(studentsQuery, params);
-        res.json(studentsRes.rows.map(s => ({
-            ...s,
-            enrollmentCount: parseInt(s.enrollmentCount),
-            course: s.course || 'No Enrollment'
-        })));
+        res.json(studentsRes.rows.map(s => {
+            let connectionType = 'Self-registered';
+            let registeredByObj = null;
+
+            if (s.registeredBy) {
+                connectionType = 'Directly Registered';
+                registeredByObj = { name: s.registeredByName, role: s.registeredByRole };
+            } else if (s.partner_code && s.partnerName) {
+                connectionType = 'Discount Code';
+                registeredByObj = { name: s.partnerName, role: 'partner' };
+            } else if (s.universityId && s.universityName) {
+                connectionType = 'University Affiliated';
+                registeredByObj = { name: s.universityName, role: 'university' };
+            }
+
+            return {
+                ...s,
+                enrollmentCount: parseInt(s.enrollmentCount),
+                course: s.course || 'No Enrollment',
+                connectionType,
+                registeredBy: registeredByObj
+            };
+        }));
     } catch (error) {
         console.error('Error in getAllStudents (PG):', error);
         res.status(500).json({ message: error.message });
@@ -639,7 +670,21 @@ const getAllStudents = async (req, res) => {
 const getStudentDocuments = async (req, res) => {
     try {
         const docsRes = await query('SELECT * FROM documents WHERE student_id = $1', [req.params.id]);
-        res.json(docsRes.rows.map(d => ({ ...d, _id: d.id })));
+        
+        const docs = docsRes.rows;
+        const processedDocs = docs.filter(doc => {
+            if (doc.status === 'pending') {
+                const isFulfilled = docs.some(d => 
+                    d.student_id === doc.student_id &&
+                    d.title === doc.title && 
+                    (d.status === 'submitted' || d.status === 'approved' || d.status === 'rejected')
+                );
+                return !isFulfilled;
+            }
+            return true;
+        });
+
+        res.json(processedDocs.map(d => ({ ...d, _id: d.id })));
     } catch (error) {
         console.error('Error in getStudentDocuments (PG):', error);
         res.status(500).json({ message: error.message });
@@ -664,6 +709,7 @@ const getStudentEnrollments = async (req, res) => {
             ...e,
             _id: e.id,
             course: {
+                _id: e.course_id,
                 title: e.course_title,
                 thumbnail: e.course_thumbnail,
                 category: e.course_category,
@@ -675,6 +721,26 @@ const getStudentEnrollments = async (req, res) => {
         })));
     } catch (error) {
         console.error('Error in getStudentEnrollments (PG):', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get student reward points
+// @route   GET /api/admin/students/:id/reward-points
+// @access  Private (Admin)
+const getStudentRewardPoints = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const [totalRes, historyRes] = await Promise.all([
+            query('SELECT COALESCE(SUM(points), 0) AS total FROM reward_points WHERE user_id = $1', [userId]),
+            query('SELECT points, reason, created_at FROM reward_points WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50', [userId])
+        ]);
+        res.json({
+            total: parseInt(totalRes.rows[0].total, 10),
+            history: historyRes.rows
+        });
+    } catch (error) {
+        console.error('Error in getStudentRewardPoints:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -699,13 +765,18 @@ const updateStudent = async (req, res) => {
         const updatedEmail = req.body.email || student.email;
         const updatedBio = req.body.bio || student.bio;
         const updatedIsVerified = req.body.isVerified !== undefined ? req.body.isVerified : student.is_verified;
+        
+        let updatedProfile = parseProfile(student.profile);
+        if (req.body.phone !== undefined) {
+            updatedProfile.phone = req.body.phone;
+        }
 
         const result = await query(`
             UPDATE users 
-            SET name = $1, email = $2, bio = $3, is_verified = $4, updated_at = NOW()
-            WHERE id = $5
-            RETURNING id, name, email, bio, role, is_verified as "isVerified"
-        `, [updatedName, updatedEmail, updatedBio, updatedIsVerified, req.params.id]);
+            SET name = $1, email = $2, bio = $3, is_verified = $4, profile = $5, updated_at = NOW()
+            WHERE id = $6
+            RETURNING id, name, email, bio, role, is_verified as "isVerified", profile
+        `, [updatedName, updatedEmail, updatedBio, updatedIsVerified, JSON.stringify(updatedProfile), req.params.id]);
 
         const updatedStudent = result.rows[0];
 
@@ -715,8 +786,10 @@ const updateStudent = async (req, res) => {
             email: updatedStudent.email,
             bio: updatedStudent.bio,
             role: updatedStudent.role,
-            isVerified: updatedStudent.isVerified
+            isVerified: updatedStudent.isVerified,
+            profile: updatedStudent.profile
         });
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -728,23 +801,61 @@ const updateStudent = async (req, res) => {
 // @route   DELETE /api/admin/students/:id
 // @access  Private (Admin)
 const deleteStudent = async (req, res) => {
+    const { id } = req.params;
+    const pool = getPool();
+    const client = await pool.connect();
+
     try {
-        const studentRes = await query('SELECT role FROM users WHERE id = $1', [req.params.id]);
+        const studentRes = await client.query('SELECT role, name FROM users WHERE id = $1', [id]);
         const student = studentRes.rows[0];
 
         if (!student) {
+            client.release();
             return res.status(404).json({ message: 'Student not found' });
         }
 
         if (student.role !== 'student') {
+            client.release();
             return res.status(400).json({ message: 'User is not a student' });
         }
 
-        await query('DELETE FROM users WHERE id = $1', [req.params.id]);
+        console.log(`[CascadeDelete] Starting cleanup for student: ${student.name} (${id})`);
 
-        res.json({ message: 'Student deleted successfully' });
+        await client.query('BEGIN');
+        try {
+            // 1. Delete dependent data in order
+            await client.query('DELETE FROM results WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM exam_submissions_new WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM progress WHERE user_id = $1', [id]);
+            await client.query('DELETE FROM submissions WHERE user_id = $1', [id]);
+            await client.query('DELETE FROM enrollments WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM projects WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM transactions WHERE student_id = $1', [id]);
+            await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
+            
+            // Handle documents (could be uploaded by student)
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
+
+            // Finally delete the user
+            await client.query('DELETE FROM users WHERE id = $1', [id]);
+
+            await client.query('COMMIT');
+            
+            // Notify via WebSocket
+            if (socketService.notifyUserListUpdate) {
+                socketService.notifyUserListUpdate('deleted', { _id: id, role: 'student' });
+            }
+
+            res.json({ success: true, message: 'Student and all associated data deleted successfully' });
+        } catch (dbError) {
+            await client.query('ROLLBACK');
+            throw dbError;
+        } finally {
+            client.release();
+        }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('[deleteStudent] CRITICAL Cascade Error:', error);
+        res.status(500).json({ message: error.message || 'Server error during student deletion' });
     }
 };
 
@@ -752,26 +863,63 @@ const deleteStudent = async (req, res) => {
 // @route   DELETE /api/admin/users/:id
 // @access  Private (Admin)
 const deleteUser = async (req, res) => {
+    const { id } = req.params;
+    const pool = getPool();
+    const client = await pool.connect();
+
     try {
-        const userRes = await query('SELECT id, name, email FROM users WHERE id = $1', [req.params.id]);
+        const userRes = await client.query('SELECT id, name, email, role FROM users WHERE id = $1', [id]);
         const user = userRes.rows[0];
 
         if (!user) {
+            client.release();
             return res.status(404).json({ message: 'User not found' });
         }
 
         // Prevent deleting yourself
         if (user.id.toString() === req.user.id.toString()) {
+            client.release();
             return res.status(400).json({ message: 'You cannot delete your own account' });
         }
 
-        await query('DELETE FROM users WHERE id = $1', [req.params.id]);
+        console.log(`[CascadeDelete] Deleting user: ${user.name} (Role: ${user.role})`);
 
-        // Notify via WebSocket
-        socketService.notifyUserListUpdate('deleted', { ...user, _id: user.id });
+        await client.query('BEGIN');
+        try {
+            // If it's a student, clean up student data first
+            if (user.role === 'student') {
+                await client.query('DELETE FROM results WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM exam_submissions_new WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM progress WHERE user_id = $1', [id]);
+                await client.query('DELETE FROM submissions WHERE user_id = $1', [id]);
+                await client.query('DELETE FROM enrollments WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM projects WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM transactions WHERE student_id = $1', [id]);
+                await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
+            }
+            
+            // Cleanup documents uploaded by this user
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
 
-        res.json({ message: 'User deleted successfully', user: { _id: user.id, name: user.name, email: user.email } });
+            // Finally delete user
+            await client.query('DELETE FROM users WHERE id = $1', [id]);
+
+            await client.query('COMMIT');
+            
+            // Notify via WebSocket
+            if (socketService.notifyUserListUpdate) {
+                socketService.notifyUserListUpdate('deleted', { ...user, _id: user.id });
+            }
+
+            res.json({ message: 'User deleted successfully', user: { _id: user.id, name: user.name, email: user.email } });
+        } catch (dbError) {
+            await client.query('ROLLBACK');
+            throw dbError;
+        } finally {
+            client.release();
+        }
     } catch (error) {
+        console.error('[deleteUser] CRITICAL Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -891,13 +1039,13 @@ async function getDirectors(req, res) {
 // @access  Private (Admin)
 async function createDirector(req, res) {
     try {
-        const { name, title, image, order, category, bio, linkedin_url, display_target } = req.body;
+        const { name, title, image, order, category, bio, linkedin_url, display_target, university, accent_color } = req.body;
         const crypto = require('crypto');
         const newId = crypto.randomUUID();
         const result = await query(`
-            INSERT INTO directors (id, name, title, image, "order", category, bio, linkedin_url, display_target, is_active)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true) RETURNING *
-        `, [newId, name, title, image, order || 0, category || 'DIRECTOR', bio || '', linkedin_url || '', display_target || 'ABOUT_DIRECTOR']);
+            INSERT INTO directors (id, name, title, image, "order", category, bio, linkedin_url, display_target, university, accent_color, is_active)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true) RETURNING *
+        `, [newId, name, title, image, order || 0, category || 'DIRECTOR', bio || '', linkedin_url || '', display_target || 'ABOUT_DIRECTOR', university || '', accent_color || 'primary']);
 
         res.status(201).json({ ...result.rows[0], _id: result.rows[0].id });
     } catch (error) {
@@ -911,16 +1059,17 @@ async function createDirector(req, res) {
 // @access  Private (Admin)
 async function updateDirector(req, res) {
     try {
-        const { name, title, image, order, isActive, category, bio, linkedin_url, display_target } = req.body;
+        const { name, title, image, order, isActive, category, bio, linkedin_url, display_target, university, accent_color } = req.body;
         const result = await query(`
             UPDATE directors 
             SET name = COALESCE($1, name), title = COALESCE($2, title), image = COALESCE($3, image), 
                 "order" = COALESCE($4, "order"), is_active = COALESCE($5, is_active), 
                 category = COALESCE($6, category), bio = COALESCE($7, bio), 
                 linkedin_url = COALESCE($8, linkedin_url), display_target = COALESCE($9, display_target),
+                university = COALESCE($10, university), accent_color = COALESCE($11, accent_color),
                 updated_at = NOW()
-            WHERE id = $10 RETURNING *
-        `, [name, title, image, order, isActive, category, bio, linkedin_url, display_target, req.params.id]);
+            WHERE id = $12 RETURNING *
+        `, [name, title, image, order, isActive, category, bio, linkedin_url, display_target, university, accent_color, req.params.id]);
 
         if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Director not found' });
@@ -974,9 +1123,9 @@ async function uploadDirectorImage(req, res) {
 // @access  Private (Admin)
 async function inviteUser(req, res) {
     try {
-        const { name, email, password, role, universityId } = req.body;
-        console.log('[inviteUser] Request Payload:', { name, email, role, universityId, hasPassword: !!password });
-        
+        const { name, email, password, role, universityId, phone, discountRate } = req.body;
+        console.log('[inviteUser] Request Payload:', { name, email, role, universityId, phone, discountRate, hasPassword: !!password });
+
         const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
         // Check if user exists in PG
@@ -992,22 +1141,43 @@ async function inviteUser(req, res) {
 
         console.log('[inviteUser] Inserting into DB...');
         await query(`
-            INSERT INTO users (id, name, email, password, role, university_id, is_verified, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())
-        `, [newId, name, normalizedEmail, hashedPassword, role, universityId || null]);
+            INSERT INTO users (id, name, email, password, role, university_id, discount_rate, is_verified, profile, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, true, $8, NOW(), NOW())
+        `, [
+            newId,
+            name,
+            normalizedEmail,
+            hashedPassword,
+            role,
+            universityId || null,
+            Number(discountRate) || 0,
+            JSON.stringify({ phone: phone || '' })
+        ]);
 
-        console.log('[inviteUser] DB Insert successful. Sending email...');
-        // Email notification
-        try {
-            await sendEmail({
-                email: normalizedEmail,
-                subject: 'Account Created - SkillDad',
-                html: emailTemplates.invitation(name, role, normalizedEmail, password)
-            });
-            console.log('[inviteUser] Email sent successfully to:', normalizedEmail);
-        } catch (err) {
-            console.error('[inviteUser] Invite email failed:', err.message);
-        }
+        console.log('[inviteUser] DB Insert successful. Sending notifications in background...');
+
+        // Fire-and-forget: email + optional WhatsApp — never block the response
+        setImmediate(async () => {
+            try {
+                await sendEmail({
+                    email: normalizedEmail,
+                    subject: 'Account Created - SkillDad',
+                    html: emailTemplates.invitation(name, role, normalizedEmail, password)
+                });
+                console.log('[inviteUser] Email sent to:', normalizedEmail);
+            } catch (err) {
+                console.error('[inviteUser] Invite email failed:', err.message);
+            }
+
+            if (phone) {
+                try {
+                    const notificationService = require('../services/NotificationService');
+                    await notificationService.send({ name, email: normalizedEmail, phone }, 'welcome');
+                } catch (err) {
+                    console.error('[inviteUser] WhatsApp notification failed:', err.message);
+                }
+            }
+        });
 
         res.status(201).json({ success: true, message: 'User invited successfully' });
     } catch (error) {
@@ -1027,11 +1197,12 @@ async function getUniversities(req, res) {
                 role, 
                 bio, 
                 profile, 
+                profile_image as "profileImage",
                 is_verified as "isVerified", 
                 discount_rate as "discountRate",
                 created_at
             FROM users 
-            WHERE LOWER(role) = 'university'
+            WHERE LOWER(role) IN ('university', 'partner')
             ORDER BY created_at DESC
         `);
         res.json(resSet.rows);
@@ -1422,11 +1593,12 @@ const adminEnrollStudent = async (req, res) => {
         }
 
         console.log(`[AdminEnroll] Creating enrollment record...`);
+        const { batchId } = req.body;
         const newEnrollmentId = `enr_${Date.now()}`;
         const enrollmentRes = await query(`
-            INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
-            VALUES ($1, $2, $3, 'active', 0, NOW(), NOW()) RETURNING *
-        `, [newEnrollmentId, studentId, courseId]);
+            INSERT INTO enrollments (id, student_id, course_id, status, progress, batch_id, created_at, updated_at)
+            VALUES ($1, $2, $3, 'active', 0, $4, NOW(), NOW()) RETURNING *
+        `, [newEnrollmentId, studentId, courseId, batchId || null]);
         const enrollment = enrollmentRes.rows[0];
 
         console.log(`[AdminEnroll] Checking/Creating progress record...`);
@@ -1472,43 +1644,45 @@ const adminEnrollStudent = async (req, res) => {
         }
 
         console.log(`[AdminEnroll] Inserting transaction... partnerId: ${partnerId}`);
-        await query(`
-            INSERT INTO transactions (id, student_id, course_id, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW(), NOW())
-        `, [`txn_${Date.now()}`, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
-
-        console.log(`[AdminEnroll] Sending notifications...`);
         try {
-            socketService.emitToUser(studentId, 'ENROLLMENT_CREATED', {
+            await query(`
+                INSERT INTO transactions (id, transaction_id, student_id, course_id, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), NOW())
+            `, [`txn_${Date.now()}`, txnId, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
+        } catch (dbErr) {
+            console.error('[AdminEnroll] Transaction INSERT failed:', dbErr);
+            throw new Error(`Database transaction log failed: ${dbErr.message}`);
+        }
+
+        try {
+            const notificationService = require('../services/NotificationService');
+            const enrolledBy = req.user?.name || 'Admin';
+
+            // Send via multi-channel service (WhatsApp + Email)
+            setImmediate(async () => {
+                try {
+                    const studentData = { ...student, phone: student.phone || student.profile?.phone };
+                    if (typeof student.profile === 'string') {
+                        try {
+                            const p = JSON.parse(student.profile);
+                            studentData.phone = student.phone || p.phone;
+                        } catch(e) {}
+                    }
+                    await notificationService.send(studentData, 'enrollment', { courseTitle: course.title, enrolledBy });
+                } catch (err) {
+                    console.error('[AdminEnroll] Unified Notification failed:', err.message);
+                }
+            });
+
+            // Keep socket notification for real-time UI update
+            socketService.sendToUser(studentId, 'ENROLLMENT_CREATED', {
                 courseId,
                 courseTitle: course.title,
                 message: `You have been enrolled in ${course.title} by admin`
             });
-        } catch (e) { console.error('[AdminEnroll] Socket error:', e.message); }
 
-        try {
-            const whatsAppService = require('../services/WhatsAppService');
-            const enrolledBy = req.user?.name || 'Admin';
-
-            if (student.email) {
-                await sendEmail({
-                    email: student.email,
-                    subject: `Course Enrollment Confirmed - ${course.title}`,
-                    html: emailTemplates.adminEnrollment(student.name, course.title, enrolledBy)
-                }).catch(err => console.error('[AdminEnroll] Email error:', err.message));
-            }
-
-            const studentPhone = student.phone || (typeof student.profile === 'object' ? student.profile?.phone : null);
-            if (studentPhone) {
-                await whatsAppService.notifyAdminEnrollment(
-                    student.name,
-                    studentPhone,
-                    course.title,
-                    enrolledBy
-                ).catch(err => console.error('[AdminEnroll] WhatsApp error:', err.message));
-            }
         } catch (notifError) {
-            console.error('[AdminEnroll] Notification service error:', notifError.message);
+            console.error('[AdminEnroll] Notification block error:', notifError.message);
         }
 
         console.log(`[AdminEnroll] Enrollment Successful!`);
@@ -1519,7 +1693,11 @@ const adminEnrollStudent = async (req, res) => {
         });
     } catch (error) {
         console.error('[AdminEnroll] CRITICAL ERROR:', error);
-        res.status(500).json({ message: error.message || 'Failed to enroll student' });
+        res.status(500).json({ 
+            success: false,
+            message: error.message || 'Failed to enroll student',
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 };
 
@@ -1746,6 +1924,180 @@ const uploadFacultyPhoto = async (req, res) => {
 };
 
 
+
+// Success Story Management
+
+// @desc    Get all success stories
+// @route   GET /api/admin/success-stories
+// @access  Private (Admin)
+async function getSuccessStories(req, res) {
+    try {
+        const storiesRes = await query('SELECT * FROM student_success_stories ORDER BY "order" ASC, created_at ASC');
+        res.json(storiesRes.rows.map(s => ({ ...s, _id: s.id })));
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// @desc    Create success story
+// @route   POST /api/admin/success-stories
+// @access  Private (Admin)
+async function createSuccessStory(req, res) {
+    try {
+        const { name, campus, package, role, image, story, video_url, order } = req.body;
+        const crypto = require('crypto');
+        const newId = crypto.randomUUID();
+        const result = await query(`
+            INSERT INTO student_success_stories (id, name, campus, package, role, image, story, video_url, "order", is_active)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true) RETURNING *
+        `, [newId, name, campus, package, role, image, story, video_url, order || 0]);
+
+        res.status(201).json({ ...result.rows[0], _id: result.rows[0].id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// @desc    Update success story
+// @route   PUT /api/admin/success-stories/:id
+// @access  Private (Admin)
+async function updateSuccessStory(req, res) {
+    try {
+        const { name, campus, package, role, image, story, video_url, order, isActive } = req.body;
+        const result = await query(`
+            UPDATE student_success_stories 
+            SET name = COALESCE($1, name), campus = COALESCE($2, campus), package = COALESCE($3, package),
+                role = COALESCE($4, role), image = COALESCE($5, image), story = COALESCE($6, story),
+                video_url = COALESCE($7, video_url), "order" = COALESCE($8, "order"), 
+                is_active = COALESCE($9, is_active), updated_at = NOW()
+            WHERE id = $10 RETURNING *
+        `, [name, campus, package, role, image, story, video_url, order, isActive, req.params.id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Success story not found' });
+        }
+        res.json({ ...result.rows[0], _id: result.rows[0].id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// @desc    Delete success story
+// @route   DELETE /api/admin/success-stories/:id
+// @access  Private (Admin)
+async function deleteSuccessStory(req, res) {
+    try {
+        const result = await query('DELETE FROM student_success_stories WHERE id = $1 RETURNING id', [req.params.id]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Success story not found' });
+        }
+        res.json({ message: 'Success story removed' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// @desc    Upload success story image
+// @route   POST /api/admin/success-stories/:id/upload
+// @access  Private (Admin)
+async function uploadSuccessStoryImage(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+        const imageUrl = `/uploads/${req.file.filename}`;
+        const result = await query(
+            'UPDATE student_success_stories SET image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [imageUrl, req.params.id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Success story not found' });
+        }
+        res.json({ ...result.rows[0], _id: result.rows[0].id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// @desc    Upload success story video
+// @route   POST /api/admin/success-stories/:id/upload-video
+// @access  Private (Admin)
+async function uploadSuccessStoryVideo(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+        const videoUrl = `/uploads/${req.file.filename}`;
+        const result = await query(
+            'UPDATE student_success_stories SET video_url = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [videoUrl, req.params.id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Success story not found' });
+        }
+        res.json({ ...result.rows[0], _id: result.rows[0].id, videoUrl });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+// @desc    Get all payout requests
+// @route   GET /api/admin/payouts
+// @access  Private (Admin)
+const getAllPayouts = async (req, res) => {
+    try {
+        const payoutRes = await query(`
+            SELECT p.*, p.id as _id, u.name as partner_name, u.email as partner_email
+            FROM payouts p
+            JOIN users u ON p.partner_id = u.id
+            ORDER BY p.created_at DESC
+        `);
+        res.json(payoutRes.rows);
+    } catch (error) {
+        console.error('[getAllPayouts] Error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update payout status
+// @route   PUT /api/admin/payouts/:id
+// @access  Private (Admin)
+const updatePayoutStatus = async (req, res) => {
+    const { status, notes } = req.body;
+    try {
+        if (!['approved', 'rejected', 'pending'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const result = await query(`
+            UPDATE payouts 
+            SET status = $1, notes = COALESCE($2, notes), updated_at = NOW()
+            WHERE id = $3
+            RETURNING *
+        `, [status, notes, req.params.id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Payout request not found' });
+        }
+
+        const updatedPayout = result.rows[0];
+
+        // Notify partner via WebSocket
+        socketService.notifyUser(updatedPayout.partner_id, 'payout_status_updated', {
+            id: updatedPayout.id,
+            status: updatedPayout.status,
+            amount: updatedPayout.amount
+        });
+
+        res.json({ success: true, message: `Payout status updated to ${status}`, payout: updatedPayout });
+    } catch (error) {
+        console.error('[updatePayoutStatus] Error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     updateEntity,
     getGlobalStats,
@@ -1761,6 +2113,7 @@ module.exports = {
     getAllStudents,
     getStudentDocuments,
     getStudentEnrollments,
+    getStudentRewardPoints,
     updateStudent,
     deleteStudent,
     deleteUser,
@@ -1772,6 +2125,12 @@ module.exports = {
     createDirector,
     updateDirector,
     deleteDirector,
+    getSuccessStories,
+    createSuccessStory,
+    updateSuccessStory,
+    deleteSuccessStory,
+    uploadSuccessStoryImage,
+    uploadSuccessStoryVideo,
     uploadPartnerLogoImage,
     uploadDirectorImage,
     inviteUser,
@@ -1786,5 +2145,7 @@ module.exports = {
     updateUniversityProfile,
     uploadUniversityGalleryImages,
     uploadFacultyPhoto,
-    testNotification
+    testNotification,
+    getAllPayouts,
+    updatePayoutStatus
 };

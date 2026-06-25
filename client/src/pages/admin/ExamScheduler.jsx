@@ -10,6 +10,7 @@ const ExamScheduler = () => {
     const [exams, setExams] = useState([]);
     const [courses, setCourses] = useState([]);
     const [universities, setUniversities] = useState([]);
+    const [batches, setBatches] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const { showToast } = useToast();
 
@@ -26,6 +27,7 @@ const ExamScheduler = () => {
         passingScore: 40,
         isMockExam: false,
         instructions: '',
+        batchIds: [],
     });
 
 
@@ -80,6 +82,23 @@ const ExamScheduler = () => {
             }
         }
     };
+
+    const fetchBatches = async (courseId) => {
+        if (!courseId) {
+            setBatches([]);
+            return;
+        }
+        try {
+            const config = getAuthConfig();
+            if (!config) return;
+            const { data } = await axios.get(`/api/batches/course/${courseId}`, config);
+            setBatches(data || []);
+        } catch (error) {
+            console.error('Error fetching batches:', error);
+            setBatches([]);
+        }
+    };
+
 
     const fetchUniversities = async () => {
         try {
@@ -140,7 +159,8 @@ const ExamScheduler = () => {
                 totalMarks: 100,
                 passingScore: 40,
                 isMockExam: false,
-                instructions: ''
+                instructions: '',
+                batchIds: []
             });
             fetchExams();
             showToast('Exam scheduled successfully!', 'success');
@@ -374,7 +394,11 @@ const ExamScheduler = () => {
                                         required
                                         className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white"
                                         value={formData.course}
-                                        onChange={(e) => setFormData({ ...formData, course: e.target.value })}
+                                        onChange={(e) => {
+                                            const courseId = e.target.value;
+                                            setFormData({ ...formData, course: courseId, batchIds: [] });
+                                            fetchBatches(courseId);
+                                        }}
                                     >
                                         <option value="">Select Course</option>
                                         {courses.map((course) => (
@@ -385,6 +409,32 @@ const ExamScheduler = () => {
                                     </select>
                                 </div>
                             </div>
+
+                            {formData.course && batches.length > 0 && (
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <label className="block text-white/70 text-xs mb-2">Target Batches (Optional - Leave empty for all batches)</label>
+                                    <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 bg-white/5 border border-white/10 rounded-lg custom-scrollbar">
+                                        {batches.map((batch) => (
+                                            <label key={batch.id} className="flex items-center space-x-2 cursor-pointer group p-1 hover:bg-white/5 rounded transition-colors">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-primary focus:ring-primary/50"
+                                                    checked={formData.batchIds.includes(batch.id)}
+                                                    onChange={(e) => {
+                                                        const newBatchIds = e.target.checked
+                                                            ? [...formData.batchIds, batch.id]
+                                                            : formData.batchIds.filter(id => id !== batch.id);
+                                                        setFormData({ ...formData, batchIds: newBatchIds });
+                                                    }}
+                                                />
+                                                <span className="text-sm text-white/70 group-hover:text-white transition-colors">
+                                                    {batch.name}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>

@@ -18,10 +18,12 @@ import {
     HelpCircle
 } from 'lucide-react';
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import MeetingRecordingPlayer from '../../components/MeetingRecordingPlayer';
+import CustomYoutubePlayer from '../../components/CustomYoutubePlayer';
 
 const CoursePlayer = () => {
     const { courseId } = useParams();
@@ -36,13 +38,23 @@ const CoursePlayer = () => {
     const [newComment, setNewComment] = useState('');
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [userProgress, setUserProgress] = useState({ completedVideos: [], completedExercises: [] });
+    const [userProgress, setUserProgress] = useState({ completedVideos: [], completedExercises: [], progress: 0 });
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [liveSessions, setLiveSessions] = useState([]);
     const [showQuiz, setShowQuiz] = useState(false);
     const [quizIndex, setQuizIndex] = useState(0);
     const [quizAnswers, setQuizAnswers] = useState({});
     const [quizResult, setQuizResult] = useState(null);
+    const [showCourseCompletion, setShowCourseCompletion] = useState(false);
+    const [isApplyingCertificate, setIsApplyingCertificate] = useState(false);
+    const [certificateApplied, setCertificateApplied] = useState(false);
+
+    useEffect(() => {
+        const module = course?.modules?.[currentModuleIndex];
+        if (module && (!module.videos || module.videos.length === 0) && module.quiz && !showQuiz) {
+            setShowQuiz(true);
+        }
+    }, [currentModuleIndex, course, showQuiz]);
 
     useEffect(() => {
         const fetchCourseAndProgress = async () => {
@@ -54,12 +66,12 @@ const CoursePlayer = () => {
 
                 // Fetch student progress for this course
                 const { data: progData } = await axios.get('/api/enrollment/my-courses', config);
-                const currentProg = progData.find(p => p.course._id === courseId);
+                const currentProg = progData.find(p => (p.course?._id || p.course_id) === courseId);
                 if (currentProg) {
                     setUserProgress({
                         ...currentProg,
-                        completedVideos: Array.isArray(currentProg.completedVideos) ? currentProg.completedVideos : [],
-                        completedExercises: Array.isArray(currentProg.completedExercises) ? currentProg.completedExercises : []
+                        completedVideos: Array.isArray(currentProg.completedVideos) ? currentProg.completedVideos : (currentProg.completed_videos || []),
+                        completedExercises: Array.isArray(currentProg.completedExercises) ? currentProg.completedExercises : (currentProg.completed_exercises || [])
                     });
                 }
 
@@ -145,9 +157,11 @@ const CoursePlayer = () => {
     );
 
     const currentModule = course.modules?.[currentModuleIndex];
+    const hasVideos = currentModule?.videos && currentModule.videos.length > 0;
+    const hasQuiz = !!currentModule?.quiz;
 
-    // Safety check if course has no modules or videos yet
-    if (!currentModule || !currentModule.videos || currentModule.videos.length === 0) {
+    // Safety check if course has no modules
+    if (!showCourseCompletion && (!currentModule || (!hasVideos && !hasQuiz))) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] text-white">
                 <h2 className="text-xl font-bold mb-4">Content Unavailable</h2>
@@ -159,7 +173,7 @@ const CoursePlayer = () => {
         );
     }
 
-    const currentVideo = currentModule.videos[currentVideoIndex];
+    const currentVideo = hasVideos ? currentModule.videos[currentVideoIndex] : {};
     const currentExercise = currentVideo?.exercises?.[0];
 
     const handleVideoEnd = () => {
@@ -176,15 +190,16 @@ const CoursePlayer = () => {
 
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const vidId = currentVideo._id || currentVideo.id;
             try {
                 await axios.put('/api/enrollment/progress', {
                     courseId,
-                    videoId: currentVideo._id,
+                    videoId: vidId,
                     exerciseScore: 100
                 }, config);
                 setUserProgress(prev => ({
                     ...prev,
-                    completedExercises: [...(prev.completedExercises || []), { video: currentVideo._id, score: 100 }]
+                    completedExercises: [...(prev.completedExercises || []), { video: vidId, score: 100 }]
                 }));
             } catch (err) {
                 console.error('Progress update failed', err);
@@ -201,30 +216,86 @@ const CoursePlayer = () => {
         }
     };
 
+    const advanceToNextValidContent = (startModuleIndex) => {
+        for (let i = startModuleIndex; i < course.modules.length; i++) {
+            const mod = course.modules[i];
+            if (mod.videos && mod.videos.length > 0) {
+                setCurrentModuleIndex(i);
+                setCurrentVideoIndex(0);
+                setShowQuiz(false);
+                return;
+            }
+            if (mod.quiz) {
+                setCurrentModuleIndex(i);
+                setCurrentVideoIndex(0);
+                setShowQuiz(true);
+                return;
+            }
+        }
+        setShowCourseCompletion(true);
+    };
+
+    const goToNextSection = () => {
+        if (showQuiz) {
+            advanceToNextValidContent(currentModuleIndex + 1);
+            return;
+        }
+
+        if (currentModule && currentModule.videos && currentVideoIndex < currentModule.videos.length - 1) {
+            setCurrentVideoIndex(prev => prev + 1);
+        } else if (currentModule && currentModule.quiz) {
+            setShowQuiz(true);
+        } else {
+            advanceToNextValidContent(currentModuleIndex + 1);
+        }
+    };
+
     const handleNext = async () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-        try {
-            await axios.put('/api/enrollment/progress', {
-                courseId,
-                videoId: currentVideo._id,
-            }, config);
-            setUserProgress(prev => ({
-                ...prev,
-                completedVideos: [...(prev.completedVideos || []), currentVideo._id]
-            }));
-        } catch (err) {
-            console.error('Video completion update failed', err);
+        if (!showQuiz) {
+            const vidId = currentVideo?._id || currentVideo?.id;
+            if (vidId) {
+                try {
+                    const resp = await axios.put('/api/enrollment/progress', {
+                        courseId,
+                        videoId: vidId,
+                    }, config);
+                    
+                    setUserProgress(prev => ({
+                        ...prev,
+                        completedVideos: [...(prev.completedVideos || []), vidId],
+                        progress: resp.data.progress
+                    }));
+                } catch (err) {
+                    console.error('Video completion update failed:', err);
+                    toast.error(`Progress Sync Error: ${err.response?.data?.message || err.message}`);
+                }
+            }
         }
+        
+        goToNextSection();
+    };
 
-        if (currentVideoIndex < currentModule.videos.length - 1) {
-            setCurrentVideoIndex(prev => prev + 1);
-        } else if (currentModuleIndex < course.modules.length - 1) {
-            setCurrentModuleIndex(prev => prev + 1);
-            setCurrentVideoIndex(0);
-        } else {
-            alert('Course Completed!');
+    const handleApplyCertificate = async () => {
+        setIsApplyingCertificate(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.post('/api/certificates/apply', { courseId }, config);
+            toast.success(data.message || 'Certificate application submitted! We will review it shortly.');
+            setCertificateApplied(true);
+        } catch (error) {
+            const msg = error.response?.data?.message;
+            if (msg === 'Certificate request already exists for this course') {
+                toast.success('You have already applied for this certificate! We are processing it.');
+                setCertificateApplied(true);
+            } else {
+                toast.error(msg || 'Failed to apply for certificate');
+            }
+        } finally {
+            setIsApplyingCertificate(false);
         }
     };
 
@@ -353,6 +424,7 @@ const CoursePlayer = () => {
                                                     setCurrentVideoIndex(vIndex);
                                                     setShowExercise(false);
                                                     setShowQuiz(false);
+                                                    setShowCourseCompletion(false);
                                                 }}
                                             >
                                                 <div className="flex items-center space-x-3 text-left">
@@ -390,6 +462,7 @@ const CoursePlayer = () => {
                                                     setQuizIndex(0);
                                                     setQuizAnswers({});
                                                     setQuizResult(null);
+                                                    setShowCourseCompletion(false);
                                                 }}
                                             >
                                                 <div className="flex items-center space-x-3 text-left">
@@ -413,6 +486,55 @@ const CoursePlayer = () => {
 
             {/* Main Content - Player */}
             <div className="flex-1 bg-transparent relative">
+                {showCourseCompletion ? (
+                    <div className="flex flex-col items-center justify-center min-h-[500px] p-8 text-center animate-in zoom-in-95 duration-700">
+                        <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/30">
+                            <CheckCircle size={48} />
+                        </div>
+                        <h2 className="text-4xl font-black text-white font-poppins mb-4">Course Completed!</h2>
+                        <p className="text-slate-400 font-inter max-w-lg mx-auto mb-6">
+                            Congratulations on reaching the end of {course.title}.
+                        </p>
+                        
+                        {Number(userProgress.progress || 0) < 100 && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 max-w-lg mx-auto text-sm font-bold">
+                                ⚠️ Your overall progress is only {Number(userProgress.progress || 0)}%. You must complete all videos and quizzes to unlock your certificate.
+                            </div>
+                        )}
+
+                        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center w-full">
+                            {certificateApplied ? (
+                                <div className="flex items-center space-x-3 px-8 py-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-black text-lg rounded-xl">
+                                    <CheckCircle size={24} />
+                                    <span>Certificate Applied!</span>
+                                </div>
+                            ) : (
+                                <ModernButton 
+                                    onClick={handleApplyCertificate} 
+                                    disabled={isApplyingCertificate || Number(userProgress.progress || 0) < 100}
+                                    className={`!px-8 !py-4 !text-lg shadow-xl ${
+                                        Number(userProgress.progress || 0) < 100
+                                            ? '!bg-slate-600 !text-slate-400 !shadow-none opacity-50 cursor-not-allowed'
+                                            : '!bg-emerald-500 shadow-emerald-500/20'
+                                    }`}
+                                >
+                                    {isApplyingCertificate
+                                        ? 'Submitting...'
+                                        : Number(userProgress.progress || 0) >= 100
+                                            ? '🎓 Apply for Certificate'
+                                            : `Complete Course to Apply (${Number(userProgress.progress || 0)}%)`
+                                    }
+                                </ModernButton>
+                            )}
+                            <button 
+                                onClick={() => navigate('/dashboard/my-courses')}
+                                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all"
+                            >
+                                Back to Dashboard
+                            </button>
+                        </div>
+                    </div>
+                ) : (
                     <div className="mx-auto animate-in fade-in duration-1000">
                         <div className="flex items-center justify-between bg-white/[0.02] p-4 lg:px-8 border-b border-white/5">
                             <div className="flex items-center space-x-4">
@@ -470,16 +592,10 @@ const CoursePlayer = () => {
                                         </div>
                                         <div className="pt-8">
                                             <ModernButton 
-                                                onClick={() => {
-                                                    setShowQuiz(false);
-                                                    if (currentModuleIndex < course.modules.length - 1) {
-                                                        setCurrentModuleIndex(prev => prev + 1);
-                                                        setCurrentVideoIndex(0);
-                                                    }
-                                                }}
+                                                onClick={handleNext}
                                                 className="!px-12 !py-4"
                                             >
-                                                {currentModuleIndex < course.modules.length - 1 ? 'Continue to Next Section' : 'Return to Course curriculum'}
+                                                {currentModuleIndex < course.modules.length - 1 ? 'Continue to Next Section' : 'Finish Course'}
                                             </ModernButton>
                                         </div>
                                     </div>
@@ -531,7 +647,7 @@ const CoursePlayer = () => {
                                                     disabled={!quizAnswers[quizIndex]}
                                                     onClick={() => {
                                                         const score = currentModule.quiz.questions.reduce((acc, q, i) => {
-                                                            return acc + (quizAnswers[i] === q.correctAnswer ? 1 : 0);
+                                                            return acc + (quizAnswers[i] === q.options[q.correctIndex] ? 1 : 0);
                                                         }, 0);
                                                         setQuizResult({ score, total: currentModule.quiz.questions.length });
                                                     }}
@@ -583,24 +699,20 @@ const CoursePlayer = () => {
                                     onEnded={handleVideoEnd}
                                     onError={(error) => console.error('Recording playback error:', error)}
                                 />
-                            ) : (
-                                <iframe
-                                    width="100%"
-                                    height="100%"
-                                    src={(() => {
-                                        let url = currentVideo.url || '';
-                                        const watchMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-                                        if (watchMatch) {
-                                            url = `https://www.youtube-nocookie.com/embed/${watchMatch[1]}`;
-                                        }
-                                        return url;
-                                    })()}
-                                    title={currentVideo.title}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
+                            ) : (currentVideo.url && (currentVideo.url.endsWith('.mp4') || currentVideo.url.endsWith('.webm') || currentVideo.url.endsWith('.ogg') || currentVideo.url.includes('/mp4') || currentVideo.url.includes('.mp4?'))) ? (
+                                <video
+                                    src={currentVideo.url}
+                                    controls
                                     className="w-full h-full"
-                                ></iframe>
+                                    onEnded={handleVideoEnd}
+                                    controlsList="nodownload"
+                                />
+                            ) : (
+                                <CustomYoutubePlayer
+                                    url={currentVideo.url}
+                                    title={currentVideo.title}
+                                    onEnded={handleVideoEnd}
+                                />
                             )}
                         </div>
                     </div>
@@ -772,7 +884,8 @@ const CoursePlayer = () => {
                         </div>
                     </div>
                     </div>
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );

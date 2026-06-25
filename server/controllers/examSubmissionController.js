@@ -45,11 +45,14 @@ const submitAnswer = asyncHandler(async (req, res) => {
   let answers = submission.answers || [];
   const existingAnswerIndex = answers.findIndex(a => (a.questionId === questionId || a.question === questionId));
 
+  const isMCQ = question.question_type === 'mcq' || question.question_type === 'online-mcq';
+  const isDescriptive = question.question_type === 'descriptive' || question.question_type === 'short-answer' || question.question_type === 'essay';
+
   const answerData = {
     questionId: questionId,
-    questionType: question.question_type,
-    selectedOption: question.question_type === 'mcq' ? selectedOption : undefined,
-    textAnswer: question.question_type === 'descriptive' ? textAnswer : undefined
+    questionType: isMCQ ? 'mcq' : 'descriptive',
+    selectedOption: isMCQ ? selectedOption : undefined,
+    textAnswer: isDescriptive ? textAnswer : undefined
   };
 
   if (existingAnswerIndex >= 0) {
@@ -125,11 +128,13 @@ const submitExam = asyncHandler(async (req, res) => {
 
     if (!question) return ans;
 
-    if (question.question_type === 'mcq') {
-      const options = question.options || [];
+    const isMCQ = question.question_type === 'mcq' || question.question_type === 'online-mcq';
+
+    if (isMCQ) {
+      const options = typeof question.options === 'string' ? JSON.parse(question.options) : (question.options || []);
       const selectedIdx = ans.selectedOption !== undefined ? ans.selectedOption : ans.answer;
       
-      const correctOptionIndex = options.findIndex(opt => opt.isCorrect === true);
+      const correctOptionIndex = options.findIndex(opt => opt.isCorrect === true || opt.isCorrect === 'true' || opt.isCorrect === 1);
       const studentSelectedIndex = (selectedIdx !== undefined && selectedIdx !== null) ? Number(selectedIdx) : -1;
       const isCorrect = studentSelectedIndex !== -1 && studentSelectedIndex === correctOptionIndex;
 
@@ -258,7 +263,13 @@ const getMySubmission = asyncHandler(async (req, res) => {
     `, [examId]);
     
     const questionsMap = {};
-    qRes.rows.forEach(q => { questionsMap[q._id] = q; });
+    qRes.rows.forEach(q => { 
+      questionsMap[q._id] = {
+        ...q,
+        options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+        questionType: (q.questionType === 'online-mcq' || q.questionType === 'mcq') ? 'mcq' : 'descriptive'
+      }; 
+    });
     
     submission.answers = submission.answers.map(ans => {
       const qId = ans.questionId || (ans.question && (ans.question._id || ans.question)) || ans.question;
@@ -285,7 +296,9 @@ const getSubmissionForGrading = asyncHandler(async (req, res) => {
 
   // 1. Fetch submission with exam and student basic info
   const subRes = await query(`
-    SELECT s.*, e.title as exam_title, e.total_marks, e.passing_score, u.name as student_name, u.email as student_email
+    SELECT s.*,
+           s.id as _id,
+           e.title as exam_title, e.total_marks, e.passing_score, u.name as "studentName", u.email as "studentEmail"
     FROM exam_submissions_new s
     JOIN exams e ON s.exam_id = e.id
     JOIN users u ON s.student_id = u.id
@@ -311,7 +324,11 @@ const getSubmissionForGrading = asyncHandler(async (req, res) => {
   const questions = qRes.rows;
   const questionsMap = {};
   questions.forEach(q => {
-    questionsMap[q._id] = q;
+    questionsMap[q._id] = {
+      ...q,
+      options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+      questionType: (q.questionType === 'online-mcq' || q.questionType === 'mcq') ? 'mcq' : 'descriptive'
+    };
   });
 
   // 3. Populate questions into answers
@@ -352,9 +369,13 @@ const getSubmissionsForExam = asyncHandler(async (req, res) => {
     throw new Error('Exam not found');
   }
 
-  if (exam.university_id?.toString() !== userId.toString() &&
-    exam.created_by_id?.toString() !== userId.toString() &&
-    req.user.role?.toLowerCase() !== 'admin') {
+  const isAuthorized = 
+    req.user.role?.toLowerCase() === 'admin' || 
+    req.user.role?.toLowerCase() === 'partner' ||
+    exam.university_id?.toString() === userId.toString() ||
+    exam.created_by_id?.toString() === userId.toString();
+
+  if (!isAuthorized) {
     res.status(403);
     throw new Error('Not authorized to view submissions for this exam');
   }
@@ -405,7 +426,7 @@ const gradeSubmission = asyncHandler(async (req, res) => {
 
   // 1. Find submission and exam info
   const subRes = await query(`
-    SELECT s.*, e.total_marks as exam_total_marks
+    SELECT s.*, e.total_marks as exam_total_marks, e.passing_score as exam_passing_score
     FROM exam_submissions_new s
     JOIN exams e ON s.exam_id = e.id
     WHERE s.id = $1
@@ -442,7 +463,7 @@ const gradeSubmission = asyncHandler(async (req, res) => {
   // 3. Calculate total obtained marks
   const totalObtainedMarks = currentAnswers.reduce((sum, ans) => sum + (Number(ans.marksAwarded) || 0), 0);
   const totalExamMarks = submission.exam_total_marks || submission.total_marks || 100;
-  const passingScore = Number(submission.passing_score) || 40;
+  const passingScore = Number(submission.exam_passing_score) || Number(submission.passing_score) || 40;
   const percentage = (totalObtainedMarks / totalExamMarks) * 100;
   const passed = percentage >= passingScore;
 

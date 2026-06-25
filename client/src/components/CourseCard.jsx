@@ -99,12 +99,7 @@ const CourseCard = ({ course }) => {
                     {course.description}
                 </p>
 
-                <div className="flex items-center justify-between pt-3 border-t border-white/5 mt-auto">
-                    <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em]">Protocol Fee</span>
-                        <span className="text-sm font-black text-white">₹{course.price || '0.00'}</span>
-                    </div>
-
+                <div className="flex items-center justify-end pt-3 border-t border-white/5 mt-auto">
                     <ModernButton
                         onClick={handleEnroll}
                         className="!px-4 !py-2 font-black uppercase tracking-widest text-[8px] group/btn shadow-glow-purple"

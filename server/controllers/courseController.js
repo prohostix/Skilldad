@@ -6,25 +6,47 @@ const { query, getPool } = require('../config/postgres');
 const getCourses = asyncHandler(async (req, res) => {
     try {
         const universityId = req.query.university;
+        const search = req.query.search;
         let coursesRes;
 
+        let queryStr = `
+            SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
+            FROM courses c
+            LEFT JOIN users u ON c.instructor_id = u.id
+            WHERE c.is_published = true AND c.status = 'approved'
+        `;
+        let queryParams = [];
+
         if (universityId) {
-            coursesRes = await query(`
-                SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
-                FROM courses c
-                JOIN users u ON c.instructor_id = u.id
-                WHERE c.is_published = true AND c.instructor_id = $1 AND c.status = 'approved'
-                ORDER BY c.is_featured DESC, c.created_at DESC
-            `, [universityId]);
-        } else {
-            coursesRes = await query(`
-                SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
-                FROM courses c
-                JOIN users u ON c.instructor_id = u.id
-                WHERE c.is_published = true AND c.status = 'approved'
-                ORDER BY c.is_featured DESC, c.created_at DESC
-            `);
+            queryParams.push(universityId);
+            queryStr += ` AND c.instructor_id = $${queryParams.length}`;
         }
+
+        if (search) {
+            const stopWords = ['is','the','a','an','of','for','to','and','or','in','on','which','one','any','all','some','what','how','details','detail'];
+            const words = search.split(/[ \-–&,]+/).filter(w => w.trim().length > 1 && !stopWords.includes(w.toLowerCase()));
+            
+            if (words.length > 0) {
+                let orConditions = [];
+                let relevanceCases = [];
+                words.forEach(word => {
+                    queryParams.push(`%${word}%`);
+                    const paramIdx = queryParams.length;
+                    orConditions.push(`c.title ILIKE $${paramIdx} OR c.university_name ILIKE $${paramIdx}`);
+                    relevanceCases.push(`(CASE WHEN c.title ILIKE $${paramIdx} THEN 2 WHEN c.university_name ILIKE $${paramIdx} THEN 1 ELSE 0 END)`);
+                });
+                
+                queryStr = queryStr.replace('SELECT c.*,', `SELECT c.*, (${relevanceCases.join(' + ')}) as relevance,`);
+                queryStr += ` AND (${orConditions.join(' OR ')})`;
+                queryStr += ` ORDER BY relevance DESC, c.is_featured DESC, c.created_at DESC LIMIT 10`;
+            } else {
+                queryStr += ` ORDER BY c.is_featured DESC, c.created_at DESC`;
+            }
+        } else {
+            queryStr += ` ORDER BY c.is_featured DESC, c.created_at DESC`;
+        }
+
+        coursesRes = await query(queryStr, queryParams);
 
         const validCourses = coursesRes.rows.map(course => ({
             ...course,
@@ -44,7 +66,7 @@ const getCourses = asyncHandler(async (req, res) => {
         res.status(200).json(validCourses);
     } catch (error) {
         console.error('Error in getCourses (PG):', error);
-        res.status(500).json({ message: 'Error fetching courses' });
+        res.status(500).json({ message: error.message || 'Error fetching courses' });
     }
 });
 
@@ -62,7 +84,17 @@ const getAdminCourses = asyncHandler(async (req, res) => {
                 LEFT JOIN users u ON c.instructor_id = u.id
                 ORDER BY c.is_featured DESC, c.created_at DESC
             `);
+        } else if (userRole === 'partner') {
+            // Partners see courses they created or are instructors for
+            coursesRes = await query(`
+                SELECT c.*, u.name as instructor_name
+                FROM courses c
+                LEFT JOIN users u ON c.instructor_id = u.id
+                WHERE c.instructor_id = $1 OR c.submitted_by = $1
+                ORDER BY c.is_featured DESC, c.created_at DESC
+            `, [userId]);
         } else {
+            // Universities/Instructors see courses they are instructors for
             coursesRes = await query(`
                 SELECT c.*, u.name as instructor_name
                 FROM courses c

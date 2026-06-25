@@ -4,10 +4,9 @@ import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin, Youtube, H
 import logoImg from '../../assets/logo.png';
 import { useUser } from '../../context/UserContext';
 
-const Footer = () => {
+const Footer = ({ forceVisible = false }) => {
     const { user } = useUser();
     const navigate = useNavigate();
-    const [isVisible, setIsVisible] = useState(false);
     const footerRef = useRef(null);
 
     // Helper to get dashboard link based on role
@@ -22,30 +21,13 @@ const Footer = () => {
         }
     };
 
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setIsVisible(true);
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        if (footerRef.current) {
-            observer.observe(footerRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, []);
-
     return (
         <footer
             ref={footerRef}
-            className={`relative bg-[#0B0F1A] border-t border-white/10 overflow-hidden transition-opacity duration-1000 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+            className="relative bg-[#0B0F1A] border-t border-white/10 overflow-hidden opacity-100"
         >
             {/* Animated Gradient Line at Top */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" style={{ animationDuration: '1s' }} />
+            <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent ${!forceVisible && 'animate-pulse'}`} style={{ animationDuration: '1s' }} />
 
             {/* Floating Background Gradients */}
             <div className="absolute top-20 left-10 w-96 h-96 bg-primary/5 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '1.5s' }} />

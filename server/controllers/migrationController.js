@@ -95,5 +95,56 @@ const fixAdminEnrollments = async (req, res) => {
 };
 
 module.exports = {
-    fixAdminEnrollments
+    fixAdminEnrollments,
+    fixFaqsTable
 };
+
+async function fixFaqsTable(req, res) {
+    try {
+        const colRes = await query(
+            "SELECT column_name FROM information_schema.columns WHERE table_name = $1",
+            ['faqs']
+        );
+        const cols = colRes.rows.map(r => r.column_name);
+        const added = [];
+
+        if (!cols.includes('help_link')) {
+            await query('ALTER TABLE faqs ADD COLUMN help_link TEXT');
+            added.push('help_link');
+        }
+        if (!cols.includes('demo_video_link')) {
+            await query('ALTER TABLE faqs ADD COLUMN demo_video_link TEXT');
+            added.push('demo_video_link');
+        }
+        if (!cols.includes('views')) {
+            await query('ALTER TABLE faqs ADD COLUMN views INTEGER DEFAULT 0');
+            added.push('views');
+        }
+        if (!cols.includes('upvotes')) {
+            await query('ALTER TABLE faqs ADD COLUMN upvotes INTEGER DEFAULT 0');
+            added.push('upvotes');
+        }
+        if (!cols.includes('downvotes')) {
+            await query('ALTER TABLE faqs ADD COLUMN downvotes INTEGER DEFAULT 0');
+            added.push('downvotes');
+        }
+        if (!cols.includes('updated_at')) {
+            await query('ALTER TABLE faqs ADD COLUMN updated_at TIMESTAMP DEFAULT NOW()');
+            added.push('updated_at');
+        }
+
+        await query(`
+            CREATE TABLE IF NOT EXISTS faq_search_analytics (
+                id SERIAL PRIMARY KEY,
+                query TEXT UNIQUE NOT NULL,
+                count INTEGER DEFAULT 1,
+                updated_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+
+        res.json({ success: true, existingColumns: cols, addedColumns: added });
+    } catch (e) {
+        console.error('[fixFaqsTable]', e.message);
+        res.status(500).json({ message: e.message });
+    }
+}

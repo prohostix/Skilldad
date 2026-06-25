@@ -38,83 +38,15 @@ const Platform = () => {
         fetchUnis();
     }, []);
 
-    const staticUniversities = [
-        {
-            id: 1,
-            name: "Harvard University",
-            location: "Cambridge, MA",
-            students: "23,000+",
-            programs: "350+",
-            established: "1636",
-            rating: 4.9,
-            image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800",
-            specialties: ["Business", "Medicine", "Law", "Engineering"],
-            description: "World-renowned institution leading in research and innovation across multiple disciplines."
-        },
-        {
-            id: 2,
-            name: "Stanford University",
-            location: "Stanford, CA",
-            students: "17,000+",
-            programs: "200+",
-            established: "1885",
-            rating: 4.8,
-            image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&q=80&w=800",
-            specialties: ["Technology", "Business", "Medicine", "Engineering"],
-            description: "Leading innovation hub in Silicon Valley, pioneering technology and entrepreneurship."
-        },
-        {
-            id: 3,
-            name: "MIT",
-            location: "Cambridge, MA",
-            students: "11,000+",
-            programs: "180+",
-            established: "1861",
-            rating: 4.9,
-            image: "https://images.unsplash.com/photo-1564981797816-1043664bf78d?auto=format&fit=crop&q=80&w=800",
-            specialties: ["Engineering", "Computer Science", "Physics", "Mathematics"],
-            description: "World's premier technological institute, advancing science and engineering frontiers."
-        },
-        {
-            id: 4,
-            name: "Oxford University",
-            location: "Oxford, UK",
-            students: "24,000+",
-            programs: "400+",
-            established: "1096",
-            rating: 4.8,
-            image: "https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b?auto=format&fit=crop&q=80&w=800",
-            specialties: ["Liberal Arts", "Medicine", "Law", "Philosophy"],
-            description: "Historic institution with nearly a millennium of academic excellence and tradition."
-        },
-        {
-            id: 5,
-            name: "University of Tokyo",
-            location: "Tokyo, Japan",
-            students: "28,000+",
-            programs: "300+",
-            established: "1877",
-            rating: 4.7,
-            image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&q=80&w=800",
-            specialties: ["Engineering", "Science", "Medicine", "Economics"],
-            description: "Japan's leading university, driving innovation in Asia and fostering global collaboration."
-        },
-        {
-            id: 6,
-            name: "ETH Zurich",
-            location: "Zurich, Switzerland",
-            students: "22,000+",
-            programs: "160+",
-            established: "1855",
-            rating: 4.8,
-            image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=800",
-            specialties: ["Engineering", "Technology", "Natural Sciences", "Mathematics"],
-            description: "Europe's premier science and technology university, known for cutting-edge research."
-        }
-    ];
+    const universities = dynamicUnis.map(u => {
+        // Build best-available image: profile.coverImage > Unsplash fallback (DO NOT fallback to logo)
+        const coverImg = u.profile?.coverImage;
+        const fallbackImg = `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`;
+        const resolvedImage = coverImg
+                ? getMediaUrl(coverImg)
+                : fallbackImg;
 
-    const universities = dynamicUnis.length > 0
-        ? dynamicUnis.map(u => ({
+        return {
             id: u._id,
             name: u.name,
             location: u.profile?.location || 'Global',
@@ -122,11 +54,12 @@ const Platform = () => {
             programs: u.courseCount > 0 ? `${u.courseCount}+` : '10+',
             established: u.profile?.foundedYear || u.profile?.established || '2020',
             rating: 4.8,
-            image: u.profileImage ? getMediaUrl(u.profileImage) : `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`,
-            specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
+            image: resolvedImage,
+            fallbackImage: fallbackImg,
+            specialties: u.profile?.specialties || ["Neural Learning", "Strategic Matrix", "Global Sync"],
             description: u.bio || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
-        }))
-        : staticUniversities;
+        };
+    });
 
     const platformStats = [
         { label: "Partner Universities", value: "150+", icon: Building, color: "purple" },
@@ -149,8 +82,8 @@ const Platform = () => {
                         className="text-center mb-10 md:mb-16"
                     >
                         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6 font-space">
-                            <span className="text-gray-400">University</span>{' '}
-                            <span className="text-white">
+                            <span className="opacity-40">University</span>{' '}
+                            <span className="premium-gradient-text">
                                 Platform
                             </span>
                         </h1>
@@ -177,6 +110,10 @@ const Platform = () => {
                                             src={university.image}
                                             alt={university.name}
                                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = university.fallbackImage || `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`;
+                                            }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                         <div className="absolute top-3 md:top-4 right-3 md:right-4 flex items-center space-x-1 bg-black/50 backdrop-blur-sm rounded-full px-2 md:px-3 py-1">

@@ -57,6 +57,9 @@ const PaymentCallback = lazy(() => import('./pages/student/PaymentCallback'));
 const PaymentHistory = lazy(() => import('./pages/student/PaymentHistory'));
 const PaymentStatus = lazy(() => import('./pages/student/PaymentStatus'));
 const InteractiveContentPage = lazy(() => import('./pages/student/InteractiveContentPage'));
+const PlacementsPortal = lazy(() => import('./pages/student/PlacementsPortal'));
+const VacancyDetails = lazy(() => import('./pages/student/VacancyDetails'));
+const RewardWallet = lazy(() => import('./pages/student/RewardWallet'));
 
 // University Pages
 const UniversityDashboard = lazy(() => import('./pages/university/UniversityDashboard'));
@@ -78,6 +81,8 @@ const CommissionWallet = lazy(() => import('./pages/partner/CommissionWallet'));
 const PartnerStudentManagement = lazy(() => import('./pages/partner/PartnerStudentManagement'));
 const PartnerCourseManager = lazy(() => import('./pages/partner/PartnerCourseManager'));
 const PartnerCourseEditor = lazy(() => import('./pages/partner/PartnerCourseEditor'));
+const PartnerExamManagement = lazy(() => import('./pages/partner/PartnerExamManagement'));
+const PartnerExamQuestionManager = lazy(() => import('./pages/partner/PartnerExamQuestionManager'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -105,6 +110,10 @@ const CouponManager = lazy(() => import('./pages/admin/CouponManager'));
 const UniversityDetail = lazy(() => import('./pages/admin/UniversityDetail'));
 const ServicesManagement = lazy(() => import('./pages/admin/ServicesManagement'));
 const StudyAbroadManagement = lazy(() => import('./pages/admin/StudyAbroadManagement'));
+const CareerManager = lazy(() => import('./pages/admin/CareerManager'));
+const CertificateManagement = lazy(() => import('./pages/admin/CertificateManagement'));
+const DocumentReview = lazy(() => import('./pages/admin/DocumentReview'));
+const UniversityDocumentReview = lazy(() => import('./pages/university/UniversityDocumentReview'));
 
 
 // Finance Pages
@@ -165,6 +174,9 @@ function App() {
                     <Route path="watch/:id" element={<WatchStream />} />
                     <Route path="documents" element={<Documents />} />
                     <Route path="exams" element={<Exams />} />
+                    <Route path="placements" element={<PlacementsPortal />} />
+                    <Route path="placements/:id" element={<VacancyDetails />} />
+                    <Route path="reward-wallet" element={<RewardWallet />} />
                     <Route path="exam/:examId/take" element={<ExamTaker />} />
                     <Route path="exam/:examId/submitted" element={<ExamSubmitted />} />
                     <Route path="exam/:examId/result" element={<ExamResult />} />
@@ -185,6 +197,7 @@ function App() {
                 <Route element={<ProtectedRoute allowedRoles={['university', 'admin']} />}>
                   <Route path="/university" element={<DashboardLayout />}>
                     <Route path="dashboard" element={<UniversityDashboard />} />
+                    <Route path="courses" element={<UniversityDashboard />} />
                     <Route path="courses/:courseId" element={<CourseContentManagement />} />
                     <Route path="courses/:courseId/grading" element={<GradingQueue />} />
                     <Route path="courses/:courseId/modules/:moduleId/content/create" element={<CreateInteractiveContent />} />
@@ -196,6 +209,8 @@ function App() {
                     <Route path="schedule" element={<ScheduleClass />} />
                     <Route path="exams" element={<ExamManagement />} />
                     <Route path="exams/:examId/questions" element={<ExamQuestionManager />} />
+                    <Route path="certificates" element={<UniversityDashboard />} />
+                    <Route path="student-documents" element={<UniversityDocumentReview />} />
                     <Route path="analytics" element={<UniversityDashboard />} />
                     <Route path="support" element={<Support />} />
                     <Route path="settings" element={<Settings />} />
@@ -209,7 +224,12 @@ function App() {
                     <Route path="students" element={<PartnerStudentManagement />} />
                     <Route path="courses" element={<PartnerCourseManager />} />
                     <Route path="courses/:id" element={<PartnerCourseEditor />} />
+                    <Route path="live-sessions" element={<LiveSessionsHub />} />
+                    <Route path="session/:sessionId" element={<SessionDetail />} />
+                    <Route path="schedule" element={<ScheduleClass />} />
                     <Route path="commission" element={<CommissionWallet />} />
+                    <Route path="exams" element={<PartnerExamManagement />} />
+                    <Route path="exams/:examId/questions" element={<PartnerExamQuestionManager />} />
                     <Route path="support" element={<Support />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>
@@ -226,6 +246,7 @@ function App() {
                     <Route path="exams" element={<ExamScheduler />} />
                     <Route path="users" element={<UserList />} />
                     <Route path="students" element={<StudentManagement />} />
+                    <Route path="career-manager" element={<CareerManager />} />
                     <Route path="university" element={<UniversityManagement />} />
                     <Route path="university/:id" element={<UniversityDetail />} />
                     <Route path="skilldad-universities" element={<SkillDadUniversities />} />
@@ -244,6 +265,8 @@ function App() {
                     <Route path="faqs" element={<FAQManagement />} />
                     <Route path="services" element={<ServicesManagement />} />
                     <Route path="study-abroad" element={<StudyAbroadManagement />} />
+                    <Route path="certificates" element={<CertificateManagement />} />
+                    <Route path="document-review" element={<DocumentReview />} />
                     <Route path="settings" element={<Settings />} />
 
                   </Route>
@@ -254,6 +277,7 @@ function App() {
                   <Route path="/finance" element={<DashboardLayout />}>
                     <Route path="dashboard" element={<FinanceDashboard />} />
                     <Route path="payouts" element={<FinanceDashboard />} />
+                    <Route path="reports" element={<FinanceDashboard />} />
                     <Route path="support" element={<Support />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>

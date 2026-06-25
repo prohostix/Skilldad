@@ -368,24 +368,6 @@ const PaymentInitiation = () => {
 
                 <div className="lg:col-span-1">
                     <GlassCard className="p-6 sticky top-6">
-                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-6">Price Summary</h3>
-                        <div className="space-y-4 mb-8">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-gray-400">Course Price</span>
-                                <span className="text-white font-semibold">₹{pricing.original}</span>
-                            </div>
-                            {appliedDiscount && (
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-emerald-400">Discount</span>
-                                    <span className="text-emerald-400 font-semibold">-₹{pricing.discount}</span>
-                                </div>
-                            )}
-                            <div className="flex justify-between text-lg font-bold pt-4 border-t border-white/10">
-                                <span className="text-white">Total</span>
-                                <span className="text-primary">₹{pricing.total}</span>
-                            </div>
-                        </div>
-
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-2 p-1 bg-white/5 rounded-xl">
                                 <button

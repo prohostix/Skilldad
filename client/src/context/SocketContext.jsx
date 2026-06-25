@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import { useUser } from './UserContext';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 const SocketContext = createContext();
 
@@ -13,16 +14,53 @@ export const SocketProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    // Fetch stored notifications from DB on mount
+    const fetchStoredNotifications = useCallback(async () => {
+        if (!user?.token) return;
+        try {
+            const { data } = await axios.get(
+                `${import.meta.env.VITE_API_URL || ''}/api/notifications/my`,
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
+            const stored = (data || []).map(n => ({
+                id: n.id,
+                type: n.type,
+                title: getTitleFromType(n.type),
+                message: getMessageFromLog(n),
+                timestamp: n.created_at,
+                read: n.is_read,
+                metadata: n.metadata
+            }));
+            setNotifications(stored);
+            setUnreadCount(stored.filter(n => !n.read).length);
+        } catch (err) {
+            // Non-fatal: silently ignore
+        }
+    }, [user]);
+
+    // Mark all as read
+    const markAllRead = useCallback(async () => {
+        if (!user?.token) return;
+        try {
+            await axios.put(
+                `${import.meta.env.VITE_API_URL || ''}/api/notifications/read`,
+                {},
+                { headers: { Authorization: `Bearer ${user.token}` } }
+            );
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(0);
+        } catch (err) {
+            // Non-fatal
+        }
+    }, [user]);
+
     useEffect(() => {
         if (user && user.token) {
-            // Point socket.io to the exact backend server URL
-            const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
+            // Load stored notifications immediately
+            fetchStoredNotifications();
 
-            const newSocket = io(socketUrl, {
-                auth: {
-                    token: user.token
-                }
-            });
+            const socketUrl = import.meta.env.VITE_API_URL || window.location.origin;
+            const newSocket = io(socketUrl, { auth: { token: user.token } });
 
             newSocket.on('connect', () => {
                 console.log('[Socket] Connected to server');
@@ -30,18 +68,14 @@ export const SocketProvider = ({ children }) => {
 
             newSocket.on('notification', (data) => {
                 console.log('[Socket] Received notification:', data);
-                
-                // Add to notifications list
                 const newNotif = {
                     ...data,
                     timestamp: new Date().toISOString(),
                     read: false
                 };
-                
                 setNotifications(prev => [newNotif, ...prev]);
                 setUnreadCount(prev => prev + 1);
 
-                // Show a premium toast notification
                 toast.success(
                     <div className="flex flex-col">
                         <span className="font-bold text-sm uppercase tracking-wider">{data.title}</span>
@@ -64,14 +98,12 @@ export const SocketProvider = ({ children }) => {
             // Admin specific notifications
             if (user.role === 'admin') {
                 newSocket.on('admin_notification', (data) => {
-                    // Also add admin notifications to the list
                     const newNotif = {
                         ...data,
                         timestamp: new Date().toISOString(),
                         read: false,
                         isAdmin: true
                     };
-                    
                     setNotifications(prev => [newNotif, ...prev]);
                     setUnreadCount(prev => prev + 1);
 
@@ -82,32 +114,29 @@ export const SocketProvider = ({ children }) => {
                         </div>,
                         {
                             position: 'bottom-right',
-                            style: {
-                                background: '#7c3aed',
-                                color: '#fff'
-                            }
+                            style: { background: '#7c3aed', color: '#fff' }
                         }
                     );
                 });
             }
 
             setSocket(newSocket);
-
             return () => newSocket.close();
         } else {
-            // Reset state if user logs out
             setSocket(null);
             setNotifications([]);
             setUnreadCount(0);
         }
-    }, [user]);
+    }, [user, fetchStoredNotifications]);
 
     const value = {
         socket,
         notifications,
         unreadCount,
         setUnreadCount,
-        setNotifications
+        setNotifications,
+        markAllRead,
+        fetchStoredNotifications
     };
 
     return (
@@ -116,3 +145,32 @@ export const SocketProvider = ({ children }) => {
         </SocketContext.Provider>
     );
 };
+
+// Helper: get a human-readable title from notification type
+function getTitleFromType(type) {
+    const map = {
+        liveSession: '🔴 Live Session Scheduled',
+        enrollment: '✅ Enrollment Confirmed',
+        exam: '📝 Exam Scheduled',
+        exam_scheduled: '📝 Exam Scheduled',
+        examResult: '🏆 Exam Result',
+        examReminder: '⏰ Exam Reminder',
+        examCancelled: '❌ Exam Cancelled',
+        welcome: '👋 Welcome to SkillDad',
+    };
+    return map[type] || '🔔 Notification';
+}
+
+// Helper: build message text from notification log
+function getMessageFromLog(n) {
+    const m = n.metadata || {};
+    switch (n.type) {
+        case 'liveSession': return `"${m.topic}" scheduled for ${m.startTime ? new Date(m.startTime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : ''}`;
+        case 'enrollment': return `You have been enrolled in ${m.courseTitle}`;
+        case 'exam':
+        case 'exam_scheduled': return `Exam "${m.examTitle}" scheduled`;
+        case 'examResult': return `Result for "${m.examTitle}": ${m.score} (${m.percentage?.toFixed?.(1) || ''}%)`;
+        default: return n.message || 'You have a new notification';
+    }
+}
+

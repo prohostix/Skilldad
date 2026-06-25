@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useSocket } from '../../context/SocketContext';
+import { getMediaUrl } from '../../utils/media';
 import {
     Building2,
     Users,
@@ -249,12 +250,16 @@ const B2BManagement = () => {
     const handleOnboardEntity = async () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.post('/api/users', newEntity, config);
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+            const { data } = await axios.post('/api/admin/users/invite', newEntity, config);
             showToast(`Successfully onboarded ${newEntity.name}`, 'success');
             setOpenOnboard(false);
             setNewEntity({ name: '', email: '', password: '', phone: '', role: 'partner', discountRate: 0 });
-            // Immediately refresh the partners list
             await fetchPartners();
         } catch (error) {
             showToast(`Failed to onboard entity: ${error.response?.data?.message || error.message}`, 'error');
@@ -452,7 +457,7 @@ const B2BManagement = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="h-[300px] w-full relative">
+                    <div className="h-[300px] w-full relative" style={{ minWidth: 0 }}>
                         <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={250} debounce={50}>
                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
@@ -555,8 +560,12 @@ const B2BManagement = () => {
                                 <tr key={partner._id} className="hover:bg-white/5 transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white font-poppins">
-                                                {partner.name?.charAt(0)}
+                                            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-white font-poppins overflow-hidden">
+                                                {partner.profileImage || partner.profile_image ? (
+                                                    <img src={getMediaUrl(partner.profileImage || partner.profile_image)} alt={partner.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    partner.name?.charAt(0)
+                                                )}
                                             </div>
                                             <button
                                                 onClick={() => navigate(`/admin/b2b/${partner._id}`)}

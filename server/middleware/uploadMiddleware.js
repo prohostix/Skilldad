@@ -16,9 +16,9 @@ const storage = multer.diskStorage({
 });
 
 function checkFileType(file, cb) {
-    const filetypes = /jpg|jpeg|png|mp4|webm|mov|ogg|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt/;
+    const filetypes = /jpg|jpeg|png|webp|svg|mp4|webm|mov|ogg|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype.toLowerCase());
+    const mimetype = /jpg|jpeg|png|webp|svg|mp4|webm|mov|ogg|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt|image\/webp|image\/svg/.test(file.mimetype.toLowerCase());
 
     if (extname || mimetype) {
         return cb(null, true);

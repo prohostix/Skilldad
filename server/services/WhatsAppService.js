@@ -38,7 +38,7 @@ class WhatsAppService {
         }
 
         try {
-            // Gupshup Template Message Format
+            // 1. Gupshup Template Message Format
             const payload = new URLSearchParams();
             payload.append('source', this.source);
             payload.append('destination', cleanPhone);
@@ -46,6 +46,7 @@ class WhatsAppService {
                 id: templateId,
                 params: variables.map(v => v ? v.toString() : '')
             }));
+            payload.append('src.name', 'SkillDadChat');
 
             const response = await axios.post(
                 this.baseUrl,
@@ -57,6 +58,7 @@ class WhatsAppService {
                     }
                 }
             );
+
 
             if (response.data.status === 'submitted' || response.data.status === 'success') {
                 console.log(`[WhatsApp Gupshup] Success: ${templateId} sent to ${cleanPhone}`);
@@ -72,6 +74,7 @@ class WhatsAppService {
         }
     }
 
+
     /**
      * Notify about a newly scheduled live session
      */
@@ -81,11 +84,11 @@ class WhatsAppService {
             timeStyle: 'short'
         });
 
-        // Use the Template ID verified in your Gupshup Dashboard
+        // common_status [Item, NewStatus]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_LIVE || 'live_session_scheduled',
-            [studentName, topic, formattedTime]
+            process.env.GUPSHUP_TEMPLATE_EXAM || 'common_status',
+            [`Live Session: ${topic}`, `Scheduled for ${formattedTime}`]
         );
     }
 
@@ -98,10 +101,11 @@ class WhatsAppService {
             timeStyle: 'short'
         });
 
+        // common_status [Item, NewStatus]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_EXAM || 'exam_scheduled',
-            [studentName, examTitle, courseTitle, formattedDate]
+            process.env.GUPSHUP_TEMPLATE_EXAM || 'common_status',
+            [`Exam: ${examTitle}`, `Scheduled for ${formattedDate}`]
         );
     }
 
@@ -111,10 +115,11 @@ class WhatsAppService {
     async notifyExamResult(studentName, phone, examTitle, score, percentage, passed) {
         const resultStatus = passed ? 'PASSED' : 'RECALIBRATION REQUIRED';
 
+        // common_status [Item, NewStatus]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_RESULT || 'exam_result',
-            [studentName, examTitle, score.toString(), percentage.toFixed(2) + '%', resultStatus]
+            process.env.GUPSHUP_TEMPLATE_RESULT || 'common_status',
+            [`Result for ${examTitle}`, `${score} (${percentage.toFixed(2)}%) - ${resultStatus}`]
         );
     }
 
@@ -122,10 +127,11 @@ class WhatsAppService {
      * Notify about course completion and certificate
      */
     async notifyCourseCompletion(studentName, phone, courseTitle) {
+        // common_status [Item, NewStatus]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_CERT || 'course_completed',
-            [studentName, courseTitle]
+            process.env.GUPSHUP_TEMPLATE_CERT || 'common_status',
+            [`Course: ${courseTitle}`, 'Completed successfully!']
         );
     }
 
@@ -133,12 +139,15 @@ class WhatsAppService {
      * Notify about admin enrollment in a course
      */
     async notifyAdminEnrollment(studentName, phone, courseTitle, enrolledBy) {
+        // common_status [Item, NewStatus]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_ENROLLMENT || 'admin_enrollment',
-            [studentName, courseTitle, enrolledBy]
+            process.env.GUPSHUP_TEMPLATE_ENROLLMENT || 'common_status',
+            [`Enrollment in ${courseTitle}`, `Activated by ${enrolledBy}`]
         );
     }
+
+
 }
 
 module.exports = new WhatsAppService();

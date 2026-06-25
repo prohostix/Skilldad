@@ -5,13 +5,52 @@ const bcrypt = require('bcryptjs');
 // @desc    Get Partner Dashboard Stats
 const getPartnerStats = async (req, res) => {
     try {
-        const discRes = await query('SELECT * FROM discounts WHERE partner_id = $1', [req.user.id]);
-        const totalCodes = discRes.rows.length;
-        const totalRedemptions = discRes.rows.reduce((acc, curr) => acc + (curr.used_count || 0), 0);
-        const totalEarnings = totalRedemptions * 10;
+        const partnerId = req.user.id || req.user._id;
 
-        res.json({ totalCodes, totalRedemptions, totalEarnings });
+        // 1. Get partner's commission rate (discount_rate column in users table)
+        const userRes = await query('SELECT discount_rate FROM users WHERE id = $1', [partnerId]);
+        const commissionRate = (parseFloat(userRes.rows[0]?.discount_rate) || 15) / 100;
+
+        // 2. Calculate Lifetime Earnings
+        // We sum up (course price * commission rate) for all enrollments of students referred by this partner
+        const earningsRes = await query(`
+            SELECT SUM(CAST(c.price AS NUMERIC) * $2) as total_earned
+            FROM users u
+            JOIN enrollments e ON u.id = e.student_id
+            JOIN courses c ON e.course_id = c.id
+            WHERE (u.registered_by = $1 OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1))
+            AND u.role = 'student'
+        `, [partnerId, commissionRate]);
+
+        const lifetimeEarnings = Math.round(parseFloat(earningsRes.rows[0]?.total_earned || 0));
+
+        // 3. Get total payouts (Pending + Approved)
+        const payoutRes = await query(`
+            SELECT SUM(CAST(amount AS NUMERIC)) as total_payouts 
+            FROM payouts 
+            WHERE partner_id = $1 AND status != 'rejected'
+        `, [partnerId]);
+
+        const totalPayouts = Math.round(parseFloat(payoutRes.rows[0]?.total_payouts || 0));
+
+        // 4. Current Withdrawable Balance
+        const withdrawableBalance = Math.max(0, lifetimeEarnings - totalPayouts);
+
+        // 5. Basic stats
+        const discRes = await query('SELECT * FROM discounts WHERE partner_id = $1', [partnerId]);
+        const totalCodes = discRes.rows.length;
+        const totalRedemptions = discRes.rows.reduce((acc, curr) => acc + (parseInt(curr.used_count) || 0), 0);
+
+        res.json({ 
+            totalCodes, 
+            totalRedemptions, 
+            totalEarnings: withdrawableBalance, // Shown in "Available for Withdrawal"
+            lifetimeEarnings,
+            totalPayouts,
+            commissionRate: commissionRate * 100
+        });
     } catch (error) {
+        console.error('[getPartnerStats] Error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -24,7 +63,7 @@ const createDiscount = async (req, res) => {
         await query(`
             INSERT INTO discounts (id, code, value, type, partner_id, active, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, true, NOW(), NOW())
-        `, [id, code.toUpperCase(), value || percentage, type, req.user.id]);
+        `, [id, code.toUpperCase(), value || percentage, type, req.user.id || req.user._id]);
 
         res.status(201).json({ success: true, id, code: code.toUpperCase() });
     } catch (error) {
@@ -39,7 +78,7 @@ const getDiscounts = async (req, res) => {
             SELECT * FROM discounts 
             WHERE partner_id = $1 OR partner_id IS NULL
             ORDER BY created_at DESC
-        `, [req.user.id]);
+        `, [req.user.id || req.user._id]);
         res.json(discRes.rows.map(r => ({ ...r, _id: r.id })));
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -57,20 +96,54 @@ const registerStudent = async (req, res) => {
         const userId = `user_${Date.now()}`;
 
         await query(`
-            INSERT INTO users (id, name, email, password, role, registered_by, partner_code, university_id, is_verified, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, 'student', $5, $6, $7, true, NOW(), NOW())
-        `, [userId, name, email, hashedPassword, req.user.id, partnerCode?.toUpperCase(), university || null]);
+            INSERT INTO users (id, name, email, password, role, registered_by, partner_code, university_id, is_verified, profile, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, 'student', $5, $6, $7, true, $8, NOW(), NOW())
+        `, [
+            userId, 
+            name, 
+            email, 
+            hashedPassword, 
+            req.user.id || req.user._id, 
+            partnerCode?.toUpperCase(), 
+            university || null,
+            JSON.stringify({ phone: phone || '' })
+        ]);
 
         // Support both single and multiple course enrollments
+        const { batchId } = req.body;
         const coursesToEnroll = courses && Array.isArray(courses) ? courses : (course ? [course] : []);
         
         for (const courseId of coursesToEnroll) {
             const enrollId = `enroll_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
             await query(`
-                INSERT INTO enrollments (id, student_id, course_id, status, progress, created_at, updated_at)
-                VALUES ($1, $2, $3, 'active', 0, NOW(), NOW())
-            `, [enrollId, userId, courseId]);
+                INSERT INTO enrollments (id, student_id, course_id, status, progress, batch_id, created_at, updated_at)
+                VALUES ($1, $2, $3, 'active', 0, $4, NOW(), NOW())
+            `, [enrollId, userId, courseId, batchId || null]);
         }
+
+        // Background Notifications
+        setImmediate(async () => {
+            try {
+                const notificationService = require('../services/NotificationService');
+                const student = { id: userId, name, email, phone };
+                
+                // 1. Welcome Message
+                await notificationService.send(student, 'welcome').catch(e => console.error('[PartnerReg] Welcome notify failed:', e.message));
+
+                // 2. Enrollment Messages
+                if (coursesToEnroll.length > 0) {
+                    const coursesRes = await query('SELECT title FROM courses WHERE id = ANY($1)', [coursesToEnroll]);
+                    for (const c of coursesRes.rows) {
+                        await notificationService.send(student, 'enrollment', { 
+                            courseTitle: c.title, 
+                            enrolledBy: req.user.name 
+                        }).catch(e => console.error(`[PartnerReg] Enroll notify failed for ${c.title}:`, e.message));
+                    }
+                }
+            } catch (err) {
+                console.error('[PartnerReg] Notification sequence failed:', err.message);
+            }
+        });
 
         res.status(201).json({ success: true, message: 'Student registered and enrolled successfully' });
     } catch (error) {
@@ -82,18 +155,37 @@ const registerStudent = async (req, res) => {
 // @desc    Get all students enrolled through this partner
 const getPartnerStudents = async (req, res) => {
     try {
+        const partnerId = req.user.id || req.user._id;
         // Fetch students directly registered by the partner OR who used one of the partner's codes
         const studentsRes = await query(`
             SELECT 
                 u.id as _id, u.name, u.email, u.profile, u.partner_code, u.created_at,
-                (SELECT COUNT(*) FROM enrollments e WHERE e.student_id = u.id) as enrollments_count
+                u.is_verified,
+                CASE 
+                    WHEN u.registered_by = $1 THEN 'Directly Registered'
+                    WHEN u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1) THEN 'Discount Code'
+                    ELSE 'Course Enrolled'
+                END as connection_type,
+                json_agg(json_build_object(
+                    'course_id', e.course_id,
+                    'course_title', c.title,
+                    'batch_id', e.batch_id,
+                    'batch_name', b.name
+                )) FILTER (WHERE e.id IS NOT NULL) as enrollments
             FROM users u
-            WHERE (u.registered_by = $1 OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1))
+            LEFT JOIN enrollments e ON u.id = e.student_id
+            LEFT JOIN courses c ON e.course_id = c.id
+            LEFT JOIN batches b ON e.batch_id = b.id
+            WHERE (
+                u.registered_by = $1 
+                OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1)
+                OR c.instructor_id = $1
+            )
             AND u.role = 'student'
+            GROUP BY u.id
             ORDER BY u.created_at DESC
-        `, [req.user.id]);
+        `, [partnerId]);
 
-        // Enrich with progress data if needed (simplified for now)
         res.json(studentsRes.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -103,11 +195,12 @@ const getPartnerStudents = async (req, res) => {
 // @desc    Get payout history for the partner
 const getPayoutHistory = async (req, res) => {
     try {
+        const partnerId = req.user.id || req.user._id;
         const payoutRes = await query(`
             SELECT *, id as _id FROM payouts 
             WHERE partner_id = $1 
             ORDER BY created_at DESC
-        `, [req.user.id]);
+        `, [partnerId]);
         res.json(payoutRes.rows);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -116,18 +209,29 @@ const getPayoutHistory = async (req, res) => {
 
 // @desc    Request a new payout
 const requestPayout = async (req, res) => {
-        const { amount, notes } = req.body;
+    const { amount, notes } = req.body;
+    const partnerId = req.user.id || req.user._id;
+
     try {
-        if (!amount || amount <= 0) return res.status(400).json({ message: 'Invalid amount' });
+        console.log(`[requestPayout] Request from ${partnerId}:`, { amount, notes });
+
+        if (!amount || Number(amount) <= 0) {
+            console.warn(`[requestPayout] Invalid amount: ${amount}`);
+            return res.status(400).json({ message: `Invalid amount received: ${amount}` });
+        }
 
         const id = `payout_${Date.now()}`;
+        console.log(`[requestPayout] Creating payout record: ${id}`);
+        
         await query(`
             INSERT INTO payouts (id, partner_id, amount, status, notes, created_at, updated_at)
             VALUES ($1, $2, $3, 'pending', $4, NOW(), NOW())
-        `, [id, req.user.id, amount, notes]);
+        `, [id, partnerId, amount, notes || 'Payout request from dashboard']);
 
-        res.status(201).json({ success: true, message: 'Payout request submitted' });
+        console.log(`[requestPayout] Success: ${id}`);
+        res.status(201).json({ success: true, message: 'Payout request submitted successfully' });
     } catch (error) {
+        console.error('[requestPayout] Error:', error);
         res.status(500).json({ message: error.message });
     }
 };

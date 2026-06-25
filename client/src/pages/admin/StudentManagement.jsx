@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
     Search,
@@ -26,7 +26,8 @@ import {
     UserPlus,
     UserMinus,
     GraduationCap,
-    Loader2
+    Loader2,
+    ExternalLink
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -35,6 +36,7 @@ import { useToast } from '../../context/ToastContext';
 import { useSocket } from '../../context/SocketContext';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { getMediaUrl } from '../../utils/media';
 
 const StudentManagement = () => {
     const { showToast } = useToast();
@@ -47,10 +49,12 @@ const StudentManagement = () => {
     const [editData, setEditData] = useState({});
     const [documents, setDocuments] = useState([]);
     const [enrollments, setEnrollments] = useState([]);
+    const [rewardWallet, setRewardWallet] = useState({ total: 0, history: [] });
     const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState('all');
     const [universities, setUniversities] = useState([]);
 
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const urlUniversityId = searchParams.get('universityId') || 'all';
     const [selectedUniversityId, setSelectedUniversityId] = useState(urlUniversityId);
@@ -60,8 +64,20 @@ const StudentManagement = () => {
     const [enrollCourseId, setEnrollCourseId] = useState('');
     const [enrollUniversityId, setEnrollUniversityId] = useState('');
     const [enrollNote, setEnrollNote] = useState('');
+    const [previewDoc, setPreviewDoc] = useState(null);
     const [enrolling, setEnrolling] = useState(false);
     const [enrollError, setEnrollError] = useState('');
+    const [enrollBatchId, setEnrollBatchId] = useState('');
+    const [enrollBatches, setEnrollBatches] = useState([]);
+    
+    // Assign batch for existing enrollment
+    const [showAssignBatchModal, setShowAssignBatchModal] = useState(false);
+    const [selectedEnrollmentForBatch, setSelectedEnrollmentForBatch] = useState(null);
+    const [assignBatchData, setAssignBatchData] = useState({
+        courseId: '',
+        batchId: ''
+    });
+    const [batchOptions, setBatchOptions] = useState([]);
 
     useEffect(() => {
         fetchStudents();
@@ -128,6 +144,28 @@ const StudentManagement = () => {
         }
     };
 
+    // Update enroll batches when selected course changes
+    useEffect(() => {
+        const fetchEnrollBatches = async () => {
+            if (!enrollCourseId) {
+                setEnrollBatches([]);
+                setEnrollBatchId('');
+                return;
+            }
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                const { data } = await axios.get(`/api/batches/course/${enrollCourseId}`, config);
+                setEnrollBatches(data);
+                setEnrollBatchId('');
+            } catch (err) {
+                console.error('Error fetching enroll batches:', err);
+                setEnrollBatches([]);
+            }
+        };
+        fetchEnrollBatches();
+    }, [enrollCourseId]);
+
     const fetchStudents = async () => {
         try {
             setLoading(true);
@@ -163,6 +201,10 @@ const StudentManagement = () => {
             // Fetch student enrollments
             const enrollResponse = await axios.get(`/api/admin/students/${studentId}/enrollments`, config);
             setEnrollments(enrollResponse.data);
+
+            // Fetch student reward wallet
+            const walletResponse = await axios.get(`/api/admin/students/${studentId}/reward-points`, config);
+            setRewardWallet(walletResponse.data);
         } catch (error) {
             console.error('Error fetching student details:', error);
             showToast?.('Failed to fetch student details', 'error');
@@ -171,8 +213,9 @@ const StudentManagement = () => {
 
     const handleViewStudent = async (student) => {
         setSelectedStudent(student);
-        setEditData(student);
+        setEditData({ ...student, phone: student.profile?.phone || '' });
         setEditMode(false);
+
         await fetchStudentDetails(student._id);
     };
 
@@ -331,7 +374,14 @@ const StudentManagement = () => {
     };
 
     const [addStudentOpen, setAddStudentOpen] = useState(false);
-    const [newStudentData, setNewStudentData] = useState({ name: '', email: '', password: '', role: 'student', universityId: '' });
+    const [newStudentData, setNewStudentData] = useState({ 
+        name: '', 
+        email: '', 
+        password: '', 
+        phone: '', 
+        role: 'student', 
+        universityId: '' 
+    });
 
     const handleAddStudent = async (e) => {
         e.preventDefault();
@@ -341,7 +391,7 @@ const StudentManagement = () => {
             await axios.post('/api/users', newStudentData, config);
             showToast?.('Student added successfully', 'success');
             setAddStudentOpen(false);
-            setNewStudentData({ name: '', email: '', password: '', role: 'student', universityId: '' });
+            setNewStudentData({ name: '', email: '', password: '', phone: '', role: 'student', universityId: '' });
             fetchStudents();
         } catch (error) {
             console.error('Error adding student:', error);
@@ -366,6 +416,7 @@ const StudentManagement = () => {
                 {
                     courseId: enrollCourseId,
                     universityId: enrollUniversityId || undefined,
+                    batchId: enrollBatchId || undefined,
                     note: enrollNote
                 },
                 config
@@ -374,6 +425,7 @@ const StudentManagement = () => {
             setEnrollModalOpen(false);
             setEnrollCourseId('');
             setEnrollUniversityId('');
+            setEnrollBatchId('');
             setEnrollNote('');
             // Refresh enrollments in detail view
             await fetchStudentDetails(selectedStudent._id);
@@ -382,6 +434,30 @@ const StudentManagement = () => {
             setEnrollError(error.response?.data?.message || 'Failed to enroll student');
         } finally {
             setEnrolling(false);
+        }
+    };
+
+    const handleAssignBatch = async () => {
+        try {
+            if (!assignBatchData.courseId) {
+                showToast?.('Please select a course', 'warning');
+                return;
+            }
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            await axios.put('/api/enrollment/assign-batch', {
+                studentId: selectedStudent._id,
+                courseId: assignBatchData.courseId,
+                batchId: assignBatchData.batchId
+            }, config);
+            
+            showToast?.('Batch assigned successfully', 'success');
+            setShowAssignBatchModal(false);
+            await fetchStudentDetails(selectedStudent._id);
+        } catch (error) {
+            console.error('Error assigning batch:', error);
+            showToast?.(error.response?.data?.message || 'Failed to assign batch', 'error');
         }
     };
 
@@ -428,31 +504,30 @@ const StudentManagement = () => {
             </div>
 
             {/* Search & Filter Bar */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <GlassCard className="p-4 md:col-span-2">
+            <div className="flex flex-col sm:flex-row gap-2">
+                <GlassCard className="!p-2 flex-1">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                         <input
                             type="text"
                             placeholder="Search students by name or email..."
-                            className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            className="w-full pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                 </GlassCard>
-                <GlassCard className="p-4 flex flex-col sm:flex-row gap-4">
+                <GlassCard className="!p-2 flex flex-row gap-2 shrink-0">
                     <select
                         value={selectedCourseId}
                         onChange={(e) => setSelectedCourseId(e.target.value)}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-lg text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
                     >
                         <option value="all" className="bg-slate-900">All Courses</option>
                         {courses.map(c => (
                             <option key={c._id} value={c._id} className="bg-slate-900">{c.title}</option>
                         ))}
                     </select>
-
                     <select
                         value={selectedUniversityId}
                         onChange={(e) => {
@@ -467,7 +542,7 @@ const StudentManagement = () => {
                                 return prev;
                             });
                         }}
-                        className="flex-1 bg-white/5 border border-white/10 rounded-lg text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
                     >
                         <option value="all" className="bg-slate-900">All Universities</option>
                         {universities.map(u => (
@@ -512,17 +587,28 @@ const StudentManagement = () => {
                                         <div className="text-[10px] text-gray-500">{student.email}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {student.registeredBy ? (
-                                            <div>
-                                                <div className="text-sm font-medium text-primary">{student.registeredBy.name}</div>
-                                                <div className="text-[10px] text-gray-500 uppercase">{student.registeredBy.role}</div>
-                                                {student.partnerCode && (
-                                                    <div className="text-[9px] text-amber-400 font-mono mt-0.5">Code: {student.partnerCode}</div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="text-xs text-gray-500 italic">Self-registered</div>
-                                        )}
+                                        <div className="flex flex-col">
+                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border inline-block w-max mb-1.5 ${
+                                                student.connectionType === 'Course Enrolled' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' :
+                                                student.connectionType === 'Discount Code' ? 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30' :
+                                                student.connectionType === 'Directly Registered' ? 'bg-primary/20 text-primary border-primary/30' :
+                                                student.connectionType === 'University Affiliated' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                                'bg-gray-500/20 text-gray-400 border-gray-500/30'
+                                            }`}>
+                                                {student.connectionType || 'Self-registered'}
+                                            </span>
+                                            {student.registeredBy ? (
+                                                <div>
+                                                    <div className="text-sm font-medium text-white leading-tight">{student.registeredBy.name}</div>
+                                                    <div className="text-[10px] text-gray-500 uppercase">{student.registeredBy.role}</div>
+                                                    {student.partnerCode && student.connectionType === 'Discount Code' && (
+                                                        <div className="text-[9px] text-amber-400 font-mono mt-0.5">Code: {student.partnerCode}</div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="text-xs text-gray-500 italic">No Reference</div>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-xs text-white/70 font-medium italic">{student.course || 'No Course'}</div>
@@ -588,6 +674,28 @@ const StudentManagement = () => {
                                 <div className="flex justify-between items-center">
                                     <span className="text-xs text-white/50 uppercase tracking-wider font-bold">Enrolled Course</span>
                                     <span className="text-xs text-primary font-medium italic truncate max-w-[150px]">{student.course || 'No Course'}</span>
+                                </div>
+                                <div className="flex flex-col border-t border-white/5 pt-2 mt-2">
+                                    <span className="text-xs text-white/50 uppercase tracking-wider font-bold mb-1">Registered By</span>
+                                    <div className="flex justify-between items-center">
+                                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
+                                            student.connectionType === 'Course Enrolled' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' :
+                                            student.connectionType === 'Discount Code' ? 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30' :
+                                            student.connectionType === 'Directly Registered' ? 'bg-primary/20 text-primary border-primary/30' :
+                                            student.connectionType === 'University Affiliated' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                            'bg-gray-500/20 text-gray-400 border-gray-500/30'
+                                        }`}>
+                                            {student.connectionType || 'Self-registered'}
+                                        </span>
+                                        {student.registeredBy ? (
+                                            <div className="text-right">
+                                                <div className="text-sm font-medium text-white">{student.registeredBy.name}</div>
+                                                <div className="text-[9px] text-gray-500 uppercase">{student.registeredBy.role}</div>
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-gray-500 italic">No Reference</span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-xs text-white/50 uppercase tracking-wider font-bold">Total Enrollments</span>
@@ -668,6 +776,17 @@ const StudentManagement = () => {
                                     value={newStudentData.password}
                                     onChange={(e) => setNewStudentData({ ...newStudentData, password: e.target.value })}
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-400 mb-1">WhatsApp Phone Number</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. 919999999999"
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:border-primary focus:outline-none font-mono"
+                                    value={newStudentData.phone}
+                                    onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
+                                />
+                                <p className="text-[10px] text-white/30 mt-1">Include country code without + (e.g., 91 for India)</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-400 mb-1">University / Institution</label>
@@ -755,6 +874,21 @@ const StudentManagement = () => {
                                         )}
                                     </div>
                                     <div>
+                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Phone Number</label>
+                                        {editMode ? (
+                                            <input
+                                                type="text"
+                                                value={editData.phone || ''}
+                                                onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                                className="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                                placeholder="e.g. 919999999999"
+                                            />
+                                        ) : (
+                                            <p className="text-white mt-1">{selectedStudent.profile?.phone || 'No phone number'}</p>
+                                        )}
+                                    </div>
+
+                                    <div>
                                         <label className="text-xs text-gray-400 uppercase tracking-wider">Bio</label>
                                         {editMode ? (
                                             <textarea
@@ -777,6 +911,15 @@ const StudentManagement = () => {
                                                 {selectedStudent.isVerified ? 'Verified' : 'Pending'}
                                             </span>
                                         </p>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Reward Wallet</label>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <div className="px-2 py-1 bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-black">
+                                                {rewardWallet.total} PTS
+                                            </div>
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">Balance</span>
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase tracking-wider">Institution / University</label>
@@ -831,6 +974,34 @@ const StudentManagement = () => {
                                                     <p className="text-xs text-gray-400 mt-1">Progress: {enrollment.progress || 0}%</p>
                                                 </div>
                                                 <div className="flex items-center gap-2 ml-3">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedEnrollmentForBatch(enrollment);
+                                                            setAssignBatchData({ 
+                                                                courseId: enrollment.course?._id, 
+                                                                batchId: enrollment.batchId || '' 
+                                                            });
+                                                            setShowAssignBatchModal(true);
+                                                            // Fetch batches for this course
+                                                            const fetchBatches = async () => {
+                                                                try {
+                                                                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                                                                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                                                                    const { data } = await axios.get(`/api/batches/course/${enrollment.course?._id}`, config);
+                                                                    setBatchOptions(data);
+                                                                } catch (err) {
+                                                                    console.error('Error fetching batches:', err);
+                                                                    setBatchOptions([]);
+                                                                }
+                                                            };
+                                                            fetchBatches();
+                                                        }}
+                                                        className="p-1.5 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors text-[10px] font-bold flex items-center gap-1"
+                                                        title="Assign Batch"
+                                                    >
+                                                        <Users size={12} />
+                                                        {enrollment.batchName || 'Assign Batch'}
+                                                    </button>
                                                     <span className={`px-2 py-1 text-xs font-bold rounded-full ${enrollment.status === 'active'
                                                         ? 'bg-emerald-500/20 text-emerald-400'
                                                         : 'bg-gray-500/20 text-gray-400'
@@ -870,20 +1041,54 @@ const StudentManagement = () => {
                                     {documents.map((doc) => (
                                         <div key={doc._id} className="p-3 bg-white/5 rounded-lg border border-white/10 flex justify-between items-center">
                                             <div className="flex items-center space-x-3">
-                                                <FileText size={20} className="text-primary" />
+                                                <div className="p-2 bg-primary/10 rounded-lg">
+                                                    <FileText size={18} className="text-primary" />
+                                                </div>
                                                 <div>
-                                                    <p className="text-white font-medium">{doc.title}</p>
-                                                    <p className="text-xs text-gray-400">
-                                                        {new Date(doc.uploadDate || doc.createdAt).toLocaleDateString()}
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-sm font-bold text-white">{doc.title}</p>
+                                                        <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded border ${
+                                                            doc.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                                            doc.status === 'rejected' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
+                                                            'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                                                        }`}>
+                                                            {doc.status}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[10px] text-gray-400 font-medium">
+                                                        {doc.type} • {new Date(doc.created_at || doc.createdAt).toLocaleDateString()}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => window.open(doc.fileUrl, '_blank')}
-                                                className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
-                                            >
-                                                <Download size={16} />
-                                            </button>
+                                            <div className="flex gap-2">
+                                                {(doc.file_url || doc.fileUrl) && (
+                                                    <button
+                                                        onClick={() => setPreviewDoc(doc)}
+                                                        className="p-2 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 transition-colors"
+                                                        title="Preview Document"
+                                                    >
+                                                        <Eye size={14} />
+                                                    </button>
+                                                )}
+                                                {doc.status === 'submitted' && (
+                                                    <button
+                                                        onClick={() => navigate('/admin/document-review')}
+                                                        className="p-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30 transition-colors"
+                                                        title="Go to Review Hub"
+                                                    >
+                                                        <Clock size={14} />
+                                                    </button>
+                                                )}
+                                                <a
+                                                    href={getMediaUrl(doc.file_url || doc.fileUrl)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+                                                    title="Download"
+                                                >
+                                                    <Download size={14} />
+                                                </a>
+                                            </div>
                                         </div>
                                     ))}
                                     {documents.length === 0 && (
@@ -922,48 +1127,64 @@ const StudentManagement = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-slate-900 rounded-2xl p-6 max-w-lg w-full border border-emerald-500/30 shadow-2xl"
+                        className="bg-slate-900 rounded-2xl p-5 max-w-lg w-full border border-emerald-500/30 shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-hide"
                     >
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-emerald-500/20 rounded-xl">
                                     <GraduationCap className="text-emerald-400" size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-white">Enroll in Course</h2>
-                                    <p className="text-xs text-gray-400">Free enrollment for <span className="text-emerald-400 font-semibold">{selectedStudent.name}</span></p>
+                                    <h2 className="text-lg font-bold text-white leading-tight">Enroll in Course</h2>
+                                    <p className="text-[11px] text-gray-400">Free enrollment for <span className="text-emerald-400 font-semibold">{selectedStudent.name}</span></p>
                                 </div>
                             </div>
-                            <button onClick={() => setEnrollModalOpen(false)} className="text-gray-400 hover:text-white">
+                            <button onClick={() => setEnrollModalOpen(false)} className="text-gray-400 hover:text-white p-1">
                                 <X size={20} />
                             </button>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Select Course *</label>
+                                <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Select Course *</label>
                                 <select
                                     value={enrollCourseId}
                                     onChange={(e) => { setEnrollCourseId(e.target.value); setEnrollError(''); }}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm"
                                 >
                                     <option value="" className="bg-slate-900">-- Choose a course --</option>
                                     {courses
-                                        .filter(c => !enrollments.find(e => e.course?._id === c._id))
+                                        .filter(c => !enrollments.find(e => (e.course?._id || e.course_id) === c._id))
                                         .map(c => (
                                             <option key={c._id} value={c._id} className="bg-slate-900">{c.title}</option>
                                         ))
                                     }
                                 </select>
-                                {courses.filter(c => !enrollments.find(e => e.course?._id === c._id)).length === 0 && (
-                                    <p className="text-xs text-amber-400 mt-1">Student is already enrolled in all available courses.</p>
+                                {courses.filter(c => !enrollments.find(e => (e.course?._id || e.course_id) === c._id)).length === 0 && (
+                                    <p className="text-[10px] text-amber-400 mt-1">Student is already enrolled in all available courses.</p>
                                 )}
                             </div>
+                            
+                            {enrollCourseId && (
+                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+                                    <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Assign to Batch (optional)</label>
+                                    <select
+                                        value={enrollBatchId}
+                                        onChange={(e) => setEnrollBatchId(e.target.value)}
+                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm"
+                                    >
+                                        <option value="" className="bg-slate-900">-- No Batch (Global) --</option>
+                                        {enrollBatches.map(batch => (
+                                            <option key={batch.id} value={batch.id} className="bg-slate-900">{batch.name}</option>
+                                        ))}
+                                    </select>
+                                </motion.div>
+                            )}
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Assign to University (optional)</label>
+                                <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Assign to University (optional)</label>
                                 <select
                                     value={enrollUniversityId}
                                     onChange={(e) => setEnrollUniversityId(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm"
                                 >
                                     <option value="" className="bg-slate-900">-- No University (Independent) --</option>
                                     {universities.map(u => (
@@ -972,47 +1193,156 @@ const StudentManagement = () => {
                                         </option>
                                     ))}
                                 </select>
-                                <p className="text-xs text-gray-500 mt-1">If selected, student will be linked to this university</p>
+                                <p className="text-[10px] text-gray-500 mt-1">If selected, student will be linked to this university</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Note (optional)</label>
+                                <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Note (optional)</label>
                                 <textarea
                                     value={enrollNote}
                                     onChange={(e) => setEnrollNote(e.target.value)}
-                                    rows={2}
+                                    rows={1}
                                     placeholder="e.g. Sponsored by admin, scholarship, etc."
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-emerald-500/50 focus:outline-none text-sm resize-none"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:border-emerald-500/50 focus:outline-none text-xs resize-none"
                                 />
                             </div>
-                            <div className="p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
-                                <p className="text-xs text-emerald-400">
-                                    <span className="font-bold">ℹ️ Free Enrollment:</span> No payment required. A ₹0 record will appear in the Finance Dashboard with status <span className="font-bold">Approved</span>. Student gets full course access immediately.
+                            <div className="p-2.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                                <p className="text-[10px] text-emerald-400/80 leading-relaxed">
+                                    <span className="font-black">ℹ️ Free Enrollment:</span> No payment required. A ₹0 record will appear in Finance Dashboard with status <span className="font-bold text-emerald-400">Approved</span>. Student gets full course access immediately.
                                 </p>
                             </div>
                             {enrollError && (
-                                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
-                                    <p className="text-sm text-red-400">{enrollError}</p>
+                                <div className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                    <p className="text-xs text-red-400 font-medium">{enrollError}</p>
                                 </div>
                             )}
                             <div className="flex gap-3 pt-2">
                                 <button
                                     onClick={() => setEnrollModalOpen(false)}
-                                    className="flex-1 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-sm font-medium"
+                                    className="flex-1 px-4 py-2.5 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-xs font-bold uppercase tracking-widest"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleAdminEnroll}
                                     disabled={enrolling || !enrollCourseId}
-                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm transition-colors"
+                                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-black text-xs uppercase tracking-widest transition-colors shadow-lg shadow-emerald-500/20"
                                 >
                                     {enrolling ? (
-                                        <><Loader2 size={16} className="animate-spin" /> Enrolling...</>
+                                        <><Loader2 size={14} className="animate-spin" /> Enrolling...</>
                                     ) : (
-                                        <><GraduationCap size={16} /> Enroll Now</>
+                                        <><GraduationCap size={14} /> Enroll Now</>
                                     )}
                                 </button>
                             </div>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+            {/* Document Preview Modal */}
+            <AnimatePresence>
+                {previewDoc && (
+                    <div className="fixed inset-0 z-[200001] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setPreviewDoc(null)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-5xl h-[90vh] bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+                        >
+                            <div className="flex justify-between items-center p-4 border-b border-white/10 bg-white/5">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                        <FileText className="text-primary" size={20} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-white">{previewDoc.title}</h2>
+                                        <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">
+                                            {previewDoc.type} • {selectedStudent.name}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <a 
+                                        href={getMediaUrl(previewDoc.file_url || previewDoc.fileUrl)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-lg transition-colors"
+                                    >
+                                        <ExternalLink size={18} />
+                                    </a>
+                                    <button onClick={() => setPreviewDoc(null)} className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-all">
+                                        <X size={24} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex-1 bg-black/40">
+                                <iframe 
+                                    src={getMediaUrl(previewDoc.file_url || previewDoc.fileUrl)} 
+                                    className="w-full h-full border-none"
+                                    title="Document Preview"
+                                />
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* Assign Batch Modal (Admin) */}
+            {showAssignBatchModal && selectedEnrollmentForBatch && (
+                <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[250000] p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-slate-900 rounded-2xl p-6 max-w-md w-full border border-primary/30 shadow-2xl"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-lg font-bold text-white">Update Batch</h2>
+                            <button onClick={() => setShowAssignBatchModal(false)} className="text-gray-400 hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Student</p>
+                                <p className="text-white font-bold">{selectedStudent.name}</p>
+                            </div>
+                            
+                            <div>
+                                <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Course</p>
+                                <p className="text-primary font-medium">{selectedEnrollmentForBatch.course?.title}</p>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Select Batch</label>
+                                <select
+                                    value={assignBatchData.batchId}
+                                    onChange={(e) => setAssignBatchData({ ...assignBatchData, batchId: e.target.value })}
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 focus:outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="" className="bg-slate-900">-- No Batch (Global) --</option>
+                                    {batchOptions.map(batch => (
+                                        <option key={batch.id} value={batch.id} className="bg-slate-900">{batch.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div className="flex gap-3 mt-8">
+                            <button
+                                onClick={() => setShowAssignBatchModal(false)}
+                                className="flex-1 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors text-sm font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <ModernButton onClick={handleAssignBatch} className="flex-1">
+                                Update Batch
+                            </ModernButton>
                         </div>
                     </motion.div>
                 </div>

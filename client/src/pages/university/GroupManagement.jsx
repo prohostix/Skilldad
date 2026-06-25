@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import {
     Users,
     Search,
@@ -14,11 +15,15 @@ import {
     FileText,
     Download,
     UserPlus,
-    Trash2
+    Trash2,
+    Clock,
+    X,
+    ExternalLink
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import { getMediaUrl } from '../../utils/media';
 
 const GroupManagement = () => {
     const [groups, setGroups] = useState([]);
@@ -32,13 +37,26 @@ const GroupManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCourse, setFilterCourse] = useState('all');
     const [selectedStudent, setSelectedStudent] = useState(null);
+    const [documents, setDocuments] = useState([]);
+    const [showAssignBatchModal, setShowAssignBatchModal] = useState(false);
+    const [selectedStudentForBatch, setSelectedStudentForBatch] = useState(null);
+    const [assignBatchData, setAssignBatchData] = useState({
+        courseId: '',
+        batchId: ''
+    });
+    const [batchOptions, setBatchOptions] = useState([]);
+    const [previewDoc, setPreviewDoc] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [universityCourses, setUniversityCourses] = useState([]);
+    const [filterBatch, setFilterBatch] = useState('all');
+    const [filterCourseBatches, setFilterCourseBatches] = useState([]);
+    const navigate = useNavigate();
     const [showRegisterStudentModal, setShowRegisterStudentModal] = useState(false);
     const [newStudentData, setNewStudentData] = useState({
         name: '',
         email: '',
         phone: '',
-        course: 'Computer Science'
+        course: ''
     });
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -94,10 +112,64 @@ const GroupManagement = () => {
         }
     };
 
+    const fetchUniversityCourses = async () => {
+        try {
+            const { data } = await axios.get('/api/university/courses', config);
+            setUniversityCourses(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error('Error fetching university courses:', error);
+        }
+    };
+
+    // Update filter batches when filterCourse changes
+    useEffect(() => {
+        const updateFilterBatches = async () => {
+            if (filterCourse === 'all') {
+                setFilterCourseBatches([]);
+                setFilterBatch('all');
+                return;
+            }
+
+            const selectedCourse = universityCourses.find(c => c.title === filterCourse);
+            if (selectedCourse) {
+                try {
+                    const { data } = await axios.get(`/api/batches/course/${selectedCourse._id || selectedCourse.id}`, config);
+                    setFilterCourseBatches(data);
+                } catch (err) {
+                    console.error('Error fetching filter batches:', err);
+                    setFilterCourseBatches([]);
+                }
+            } else {
+                setFilterCourseBatches([]);
+            }
+            setFilterBatch('all');
+        };
+
+        updateFilterBatches();
+    }, [filterCourse, universityCourses]);
+
     useEffect(() => {
         fetchGroups();
         fetchStudents();
+        fetchUniversityCourses();
     }, []);
+
+    useEffect(() => {
+        if (selectedStudent) {
+            fetchStudentDocuments(selectedStudent._id || selectedStudent.id);
+        } else {
+            setDocuments([]);
+        }
+    }, [selectedStudent]);
+
+    const fetchStudentDocuments = async (studentId) => {
+        try {
+            const { data } = await axios.get(`/api/documents?student=${studentId}`, config);
+            setDocuments(data);
+        } catch (error) {
+            console.error('Error fetching student documents:', error);
+        }
+    };
 
     const handleCreateGroup = async () => {
         try {
@@ -124,16 +196,19 @@ const GroupManagement = () => {
                 return alert('Please fill in Name, Email and Phone');
             }
 
+            const selectedCourse = universityCourses.find(c => c.title === newStudentData.course);
+
             const { data } = await axios.post('/api/university/register-student', {
                 name: newStudentData.name,
                 email: newStudentData.email,
                 phone: newStudentData.phone,
-                // courseId is optional, we could add a course selector to the modal if needed
+                password: 'Student@' + Math.random().toString(36).slice(-6),
+                courseId: selectedCourse?.id || selectedCourse?._id
             }, config);
 
             alert(data.message || 'Student registered successfully!');
             setShowRegisterStudentModal(false);
-            setNewStudentData({ name: '', email: '', phone: '', course: 'Computer Science' });
+            setNewStudentData({ name: '', email: '', phone: '', course: '' });
 
             // Refresh students list
             fetchStudents();
@@ -181,11 +256,47 @@ const GroupManagement = () => {
         }
     };
 
+    const handleAssignBatch = async () => {
+        try {
+            if (!assignBatchData.courseId) {
+                alert('Please select a course');
+                return;
+            }
+            await axios.put('/api/enrollment/assign-batch', {
+                studentId: selectedStudentForBatch._id || selectedStudentForBatch.id,
+                courseId: assignBatchData.courseId,
+                batchId: assignBatchData.batchId
+            }, config);
+            
+            // Re-fetch students to update the UI
+            fetchStudents();
+            setShowAssignBatchModal(false);
+            alert('Batch assigned successfully');
+        } catch (error) {
+            console.error('Error assigning batch:', error);
+            alert(error.response?.data?.message || 'Failed to assign batch');
+        }
+    };
+
     const filteredStudents = students.filter(student => {
         const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCourse = filterCourse === 'all' || student.course === filterCourse;
-        return matchesSearch && matchesCourse;
+        
+        // Match course - check if any enrollment matches the filterCourse title
+        const matchesCourse = filterCourse === 'all' || 
+            (student.enrollments && student.enrollments.some(e => e.courseTitle === filterCourse)) ||
+            student.course === filterCourse;
+
+        // Match batch
+        let matchesBatch = filterBatch === 'all';
+        if (filterBatch !== 'all' && student.enrollments) {
+            matchesBatch = student.enrollments.some(e => 
+                (filterCourse === 'all' || e.courseTitle === filterCourse) && 
+                e.batchId === filterBatch
+            );
+        }
+
+        return matchesSearch && matchesCourse && matchesBatch;
     });
 
     const courses = [...new Set(students.map(s => s.course))];
@@ -226,16 +337,31 @@ const GroupManagement = () => {
                             className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary text-sm"
                         />
                     </div>
-                    <select
-                        value={filterCourse}
-                        onChange={(e) => setFilterCourse(e.target.value)}
-                        className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary text-sm"
-                    >
-                        <option value="all">All Courses</option>
-                        {courses.map(course => (
-                            <option key={course} value={course}>{course}</option>
-                        ))}
-                    </select>
+                    <div className="flex gap-2">
+                        <select
+                            value={filterCourse}
+                            onChange={(e) => setFilterCourse(e.target.value)}
+                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary text-sm min-w-[140px]"
+                        >
+                            <option value="all">All Courses</option>
+                            {courses.map(course => (
+                                <option key={course} value={course}>{course}</option>
+                            ))}
+                        </select>
+
+                        {filterCourse !== 'all' && filterCourseBatches.length > 0 && (
+                            <select
+                                value={filterBatch}
+                                onChange={(e) => setFilterBatch(e.target.value)}
+                                className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary text-sm min-w-[140px] animate-in slide-in-from-left-2 duration-300"
+                            >
+                                <option value="all">All Batches</option>
+                                {filterCourseBatches.map(batch => (
+                                    <option key={batch.id} value={batch.id}>{batch.name}</option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
                     <ModernButton variant="primary" onClick={() => { }} className="!py-2 !px-4 text-sm">
                         <Filter size={16} className="mr-2" />
                         More Filters
@@ -306,7 +432,23 @@ const GroupManagement = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-white">{student.name}</h3>
-                                        <p className="text-sm text-white/50">{student.course}</p>
+                                        <div className="flex flex-wrap gap-2 mt-1">
+                                            {(student.enrollments && student.enrollments.length > 0) ? (
+                                                student.enrollments.map((en, idx) => (
+                                                    <div key={idx} className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
+                                                        <span className="text-xs font-medium text-white/70">{en.courseTitle}</span>
+                                                        {en.batchName && (
+                                                            <>
+                                                                <span className="w-1 h-1 rounded-full bg-white/20" />
+                                                                <span className="text-[10px] font-bold text-primary uppercase">{en.batchName}</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-sm text-white/50">{student.course || 'Unassigned'}</p>
+                                            )}
+                                        </div>
                                         <div className="flex items-center gap-4 mt-1 text-xs text-white/40">
                                             <span className="flex items-center gap-1">
                                                 <Mail size={12} />
@@ -330,8 +472,20 @@ const GroupManagement = () => {
                                         </div>
                                     </div>
                                     <button
+                                        onClick={() => {
+                                            setSelectedStudentForBatch(student);
+                                            setAssignBatchData({ courseId: '', batchId: '' });
+                                            setShowAssignBatchModal(true);
+                                        }}
+                                        className="p-2 bg-white/5 hover:bg-primary/20 text-white/60 hover:text-primary rounded-lg transition-all"
+                                        title="Assign Batch"
+                                    >
+                                        <Users size={16} />
+                                    </button>
+                                    <button
                                         onClick={() => setSelectedStudent(student)}
                                         className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+                                        title="View Details"
                                     >
                                         <Eye size={16} />
                                     </button>
@@ -481,19 +635,77 @@ const GroupManagement = () => {
                                 </div>
                             </div>
 
-                            <div className="p-4 bg-white/5 rounded-xl">
-                                <h3 className="font-bold text-white mb-3 flex items-center">
-                                    <FileText size={18} className="mr-2 text-primary" /> Documents
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+                                <h3 className="font-bold text-white mb-4 flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <FileText size={18} className="mr-2 text-primary" /> Documents ({documents.length})
+                                    </div>
+                                    <button 
+                                        onClick={() => navigate('/university/student-documents')}
+                                        className="text-[10px] font-black uppercase text-primary hover:underline"
+                                    >
+                                        Go to Review Hub
+                                    </button>
                                 </h3>
-                                <div className="space-y-2">
-                                    {selectedStudent.documents?.map((doc, index) => (
-                                        <div key={index} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                                            <span className="text-sm text-white">{doc}</span>
-                                            <button className="p-1 text-primary hover:bg-primary/10 rounded">
-                                                <Eye size={14} />
-                                            </button>
+                                <div className="space-y-3">
+                                    {documents.length > 0 ? documents.map((doc) => (
+                                        <div key={doc._id} className="p-3 bg-white/5 rounded-lg border border-white/5 flex justify-between items-center group">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="p-2 bg-primary/10 rounded-lg">
+                                                    <FileText size={16} className="text-primary" />
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-xs font-bold text-white">{doc.title}</p>
+                                                        <span className={`px-1 py-0.5 text-[8px] font-black uppercase rounded border ${
+                                                            doc.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                                            doc.status === 'rejected' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
+                                                            'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                                                        }`}>
+                                                            {doc.status}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[9px] text-white/30 font-medium">
+                                                        {doc.type} • {new Date(doc.created_at || doc.createdAt).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                {(doc.file_url || doc.fileUrl) && (
+                                                    <button
+                                                        onClick={() => setPreviewDoc(doc)}
+                                                        className="p-1.5 bg-white/5 text-white/40 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+                                                        title="Preview"
+                                                    >
+                                                        <Eye size={12} />
+                                                    </button>
+                                                )}
+                                                {doc.status === 'submitted' && (
+                                                    <button
+                                                        onClick={() => navigate('/university/student-documents')}
+                                                        className="p-1.5 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30 transition-colors"
+                                                        title="Review"
+                                                    >
+                                                        <Clock size={12} />
+                                                    </button>
+                                                )}
+                                                <a
+                                                    href={getMediaUrl(doc.file_url || doc.fileUrl)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="p-1.5 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+                                                    title="Download"
+                                                >
+                                                    <Download size={12} />
+                                                </a>
+                                            </div>
                                         </div>
-                                    ))}
+                                    )) : (
+                                        <div className="py-8 text-center bg-white/[0.02] rounded-xl border border-dashed border-white/10">
+                                            <FileText className="mx-auto text-white/10 mb-2" size={24} />
+                                            <p className="text-xs text-white/30">No documents found for this student.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -542,13 +754,23 @@ const GroupManagement = () => {
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-white/70 mb-2">Course</label>
-                                <input
-                                    type="text"
+                                <select
                                     value={newStudentData.course}
                                     onChange={(e) => setNewStudentData({ ...newStudentData, course: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
-                                    placeholder="e.g. Computer Science"
-                                />
+                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary appearance-none"
+                                >
+                                    <option value="" className="bg-[#0B0F1A]">Select Course</option>
+                                    {universityCourses.map(course => (
+                                        <option key={course.id || course._id} value={course.title} className="bg-[#0B0F1A]">
+                                            {course.title}
+                                        </option>
+                                    ))}
+                                </select>
+                                {universityCourses.length === 0 && (
+                                    <p className="text-[10px] text-amber-400 mt-1">
+                                        No courses assigned. Contact Admin.
+                                    </p>
+                                )}
                             </div>
                         </div>
                         <div className="flex gap-3 mt-6">
@@ -561,6 +783,145 @@ const GroupManagement = () => {
                             </ModernButton>
                             <ModernButton onClick={handleRegisterStudent} className="flex-1">
                                 Register
+                            </ModernButton>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
+            {/* Document Preview Modal */}
+            <AnimatePresence>
+                {previewDoc && (
+                    <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setPreviewDoc(null)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-5xl h-[90vh] bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+                        >
+                            <div className="flex justify-between items-center p-4 border-b border-white/10 bg-white/5">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                        <FileText className="text-primary" size={20} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-white">{previewDoc.title}</h2>
+                                        <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">
+                                            {previewDoc.type} • {selectedStudent.name}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <a 
+                                        href={getMediaUrl(previewDoc.file_url || previewDoc.fileUrl)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-lg transition-colors"
+                                    >
+                                        <ExternalLink size={18} />
+                                    </a>
+                                    <button onClick={() => setPreviewDoc(null)} className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-all">
+                                        <X size={24} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex-1 bg-black/40">
+                                <iframe 
+                                    src={getMediaUrl(previewDoc.file_url || previewDoc.fileUrl)} 
+                                    className="w-full h-full border-none"
+                                    title="Document Preview"
+                                />
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* Assign Batch Modal */}
+            {showAssignBatchModal && selectedStudentForBatch && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[500] flex items-center justify-center p-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-[#0B0F1A] border border-white/10 rounded-2xl p-6 max-w-md w-full"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-white">Assign to Batch</h2>
+                            <button onClick={() => setShowAssignBatchModal(false)} className="text-white/40 hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-sm text-white/60 mb-1">Student</p>
+                                <p className="text-lg font-bold text-white">{selectedStudentForBatch.name}</p>
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-bold text-white/70 mb-2">Select Course</label>
+                                <select
+                                    value={assignBatchData.courseId}
+                                    onChange={async (e) => {
+                                        const courseId = e.target.value;
+                                        setAssignBatchData({ ...assignBatchData, courseId, batchId: '' });
+                                        if (courseId) {
+                                            try {
+                                                const { data } = await axios.get(`/api/batches/course/${courseId}`, config);
+                                                setBatchOptions(data);
+                                            } catch (err) {
+                                                console.error('Error fetching batches:', err);
+                                                setBatchOptions([]);
+                                            }
+                                        } else {
+                                            setBatchOptions([]);
+                                        }
+                                    }}
+                                    className="w-full px-4 py-2 bg-[#0B0F1A] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
+                                >
+                                    <option value="">Select a course</option>
+                                    {selectedStudentForBatch.enrollments?.map(en => (
+                                        <option key={en.courseId} value={en.courseId}>
+                                            {en.courseTitle}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            {assignBatchData.courseId && (
+                                <div>
+                                    <label className="block text-sm font-bold text-white/70 mb-2">Select Batch</label>
+                                    <select
+                                        value={assignBatchData.batchId}
+                                        onChange={(e) => setAssignBatchData({ ...assignBatchData, batchId: e.target.value })}
+                                        className="w-full px-4 py-2 bg-[#0B0F1A] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
+                                    >
+                                        <option value="">No Batch (Global)</option>
+                                        {batchOptions.map(batch => (
+                                            <option key={batch.id} value={batch.id}>
+                                                {batch.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="flex gap-3 mt-8">
+                            <ModernButton
+                                variant="secondary"
+                                onClick={() => setShowAssignBatchModal(false)}
+                                className="flex-1 border !border-white/10"
+                            >
+                                Cancel
+                            </ModernButton>
+                            <ModernButton onClick={handleAssignBatch} className="flex-1">
+                                Update Batch
                             </ModernButton>
                         </div>
                     </motion.div>

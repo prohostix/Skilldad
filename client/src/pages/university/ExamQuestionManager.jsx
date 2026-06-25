@@ -27,7 +27,7 @@ const ExamQuestionManager = () => {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             
             const { data } = await axios.get(`/api/exams/${examId}`, config);
-            setExam(data);
+            setExam(data.exam || data.data);
             setLoading(false);
         } catch (err) {
             console.error('Error fetching exam:', err);

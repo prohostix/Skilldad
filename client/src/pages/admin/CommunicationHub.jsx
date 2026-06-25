@@ -190,7 +190,7 @@ const CommunicationHub = () => {
                         </thead>
                         <tbody className="divide-y divide-white/5 font-inter">
                             {logs.map((log) => (
-                                <tr key={log._id} className="hover:bg-white/[0.01] transition-colors group">
+                                <tr key={log.id} className="hover:bg-white/[0.01] transition-colors group">
                                     <td className="px-6 py-4 whitespace-nowrap text-white/40 text-xs">
                                         <div className="flex items-center gap-2">
                                             <Clock size={12} className="text-white/20" />
@@ -208,17 +208,17 @@ const CommunicationHub = () => {
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex items-center justify-center gap-2">
-                                            {getStatusIcon(log.status.whatsapp.state)}
-                                            <span className={`text-[10px] font-black uppercase ${log.status.whatsapp.state === 'failed' ? 'text-red-400' : 'text-white/40'}`}>
-                                                {log.status.whatsapp.state}
+                                            {getStatusIcon(log.status?.whatsapp?.state || log.delivery_status?.whatsapp?.state)}
+                                            <span className={`text-[10px] font-black uppercase ${(log.status?.whatsapp?.state || log.delivery_status?.whatsapp?.state) === 'failed' ? 'text-red-400' : 'text-white/40'}`}>
+                                                {(log.status?.whatsapp?.state || log.delivery_status?.whatsapp?.state) || 'skipped'}
                                             </span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex items-center justify-center gap-2">
-                                            {getStatusIcon(log.status.email.state)}
-                                            <span className={`text-[10px] font-black uppercase ${log.status.email.state === 'failed' ? 'text-red-400' : 'text-white/40'}`}>
-                                                {log.status.email.state}
+                                            {getStatusIcon(log.status?.email?.state || log.delivery_status?.email?.state)}
+                                            <span className={`text-[10px] font-black uppercase ${(log.status?.email?.state || log.delivery_status?.email?.state) === 'failed' ? 'text-red-400' : 'text-white/40'}`}>
+                                                {(log.status?.email?.state || log.delivery_status?.email?.state) || 'skipped'}
                                             </span>
                                         </div>
                                     </td>

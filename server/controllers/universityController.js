@@ -94,12 +94,13 @@ const registerStudentByUniversity = async (req, res) => {
         const student = newUser.rows[0];
 
         // 4. Enroll in course if provided
+        const { batchId } = req.body;
         if (courseId) {
             const enrollId = `enroll_${Date.now()}`;
             await query(`
-                INSERT INTO enrollments (id, student_id, course_id, university_id, status, created_at)
-                VALUES ($1, $2, $3, $4, 'active', NOW())
-            `, [enrollId, student.id, courseId, universityId]);
+                INSERT INTO enrollments (id, student_id, course_id, university_id, status, batch_id, created_at)
+                VALUES ($1, $2, $3, $4, 'active', $5, NOW())
+            `, [enrollId, student.id, courseId, universityId, batchId || null]);
 
             // Add progress record
             const progId = `prog_${Date.now()}`;
@@ -115,6 +116,35 @@ const registerStudentByUniversity = async (req, res) => {
             name: student.name,
             email: student.email
         });
+
+        // 5. Send Notifications (Awaited for reliability)
+        setImmediate(async () => {
+            try {
+                const notificationService = require('../services/NotificationService');
+                const adminName = req.user.name || 'University Administrator';
+
+                // Send Welcome
+                await notificationService.send(
+                    { id: student.id, name: student.name, email: student.email, phone }, 
+                    'welcome'
+                );
+
+                // Send Enrollment if course provided
+                if (courseId) {
+                    const courseRes = await query('SELECT title FROM courses WHERE id = $1', [courseId]);
+                    const courseTitle = courseRes.rows[0]?.title || 'New Course';
+                    
+                    await notificationService.send(
+                        { id: student.id, name: student.name, email: student.email, phone },
+                        'enrollment',
+                        { courseTitle, enrolledBy: adminName }
+                    );
+                }
+            } catch (err) {
+                console.error('[Uni Registration] Notification failed:', err.message);
+            }
+        });
+
 
     } catch (error) {
         console.error('[Uni Registration] Error:', error);

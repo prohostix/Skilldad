@@ -16,12 +16,14 @@ import {
     Download,
     FileSpreadsheet,
     FileText,
-    ChevronDown
+    ChevronDown,
+    Briefcase
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ChartCard from '../../components/ui/ChartCard';
 import ModernButton from '../../components/ui/ModernButton';
 import { toast } from 'react-hot-toast';
+import { useSocket } from '../../context/SocketContext';
 
 const AdminDashboard = () => {
     // Pre-seed with demo values so the dashboard NEVER shows a blank/loading screen
@@ -40,6 +42,23 @@ const AdminDashboard = () => {
         ]
     });
     const [showExportMenu, setShowExportMenu] = useState(false);
+    const { socket } = useSocket();
+
+    const fetchStats = async () => {
+        try {
+            const rawInfo = localStorage.getItem('userInfo');
+            if (!rawInfo) return;
+            const userInfo = JSON.parse(rawInfo);
+            const config = {
+                headers: { Authorization: `Bearer ${userInfo.token}` },
+                timeout: 8000,
+            };
+            const { data } = await axios.get('/api/admin/stats', config);
+            if (data) setStats(data);
+        } catch (error) {
+            console.warn('[AdminDashboard] Stats fetch failed, showing fallback values:', error.message);
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = () => setShowExportMenu(false);
@@ -63,24 +82,16 @@ const AdminDashboard = () => {
         ];
 
     useEffect(() => {
-        // Background fetch — never blocks rendering
-        const fetchStats = async () => {
-            try {
-                const rawInfo = localStorage.getItem('userInfo');
-                if (!rawInfo) return;
-                const userInfo = JSON.parse(rawInfo);
-                const config = {
-                    headers: { Authorization: `Bearer ${userInfo.token}` },
-                    timeout: 8000,
-                };
-                const { data } = await axios.get('/api/admin/stats', config);
-                if (data) setStats(data);
-            } catch (error) {
-                console.warn('[AdminDashboard] Stats fetch failed, showing fallback values:', error.message);
-            }
-        };
         fetchStats();
-    }, []);
+
+        if (socket) {
+            socket.on('vacancyApplicationUpdate', (data) => {
+                toast.success(`New application from ${data.student_name}!`, { icon: '💼' });
+                fetchStats(); // Refresh dashboard stats
+            });
+            return () => socket.off('vacancyApplicationUpdate');
+        }
+    }, [socket]);
 
     const handleExportAnalytics = async (format = 'csv') => {
         try {
@@ -168,6 +179,7 @@ const AdminDashboard = () => {
         { title: 'Total Students', value: stats.totalStudents || '1.2k', icon: GraduationCap, color: '#5B5CFF', trend: '+12.5%' },
         { title: 'Active Courses', value: stats.totalCourses || '48', icon: BookOpen, color: '#7A5CFF', trend: '+5.2%' },
         { title: 'Partner Network', value: stats.totalPartners || '12', icon: Globe, color: '#B05CFF', trend: '+8.1%' },
+        { title: 'Job Applications', value: stats.totalApplications || '0', icon: Briefcase, color: '#FFAC5C', trend: 'Career' },
         { title: 'Total Revenue', value: stats.totalRevenue ? `₹${stats.totalRevenue.toLocaleString()}` : '₹24.5k', icon: DollarSign, color: '#5B5CFF', trend: '+15.3%' },
         { title: 'Open Tickets', value: stats.totalTickets || '0', icon: FileText, color: '#FF5C5C', trend: 'Active' },
     ];

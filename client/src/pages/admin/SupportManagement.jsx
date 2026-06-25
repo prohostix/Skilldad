@@ -122,6 +122,7 @@ const SupportManagement = () => {
                     <p className="text-white/50 text-xs">Manage and respond to student inquiries</p>
                 </div>
                 <div className="flex items-center space-x-2">
+                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mr-2">STATUS:</div>
                     {['All', 'Open', 'In Progress', 'Resolved'].map(status => (
                         <button
                             key={status}
@@ -141,11 +142,12 @@ const SupportManagement = () => {
                 {/* Tickets List */}
                 <div className="lg:col-span-1 space-y-4 h-[calc(100vh-280px)] overflow-y-auto pr-2 custom-scrollbar">
                     <div className="relative sticky top-0 z-10 bg-[#0B0F1A]/80 backdrop-blur-md pb-2">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                        <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono mb-2">FILTER_INBOX</div>
+                        <Search className="absolute left-3 bottom-5 text-white/40" size={14} />
                         <input
                             type="text"
-                            placeholder="Search tickets..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm text-white"
+                            placeholder="Search keywords..."
+                            className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none transition-all text-xs text-white"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />

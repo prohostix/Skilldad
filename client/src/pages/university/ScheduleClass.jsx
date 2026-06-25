@@ -21,8 +21,10 @@ const ScheduleClass = () => {
         category: 'General',
         universityId: '',
         instructor: '',
-        courseId: ''
+        courseId: '',
+        batchId: ''
     });
+    const [availableBatches, setAvailableBatches] = useState([]);
 
     React.useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -66,8 +68,26 @@ const ScheduleClass = () => {
         }
     }, [navigate]);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleChange = async (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        if (name === 'courseId') {
+            setFormData(prev => ({ ...prev, batchId: '' }));
+            if (value) {
+                try {
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                    const { data } = await axios.get(`/api/batches/course/${value}`, config);
+                    setAvailableBatches(data);
+                } catch (err) {
+                    console.error('Error fetching batches:', err);
+                    setAvailableBatches([]);
+                }
+            } else {
+                setAvailableBatches([]);
+            }
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -270,6 +290,29 @@ const ScheduleClass = () => {
                                         : 'No courses found. Session will be university-wide.'}
                                 </p>
                             </div>
+
+                            {/* Batch Selection */}
+                            {formData.courseId && (
+                                <div className="space-y-4">
+                                    <label className={labelClasses}>Target Batch (Optional)</label>
+                                    <select
+                                        name="batchId"
+                                        value={formData.batchId}
+                                        onChange={handleChange}
+                                        className={`${inputClasses} appearance-none cursor-pointer`}
+                                    >
+                                        <option value="" className="bg-black text-white italic">All Students in Course</option>
+                                        {availableBatches.map(batch => (
+                                            <option key={batch.id} value={batch.id} className="bg-black text-white">
+                                                {batch.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <p className="text-xs text-white/30 mt-2 ml-1">
+                                        Restricts session to students in this specific batch.
+                                    </p>
+                                </div>
+                            )}
 
                             {JSON.parse(localStorage.getItem('userInfo'))?.role === 'admin' && (
                                 <div className="space-y-4 pt-2">

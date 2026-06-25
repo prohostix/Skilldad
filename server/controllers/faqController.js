@@ -22,7 +22,7 @@ const getFAQs = async (req, res) => {
             faqs = await query('SELECT * FROM faqs ORDER BY views DESC, created_at DESC');
         }
 
-        res.status(200).json(faqs.rows);
+        res.status(200).json(faqs.rows.map(f => ({ ...f, _id: f.id })));
     } catch (error) {
         res.status(500).json({ message: 'Server Error fetching FAQs' });
     }
@@ -49,13 +49,19 @@ const getFAQById = async (req, res) => {
 // @access  Private/Admin
 const createFAQ = async (req, res) => {
     try {
-        const { question, answer, category } = req.body;
+        const { question, answer, category, help_link, demo_video_link } = req.body;
+        if (!question || !answer) {
+            return res.status(400).json({ message: 'Question and Answer are required.' });
+        }
+        const crypto = require('crypto');
+        const newId = crypto.randomUUID();
         const faqRes = await query(
-            'INSERT INTO faqs (question, answer, category) VALUES ($1, $2, $3) RETURNING *',
-            [question, answer, category || 'general']
+            'INSERT INTO faqs (id, question, answer, category, help_link, demo_video_link) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [newId, question, answer, category || 'general', help_link || null, demo_video_link || null]
         );
-        res.status(201).json(faqRes.rows[0]);
+        res.status(201).json({ ...faqRes.rows[0], _id: faqRes.rows[0].id });
     } catch (error) {
+        console.error('[createFAQ] Error:', error.message);
         res.status(400).json({ message: error.message });
     }
 };
@@ -65,15 +71,23 @@ const createFAQ = async (req, res) => {
 // @access  Private/Admin
 const updateFAQ = async (req, res) => {
     try {
-        const { question, answer, category } = req.body;
+        const { question, answer, category, help_link, demo_video_link } = req.body;
         const faqRes = await query(
-            'UPDATE faqs SET question = COALESCE($1, question), answer = COALESCE($2, answer), category = COALESCE($3, category), updated_at = NOW() WHERE id = $4 RETURNING *',
-            [question, answer, category, req.params.id]
+            `UPDATE faqs 
+             SET question = COALESCE($1, question), 
+                 answer = COALESCE($2, answer), 
+                 category = COALESCE($3, category),
+                 help_link = $4,
+                 demo_video_link = $5,
+                 updated_at = NOW() 
+             WHERE id = $6 RETURNING *`,
+            [question, answer, category, help_link || null, demo_video_link || null, req.params.id]
         );
         const faq = faqRes.rows[0];
         if (!faq) return res.status(404).json({ message: 'FAQ not found' });
-        res.status(200).json(faq);
+        res.status(200).json({ ...faq, _id: faq.id });
     } catch (error) {
+        console.error('[updateFAQ] Error:', error.message);
         res.status(400).json({ message: error.message });
     }
 };

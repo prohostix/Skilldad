@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const { query } = require('../config/postgres');
 const socketService = require('../services/SocketService');
+const notificationService = require('../services/NotificationService');
+
 
 /**
  * Helper to notify all students enrolled in a course or all students in a university
@@ -10,22 +12,32 @@ const notifyEnrolledStudents = async (session, title, message) => {
         let studentIds = [];
         
         if (session.course_id) {
-            // Get all students enrolled in the specific course
-            const res = await query(
-                "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'",
-                [session.course_id]
-            );
+            let enrollSql = "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'";
+            let enrollParams = [session.course_id];
+            
+            if (session.batch_id) {
+                enrollSql += " AND batch_id = $2";
+                enrollParams.push(session.batch_id);
+            }
+            
+            const res = await query(enrollSql, enrollParams);
             studentIds = res.rows.map(r => r.student_id);
         } else if (session.university_id) {
-            // Get all students in the university if it's a general session
             const res = await query(
                 "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
                 [session.university_id]
             );
             studentIds = res.rows.map(r => r.id);
+        } else if (session.partner_id) {
+            const res = await query(
+                "SELECT id FROM users WHERE registered_by = $1 AND role = 'student'",
+                [session.partner_id]
+            );
+            studentIds = res.rows.map(r => r.id);
         }
 
         if (studentIds.length > 0) {
+            // 1. Send WebSocket Notification (Internal Dashboard)
             socketService.sendToUsers(studentIds, 'notification', {
                 type: 'live_session',
                 title,
@@ -35,17 +47,48 @@ const notifyEnrolledStudents = async (session, title, message) => {
                 startTime: session.start_time,
                 timestamp: new Date()
             });
-            console.log(`[Notification] Sent live session update to ${studentIds.length} students`);
+
+            // 2. Send External Notifications (WhatsApp & Email)
+            // Fetch student details to get phone numbers and emails
+            const studentsRes = await query(
+                "SELECT id, name, email, profile FROM users WHERE id = ANY($1)",
+                [studentIds]
+            );
+
+            for (const student of studentsRes.rows) {
+                // Ensure ID is passed correctly
+                student._id = student.id; 
+                
+                try {
+                    await notificationService.send(
+                        student,
+                        'liveSession',
+                        {
+                            topic: session.topic,
+                            startTime: session.start_time,
+                            description: session.description || 'No description provided'
+                        },
+                        { email: true, whatsapp: true }
+                    );
+                } catch (err) {
+                    console.error(`[Notification] Failed to send WhatsApp/Email to ${student.name}:`, err.message);
+                }
+            }
+
+            console.log(`[Notification] Successfully processed live session update for ${studentsRes.rows.length} students`);
+
         }
     } catch (error) {
         console.error('[Notification] Failed to notify students:', error.message);
     }
 };
 
+
 // @desc    Create a live session
 const createSession = asyncHandler(async (req, res) => {
-    const { topic, description, startTime, duration, timezone, instructor, courseId } = req.body;
-    const universityId = req.user.id;
+    const { topic, description, startTime, duration, timezone, instructor, courseId, batchId } = req.body;
+    const universityId = req.user.role === 'university' ? req.user.id : null;
+    const partnerId = req.user.role === 'partner' ? req.user.id : null;
 
     const id = `sess_${Date.now()}`;
 
@@ -64,16 +107,17 @@ const createSession = asyncHandler(async (req, res) => {
     }
 
     await query(`
-        INSERT INTO live_sessions (id, topic, description, start_time, duration, timezone, instructor_id, university_id, course_id, zoom, status, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'scheduled', NOW(), NOW())
-    `, [id, topic, description, startTime, duration, timezone || 'Asia/Kolkata', instructor || req.user.id, universityId, courseId || null, JSON.stringify(jitsiData)]);
+        INSERT INTO live_sessions (id, topic, description, start_time, duration, timezone, instructor_id, university_id, partner_id, course_id, batch_id, zoom, status, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'scheduled', NOW(), NOW())
+    `, [id, topic, description, startTime, duration, timezone || 'Asia/Kolkata', instructor || req.user.id, universityId, partnerId, courseId || null, batchId || null, JSON.stringify(jitsiData)]);
 
     // Notify students about scheduled session
-    notifyEnrolledStudents(
-        { id, course_id: courseId, university_id: universityId, start_time: startTime },
+    await notifyEnrolledStudents(
+        { id, course_id: courseId, university_id: universityId, partner_id: partnerId, batch_id: batchId, start_time: startTime, topic, description },
         'New Live Session Scheduled',
         `A new session "${topic}" has been scheduled for your course.`
     );
+
 
     res.status(201).json({ success: true, id, joinUrl: jitsiData?.joinUrl });
 });
@@ -81,22 +125,28 @@ const createSession = asyncHandler(async (req, res) => {
 // @desc    Get all sessions for a user
 const getSessions = asyncHandler(async (req, res) => {
     let sql = `
-        SELECT s.*, u.name as instructor_name, c.title as course_title
+        SELECT s.*, u.name as instructor_name, c.title as course_title, b.name as batch_name
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
         LEFT JOIN courses c ON s.course_id = c.id
+        LEFT JOIN batches b ON s.batch_id = b.id
         WHERE (s.is_deleted IS NULL OR s.is_deleted = false)
     `;
     const params = [];
 
     if (req.user.role === 'student') {
         sql += ` AND (
-            s.course_id IN (SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active')
+            (s.course_id IN (SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active')
+             AND (s.batch_id IS NULL OR s.batch_id = (SELECT batch_id FROM enrollments WHERE student_id = $1 AND course_id = s.course_id LIMIT 1)))
             OR (s.course_id IS NULL AND s.university_id = (SELECT university_id FROM users WHERE id = $1))
+            OR (s.course_id IS NULL AND s.partner_id = (SELECT registered_by FROM users WHERE id = $1))
         )`;
         params.push(req.user.id);
     } else if (req.user.role === 'university') {
         sql += ` AND s.university_id = $1`;
+        params.push(req.user.id);
+    } else if (req.user.role === 'partner') {
+        sql += ` AND s.partner_id = $1`;
         params.push(req.user.id);
     }
 
@@ -120,7 +170,8 @@ const getSessions = asyncHandler(async (req, res) => {
             recording,
             startTime: r.start_time,
             instructor: { name: r.instructor_name },
-            course: { title: r.course_title }
+            course: { title: r.course_title },
+            batchName: r.batch_name
         };
     });
 
@@ -130,10 +181,12 @@ const getSessions = asyncHandler(async (req, res) => {
 // @desc    Get single session
 const getSession = asyncHandler(async (req, res) => {
     const resSet = await query(`
-        SELECT s.*, u.name as instructor_name, u.email as instructor_email, uni.name as university_name
+        SELECT s.*, u.name as instructor_name, u.email as instructor_email, 
+               uni.name as university_name, p.name as partner_name
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
-        JOIN users uni ON s.university_id = uni.id
+        LEFT JOIN users uni ON s.university_id = uni.id
+        LEFT JOIN users p ON s.partner_id = p.id
         WHERE s.id = $1 AND (s.is_deleted IS NULL OR s.is_deleted = false)
     `, [req.params.id]);
 
@@ -166,6 +219,11 @@ const getSession = asyncHandler(async (req, res) => {
             _id: session.university_id,
             id: session.university_id,
             name: session.university_name
+        },
+        partner: {
+            _id: session.partner_id,
+            id: session.partner_id,
+            name: session.partner_name
         }
     });
 });
@@ -223,9 +281,12 @@ const getCourseLiveSessions = asyncHandler(async (req, res) => {
         SELECT s.*, u.name as instructor_name, u.profile as instructor_profile
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
-        WHERE s.course_id = $1 AND (s.is_deleted IS NULL OR s.is_deleted = false)
+        LEFT JOIN enrollments en ON s.course_id = en.course_id AND en.student_id = $2
+        WHERE s.course_id = $1 
+        AND (s.is_deleted IS NULL OR s.is_deleted = false)
+        AND ($3 = false OR s.batch_id IS NULL OR s.batch_id = en.batch_id)
         ORDER BY s.start_time ASC
-    `, [courseId]);
+    `, [courseId, req.user.id, req.user.role === 'student']);
 
     res.json(resSet.rows.map(r => ({
         ...r,
@@ -244,6 +305,46 @@ module.exports = {
     getSession,
     startSession,
     endSession,
+    uploadSessionRecording: asyncHandler(async (req, res) => {
+        const { id } = req.params;
+        const { recordingUrl } = req.body;
+        let finalUrl = recordingUrl;
+
+        // If file was uploaded natively via multer
+        if (req.file) {
+            finalUrl = `/uploads/recordings/${req.file.filename}`;
+        }
+
+        if (!finalUrl) {
+            return res.status(400).json({ success: false, message: 'Please provide a file or a recording URL.' });
+        }
+
+        const resSet = await query("SELECT * FROM live_sessions WHERE id = $1 AND (is_deleted IS NULL OR is_deleted = false)", [id]);
+        if (resSet.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Session not found' });
+        }
+
+        const session = resSet.rows[0];
+
+        // Ensure user owns this or is admin
+        if ((req.user.role === 'university' && session.university_id !== req.user.id) || 
+            (req.user.role === 'partner' && session.partner_id !== req.user.id)) {
+            return res.status(403).json({ success: false, message: 'Not authorized to modify this session.' });
+        }
+
+        const existingRecording = typeof session.recording === 'string' ? JSON.parse(session.recording || '{}') : (session.recording || {});
+        const newRecording = {
+            ...existingRecording,
+            playUrl: finalUrl,
+            status: 'available',
+            addedAt: new Date().toISOString(),
+            type: req.file ? 'file' : 'link'
+        };
+
+        await query("UPDATE live_sessions SET recording = $1, updated_at = NOW() WHERE id = $2", [JSON.stringify(newRecording), id]);
+        
+        res.json({ success: true, message: 'Recording added successfully!', recording: newRecording });
+    }),
     deleteSession: asyncHandler(async (req, res) => {
         const { id } = req.params;
         await query("UPDATE live_sessions SET is_deleted = true, updated_at = NOW() WHERE id = $1", [id]);
@@ -253,7 +354,24 @@ module.exports = {
         // Implementation based on update params
         res.json({ success: true });
     }),
-    sendNotification: asyncHandler(async (req, res) => res.json({ success: true })),
+    sendNotification: asyncHandler(async (req, res) => {
+        const { id } = req.params;
+        const resSet = await query("SELECT * FROM live_sessions WHERE id = $1", [id]);
+        const session = resSet.rows[0];
+
+        if (!session) {
+            return res.status(404).json({ success: false, message: 'Session not found' });
+        }
+
+        // Notify students
+        await notifyEnrolledStudents(
+            session,
+            'Live Class Reminder 🔔',
+            `Reminder: The session "${session.topic}" is starting soon.`
+        );
+
+        res.json({ success: true, message: 'Notifications sent' });
+    }),
     getSessionStatusRoute: asyncHandler(async (req, res) => {
         const { id } = req.params;
         const resSet = await query("SELECT status FROM live_sessions WHERE id = $1 AND (is_deleted IS NULL OR is_deleted = false)", [id]);

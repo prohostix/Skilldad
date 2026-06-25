@@ -8,7 +8,11 @@ import {
     ChevronRight,
     Loader2,
     CheckCircle2,
-    ShieldAlert
+    ShieldAlert,
+    Eye,
+    EyeOff,
+    ShieldCheck,
+    Check
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
@@ -21,6 +25,8 @@ const ResetPassword = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isFocused, setIsFocused] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const { token } = useParams();
     const navigate = useNavigate();
@@ -30,11 +36,20 @@ const ResetPassword = () => {
         setError('');
 
         if (password !== confirmPassword) {
-            return setError('Neural passphrases do not match.');
+            return setError('Passwords do not match.');
         }
 
-        if (password.length < 6) {
-            return setError('Passphrase must be at least 6 characters.');
+        const requirements = [
+            { regex: /.{8,}/, message: 'Minimum 8 characters' },
+            { regex: /[A-Z]/, message: 'Include uppercase' },
+            { regex: /[0-9]/, message: 'Include number' },
+            { regex: /[^A-Za-z0-9]/, message: 'Include special character' }
+        ];
+
+        for (let req of requirements) {
+            if (!req.regex.test(password)) {
+                return setError(req.message);
+            }
         }
 
         setLoading(true);
@@ -66,8 +81,8 @@ const ResetPassword = () => {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/20 border border-primary/30 text-primary mb-4">
                         <Lock size={32} />
                     </div>
-                    <h1 className="text-sm font-black text-primary uppercase tracking-[0.4em] font-inter">Encryption Update</h1>
-                    <p className="text-2xl font-bold text-white font-jakarta tracking-tight">New Neural Passphrase</p>
+                    <h1 className="text-sm font-black text-primary uppercase tracking-[0.4em] font-inter">Security Protocol</h1>
+                    <p className="text-2xl font-bold text-white font-jakarta tracking-tight">Reset Password</p>
                 </div>
 
                 <GlassCard className="!p-6 md:!p-8 shadow-glow-purple border-white/20">
@@ -81,9 +96,9 @@ const ResetPassword = () => {
                                 <CheckCircle2 size={64} className="text-emerald-400 animate-bounce" />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-white">Sync Updated!</h3>
+                                <h3 className="text-xl font-bold text-white">Password Updated!</h3>
                                 <p className="text-sm text-text-secondary leading-relaxed">
-                                    Your neural access has been restored successfully. Authenticating and redirecting to login...
+                                    Your password has been restored successfully. Authenticating and redirecting to login...
                                 </p>
                             </div>
                             <ModernButton
@@ -108,42 +123,78 @@ const ResetPassword = () => {
 
                             <div className="space-y-4">
                                 <div className="space-y-2 text-left">
-                                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] ml-1 font-inter">New Passphrase</label>
+                                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] ml-1 font-inter">New Password</label>
                                     <div className={`relative transition-all duration-300 ${isFocused === 'pass' ? 'scale-[1.02]' : ''}`}>
                                         <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'pass' ? 'text-primary' : 'text-text-muted'}`}>
                                             <Lock size={16} />
                                         </div>
                                         <input
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             required
                                             placeholder="••••••••••••"
                                             onFocus={() => setIsFocused('pass')}
                                             onBlur={() => setIsFocused('')}
                                             onChange={(e) => setPassword(e.target.value)}
                                             value={password}
-                                            className="w-full pl-11 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-inter text-text-primary placeholder:text-text-muted text-sm font-medium backdrop-blur-sm"
+                                            className="w-full pl-11 pr-12 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-inter text-text-primary placeholder:text-text-muted text-sm font-medium backdrop-blur-sm"
                                         />
+                                        <button
+                                            type="button"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 right-4 flex items-center text-text-muted hover:text-primary transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2 text-left">
-                                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] ml-1 font-inter">Confirm Passphrase</label>
+                                    <label className="text-[10px] font-bold text-text-muted uppercase tracking-[0.2em] ml-1 font-inter">Confirm Password</label>
                                     <div className={`relative transition-all duration-300 ${isFocused === 'confirm' ? 'scale-[1.02]' : ''}`}>
                                         <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'confirm' ? 'text-primary' : 'text-text-muted'}`}>
                                             <Lock size={16} />
                                         </div>
                                         <input
-                                            type="password"
+                                            type={showConfirmPassword ? "text" : "password"}
                                             required
                                             placeholder="••••••••••••"
                                             onFocus={() => setIsFocused('confirm')}
                                             onBlur={() => setIsFocused('')}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             value={confirmPassword}
-                                            className="w-full pl-11 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-inter text-text-primary placeholder:text-text-muted text-sm font-medium backdrop-blur-sm"
+                                            className="w-full pl-11 pr-12 py-4 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all font-inter text-text-primary placeholder:text-text-muted text-sm font-medium backdrop-blur-sm"
                                         />
+                                        <button
+                                            type="button"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute inset-y-0 right-4 flex items-center text-text-muted hover:text-primary transition-colors"
+                                        >
+                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl space-y-3">
+                                <div className="flex items-center space-x-2 text-primary">
+                                    <ShieldCheck size={16} />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Security Protocol</span>
+                                </div>
+                                <ul className="space-y-1.5">
+                                    {[
+                                        'Minimum 8 characters',
+                                        'Include uppercase & lowercase',
+                                        'Include at least one number',
+                                        'Include a special character'
+                                    ].map((req, i) => (
+                                        <li key={i} className="flex items-center space-x-2 text-[11px] text-text-secondary font-medium">
+                                            <div className="w-1 h-1 rounded-full bg-primary/50" />
+                                            <span>{req}</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
 
                             <ModernButton

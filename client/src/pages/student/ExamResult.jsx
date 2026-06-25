@@ -59,7 +59,7 @@ const ExamResult = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
         // Header - Branding
-        doc.setFillColor(79, 70, 229); // Primary color
+        doc.setFillColor(124, 58, 237); // Primary color
         doc.rect(0, 0, 210, 40, 'F');
         
         doc.setTextColor(255, 255, 255);
@@ -92,7 +92,7 @@ const ExamResult = () => {
         doc.setFillColor(248, 250, 252);
         doc.roundedRect(140, 50, 55, 45, 3, 3, 'FD');
         
-        doc.setTextColor(79, 70, 229);
+        doc.setTextColor(124, 58, 237);
         doc.setFontSize(22);
         doc.setFont('helvetica', 'bold');
         doc.text(`${result.obtainedMarks}/${result.totalMarks}`, 150, 65);
@@ -117,8 +117,9 @@ const ExamResult = () => {
             let correctAns = 'N/A';
             
             if (ans.questionType === 'mcq') {
-                studentAns = ans.question?.options[ans.selectedOption]?.text || 'Not answered';
-                correctAns = ans.question?.options.find(opt => opt.isCorrect)?.text || 'N/A';
+                const opts = Array.isArray(ans.question?.options) ? ans.question.options : [];
+                studentAns = opts[ans.selectedOption]?.text || 'Not answered';
+                correctAns = opts.find(opt => opt.isCorrect)?.text || 'N/A';
             } else {
                 studentAns = ans.textAnswer || 'Not answered';
                 correctAns = 'Subjective';
@@ -138,7 +139,7 @@ const ExamResult = () => {
             head: [['#', 'Question', 'Your Answer', 'Status', 'Marks']],
             body: tableData,
             theme: 'grid',
-            headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255], fontStyle: 'bold' },
+            headStyles: { fillColor: [124, 58, 237], textColor: [255, 255, 255], fontStyle: 'bold' },
             styles: { fontSize: 9, cellPadding: 3 },
             columnStyles: {
                 0: { cellWidth: 10 },
@@ -432,15 +433,23 @@ const ExamResult = () => {
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-white/40 font-bold w-28">Your Answer:</span>
                                                                 <span className={`font-bold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                                    {answer.question?.options[answer.selectedOption]?.text || 'Not answered'}
+                                                                    {(Array.isArray(answer.question?.options) && answer.question.options[answer.selectedOption]?.text) || 'Not answered'}
                                                                 </span>
                                                             </div>
                                                             {!isCorrect && (
                                                                 <div className="flex items-center gap-2">
                                                                     <span className="text-white/40 font-bold w-28">Correct Answer:</span>
                                                                     <span className="font-bold text-emerald-400">
-                                                                        {answer.question?.options.find(opt => opt.isCorrect)?.text || 'N/A'}
+                                                                        {(Array.isArray(answer.question?.options) && answer.question.options.find(opt => opt.isCorrect)?.text) || 'N/A'}
                                                                     </span>
+                                                                </div>
+                                                            )}
+                                                            {answer.feedback && (
+                                                                <div className="mt-3 pt-3 border-t border-white/5">
+                                                                    <p className="text-[10px] text-primary/60 font-black uppercase tracking-widest mb-1.5">Instructor Feedback</p>
+                                                                    <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl text-white/70 text-xs leading-relaxed">
+                                                                        {answer.feedback}
+                                                                    </div>
                                                                 </div>
                                                             )}
                                                         </div>

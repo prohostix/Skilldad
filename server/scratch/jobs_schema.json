@@ -1,0 +1,273 @@
+{
+  "job_openings": [
+    {
+      "column_name": "filledCount",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "noOfPositions",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "postingDate",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "closedDate",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "departmentId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "organizationId",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "jobTitle",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "designationId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO"
+    }
+  ],
+  "applications": [
+    {
+      "column_name": "applicationDate",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "extraFields",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "isEligible",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "assignedTo",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "organizationId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "departmentId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "feeStatus",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "lmsId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "paymentLink",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "verifierId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "student",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "program",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "studyCenter",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    }
+  ],
+  "students": [
+    {
+      "column_name": "extraFields",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "financeApprovedAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "createdAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "updatedAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "opsApprovedAt",
+      "data_type": "timestamp without time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "carryForward",
+      "data_type": "double precision",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "pendingBalance",
+      "data_type": "double precision",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "password",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "hierarchyNodeId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "organizationId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "departmentId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "activationStatus",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "financeApproverId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "financeRemarks",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "opsApproverId",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "id",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "opsRemarks",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "studentName",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "email",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "phone",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "qualification",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "column_name": "status",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "column_name": "username",
+      "data_type": "text",
+      "is_nullable": "YES"
+    }
+  ]
+}

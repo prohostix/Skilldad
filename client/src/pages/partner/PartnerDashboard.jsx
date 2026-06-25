@@ -33,7 +33,7 @@ import {
     Phone,
     MapPin,
     Clock,
-    CheckCircle,
+    CheckCircle2,
     AlertCircle,
     Plus,
     XCircle,
@@ -45,6 +45,7 @@ import {
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import { useToast } from '../../context/ToastContext';
 
 const PartnerDashboard = () => {
     const [stats, setStats] = useState({ totalCodes: 0, totalRedemptions: 0, totalEarnings: 0 });
@@ -66,6 +67,10 @@ const PartnerDashboard = () => {
         partnerCode: '',
         selectedCourses: []
     });
+    const [studentDocs, setStudentDocs] = useState([]);
+    const [studentCerts, setStudentCerts] = useState([]);
+    const [assetsLoading, setAssetsLoading] = useState(false);
+    const { showToast } = useToast();
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
@@ -186,10 +191,44 @@ const PartnerDashboard = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             await axios.delete(`/api/partner/students/${studentId}`, config);
-            alert('Student deleted successfully');
+            showToast('Student deleted successfully', 'success');
             fetchStats();
         } catch (error) {
-            alert(error.response?.data?.message || 'Delete failed');
+            showToast(error.response?.data?.message || 'Delete failed', 'error');
+        }
+    };
+
+    const fetchStudentAssets = async (student) => {
+        setSelectedStudent(student);
+        try {
+            setAssetsLoading(true);
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const studentId = student._id || student.id;
+            
+            const [docsRes, certsRes] = await Promise.all([
+                axios.get('/api/documents', { ...config, params: { student: studentId } }),
+                axios.get('/api/certificates/admin/all', { ...config, params: { studentId } })
+            ]);
+            
+            setStudentDocs(docsRes.data);
+            setStudentCerts(certsRes.data);
+        } catch (error) {
+            console.error('Error fetching student assets:', error);
+            showToast('Failed to fetch student documents/certificates', 'error');
+        } finally {
+            setAssetsLoading(false);
+        }
+    };
+
+    const handleDocumentReview = async (id, status, reason = '') => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            await axios.put(`/api/documents/${id}/review`, { status, rejectionReason: reason }, config);
+            showToast(`Document ${status} successfully!`, 'success');
+            // Refresh
+            if (selectedStudent) fetchStudentAssets(selectedStudent);
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to review document', 'error');
         }
     };
 
@@ -532,7 +571,7 @@ const PartnerDashboard = () => {
                                                 <p className="text-[10px] text-emerald-400">₹{s.discountSaved || 0} saved</p>
                                             </div>
                                             <div className="flex gap-2">
-                                                <button onClick={() => setSelectedStudent(s)} className="p-2 bg-white/5 rounded-lg text-white/50 hover:text-primary"><Eye size={18} /></button>
+                                                <button onClick={() => fetchStudentAssets(s)} className="p-2 bg-white/5 rounded-lg text-white/50 hover:text-primary transition-all"><Eye size={18} /></button>
                                                 <button onClick={() => handleDeleteStudent(s.id || s._id)} className="p-2 bg-white/5 rounded-lg text-white/50 hover:text-red-500"><Trash2 size={18} /></button>
                                             </div>
                                         </div>
@@ -566,16 +605,246 @@ const PartnerDashboard = () => {
                 )}
 
                 {activeTab === 'payouts' && (
-                    <motion.div key="payouts" className="space-y-6">
+                    <motion.div key="payouts" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <GlassCard className="bg-emerald-500/10 border-emerald-500/20 text-left">
+                                <p className="text-[10px] text-emerald-400 uppercase font-black tracking-widest mb-1">Available for Withdrawal</p>
+                                <p className="text-3xl font-bold text-white mb-6">₹{stats.totalEarnings?.toLocaleString()}</p>
+                                <ModernButton onClick={handleRequestPayout} className="w-full shadow-lg shadow-emerald-500/20">
+                                    Withdraw Now
+                                </ModernButton>
+                            </GlassCard>
+
+                            <GlassCard className="text-left flex flex-col justify-center">
+                                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mb-1">Lifetime Earnings</p>
+                                <p className="text-2xl font-bold text-white">₹{stats.lifetimeEarnings?.toLocaleString() || 0}</p>
+                                <div className="h-1 w-12 bg-primary/40 rounded-full mt-3"></div>
+                            </GlassCard>
+
+                            <GlassCard className="text-left flex flex-col justify-center">
+                                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest mb-1">Total Paid Out</p>
+                                <p className="text-2xl font-bold text-white">₹{stats.totalPayouts?.toLocaleString() || 0}</p>
+                                <div className="h-1 w-12 bg-amber-500/40 rounded-full mt-3"></div>
+                            </GlassCard>
+                        </div>
+
+                        {/* Payout History Table (Optional but good) */}
                         <GlassCard className="text-left">
-                            <h2 className="text-base font-bold text-white mb-6">Payout Hub</h2>
-                            <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-2xl mb-8">
-                                <p className="text-[10px] text-emerald-400 uppercase font-bold mb-1">Available for Withdrawal</p>
-                                <p className="text-3xl font-bold text-white">₹{stats.totalEarnings?.toLocaleString()}</p>
-                                <ModernButton onClick={handleRequestPayout} className="mt-4">Withdraw Now</ModernButton>
+                            <div className="flex items-center justify-between mb-8">
+                                <h3 className="text-lg font-bold text-white">Payout History</h3>
+                                <div className="p-2 bg-white/5 rounded-lg text-white/40">
+                                    <History size={18} />
+                                </div>
+                            </div>
+                            
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] border-b border-white/5">
+                                            <th className="pb-4 text-left">Request ID</th>
+                                            <th className="pb-4 text-left">Date</th>
+                                            <th className="pb-4 text-left">Amount</th>
+                                            <th className="pb-4 text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {payoutRequests.length > 0 ? payoutRequests.map((req) => (
+                                            <tr key={req.id || req._id} className="group hover:bg-white/[0.02] transition-all">
+                                                <td className="py-4 font-mono text-[10px] text-white/40">{req.id || req._id}</td>
+                                                <td className="py-4 text-xs text-white/60">{new Date(req.created_at).toLocaleDateString()}</td>
+                                                <td className="py-4 text-sm font-bold text-white">₹{req.amount?.toLocaleString()}</td>
+                                                <td className="py-4">
+                                                    <div className="flex justify-center">
+                                                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${
+                                                            req.status === 'pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                                            req.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                                            'bg-red-500/10 text-red-500 border-red-500/20'
+                                                        }`}>
+                                                            {req.status}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr>
+                                                <td colSpan="4" className="py-12 text-center">
+                                                    <p className="text-xs text-white/20 font-bold uppercase tracking-widest">No payout history found</p>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
                         </GlassCard>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Student Asset Modal */}
+            <AnimatePresence>
+                {selectedStudent && (
+                    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedStudent(null)}
+                            className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+                        />
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-5xl max-h-[90vh] bg-[#0B0F1A] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+                        >
+                            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-1">
+                                        <h3 className="text-2xl font-bold text-white">{selectedStudent.name}</h3>
+                                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded border border-primary/20">Student Portal</span>
+                                    </div>
+                                    <p className="text-sm text-white/40 flex items-center gap-4">
+                                        <span className="flex items-center gap-1.5"><Mail size={14} /> {selectedStudent.email}</span>
+                                        <span className="text-white/10">|</span>
+                                        <span className="flex items-center gap-1.5"><ShieldCheck size={14} /> ID: {selectedStudent._id || selectedStudent.id}</span>
+                                    </p>
+                                </div>
+                                <button onClick={() => setSelectedStudent(null)} className="p-3 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-2xl transition-all">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
+                                {assetsLoading ? (
+                                    <div className="flex flex-col items-center justify-center py-20">
+                                        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                                        <p className="text-white/40 font-bold uppercase tracking-widest text-xs">Synchronizing Assets...</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-12">
+                                        {/* Documents Section */}
+                                        <section>
+                                            <h4 className="text-xs font-black text-white/20 uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                                                <div className="h-px flex-1 bg-white/5"></div>
+                                                Student Documents
+                                                <div className="h-px flex-1 bg-white/5"></div>
+                                            </h4>
+                                            {studentDocs.length > 0 ? (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                    {studentDocs.map((doc) => (
+                                                        <GlassCard key={doc.id || doc._id} className="p-5 border-white/5 hover:border-primary/20 transition-all group">
+                                                            <div className="flex justify-between items-start mb-4">
+                                                                <div className="p-3 bg-primary/10 text-primary rounded-xl group-hover:scale-110 transition-transform">
+                                                                    <FileText size={20} />
+                                                                </div>
+                                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                                                                    doc.status === 'submitted' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/10' :
+                                                                    doc.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/10' : 'bg-red-500/10 text-red-400 border border-red-500/10'
+                                                                }`}>
+                                                                    {doc.status}
+                                                                </span>
+                                                            </div>
+                                                            <h5 className="font-bold text-white text-sm mb-1 truncate">{doc.title}</h5>
+                                                            <p className="text-[10px] text-white/30 uppercase font-black mb-6">{doc.type} • {new Date(doc.createdAt).toLocaleDateString()}</p>
+                                                            <div className="flex gap-2">
+                                                                <button 
+                                                                    onClick={() => window.open(`/${doc.fileUrl}`, '_blank')}
+                                                                    className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-2"
+                                                                >
+                                                                    <Eye size={14} /> View
+                                                                </button>
+                                                                {doc.status === 'submitted' && (
+                                                                    <div className="flex flex-[2] gap-1.5">
+                                                                        <button 
+                                                                            onClick={() => handleDocumentReview(doc.id || doc._id, 'approved')}
+                                                                            className="flex-1 py-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-xl text-[10px] font-bold transition-all"
+                                                                        >
+                                                                            Approve
+                                                                        </button>
+                                                                        <button 
+                                                                            onClick={() => {
+                                                                                const reason = prompt('Reason for rejection:');
+                                                                                if (reason) handleDocumentReview(doc.id || doc._id, 'rejected', reason);
+                                                                            }}
+                                                                            className="flex-1 py-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl text-[10px] font-bold transition-all"
+                                                                        >
+                                                                            Reject
+                                                                        </button>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </GlassCard>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="py-12 text-center bg-white/[0.01] border border-dashed border-white/5 rounded-3xl">
+                                                    <FileText size={40} className="mx-auto mb-3 text-white/5" />
+                                                    <p className="text-white/20 text-xs font-bold uppercase tracking-widest">No Documents Found</p>
+                                                </div>
+                                            )}
+                                        </section>
+
+                                        {/* Certificates Section */}
+                                        <section>
+                                            <h4 className="text-xs font-black text-white/20 uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                                                <div className="h-px flex-1 bg-white/5"></div>
+                                                Earned Certificates
+                                                <div className="h-px flex-1 bg-white/5"></div>
+                                            </h4>
+                                            {studentCerts.length > 0 ? (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                    {studentCerts.map((req) => (
+                                                        <GlassCard key={req.id} className="p-5 border-white/5 bg-gradient-to-br from-white/[0.02] to-transparent">
+                                                            <div className="flex items-center gap-4 mb-6">
+                                                                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                                                                    <GraduationCap size={24} />
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <h5 className="font-bold text-white text-sm truncate">{req.course_title}</h5>
+                                                                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+                                                                        req.status === 'ISSUED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                                                                    }`}>
+                                                                        {req.status}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2 mb-6">
+                                                                <div className="flex justify-between text-[10px] font-black">
+                                                                    <span className="text-white/20 uppercase tracking-widest">Issue Date</span>
+                                                                    <span className="text-white/60">{new Date(req.apply_date).toLocaleDateString()}</span>
+                                                                </div>
+                                                                <div className="flex justify-between text-[10px] font-black">
+                                                                    <span className="text-white/20 uppercase tracking-widest">Institution</span>
+                                                                    <span className="text-white/60 truncate ml-6">{req.university_name}</span>
+                                                                </div>
+                                                            </div>
+                                                            {req.status === 'ISSUED' ? (
+                                                                <button 
+                                                                    onClick={() => window.open(req.file_url, '_blank')}
+                                                                    className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                                                                >
+                                                                    <Eye size={16} /> View Certificate
+                                                                </button>
+                                                            ) : (
+                                                                <div className="w-full py-3 bg-white/5 text-white/20 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2">
+                                                                    <Clock size={16} /> Processing
+                                                                </div>
+                                                            )}
+                                                        </GlassCard>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="py-12 text-center bg-white/[0.01] border border-dashed border-white/5 rounded-3xl">
+                                                    <Award size={40} className="mx-auto mb-3 text-white/5" />
+                                                    <p className="text-white/20 text-xs font-bold uppercase tracking-widest">No Certificates Issued</p>
+                                                </div>
+                                            )}
+                                        </section>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </div>

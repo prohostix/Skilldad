@@ -22,14 +22,20 @@ async function checkExamAccess(examId, studentId) {
       return { canAccess: false, reason: 'Exam not found' };
     }
 
-    // 2. Verify student enrollment in course from PG
+    // 2. Verify student enrollment and batch access from PG
     const enrollRes = await query(`
         SELECT * FROM enrollments 
         WHERE student_id = $1 AND course_id = $2 AND status = 'active'
     `, [studentId.toString(), exam.course_id]);
 
-    if (enrollRes.rows.length === 0) {
+    const enrollment = enrollRes.rows[0];
+    if (!enrollment) {
       return { canAccess: false, reason: 'Not enrolled in course' };
+    }
+
+    // 2b. Batch access check
+    if (exam.batch_ids && exam.batch_ids.length > 0 && !exam.batch_ids.includes(enrollment.batch_id)) {
+      return { canAccess: false, reason: 'This exam is restricted to another batch' };
     }
 
     // 3. Check exam status
@@ -40,8 +46,8 @@ async function checkExamAccess(examId, studentId) {
 
     // 4. Check time window
     const now = new Date();
-    const startTime = new Date(exam.scheduled_start);
-    const endTime = new Date(exam.scheduled_end);
+    const startTime = exam.scheduled_start ? new Date(exam.scheduled_start) : new Date(0);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
 
     if (now < startTime) {
       const minutesUntilStart = Math.floor((startTime - now) / 60000);
@@ -96,13 +102,13 @@ module.exports = {
   // Other methods if needed can be added here or kept as stubs
   isExamActive: (exam) => {
     const now = new Date();
-    const startTime = new Date(exam.scheduled_start);
-    const endTime = new Date(exam.scheduled_end);
+    const startTime = exam.scheduled_start ? new Date(exam.scheduled_start) : new Date(0);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
     return now >= startTime && now <= endTime;
   },
   calculateTimeRemaining: (exam) => {
     const now = new Date();
-    const endTime = new Date(exam.scheduled_end);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
     const effectiveEndTime = exam.allow_late_submission && exam.late_submission_deadline
       ? new Date(exam.late_submission_deadline)
       : endTime;
@@ -110,7 +116,7 @@ module.exports = {
   },
   hasExamEnded: (exam) => {
     const now = new Date();
-    const endTime = new Date(exam.scheduled_end);
+    const endTime = exam.scheduled_end ? new Date(exam.scheduled_end) : new Date('2099-12-31T23:59:59Z');
     const effectiveEndTime = exam.allow_late_submission && exam.late_submission_deadline
       ? new Date(exam.late_submission_deadline)
       : endTime;

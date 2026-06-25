@@ -9,7 +9,9 @@ import {
     Trash2,
     ExternalLink,
     BookOpen,
-    X
+    X,
+    Upload,
+    Image
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -32,8 +34,13 @@ const CourseManager = () => {
         isPublished: false,
         isFeatured: false,
         brochure_url: '',
+        thumbnail: '',
         university_tools: []
     });
+    const [thumbnailUploading, setThumbnailUploading] = useState(false);
+    const [brochureUploading, setBrochureUploading] = useState(false);
+    const thumbnailInputRef = React.useRef(null);
+    const brochureInputRef = React.useRef(null);
     const [universities, setUniversities] = useState([]);
     const navigate = useNavigate();
     const { showToast } = useToast();
@@ -82,6 +89,7 @@ const CourseManager = () => {
             isPublished: true,
             isFeatured: false,
             brochure_url: '',
+            thumbnail: '',
             university_tools: []
         });
         setEditingCourse(null);
@@ -100,6 +108,7 @@ const CourseManager = () => {
             isPublished: course.isPublished || false,
             isFeatured: course.isFeatured || false,
             brochure_url: course.brochure_url || '',
+            thumbnail: course.thumbnail || '',
             university_tools: course.university_tools || []
         });
         setEditingCourse(course);
@@ -146,6 +155,81 @@ const CourseManager = () => {
                 navigate('/login', { state: { from: window.location.pathname } });
             }
             showToast(error.response?.data?.message || error.message, 'error');
+        }
+    };
+
+    const handleThumbnailUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formDataUpload = new FormData();
+        formDataUpload.append('thumbnail', file);
+
+        setThumbnailUploading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+            
+            // If editing, we use the course ID. If creating, we might need to upload after creation? 
+            // Actually, the backend uploadThumbnail requires a course ID.
+            // For brand-new courses, we can't upload until we have an ID.
+            // However, the user might want to upload BEFORE creation.
+            // Usually, we create the course then upload components.
+            // For now, I'll allow uploading only if editingCourse exists.
+            
+            if (!editingCourse) {
+                showToast('Please save the course first before uploading a thumbnail, or provide a direct URL.', 'info');
+                setThumbnailUploading(false);
+                return;
+            }
+
+            const { data } = await axios.post(`/api/courses/${editingCourse._id}/upload-thumbnail`, formDataUpload, config);
+            setFormData(prev => ({ ...prev, thumbnail: data.thumbnail }));
+            showToast('Thumbnail uploaded successfully!', 'success');
+        } catch (error) {
+            console.error('Thumbnail upload error:', error);
+            showToast('Failed to upload thumbnail', 'error');
+        } finally {
+            setThumbnailUploading(false);
+        }
+    };
+
+    const handleBrochureUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formDataUpload = new FormData();
+        formDataUpload.append('brochure', file);
+
+        setBrochureUploading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+            
+            if (!editingCourse) {
+                showToast('Please save the course first before uploading a brochure.', 'info');
+                setBrochureUploading(false);
+                return;
+            }
+
+            const { data } = await axios.post(`/api/courses/${editingCourse._id}/upload-brochure`, formDataUpload, config);
+            setFormData(prev => ({ ...prev, brochure_url: data.brochure_url }));
+            showToast('Brochure uploaded successfully!', 'success');
+        } catch (error) {
+            console.error('Brochure upload error:', error);
+            showToast('Failed to upload brochure', 'error');
+        } finally {
+            setBrochureUploading(false);
         }
     };
 
@@ -342,6 +426,48 @@ const CourseManager = () => {
                             {editingCourse ? 'Edit Course' : 'Create New Course'}
                         </h3>
 
+                        {/* Thumbnail Section */}
+                        <div className="mb-6 flex flex-col sm:flex-row items-center gap-6 p-4 bg-white/5 rounded-2xl border border-white/10">
+                            <div className="w-40 h-24 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                {formData.thumbnail ? (
+                                    <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <Image size={24} className="text-white/20" />
+                                )}
+                            </div>
+                            <div className="flex-1 w-full">
+                                <label className="block text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Cover Image (Thumbnail)</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Direct URL or upload ->"
+                                        className="flex-1 px-3 py-2 bg-black/40 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-primary"
+                                        value={formData.thumbnail}
+                                        onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                                    />
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        ref={thumbnailInputRef}
+                                        onChange={handleThumbnailUpload}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => thumbnailInputRef.current.click()}
+                                        disabled={thumbnailUploading || !editingCourse}
+                                        className={`p-2 rounded-lg border transition-all ${!editingCourse ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed' : 'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30'}`}
+                                        title={!editingCourse ? "Save course first to enable upload" : "Upload Image"}
+                                    >
+                                        <Upload size={16} className={thumbnailUploading ? "animate-bounce" : ""} />
+                                    </button>
+                                </div>
+                                {!editingCourse && (
+                                    <p className="text-[10px] text-amber-400/60 mt-1.5 font-medium italic">Save course first to enable file uploads, or use a direct URL.</p>
+                                )}
+                            </div>
+                        </div>
+
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
@@ -467,13 +593,33 @@ const CourseManager = () => {
                                     <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
                                         Brochure URL (Download Link)
                                     </label>
-                                    <input
-                                        type="url"
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
-                                        placeholder="https://example.com/brochure.pdf"
-                                        value={formData.brochure_url || ''}
-                                        onChange={(e) => setFormData({ ...formData, brochure_url: e.target.value })}
-                                    />
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
+                                            placeholder="https://example.com/brochure.pdf or /uploads/..."
+                                            value={formData.brochure_url || ''}
+                                            onChange={(e) => setFormData({ ...formData, brochure_url: e.target.value })}
+                                        />
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            ref={brochureInputRef}
+                                            onChange={handleBrochureUpload}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => brochureInputRef.current.click()}
+                                            disabled={brochureUploading || !editingCourse}
+                                            className={`px-4 rounded-xl border transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${!editingCourse ? 'bg-white/5 text-white/20 border-white/5 cursor-not-allowed' : 'bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-white'}`}
+                                        >
+                                            <Upload size={14} className={brochureUploading ? "animate-bounce" : ""} />
+                                            {brochureUploading ? '...' : (formData.brochure_url ? 'Update' : 'Upload')}
+                                        </button>
+                                    </div>
+                                    {!editingCourse && (
+                                        <p className="text-[10px] text-amber-400/60 mt-1.5 font-medium italic">Save course first to enable brochure uploads.</p>
+                                    )}
                                 </div>
                             </div>
 

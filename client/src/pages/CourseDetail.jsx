@@ -10,20 +10,20 @@ import {
     Layout,
     PlayCircle,
     CheckCircle2,
-
     Send,
     MessageSquare,
     Sparkles,
     ShieldCheck,
-    ArrowLeft
+    ArrowLeft,
+    Camera,
+    Loader2,
+    Share2
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 import { getMediaUrl } from '../utils/media';
-
-
 
 const CourseDetail = () => {
     const { courseId } = useParams();
@@ -32,6 +32,8 @@ const CourseDetail = () => {
     const [loading, setLoading] = useState(true);
     const [enquiryStatus, setEnquiryStatus] = useState({ loading: false, success: false, error: null });
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
+    const [userInfo, setUserInfo] = useState(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -45,6 +47,11 @@ const CourseDetail = () => {
             }
         };
         fetchCourse();
+        
+        const stored = localStorage.getItem('userInfo');
+        if (stored) {
+            setUserInfo(JSON.parse(stored));
+        }
     }, [courseId]);
 
 
@@ -60,6 +67,60 @@ const CourseDetail = () => {
             setFormData({ name: '', email: '', phone: '', message: '' });
         } catch (error) {
             setEnquiryStatus({ loading: false, success: false, error: 'Failed to send inquiry. Please try again.' });
+        }
+    };
+
+    const isOwnerOrAdmin = userInfo?.role === 'admin' || userInfo?.id === course?.instructorId;
+
+    const handleSecureAction = (action) => {
+        if (userInfo) {
+            action();
+        } else {
+            navigate('/login', { state: { from: `/course/${courseId}` } });
+        }
+    };
+
+    const handleShareBrochure = async () => {
+        if (!course?.brochure_url) return;
+        const url = getMediaUrl(course.brochure_url);
+        const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `${course.title} Brochure`,
+                    text: `Check out the brochure for ${course.title}!`,
+                    url: fullUrl
+                });
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        } else {
+            navigator.clipboard.writeText(fullUrl);
+            alert('Brochure link copied to clipboard!');
+        }
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const uploadData = new FormData();
+        uploadData.append('thumbnail', file);
+
+        setUploadingImage(true);
+        try {
+            const res = await axios.post(`/api/courses/${courseId}/upload-thumbnail`, uploadData, {
+                headers: {
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            setCourse({ ...course, thumbnail: res.data.thumbnail });
+        } catch (error) {
+            console.error('Upload failed:', error);
+            alert('Failed to upload thumbnail');
+        } finally {
+            setUploadingImage(false);
         }
     };
 
@@ -84,11 +145,10 @@ const CourseDetail = () => {
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] text-white selection:bg-primary/30 relative">
             <Navbar />
 
-            {/* Hero Header */}
-            <section className="pt-32 pb-20 px-6 relative overflow-hidden">
+            {/* Hero Header standard e-learning format */}
+            <section className="pt-24 pb-16 px-6 relative overflow-hidden bg-black/40 border-b border-white/5">
                 <div className="absolute inset-0 z-0 pointer-events-none opacity-20">
-                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary blur-[120px] rounded-full opacity-15"></div>
-                    <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600 blur-[120px] rounded-full opacity-10"></div>
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary blur-[120px] rounded-full opacity-10"></div>
                 </div>
 
                 <div className="max-w-7xl mx-auto relative z-10">
@@ -96,26 +156,28 @@ const CourseDetail = () => {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         onClick={() => navigate('/courses')}
-                        className="flex items-center space-x-2 text-text-secondary hover:text-white transition-colors mb-10 group"
+                        className="flex items-center space-x-2 text-text-secondary hover:text-white transition-colors mb-8 group"
                     >
-                        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-xs font-black uppercase tracking-widest">Back to catalog</span>
+                        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-sm font-semibold uppercase tracking-wider">Back to catalog</span>
                     </motion.button>
 
-                    <div className="grid lg:grid-cols-2 gap-16 items-start">
+                    <div className="grid lg:grid-cols-12 gap-12 items-start">
+                        {/* Left Side: Title and Details */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
+                            className="lg:col-span-8"
                         >
-                            <div className="flex flex-col mb-6">
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className="inline-flex items-center space-x-2 px-3 py-1 bg-primary/20 rounded-full font-black text-[10px] text-primary uppercase tracking-[0.3em] border border-primary/30">
-                                        <Sparkles size={14} /> <span>{course.category}</span>
+                            <div className="flex flex-col mb-4">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="inline-flex items-center space-x-2 px-3 py-1 bg-primary/20 rounded-md font-bold text-xs text-primary border border-primary/30">
+                                        <BookOpen size={14} /> <span>{course.category}</span>
                                     </div>
                                     {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && (
                                         <div className="flex items-center gap-3 border-l border-white/20 pl-4">
                                             {(course.instructor?.profile?.profileImage || course.instructor?.profileImage) && (
-                                                <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 overflow-hidden flex-shrink-0">
+                                                <div className="w-6 h-6 rounded bg-white/5 border border-white/10 overflow-hidden flex-shrink-0">
                                                     <img 
                                                         src={getMediaUrl(course.instructor?.profile?.profileImage || course.instructor?.profileImage)} 
                                                         alt="University Logo" 
@@ -124,104 +186,109 @@ const CourseDetail = () => {
                                                     />
                                                 </div>
                                             )}
-                                            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-                                                Partnered with <span className="text-white">{course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}</span>
+                                            <div className="text-xs font-semibold text-white/50">
+                                                Offered by <span className="text-white ml-1">{course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}</span>
                                             </div>
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-1">
-                                    Directed by {course.instructorName || course.instructor?.name || 'Academic Facilitator'}
-                                </p>
                             </div>
-                            <h1 className="text-2xl sm:text-4xl font-black mb-8 leading-[1.1] tracking-tight font-jakarta">
+                            
+                            <h1 className="text-2xl sm:text-4xl font-bold mb-4 leading-tight tracking-tight">
                                 {course.title}
                             </h1>
-                            <p className="text-xl text-text-secondary mb-10 leading-relaxed font-inter opacity-90">
+                            <p className="text-base text-text-secondary mb-6 leading-relaxed font-inter opacity-90">
                                 {course.description}
                             </p>
 
-                            <div className="flex flex-wrap gap-8 mb-12">
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                                        <Users size={20} className="text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Students</p>
-                                        <p className="font-bold text-lg">1,240+</p>
-                                    </div>
+                            <div className="flex items-center gap-6 text-sm text-text-secondary mb-8 flex-wrap">
+                                <div className="flex items-center gap-2">
+                                    <Star size={16} className="text-amber-400 fill-amber-400" />
+                                    <span className="font-semibold text-white">4.9/5.0</span>
                                 </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                                        <Star size={20} className="text-amber-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Rating</p>
-                                        <p className="font-bold text-lg">4.9/5.0</p>
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                    <Users size={16} />
+                                    <span>1,240+ students</span>
                                 </div>
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                                        <Clock size={20} className="text-emerald-400" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Duration</p>
-                                        <p className="font-bold text-lg">12h Content</p>
-                                    </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock size={16} />
+                                    <span>Approx. 12h content</span>
                                 </div>
                             </div>
-
-                            <div className="flex flex-wrap gap-4 mb-12">
-                                <ModernButton
-                                    className="px-12 py-5 shadow-glow-gradient"
-                                    onClick={() => {
-                                        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                                        if (userInfo) {
-                                            navigate(`/dashboard/payment/${courseId}`);
-                                        } else {
-                                            navigate('/login', { state: { from: `/course/${courseId}` } });
-                                        }
-                                    }}
-                                >
-                                    Enroll for ₹{Number(course.price)?.toFixed(2) || '0.00'}
-                                </ModernButton>
-
-                                {course.brochure_url && (
-                                    <a 
-                                        href={course.brochure_url} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-3 px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all group"
-                                    >
-                                        <BookOpen size={20} className="text-primary" />
-                                        Download Brochure
-                                    </a>
-                                )}
+                            
+                            <div className="text-sm text-text-muted">
+                                Instructed by <span className="text-primary font-medium">{course.instructorName || course.instructor?.name || 'Academic Facilitator'}</span>
                             </div>
                         </motion.div>
 
+                        {/* Right Side: Image and Pricing Card */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl group"
+                            className="lg:col-span-4 relative z-20"
                         >
-                            <img
-                                src={getMediaUrl(course.thumbnail) || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200`}
-                                alt={course.title}
-                                className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
-                                onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200";
-                                }}
-                            />
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all">
-                                <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-full border border-white/20 flex items-center justify-center text-white"
-                                >
-                                    <PlayCircle size={40} />
-                                </motion.button>
+                            <div className="bg-[#120D26] rounded-2xl border border-white/10 shadow-2xl p-1 overflow-hidden sticky top-24">
+                                <div className="relative aspect-video rounded-xl overflow-hidden group">
+                                    <img
+                                        src={getMediaUrl(course.thumbnail) || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200`}
+                                        alt={course.title}
+                                        className={`w-full h-full object-cover transition-all duration-300 ${uploadingImage ? 'opacity-50 blur-sm' : ''}`}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200";
+                                        }}
+                                    />
+                                    
+                                    {/* Edit Course Cover Image Overlay */}
+                                    {isOwnerOrAdmin && (
+                                        <label className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full cursor-pointer backdrop-blur-sm border border-white/20 transition-all shadow-lg z-10 flex items-center justify-center" title="Update Course Cover">
+                                            {uploadingImage ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+                                            <input 
+                                                type="file" 
+                                                className="hidden" 
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                disabled={uploadingImage}
+                                            />
+                                        </label>
+                                    )}
+
+                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
+                                            <PlayCircle size={32} className="text-white ml-1" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="p-5">
+                                    <div className="space-y-3">
+                                        <ModernButton
+                                            className="w-full justify-center !py-3 text-[15px] font-semibold"
+                                            onClick={() => handleSecureAction(() => navigate(`/dashboard/payment/${courseId}`))}
+                                        >
+                                            Enroll Now
+                                        </ModernButton>
+
+                                        {course.brochure_url && (
+                                            <div className="flex gap-2 w-full">
+                                                <button 
+                                                    onClick={() => handleSecureAction(() => window.open(getMediaUrl(course.brochure_url), '_blank'))}
+                                                    className="flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold border border-white/20 rounded-xl hover:bg-white/5 transition-colors text-white"
+                                                >
+                                                    <BookOpen size={16} />
+                                                    Download
+                                                </button>
+                                                <button
+                                                    onClick={() => handleSecureAction(handleShareBrochure)}
+                                                    className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold border border-white/20 rounded-xl hover:bg-white/5 transition-colors text-white"
+                                                    title="Share Brochure"
+                                                >
+                                                    <Share2 size={16} />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     </div>
@@ -229,10 +296,10 @@ const CourseDetail = () => {
             </section>
 
             {/* Curriculum & Details */}
-            <section className="py-24 px-6 bg-white/[0.02] border-y border-white/10">
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-16">
+            <section className="py-16 px-6 bg-white/[0.02] border-y border-white/10">
+                <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-12">
                     {/* Syllabus */}
-                    <div className="lg:col-span-2 space-y-20">
+                    <div className="lg:col-span-2 space-y-12">
                         {course.university_tools && course.university_tools.length > 0 && (
                             <section className="relative overflow-hidden p-10 rounded-[48px] border border-primary/20 bg-primary/5 shadow-glow-purple/10">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[90px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
@@ -248,8 +315,8 @@ const CourseDetail = () => {
                                                     <Layout size={24} />
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-black text-white mb-2 tracking-tight">{tool.name || tool}</h4>
-                                                    <p className="text-xs text-text-secondary leading-relaxed font-inter font-medium opacity-80">{tool.description || 'Exclusive toolkit and specialized environment provided by the university for immersive learning.'}</p>
+                                                    <h4 className="font-black text-white mb-2 tracking-tight">{tool?.name || 'Unnamed Tool'}</h4>
+                                                    <p className="text-xs text-text-secondary leading-relaxed font-inter font-medium opacity-80">{tool?.description || 'Exclusive toolkit and specialized environment provided by the university for immersive learning.'}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -259,9 +326,9 @@ const CourseDetail = () => {
                         )}
 
                         <div>
-                            <h2 className="text-3xl font-black mb-10 flex items-center space-x-4 tracking-tighter uppercase">
-                                <Layout className="text-primary" size={32} />
-                                <span>Mastery Framework</span>
+                            <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
+                                <Layout className="text-primary" size={24} />
+                                <span>Course Curriculum</span>
                             </h2>
                             <div className="space-y-6">
                                 {course.modules?.map((module, idx) => (
@@ -272,13 +339,15 @@ const CourseDetail = () => {
                                     >
                                         <GlassCard className="!p-8 border-white/5 hover:border-primary/30 transition-all shadow-xl hover:bg-white/[0.04]">
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                                                <h3 className="font-black text-xl flex items-center space-x-4">
-                                                    <span className="text-primary text-sm font-black w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg">{idx + 1}</span>
-                                                    <span className="tracking-tight">{module.title}</span>
+                                                <h3 className="font-bold text-lg flex items-center space-x-3">
+                                                    <span className="text-primary text-sm font-bold w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                                                        {idx + 1}
+                                                    </span>
+                                                    <span>{module.title}</span>
                                                 </h3>
                                                 <div className="flex items-center gap-4">
-                                                    <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-text-muted">
-                                                        {module.videos?.length || 0} Core Sessions
+                                                    <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-text-muted">
+                                                        {module.videos?.length || 0} Lessons
                                                     </span>
                                                 </div>
                                             </div>
@@ -302,9 +371,9 @@ const CourseDetail = () => {
                         {/* Faculty / Scientific Committee Section */}
                         {course.instructor?.profile?.faculty && course.instructor?.profile?.faculty.length > 0 && (
                             <section>
-                                <h2 className="text-3xl font-black mb-10 flex items-center space-x-4 tracking-tighter uppercase">
-                                    <Users className="text-emerald-400" size={32} />
-                                    <span>Scientific Committee / Faculty</span>
+                                <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
+                                    <Users className="text-emerald-400" size={24} />
+                                    <span>Instructors</span>
                                 </h2>
                                 <div className="grid sm:grid-cols-2 gap-8">
                                     {course.instructor.profile.faculty.map((member, i) => (
@@ -319,9 +388,9 @@ const CourseDetail = () => {
                                                     />
                                                 </div>
                                                 <div className="flex-1 space-y-1">
-                                                    <h4 className="font-black text-lg text-white tracking-tight">{member.name}</h4>
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary-accent">{member.role || 'Member'}</p>
-                                                    <p className="text-xs text-text-secondary leading-relaxed font-inter line-clamp-3 opacity-80 pt-1">
+                                                    <h4 className="font-bold text-lg text-white">{member.name}</h4>
+                                                    <p className="text-xs font-semibold text-primary">{member.role || 'Instructor'}</p>
+                                                    <p className="text-sm text-text-secondary leading-relaxed pt-1">
                                                         {member.description || 'Specialized faculty member dedicated to providing excellence in this academic path.'}
                                                     </p>
                                                 </div>
@@ -333,9 +402,9 @@ const CourseDetail = () => {
                         )}
 
                         <div>
-                            <h2 className="text-3xl font-black mb-10 flex items-center space-x-4 tracking-tighter uppercase">
-                                <BookOpen className="text-purple-400" size={32} />
-                                <span>Strategic Capabilities</span>
+                            <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
+                                <BookOpen className="text-purple-400" size={24} />
+                                <span>What You'll Learn</span>
                             </h2>
                             <div className="grid sm:grid-cols-2 gap-6">
                                 {[

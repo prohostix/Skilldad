@@ -7,13 +7,24 @@ export const getMediaUrl = (path) => {
     if (path.startsWith('http') || path.startsWith('data:')) return path;
     
     let normalizedPath = path;
+    let isAsset = false;
+
+    // Check if it's a frontend relative asset path
+    if (normalizedPath.startsWith('assets/')) {
+        normalizedPath = `/${normalizedPath}`;
+        isAsset = true;
+    } else if (normalizedPath.startsWith('/assets/')) {
+        isAsset = true;
+    }
     
+    if (isAsset) {
+        // Assets are always served from the frontend origin
+        return `${window.location.origin}${normalizedPath}`;
+    }
+
+    // Handle upload paths
     if (!normalizedPath.startsWith('/') && !normalizedPath.startsWith('uploads/')) {
-        if (!normalizedPath.startsWith('assets/')) {
-             normalizedPath = `/uploads/${normalizedPath}`;
-        } else {
-             normalizedPath = `/${normalizedPath}`;
-        }
+        normalizedPath = `/uploads/${normalizedPath}`;
     } else if (normalizedPath.startsWith('uploads/')) {
         normalizedPath = `/${normalizedPath}`;
     }

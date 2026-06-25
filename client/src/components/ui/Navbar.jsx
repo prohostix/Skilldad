@@ -35,7 +35,6 @@ const Navbar = ({ compact = false }) => {
         { name: 'Courses', href: '/courses' },
         { name: 'Universities', href: '/platform' },
         { name: 'Study Abroad', href: '/study-abroad' },
-        { name: 'Support', href: '/support' },
         { name: 'Services', href: '/services' },
         { name: 'About Us', href: '/about' },
     ];
@@ -162,7 +161,7 @@ const Navbar = ({ compact = false }) => {
                                 key={item.name}
                                 to={item.href}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-2xl font-bold text-white hover:text-primary transition-colors"
+                                className="text-lg font-medium text-white hover:text-primary transition-colors"
                             >
                                 {item.name}
                             </Link>
