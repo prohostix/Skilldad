@@ -566,11 +566,7 @@ const LandingPage = () => {
                                         <p className="text-text-secondary font-inter text-sm leading-relaxed mb-6 opacity-80 group-hover:opacity-100 transition-opacity line-clamp-2">
                                             {c.description || `Experience high-fidelity education in ${c.category} with our institutional track.`}
                                         </p>
-                                        <div className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-between group/link">
-                                            <div className="flex flex-col">
-                                                <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">Enrollment Fee</span>
-                                                <span className="text-sm font-black text-white">₹{c.price || '199'}</span>
-                                            </div>
+                                        <div className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-end group/link">
                                             <ModernButton
                                                 onClick={(e) => {
                                                     e.stopPropagation();

@@ -196,6 +196,7 @@ const CommissionWallet = () => {
                                     onChange={e => setManualAmount(e.target.value)}
                                 />
                             </div>
+
                         </div>
 
                         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4">

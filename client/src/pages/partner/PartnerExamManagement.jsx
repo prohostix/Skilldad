@@ -569,6 +569,32 @@ const PartnerExamManagement = () => {
                                                 >
                                                     <HelpCircle size={12} /> Questions
                                                 </button>
+                                                <div className="flex flex-col gap-1">
+                                                    <input 
+                                                        type="file" 
+                                                        id={`excel-${exam._id}`}
+                                                        className="hidden" 
+                                                        onChange={(e) => setExcelFile(e.target.files[0])}
+                                                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                                    />
+                                                    <div className="flex items-center gap-1.5">
+                                                        <label 
+                                                            htmlFor={`excel-${exam._id}`}
+                                                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black uppercase text-white/60 hover:bg-white/10 cursor-pointer transition-all tracking-widest"
+                                                        >
+                                                            <Upload size={12} /> 
+                                                            {excelFile ? 'Ready' : 'Bulk Questions'}
+                                                        </label>
+                                                        {excelFile && (
+                                                            <button 
+                                                                onClick={() => handleExcelUpload(exam._id)}
+                                                                className="p-1.5 bg-primary text-white rounded-lg hover:bg-primary/80 transition-all"
+                                                            >
+                                                                <RefreshCw size={12} className={uploadingExcel ? 'animate-spin' : ''} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
                                                 <ModernButton
                                                     size="sm"
                                                     variant="secondary"
@@ -723,8 +749,8 @@ const PartnerExamManagement = () => {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <ModernButton 
-                                                                size="xs" 
+                                                            <ModernButton
+                                                                size="sm"
                                                                 variant={sub.status === 'graded' ? 'secondary' : 'primary'}
                                                                 onClick={() => viewSubmissionForGrading(sub)}
                                                                 className="!rounded-lg !text-[10px] !px-3 !py-1 mt-2"
@@ -1022,9 +1048,9 @@ const PartnerExamManagement = () => {
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Subject Vector</label>
-                                            <select 
-                                                required 
-                                                value={examData.course} 
+                                            <select
+                                                required
+                                                value={examData.course}
                                                 onChange={async (e) => {
                                                     const courseId = e.target.value;
                                                     setExamData({ ...examData, course: courseId, batchId: '' });
@@ -1041,7 +1067,7 @@ const PartnerExamManagement = () => {
                                                     } else {
                                                         setAvailableBatches([]);
                                                     }
-                                                }} 
+                                                }}
                                                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/60 text-sm"
                                             >
                                                 <option value="">Select Domain</option>
@@ -1051,7 +1077,7 @@ const PartnerExamManagement = () => {
                                         {examData.course && (
                                             <div className="space-y-1 col-span-2">
                                                 <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Target Batch (Optional)</label>
-                                                <select 
+                                                <select
                                                     className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/60 text-sm"
                                                     value={examData.batchId}
                                                     onChange={e => setExamData({ ...examData, batchId: e.target.value })}

@@ -52,7 +52,7 @@ const applyForCertificate = async (req, res) => {
 
         // 4. Create request
         const id = `CERT-${uuidv4().slice(0, 8).toUpperCase()}`;
-        let universityId = course.instructor_id || course.submitted_by; 
+        let universityId = course.instructor_id || course.submitted_by;
 
         if (!universityId) {
             // Fallback: assign to the first available admin if no instructor/submitter is linked

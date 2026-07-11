@@ -25,6 +25,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
             university: '/university/dashboard',
             partner: '/partner/dashboard',
             finance: '/finance/dashboard',
+            sales: '/sales/dashboard',
             student: '/dashboard',
         };
         return <Navigate to={roleHome[userRole] || '/dashboard'} replace />;

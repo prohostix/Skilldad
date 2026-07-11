@@ -119,6 +119,10 @@ const UniversityDocumentReview = lazy(() => import('./pages/university/Universit
 // Finance Pages
 const FinanceDashboard = lazy(() => import('./pages/finance/FinanceDashboard'));
 
+// Sales Pages
+const SalesDashboard = lazy(() => import('./pages/sales/SalesDashboard'));
+const StudentApply = lazy(() => import('./pages/sales/StudentApply'));
+
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-slate-900">
     <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -162,6 +166,7 @@ function App() {
                 <Route path="/cookies" element={<CookiePolicy />} />
                 <Route path="/refund-policy" element={<RefundPolicy />} />
                 <Route path="/university-profile/:name" element={<UniversityPublicDetail />} />
+                <Route path="/apply/:id" element={<StudentApply />} />
 
                 {/* Protected Dashboard Routes */}
 
@@ -278,6 +283,16 @@ function App() {
                     <Route path="dashboard" element={<FinanceDashboard />} />
                     <Route path="payouts" element={<FinanceDashboard />} />
                     <Route path="reports" element={<FinanceDashboard />} />
+                    <Route path="support" element={<Support />} />
+                    <Route path="settings" element={<Settings />} />
+                  </Route>
+                </Route>
+
+                {/* Sales Routes */}
+                <Route element={<ProtectedRoute allowedRoles={['sales', 'admin']} />}>
+                  <Route path="/sales" element={<DashboardLayout />}>
+                    <Route index element={<SalesDashboard />} />
+                    <Route path="dashboard" element={<SalesDashboard />} />
                     <Route path="support" element={<Support />} />
                     <Route path="settings" element={<Settings />} />
                   </Route>

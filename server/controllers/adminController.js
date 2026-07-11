@@ -511,7 +511,7 @@ const grantPermission = async (req, res) => {
             return res.status(400).json({ message: 'Role is required' });
         }
 
-        const validRoles = ['student', 'university', 'partner', 'admin', 'finance'];
+        const validRoles = ['student', 'university', 'partner', 'admin', 'finance', 'sales'];
         if (!validRoles.includes(role)) {
             return res.status(400).json({ message: 'Invalid role specified' });
         }
@@ -834,7 +834,22 @@ const deleteStudent = async (req, res) => {
             await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
             
             // Handle documents (could be uploaded by student)
-            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1 OR student_id = $1', [id]);
+
+            // Nullify references in other tables to avoid foreign key violations
+            await client.query('UPDATE documents SET reviewed_by_id = NULL WHERE reviewed_by_id = $1', [id]);
+            await client.query('UPDATE exams SET created_by_id = NULL WHERE created_by_id = $1', [id]);
+            await client.query('UPDATE exam_submissions_new SET graded_by_id = NULL WHERE graded_by_id = $1', [id]);
+            await client.query('UPDATE results SET generated_by_id = NULL WHERE generated_by_id = $1', [id]);
+            await client.query('UPDATE live_sessions SET instructor_id = NULL WHERE instructor_id = $1', [id]);
+            await client.query('UPDATE live_sessions SET partner_id = NULL WHERE partner_id = $1', [id]);
+            await client.query('UPDATE support_tickets SET user_id = NULL WHERE user_id = $1', [id]);
+            await client.query('UPDATE whiteboard_snapshots SET created_by = NULL WHERE created_by = $1', [id]);
+            await client.query('UPDATE certificates SET university_id = NULL WHERE university_id = $1', [id]);
+
+            // Delete strict dependencies
+            await client.query('DELETE FROM referral_codes WHERE user_id = $1', [id]);
+            await client.query('DELETE FROM referrals WHERE referrer_id = $1 OR referred_id = $1', [id]);
 
             // Finally delete the user
             await client.query('DELETE FROM users WHERE id = $1', [id]);
@@ -899,7 +914,22 @@ const deleteUser = async (req, res) => {
             }
             
             // Cleanup documents uploaded by this user
-            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1', [id]);
+            await client.query('DELETE FROM documents WHERE uploaded_by_id = $1 OR student_id = $1', [id]);
+
+            // Nullify references in other tables to avoid foreign key violations
+            await client.query('UPDATE documents SET reviewed_by_id = NULL WHERE reviewed_by_id = $1', [id]);
+            await client.query('UPDATE exams SET created_by_id = NULL WHERE created_by_id = $1', [id]);
+            await client.query('UPDATE exam_submissions_new SET graded_by_id = NULL WHERE graded_by_id = $1', [id]);
+            await client.query('UPDATE results SET generated_by_id = NULL WHERE generated_by_id = $1', [id]);
+            await client.query('UPDATE live_sessions SET instructor_id = NULL WHERE instructor_id = $1', [id]);
+            await client.query('UPDATE live_sessions SET partner_id = NULL WHERE partner_id = $1', [id]);
+            await client.query('UPDATE support_tickets SET user_id = NULL WHERE user_id = $1', [id]);
+            await client.query('UPDATE whiteboard_snapshots SET created_by = NULL WHERE created_by = $1', [id]);
+            await client.query('UPDATE certificates SET university_id = NULL WHERE university_id = $1', [id]);
+
+            // Delete strict dependencies
+            await client.query('DELETE FROM referral_codes WHERE user_id = $1', [id]);
+            await client.query('DELETE FROM referrals WHERE referrer_id = $1 OR referred_id = $1', [id]);
 
             // Finally delete user
             await client.query('DELETE FROM users WHERE id = $1', [id]);

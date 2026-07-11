@@ -102,8 +102,8 @@ const registerStudent = async (req, res) => {
             userId, 
             name, 
             email, 
-            hashedPassword, 
-            req.user.id || req.user._id, 
+            hashedPassword,
+            req.user.id || req.user._id,
             partnerCode?.toUpperCase(), 
             university || null,
             JSON.stringify({ phone: phone || '' })
@@ -218,6 +218,36 @@ const requestPayout = async (req, res) => {
         if (!amount || Number(amount) <= 0) {
             console.warn(`[requestPayout] Invalid amount: ${amount}`);
             return res.status(400).json({ message: `Invalid amount received: ${amount}` });
+        }
+
+        // Calculate current withdrawable balance
+        const userRes = await query('SELECT discount_rate FROM users WHERE id = $1', [partnerId]);
+        const commissionRate = (parseFloat(userRes.rows[0]?.discount_rate) || 15) / 100;
+
+        const earningsRes = await query(`
+            SELECT SUM(CAST(c.price AS NUMERIC) * $2) as total_earned
+            FROM users u
+            JOIN enrollments e ON u.id = e.student_id
+            JOIN courses c ON e.course_id = c.id
+            WHERE (u.registered_by = $1 OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1))
+            AND u.role = 'student'
+        `, [partnerId, commissionRate]);
+
+        const lifetimeEarnings = Math.round(parseFloat(earningsRes.rows[0]?.total_earned || 0));
+
+        const payoutRes = await query(`
+            SELECT SUM(CAST(amount AS NUMERIC)) as total_payouts
+            FROM payouts
+            WHERE partner_id = $1 AND status != 'rejected'
+        `, [partnerId]);
+
+        const totalPayouts = Math.round(parseFloat(payoutRes.rows[0]?.total_payouts || 0));
+        const withdrawableBalance = Math.max(0, lifetimeEarnings - totalPayouts);
+
+        if (amount > withdrawableBalance) {
+            return res.status(400).json({
+                message: `Insufficient balance. Max withdrawable: ₹${withdrawableBalance.toLocaleString()}`
+            });
         }
 
         const id = `payout_${Date.now()}`;

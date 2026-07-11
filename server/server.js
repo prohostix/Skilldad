@@ -166,6 +166,8 @@ app.use('/api/discussions', require('./routes/discussionRoutes'));
 app.use('/api/career', require('./routes/careerRoutes'));
 app.use('/api/certificates', require('./routes/certificateRoutes'));
 app.use('/api/batches', require('./routes/batchRoutes'));
+app.use('/api/sales', require('./routes/salesRoutes'));
+
 app.use('/', require('./routes/seoRoutes'));
 
 
@@ -317,6 +319,37 @@ const startServer = async () => {
         if (!sessCols.includes('partner_id')) {
             await query('ALTER TABLE live_sessions ADD COLUMN partner_id VARCHAR(255) REFERENCES users(id)');
             console.log('[Migration] Added partner_id to live_sessions'.green);
+        }
+
+        // Auto-migrate: Create sales_applications table
+        await query(`
+            CREATE TABLE IF NOT EXISTS sales_applications (
+                id VARCHAR(255) PRIMARY KEY,
+                sales_id VARCHAR(255) REFERENCES users(id) ON DELETE SET NULL,
+                university_name VARCHAR(255) NOT NULL,
+                course_name VARCHAR(255) NOT NULL,
+                university_logo VARCHAR(255),
+                fee_amount NUMERIC NOT NULL,
+                student_name VARCHAR(255),
+                father_name VARCHAR(255),
+                student_address TEXT,
+                student_email VARCHAR(255),
+                student_phone VARCHAR(50),
+                status VARCHAR(50) DEFAULT 'pending',
+                razorpay_order_id VARCHAR(255),
+                razorpay_payment_id VARCHAR(255),
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+        console.log('[Migration] sales_applications table verified/created'.green);
+
+        // Auto-migrate: ensure sales_applications has student_dob
+        const salesColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['sales_applications']);
+        const salesCols = salesColRes.rows.map(r => r.column_name);
+        if (!salesCols.includes('student_dob')) {
+            await query('ALTER TABLE sales_applications ADD COLUMN student_dob VARCHAR(50)');
+            console.log('[Migration] Added student_dob to sales_applications'.green);
         }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);

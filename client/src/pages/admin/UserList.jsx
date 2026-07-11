@@ -423,6 +423,7 @@ const UserList = () => {
                                 <option value="student" className="bg-[#0B0F1A]">Student</option>
                                 <option value="university" className="bg-[#0B0F1A]">University</option>
                                 <option value="partner" className="bg-[#0B0F1A]">Partner</option>
+                                <option value="sales" className="bg-[#0B0F1A]">Sales</option>
                                 <option value="admin" className="bg-[#0B0F1A]">Admin</option>
                                 <option value="finance" className="bg-[#0B0F1A]">Finance</option>
                             </select>
@@ -649,6 +650,7 @@ const UserList = () => {
                                     <option value="student" className="bg-[#0B0F1A]">Student</option>
                                     <option value="university" className="bg-[#0B0F1A]">University</option>
                                     <option value="partner" className="bg-[#0B0F1A]">Partner</option>
+                                    <option value="sales" className="bg-[#0B0F1A]">Sales</option>
                                     <option value="admin" className="bg-[#0B0F1A]">Admin</option>
                                     <option value="finance" className="bg-[#0B0F1A]">Finance</option>
                                 </select>
@@ -743,6 +745,7 @@ const UserList = () => {
                                     <option value="student" className="bg-[#0B0F1A]">Student</option>
                                     <option value="university" className="bg-[#0B0F1A]">University</option>
                                     <option value="partner" className="bg-[#0B0F1A]">Industry Partner</option>
+                                    <option value="sales" className="bg-[#0B0F1A]">Sales User</option>
                                     <option value="finance" className="bg-[#0B0F1A]">Finance Manager</option>
                                     <option value="admin" className="bg-[#0B0F1A]">Platform Admin</option>
                                 </select>

@@ -44,6 +44,7 @@ const Login = () => {
                     case 'university': return '/university/dashboard';
                     case 'partner': return '/partner/dashboard';
                     case 'finance': return '/finance/dashboard';
+                    case 'sales': return '/sales/dashboard';
                     case 'student': return '/dashboard';
                     default: return '/';
                 }
@@ -76,6 +77,7 @@ const Login = () => {
                     case 'university': return '/university/dashboard';
                     case 'partner': return '/partner/dashboard';
                     case 'finance': return '/finance/dashboard';
+                    case 'sales': return '/sales/dashboard';
                     case 'student': return '/dashboard';
                     default: return '/';
                 }
@@ -201,25 +203,7 @@ const Login = () => {
                         </ModernButton>
                     </form>
 
-                    <div className="mt-6 pt-5 border-t border-white/10 text-center space-y-4">
-                        <div className="flex flex-wrap justify-center gap-2">
-                            {[
-                                { role: 'Admin', email: 'admin@skilldad.com' },
-                                { role: 'Finance', email: 'fin@gmail.com' },
-                                { role: 'Partner', email: 'iits@gmail.com' },
-                                { role: 'University', email: 'info@cit.edu.al' },
-                                { role: 'Student', email: 'rinsnac4@gmail.com' }
-                            ].map((demo) => (
-                                <button
-                                    key={demo.role}
-                                    type="button"
-                                    onClick={() => setFormData({ email: demo.email, password: '123456' })}
-                                    className="px-2 py-1 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-white/5 border border-white/5 hover:border-primary/20 rounded-md transition-all"
-                                >
-                                    {demo.role} Access
-                                </button>
-                            ))}
-                        </div>
+                    <div className="mt-6 pt-5 border-t border-white/10 text-center">
                         <p className="text-xs font-inter text-text-secondary">
                             New to the platform?{' '}
                             <Link to="/register" className="text-primary font-bold hover:text-primary-dark transition-colors">
