@@ -1,12 +1,15 @@
 const { query } = require('../config/postgres');
 
+// Frontend expects Mongo-style `_id`; DB uses a plain integer `id`.
+const withId = (row) => row && { ...row, _id: row.id };
+
 // @desc    Get all SkillDad universities
 // @route   GET /api/admin/skilldad-universities
 // @access  Private (Admin)
 const getSkillDadUniversities = async (req, res) => {
     try {
         const result = await query('SELECT * FROM skill_dad_universities ORDER BY created_at DESC');
-        res.json(result.rows);
+        res.json(result.rows.map(withId));
     } catch (error) {
         console.error('Error fetching SkillDad universities:', error);
         res.status(500).json({ message: error.message });
@@ -29,7 +32,7 @@ const createSkillDadUniversity = async (req, res) => {
             [name, location, website, phone, email, description]
         );
 
-        res.status(201).json(result.rows[0]);
+        res.status(201).json(withId(result.rows[0]));
     } catch (error) {
         console.error('Error creating SkillDad university:', error);
         res.status(400).json({ message: error.message });
@@ -51,7 +54,7 @@ const updateSkillDadUniversity = async (req, res) => {
         `, [name, location, website, phone, email, description, isActive, req.params.id]);
 
         if (result.rowCount === 0) return res.status(404).json({ message: 'University not found' });
-        res.json(result.rows[0]);
+        res.json(withId(result.rows[0]));
     } catch (error) {
         console.error('Error updating SkillDad university:', error);
         res.status(400).json({ message: error.message });
