@@ -351,6 +351,22 @@ const startServer = async () => {
             await query('ALTER TABLE sales_applications ADD COLUMN student_dob VARCHAR(50)');
             console.log('[Migration] Added student_dob to sales_applications'.green);
         }
+
+        // Auto-migrate: ensure skill_dad_universities has profile media columns
+        const sdUniColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['skill_dad_universities']);
+        const sdUniCols = sdUniColRes.rows.map(r => r.column_name);
+        if (!sdUniCols.includes('profile_image')) {
+            await query('ALTER TABLE skill_dad_universities ADD COLUMN profile_image VARCHAR(255)');
+            console.log('[Migration] Added profile_image to skill_dad_universities'.green);
+        }
+        if (!sdUniCols.includes('cover_image')) {
+            await query('ALTER TABLE skill_dad_universities ADD COLUMN cover_image VARCHAR(255)');
+            console.log('[Migration] Added cover_image to skill_dad_universities'.green);
+        }
+        if (!sdUniCols.includes('gallery')) {
+            await query("ALTER TABLE skill_dad_universities ADD COLUMN gallery JSONB DEFAULT '[]'::jsonb");
+            console.log('[Migration] Added gallery to skill_dad_universities'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

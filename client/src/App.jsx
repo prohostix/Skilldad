@@ -92,6 +92,7 @@ const UserList = lazy(() => import('./pages/admin/UserList'));
 const StudentManagement = lazy(() => import('./pages/admin/StudentManagement'));
 const UniversityManagement = lazy(() => import('./pages/admin/UniversityManagement'));
 const SkillDadUniversities = lazy(() => import('./pages/admin/SkillDadUniversities'));
+const SkillDadUniversityDetail = lazy(() => import('./pages/admin/SkillDadUniversityDetail'));
 const B2BManagement = lazy(() => import('./pages/admin/B2BManagement'));
 const PartnerDetail = lazy(() => import('./pages/admin/PartnerDetail'));
 const PlatformAnalytics = lazy(() => import('./pages/admin/PlatformAnalytics'));
@@ -255,6 +256,7 @@ function App() {
                     <Route path="university" element={<UniversityManagement />} />
                     <Route path="university/:id" element={<UniversityDetail />} />
                     <Route path="skilldad-universities" element={<SkillDadUniversities />} />
+                    <Route path="skilldad-universities/:id" element={<SkillDadUniversityDetail />} />
                     <Route path="b2b" element={<B2BManagement />} />
                     <Route path="b2b/:partnerId" element={<PartnerDetail />} />
                     <Route path="analytics" element={<PlatformAnalytics />} />

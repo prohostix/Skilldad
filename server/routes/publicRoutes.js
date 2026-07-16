@@ -86,7 +86,7 @@ router.get('/universities', async (req, res) => {
 router.get('/skilldad-universities', async (req, res) => {
     try {
         const result = await query(`
-            SELECT id, name, location, website, phone, email, description
+            SELECT id, name, location, website, phone, email, description, profile_image, cover_image, gallery
             FROM skill_dad_universities
             WHERE is_active = true
             ORDER BY created_at ASC

@@ -236,19 +236,22 @@ const LandingPage = () => {
         })) : staticUnis;
 
     // SkillDad-owned universities are display-only (no login/dashboard) — always shown after partner universities
-    const skillDadUniversityCards = dynamicSkillDadUniversities.map(u => ({
-        _id: `sd-${u.id}`,
-        name: u.name,
-        location: u.location || 'Global',
-        students: '1,200+',
-        programs: '24+',
-        logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
-        image: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
-        description: u.description || 'World-class institution providing excellence in global education through SkillDad.',
-        established: '2023',
-        rating: (4.8 + (Math.random() * 0.15)).toFixed(1),
-        specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
-    }));
+    const skillDadUniversityCards = dynamicSkillDadUniversities.map(u => {
+        const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`;
+        return {
+            _id: `sd-${u.id}`,
+            name: u.name,
+            location: u.location || 'Global',
+            students: '1,200+',
+            programs: '24+',
+            logo: u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo,
+            image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo),
+            description: u.description || 'World-class institution providing excellence in global education through SkillDad.',
+            established: '2023',
+            rating: (4.8 + (Math.random() * 0.15)).toFixed(1),
+            specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
+        };
+    });
 
     const allUniversities = [...universities, ...skillDadUniversityCards];
 

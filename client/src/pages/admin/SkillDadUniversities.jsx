@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Plus, Trash2, Edit2, Building2, MapPin, Globe, Phone, Mail } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import { getMediaUrl } from '../../utils/media';
 
 const SkillDadUniversities = () => {
+    const navigate = useNavigate();
     const [universities, setUniversities] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [editingUniversity, setEditingUniversity] = useState(null);
@@ -122,21 +125,29 @@ const SkillDadUniversities = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {universities.map((university) => (
-                        <GlassCard key={university._id} className="!p-6">
+                        <GlassCard
+                            key={university._id}
+                            className="!p-6 cursor-pointer hover:border-primary/40 transition-all"
+                            onClick={() => navigate(`/admin/skilldad-universities/${university._id}`)}
+                        >
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-primary/10 text-primary rounded-2xl">
-                                    <Building2 size={24} />
+                                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center overflow-hidden">
+                                    {university.profile_image ? (
+                                        <img src={getMediaUrl(university.profile_image)} alt={university.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Building2 size={24} />
+                                    )}
                                 </div>
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => handleEdit(university)}
+                                        onClick={(e) => { e.stopPropagation(); handleEdit(university); }}
                                         className="p-2 text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                                         title="Edit"
                                     >
                                         <Edit2 size={16} />
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(university._id)}
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(university._id); }}
                                         className="p-2 text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                                         title="Delete"
                                     >

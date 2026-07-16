@@ -16,6 +16,20 @@ const getSkillDadUniversities = async (req, res) => {
     }
 };
 
+// @desc    Get a single SkillDad university
+// @route   GET /api/admin/skilldad-universities/:id
+// @access  Private (Admin)
+const getSkillDadUniversityById = async (req, res) => {
+    try {
+        const result = await query('SELECT * FROM skill_dad_universities WHERE id = $1', [req.params.id]);
+        if (result.rowCount === 0) return res.status(404).json({ message: 'University not found' });
+        res.json(withId(result.rows[0]));
+    } catch (error) {
+        console.error('Error fetching SkillDad university:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // @desc    Create a new SkillDad university
 // @route   POST /api/admin/skilldad-universities
 // @access  Private (Admin)
@@ -61,6 +75,91 @@ const updateSkillDadUniversity = async (req, res) => {
     }
 };
 
+// @desc    Upload SkillDad university profile image (logo)
+// @route   POST /api/admin/skilldad-universities/:id/upload-image
+// @access  Private (Admin)
+const uploadSkillDadUniversityProfileImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'Please upload an image' });
+        }
+
+        const imagePath = `/uploads/${req.file.filename}`;
+        const result = await query(
+            'UPDATE skill_dad_universities SET profile_image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [imagePath, req.params.id]
+        );
+
+        if (result.rowCount === 0) return res.status(404).json({ message: 'University not found' });
+
+        res.json({
+            message: 'University profile image updated',
+            profileImage: imagePath
+        });
+    } catch (error) {
+        console.error('[uploadSkillDadUniversityProfileImage] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error uploading image' });
+    }
+};
+
+// @desc    Upload SkillDad university cover image
+// @route   POST /api/admin/skilldad-universities/:id/upload-cover
+// @access  Private (Admin)
+const uploadSkillDadUniversityCoverImage = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'Please upload an image' });
+        }
+
+        const imagePath = `/uploads/${req.file.filename}`;
+        const result = await query(
+            'UPDATE skill_dad_universities SET cover_image = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            [imagePath, req.params.id]
+        );
+
+        if (result.rowCount === 0) return res.status(404).json({ message: 'University not found' });
+
+        res.json({
+            message: 'University cover image updated',
+            coverImage: imagePath
+        });
+    } catch (error) {
+        console.error('[uploadSkillDadUniversityCoverImage] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error uploading cover image' });
+    }
+};
+
+// @desc    Upload SkillDad university gallery images
+// @route   POST /api/admin/skilldad-universities/:id/upload-gallery
+// @access  Private (Admin)
+const uploadSkillDadUniversityGalleryImages = async (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: 'Please upload images' });
+        }
+
+        const existingRes = await query('SELECT gallery FROM skill_dad_universities WHERE id = $1', [req.params.id]);
+        if (existingRes.rowCount === 0) return res.status(404).json({ message: 'University not found' });
+
+        const currentGallery = existingRes.rows[0].gallery || [];
+        const newImages = req.files.map(file => `/uploads/${file.filename}`);
+        const updatedGallery = [...currentGallery, ...newImages];
+
+        await query(
+            'UPDATE skill_dad_universities SET gallery = $1, updated_at = NOW() WHERE id = $2',
+            [JSON.stringify(updatedGallery), req.params.id]
+        );
+
+        res.json({
+            message: `${req.files.length} images added to gallery`,
+            gallery: updatedGallery
+        });
+    } catch (error) {
+        console.error('[uploadSkillDadUniversityGalleryImages] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error uploading gallery' });
+    }
+};
+
 // @desc    Delete a SkillDad university
 // @route   DELETE /api/admin/skilldad-universities/:id
 // @access  Private (Admin)
@@ -77,7 +176,11 @@ const deleteSkillDadUniversity = async (req, res) => {
 
 module.exports = {
     getSkillDadUniversities,
+    getSkillDadUniversityById,
     createSkillDadUniversity,
     updateSkillDadUniversity,
     deleteSkillDadUniversity,
+    uploadSkillDadUniversityProfileImage,
+    uploadSkillDadUniversityCoverImage,
+    uploadSkillDadUniversityGalleryImages,
 };

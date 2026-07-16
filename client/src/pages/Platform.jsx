@@ -76,7 +76,7 @@ const Platform = () => {
         programs: '10+',
         established: '2020',
         rating: 4.8,
-        image: fallbackImg,
+        image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackImg),
         fallbackImage: fallbackImg,
         specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
         description: u.description || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
