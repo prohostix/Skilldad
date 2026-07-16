@@ -22,13 +22,18 @@ import { getMediaUrl } from '../utils/media';
 const Platform = () => {
     const navigate = useNavigate();
     const [dynamicUnis, setDynamicUnis] = React.useState([]);
+    const [dynamicSkillDadUnis, setDynamicSkillDadUnis] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const fetchUnis = async () => {
             try {
-                const { data } = await axios.get('/api/public/universities');
-                setDynamicUnis(data);
+                const [unisRes, skillDadUnisRes] = await Promise.all([
+                    axios.get('/api/public/universities'),
+                    axios.get('/api/public/skilldad-universities')
+                ]);
+                setDynamicUnis(unisRes.data);
+                setDynamicSkillDadUnis(skillDadUnisRes.data);
             } catch (error) {
                 console.error('Failed to fetch universities:', error);
             } finally {
@@ -38,10 +43,11 @@ const Platform = () => {
         fetchUnis();
     }, []);
 
+    const fallbackImg = `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`;
+
     const universities = dynamicUnis.map(u => {
         // Build best-available image: profile.coverImage > Unsplash fallback (DO NOT fallback to logo)
         const coverImg = u.profile?.coverImage;
-        const fallbackImg = `https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800`;
         const resolvedImage = coverImg
                 ? getMediaUrl(coverImg)
                 : fallbackImg;
@@ -60,6 +66,23 @@ const Platform = () => {
             description: u.bio || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
         };
     });
+
+    // SkillDad-owned universities are display-only (no login/dashboard) — always shown after partner universities
+    const skillDadUniversities = dynamicSkillDadUnis.map(u => ({
+        id: `sd-${u.id}`,
+        name: u.name,
+        location: u.location || 'Global',
+        students: '100+',
+        programs: '10+',
+        established: '2020',
+        rating: 4.8,
+        image: fallbackImg,
+        fallbackImage: fallbackImg,
+        specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
+        description: u.description || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
+    }));
+
+    const allUniversities = [...universities, ...skillDadUniversities];
 
     const platformStats = [
         { label: "Partner Universities", value: "150+", icon: Building, color: "purple" },
@@ -93,7 +116,7 @@ const Platform = () => {
                     </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-20">
-                        {universities.map((university, index) => (
+                        {allUniversities.map((university, index) => (
                             <motion.div
                                 key={university.id}
                                 initial={{ opacity: 0, y: 30 }}
