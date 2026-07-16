@@ -10,8 +10,7 @@ import {
     Layers,
     Sparkles,
     SearchX,
-    ShieldCheck,
-    ArrowLeft
+    ShieldCheck
 } from 'lucide-react';
 
 import Navbar from '../components/ui/Navbar';
@@ -112,17 +111,6 @@ const CourseCatalog = () => {
                             transition={{ duration: 0.4, ease: "easeInOut" }}
                             className="max-w-[1300px] mx-auto text-center space-y-4 px-4 overflow-hidden"
                         >
-                            {/* Back Button */}
-                            <div className="flex justify-start mb-2">
-                                <button
-                                    onClick={() => navigate(-1)}
-                                    className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200"
-                                >
-                                    <ArrowLeft size={16} />
-                                    <span className="text-sm font-medium">Go Back</span>
-                                </button>
-                            </div>
-
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
