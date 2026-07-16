@@ -44,6 +44,7 @@ const LandingPage = () => {
     const [dynamicLogos, setDynamicLogos] = useState([]);
     const [featuredCourses, setFeaturedCourses] = useState([]);
     const [dynamicUniversities, setDynamicUniversities] = useState([]);
+    const [dynamicSkillDadUniversities, setDynamicSkillDadUniversities] = useState([]);
     const [dynamicSuccessStories, setDynamicSuccessStories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeVideo, setActiveVideo] = useState(null); // { url, name }
@@ -60,11 +61,12 @@ const LandingPage = () => {
         const fetchPublicData = async () => {
             try {
                 setLoading(true);
-                const [directorsRes, logosRes, coursesRes, universitiesRes, storiesRes] = await Promise.all([
+                const [directorsRes, logosRes, coursesRes, universitiesRes, skillDadUniversitiesRes, storiesRes] = await Promise.all([
                     axios.get('/api/public/directors'),
                     axios.get('/api/public/partner-logos'),
                     axios.get('/api/courses'),
                     axios.get('/api/public/universities'),
+                    axios.get('/api/public/skilldad-universities'),
                     axios.get('/api/public/success-stories')
                 ]);
 
@@ -82,6 +84,10 @@ const LandingPage = () => {
 
                 if (universitiesRes.data) {
                     setDynamicUniversities(universitiesRes.data);
+                }
+
+                if (skillDadUniversitiesRes.data) {
+                    setDynamicSkillDadUniversities(skillDadUniversitiesRes.data);
                 }
 
                 if (storiesRes.data) {
@@ -228,6 +234,23 @@ const LandingPage = () => {
             rating: 4.9,
             specialties: ['Digital Transformation', 'Enterprise Learning']
         })) : staticUnis;
+
+    // SkillDad-owned universities are display-only (no login/dashboard) — always shown after partner universities
+    const skillDadUniversityCards = dynamicSkillDadUniversities.map(u => ({
+        _id: `sd-${u.id}`,
+        name: u.name,
+        location: u.location || 'Global',
+        students: '1,200+',
+        programs: '24+',
+        logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+        image: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+        description: u.description || 'World-class institution providing excellence in global education through SkillDad.',
+        established: '2023',
+        rating: (4.8 + (Math.random() * 0.15)).toFixed(1),
+        specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
+    }));
+
+    const allUniversities = [...universities, ...skillDadUniversityCards];
 
 
     let marqueeRow1 = [];
@@ -652,14 +675,14 @@ const LandingPage = () => {
                             transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
                             className="hidden lg:block w-[320px] h-[320px] shrink-0 -ml-48 mr-[8%] gpu-accelerated"
                         >
-                            <UniversityOrb3D universities={universities} />
+                            <UniversityOrb3D universities={allUniversities} />
                         </motion.div>
 
                     </div>
 
                     {/* University Grid */}
                     <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                        {universities.map((uni, i) => (
+                        {allUniversities.map((uni, i) => (
                             <motion.div
                                 key={i}
                                 initial={{ opacity: 0, y: 20 }}

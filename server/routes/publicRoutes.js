@@ -80,6 +80,24 @@ router.get('/universities', async (req, res) => {
     }
 });
 
+// @desc    Get active SkillDad-owned universities (no login account, display-only)
+// @route   GET /api/public/skilldad-universities
+// @access  Public
+router.get('/skilldad-universities', async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT id, name, location, website, phone, email, description
+            FROM skill_dad_universities
+            WHERE is_active = true
+            ORDER BY created_at ASC
+        `);
+        res.json(result.rows || []);
+    } catch (error) {
+        console.error('Error fetching SkillDad universities:', error.message);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // @desc    Get courses for a specific university by name
 // @route   GET /api/public/universities/:name/courses
 // @access  Public
