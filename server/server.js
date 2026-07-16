@@ -375,6 +375,10 @@ const startServer = async () => {
             await query("ALTER TABLE courses ADD COLUMN program_type VARCHAR(30) NOT NULL DEFAULT 'course'");
             console.log('[Migration] Added program_type to courses'.green);
         }
+        if (!courseCols.includes('skill_dad_university_id')) {
+            await query('ALTER TABLE courses ADD COLUMN skill_dad_university_id INTEGER REFERENCES skill_dad_universities(id) ON DELETE SET NULL');
+            console.log('[Migration] Added skill_dad_university_id to courses'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

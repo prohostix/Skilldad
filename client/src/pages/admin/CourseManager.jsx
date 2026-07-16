@@ -36,13 +36,15 @@ const CourseManager = () => {
         brochure_url: '',
         thumbnail: '',
         university_tools: [],
-        programType: 'course'
+        programType: 'course',
+        skillDadUniversityId: ''
     });
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [brochureUploading, setBrochureUploading] = useState(false);
     const thumbnailInputRef = React.useRef(null);
     const brochureInputRef = React.useRef(null);
     const [universities, setUniversities] = useState([]);
+    const [skillDadUniversities, setSkillDadUniversities] = useState([]);
     const navigate = useNavigate();
     const { showToast } = useToast();
 
@@ -54,6 +56,17 @@ const CourseManager = () => {
             setUniversities(data);
         } catch (error) {
             console.error('Error fetching universities:', error);
+        }
+    };
+
+    const fetchSkillDadUniversities = async () => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.get('/api/admin/skilldad-universities', config);
+            setSkillDadUniversities(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error('Error fetching SkillDad universities:', error);
         }
     };
 
@@ -76,6 +89,7 @@ const CourseManager = () => {
     useEffect(() => {
         fetchCourses();
         fetchUniversities();
+        fetchSkillDadUniversities();
     }, []);
 
     const handleCreate = async () => {
@@ -92,7 +106,8 @@ const CourseManager = () => {
             brochure_url: '',
             thumbnail: '',
             university_tools: [],
-            programType: 'course'
+            programType: 'course',
+            skillDadUniversityId: ''
         });
         setEditingCourse(null);
         setShowCreateModal(true);
@@ -112,7 +127,8 @@ const CourseManager = () => {
             brochure_url: course.brochure_url || '',
             thumbnail: course.thumbnail || '',
             university_tools: course.university_tools || [],
-            programType: course.programType || course.program_type || 'course'
+            programType: course.programType || course.program_type || 'course',
+            skillDadUniversityId: course.skillDadUniversityId || course.skill_dad_university_id || ''
         });
         setEditingCourse(course);
         setShowCreateModal(true);
@@ -135,7 +151,8 @@ const CourseManager = () => {
             };
 
             // Validation: University is mandatory for Admin
-            if (userInfo.role === 'admin' && !formData.instructorId) {
+            const needsSkillDadUniversity = formData.programType === 'degree_programme';
+            if (userInfo.role === 'admin' && (needsSkillDadUniversity ? !formData.skillDadUniversityId : !formData.instructorId)) {
                 showToast('Please select a Provider University', 'error');
                 return;
             }
@@ -551,7 +568,13 @@ const CourseManager = () => {
                                     <select
                                         className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
                                         value={formData.programType}
-                                        onChange={(e) => setFormData({ ...formData, programType: e.target.value })}
+                                        onChange={(e) => setFormData({
+                                            ...formData,
+                                            programType: e.target.value,
+                                            instructorId: '',
+                                            skillDadUniversityId: '',
+                                            universityName: ''
+                                        })}
                                     >
                                         <option value="course" className="bg-[#0B071A]">Skill Course</option>
                                         <option value="degree_programme" className="bg-[#0B071A]">Skill Integrated Degree Programme</option>
@@ -564,25 +587,47 @@ const CourseManager = () => {
                                     <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
                                         Provider University
                                     </label>
-                                    <select
-                                        required
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter appearance-none"
-                                        value={formData.instructorId}
-                                        onChange={(e) => {
-                                            const univId = e.target.value;
-                                            const univ = universities.find(u => u._id === univId);
-                                            setFormData({
-                                                ...formData,
-                                                instructorId: univId,
-                                                universityName: univ ? univ.name : ''
-                                            });
-                                        }}
-                                    >
-                                        <option value="" disabled className="bg-black text-white">Select Provider University (Mandatory)</option>
-                                        {universities.map(u => (
-                                            <option key={u._id} value={u._id} className="bg-black text-white">{u.name}</option>
-                                        ))}
-                                    </select>
+                                    {formData.programType === 'degree_programme' ? (
+                                        <select
+                                            required
+                                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter appearance-none"
+                                            value={formData.skillDadUniversityId}
+                                            onChange={(e) => {
+                                                const uniId = e.target.value;
+                                                const uni = skillDadUniversities.find(u => String(u._id) === uniId);
+                                                setFormData({
+                                                    ...formData,
+                                                    skillDadUniversityId: uniId,
+                                                    universityName: uni ? uni.name : ''
+                                                });
+                                            }}
+                                        >
+                                            <option value="" disabled className="bg-black text-white">Select SkillDad University (Mandatory)</option>
+                                            {skillDadUniversities.map(u => (
+                                                <option key={u._id} value={u._id} className="bg-black text-white">{u.name}</option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <select
+                                            required
+                                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter appearance-none"
+                                            value={formData.instructorId}
+                                            onChange={(e) => {
+                                                const univId = e.target.value;
+                                                const univ = universities.find(u => u._id === univId);
+                                                setFormData({
+                                                    ...formData,
+                                                    instructorId: univId,
+                                                    universityName: univ ? univ.name : ''
+                                                });
+                                            }}
+                                        >
+                                            <option value="" disabled className="bg-black text-white">Select Provider University (Mandatory)</option>
+                                            {universities.map(u => (
+                                                <option key={u._id} value={u._id} className="bg-black text-white">{u.name}</option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
                             </div>
 
