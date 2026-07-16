@@ -415,100 +415,6 @@ const UniversityManagement = () => {
                 </GlassCard>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-                {/* ROI Analytics Chart */}
-                <GlassCard className="lg:col-span-2 shadow-xl border-white/10">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 className="text-base font-semibold text-white font-inter flex items-center">
-                                <BarChart3 size={18} className="mr-2 text-primary" /> Engagement  vs  ROI
-                            </h3>
-                            <p className="text-xs text-white/40 font-semibold uppercase tracking-widest mt-1">Cross-entity performance analysis</p>
-                        </div>
-                        <div className="flex bg-white/5 p-1 rounded-lg">
-                            <button
-                                onClick={() => setTimeframe('monthly')}
-                                className={`px-3 py-1 text-xs font-bold rounded-md shadow-sm transition-all ${timeframe === 'monthly' ? 'bg-white/10 text-primary' : 'text-white/50'}`}
-                            >
-                                Monthly
-                            </button>
-                            <button
-                                onClick={() => setTimeframe('yearly')}
-                                className={`px-3 py-1 text-xs font-bold rounded-md shadow-sm transition-all ${timeframe === 'yearly' ? 'bg-white/10 text-primary' : 'text-white/50'}`}
-                            >
-                                Yearly
-                            </button>
-                        </div>
-                    </div>
-                    <div className="h-[300px] w-full relative" style={{ minWidth: 0 }}>
-                        <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={250} debounce={50}>
-                            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorEngage" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#5B5CF0" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#5B5CF0" stopOpacity={0} />
-                                    </linearGradient>
-                                    <linearGradient id="colorRoi" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                        borderRadius: '16px',
-                                        border: '1px solid #e2e8f0',
-                                        boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
-                                        color: '#000'
-                                    }}
-                                />
-                                <Area type="monotone" dataKey="engagement" stroke="#5B5CF0" strokeWidth={3} fillOpacity={1} fill="url(#colorEngage)" />
-                                <Area type="monotone" dataKey="roi" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRoi)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </GlassCard>
-
-                {/* Assignment Fast-Actions */}
-                <div className="space-y-6">
-                    <GlassCard className="bg-white/5 text-white border-white/10 shadow-2xl shadow-primary/20 relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h4 className="text-base font-semibold font-inter mb-2 flex items-center">
-                                <ShieldCheck size={18} className="mr-2 text-emerald-400" /> Compliance Status
-                            </h4>
-                            <p className="text-white/70 text-sm font-inter mb-6">92% of corporate partners have completed the annual security audit.</p>
-                            <ModernButton onClick={() => setOpenAudits(true)} className="w-full !bg-white !text-slate-900 font-bold shadow-none">Review Audits</ModernButton>
-                        </div>
-                        <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-primary/20 rounded-full blur-[40px]"></div>
-                    </GlassCard>
-
-                    <GlassCard className="border-white/10 overflow-hidden !p-0">
-                        <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
-                            <p className="text-xs font-bold text-white/50 uppercase tracking-widest">Rapid Assignments</p>
-                            <Layers size={14} className="text-white/40" />
-                        </div>
-                        <div className="p-4 space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-primary/20 text-primary rounded-lg"><Briefcase size={14} /></div>
-                                    <span className="text-sm font-bold text-white">Enterprise AI</span>
-                                </div>
-                                <button onClick={() => handleRapidAssign('Enterprise AI')} className="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors"><Plus size={16} /></button>
-                            </div>
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg"><Briefcase size={14} /></div>
-                                    <span className="text-sm font-bold text-white">Project Management</span>
-                                </div>
-                                <button onClick={() => handleRapidAssign('Project Management')} className="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors"><Plus size={16} /></button>
-                            </div>
-                        </div>
-                    </GlassCard>
-                </div>
-            </div>
-
             {/* Entity Table */}
             <GlassCard className="!p-0 border-white/10 overflow-hidden shadow-xl">
                 <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -749,6 +655,100 @@ const UniversityManagement = () => {
                     </div>
                 </div>
             </GlassCard>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+                {/* ROI Analytics Chart */}
+                <GlassCard className="lg:col-span-2 shadow-xl border-white/10">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-base font-semibold text-white font-inter flex items-center">
+                                <BarChart3 size={18} className="mr-2 text-primary" /> Engagement  vs  ROI
+                            </h3>
+                            <p className="text-xs text-white/40 font-semibold uppercase tracking-widest mt-1">Cross-entity performance analysis</p>
+                        </div>
+                        <div className="flex bg-white/5 p-1 rounded-lg">
+                            <button
+                                onClick={() => setTimeframe('monthly')}
+                                className={`px-3 py-1 text-xs font-bold rounded-md shadow-sm transition-all ${timeframe === 'monthly' ? 'bg-white/10 text-primary' : 'text-white/50'}`}
+                            >
+                                Monthly
+                            </button>
+                            <button
+                                onClick={() => setTimeframe('yearly')}
+                                className={`px-3 py-1 text-xs font-bold rounded-md shadow-sm transition-all ${timeframe === 'yearly' ? 'bg-white/10 text-primary' : 'text-white/50'}`}
+                            >
+                                Yearly
+                            </button>
+                        </div>
+                    </div>
+                    <div className="h-[300px] w-full relative" style={{ minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={250} debounce={50}>
+                            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorEngage" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#5B5CF0" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#5B5CF0" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="colorRoi" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                        borderRadius: '16px',
+                                        border: '1px solid #e2e8f0',
+                                        boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+                                        color: '#000'
+                                    }}
+                                />
+                                <Area type="monotone" dataKey="engagement" stroke="#5B5CF0" strokeWidth={3} fillOpacity={1} fill="url(#colorEngage)" />
+                                <Area type="monotone" dataKey="roi" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRoi)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </GlassCard>
+
+                {/* Assignment Fast-Actions */}
+                <div className="space-y-6">
+                    <GlassCard className="bg-white/5 text-white border-white/10 shadow-2xl shadow-primary/20 relative overflow-hidden">
+                        <div className="relative z-10">
+                            <h4 className="text-base font-semibold font-inter mb-2 flex items-center">
+                                <ShieldCheck size={18} className="mr-2 text-emerald-400" /> Compliance Status
+                            </h4>
+                            <p className="text-white/70 text-sm font-inter mb-6">92% of corporate partners have completed the annual security audit.</p>
+                            <ModernButton onClick={() => setOpenAudits(true)} className="w-full !bg-white !text-slate-900 font-bold shadow-none">Review Audits</ModernButton>
+                        </div>
+                        <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-primary/20 rounded-full blur-[40px]"></div>
+                    </GlassCard>
+
+                    <GlassCard className="border-white/10 overflow-hidden !p-0">
+                        <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
+                            <p className="text-xs font-bold text-white/50 uppercase tracking-widest">Rapid Assignments</p>
+                            <Layers size={14} className="text-white/40" />
+                        </div>
+                        <div className="p-4 space-y-4">
+                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-primary/20 text-primary rounded-lg"><Briefcase size={14} /></div>
+                                    <span className="text-sm font-bold text-white">Enterprise AI</span>
+                                </div>
+                                <button onClick={() => handleRapidAssign('Enterprise AI')} className="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors"><Plus size={16} /></button>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg"><Briefcase size={14} /></div>
+                                    <span className="text-sm font-bold text-white">Project Management</span>
+                                </div>
+                                <button onClick={() => handleRapidAssign('Project Management')} className="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors"><Plus size={16} /></button>
+                            </div>
+                        </div>
+                    </GlassCard>
+                </div>
+            </div>
 
             {/* Manage Discount Dialog */}
             {openDiscount && (
