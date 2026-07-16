@@ -35,7 +35,8 @@ const CourseManager = () => {
         isFeatured: false,
         brochure_url: '',
         thumbnail: '',
-        university_tools: []
+        university_tools: [],
+        programType: 'course'
     });
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [brochureUploading, setBrochureUploading] = useState(false);
@@ -90,7 +91,8 @@ const CourseManager = () => {
             isFeatured: false,
             brochure_url: '',
             thumbnail: '',
-            university_tools: []
+            university_tools: [],
+            programType: 'course'
         });
         setEditingCourse(null);
         setShowCreateModal(true);
@@ -109,7 +111,8 @@ const CourseManager = () => {
             isFeatured: course.isFeatured || false,
             brochure_url: course.brochure_url || '',
             thumbnail: course.thumbnail || '',
-            university_tools: course.university_tools || []
+            university_tools: course.university_tools || [],
+            programType: course.programType || course.program_type || 'course'
         });
         setEditingCourse(course);
         setShowCreateModal(true);
@@ -342,9 +345,16 @@ const CourseManager = () => {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="px-2.5 py-1 bg-white/10 text-white/70 rounded-full text-[10px] font-bold uppercase tracking-tight">
-                                            {course.category}
-                                        </span>
+                                        <div className="flex flex-col items-start gap-1">
+                                            <span className="px-2.5 py-1 bg-white/10 text-white/70 rounded-full text-[10px] font-bold uppercase tracking-tight">
+                                                {course.category}
+                                            </span>
+                                            {(course.programType || course.program_type) === 'degree_programme' && (
+                                                <span className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-[9px] font-bold uppercase tracking-tight">
+                                                    Degree Programme
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className="text-sm font-semibold text-white">₹{course.price}</span>
@@ -530,6 +540,22 @@ const CourseManager = () => {
                                             setFormData({ ...formData, price: isNaN(parsed) ? 0 : parsed });
                                         }}
                                     />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
+                                        Program Type
+                                    </label>
+                                    <select
+                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
+                                        value={formData.programType}
+                                        onChange={(e) => setFormData({ ...formData, programType: e.target.value })}
+                                    >
+                                        <option value="course" className="bg-[#0B071A]">Skill Course</option>
+                                        <option value="degree_programme" className="bg-[#0B071A]">Skill Integrated Degree Programme</option>
+                                    </select>
                                 </div>
                             </div>
 

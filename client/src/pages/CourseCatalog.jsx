@@ -26,6 +26,7 @@ const CourseCatalog = () => {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
     const [category, setCategory] = useState('All');
+    const [programType, setProgramType] = useState('course');
     const [selectedUniversity, setSelectedUniversity] = useState('All');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [universityName, setUniversityName] = useState('');
@@ -76,11 +77,17 @@ const CourseCatalog = () => {
             const courseUniversity = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad';
             const matchesUniversity = selectedUniversity === 'All' || courseUniversity === selectedUniversity;
 
-            return matchesSearch && matchesUniversity && (category === 'All' || course.category === category);
-        });
-    }, [courses, filter, category, selectedUniversity]);
+            const matchesProgramType = (course.programType || course.program_type || 'course') === programType;
 
-    const categories = useMemo(() => ['All', ...new Set(courses.map(c => c.category))], [courses]);
+            return matchesSearch && matchesUniversity && matchesProgramType && (category === 'All' || course.category === category);
+        });
+    }, [courses, filter, category, selectedUniversity, programType]);
+
+    const coursesForCategoryList = useMemo(
+        () => courses.filter(c => (c.programType || c.program_type || 'course') === programType),
+        [courses, programType]
+    );
+    const categories = useMemo(() => ['All', ...new Set(coursesForCategoryList.map(c => c.category))], [coursesForCategoryList]);
 
     // Check if the user is already filtering uniquely by backend so we hide the filter
     const isFixedUniversity = !!universityName;
@@ -125,6 +132,30 @@ const CourseCatalog = () => {
                             {universityName && (
                                 <p className="text-white/40 text-sm mt-2">Showing all courses provided by your university</p>
                             )}
+
+                            {/* Program Type Toggle */}
+                            <div className="flex justify-center pt-2">
+                                <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-2xl">
+                                    <button
+                                        onClick={() => { setProgramType('course'); setCategory('All'); }}
+                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'course'
+                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white'
+                                            }`}
+                                    >
+                                        Skill Courses
+                                    </button>
+                                    <button
+                                        onClick={() => { setProgramType('degree_programme'); setCategory('All'); }}
+                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'degree_programme'
+                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white'
+                                            }`}
+                                    >
+                                        Skill Integrated Degree Programmes
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

@@ -367,6 +367,14 @@ const startServer = async () => {
             await query("ALTER TABLE skill_dad_universities ADD COLUMN gallery JSONB DEFAULT '[]'::jsonb");
             console.log('[Migration] Added gallery to skill_dad_universities'.green);
         }
+
+        // Auto-migrate: ensure courses has program_type (Skill Courses vs Skill Integrated Degree Programmes)
+        const courseColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['courses']);
+        const courseCols = courseColRes.rows.map(r => r.column_name);
+        if (!courseCols.includes('program_type')) {
+            await query("ALTER TABLE courses ADD COLUMN program_type VARCHAR(30) NOT NULL DEFAULT 'course'");
+            console.log('[Migration] Added program_type to courses'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

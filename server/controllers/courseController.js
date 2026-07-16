@@ -56,6 +56,7 @@ const getCourses = asyncHandler(async (req, res) => {
             instructorId: course.instructor_id,
             instructorName: course.instructor_name,
             universityName: course.university_name,
+            programType: course.program_type,
             instructor: {
                 name: course.instructor_name,
                 profile: course.instructor_profile,
@@ -104,14 +105,15 @@ const getAdminCourses = asyncHandler(async (req, res) => {
             `, [userId]);
         }
 
-        res.status(200).json(coursesRes.rows.map(c => ({ 
-            ...c, 
+        res.status(200).json(coursesRes.rows.map(c => ({
+            ...c,
             _id: c.id,
             isPublished: c.is_published,
             isFeatured: c.is_featured,
             instructorId: c.instructor_id,
             instructorName: c.instructor_name,
-            universityName: c.university_name
+            universityName: c.university_name,
+            programType: c.program_type
         })));
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -154,6 +156,7 @@ const getCourse = asyncHandler(async (req, res) => {
         instructorId: course.instructor_id,
         instructorName: course.instructor_name,
         universityName: course.university_name,
+        programType: course.program_type,
         isEnrolled,
         instructor: {
             name: course.instructor_name,
@@ -165,8 +168,8 @@ const getCourse = asyncHandler(async (req, res) => {
 
 // @desc    Create new course
 const createCourse = asyncHandler(async (req, res) => {
-    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail } = req.body;
-    
+    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail, programType } = req.body;
+
     // For Admin, instructorId (University) is mandatory
     if (req.user.role === 'admin' && !instructorId) {
         res.status(400);
@@ -178,9 +181,9 @@ const createCourse = asyncHandler(async (req, res) => {
     const initialStatus = req.user.role === 'admin' ? 'approved' : 'pending';
 
     await query(`
-        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, status, submitted_by, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
-    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '', initialStatus, req.user.id]);
+        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, status, submitted_by, program_type, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), NOW())
+    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '', initialStatus, req.user.id, programType || 'course']);
 
     // Auto-sync with University profile.assigned_courses
     try {
@@ -199,21 +202,22 @@ const createCourse = asyncHandler(async (req, res) => {
     }
 
     const saved = await query('SELECT * FROM courses WHERE id = $1', [newId]);
-    res.status(201).json({ 
-        ...saved.rows[0], 
+    res.status(201).json({
+        ...saved.rows[0],
         _id: newId,
         isPublished: saved.rows[0].is_published,
         isFeatured: saved.rows[0].is_featured,
         instructorId: saved.rows[0].instructor_id,
         instructorName: saved.rows[0].instructor_name,
-        universityName: saved.rows[0].university_name
+        universityName: saved.rows[0].university_name,
+        programType: saved.rows[0].program_type
     });
 });
 
 // @desc    Update course
 const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail } = req.body;
+    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail, programType } = req.body;
 
     // Get old course to check for instructor changes
     const oldCourseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
@@ -225,7 +229,7 @@ const updateCourse = asyncHandler(async (req, res) => {
     }
 
     await query(`
-        UPDATE courses 
+        UPDATE courses
         SET title = COALESCE($1, title),
             description = COALESCE($2, description),
             category = COALESCE($3, category),
@@ -238,9 +242,10 @@ const updateCourse = asyncHandler(async (req, res) => {
             brochure_url = COALESCE($10, brochure_url),
             university_tools = COALESCE($11, university_tools),
             thumbnail = COALESCE($12, thumbnail),
+            program_type = COALESCE($13, program_type),
             updated_at = NOW()
-        WHERE id = $13
-    `, [title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, id]);
+        WHERE id = $14
+    `, [title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, programType, id]);
 
     // Handle instructor change in assigned_courses list
     if (instructorId && oldInstructorId && instructorId !== oldInstructorId) {
@@ -269,14 +274,15 @@ const updateCourse = asyncHandler(async (req, res) => {
     }
 
     const updated = await query('SELECT * FROM courses WHERE id = $1', [id]);
-    res.json({ 
-        ...updated.rows[0], 
+    res.json({
+        ...updated.rows[0],
         _id: id,
         isPublished: updated.rows[0].is_published,
         isFeatured: updated.rows[0].is_featured,
         instructorId: updated.rows[0].instructor_id,
         instructorName: updated.rows[0].instructor_name,
-        universityName: updated.rows[0].university_name
+        universityName: updated.rows[0].university_name,
+        programType: updated.rows[0].program_type
     });
 });
 
