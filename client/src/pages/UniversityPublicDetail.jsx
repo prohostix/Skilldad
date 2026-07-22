@@ -172,17 +172,19 @@ const UniversityPublicDetail = () => {
                     const { data: skillDadUnis } = await axios.get('/api/public/skilldad-universities');
                     const match = skillDadUnis.find(u => u.name === universityName);
                     if (match) {
-                        if (!university) {
-                            setUniversity({
-                                _id: `sd-${match.id}`,
-                                name: match.name,
-                                location: match.location || 'Global',
-                                description: match.description || '',
-                                image: match.cover_image ? getMediaUrl(match.cover_image) : (match.profile_image ? getMediaUrl(match.profile_image) : undefined),
-                                profileImage: match.profile_image ? getMediaUrl(match.profile_image) : undefined,
-                                profile: { website: match.website, phone: match.phone, coverImage: match.cover_image || undefined }
-                            });
-                        }
+                        // Always use the freshly-fetched record, even if location.state already had a
+                        // university object — that state is a snapshot from whenever the Platform/Landing
+                        // page last loaded its university list, and goes stale the moment someone edits
+                        // the logo/cover here (edits would otherwise appear to "revert" on next visit).
+                        setUniversity({
+                            _id: `sd-${match.id}`,
+                            name: match.name,
+                            location: match.location || 'Global',
+                            description: match.description || '',
+                            image: match.cover_image ? getMediaUrl(match.cover_image) : (match.profile_image ? getMediaUrl(match.profile_image) : undefined),
+                            profileImage: match.profile_image ? getMediaUrl(match.profile_image) : undefined,
+                            profile: { website: match.website, phone: match.phone, coverImage: match.cover_image || undefined }
+                        });
                         return;
                     }
                 } catch (skillDadError) {
