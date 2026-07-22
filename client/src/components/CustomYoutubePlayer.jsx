@@ -1,6 +1,28 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
 
+// Loads the YouTube IFrame Player API script once and shares readiness across
+// every player instance on the page (multiple lessons can mount this component).
+let apiLoadPromise = null;
+const loadYoutubeApi = () => {
+  if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+  if (apiLoadPromise) return apiLoadPromise;
+
+  apiLoadPromise = new Promise((resolve) => {
+    const previousCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      if (previousCallback) previousCallback();
+      resolve(window.YT);
+    };
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    }
+  });
+  return apiLoadPromise;
+};
+
 const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -9,67 +31,127 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   const [volume, setVolume] = useState(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
-  
-  const iframeRef = useRef(null);
+  const [isReady, setIsReady] = useState(false);
+
+  const mountRef = useRef(null);
+  const playerRef = useRef(null);
   const containerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
+  const pollIntervalRef = useRef(null);
+  const onEndedRef = useRef(onEnded);
+  onEndedRef.current = onEnded;
 
   // Extract YouTube ID
   const getYoutubeId = (urlStr) => {
     if (!urlStr) return '';
-    const match = urlStr.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube-nocookie\.com\/embed\/)([\w-]+)/);
+    const match = urlStr.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube-nocookie\.com\/embed\/|youtube\.com\/embed\/)([\w-]+)/);
     return match ? match[1] : '';
   };
 
   const videoId = getYoutubeId(url);
 
-  // Post messages to YouTube IFrame
-  const postCommand = (func, args = []) => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(
-        JSON.stringify({
-          event: 'command',
-          func: func,
-          args: args
-        }),
-        '*'
-      );
+  useEffect(() => {
+    if (!videoId || !mountRef.current) return;
+    let destroyed = false;
+
+    loadYoutubeApi().then((YT) => {
+      if (destroyed || !mountRef.current) return;
+      playerRef.current = new YT.Player(mountRef.current, {
+        videoId,
+        playerVars: {
+          controls: 0,
+          disablekb: 1,
+          modestbranding: 1,
+          rel: 0,
+          iv_load_policy: 3,
+          fs: 0,
+          playsinline: 1,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: () => {
+            if (destroyed) return;
+            setIsReady(true);
+            setDuration(playerRef.current.getDuration() || 0);
+          },
+          onStateChange: (event) => {
+            if (destroyed) return;
+            const YTState = window.YT.PlayerState;
+            if (event.data === YTState.PLAYING) {
+              setIsPlaying(true);
+              setDuration(playerRef.current.getDuration() || 0);
+            } else if (event.data === YTState.PAUSED) {
+              setIsPlaying(false);
+            } else if (event.data === YTState.ENDED) {
+              setIsPlaying(false);
+              if (onEndedRef.current) onEndedRef.current();
+            }
+          }
+        }
+      });
+    });
+
+    return () => {
+      destroyed = true;
+      if (playerRef.current && playerRef.current.destroy) {
+        playerRef.current.destroy();
+      }
+      playerRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId]);
+
+  // Poll current time while playing (YouTube's API has no continuous timeupdate event)
+  useEffect(() => {
+    if (isPlaying && isReady) {
+      pollIntervalRef.current = setInterval(() => {
+        if (playerRef.current && playerRef.current.getCurrentTime) {
+          setCurrentTime(playerRef.current.getCurrentTime());
+        }
+      }, 250);
     }
-  };
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, [isPlaying, isReady]);
 
   const handlePlayPause = () => {
+    if (!playerRef.current || !isReady) return;
     if (isPlaying) {
-      postCommand('pauseVideo');
-      setIsPlaying(false);
+      playerRef.current.pauseVideo();
     } else {
-      postCommand('playVideo');
-      setIsPlaying(true);
+      playerRef.current.playVideo();
     }
   };
 
   const handleSeek = (e) => {
     const newTime = parseFloat(e.target.value);
-    postCommand('seekTo', [newTime, true]);
     setCurrentTime(newTime);
+    if (playerRef.current && isReady) {
+      playerRef.current.seekTo(newTime, true);
+    }
   };
 
   const handleVolumeChange = (e) => {
     const newVolume = parseInt(e.target.value);
     setVolume(newVolume);
-    postCommand('setVolume', [newVolume]);
-    if (newVolume > 0 && isMuted) {
-      postCommand('unMute');
-      setIsMuted(false);
+    if (playerRef.current && isReady) {
+      playerRef.current.setVolume(newVolume);
+      if (newVolume > 0 && isMuted) {
+        playerRef.current.unMute();
+        setIsMuted(false);
+      }
     }
   };
 
   const handleMuteToggle = () => {
+    if (!playerRef.current || !isReady) return;
     if (isMuted) {
-      postCommand('unMute');
+      playerRef.current.unMute();
+      playerRef.current.setVolume(volume || 50);
       setIsMuted(false);
-      postCommand('setVolume', [volume || 50]);
     } else {
-      postCommand('mute');
+      playerRef.current.mute();
       setIsMuted(true);
     }
   };
@@ -119,50 +201,21 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
     };
   }, [isPlaying]);
 
-  // Listen to messages from YouTube player
-  useEffect(() => {
-    const handleMessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.event === 'infoDelivery' && data.info) {
-          const info = data.info;
-          if (info.currentTime !== undefined) {
-            setCurrentTime(info.currentTime);
-          }
-          if (info.duration !== undefined) {
-            setDuration(info.duration);
-          }
-          if (info.playerState !== undefined) {
-            setIsPlaying(info.playerState === 1);
-            if (info.playerState === 0 && onEnded) {
-              onEnded();
-            }
-          }
-        }
-      } catch (err) {
-        // Ignore parsing errors of other messages
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [onEnded]);
-
   if (!videoId) return null;
 
   return (
-    <div 
+    <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
       className="relative w-full aspect-video bg-black overflow-hidden group rounded-2xl border border-white/10 shadow-2xl"
     >
-      {/* Cropped YouTube Player with Pointer Events Disabled */}
+      {/* Cropped YouTube Player — hides the corner watermark/logo so no YouTube
+          branding is visible. Pointer events disabled so only our custom
+          overlay/controls below are clickable. */}
       <div className="absolute inset-0 overflow-hidden w-full h-full pointer-events-none select-none">
-        <iframe
-          ref={iframeRef}
-          src={`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&showinfo=0&fs=0`}
-          title={title}
-          className="absolute border-0 w-full"
+        <div
+          ref={mountRef}
+          className="absolute w-full"
           style={{
             top: '-9%',
             left: 0,
@@ -172,13 +225,13 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
       </div>
 
       {/* Intercept Overlay */}
-      <div 
+      <div
         onClick={handlePlayPause}
         className="absolute inset-0 cursor-pointer z-10"
       />
 
       {/* Control Skin Layer */}
-      <div 
+      <div
         className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-4 flex flex-col gap-3 transition-all duration-300 z-20 ${
           showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
         }`}
@@ -206,7 +259,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         <div className="flex items-center justify-between text-white">
           <div className="flex items-center gap-4">
             {/* Play/Pause Button */}
-            <button 
+            <button
               onClick={handlePlayPause}
               className="p-1.5 rounded-lg bg-white/10 hover:bg-primary text-white hover:scale-105 transition-all shadow-md"
             >
@@ -222,7 +275,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
           <div className="flex items-center gap-4">
             {/* Mute/Volume controls */}
             <div className="flex items-center gap-2 group/volume">
-              <button 
+              <button
                 onClick={handleMuteToggle}
                 className="p-1 text-slate-300 hover:text-white transition-colors"
               >
@@ -239,7 +292,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
             </div>
 
             {/* Fullscreen Button */}
-            <button 
+            <button
               onClick={toggleFullscreen}
               className="p-1 text-slate-300 hover:text-white transition-colors hover:scale-105"
             >
