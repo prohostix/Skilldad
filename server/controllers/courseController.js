@@ -609,9 +609,9 @@ module.exports = {
             const dependentTables = [
                 'progress', 'submissions', 'projects', 'interactive_contents',
                 'enrollments', 'live_sessions', 'payments', 'transactions', 'reviews',
-                'documents', 'certificates', 'batches'
+                'certificates', 'batches'
             ];
-            
+
             for (const table of dependentTables) {
                 try {
                     await client.query(`SAVEPOINT before_${table}`);
@@ -635,6 +635,18 @@ module.exports = {
                 await client.query('RELEASE SAVEPOINT before_exams');
             } catch (e) {
                 await client.query('ROLLBACK TO SAVEPOINT before_exams');
+            }
+
+            // Documents must be deleted after exams — exam question papers/answer keys are
+            // referenced by exams.linked_paper_id/answer_key_id, so deleting documents first
+            // would violate that foreign key and silently roll back, leaving orphaned documents
+            // that then block the course delete itself.
+            try {
+                await client.query('SAVEPOINT before_documents');
+                await client.query('DELETE FROM documents WHERE course_id = $1', [id]);
+                await client.query('RELEASE SAVEPOINT before_documents');
+            } catch (e) {
+                await client.query('ROLLBACK TO SAVEPOINT before_documents');
             }
 
             // Finally, delete the course
