@@ -6,124 +6,125 @@ import { UserProvider } from './context/UserContext';
 import { SocketProvider } from './context/SocketContext';
 import { Toaster } from 'react-hot-toast';
 import ErrorBoundary from './components/ErrorBoundary';
+import lazyRetry from './utils/lazyRetry';
 import './utils/axiosConfig'; // Setup axios interceptors for 401 handling
 
 // Layouts
-const DashboardLayout = lazy(() => import('./components/layout/DashboardLayout'));
-const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
+const DashboardLayout = lazy(() => lazyRetry(() => import('./components/layout/DashboardLayout')));
+const ProtectedRoute = lazy(() => lazyRetry(() => import('./components/ProtectedRoute')));
 import ScrollToTop from './components/ScrollToTop';
 
 // Public Pages
-const LandingPage = lazy(() => import('./pages/LandingPage'));
-const CourseCatalog = lazy(() => import('./pages/CourseCatalog'));
-const Platform = lazy(() => import('./pages/Platform'));
-const TestCourses = lazy(() => import('./pages/TestCourses'));
-const Services = lazy(() => import('./pages/Services'));
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
-const ResetPassword = lazy(() => import('./pages/ResetPassword'));
-const Support = lazy(() => import('./pages/Support'));
-const AboutUs = lazy(() => import('./pages/AboutUs'));
-const Partners = lazy(() => import('./pages/Partners'));
-const StudyAbroad = lazy(() => import('./pages/StudyAbroad'));
-const Settings = lazy(() => import('./pages/Settings'));
-const CourseDetail = lazy(() => import('./pages/CourseDetail'));
-const HostRoom = lazy(() => import('./pages/HostRoom'));
-const StudentRoom = lazy(() => import('./pages/StudentRoom'));
-const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
-const LinkRecording = lazy(() => import('./pages/university/LinkRecording'));
-const MockPaymentGateway = lazy(() => import('./pages/MockPaymentGateway'));
+const LandingPage = lazy(() => lazyRetry(() => import('./pages/LandingPage')));
+const CourseCatalog = lazy(() => lazyRetry(() => import('./pages/CourseCatalog')));
+const Platform = lazy(() => lazyRetry(() => import('./pages/Platform')));
+const TestCourses = lazy(() => lazyRetry(() => import('./pages/TestCourses')));
+const Services = lazy(() => lazyRetry(() => import('./pages/Services')));
+const Login = lazy(() => lazyRetry(() => import('./pages/Login')));
+const Register = lazy(() => lazyRetry(() => import('./pages/Register')));
+const ForgotPassword = lazy(() => lazyRetry(() => import('./pages/ForgotPassword')));
+const ResetPassword = lazy(() => lazyRetry(() => import('./pages/ResetPassword')));
+const Support = lazy(() => lazyRetry(() => import('./pages/Support')));
+const AboutUs = lazy(() => lazyRetry(() => import('./pages/AboutUs')));
+const Partners = lazy(() => lazyRetry(() => import('./pages/Partners')));
+const StudyAbroad = lazy(() => lazyRetry(() => import('./pages/StudyAbroad')));
+const Settings = lazy(() => lazyRetry(() => import('./pages/Settings')));
+const CourseDetail = lazy(() => lazyRetry(() => import('./pages/CourseDetail')));
+const HostRoom = lazy(() => lazyRetry(() => import('./pages/HostRoom')));
+const StudentRoom = lazy(() => lazyRetry(() => import('./pages/StudentRoom')));
+const NotificationDemo = lazy(() => lazyRetry(() => import('./pages/NotificationDemo')));
+const LinkRecording = lazy(() => lazyRetry(() => import('./pages/university/LinkRecording')));
+const MockPaymentGateway = lazy(() => lazyRetry(() => import('./pages/MockPaymentGateway')));
 import { PrivacyPolicy, TermsOfService, CookiePolicy, RefundPolicy } from './pages/LegalPages';
-const UniversityPublicDetail = lazy(() => import('./pages/UniversityPublicDetail'));
+const UniversityPublicDetail = lazy(() => lazyRetry(() => import('./pages/UniversityPublicDetail')));
 
 
 
 // Student Pages
-const MyCourses = lazy(() => import('./pages/student/MyCourses'));
-const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard'));
-const CoursePlayer = lazy(() => import('./pages/student/CoursePlayer'));
-const LiveClasses = lazy(() => import('./pages/student/LiveClasses'));
-const ProjectView = lazy(() => import('./pages/student/ProjectView'));
-const Documents = lazy(() => import('./pages/student/Documents'));
-const Exams = lazy(() => import('./pages/student/Exams'));
-const ExamTaker = lazy(() => import('./components/ExamTaker'));
-const ExamSubmitted = lazy(() => import('./pages/student/ExamSubmitted'));
-const ExamResult = lazy(() => import('./pages/student/ExamResult'));
-const CourseEnrollment = lazy(() => import('./pages/student/CourseEnrollment'));
-const WatchStream = lazy(() => import('./pages/student/WatchStream'));
-const PaymentInitiation = lazy(() => import('./pages/student/PaymentInitiation'));
-const PaymentCallback = lazy(() => import('./pages/student/PaymentCallback'));
-const PaymentHistory = lazy(() => import('./pages/student/PaymentHistory'));
-const PaymentStatus = lazy(() => import('./pages/student/PaymentStatus'));
-const InteractiveContentPage = lazy(() => import('./pages/student/InteractiveContentPage'));
-const PlacementsPortal = lazy(() => import('./pages/student/PlacementsPortal'));
-const VacancyDetails = lazy(() => import('./pages/student/VacancyDetails'));
-const RewardWallet = lazy(() => import('./pages/student/RewardWallet'));
+const MyCourses = lazy(() => lazyRetry(() => import('./pages/student/MyCourses')));
+const StudentDashboard = lazy(() => lazyRetry(() => import('./pages/student/StudentDashboard')));
+const CoursePlayer = lazy(() => lazyRetry(() => import('./pages/student/CoursePlayer')));
+const LiveClasses = lazy(() => lazyRetry(() => import('./pages/student/LiveClasses')));
+const ProjectView = lazy(() => lazyRetry(() => import('./pages/student/ProjectView')));
+const Documents = lazy(() => lazyRetry(() => import('./pages/student/Documents')));
+const Exams = lazy(() => lazyRetry(() => import('./pages/student/Exams')));
+const ExamTaker = lazy(() => lazyRetry(() => import('./components/ExamTaker')));
+const ExamSubmitted = lazy(() => lazyRetry(() => import('./pages/student/ExamSubmitted')));
+const ExamResult = lazy(() => lazyRetry(() => import('./pages/student/ExamResult')));
+const CourseEnrollment = lazy(() => lazyRetry(() => import('./pages/student/CourseEnrollment')));
+const WatchStream = lazy(() => lazyRetry(() => import('./pages/student/WatchStream')));
+const PaymentInitiation = lazy(() => lazyRetry(() => import('./pages/student/PaymentInitiation')));
+const PaymentCallback = lazy(() => lazyRetry(() => import('./pages/student/PaymentCallback')));
+const PaymentHistory = lazy(() => lazyRetry(() => import('./pages/student/PaymentHistory')));
+const PaymentStatus = lazy(() => lazyRetry(() => import('./pages/student/PaymentStatus')));
+const InteractiveContentPage = lazy(() => lazyRetry(() => import('./pages/student/InteractiveContentPage')));
+const PlacementsPortal = lazy(() => lazyRetry(() => import('./pages/student/PlacementsPortal')));
+const VacancyDetails = lazy(() => lazyRetry(() => import('./pages/student/VacancyDetails')));
+const RewardWallet = lazy(() => lazyRetry(() => import('./pages/student/RewardWallet')));
 
 // University Pages
-const UniversityDashboard = lazy(() => import('./pages/university/UniversityDashboard'));
-const GroupManagement = lazy(() => import('./pages/university/GroupManagement'));
-const LiveSessionsHub = lazy(() => import('./pages/university/LiveSessionsHub'));
-const SessionDetail = lazy(() => import('./pages/university/SessionDetail'));
-const ScheduleClass = lazy(() => import('./pages/university/ScheduleClass'));
-const ExamManagement = lazy(() => import('./pages/university/ExamManagement'));
-const ExamQuestionManager = lazy(() => import('./pages/university/ExamQuestionManager'));
-const CourseContentManagement = lazy(() => import('./pages/university/CourseContentManagement'));
-const GradingQueue = lazy(() => import('./pages/university/GradingQueue'));
-const CreateInteractiveContent = lazy(() => import('./pages/university/CreateInteractiveContent'));
-const ManageInteractiveContent = lazy(() => import('./pages/university/ManageInteractiveContent'));
-const EditInteractiveContent = lazy(() => import('./pages/university/EditInteractiveContent'));
+const UniversityDashboard = lazy(() => lazyRetry(() => import('./pages/university/UniversityDashboard')));
+const GroupManagement = lazy(() => lazyRetry(() => import('./pages/university/GroupManagement')));
+const LiveSessionsHub = lazy(() => lazyRetry(() => import('./pages/university/LiveSessionsHub')));
+const SessionDetail = lazy(() => lazyRetry(() => import('./pages/university/SessionDetail')));
+const ScheduleClass = lazy(() => lazyRetry(() => import('./pages/university/ScheduleClass')));
+const ExamManagement = lazy(() => lazyRetry(() => import('./pages/university/ExamManagement')));
+const ExamQuestionManager = lazy(() => lazyRetry(() => import('./pages/university/ExamQuestionManager')));
+const CourseContentManagement = lazy(() => lazyRetry(() => import('./pages/university/CourseContentManagement')));
+const GradingQueue = lazy(() => lazyRetry(() => import('./pages/university/GradingQueue')));
+const CreateInteractiveContent = lazy(() => lazyRetry(() => import('./pages/university/CreateInteractiveContent')));
+const ManageInteractiveContent = lazy(() => lazyRetry(() => import('./pages/university/ManageInteractiveContent')));
+const EditInteractiveContent = lazy(() => lazyRetry(() => import('./pages/university/EditInteractiveContent')));
 
 // Partner Pages
-const PartnerDashboard = lazy(() => import('./pages/partner/PartnerDashboard'));
-const CommissionWallet = lazy(() => import('./pages/partner/CommissionWallet'));
-const PartnerStudentManagement = lazy(() => import('./pages/partner/PartnerStudentManagement'));
-const PartnerCourseManager = lazy(() => import('./pages/partner/PartnerCourseManager'));
-const PartnerCourseEditor = lazy(() => import('./pages/partner/PartnerCourseEditor'));
-const PartnerExamManagement = lazy(() => import('./pages/partner/PartnerExamManagement'));
-const PartnerExamQuestionManager = lazy(() => import('./pages/partner/PartnerExamQuestionManager'));
+const PartnerDashboard = lazy(() => lazyRetry(() => import('./pages/partner/PartnerDashboard')));
+const CommissionWallet = lazy(() => lazyRetry(() => import('./pages/partner/CommissionWallet')));
+const PartnerStudentManagement = lazy(() => lazyRetry(() => import('./pages/partner/PartnerStudentManagement')));
+const PartnerCourseManager = lazy(() => lazyRetry(() => import('./pages/partner/PartnerCourseManager')));
+const PartnerCourseEditor = lazy(() => lazyRetry(() => import('./pages/partner/PartnerCourseEditor')));
+const PartnerExamManagement = lazy(() => lazyRetry(() => import('./pages/partner/PartnerExamManagement')));
+const PartnerExamQuestionManager = lazy(() => lazyRetry(() => import('./pages/partner/PartnerExamQuestionManager')));
 
 // Admin Pages
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const CourseManager = lazy(() => import('./pages/admin/CourseManager'));
-const CourseEnquiries = lazy(() => import('./pages/admin/CourseEnquiries'));
-const CourseEditor = lazy(() => import('./pages/admin/CourseEditor'));
-const UserList = lazy(() => import('./pages/admin/UserList'));
-const StudentManagement = lazy(() => import('./pages/admin/StudentManagement'));
-const UniversityManagement = lazy(() => import('./pages/admin/UniversityManagement'));
-const SkillDadUniversities = lazy(() => import('./pages/admin/SkillDadUniversities'));
-const SkillDadUniversityDetail = lazy(() => import('./pages/admin/SkillDadUniversityDetail'));
-const B2BManagement = lazy(() => import('./pages/admin/B2BManagement'));
-const PartnerDetail = lazy(() => import('./pages/admin/PartnerDetail'));
-const PlatformAnalytics = lazy(() => import('./pages/admin/PlatformAnalytics'));
-const ProjectManager = lazy(() => import('./pages/admin/ProjectManager'));
-const ExamScheduler = lazy(() => import('./pages/admin/ExamScheduler'));
-const PayoutManager = lazy(() => import('./pages/admin/PayoutManager'));
-const SupportManagement = lazy(() => import('./pages/admin/SupportManagement'));
-const FAQManagement = lazy(() => import('./pages/admin/FAQManagement'));
-const SiteContentManager = lazy(() => import('./pages/admin/SiteContentManager'));
-const AdminRefundPanel = lazy(() => import('./pages/admin/AdminRefundPanel'));
-const GatewayConfigPanel = lazy(() => import('./pages/admin/GatewayConfigPanel'));
-const ReconciliationDashboard = lazy(() => import('./pages/admin/ReconciliationDashboard'));
-const PaymentMonitoringDashboard = lazy(() => import('./pages/admin/PaymentMonitoringDashboard'));
-const CommunicationHub = lazy(() => import('./pages/admin/CommunicationHub'));
-const CouponManager = lazy(() => import('./pages/admin/CouponManager'));
-const UniversityDetail = lazy(() => import('./pages/admin/UniversityDetail'));
-const ServicesManagement = lazy(() => import('./pages/admin/ServicesManagement'));
-const StudyAbroadManagement = lazy(() => import('./pages/admin/StudyAbroadManagement'));
-const CareerManager = lazy(() => import('./pages/admin/CareerManager'));
-const CertificateManagement = lazy(() => import('./pages/admin/CertificateManagement'));
-const DocumentReview = lazy(() => import('./pages/admin/DocumentReview'));
-const UniversityDocumentReview = lazy(() => import('./pages/university/UniversityDocumentReview'));
+const AdminDashboard = lazy(() => lazyRetry(() => import('./pages/admin/AdminDashboard')));
+const CourseManager = lazy(() => lazyRetry(() => import('./pages/admin/CourseManager')));
+const CourseEnquiries = lazy(() => lazyRetry(() => import('./pages/admin/CourseEnquiries')));
+const CourseEditor = lazy(() => lazyRetry(() => import('./pages/admin/CourseEditor')));
+const UserList = lazy(() => lazyRetry(() => import('./pages/admin/UserList')));
+const StudentManagement = lazy(() => lazyRetry(() => import('./pages/admin/StudentManagement')));
+const UniversityManagement = lazy(() => lazyRetry(() => import('./pages/admin/UniversityManagement')));
+const SkillDadUniversities = lazy(() => lazyRetry(() => import('./pages/admin/SkillDadUniversities')));
+const SkillDadUniversityDetail = lazy(() => lazyRetry(() => import('./pages/admin/SkillDadUniversityDetail')));
+const B2BManagement = lazy(() => lazyRetry(() => import('./pages/admin/B2BManagement')));
+const PartnerDetail = lazy(() => lazyRetry(() => import('./pages/admin/PartnerDetail')));
+const PlatformAnalytics = lazy(() => lazyRetry(() => import('./pages/admin/PlatformAnalytics')));
+const ProjectManager = lazy(() => lazyRetry(() => import('./pages/admin/ProjectManager')));
+const ExamScheduler = lazy(() => lazyRetry(() => import('./pages/admin/ExamScheduler')));
+const PayoutManager = lazy(() => lazyRetry(() => import('./pages/admin/PayoutManager')));
+const SupportManagement = lazy(() => lazyRetry(() => import('./pages/admin/SupportManagement')));
+const FAQManagement = lazy(() => lazyRetry(() => import('./pages/admin/FAQManagement')));
+const SiteContentManager = lazy(() => lazyRetry(() => import('./pages/admin/SiteContentManager')));
+const AdminRefundPanel = lazy(() => lazyRetry(() => import('./pages/admin/AdminRefundPanel')));
+const GatewayConfigPanel = lazy(() => lazyRetry(() => import('./pages/admin/GatewayConfigPanel')));
+const ReconciliationDashboard = lazy(() => lazyRetry(() => import('./pages/admin/ReconciliationDashboard')));
+const PaymentMonitoringDashboard = lazy(() => lazyRetry(() => import('./pages/admin/PaymentMonitoringDashboard')));
+const CommunicationHub = lazy(() => lazyRetry(() => import('./pages/admin/CommunicationHub')));
+const CouponManager = lazy(() => lazyRetry(() => import('./pages/admin/CouponManager')));
+const UniversityDetail = lazy(() => lazyRetry(() => import('./pages/admin/UniversityDetail')));
+const ServicesManagement = lazy(() => lazyRetry(() => import('./pages/admin/ServicesManagement')));
+const StudyAbroadManagement = lazy(() => lazyRetry(() => import('./pages/admin/StudyAbroadManagement')));
+const CareerManager = lazy(() => lazyRetry(() => import('./pages/admin/CareerManager')));
+const CertificateManagement = lazy(() => lazyRetry(() => import('./pages/admin/CertificateManagement')));
+const DocumentReview = lazy(() => lazyRetry(() => import('./pages/admin/DocumentReview')));
+const UniversityDocumentReview = lazy(() => lazyRetry(() => import('./pages/university/UniversityDocumentReview')));
 
 
 // Finance Pages
-const FinanceDashboard = lazy(() => import('./pages/finance/FinanceDashboard'));
+const FinanceDashboard = lazy(() => lazyRetry(() => import('./pages/finance/FinanceDashboard')));
 
 // Sales Pages
-const SalesDashboard = lazy(() => import('./pages/sales/SalesDashboard'));
-const StudentApply = lazy(() => import('./pages/sales/StudentApply'));
+const SalesDashboard = lazy(() => lazyRetry(() => import('./pages/sales/SalesDashboard')));
+const StudentApply = lazy(() => lazyRetry(() => import('./pages/sales/StudentApply')));
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center min-h-screen bg-slate-900">
