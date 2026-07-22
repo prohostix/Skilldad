@@ -1676,9 +1676,9 @@ const adminEnrollStudent = async (req, res) => {
         console.log(`[AdminEnroll] Inserting transaction... partnerId: ${partnerId}`);
         try {
             await query(`
-                INSERT INTO transactions (id, transaction_id, student_id, course_id, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, created_at, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW(), NOW())
-            `, [`txn_${Date.now()}`, txnId, studentId, courseId, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id]);
+                INSERT INTO transactions (id, transaction_id, student_id, course_id, original_amount, final_amount, payment_method, gateway_transaction_id, status, partner_id, notes, reviewed_by, reviewed_at, session_id, session_expires_at, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), $13, $14, NOW(), NOW())
+            `, [`txn_${Date.now()}`, txnId, studentId, courseId, 0, 0, 'admin_enrolled', txnId, 'completed', partnerId || null, note || `Admin free enrollment by ${req.user?.name || 'Admin'}`, req.user?.id, txnId, new Date()]);
         } catch (dbErr) {
             console.error('[AdminEnroll] Transaction INSERT failed:', dbErr);
             throw new Error(`Database transaction log failed: ${dbErr.message}`);
