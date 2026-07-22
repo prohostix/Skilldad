@@ -698,15 +698,6 @@ const LandingPage = () => {
                                 <GlassCard
                                     className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"
                                     onClick={() => {
-                                        // SkillDad Universities have no login account — admins manage
-                                        // their logo/cover/gallery from the admin edit page instead.
-                                        if (String(uni._id).startsWith('sd-')) {
-                                            const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-                                            if (userInfo?.role === 'admin') {
-                                                navigate(`/admin/skilldad-universities/${String(uni._id).replace('sd-', '')}`);
-                                                return;
-                                            }
-                                        }
                                         navigate(`/university-profile/${encodeURIComponent(uni.name)}`, { state: { university: uni } });
                                     }}
                                 >

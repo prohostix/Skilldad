@@ -132,7 +132,10 @@ const UniversityPublicDetail = () => {
     // Check if current user owns this profile
     // university._id may be undefined on first render when data comes from location.state (which uses `id`)
     const universityOwnerId = university?._id || university?.id;
-    const isOwner = currentUser && (currentUser._id === universityOwnerId || currentUser.role === 'admin');
+    // SkillDad Universities have no login account (id is always prefixed "sd-") — they're managed
+    // from the dedicated admin edit page, not via self-upload on this public page.
+    const isSkillDadUni = String(universityOwnerId).startsWith('sd-');
+    const isOwner = !isSkillDadUni && currentUser && (currentUser._id === universityOwnerId || currentUser.role === 'admin');
 
     useEffect(() => {
         if (university) {
@@ -166,11 +169,6 @@ const UniversityPublicDetail = () => {
                     const { data: skillDadUnis } = await axios.get('/api/public/skilldad-universities');
                     const match = skillDadUnis.find(u => u.name === universityName);
                     if (match) {
-                        const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-                        if (userInfo?.role === 'admin') {
-                            navigate(`/admin/skilldad-universities/${match.id}`, { replace: true });
-                            return;
-                        }
                         if (!university) {
                             setUniversity({
                                 _id: `sd-${match.id}`,
@@ -382,6 +380,20 @@ const UniversityPublicDetail = () => {
                     <div className="absolute inset-0 bg-gradient-to-b from-[#05030B]/40 via-[#05030B]/80 to-[#05030B]"></div>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#05030B] via-transparent to-[#05030B]/20"></div>
                 </div>
+
+                {/* Admin edit shortcut for SkillDad Universities (no login account, so no self-upload UI) */}
+                {isSkillDadUni && currentUser?.role === 'admin' && (
+                    <div className="absolute top-24 right-6 z-30">
+                        <ModernButton
+                            variant="secondary"
+                            className="!px-6 !py-2.5 bg-[#05030B]/60 backdrop-blur-md border-white/10 hover:border-primary/50 text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
+                            onClick={() => navigate(`/admin/skilldad-universities/${String(universityOwnerId).replace('sd-', '')}`)}
+                        >
+                            <ImageIcon size={14} />
+                            Edit in Admin Panel
+                        </ModernButton>
+                    </div>
+                )}
 
                 {/* Change Cover Button (Owner only) */}
                 {isOwner && (

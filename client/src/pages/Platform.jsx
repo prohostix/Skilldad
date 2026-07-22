@@ -116,15 +116,6 @@ const Platform = () => {
                                 whileHover={{ y: -10 }}
                                 className="group cursor-pointer"
                                 onClick={() => {
-                                    // SkillDad Universities have no login account — admins manage
-                                    // their logo/cover/gallery from the admin edit page instead.
-                                    if (String(university.id).startsWith('sd-')) {
-                                        const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-                                        if (userInfo?.role === 'admin') {
-                                            navigate(`/admin/skilldad-universities/${String(university.id).replace('sd-', '')}`);
-                                            return;
-                                        }
-                                    }
                                     navigate(`/university-profile/${encodeURIComponent(university.name)}`, { state: { university } });
                                 }}
                             >
