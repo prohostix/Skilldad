@@ -180,7 +180,7 @@ const UniversityPublicDetail = () => {
                                 description: match.description || '',
                                 image: match.cover_image ? getMediaUrl(match.cover_image) : (match.profile_image ? getMediaUrl(match.profile_image) : undefined),
                                 profileImage: match.profile_image ? getMediaUrl(match.profile_image) : undefined,
-                                profile: { website: match.website, phone: match.phone }
+                                profile: { website: match.website, phone: match.phone, coverImage: match.cover_image || undefined }
                             });
                         }
                         return;
