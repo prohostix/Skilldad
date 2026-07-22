@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Mail, Phone, BookOpen, Calendar, Search } from 'lucide-react';
+import { Mail, Phone, BookOpen, Building2, Calendar, Search } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
@@ -55,7 +55,8 @@ const CourseEnquiries = () => {
             e.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             e.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             e.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            e.course_name?.toLowerCase().includes(searchQuery.toLowerCase());
+            e.course_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            e.university_name?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === 'all' || e.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -74,7 +75,7 @@ const CourseEnquiries = () => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
                     <input
                         type="text"
-                        placeholder="Search by name, email, phone, or course..."
+                        placeholder="Search by name, email, phone, course, or university..."
                         className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -113,6 +114,12 @@ const CourseEnquiries = () => {
                                         <div className="flex items-center gap-1.5 text-primary text-xs font-bold mt-1">
                                             <BookOpen size={12} />
                                             <span>{enquiry.course_name}</span>
+                                        </div>
+                                    )}
+                                    {enquiry.university_name && (
+                                        <div className="flex items-center gap-1.5 text-white/50 text-[11px] font-bold uppercase tracking-wider mt-1">
+                                            <Building2 size={12} />
+                                            <span>{enquiry.university_name}</span>
                                         </div>
                                     )}
                                 </div>

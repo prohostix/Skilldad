@@ -7,6 +7,7 @@ import ModernButton from './ModernButton';
 
 const EnrollEnquiryModal = ({ course, onClose }) => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+    const universityName = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '';
 
     const [formData, setFormData] = useState({
         name: userInfo?.name || '',
@@ -30,7 +31,8 @@ const EnrollEnquiryModal = ({ course, onClose }) => {
             await axios.post('/api/enquiries', {
                 ...formData,
                 courseId: course._id,
-                courseName: course.title
+                courseName: course.title,
+                universityName
             });
             setSubmitted(true);
         } catch (err) {
@@ -70,7 +72,8 @@ const EnrollEnquiryModal = ({ course, onClose }) => {
                             </div>
                             <h3 className="text-lg font-bold text-white font-inter mb-2">Thank you, {formData.name.split(' ')[0]}!</h3>
                             <p className="text-sm text-white/60 font-inter leading-relaxed mb-6">
-                                Our counsellor will contact you soon to help you get enrolled in <span className="text-primary font-semibold">{course.title}</span>.
+                                Our counsellor will contact you soon to help you get enrolled in <span className="text-primary font-semibold">{course.title}</span>
+                                {universityName && <> at <span className="text-primary font-semibold">{universityName}</span></>}.
                             </p>
                             <ModernButton onClick={onClose} className="w-full">
                                 Close
@@ -79,7 +82,10 @@ const EnrollEnquiryModal = ({ course, onClose }) => {
                     ) : (
                         <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                             <h3 className="text-base font-semibold text-white font-inter mb-1">Enroll in this course</h3>
-                            <p className="text-xs text-white/50 font-inter mb-6">{course.title}</p>
+                            <p className="text-xs text-white/50 font-inter mb-6">
+                                {course.title}
+                                {universityName && <span className="text-primary"> · {universityName}</span>}
+                            </p>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="relative">

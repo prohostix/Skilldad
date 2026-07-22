@@ -4,7 +4,7 @@ const { query } = require('../config/postgres');
 // @route   POST /api/enquiries
 // @access  Public
 const createEnquiry = async (req, res) => {
-    const { name, email, phone, message, courseId, courseName } = req.body;
+    const { name, email, phone, message, courseId, courseName, universityName } = req.body;
 
     if (!name || !email || !phone) {
         res.status(400);
@@ -12,8 +12,8 @@ const createEnquiry = async (req, res) => {
     }
 
     const result = await query(
-        'INSERT INTO enquiries (name, email, phone, message, course_id, course_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-        [name, email, phone, message || null, courseId || null, courseName || null]
+        'INSERT INTO enquiries (name, email, phone, message, course_id, course_name, university_name) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+        [name, email, phone, message || null, courseId || null, courseName || null, universityName || null]
     );
 
     if (result.rows.length > 0) {

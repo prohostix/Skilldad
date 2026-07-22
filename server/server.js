@@ -395,6 +395,10 @@ const startServer = async () => {
             await query("ALTER TABLE enquiries ADD COLUMN status VARCHAR(30) NOT NULL DEFAULT 'new'");
             console.log('[Migration] Added status to enquiries'.green);
         }
+        if (!enquiryCols.includes('university_name')) {
+            await query('ALTER TABLE enquiries ADD COLUMN university_name VARCHAR(255)');
+            console.log('[Migration] Added university_name to enquiries'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

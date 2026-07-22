@@ -64,7 +64,8 @@ const CourseDetail = () => {
             await axios.post('/api/enquiries', {
                 ...formData,
                 courseId: course._id,
-                courseName: course.title
+                courseName: course.title,
+                universityName: course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || ''
             });
             setEnquiryStatus({ loading: false, success: true, error: null });
             setFormData({ name: '', email: '', phone: '', message: '' });
