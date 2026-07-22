@@ -158,6 +158,36 @@ const UniversityPublicDetail = () => {
                 const { data } = await axios.get(`/api/public/universities/profile/${encodeURIComponent(universityName)}`);
                 setUniversity(data);
             } catch (error) {
+                // Not a real university account — check if this is a SkillDad University instead
+                // (no login account, so it isn't in /api/public/universities/profile). Covers being
+                // reached directly (bookmark/typed URL) rather than via a card click that already
+                // passed state, since those don't hit this fallback at all.
+                try {
+                    const { data: skillDadUnis } = await axios.get('/api/public/skilldad-universities');
+                    const match = skillDadUnis.find(u => u.name === universityName);
+                    if (match) {
+                        const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+                        if (userInfo?.role === 'admin') {
+                            navigate(`/admin/skilldad-universities/${match.id}`, { replace: true });
+                            return;
+                        }
+                        if (!university) {
+                            setUniversity({
+                                _id: `sd-${match.id}`,
+                                name: match.name,
+                                location: match.location || 'Global',
+                                description: match.description || '',
+                                image: match.cover_image ? getMediaUrl(match.cover_image) : (match.profile_image ? getMediaUrl(match.profile_image) : undefined),
+                                profileImage: match.profile_image ? getMediaUrl(match.profile_image) : undefined,
+                                profile: { website: match.website, phone: match.phone }
+                            });
+                        }
+                        return;
+                    }
+                } catch (skillDadError) {
+                    console.error('Error checking SkillDad universities:', skillDadError);
+                }
+
                 console.error("Error fetching university profile:", error);
                 if (!university) {
                     const fallback = fallbackUniversities.find(u => u.name === universityName);
