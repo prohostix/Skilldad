@@ -303,6 +303,68 @@ const CoursePlayer = () => {
     const completedCount = userProgress.completedVideos?.length || 0;
     const progressPercent = Math.round((completedCount / totalVideos) * 100) || 0;
 
+    // Discussion Hub is extracted so it can render full-width below the exercise/sidebar
+    // row when the curriculum index is open (that row is too narrow otherwise), while
+    // staying in its original spot alongside the sidebar when the index is hidden.
+    const discussionHubBlock = (
+        <div className="space-y-4">
+            <h4 className="text-lg font-bold text-white font-poppins flex items-center">
+                <MessageSquare size={18} className="mr-2 text-primary" /> Discussion Hub
+            </h4>
+
+            <GlassCard className="!p-4 bg-white/5 border-white/10">
+                <form onSubmit={handleCommentSubmit} className="relative">
+                    <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Write your thought or question here..."
+                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 text-sm focus:outline-none focus:border-primary/50 transition-all resize-none h-24"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleCommentSubmit(e);
+                            }
+                        }}
+                    />
+                    <button
+                        type="submit"
+                        disabled={!newComment.trim() || isSubmittingComment}
+                        className="absolute bottom-3 right-3 p-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Send size={16} />
+                    </button>
+                </form>
+            </GlassCard>
+
+            <div className="space-y-4 pt-2">
+                {discussions.length === 0 ? (
+                    <p className="text-center text-white/30 text-sm py-4 italic">No discussions yet. Be the first to ask a question!</p>
+                ) : (
+                    discussions.map((msg) => (
+                        <div key={msg._id} className="flex space-x-3 group">
+                            <div className="w-10 h-10 rounded-xl bg-white/10 flex-shrink-0 flex items-center justify-center text-white font-bold">
+                                {msg.user_profile_image ? (
+                                    <img src={msg.user_profile_image} alt="" className="w-full h-full object-cover rounded-xl" />
+                                ) : (
+                                    msg.user_name[0]
+                                )}
+                            </div>
+                            <div className="flex-1 space-y-1">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-bold text-white">{msg.user_name}</span>
+                                    <span className="text-[10px] text-white/40">{new Date(msg.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <p className="text-sm text-white/70 leading-relaxed bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/5">
+                                    {msg.content}
+                                </p>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
+    );
+
     return (
         <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] bg-[#050505] lg:rounded-2xl border border-white/5 font-inter shadow-2xl relative">
             {/* Sidebar - Course Content */}
@@ -758,63 +820,10 @@ const CoursePlayer = () => {
                                 </GlassCard>
                             )}
 
-                            {/* Discussion Hub Implementation */}
-                            <div className="space-y-4">
-                                <h4 className="text-lg font-bold text-white font-poppins flex items-center">
-                                    <MessageSquare size={18} className="mr-2 text-primary" /> Discussion Hub
-                                </h4>
-                                
-                                <GlassCard className="!p-4 bg-white/5 border-white/10">
-                                    <form onSubmit={handleCommentSubmit} className="relative">
-                                        <textarea
-                                            value={newComment}
-                                            onChange={(e) => setNewComment(e.target.value)}
-                                            placeholder="Write your thought or question here..."
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 text-sm focus:outline-none focus:border-primary/50 transition-all resize-none h-24"
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                    e.preventDefault();
-                                                    handleCommentSubmit(e);
-                                                }
-                                            }}
-                                        />
-                                        <button 
-                                            type="submit"
-                                            disabled={!newComment.trim() || isSubmittingComment}
-                                            className="absolute bottom-3 right-3 p-2 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            <Send size={16} />
-                                        </button>
-                                    </form>
-                                </GlassCard>
-
-                                <div className="space-y-4 pt-2">
-                                    {discussions.length === 0 ? (
-                                        <p className="text-center text-white/30 text-sm py-4 italic">No discussions yet. Be the first to ask a question!</p>
-                                    ) : (
-                                        discussions.map((msg) => (
-                                            <div key={msg._id} className="flex space-x-3 group">
-                                                <div className="w-10 h-10 rounded-xl bg-white/10 flex-shrink-0 flex items-center justify-center text-white font-bold">
-                                                    {msg.user_profile_image ? (
-                                                        <img src={msg.user_profile_image} alt="" className="w-full h-full object-cover rounded-xl" />
-                                                    ) : (
-                                                        msg.user_name[0]
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 space-y-1">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm font-bold text-white">{msg.user_name}</span>
-                                                        <span className="text-[10px] text-white/40">{new Date(msg.created_at).toLocaleDateString()}</span>
-                                                    </div>
-                                                    <p className="text-sm text-white/70 leading-relaxed bg-white/5 p-3 rounded-2xl rounded-tl-none border border-white/5">
-                                                        {msg.content}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
+                            {/* Discussion Hub renders here only when the curriculum index sidebar is
+                                hidden; when it's open, the row is too narrow so it moves below (see
+                                after this flex row) and spans full width instead. */}
+                            {!isSidebarOpen && discussionHubBlock}
                         </div>
 
                         {/* Sidebar Info Widgets */}
@@ -883,6 +892,14 @@ const CoursePlayer = () => {
                             </GlassCard>
                         </div>
                     </div>
+
+                    {/* Curriculum index is open — row above is too narrow for the discussion
+                        box, so it takes the full width below instead. */}
+                    {isSidebarOpen && (
+                        <div className="w-full">
+                            {discussionHubBlock}
+                        </div>
+                    )}
                     </div>
                     </div>
                 )}
