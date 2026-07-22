@@ -796,7 +796,7 @@ const StudentManagement = () => {
                                     onChange={(e) => setNewStudentData({ ...newStudentData, universityId: e.target.value })}
                                 >
                                     <option value="" className="bg-slate-900">Independent (No University)</option>
-                                    {universities.map(u => (
+                                    {universities.filter(u => u.role === 'university').map(u => (
                                         <option key={u._id} value={u._id} className="bg-slate-900">{u.name}</option>
                                     ))}
                                 </select>
@@ -1187,7 +1187,7 @@ const StudentManagement = () => {
                                     className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm"
                                 >
                                     <option value="" className="bg-slate-900">-- No University (Independent) --</option>
-                                    {universities.map(u => (
+                                    {universities.filter(u => u.role === 'university').map(u => (
                                         <option key={u._id} value={u._id} className="bg-slate-900">
                                             {u.profile?.universityName || u.name}
                                         </option>
