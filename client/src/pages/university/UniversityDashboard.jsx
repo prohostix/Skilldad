@@ -1062,114 +1062,116 @@ const CreateCourseModal = ({ onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[200] p-4 overflow-y-auto">
-            <GlassCard className="w-full max-w-2xl p-8 relative animate-in zoom-in duration-300">
-                <div className="flex justify-between items-center mb-8">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[200] p-4">
+            <GlassCard className="w-full max-w-2xl max-h-[85vh] p-6 relative animate-in zoom-in duration-300 flex flex-col">
+                <div className="flex justify-between items-center mb-4 flex-shrink-0">
                     <div>
-                        <h3 className="text-2xl font-bold text-white">Create New Course</h3>
-                        <p className="text-white/40 text-sm mt-1">Submit your course proposal for review.</p>
+                        <h3 className="text-xl font-bold text-white">Create New Course</h3>
+                        <p className="text-white/40 text-xs mt-1">Submit your course proposal for review.</p>
                     </div>
                     <button onClick={onClose} className="text-white/60 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full">
-                        <X size={24} />
+                        <X size={20} />
                     </button>
                 </div>
 
-                {/* Thumbnail Preview */}
-                <div className="mb-8 p-5 bg-white/5 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center gap-6">
-                    <div className="w-48 h-28 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner group">
-                        {formData.thumbnail ? (
-                            <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                        ) : (
-                            <ImageIcon size={32} className="text-white/10" />
-                        )}
+                <div className="overflow-y-auto pr-1 space-y-4">
+                    {/* Thumbnail Preview */}
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex flex-col md:flex-row items-center gap-4">
+                        <div className="w-40 h-24 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-inner group">
+                            {formData.thumbnail ? (
+                                <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            ) : (
+                                <ImageIcon size={28} className="text-white/10" />
+                            )}
+                        </div>
+                        <div className="flex-1 w-full space-y-2">
+                            <label className="block text-[10px] font-black text-primary uppercase tracking-[0.2em]">Course Thumbnail URL</label>
+                            <input
+                                type="text"
+                                placeholder="https://images.unsplash.com/your-image.jpg"
+                                className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary transition-all"
+                                value={formData.thumbnail}
+                                onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                            />
+                            <p className="text-[10px] text-white/30 italic">Tip: You can upload local files after the course is created.</p>
+                        </div>
                     </div>
-                    <div className="flex-1 w-full space-y-3">
-                        <label className="block text-[10px] font-black text-primary uppercase tracking-[0.2em]">Course Thumbnail URL</label>
-                        <input
-                            type="text"
-                            placeholder="https://images.unsplash.com/your-image.jpg"
-                            className="w-full px-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary transition-all"
-                            value={formData.thumbnail}
-                            onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
-                        />
-                        <p className="text-[10px] text-white/30 italic">Tip: You can upload local files after the course is created.</p>
-                    </div>
+
+                    <form id="university-create-course-form" onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="md:col-span-2">
+                                <label className="block text-white/80 text-sm font-medium mb-1.5">Course Title *</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                    placeholder="e.g., Master UX/UI Design Fundamentals"
+                                />
+                            </div>
+
+                            <div className="md:col-span-2">
+                                <label className="block text-white/80 text-sm font-medium mb-1.5">Description *</label>
+                                <textarea
+                                    required
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all resize-none"
+                                    rows="2"
+                                    placeholder="What will students learn in this course?"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-white/80 text-sm font-medium mb-1.5">Category *</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                    placeholder="e.g., Design, Programming"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-white/80 text-sm font-medium mb-1.5">Level *</label>
+                                <select
+                                    value={formData.level}
+                                    onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                                    className="w-full px-4 py-[11px] bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all appearance-none"
+                                >
+                                    <option value="Beginner" className="bg-black">Beginner</option>
+                                    <option value="Intermediate" className="bg-black">Intermediate</option>
+                                    <option value="Advanced" className="bg-black">Advanced</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-white/80 text-sm font-medium mb-1.5">Price (₹) *</label>
+                                <input
+                                    type="number"
+                                    required
+                                    min="0"
+                                    value={formData.price}
+                                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
+                                    placeholder="e.g., 4999"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 pt-4">
+                            <ModernButton type="submit" className="flex-1 justify-center py-3 text-base font-bold">
+                                Submit Course for Approval
+                            </ModernButton>
+                            <ModernButton type="button" variant="secondary" onClick={onClose} className="px-8">
+                                Cancel
+                            </ModernButton>
+                        </div>
+                    </form>
                 </div>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="md:col-span-2">
-                            <label className="block text-white/80 text-sm font-medium mb-2">Course Title *</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
-                                placeholder="e.g., Master UX/UI Design Fundamentals"
-                            />
-                        </div>
-
-                        <div className="md:col-span-2">
-                            <label className="block text-white/80 text-sm font-medium mb-2">Description *</label>
-                            <textarea
-                                required
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all resize-none"
-                                rows="3"
-                                placeholder="What will students learn in this course?"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-white/80 text-sm font-medium mb-2">Category *</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
-                                placeholder="e.g., Design, Programming"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-white/80 text-sm font-medium mb-2">Level *</label>
-                            <select
-                                value={formData.level}
-                                onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                                className="w-full px-4 py-[13px] bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all appearance-none"
-                            >
-                                <option value="Beginner" className="bg-black">Beginner</option>
-                                <option value="Intermediate" className="bg-black">Intermediate</option>
-                                <option value="Advanced" className="bg-black">Advanced</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-white/80 text-sm font-medium mb-2">Price (₹) *</label>
-                            <input
-                                type="number"
-                                required
-                                min="0"
-                                value={formData.price}
-                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary transition-all"
-                                placeholder="e.g., 4999"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex gap-4 pt-4">
-                        <ModernButton type="submit" className="flex-1 justify-center py-4 text-base font-bold">
-                            Submit Course for Approval
-                        </ModernButton>
-                        <ModernButton type="button" variant="secondary" onClick={onClose} className="px-8">
-                            Cancel
-                        </ModernButton>
-                    </div>
-                </form>
             </GlassCard>
         </div>
     );
