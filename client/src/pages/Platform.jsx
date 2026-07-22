@@ -6,13 +6,11 @@ import {
     GraduationCap,
     Users,
     BookOpen,
-    Award,
     MapPin,
     Calendar,
     TrendingUp,
     Globe,
-    Star,
-    Building
+    Star
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
@@ -83,13 +81,6 @@ const Platform = () => {
     }));
 
     const allUniversities = [...universities, ...skillDadUniversities];
-
-    const platformStats = [
-        { label: "Partner Universities", value: "150+", icon: Building, color: "purple" },
-        { label: "Active Students", value: "2.5M+", icon: Users, color: "purple" },
-        { label: "Course Programs", value: "5,000+", icon: BookOpen, color: "purple" },
-        { label: "Certificates Issued", value: "850K+", icon: Award, color: "purple" }
-    ];
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A]">
@@ -200,26 +191,6 @@ const Platform = () => {
                                             )}
                                         </div>
                                     </div>
-                                </GlassCard>
-                            </motion.div>
-                        ))}
-                    </div>
-
-                    {/* Platform Stats - Moved to bottom */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                        {platformStats.map((stat, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                <GlassCard className="text-center p-4 md:p-6 border-white/5 hover:border-primary/20 transition-all">
-                                    <div className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                                        <stat.icon className="text-purple-500" size={20} />
-                                    </div>
-                                    <h3 className="text-lg md:text-2xl font-bold text-white mb-1 md:mb-2 font-space">{stat.value}</h3>
-                                    <p className="text-gray-400 text-[10px] md:text-xs uppercase tracking-widest">{stat.label}</p>
                                 </GlassCard>
                             </motion.div>
                         ))}
