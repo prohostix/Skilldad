@@ -296,7 +296,9 @@ const PartnerExamManagement = () => {
                     ...examData,
                     scheduledStartTime: examData.scheduledStartTime ? new Date(examData.scheduledStartTime).toISOString() : null,
                     scheduledEndTime: examData.scheduledEndTime ? new Date(examData.scheduledEndTime).toISOString() : null,
-                    description: `B2B Deployment: ${examData.title}`
+                    description: `B2B Deployment: ${examData.title}`,
+                    // Backend expects batchIds (array); the Target Batch dropdown only selects one
+                    batchIds: examData.batchId ? [examData.batchId] : []
                 };
                 await axios.post('/api/exams', payload, config);
                 showToast('Assessment deployed to production.', 'success');
