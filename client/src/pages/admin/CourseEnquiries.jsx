@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Mail, Phone, BookOpen, Building2, Calendar, Search } from 'lucide-react';
+import { Mail, Phone, BookOpen, Building2, Calendar, Search, Download } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
+import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+
+// Wraps a CSV field in quotes and escapes any quotes inside it, so commas/newlines
+// in free-text fields (like the enquiry message) don't break the file's columns.
+const csvField = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
 const STATUS_OPTIONS = ['new', 'contacted', 'closed'];
 
@@ -61,6 +66,37 @@ const CourseEnquiries = () => {
         return matchesSearch && matchesStatus;
     });
 
+    const handleDownload = () => {
+        if (filteredEnquiries.length === 0) {
+            showToast('No enquiries to download', 'error');
+            return;
+        }
+
+        const headers = ['Name', 'Email', 'Phone', 'Course', 'University', 'Status', 'Submitted At', 'Message'];
+        const rows = filteredEnquiries.map(e => [
+            e.name,
+            e.email,
+            e.phone,
+            e.course_name || '',
+            e.university_name || '',
+            e.status || 'new',
+            new Date(e.created_at).toLocaleString(),
+            e.message || ''
+        ]);
+
+        const csvContent = [headers, ...rows].map(row => row.map(csvField).join(',')).join('\r\n');
+        const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `course-enquiries_${new Date().toISOString().split('T')[0]}.csv`;
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -68,6 +104,10 @@ const CourseEnquiries = () => {
                     <DashboardHeading title="Course Enquiries" />
                     <p className="text-white/50 text-sm mt-2">Students who submitted the Enroll form, waiting for a counsellor follow-up</p>
                 </div>
+                <ModernButton variant="secondary" onClick={handleDownload}>
+                    <Download size={16} className="mr-2" />
+                    Download {statusFilter !== 'all' ? `(${statusFilter})` : 'All'}
+                </ModernButton>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
