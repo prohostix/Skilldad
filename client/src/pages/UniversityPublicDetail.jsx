@@ -401,11 +401,11 @@ const UniversityPublicDetail = () => {
                         return (
                             <motion.img
                                 initial={{ scale: 1.1, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 0.6 }}
+                                animate={{ scale: 1, opacity: 0.85 }}
                                 transition={{ duration: 2 }}
                                 src={heroSrc}
                                 alt="University Cover"
-                                className="w-full h-full object-cover grayscale-[20%]"
+                                className="w-full h-full object-cover grayscale-[8%]"
                                 onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = defaultImg;
@@ -413,8 +413,8 @@ const UniversityPublicDetail = () => {
                             />
                         );
                     })()}
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#05030B]/40 via-[#05030B]/80 to-[#05030B]"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#05030B] via-transparent to-[#05030B]/20"></div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#05030B]/15 via-[#05030B]/45 to-[#05030B]/90"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#05030B]/70 via-transparent to-[#05030B]/10"></div>
                 </div>
 
                 {/* Admin edit shortcut for SkillDad Universities (no login account, so no self-upload UI) */}
