@@ -115,7 +115,18 @@ const Platform = () => {
                                 transition={{ delay: index * 0.1 }}
                                 whileHover={{ y: -10 }}
                                 className="group cursor-pointer"
-                                onClick={() => navigate(`/university-profile/${encodeURIComponent(university.name)}`, { state: { university } })}
+                                onClick={() => {
+                                    // SkillDad Universities have no login account — admins manage
+                                    // their logo/cover/gallery from the admin edit page instead.
+                                    if (String(university.id).startsWith('sd-')) {
+                                        const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+                                        if (userInfo?.role === 'admin') {
+                                            navigate(`/admin/skilldad-universities/${String(university.id).replace('sd-', '')}`);
+                                            return;
+                                        }
+                                    }
+                                    navigate(`/university-profile/${encodeURIComponent(university.name)}`, { state: { university } });
+                                }}
                             >
                                 <GlassCard className="overflow-hidden h-full hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 !p-0">
                                     {/* University Image */}
