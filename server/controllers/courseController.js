@@ -607,8 +607,9 @@ module.exports = {
             
             // Delete related simple dependencies safely using savepoints
             const dependentTables = [
-                'progress', 'submissions', 'projects', 'interactive_contents', 
-                'enrollments', 'live_sessions', 'payments', 'transactions', 'reviews'
+                'progress', 'submissions', 'projects', 'interactive_contents',
+                'enrollments', 'live_sessions', 'payments', 'transactions', 'reviews',
+                'documents', 'certificates', 'batches'
             ];
             
             for (const table of dependentTables) {
