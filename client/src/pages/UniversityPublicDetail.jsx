@@ -136,6 +136,9 @@ const UniversityPublicDetail = () => {
     // from the dedicated admin edit page, not via self-upload on this public page.
     const isSkillDadUni = String(universityOwnerId).startsWith('sd-');
     const isOwner = !isSkillDadUni && currentUser && (currentUser._id === universityOwnerId || currentUser.role === 'admin');
+    // SkillDad Universities have no login account, but admins can still update their logo/cover
+    // right here (routed to the skill_dad_universities table instead of the users table).
+    const canEditImages = isOwner || (isSkillDadUni && currentUser?.role === 'admin');
 
     useEffect(() => {
         if (university) {
@@ -225,9 +228,23 @@ const UniversityPublicDetail = () => {
         const loadingToast = toast.loading('Calibrating institutional logo...');
 
         try {
+            if (isSkillDadUni) {
+                const skillDadId = String(universityOwnerId).replace('sd-', '');
+                const formData = new FormData();
+                formData.append('profileImage', file);
+
+                const { data } = await axios.post(`/api/admin/skilldad-universities/${skillDadId}/upload-image`, formData, {
+                    headers: { Authorization: `Bearer ${currentUser.token}` }
+                });
+
+                setUniversity(prev => ({ ...prev, profileImage: data.profileImage }));
+                toast.success('Institutional logo updated successfully!', { id: loadingToast });
+                return;
+            }
+
             const formData = new FormData();
             formData.append('profileImage', file);
-            
+
             // If admin or different ID, specify target
             if (currentUser._id !== university._id) {
                 formData.append('targetUserId', university._id);
@@ -285,6 +302,23 @@ const UniversityPublicDetail = () => {
         const loadingToast = toast.loading('Updating cover image...');
 
         try {
+            if (isSkillDadUni) {
+                const skillDadId = String(universityOwnerId).replace('sd-', '');
+                const formData = new FormData();
+                formData.append('coverImage', file);
+
+                const { data } = await axios.post(`/api/admin/skilldad-universities/${skillDadId}/upload-cover`, formData, {
+                    headers: { Authorization: `Bearer ${currentUser.token}` }
+                });
+
+                setUniversity(prev => ({
+                    ...prev,
+                    profile: { ...(prev.profile || {}), coverImage: data.coverImage }
+                }));
+                toast.success('Cover image updated!', { id: loadingToast });
+                return;
+            }
+
             const formData = new FormData();
             formData.append('coverImage', file);
 
@@ -396,7 +430,7 @@ const UniversityPublicDetail = () => {
                 )}
 
                 {/* Change Cover Button (Owner only) */}
-                {isOwner && (
+                {canEditImages && (
                     <div className="absolute top-24 right-6 z-30">
                         <input
                             type="file"
@@ -438,8 +472,8 @@ const UniversityPublicDetail = () => {
                                         }}
                                     />
                                     
-                                    {isOwner && (
-                                        <div 
+                                    {canEditImages && (
+                                        <div
                                             className="absolute inset-0 bg-[#05030B]/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm cursor-pointer"
                                             onClick={() => document.getElementById('university-logo-upload').click()}
                                         >
@@ -452,7 +486,7 @@ const UniversityPublicDetail = () => {
 
                                 </div>
 
-                                {isOwner && (
+                                {canEditImages && (
                                     <input
                                         type="file"
                                         id="university-logo-upload"
