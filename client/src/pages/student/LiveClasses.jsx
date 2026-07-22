@@ -38,35 +38,7 @@ const LiveClasses = () => {
         setError(null);
         try {
             const { data } = await axios.get('/api/sessions', config);
-
-            if (!data || data.length === 0) {
-                setSessions([
-                    {
-                        _id: 'demo1',
-                        topic: 'Systemic Architecture with Microservices',
-                        category: 'Engineering',
-                        startTime: new Date(Date.now() + 3600000 * 3).toISOString(),
-                        duration: 90,
-                        description: 'A masterclass on scaling distributed systems using modern orchestration tools.',
-                        instructor: { name: 'Dr. Elizabeth Thorne' },
-                        status: 'scheduled',
-                        meetingLink: '#'
-                    },
-                    {
-                        _id: 'demo2',
-                        topic: 'UI/UX Design Psychology',
-                        category: 'Design',
-                        startTime: new Date(Date.now() + 86400000).toISOString(),
-                        duration: 60,
-                        description: 'Exploring how cognitive load influences conversion rates.',
-                        instructor: { name: 'Marcus Sterling' },
-                        status: 'scheduled',
-                        meetingLink: '#'
-                    }
-                ]);
-            } else {
-                setSessions(data);
-            }
+            setSessions(Array.isArray(data) ? data : []);
             setLoading(false);
         } catch (error) {
             console.error(error);

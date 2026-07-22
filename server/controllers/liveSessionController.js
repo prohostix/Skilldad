@@ -135,11 +135,11 @@ const getSessions = asyncHandler(async (req, res) => {
     const params = [];
 
     if (req.user.role === 'student') {
+        // Students only see sessions for courses they're actively enrolled in — no
+        // institution-wide sessions regardless of enrollment (course_id IS NULL branch removed).
         sql += ` AND (
-            (s.course_id IN (SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active')
-             AND (s.batch_id IS NULL OR s.batch_id = (SELECT batch_id FROM enrollments WHERE student_id = $1 AND course_id = s.course_id LIMIT 1)))
-            OR (s.course_id IS NULL AND s.university_id = (SELECT university_id FROM users WHERE id = $1))
-            OR (s.course_id IS NULL AND s.partner_id = (SELECT registered_by FROM users WHERE id = $1))
+            s.course_id IN (SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active')
+            AND (s.batch_id IS NULL OR s.batch_id = (SELECT batch_id FROM enrollments WHERE student_id = $1 AND course_id = s.course_id LIMIT 1))
         )`;
         params.push(req.user.id);
     } else if (req.user.role === 'university') {
