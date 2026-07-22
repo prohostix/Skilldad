@@ -12,7 +12,6 @@ import {
     MoreVertical,
     Activity,
     Shield,
-    Zap,
     Download,
     FileSpreadsheet,
     FileText,
@@ -198,30 +197,6 @@ const AdminDashboard = () => {
                     </motion.h1>
                 </div>
                 <div className="flex items-center space-x-3">
-                    <ModernButton
-                        variant="primary"
-                        size="sm"
-                        onClick={async () => {
-                            try {
-                                const rawInfo = localStorage.getItem('userInfo');
-                                if (!rawInfo) return;
-                                const userInfo = JSON.parse(rawInfo);
-                                const config = {
-                                    headers: { Authorization: `Bearer ${userInfo.token}` }
-                                };
-                                
-                                toast.loading('Sending test broadcast...', { id: 'test-notif' });
-                                await axios.post('/api/admin/test-notification', {}, config);
-                                toast.success('Test broadcast initiated!', { id: 'test-notif' });
-                            } catch (error) {
-                                console.error('Test notification failed:', error);
-                                toast.error('Failed to trigger notification', { id: 'test-notif' });
-                            }
-                        }}
-                    >
-                        <Zap size={16} className="mr-2" />
-                        Test Notification
-                    </ModernButton>
                     <div className="relative">
                         <ModernButton
                             variant="secondary"
