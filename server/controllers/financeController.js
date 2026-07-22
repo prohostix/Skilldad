@@ -378,7 +378,7 @@ const exportReport = async (req, res) => {
                     SUM(t.final_amount) as "RevenueGenerated"
                 FROM enrollments e
                 JOIN courses c ON e.course_id = c.id
-                JOIN users p ON c.instructor_id = p.id
+                LEFT JOIN users p ON c.instructor_id = p.id
                 LEFT JOIN transactions t ON (e.student_id = t.student_id AND e.course_id = t.course_id AND t.status = 'success')
                 GROUP BY p.name, c.title
                 ORDER BY p.name, c.title

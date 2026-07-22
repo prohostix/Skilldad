@@ -126,11 +126,12 @@ const getAdminCourses = asyncHandler(async (req, res) => {
 const getCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    // PG Query
+    // PG Query — LEFT JOIN because Degree Programme courses (linked to a SkillDad University)
+    // have a null instructor_id and no real instructor user account
     const courseRes = await query(`
         SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
         FROM courses c
-        JOIN users u ON c.instructor_id = u.id
+        LEFT JOIN users u ON c.instructor_id = u.id
         WHERE c.id = $1
     `, [id]);
 
