@@ -379,6 +379,22 @@ const startServer = async () => {
             await query('ALTER TABLE courses ADD COLUMN skill_dad_university_id INTEGER REFERENCES skill_dad_universities(id) ON DELETE SET NULL');
             console.log('[Migration] Added skill_dad_university_id to courses'.green);
         }
+
+        // Auto-migrate: ensure enquiries supports course-linked enrollment enquiries and status tracking
+        const enquiryColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['enquiries']);
+        const enquiryCols = enquiryColRes.rows.map(r => r.column_name);
+        if (!enquiryCols.includes('course_id')) {
+            await query('ALTER TABLE enquiries ADD COLUMN course_id VARCHAR(255) REFERENCES courses(id) ON DELETE SET NULL');
+            console.log('[Migration] Added course_id to enquiries'.green);
+        }
+        if (!enquiryCols.includes('course_name')) {
+            await query('ALTER TABLE enquiries ADD COLUMN course_name VARCHAR(255)');
+            console.log('[Migration] Added course_name to enquiries'.green);
+        }
+        if (!enquiryCols.includes('status')) {
+            await query("ALTER TABLE enquiries ADD COLUMN status VARCHAR(30) NOT NULL DEFAULT 'new'");
+            console.log('[Migration] Added status to enquiries'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

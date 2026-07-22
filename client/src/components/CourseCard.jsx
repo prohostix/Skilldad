@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Star,
@@ -9,21 +9,16 @@ import {
 
 import GlassCard from './ui/GlassCard';
 import ModernButton from './ui/ModernButton';
+import EnrollEnquiryModal from './ui/EnrollEnquiryModal';
 
 const CourseCard = ({ course }) => {
     const navigate = useNavigate();
+    const [showEnquiry, setShowEnquiry] = useState(false);
 
-    const handleEnroll = () => {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        if (!userInfo) {
-            navigate('/login', { state: { from: `/course/${course._id}` } });
-            return;
-        }
-
-        navigate(`/dashboard/payment/${course._id}`);
-    };
+    const handleEnroll = () => setShowEnquiry(true);
 
     return (
+        <>
         <GlassCard
             lowBlur={true}
             className="group overflow-hidden !p-0 h-full flex flex-col hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 gpu-accelerated"
@@ -110,6 +105,10 @@ const CourseCard = ({ course }) => {
 
             </div>
         </GlassCard>
+        {showEnquiry && (
+            <EnrollEnquiryModal course={course} onClose={() => setShowEnquiry(false)} />
+        )}
+        </>
     );
 };
 

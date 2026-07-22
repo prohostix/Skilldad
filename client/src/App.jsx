@@ -87,6 +87,7 @@ const PartnerExamQuestionManager = lazy(() => import('./pages/partner/PartnerExa
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const CourseManager = lazy(() => import('./pages/admin/CourseManager'));
+const CourseEnquiries = lazy(() => import('./pages/admin/CourseEnquiries'));
 const CourseEditor = lazy(() => import('./pages/admin/CourseEditor'));
 const UserList = lazy(() => import('./pages/admin/UserList'));
 const StudentManagement = lazy(() => import('./pages/admin/StudentManagement'));
@@ -246,6 +247,7 @@ function App() {
                   <Route path="/admin" element={<DashboardLayout />}>
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="courses" element={<CourseManager />} />
+                    <Route path="course-enquiries" element={<CourseEnquiries />} />
                     <Route path="courses/edit/:id" element={<CourseEditor />} />
                     <Route path="courses/:courseId/modules/:moduleIndex/videos/:videoIndex/link-recording" element={<LinkRecording />} />
                     <Route path="projects" element={<ProjectManager />} />

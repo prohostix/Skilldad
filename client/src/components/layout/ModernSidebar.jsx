@@ -4,7 +4,7 @@ import {
     LayoutDashboard, Briefcase, BookOpen, Users, Building2,
     BarChart3, LifeBuoy, Settings, X, LogOut, FileText,
     Trophy, DollarSign, GraduationCap, Image, Bell, Ticket,
-    Wallet, MessageCircle, ChevronDown, ChevronRight, Globe, Home, Video
+    Wallet, MessageCircle, ChevronDown, ChevronRight, Globe, Home, Video, Inbox
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
@@ -105,6 +105,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
         if (userRole === 'admin') return [
             { name: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
             { name: 'Courses', icon: BookOpen, path: '/admin/courses' },
+            { name: 'Course Enquiries', icon: Inbox, path: '/admin/course-enquiries' },
             { name: 'Projects', icon: FileText, path: '/admin/projects' },
             { name: 'Exams', icon: Trophy, path: '/admin/exams' },
             { name: 'Users', icon: Users, path: '/admin/users' },

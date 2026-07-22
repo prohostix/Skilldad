@@ -23,6 +23,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
+import EnrollEnquiryModal from '../components/ui/EnrollEnquiryModal';
 import { getMediaUrl } from '../utils/media';
 
 const CourseDetail = () => {
@@ -34,6 +35,7 @@ const CourseDetail = () => {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
     const [userInfo, setUserInfo] = useState(null);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [showEnrollModal, setShowEnrollModal] = useState(false);
 
     useEffect(() => {
         const fetchCourse = async () => {
@@ -61,7 +63,8 @@ const CourseDetail = () => {
         try {
             await axios.post('/api/enquiries', {
                 ...formData,
-                message: `Course Inquiry: ${course.title}\n\n${formData.message}`
+                courseId: course._id,
+                courseName: course.title
             });
             setEnquiryStatus({ loading: false, success: true, error: null });
             setFormData({ name: '', email: '', phone: '', message: '' });
@@ -264,7 +267,7 @@ const CourseDetail = () => {
                                     <div className="space-y-3">
                                         <ModernButton
                                             className="w-full justify-center !py-3 text-[15px] font-semibold"
-                                            onClick={() => handleSecureAction(() => navigate(`/dashboard/payment/${courseId}`))}
+                                            onClick={() => setShowEnrollModal(true)}
                                         >
                                             Enroll Now
                                         </ModernButton>
@@ -511,6 +514,10 @@ const CourseDetail = () => {
 
 
             <Footer />
+
+            {showEnrollModal && (
+                <EnrollEnquiryModal course={course} onClose={() => setShowEnrollModal(false)} />
+            )}
         </div>
     );
 };
