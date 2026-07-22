@@ -16,6 +16,7 @@ import {
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../context/ToastContext';
 
 const CourseManager = () => {
@@ -45,6 +46,7 @@ const CourseManager = () => {
     const brochureInputRef = React.useRef(null);
     const [universities, setUniversities] = useState([]);
     const [skillDadUniversities, setSkillDadUniversities] = useState([]);
+    const [courseToDelete, setCourseToDelete] = useState(null);
     const navigate = useNavigate();
     const { showToast } = useToast();
 
@@ -253,8 +255,13 @@ const CourseManager = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this course?')) return;
+    const handleDelete = (id) => {
+        setCourseToDelete(id);
+    };
+
+    const confirmDelete = async () => {
+        const id = courseToDelete;
+        setCourseToDelete(null);
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         try {
@@ -808,6 +815,15 @@ const CourseManager = () => {
                     </GlassCard>
                 </div>
             )}
+
+            <ConfirmDialog
+                open={!!courseToDelete}
+                title="Delete this course?"
+                message="This permanently removes the course along with all linked enrollments, documents, exams, and other related data. This cannot be undone."
+                confirmLabel="Delete Course"
+                onConfirm={confirmDelete}
+                onCancel={() => setCourseToDelete(null)}
+            />
         </div>
     );
 };
