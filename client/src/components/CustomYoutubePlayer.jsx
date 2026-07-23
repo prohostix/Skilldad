@@ -269,9 +269,13 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         className="absolute inset-0 cursor-pointer z-10"
       />
 
-      {/* Control Skin Layer */}
+      {/* Control Skin Layer — extra bottom padding in fullscreen pushes our own
+          opaque background further down the frame, covering the row where
+          YouTube's native share/watch-later/more-videos icons render (rather
+          than trying to suppress them directly, which fullscreen doesn't allow
+          reliably). */}
       <div
-        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-4 flex flex-col gap-3 transition-all duration-300 z-20 ${
+        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 pt-4 ${isFullscreen ? 'pb-24' : 'pb-4'} flex flex-col gap-3 transition-all duration-300 z-20 ${
           showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
         }`}
       >
