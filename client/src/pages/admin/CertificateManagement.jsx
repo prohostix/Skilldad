@@ -5,7 +5,7 @@ import {
     Trophy, Search, Filter, CheckCircle2, AlertCircle, 
     Download, Clock, GraduationCap, Building2, BookOpen,
     ArrowUpRight, Users, ChevronRight, MoreHorizontal,
-    FileText, ShieldCheck
+    FileText, ShieldCheck, Upload, X, XCircle
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -17,7 +17,50 @@ const CertificateManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [universityFilter, setUniversityFilter] = useState('all');
-    const [universities, setUniversities] = useState([]);
+    const [selectedCert, setSelectedCert] = useState(null);
+    const [showUploadModal, setShowUploadModal] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [file, setFile] = useState(null);
+
+    const handleStatusUpdate = async (id, status, notes = '') => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            await axios.put(`/api/certificates/${id}/status`, { status, notes }, config);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to update certificate status');
+        }
+    };
+
+    const handleFileUpload = async (e) => {
+        e.preventDefault();
+        if (!file || !selectedCert) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('certificate', file);
+
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { 
+                headers: { 
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'multipart/form-data'
+                } 
+            };
+            await axios.post(`/api/certificates/${selectedCert.id}/upload`, formData, config);
+            alert('Certificate uploaded and ISSUED to student successfully!');
+            setShowUploadModal(false);
+            setFile(null);
+            setSelectedCert(null);
+            fetchData();
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to upload certificate PDF');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     useEffect(() => {
         fetchData();
@@ -209,23 +252,38 @@ const CertificateManagement = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {cert.status === 'ISSUED' ? (
+                                            <div className="flex items-center justify-end gap-2">
+                                                {/* Upload Certificate Button */}
+                                                <button 
+                                                    onClick={() => { setSelectedCert(cert); setShowUploadModal(true); }}
+                                                    className="px-3 py-1.5 bg-primary/20 hover:bg-primary text-primary hover:text-white border border-primary/30 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                                                    title="Upload Official Certificate PDF"
+                                                >
+                                                    <Upload size={14} /> {cert.status === 'ISSUED' ? 'Re-upload PDF' : 'Upload PDF & Issue'}
+                                                </button>
+
+                                                {/* Download if Issued */}
+                                                {cert.status === 'ISSUED' && cert.file_url && (
                                                     <button 
                                                         onClick={() => window.open(cert.file_url, '_blank')}
-                                                        className="p-2 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all"
-                                                        title="Download Certificate"
+                                                        className="p-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg transition-all"
+                                                        title="View Issued Certificate"
                                                     >
                                                         <Download size={16} />
                                                     </button>
-                                                ) : (
-                                                    <button className="p-2 text-white/20 cursor-not-allowed">
-                                                        <Clock size={16} />
-                                                    </button>
                                                 )}
-                                                <button className="p-2 hover:bg-white/10 text-white/30 hover:text-white rounded-lg transition-all">
-                                                    <MoreHorizontal size={18} />
-                                                </button>
+
+                                                {/* Quick Status Toggle */}
+                                                <select
+                                                    value={cert.status}
+                                                    onChange={(e) => handleStatusUpdate(cert.id, e.target.value)}
+                                                    className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white/80 focus:outline-none focus:border-primary/50"
+                                                >
+                                                    <option value="PENDING" className="bg-[#0B0F1A]">PENDING</option>
+                                                    <option value="APPROVED" className="bg-[#0B0F1A]">APPROVED</option>
+                                                    <option value="ISSUED" className="bg-[#0B0F1A]">ISSUED</option>
+                                                    <option value="REJECTED" className="bg-[#0B0F1A]">REJECTED</option>
+                                                </select>
                                             </div>
                                         </td>
                                     </motion.tr>
@@ -245,6 +303,73 @@ const CertificateManagement = () => {
                     )}
                 </div>
             </GlassCard>
+
+            {/* Upload Certificate Modal */}
+            {showUploadModal && selectedCert && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-[#141418] border border-white/10 w-full max-w-md rounded-2xl p-6 shadow-2xl"
+                    >
+                        <div className="flex justify-between items-center pb-4 border-b border-white/10 mb-5">
+                            <div>
+                                <h3 className="text-base font-bold text-white">Upload Certificate PDF</h3>
+                                <p className="text-xs text-white/40 mt-0.5">For {selectedCert.student_name} • {selectedCert.course_title}</p>
+                            </div>
+                            <button onClick={() => setShowUploadModal(false)} className="text-white/40 hover:text-white p-1">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleFileUpload} className="space-y-4">
+                            <div className="border-2 border-dashed border-white/15 rounded-xl p-6 text-center hover:border-primary/50 transition-colors bg-white/[0.01]">
+                                <input
+                                    type="file"
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                    onChange={(e) => setFile(e.target.files[0])}
+                                    required
+                                    className="hidden"
+                                    id="cert-file-input"
+                                />
+                                <label htmlFor="cert-file-input" className="cursor-pointer flex flex-col items-center gap-2">
+                                    <div className="p-3 bg-primary/10 rounded-full text-primary">
+                                        <Upload size={22} />
+                                    </div>
+                                    {file ? (
+                                        <div>
+                                            <p className="text-xs font-bold text-white">{file.name}</p>
+                                            <p className="text-[10px] text-white/40 mt-0.5">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <p className="text-xs font-bold text-white">Click to select Certificate PDF</p>
+                                            <p className="text-[10px] text-white/40 mt-0.5">PDF, PNG or JPG (Max 20MB)</p>
+                                        </div>
+                                    )}
+                                </label>
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowUploadModal(false)}
+                                    className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <ModernButton
+                                    type="submit"
+                                    disabled={uploading || !file}
+                                    className="flex-1 !py-2.5 text-xs font-bold"
+                                >
+                                    {uploading ? 'Issuing...' : 'Upload & Issue'}
+                                </ModernButton>
+                            </div>
+                        </form>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };

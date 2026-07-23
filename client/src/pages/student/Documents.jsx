@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     FileText, Download, Upload, Eye,
     AlertCircle, CheckCircle, Clock,
-    Search, Trash2, Calendar, Trophy
+    Search, Trash2, Calendar, Trophy, X
 } from 'lucide-react';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 
@@ -19,7 +19,16 @@ const Documents = () => {
     const [uploadProgress, setUploadProgress] = useState({});
     const [loading, setLoading] = useState(true);
     const [requesting, setRequesting] = useState(null);
+    const [toast, setToast] = useState(null);
+    const [deleteConfirmDocId, setDeleteConfirmDocId] = useState(null);
     const navigate = useNavigate();
+
+    const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => {
+            setToast(null);
+        }, 4000);
+    };
 
     const fetchData = async () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -57,11 +66,11 @@ const Documents = () => {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             
             await axios.post('/api/certificates/apply', { courseId }, config);
-            alert('Graduation request submitted successfully to the University!');
+            showToast('Graduation request submitted successfully to the University!', 'success');
             fetchData();
         } catch (error) {
             const msg = error.response?.data?.message || 'Failed to submit request';
-            alert(`Application Error: ${msg}`);
+            showToast(`Application Error: ${msg}`, 'error');
         } finally {
             setRequesting(null);
         }
@@ -75,22 +84,16 @@ const Documents = () => {
     };
 
     const handleFileUpload = async (docId) => {
-        console.log('Starting file upload for docId:', docId);
-        // Debug alert to confirm function call
-        window.alert('Upload triggered for requirement ID: ' + docId); 
-        
         const files = selectedFiles[docId];
         if (!files || files.length === 0) {
-            console.warn('No files selected for docId:', docId);
-            alert('Please select a file first.');
+            showToast('Please select a file first.', 'error');
             return;
         }
 
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             if (!userInfo || !userInfo.token) {
-                console.error('No user info or token found');
-                alert('Session expired. Please login again.');
+                showToast('Session expired. Please login again.', 'error');
                 navigate('/login');
                 return;
             }
@@ -98,20 +101,18 @@ const Documents = () => {
             const formData = new FormData();
             formData.append('document', files[0]);
             
-            // Add metadata from the document requirement if it exists
-            // Use String comparison to avoid type mismatch issues
-            const docReq = documents.find(d => String(d.id) === String(docId) || String(d._id) === String(docId));
+            // Find requirement metadata from displayItems or documents
+            const docReq = displayItems.find(d => String(d.id) === String(docId) || String(d._id) === String(docId)) ||
+                           documents.find(d => String(d.id) === String(docId) || String(d._id) === String(docId));
             
             if (docReq) {
-                console.log('Found document requirement:', docReq.title);
-                formData.append('title', docReq.title || '');
-                formData.append('type', docReq.type || '');
+                formData.append('title', docReq.title || files[0].name.split('.')[0]);
+                formData.append('type', docReq.type || 'other');
                 if (docReq.course_id) formData.append('course', docReq.course_id);
                 if (docReq.university_id) formData.append('university_id', docReq.university_id);
             } else {
-                console.warn('Could not find document requirement for ID:', docId);
-                // Fallback: if we can't find the req, at least try to send the ID
-                formData.append('docId', docId);
+                formData.append('title', files[0].name.split('.')[0]);
+                formData.append('type', 'other');
             }
 
             const config = {
@@ -121,16 +122,13 @@ const Documents = () => {
                 },
                 onUploadProgress: (progressEvent) => {
                     const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    console.log(`Upload progress for ${docId}: ${progress}%`);
                     setUploadProgress(prev => ({ ...prev, [docId]: progress }));
                 }
             };
 
-            console.log('Sending POST request to /api/documents/upload');
             const response = await axios.post('/api/documents/upload', formData, config);
-            console.log('Upload response:', response.data);
             
-            alert('Document uploaded successfully!');
+            showToast('Document uploaded successfully!', 'success');
             fetchData();
             
             // Reset state
@@ -139,22 +137,27 @@ const Documents = () => {
         } catch (error) {
             console.error('Upload failed:', error);
             const msg = error.response?.data?.message || error.message || 'Failed to upload document';
-            alert(`Upload Error: ${msg}`);
+            showToast(`Upload Error: ${msg}`, 'error');
             setUploadProgress(prev => ({ ...prev, [docId]: 0 }));
         }
     };
 
-    const handleDeleteDocument = async (docId) => {
-        if (!window.confirm('Are you sure you want to remove this document?')) return;
+    const handleDeleteDocument = (docId) => {
+        setDeleteConfirmDocId(docId);
+    };
+
+    const confirmDeleteDocument = async (docId) => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             await axios.delete(`/api/documents/${docId}`, config);
-            alert('Document removed successfully');
+            showToast('Document removed successfully', 'success');
+            setDeleteConfirmDocId(null);
             fetchData();
         } catch (error) {
             const msg = error.response?.data?.message || 'Failed to remove document';
-            alert(`Remove Error: ${msg}`);
+            showToast(`Remove Error: ${msg}`, 'error');
+            setDeleteConfirmDocId(null);
         }
     };
 
@@ -177,12 +180,11 @@ const Documents = () => {
             };
 
             await axios.post('/api/documents/upload', formData, config);
-            alert('Extra document uploaded successfully!');
+            showToast('Extra document uploaded successfully!', 'success');
             fetchData();
         } catch (error) {
-            alert(`Upload Error: ${error.response?.data?.message || error.message}`);
+            showToast(`Upload Error: ${error.response?.data?.message || error.message}`, 'error');
         }
-        // Reset input so the same file can be uploaded again if needed
         event.target.value = null;
     };
 
@@ -190,9 +192,52 @@ const Documents = () => {
         if (url) {
             window.open(url, '_blank');
         } else {
-            alert(`Download started: ${fileName}`);
+            showToast(`Opening document: ${fileName}`, 'success');
         }
     };
+
+    const STANDARD_REQUIRED_SLOTS = [
+        {
+            id: 'std_id_proof',
+            title: 'Identity Proof',
+            type: 'id_proof',
+            description: 'Upload a clear scanned copy of your official Govt ID (Aadhaar Card / Passport / Voter ID / Driving License).',
+            required: true,
+            format: 'PDF, JPG, PNG',
+            maxSize: '10MB',
+            matchKeywords: ['identity', 'id proof', 'aadhaar', 'passport', 'id_proof', 'govt id', 'voter']
+        },
+        {
+            id: 'std_sslc',
+            title: 'SSLC / 10th Certificate',
+            type: 'sslc_certificate',
+            description: 'Upload your Secondary School Leaving Certificate (10th Board Marksheet/Certificate).',
+            required: true,
+            format: 'PDF, JPG, PNG',
+            maxSize: '10MB',
+            matchKeywords: ['sslc', '10th', 'secondary school', 'sslc_certificate', 'tenth']
+        },
+        {
+            id: 'std_12th',
+            title: 'Higher Secondary (12th) Marksheet',
+            type: '12th_marksheet',
+            description: 'Upload your Higher Secondary Examination (12th Class / Pre-Degree) mark statement.',
+            required: true,
+            format: 'PDF, JPG, PNG',
+            maxSize: '10MB',
+            matchKeywords: ['12th', 'higher secondary', 'plus two', '+2', '12th_marksheet', 'twelfth']
+        },
+        {
+            id: 'std_degree',
+            title: 'Graduation / Degree Certificate',
+            type: 'degree_certificate',
+            description: 'Upload your Bachelor Degree Certificate or consolidated semester marksheets (if applicable).',
+            required: false,
+            format: 'PDF, JPG, PNG',
+            maxSize: '10MB',
+            matchKeywords: ['degree', 'graduation', 'bachelor', 'degree_certificate', 'diploma']
+        }
+    ];
 
     const eligibleCourses = enrollments.filter(e => {
         const progress = parseFloat(e.progress) || 0;
@@ -202,16 +247,45 @@ const Documents = () => {
 
     const pendingRequests = certificates.filter(c => c.status === 'PENDING');
 
-    const processedDocuments = documents.filter(doc => {
-        if (doc.status === 'pending') {
-            const isFulfilled = documents.some(d => 
-                d.title === doc.title && 
-                (d.status === 'submitted' || d.status === 'approved')
+    const processedDocuments = (() => {
+        // Standard required slots mapped to student's uploaded docs
+        const standardMerged = STANDARD_REQUIRED_SLOTS.map(slot => {
+            const uploaded = documents.find(d => {
+                const titleLower = (d.title || '').toLowerCase();
+                const typeLower = (d.type || '').toLowerCase();
+                return slot.matchKeywords.some(kw => titleLower.includes(kw) || typeLower.includes(kw));
+            });
+
+            if (uploaded) {
+                return {
+                    ...uploaded,
+                    isStandardSlot: true,
+                    required: slot.required,
+                    description: uploaded.description || slot.description,
+                    title: uploaded.title || slot.title,
+                    fileName: uploaded.file_name || uploaded.fileName || uploaded.title
+                };
+            }
+
+            return {
+                ...slot,
+                status: 'pending',
+                isStandardSlot: true
+            };
+        });
+
+        // Custom documents uploaded or requested that don't match the 4 standard slots
+        const extraDocs = documents.filter(d => {
+            const titleLower = (d.title || '').toLowerCase();
+            const typeLower = (d.type || '').toLowerCase();
+            const isMatched = STANDARD_REQUIRED_SLOTS.some(slot =>
+                slot.matchKeywords.some(kw => titleLower.includes(kw) || typeLower.includes(kw))
             );
-            return !isFulfilled;
-        }
-        return true;
-    });
+            return !isMatched;
+        });
+
+        return [...standardMerged, ...extraDocs];
+    })();
 
     const displayItems = [
         ...processedDocuments.map(d => ({ ...d, isCertificate: false })),
@@ -511,15 +585,12 @@ const Documents = () => {
                                                          onClick={(e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            console.log('--- BUTTON CLICKED ---');
-                                                            console.log('doc.id:', doc.id);
-                                                            window.alert('Button Clicked for ID: ' + doc.id);
                                                             handleFileUpload(doc.id);
                                                          }}
                                                          disabled={isUploading}
-                                                         className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-wide rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 relative z-50"
+                                                         className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold tracking-wide rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 relative z-10"
                                                      >
-                                                         {isUploading ? <><Clock size={14} className="animate-pulse" /> UPLOADING {progress}%</> : <><Upload size={14} /> SUBMIT FILE ({doc.id || 'NO ID'})</>}
+                                                         {isUploading ? <><Clock size={14} className="animate-pulse" /> UPLOADING {progress}%</> : <><Upload size={14} /> SUBMIT DOCUMENT</>}
                                                      </button>
                                                 </div>
                                             )}
@@ -574,6 +645,75 @@ const Documents = () => {
                             Clear filters
                         </button>
                     )}
+                </div>
+            )}
+
+            {/* Standard Premium Toast Notification */}
+            {toast && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                    className="fixed top-20 right-6 z-[9999] max-w-md w-full"
+                >
+                    <div className={`p-4 rounded-2xl border shadow-2xl backdrop-blur-xl flex items-center justify-between gap-3 ${
+                        toast.type === 'error'
+                            ? 'bg-red-950/90 border-red-500/30 text-red-200 shadow-red-950/50'
+                            : 'bg-emerald-950/90 border-emerald-500/30 text-emerald-200 shadow-emerald-950/50'
+                    }`}>
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl shrink-0 ${
+                                toast.type === 'error' ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'
+                            }`}>
+                                {toast.type === 'error' ? <AlertCircle size={20} /> : <CheckCircle size={20} />}
+                            </div>
+                            <div>
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-white/50">
+                                    {toast.type === 'error' ? 'Notification Error' : 'Success'}
+                                </h4>
+                                <p className="text-xs font-semibold mt-0.5 leading-snug">{toast.message}</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setToast(null)}
+                            className="p-1 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {deleteConfirmDocId && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-[#141418] border border-white/10 w-full max-w-sm rounded-2xl p-6 shadow-2xl"
+                    >
+                        <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 text-red-400">
+                            <Trash2 size={24} />
+                        </div>
+                        <h3 className="text-lg font-bold text-white text-center mb-1">Remove Document?</h3>
+                        <p className="text-xs text-white/50 text-center mb-6 leading-relaxed">
+                            Are you sure you want to remove this document? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteConfirmDocId(null)}
+                                className="flex-1 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold transition-all border border-white/10"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => confirmDeleteDocument(deleteConfirmDocId)}
+                                className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-red-900/30"
+                            >
+                                Yes, Remove
+                            </button>
+                        </div>
+                    </motion.div>
                 </div>
             )}
         </div>

@@ -232,6 +232,36 @@ const PartnerDashboard = () => {
         }
     };
 
+    const handlePartnerCertUpload = async (certId, file) => {
+        if (!file) return;
+        try {
+            const config = { 
+                headers: { 
+                    Authorization: `Bearer ${userInfo.token}`,
+                    'Content-Type': 'multipart/form-data'
+                } 
+            };
+            const formData = new FormData();
+            formData.append('certificate', file);
+            await axios.post(`/api/certificates/${certId}/upload`, formData, config);
+            showToast('Certificate PDF uploaded and issued successfully!', 'success');
+            if (selectedStudent) fetchStudentAssets(selectedStudent);
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to upload certificate', 'error');
+        }
+    };
+
+    const handlePartnerCertStatus = async (certId, status) => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            await axios.put(`/api/certificates/${certId}/status`, { status }, config);
+            showToast(`Certificate status updated to ${status}!`, 'success');
+            if (selectedStudent) fetchStudentAssets(selectedStudent);
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to update status', 'error');
+        }
+    };
+
     useEffect(() => {
         fetchStats();
     }, []);
@@ -818,18 +848,36 @@ const PartnerDashboard = () => {
                                                                     <span className="text-white/60 truncate ml-6">{req.university_name}</span>
                                                                 </div>
                                                             </div>
-                                                            {req.status === 'ISSUED' ? (
-                                                                <button 
-                                                                    onClick={() => window.open(req.file_url, '_blank')}
-                                                                    className="w-full py-3 bg-primary hover:bg-primary/90 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-                                                                >
-                                                                    <Eye size={16} /> View Certificate
-                                                                </button>
-                                                            ) : (
-                                                                <div className="w-full py-3 bg-white/5 text-white/20 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-2">
-                                                                    <Clock size={16} /> Processing
+                                                            <div className="flex flex-col gap-2">
+                                                                {req.status === 'ISSUED' && req.file_url && (
+                                                                    <button 
+                                                                        onClick={() => window.open(req.file_url, '_blank')}
+                                                                        className="w-full py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2"
+                                                                    >
+                                                                        <Eye size={15} /> View Issued Certificate
+                                                                    </button>
+                                                                )}
+                                                                
+                                                                <div className="flex gap-2">
+                                                                    <label className="flex-1 py-2.5 bg-primary/20 hover:bg-primary text-primary hover:text-white rounded-xl text-xs font-bold transition-all border border-primary/30 flex items-center justify-center gap-1.5 cursor-pointer">
+                                                                        <Upload size={14} /> {req.status === 'ISSUED' ? 'Re-upload PDF' : 'Upload PDF'}
+                                                                        <input 
+                                                                            type="file" 
+                                                                            accept=".pdf,.png,.jpg,.jpeg" 
+                                                                            className="hidden" 
+                                                                            onChange={(e) => handlePartnerCertUpload(req.id, e.target.files[0])} 
+                                                                        />
+                                                                    </label>
+                                                                    {req.status === 'PENDING' && (
+                                                                        <button 
+                                                                            onClick={() => handlePartnerCertStatus(req.id, 'APPROVED')}
+                                                                            className="px-3 py-2.5 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-xl text-xs font-bold transition-all border border-emerald-500/20"
+                                                                        >
+                                                                            Approve
+                                                                        </button>
+                                                                    )}
                                                                 </div>
-                                                            )}
+                                                            </div>
                                                         </GlassCard>
                                                     ))}
                                                 </div>
