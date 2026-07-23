@@ -70,18 +70,27 @@ const updateEntity = async (req, res) => {
         socketService.notifyUserListUpdate('updated', { ...saved, _id: saved.id });
 
         if (saved.role === 'partner' && discountRate !== undefined && discountRate !== null) {
-            const newCode = (saved.name.replace(/\s+/g, '').substring(0, 6) + saved.discount_rate).toUpperCase();
-
+            const rawCode = (saved.name.replace(/\s+/g, '').substring(0, 6) + saved.discount_rate).toUpperCase();
+            
             // Look for existing discount code for this partner
-            let discountRes = await query('SELECT id FROM discounts WHERE partner_id = $1', [saved.id]);
+            let discountRes = await query('SELECT id FROM discounts WHERE partner_id = $1 ORDER BY id ASC', [saved.id]);
+            
+            let finalCode = rawCode;
+            const codeCheck = await query('SELECT id FROM discounts WHERE code = $1 AND (partner_id IS NULL OR partner_id != $2)', [finalCode, saved.id]);
+            if (codeCheck.rows.length > 0) {
+                finalCode = `${rawCode}_${saved.id.slice(-4)}`.toUpperCase();
+            }
+
             if (discountRes.rows.length > 0) {
-                await query('UPDATE discounts SET value = $1, code = $2, updated_at = NOW() WHERE partner_id = $3', [saved.discount_rate, newCode, saved.id]);
+                // Update only the primary discount record for this partner
+                const targetDiscountId = discountRes.rows[0].id;
+                await query('UPDATE discounts SET value = $1, code = $2, updated_at = NOW() WHERE id = $3', [saved.discount_rate, finalCode, targetDiscountId]);
             } else {
                 const newDiscountId = `disc_${Date.now()}`;
                 await query(`
                     INSERT INTO discounts (id, code, value, type, partner_id, active, uses, max_uses)
                     VALUES ($1, $2, $3, 'percentage', $4, true, 0, 9999)
-                `, [newDiscountId, newCode, saved.discount_rate, saved.id]);
+                `, [newDiscountId, finalCode, saved.discount_rate, saved.id]);
             }
         }
 
@@ -97,7 +106,13 @@ const updateEntity = async (req, res) => {
     } catch (error) {
         console.error('[updateEntity] error:', error);
         if (error.code === '23505') { // Postgres unique violation
-            return res.status(400).json({ message: 'Email already in use by another account' });
+            if (error.constraint === 'users_email_key' || (error.detail && error.detail.includes('email'))) {
+                return res.status(400).json({ message: 'Email already in use by another account' });
+            }
+            if (error.constraint === 'discounts_code_key' || (error.detail && error.detail.includes('code'))) {
+                return res.status(400).json({ message: 'Generated discount code already exists. Please use a different partner name or discount rate.' });
+            }
+            return res.status(400).json({ message: 'A record with duplicate unique details already exists.' });
         }
         return res.status(500).json({ message: error.message || 'Server error updating entity' });
     }
@@ -1605,7 +1620,7 @@ const adminEnrollStudent = async (req, res) => {
         if (universityId) {
             const universityRes = await query('SELECT id, role FROM users WHERE id = $1', [universityId]);
             const university = universityRes.rows[0];
-            if (!university || university.role !== 'university') {
+            if (!university || !['university', 'partner'].includes(university.role)) {
                 return res.status(400).json({ message: 'Invalid university ID' });
             }
             assignedUniversityId = universityId;

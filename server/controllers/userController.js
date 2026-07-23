@@ -17,7 +17,7 @@ const generateToken = (id) => {
 // @access  Public
 const registerUser = async (req, res) => {
     try {
-        const { name, email, password, phone, role = 'student', discountRate = 0 } = req.body;
+        const { name, email, password, phone, role = 'student', discountRate = 0, universityId } = req.body;
         const lowerEmail = email.toLowerCase().trim();
 
         // 1. Check if user exists
@@ -32,12 +32,12 @@ const registerUser = async (req, res) => {
 
         // 3. Insert into PG
         const newUser = await query(`
-            INSERT INTO users (id, name, email, password, role, discount_rate, profile, is_verified, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, true, NOW(), NOW())
-            RETURNING id, name, email, role
+            INSERT INTO users (id, name, email, password, role, discount_rate, profile, university_id, is_verified, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW(), NOW())
+            RETURNING id, name, email, role, university_id
         `, [
             newId, name, lowerEmail, hashedPassword, role, discountRate,
-            JSON.stringify({ phone: phone || '' })
+            JSON.stringify({ phone: phone || '' }), universityId || null
         ]);
 
         const user = newUser.rows[0];
@@ -294,7 +294,10 @@ module.exports = {
             `, [hashedToken, expire, user.id]);
 
             // 4. Send Email
-            const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+            const baseUrl = (process.env.CLIENT_URL && !process.env.CLIENT_URL.includes('localhost') && !process.env.CLIENT_URL.includes('127.0.0.1'))
+                ? process.env.CLIENT_URL 
+                : 'https://skilldad.com';
+            const resetUrl = `${baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl}/reset-password/${resetToken}`;
             
             try {
                 const html = emailTemplates.passwordReset(user.name, resetUrl);

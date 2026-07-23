@@ -125,7 +125,32 @@ const createSession = asyncHandler(async (req, res) => {
 // @desc    Get all sessions for a user
 const getSessions = asyncHandler(async (req, res) => {
     let sql = `
-        SELECT s.*, u.name as instructor_name, c.title as course_title, b.name as batch_name
+        SELECT s.*, u.name as instructor_name, c.title as course_title, b.name as batch_name,
+        COALESCE(
+            CASE 
+                WHEN s.course_id IS NOT NULL AND s.batch_id IS NOT NULL THEN (
+                    SELECT COUNT(DISTINCT e.student_id)::int 
+                    FROM enrollments e 
+                    WHERE e.course_id = s.course_id AND (e.batch_id = s.batch_id OR e.batch_id::text = s.batch_id::text) AND (e.status = 'active' OR e.status IS NULL)
+                )
+                WHEN s.course_id IS NOT NULL AND s.batch_id IS NULL THEN (
+                    SELECT COUNT(DISTINCT e.student_id)::int 
+                    FROM enrollments e 
+                    WHERE e.course_id = s.course_id AND (e.status = 'active' OR e.status IS NULL)
+                )
+                WHEN s.university_id IS NOT NULL THEN (
+                    SELECT COUNT(DISTINCT id)::int 
+                    FROM users 
+                    WHERE university_id = s.university_id AND role = 'student'
+                )
+                WHEN s.partner_id IS NOT NULL THEN (
+                    SELECT COUNT(DISTINCT id)::int 
+                    FROM users 
+                    WHERE registered_by = s.partner_id AND role = 'student'
+                )
+                ELSE 0
+            END, 0
+        ) as dynamic_enrolled_count
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
         LEFT JOIN courses c ON s.course_id = c.id
@@ -150,6 +175,8 @@ const getSessions = asyncHandler(async (req, res) => {
         params.push(req.user.id);
     }
 
+    sql += ' ORDER BY s.created_at DESC, s.start_time DESC';
+
     const resSet = await query(sql, params);
     
     const sessions = resSet.rows.map(r => {
@@ -163,6 +190,10 @@ const getSessions = asyncHandler(async (req, res) => {
             try { recording = JSON.parse(recording); } catch (e) {}
         }
 
+        const enrolledCount = r.dynamic_enrolled_count !== undefined && r.dynamic_enrolled_count !== null
+            ? Number(r.dynamic_enrolled_count)
+            : (Array.isArray(r.enrolled_students) ? r.enrolled_students.length : (typeof r.enrolled_students === 'number' ? r.enrolled_students : 0));
+
         return {
             ...r,
             _id: r.id,
@@ -171,7 +202,9 @@ const getSessions = asyncHandler(async (req, res) => {
             startTime: r.start_time,
             instructor: { name: r.instructor_name },
             course: { title: r.course_title },
-            batchName: r.batch_name
+            batchName: r.batch_name,
+            enrolledStudents: enrolledCount,
+            enrolledCount: enrolledCount
         };
     });
 

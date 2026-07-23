@@ -50,6 +50,8 @@ const GroupManagement = () => {
     const [universityCourses, setUniversityCourses] = useState([]);
     const [filterBatch, setFilterBatch] = useState('all');
     const [filterCourseBatches, setFilterCourseBatches] = useState([]);
+    const [showMoreFilters, setShowMoreFilters] = useState(false);
+    const [filterProgress, setFilterProgress] = useState('all');
     const navigate = useNavigate();
     const [showRegisterStudentModal, setShowRegisterStudentModal] = useState(false);
     const [newStudentData, setNewStudentData] = useState({
@@ -296,8 +298,24 @@ const GroupManagement = () => {
             );
         }
 
-        return matchesSearch && matchesCourse && matchesBatch;
+        // Match progress
+        let matchesProgress = true;
+        const prog = student.progress || 0;
+        if (filterProgress === 'high') matchesProgress = prog >= 70;
+        else if (filterProgress === 'mid') matchesProgress = prog >= 30 && prog < 70;
+        else if (filterProgress === 'low') matchesProgress = prog < 30;
+
+        return matchesSearch && matchesCourse && matchesBatch && matchesProgress;
     });
+
+    const activeFilterCount = (filterCourse !== 'all' ? 1 : 0) + (filterBatch !== 'all' ? 1 : 0) + (filterProgress !== 'all' ? 1 : 0) + (searchTerm ? 1 : 0);
+
+    const resetFilters = () => {
+        setSearchTerm('');
+        setFilterCourse('all');
+        setFilterBatch('all');
+        setFilterProgress('all');
+    };
 
     const courses = [...new Set(students.map(s => s.course))];
 
@@ -343,9 +361,9 @@ const GroupManagement = () => {
                             onChange={(e) => setFilterCourse(e.target.value)}
                             className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary text-sm min-w-[140px]"
                         >
-                            <option value="all">All Courses</option>
+                            <option value="all" className="bg-[#0B0F1A]">All Courses</option>
                             {courses.map(course => (
-                                <option key={course} value={course}>{course}</option>
+                                <option key={course} value={course} className="bg-[#0B0F1A]">{course}</option>
                             ))}
                         </select>
 
@@ -355,17 +373,13 @@ const GroupManagement = () => {
                                 onChange={(e) => setFilterBatch(e.target.value)}
                                 className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary text-sm min-w-[140px] animate-in slide-in-from-left-2 duration-300"
                             >
-                                <option value="all">All Batches</option>
+                                <option value="all" className="bg-[#0B0F1A]">All Batches</option>
                                 {filterCourseBatches.map(batch => (
-                                    <option key={batch.id} value={batch.id}>{batch.name}</option>
+                                    <option key={batch.id} value={batch.id} className="bg-[#0B0F1A]">{batch.name}</option>
                                 ))}
                             </select>
                         )}
                     </div>
-                    <ModernButton variant="primary" onClick={() => { }} className="!py-2 !px-4 text-sm">
-                        <Filter size={16} className="mr-2" />
-                        More Filters
-                    </ModernButton>
                 </div>
             </GlassCard>
 

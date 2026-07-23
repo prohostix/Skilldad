@@ -563,7 +563,7 @@ const SessionCard = ({
                                 })()}
                             </span>
                             <span className="flex items-center gap-1"><Clock size={11} className="text-primary" /> {session.duration} min</span>
-                            <span className="flex items-center gap-1"><Users size={11} className="text-primary" /> {session.enrolledStudents?.length || 0} students</span>
+                            <span className="flex items-center gap-1"><Users size={11} className="text-primary" /> {typeof session.enrolledStudents === 'number' ? session.enrolledStudents : (typeof session.enrolledCount === 'number' ? session.enrolledCount : (session.enrolledStudents?.length || 0))} students</span>
                         </div>
 
                         {/* Instructor & University */}
@@ -923,8 +923,12 @@ const LiveSessionsTab = ({ students }) => {
     // Get unique courses
     const uniqueCourses = [...new Set(sessions.map(s => s.course?.title).filter(Boolean))];
     
-    // Apply both status and course filters
-    let filtered = sessions;
+    // Apply both status and course filters & sort newly created/newest first
+    let filtered = [...sessions].sort((a, b) => {
+        const timeA = new Date(a.created_at || a.createdAt || a.startTime).getTime();
+        const timeB = new Date(b.created_at || b.createdAt || b.startTime).getTime();
+        return timeB - timeA;
+    });
     if (filterStatus !== 'all') {
         filtered = filtered.filter(s => s.status === filterStatus);
     }

@@ -24,6 +24,7 @@ import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import MeetingRecordingPlayer from '../../components/MeetingRecordingPlayer';
 import CustomYoutubePlayer from '../../components/CustomYoutubePlayer';
+import { getMediaUrl } from '../../utils/media';
 
 const CoursePlayer = () => {
     const { courseId } = useParams();
@@ -761,12 +762,16 @@ const CoursePlayer = () => {
                                     onEnded={handleVideoEnd}
                                     onError={(error) => console.error('Recording playback error:', error)}
                                 />
-                            ) : (currentVideo.url && (currentVideo.url.endsWith('.mp4') || currentVideo.url.endsWith('.webm') || currentVideo.url.endsWith('.ogg') || currentVideo.url.includes('/mp4') || currentVideo.url.includes('.mp4?'))) ? (
+                            ) : (currentVideo.url && (currentVideo.url.endsWith('.mp4') || currentVideo.url.endsWith('.webm') || currentVideo.url.endsWith('.ogg') || currentVideo.url.endsWith('.mov') || currentVideo.url.includes('/mp4') || currentVideo.url.includes('.mp4?') || currentVideo.url.includes('/uploads/'))) ? (
                                 <video
-                                    src={currentVideo.url}
+                                    src={getMediaUrl(currentVideo.url)}
                                     controls
                                     className="w-full h-full"
                                     onEnded={handleVideoEnd}
+                                    onError={(e) => {
+                                        console.error('Video playback error:', e);
+                                        toast.error('Unable to load video file. The file may be missing from the server.');
+                                    }}
                                     controlsList="nodownload"
                                 />
                             ) : (

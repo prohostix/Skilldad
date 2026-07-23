@@ -80,10 +80,15 @@ const LiveClasses = () => {
     // Get unique courses from sessions
     const uniqueCourses = [...new Set(sessions.map(s => s.course?.title).filter(Boolean))];
 
-    // Filter sessions based on selected course
-    const filteredSessions = selectedCourse === 'all' 
+    // Filter sessions based on selected course & sort newly created/newest first
+    const filteredSessions = (selectedCourse === 'all' 
         ? sessions 
-        : sessions.filter(s => s.course?.title === selectedCourse);
+        : sessions.filter(s => s.course?.title === selectedCourse)
+    ).sort((a, b) => {
+        const timeA = new Date(a.created_at || a.createdAt || a.startTime).getTime();
+        const timeB = new Date(b.created_at || b.createdAt || b.startTime).getTime();
+        return timeB - timeA;
+    });
 
     const renderSessionCard = (session, index) => {
         const { day, time } = formatDate(session.startTime);

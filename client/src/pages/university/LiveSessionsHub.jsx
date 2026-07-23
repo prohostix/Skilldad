@@ -132,7 +132,7 @@ const formatSession = (s, currentUserId) => {
         date: startObj.toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' }),
         time: startObj.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true }),
         duration: `${s.duration} min`,
-        enrolledStudents: typeof s.enrolledStudents === 'number' ? s.enrolledStudents : (s.enrolledStudents?.length || 0),
+        enrolledStudents: typeof s.enrolledStudents === 'number' ? s.enrolledStudents : (typeof s.enrolledCount === 'number' ? s.enrolledCount : (Array.isArray(s.enrolledStudents) ? s.enrolledStudents.length : 0)),
         status: s.status || (startObj > new Date() ? 'scheduled' : 'completed'),
         description: s.description,
         meetingLink: s.meetingLink,
@@ -832,7 +832,11 @@ const LiveSessionsHub = () => {
                             ) : (
                                 <div className="grid gap-5">
                                     {liveSessions
-                                        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+                                        .sort((a, b) => {
+                                            const timeA = new Date(a.created_at || a.startTime).getTime();
+                                            const timeB = new Date(b.created_at || b.startTime).getTime();
+                                            return timeB - timeA;
+                                        })
                                         .map((session, idx) => (
                                             <GlassCard key={session.id || `sess-${idx}`} className={`p-5 md:p-6 group relative overflow-hidden transition-all duration-400 border-white/10 hover:border-primary/30 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/30' : ''}`}>
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/10 transition-all pointer-events-none" />

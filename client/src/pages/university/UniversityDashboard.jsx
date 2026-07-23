@@ -71,6 +71,7 @@ const UniversityDashboard = () => {
     const [availableBatches, setAvailableBatches] = useState([]);
     const [receivedDocuments, setReceivedDocuments] = useState([]);
     const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
+    const [selectedStudentForView, setSelectedStudentForView] = useState(null);
 
     useEffect(() => {
         if (location.pathname.includes('analytics')) {
@@ -374,8 +375,15 @@ const UniversityDashboard = () => {
         }
     };
 
+    const formatJoinedDate = (student) => {
+        const rawDate = student?.created_at || student?.createdAt || student?.enrollmentDate || student?.enrollment_date;
+        if (!rawDate) return 'N/A';
+        const date = new Date(rawDate);
+        return isNaN(date.getTime()) ? 'N/A' : date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    };
+
     const handleViewStudent = (student) => {
-        alert(`Viewing Details for ${student.name}\nCourse: ${student.course}\nProgress: ${student.progress}%\nEmail: ${student.email}`);
+        setSelectedStudentForView(student);
     };
 
     return (
@@ -544,7 +552,7 @@ const UniversityDashboard = () => {
                                                     ></div>
                                                 </div>
                                                 <div className="text-xs text-white/50 mt-1">
-                                                    Joined: {new Date(student.createdAt || student.enrollmentDate).toLocaleDateString()}
+                                                    Joined: {formatJoinedDate(student)}
                                                 </div>
                                             </div>
                                             <div className="flex space-x-2">
@@ -1007,6 +1015,133 @@ const UniversityDashboard = () => {
                     onSave={handleCreateCourse}
                 />
             )}
+
+            {/* Student Details View Modal */}
+            <AnimatePresence>
+                {selectedStudentForView && (
+                    <div 
+                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+                        onClick={() => setSelectedStudentForView(null)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-full max-w-lg bg-[#0B0F1A] border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
+                        >
+                            {/* Background Glow */}
+                            <div className="absolute -top-12 -right-12 w-36 h-36 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+
+                            {/* Modal Header */}
+                            <div className="flex items-start justify-between mb-6 pb-4 border-b border-white/10">
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/30 to-purple-600/30 border border-primary/40 flex items-center justify-center text-xl font-black text-white shadow-lg overflow-hidden shrink-0">
+                                        {selectedStudentForView.avatar ? (
+                                            <img src={selectedStudentForView.avatar} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            selectedStudentForView.name?.charAt(0) || 'S'
+                                        )}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <h3 className="text-xl font-bold text-white truncate">{selectedStudentForView.name}</h3>
+                                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider">
+                                                Enrolled Student
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-white/40 mt-1 font-mono truncate">ID: {selectedStudentForView._id || selectedStudentForView.id || 'N/A'}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedStudentForView(null)}
+                                    className="p-2 text-white/40 hover:text-white hover:bg-white/10 rounded-xl transition-all shrink-0"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="space-y-4">
+                                {/* Enrolled Course */}
+                                <div className="p-3.5 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                                    <p className="text-[10px] font-black uppercase tracking-wider text-white/40">Enrolled Course(s)</p>
+                                    <p className="text-sm font-bold text-white">
+                                        {Array.isArray(selectedStudentForView.courses) && selectedStudentForView.courses.length > 0
+                                            ? selectedStudentForView.courses.join(', ')
+                                            : selectedStudentForView.course || 'General Student'}
+                                    </p>
+                                </div>
+
+                                {/* Contact Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                                        <p className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-1 flex items-center gap-1">
+                                            <Mail size={11} className="text-primary" /> Email Address
+                                        </p>
+                                        <p className="text-xs font-semibold text-white truncate">{selectedStudentForView.email || 'N/A'}</p>
+                                    </div>
+                                    <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                                        <p className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-1 flex items-center gap-1">
+                                            <Phone size={11} className="text-primary" /> Phone Number
+                                        </p>
+                                        <p className="text-xs font-semibold text-white">{selectedStudentForView.phone || selectedStudentForView.profile?.phone || 'N/A'}</p>
+                                    </div>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs font-bold text-white/70">Course Learning Progress</span>
+                                        <span className="text-sm font-black text-primary">{selectedStudentForView.progress || 0}%</span>
+                                    </div>
+                                    <div className="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
+                                        <div
+                                            className="bg-gradient-to-r from-primary to-purple-500 h-full rounded-full transition-all duration-500"
+                                            style={{ width: `${selectedStudentForView.progress || 0}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Documents List */}
+                                <div className="p-3.5 bg-white/5 border border-white/10 rounded-xl">
+                                    <p className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-2">Documents</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(selectedStudentForView.documents && selectedStudentForView.documents.length > 0) ? (
+                                            selectedStudentForView.documents.map((doc, idx) => (
+                                                <span key={idx} className="px-2.5 py-1 bg-white/10 text-xs font-semibold text-white/80 rounded-lg border border-white/10">
+                                                    {typeof doc === 'string' ? doc : doc.title || 'Document'}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-xs text-white/30 italic">No documents uploaded yet</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Joined Date & Verification */}
+                                <div className="flex items-center justify-between text-xs text-white/40 px-1 pt-1">
+                                    <span>Joined: <strong className="text-white/70">{formatJoinedDate(selectedStudentForView)}</strong></span>
+                                    <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                                        <CheckCircle2 size={12} /> Active Student
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="mt-6 pt-4 border-t border-white/10 flex justify-end">
+                                <ModernButton
+                                    variant="primary"
+                                    onClick={() => setSelectedStudentForView(null)}
+                                    className="w-full justify-center text-sm font-bold py-2.5"
+                                >
+                                    Close Details
+                                </ModernButton>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div >
     );
 };

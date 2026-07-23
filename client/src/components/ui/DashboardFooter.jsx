@@ -23,8 +23,8 @@ const DashboardFooter = () => {
                         </div>
                         <div className="flex items-center gap-2 text-gray-400 text-sm group">
                             <Phone size={16} className="flex-shrink-0 group-hover:text-primary transition-colors" />
-                            <a href="tel:+15551234567" className="hover:text-white transition-colors">
-                                +1 (555) 123-4567
+                            <a href="tel:+916238067220" className="hover:text-white transition-colors">
+                                +91 6238067220
                             </a>
                         </div>
                     </div>

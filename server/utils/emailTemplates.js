@@ -18,7 +18,46 @@ const baseStyle = {
     value: 'font-family: "JetBrains Mono", monospace; font-size: 16px; font-weight: 600; color: #111827;'
 };
 
-const layout = (title, content, button = null) => `
+const getClientUrl = (path = '') => {
+    let baseUrl = process.env.CLIENT_URL || 'https://skilldad.com';
+    // Always convert localhost / 127.0.0.1 origins in email URLs to live https://skilldad.com
+    baseUrl = baseUrl.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, 'https://skilldad.com');
+
+    if (!path) {
+        return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    }
+    
+    if (typeof path === 'string') {
+        if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('mailto:')) {
+            return path.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, 'https://skilldad.com');
+        }
+    }
+
+    const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${base}${cleanPath}`;
+};
+
+const layout = (title, content, button = null) => {
+    let buttonHtml = '';
+    if (button && button.url && button.text) {
+        const targetUrl = getClientUrl(button.url);
+        buttonHtml = `
+            <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin: 28px auto 0 auto; text-align: center;">
+                <tr>
+                    <td align="center" bgcolor="#7C3AED" style="border-radius: 10px; background-color: #7C3AED; padding: 0;">
+                        <a href="${targetUrl}" target="_blank" style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; font-weight: 700; color: #FFFFFF !important; text-decoration: none !important; padding: 14px 32px; border-radius: 10px; border: 1px solid #7C3AED; display: inline-block; background-color: #7C3AED; mso-padding-alt: 0; text-underline-color: #7C3AED;">
+                            <!--[if mso]><i style="letter-spacing: 32px; mso-font-width: -100%; mso-text-raise: 30pt">&nbsp;</i><![endif]-->
+                            <span style="color: #FFFFFF !important; text-decoration: none !important; display: inline-block;">${button.text}</span>
+                            <!--[if mso]><i style="letter-spacing: 32px; mso-font-width: -100%">&nbsp;</i><![endif]-->
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        `;
+    }
+
+    return `
     <div style="${baseStyle.container}">
         <div style="${baseStyle.card}">
             <div style="${baseStyle.header}">
@@ -28,30 +67,19 @@ const layout = (title, content, button = null) => `
             <div style="${baseStyle.body}">
                 <h2 style="${baseStyle.h2}">${title}</h2>
                 ${content}
-                ${button ? `
-                    <div style="text-align: center; margin-top: 8px;">
-                        <a href="${button.url}" style="${baseStyle.button}">${button.text}</a>
-                    </div>
-                ` : ''}
+                ${buttonHtml}
             </div>
             <div style="${baseStyle.footer}">
                 <p style="margin: 0 0 12px 0;">&copy; ${new Date().getFullYear()} SkillDad. All rights reserved.</p>
                 <div style="margin-bottom: 12px;">
-                    <a href="#" style="color: #7C3AED; text-decoration: none; margin: 0 10px;">Privacy Policy</a>
-                    <a href="#" style="color: #7C3AED; text-decoration: none; margin: 0 10px;">Terms of Service</a>
+                    <a href="${getClientUrl('/privacy')}" style="color: #7C3AED; text-decoration: none; margin: 0 10px;">Privacy Policy</a>
+                    <a href="${getClientUrl('/terms')}" style="color: #7C3AED; text-decoration: none; margin: 0 10px;">Terms of Service</a>
                 </div>
-                <p style="margin: 0;">If you have any questions, contact us at support@skilldad.com</p>
+                <p style="margin: 0;">If you have any questions, contact us at <a href="mailto:support@skilldad.com" style="color: #7C3AED; text-decoration: none;">support@skilldad.com</a></p>
             </div>
         </div>
     </div>
-`;
-
-const getClientUrl = (path = '') => {
-    const baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    // Ensure base doesn't have trailing slash and path has leading slash
-    const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${base}${cleanPath}`;
+    `;
 };
 
 const templates = {
@@ -338,6 +366,10 @@ const templates = {
             text: 'Access My Course',
             url: getClientUrl('/dashboard/courses')
         });
+    },
+
+    enrollmentConfirmed: (name, courseTitle, enrolledBy) => {
+        return templates.adminEnrollment(name, courseTitle, enrolledBy);
     }
 };
 

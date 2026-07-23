@@ -275,14 +275,14 @@ const Footer = ({ forceVisible = false }) => {
                             </li>
                             <li className="flex items-start gap-3 text-gray-400 text-sm group">
                                 <Phone size={16} className="mt-0.5 flex-shrink-0 group-hover:text-primary transition-colors" />
-                                <a href="tel:+15551234567" className="hover:text-white transition-colors font-inter">
-                                    +1 (555) 123-4567
+                                <a href="tel:+916238067220" className="hover:text-white transition-colors font-inter">
+                                    +91 6238067220
                                 </a>
                             </li>
                             <li className="flex items-start gap-3 text-gray-400 text-sm">
                                 <MapPin size={16} className="mt-0.5 flex-shrink-0" />
                                 <span className="font-inter">
-                                    123 Learning Street<br />Education City, EC 12345
+                                    A-18, S1, Second Floor,<br />Sector 59, Noida UP 201301.
                                 </span>
                             </li>
                         </ul>
