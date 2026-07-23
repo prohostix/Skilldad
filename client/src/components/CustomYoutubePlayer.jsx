@@ -218,6 +218,19 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         <div ref={mountRef} className="w-full h-full" />
       </div>
 
+      {/* Pause Cover — YouTube shows its own title bar + suggested-video overlay
+          whenever the video is paused via the API, with no parameter to disable
+          it. Since a paused frame isn't changing anyway, fully covering it while
+          not playing hides that native UI completely instead of trying to mask
+          pieces of it. */}
+      {!isPlaying && (
+        <div className="absolute inset-0 z-[15] pointer-events-none flex items-center justify-center bg-black">
+          <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+            <Play size={28} className="text-white ml-1" fill="white" />
+          </div>
+        </div>
+      )}
+
       {/* Intercept Overlay */}
       <div
         onClick={handlePlayPause}
