@@ -771,6 +771,7 @@ const LiveSessionsTab = ({ students }) => {
     // Initialise with demo data so the page is NEVER blank on first render
     // Initialise empty so we can detect once API responds
     const [sessions, setSessions] = useState([]);
+    const [allUniversityCourses, setAllUniversityCourses] = useState([]);
     const [loading, setLoading] = useState(true); // Indicate loading initially
     const [loadingId, setLoadingId] = useState(null);
     const [filterStatus, setFilterStatus] = useState('all');
@@ -781,6 +782,29 @@ const LiveSessionsTab = ({ students }) => {
     const pollRef = useRef(null);
 
     const showToast = (msg, type = 'info') => setToast({ msg, type });
+
+    useEffect(() => {
+        const fetchUniversityCourses = async () => {
+            try {
+                const raw = localStorage.getItem('userInfo');
+                if (!raw) return;
+                const { token } = JSON.parse(raw);
+                const config = { headers: { Authorization: `Bearer ${token}` } };
+                let res = await axios.get('/api/courses/admin', config).catch(() => null);
+                if (!res || !res.data || (Array.isArray(res.data) && res.data.length === 0)) {
+                    res = await axios.get('/api/courses', config).catch(() => null);
+                }
+                if (res && res.data) {
+                    const list = Array.isArray(res.data) ? res.data : (res.data.courses || []);
+                    const titles = list.map(c => c.title || c.name).filter(Boolean);
+                    setAllUniversityCourses(titles);
+                }
+            } catch (err) {
+                console.warn('[LiveSessionsTab] Could not fetch university courses:', err.message);
+            }
+        };
+        fetchUniversityCourses();
+    }, []);
 
     /* ── Background fetch with retry for Render cold starts ── */
     const fetchSessions = useCallback(async (attempt = 1) => {
@@ -919,9 +943,17 @@ const LiveSessionsTab = ({ students }) => {
         navigate(`/student-room/${id}`);
     };
 
-    /* ── Derived ── */
-    // Get unique courses
-    const uniqueCourses = [...new Set(sessions.map(s => s.course?.title).filter(Boolean))];
+    const getCourseTitle = (item) => {
+        if (!item) return '';
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object') return item.title || item.name || '';
+        return String(item);
+    };
+
+    // Get unique courses combining university-provided courses and session courses
+    const sessionCourseTitles = sessions.map(s => getCourseTitle(s.course) || getCourseTitle(s.category)).filter(Boolean);
+    const universityCourseTitles = allUniversityCourses.map(c => getCourseTitle(c)).filter(Boolean);
+    const uniqueCourses = Array.from(new Set([...universityCourseTitles, ...sessionCourseTitles])).filter(Boolean).sort();
     
     // Apply both status and course filters & sort newly created/newest first
     let filtered = [...sessions].sort((a, b) => {
@@ -933,7 +965,7 @@ const LiveSessionsTab = ({ students }) => {
         filtered = filtered.filter(s => s.status === filterStatus);
     }
     if (filterCourse !== 'all') {
-        filtered = filtered.filter(s => s.course?.title === filterCourse);
+        filtered = filtered.filter(s => (getCourseTitle(s.course) || getCourseTitle(s.category)) === filterCourse);
     }
 
     const liveCount = sessions.filter(s => s.status === 'live').length;
@@ -1019,12 +1051,15 @@ const LiveSessionsTab = ({ students }) => {
                         onChange={(e) => setFilterCourse(e.target.value)}
                         className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white hover:border-primary/50 transition-all focus:outline-none focus:border-primary uppercase tracking-wider"
                     >
-                        <option value="all" className="bg-[#0a0a0a]">All Courses</option>
-                        {uniqueCourses.map((course, index) => (
-                            <option key={index} value={course} className="bg-[#0a0a0a]">
-                                {course}
-                            </option>
-                        ))}
+                        <option value="all" className="bg-[#0a0a0a]">ALL COURSES</option>
+                        {uniqueCourses.map((course, index) => {
+                            const courseTitleStr = getCourseTitle(course);
+                            return (
+                                <option key={index} value={courseTitleStr} className="bg-[#0a0a0a]">
+                                    {courseTitleStr}
+                                </option>
+                            );
+                        })}
                     </select>
                 )}
             </div>

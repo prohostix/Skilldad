@@ -52,7 +52,7 @@ const DashboardLayout = () => {
             )}
             {!location.pathname.includes('/session/') && <BottomNav />}
 
-            <FloatingHelpWidget />
+            {!location.pathname.includes('/session/') && <FloatingHelpWidget />}
             {isStudent && !location.pathname.includes('/session/') && location.pathname !== '/dashboard/reward-wallet' && (
                 <>
                     <ReferralModal isOpen={referModalOpen} onClose={() => setReferModalOpen(false)} />

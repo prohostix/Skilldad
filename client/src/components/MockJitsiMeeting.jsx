@@ -561,24 +561,9 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
         document.body
       )}
 
-      {/* Mock Native Whiteboard Overlay */}
+      {/* Real Interactive Whiteboard Canvas */}
       {showMockWhiteboard && (
-        <div className="absolute inset-x-0 bottom-[80px] top-0 z-30 bg-white m-4 rounded-xl flex items-center justify-center border border-white/20 shadow-2xl overflow-hidden shadow-white/10">
-            <div className="text-center p-8">
-                <PenTool size={48} className="mx-auto text-blue-500 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Built-in Jitsi Whiteboard</h2>
-                <p className="text-gray-500 max-w-sm mx-auto">
-                    This is a placeholder for the local Mock environment. <br/><br/>
-                    When you run the real Jitsi SDK (<code>JITSI_MOCK_MODE=false</code>), the official Excalidraw-based Jitsi Whiteboard will seamlessly appear here automatically.
-                </p>
-                <button 
-                    onClick={() => setShowMockWhiteboard(false)}
-                    className="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-semibold"
-                >
-                    Close Mock Whiteboard
-                </button>
-            </div>
-        </div>
+        <InteractiveWhiteboard onClose={() => setShowMockWhiteboard(false)} />
       )}
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -676,5 +661,194 @@ const ScreenShareTile = ({ videoRef }) => (
     </div>
   </div>
 );
+
+// ── Interactive HTML5 Canvas Whiteboard Component ─────────────────────────────
+const InteractiveWhiteboard = ({ onClose }) => {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [color, setColor] = useState('#7C3AED');
+  const [lineWidth, setLineWidth] = useState(4);
+  const [mode, setMode] = useState('pen'); // 'pen' | 'eraser'
+  const contextRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const parent = canvas.parentElement;
+    const width = parent.clientWidth || 800;
+    const height = parent.clientHeight || 500;
+
+    canvas.width = width * 2;
+    canvas.height = height * 2;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(2, 2);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    contextRef.current = ctx;
+  }, []);
+
+  useEffect(() => {
+    if (!contextRef.current) return;
+    contextRef.current.strokeStyle = mode === 'eraser' ? '#FFFFFF' : color;
+    contextRef.current.lineWidth = mode === 'eraser' ? lineWidth * 3 : lineWidth;
+  }, [color, lineWidth, mode]);
+
+  const getCoordinates = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches && e.touches[0]) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top
+      };
+    }
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+  };
+
+  const startDrawing = (e) => {
+    const { x, y } = getCoordinates(e);
+    contextRef.current.beginPath();
+    contextRef.current.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    const { x, y } = getCoordinates(e);
+    contextRef.current.lineTo(x, y);
+    contextRef.current.stroke();
+  };
+
+  const stopDrawing = () => {
+    if (isDrawing) {
+      contextRef.current.closePath();
+      setIsDrawing(false);
+    }
+  };
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = contextRef.current;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const downloadCanvas = () => {
+    const canvas = canvasRef.current;
+    const link = document.createElement('a');
+    link.download = `whiteboard-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  return (
+    <div className="absolute inset-x-0 bottom-[85px] top-4 z-30 bg-[#0F1117] mx-4 rounded-2xl flex flex-col border border-white/20 shadow-2xl overflow-hidden backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-200">
+      {/* Header Toolbar */}
+      <div className="p-3 bg-[#181B24] border-b border-white/10 flex items-center justify-between flex-wrap gap-2 text-white shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-xl bg-primary/20 text-primary">
+            <PenTool size={18} />
+          </div>
+          <div>
+            <h3 className="font-bold text-sm leading-none text-white font-inter">Interactive Whiteboard</h3>
+            <span className="text-[10px] text-white/40 font-inter">Real-time drawing canvas</span>
+          </div>
+        </div>
+
+        {/* Tools Bar */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Colors */}
+          <div className="flex items-center gap-1.5 bg-black/40 p-1.5 rounded-xl border border-white/10">
+            {['#7C3AED', '#3B82F6', '#10B981', '#EF4444', '#F59E0B', '#000000'].map(c => (
+              <button
+                key={c}
+                onClick={() => { setColor(c); setMode('pen'); }}
+                className={`w-6 h-6 rounded-full border-2 transition-all ${color === c && mode === 'pen' ? 'scale-110 border-white shadow-md' : 'border-transparent opacity-80 hover:opacity-100'}`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
+
+          {/* Stroke Thickness */}
+          <div className="flex items-center gap-1 bg-black/40 p-1.5 rounded-xl border border-white/10">
+            {[2, 4, 8, 14].map(w => (
+              <button
+                key={w}
+                onClick={() => setLineWidth(w)}
+                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${lineWidth === w ? 'bg-primary text-white' : 'text-white/50 hover:text-white'}`}
+              >
+                {w === 2 ? 'Thin' : w === 4 ? 'Medium' : w === 8 ? 'Thick' : 'XL'}
+              </button>
+            ))}
+          </div>
+
+          {/* Mode Toggle: Pen vs Eraser */}
+          <div className="flex items-center gap-1 bg-black/40 p-1.5 rounded-xl border border-white/10">
+            <button
+              onClick={() => setMode('pen')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${mode === 'pen' ? 'bg-primary text-white shadow' : 'text-white/50 hover:text-white'}`}
+            >
+              Pen
+            </button>
+            <button
+              onClick={() => setMode('eraser')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${mode === 'eraser' ? 'bg-primary text-white shadow' : 'text-white/50 hover:text-white'}`}
+            >
+              Eraser
+            </button>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={clearCanvas}
+              className="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 rounded-xl text-xs font-bold transition-all"
+            >
+              Clear Canvas
+            </button>
+            <button
+              onClick={downloadCanvas}
+              className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/15 rounded-xl text-xs font-bold transition-all"
+            >
+              Save Image
+            </button>
+          </div>
+        </div>
+
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Drawing Canvas Area */}
+      <div className="flex-1 relative bg-white cursor-crosshair overflow-hidden">
+        <canvas
+          ref={canvasRef}
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+          className="w-full h-full block touch-none"
+        />
+      </div>
+    </div>
+  );
+};
 
 export default MockJitsiMeeting;
