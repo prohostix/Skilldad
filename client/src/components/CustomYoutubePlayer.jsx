@@ -228,7 +228,8 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
           thumbnail/branding to hide in the first place. */}
       {!started && (
         <div
-          className="absolute inset-0 z-[15] bg-cover bg-center flex items-center justify-center"
+          onClick={handlePlayPause}
+          className="absolute inset-0 z-[15] bg-cover bg-center flex items-center justify-center cursor-pointer"
           style={{ backgroundImage: `url(https://img.youtube.com/vi/${videoId}/hqdefault.jpg)` }}
         >
           <div className="absolute inset-0 bg-black/30" />
