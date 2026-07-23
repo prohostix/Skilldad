@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize2, Minimize2 } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 
 // Loads the YouTube IFrame Player API script once and shares readiness across
 // every player instance on the page (multiple lessons can mount this component).
@@ -29,7 +29,6 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isReady, setIsReady] = useState(false);
   // The YouTube iframe isn't created until the student presses play. Before that,
@@ -170,26 +169,6 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
     }
   };
 
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen()
-        .then(() => setIsFullscreen(true))
-        .catch(err => console.error(err));
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   // Format time (seconds -> mm:ss)
   const formatTime = (timeInSeconds) => {
     if (isNaN(timeInSeconds)) return '0:00';
@@ -329,14 +308,6 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
                 className="w-0 group-hover/volume:w-16 h-1 rounded bg-white/20 appearance-none cursor-pointer accent-primary transition-all duration-300 overflow-hidden"
               />
             </div>
-
-            {/* Fullscreen Button */}
-            <button
-              onClick={toggleFullscreen}
-              className="p-1 text-slate-300 hover:text-white transition-colors hover:scale-105"
-            >
-              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </button>
           </div>
         </div>
       </div>
