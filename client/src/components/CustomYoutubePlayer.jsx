@@ -36,7 +36,6 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   // we show our own poster image + play button — a plain <img>, not an iframe —
   // so there's no YouTube "cued" thumbnail/branding to hide in the first place.
   const [started, setStarted] = useState(false);
-  const autoplayOnReadyRef = useRef(false);
 
   const mountRef = useRef(null);
   const playerRef = useRef(null);
@@ -63,7 +62,13 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
       if (destroyed || !mountRef.current) return;
       playerRef.current = new YT.Player(mountRef.current, {
         videoId,
+        // autoplay is always 1 here — the player is only ever created after the
+        // student clicks the poster. Using the playerVars flag (rather than an
+        // imperative .playVideo() call after the API script finishes loading)
+        // avoids the async gap that can make browsers silently block playback,
+        // which previously left the video "cued" showing YouTube's own UI.
         playerVars: {
+          autoplay: 1,
           controls: 0,
           disablekb: 1,
           modestbranding: 1,
@@ -78,10 +83,6 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
             if (destroyed) return;
             setIsReady(true);
             setDuration(playerRef.current.getDuration() || 0);
-            if (autoplayOnReadyRef.current) {
-              autoplayOnReadyRef.current = false;
-              playerRef.current.playVideo();
-            }
           },
           onStateChange: (event) => {
             if (destroyed) return;
@@ -126,7 +127,6 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
 
   const handlePlayPause = () => {
     if (!started) {
-      autoplayOnReadyRef.current = true;
       setStarted(true);
       return;
     }
