@@ -250,18 +250,6 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         </div>
       )}
 
-      {/* Corner Watermark Mask — even during active playback, with controls=0,
-          modestbranding=1 and rel=0, YouTube still shows a small "more videos" +
-          logo cluster in the bottom-right corner with no parameter to disable it.
-          Kept narrow and right-anchored so it doesn't reach into the centered
-          bottom-of-frame area where subtitles render. */}
-      {started && (
-        <div
-          className="absolute bottom-0 right-0 z-[16] pointer-events-none bg-black"
-          style={{ width: '38%', height: '20%' }}
-        />
-      )}
-
       {/* Pause Cover — YouTube shows its own title bar + suggested-video overlay
           whenever the video is paused via the API, with no parameter to disable
           it. Since a paused frame isn't changing anyway, fully covering it while
