@@ -269,80 +269,71 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         className="absolute inset-0 cursor-pointer z-10"
       />
 
-      {/* Control Skin Layer — extra bottom padding in fullscreen pushes our own
-          opaque background further down the frame, covering the row where
-          YouTube's native share/watch-later/more-videos icons render (rather
-          than trying to suppress them directly, which fullscreen doesn't allow
+      {/* Control Skin Layer — single row, hugging the very bottom edge, so it
+          physically occupies the same strip where YouTube's native share/
+          watch-later/more-videos icons render in fullscreen (rather than
+          trying to suppress them directly, which fullscreen doesn't allow
           reliably). */}
       <div
-        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 pt-4 ${isFullscreen ? 'pb-24' : 'pb-4'} flex flex-col gap-3 transition-all duration-300 z-20 ${
+        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 pt-3 pb-2 flex items-center gap-4 text-white transition-all duration-300 z-20 ${
           showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
         }`}
       >
-        {/* Progress Timeline bar */}
-        <div className="flex items-center gap-3 w-full">
+        {/* Play/Pause Button */}
+        <button
+          onClick={handlePlayPause}
+          className="p-1.5 rounded-lg bg-white/10 hover:bg-primary text-white hover:scale-105 transition-all shadow-md shrink-0"
+        >
+          {isPlaying ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" className="ml-0.5" />}
+        </button>
+
+        {/* Time Indicator */}
+        <span className="text-[11px] font-bold font-inter tracking-wider text-slate-200 shrink-0">
+          {formatTime(currentTime)} <span className="text-white/30">/</span> {formatTime(duration)}
+        </span>
+
+        {/* Progress Timeline bar — fills the space between the buttons */}
+        <input
+          type="range"
+          min={0}
+          max={duration || 100}
+          value={currentTime}
+          onChange={handleSeek}
+          className="flex-1 h-1 bg-white/20 hover:h-1.5 rounded-lg appearance-none cursor-pointer accent-primary transition-all"
+          style={{
+            background: `linear-gradient(to right, #5B5CFF 0%, #5B5CFF ${
+              duration ? (currentTime / duration) * 100 : 0
+            }%, rgba(255,255,255,0.2) ${
+              duration ? (currentTime / duration) * 100 : 0
+            }%, rgba(255,255,255,0.2) 100%)`
+          }}
+        />
+
+        {/* Mute/Volume controls */}
+        <div className="flex items-center gap-2 group/volume shrink-0">
+          <button
+            onClick={handleMuteToggle}
+            className="p-1 text-slate-300 hover:text-white transition-colors"
+          >
+            {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
+          </button>
           <input
             type="range"
             min={0}
-            max={duration || 100}
-            value={currentTime}
-            onChange={handleSeek}
-            className="w-full h-1 bg-white/20 hover:h-1.5 rounded-lg appearance-none cursor-pointer accent-primary transition-all"
-            style={{
-              background: `linear-gradient(to right, #5B5CFF 0%, #5B5CFF ${
-                duration ? (currentTime / duration) * 100 : 0
-              }%, rgba(255,255,255,0.2) ${
-                duration ? (currentTime / duration) * 100 : 0
-              }%, rgba(255,255,255,0.2) 100%)`
-            }}
+            max={100}
+            value={isMuted ? 0 : volume}
+            onChange={handleVolumeChange}
+            className="w-0 group-hover/volume:w-16 h-1 rounded bg-white/20 appearance-none cursor-pointer accent-primary transition-all duration-300 overflow-hidden"
           />
         </div>
 
-        {/* Buttons & Labels bar */}
-        <div className="flex items-center justify-between text-white">
-          <div className="flex items-center gap-4">
-            {/* Play/Pause Button */}
-            <button
-              onClick={handlePlayPause}
-              className="p-1.5 rounded-lg bg-white/10 hover:bg-primary text-white hover:scale-105 transition-all shadow-md"
-            >
-              {isPlaying ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" className="ml-0.5" />}
-            </button>
-
-            {/* Time Indicator */}
-            <span className="text-[11px] font-bold font-inter tracking-wider text-slate-200">
-              {formatTime(currentTime)} <span className="text-white/30">/</span> {formatTime(duration)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Mute/Volume controls */}
-            <div className="flex items-center gap-2 group/volume">
-              <button
-                onClick={handleMuteToggle}
-                className="p-1 text-slate-300 hover:text-white transition-colors"
-              >
-                {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
-              </button>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-                className="w-0 group-hover/volume:w-16 h-1 rounded bg-white/20 appearance-none cursor-pointer accent-primary transition-all duration-300 overflow-hidden"
-              />
-            </div>
-
-            {/* Fullscreen Button */}
-            <button
-              onClick={toggleFullscreen}
-              className="p-1 text-slate-300 hover:text-white transition-colors hover:scale-105"
-            >
-              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </button>
-          </div>
-        </div>
+        {/* Fullscreen Button */}
+        <button
+          onClick={toggleFullscreen}
+          className="p-1 text-slate-300 hover:text-white transition-colors hover:scale-105 shrink-0"
+        >
+          {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+        </button>
       </div>
     </div>
   );
