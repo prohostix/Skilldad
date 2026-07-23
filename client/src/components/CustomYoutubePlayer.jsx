@@ -32,6 +32,11 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  // The YouTube iframe isn't created until the student presses play. Before that,
+  // we show our own poster image + play button — a plain <img>, not an iframe —
+  // so there's no YouTube "cued" thumbnail/branding to hide in the first place.
+  const [started, setStarted] = useState(false);
+  const autoplayOnReadyRef = useRef(false);
 
   const mountRef = useRef(null);
   const playerRef = useRef(null);
@@ -51,7 +56,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   const videoId = getYoutubeId(url);
 
   useEffect(() => {
-    if (!videoId || !mountRef.current) return;
+    if (!started || !videoId || !mountRef.current) return;
     let destroyed = false;
 
     loadYoutubeApi().then((YT) => {
@@ -73,6 +78,10 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
             if (destroyed) return;
             setIsReady(true);
             setDuration(playerRef.current.getDuration() || 0);
+            if (autoplayOnReadyRef.current) {
+              autoplayOnReadyRef.current = false;
+              playerRef.current.playVideo();
+            }
           },
           onStateChange: (event) => {
             if (destroyed) return;
@@ -99,7 +108,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
       playerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId]);
+  }, [started, videoId]);
 
   // Poll current time while playing (YouTube's API has no continuous timeupdate event)
   useEffect(() => {
@@ -116,6 +125,11 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   }, [isPlaying, isReady]);
 
   const handlePlayPause = () => {
+    if (!started) {
+      autoplayOnReadyRef.current = true;
+      setStarted(true);
+      return;
+    }
     if (!playerRef.current || !isReady) return;
     if (isPlaying) {
       playerRef.current.pauseVideo();
@@ -209,21 +223,38 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
       onMouseMove={handleMouseMove}
       className="relative w-full aspect-video bg-black overflow-hidden group rounded-2xl border border-white/10 shadow-2xl"
     >
-      {/* YouTube Player — controls=0/modestbranding/rel=0 suppress YouTube's own UI,
-          and pointer-events-none means the iframe never receives real hover/click
-          events (so YouTube's hover-triggered title bar can never trigger either).
-          Rendered at natural size with no crop/stretch, since a vertical crop here
-          previously clipped subtitles rendered near the bottom of the frame. */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none select-none">
-        <div ref={mountRef} className="w-full h-full" />
-      </div>
+      {/* Before the student presses play, there is no iframe in the DOM at all —
+          just our own poster image + play button — so there is no YouTube "cued"
+          thumbnail/branding to hide in the first place. */}
+      {!started && (
+        <div
+          className="absolute inset-0 z-[15] bg-cover bg-center flex items-center justify-center"
+          style={{ backgroundImage: `url(https://img.youtube.com/vi/${videoId}/hqdefault.jpg)` }}
+        >
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="relative w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+            <Play size={28} className="text-white ml-1" fill="white" />
+          </div>
+        </div>
+      )}
+
+      {/* YouTube Player — only created once started=true. controls=0/modestbranding/
+          rel=0 suppress YouTube's own UI, and pointer-events-none means the iframe
+          never receives real hover/click events. Rendered at natural size with no
+          crop/stretch, since a vertical crop here previously clipped subtitles
+          rendered near the bottom of the frame. */}
+      {started && (
+        <div className="absolute inset-0 w-full h-full pointer-events-none select-none">
+          <div ref={mountRef} className="w-full h-full" />
+        </div>
+      )}
 
       {/* Pause Cover — YouTube shows its own title bar + suggested-video overlay
           whenever the video is paused via the API, with no parameter to disable
           it. Since a paused frame isn't changing anyway, fully covering it while
           not playing hides that native UI completely instead of trying to mask
           pieces of it. */}
-      {!isPlaying && (
+      {started && !isPlaying && (
         <div className="absolute inset-0 z-[15] pointer-events-none flex items-center justify-center bg-black">
           <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
             <Play size={28} className="text-white ml-1" fill="white" />
