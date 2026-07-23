@@ -209,19 +209,13 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
       onMouseMove={handleMouseMove}
       className="relative w-full aspect-video bg-black overflow-hidden group rounded-2xl border border-white/10 shadow-2xl"
     >
-      {/* Cropped YouTube Player — hides the corner watermark/logo so no YouTube
-          branding is visible. Pointer events disabled so only our custom
-          overlay/controls below are clickable. */}
-      <div className="absolute inset-0 overflow-hidden w-full h-full pointer-events-none select-none">
-        <div
-          ref={mountRef}
-          className="absolute w-full"
-          style={{
-            top: '-9%',
-            left: 0,
-            height: '118%',
-          }}
-        />
+      {/* YouTube Player — controls=0/modestbranding/rel=0 suppress YouTube's own UI,
+          and pointer-events-none means the iframe never receives real hover/click
+          events (so YouTube's hover-triggered title bar can never trigger either).
+          Rendered at natural size with no crop/stretch, since a vertical crop here
+          previously clipped subtitles rendered near the bottom of the frame. */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none select-none">
+        <div ref={mountRef} className="w-full h-full" />
       </div>
 
       {/* Intercept Overlay */}
