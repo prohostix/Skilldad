@@ -7,15 +7,20 @@ import {
     Eye,
     ChevronUp,
     ChevronDown,
-    AlertCircle
+    AlertCircle,
+    Download,
+    FileSpreadsheet
 } from 'lucide-react';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 import GlassCard from './ui/GlassCard';
 import ModernButton from './ui/ModernButton';
+import { useToast } from '../context/ToastContext';
 
 const InteractiveContentBuilder = ({ moduleId, initialContent, onSave, isEditing = false }) => {
     const { courseId } = useParams();
     const navigate = useNavigate();
+    const { showToast } = useToast();
 
     const [content, setContent] = useState(initialContent || {
         title: '',
@@ -32,6 +37,105 @@ const InteractiveContentBuilder = ({ moduleId, initialContent, onSave, isEditing
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [showPreview, setShowPreview] = useState(false);
+
+    const downloadExcelTemplate = () => {
+        const templateData = [
+            {
+                "Question": "What is the primary role of a Hospital Administrator?",
+                "Option A": "Managing healthcare facility operations and staff",
+                "Option B": "Performing surgeries",
+                "Option C": "Manufacturing medicines",
+                "Option D": "Designing architectural blueprints",
+                "Correct Option (A/B/C/D)": "A",
+                "Points": 10,
+                "Explanation": "Hospital administrators oversee the operational, financial, and organizational aspects of healthcare facilities."
+            },
+            {
+                "Question": "Which department handles patient billing and medical records?",
+                "Option A": "Emergency Room",
+                "Option B": "Health Information Management",
+                "Option C": "Radiology",
+                "Option D": "Pharmacy",
+                "Correct Option (A/B/C/D)": "B",
+                "Points": 10,
+                "Explanation": "HIM handles records, compliance, coding, and billing documentation."
+            }
+        ];
+
+        const worksheet = XLSX.utils.json_to_sheet(templateData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Quiz Template");
+        XLSX.writeFile(workbook, "quiz_questions_template.xlsx");
+        if (showToast) showToast('Quiz Excel Template downloaded!', 'success');
+    };
+
+    const handleExcelBulkUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+                if (!jsonData || jsonData.length === 0) {
+                    if (showToast) showToast('Excel file is empty or formatted incorrectly', 'error');
+                    return;
+                }
+
+                const parsedQuestions = jsonData.map((row, idx) => {
+                    const questionText = row["Question"] || row["Question Text"] || row["question"] || `Question ${idx + 1}`;
+                    const optA = String(row["Option A"] || row["Option 1"] || row["option_a"] || '').trim();
+                    const optB = String(row["Option B"] || row["Option 2"] || row["option_b"] || '').trim();
+                    const optC = String(row["Option C"] || row["Option 3"] || row["option_c"] || '').trim();
+                    const optD = String(row["Option D"] || row["Option 4"] || row["option_d"] || '').trim();
+
+                    const rawOptions = [optA, optB, optC, optD].filter(Boolean);
+                    const options = rawOptions.length >= 2 ? rawOptions : [optA || 'Option 1', optB || 'Option 2', optC || 'Option 3', optD || 'Option 4'];
+
+                    const correctStr = String(row["Correct Option (A/B/C/D)"] || row["Correct Option"] || row["Correct Answer"] || row["Answer"] || 'A').toUpperCase().trim();
+
+                    let correctAnswer = optA;
+                    if (correctStr === 'B' || correctStr === '2') correctAnswer = optB || options[1] || options[0];
+                    else if (correctStr === 'C' || correctStr === '3') correctAnswer = optC || options[2] || options[0];
+                    else if (correctStr === 'D' || correctStr === '4') correctAnswer = optD || options[3] || options[0];
+                    else if (correctStr === 'A' || correctStr === '1') correctAnswer = optA || options[0];
+                    else correctAnswer = row["Correct Answer"] || options[0];
+
+                    const points = parseInt(row["Points"] || row["Marks"] || 10) || 10;
+                    const explanation = String(row["Explanation"] || row["Solution"] || '');
+
+                    return {
+                        type: 'multiple-choice',
+                        questionText: String(questionText).trim(),
+                        points: points,
+                        options: options,
+                        correctAnswer: correctAnswer,
+                        acceptedAnswers: [],
+                        solution: explanation,
+                        explanation: explanation
+                    };
+                });
+
+                setContent(prev => ({
+                    ...prev,
+                    questions: [...prev.questions, ...parsedQuestions]
+                }));
+
+                if (showToast) showToast(`Bulk imported ${parsedQuestions.length} questions from Excel!`, 'success');
+            } catch (err) {
+                console.error('Excel parse error:', err);
+                if (showToast) showToast('Failed to parse Excel file. Please use the downloaded template format.', 'error');
+            } finally {
+                if (e.target) e.target.value = '';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
 
     const questionTypes = [
         { value: 'multiple-choice', label: 'Multiple Choice' },
@@ -506,14 +610,41 @@ const InteractiveContentBuilder = ({ moduleId, initialContent, onSave, isEditing
 
             {/* Questions */}
             <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     <h2 className="text-xl font-extrabold text-white font-poppins">
                         Questions ({content.questions.length})
                     </h2>
-                    <ModernButton onClick={addQuestion} variant="secondary">
-                        <Plus size={20} className="mr-2" />
-                        Add Question
-                    </ModernButton>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                            type="button"
+                            onClick={downloadExcelTemplate}
+                            className="px-3.5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                            title="Download sample Excel template format"
+                        >
+                            <Download size={14} />
+                            Excel Template
+                        </button>
+                        <input
+                            type="file"
+                            id="excel-bulk-upload-interactive"
+                            accept=".xlsx, .xls, .csv"
+                            className="hidden"
+                            onChange={handleExcelBulkUpload}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => document.getElementById('excel-bulk-upload-interactive')?.click()}
+                            className="px-3.5 py-2.5 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                            title="Bulk upload questions from Excel file"
+                        >
+                            <FileSpreadsheet size={14} />
+                            Bulk Upload Excel
+                        </button>
+                        <ModernButton onClick={addQuestion} variant="secondary">
+                            <Plus size={18} className="mr-1.5" />
+                            Add Question
+                        </ModernButton>
+                    </div>
                 </div>
 
                 <div className="space-y-4">

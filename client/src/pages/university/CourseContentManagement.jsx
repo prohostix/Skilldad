@@ -6,8 +6,9 @@ import {
     Upload, FileText, CheckCircle2, AlertCircle, X,
     Layout, BookOpen, Clock, Users, Link,
     ChevronDown, ChevronUp, ArrowLeft, Image as ImageIcon,
-    HelpCircle, Play, ClipboardList, Send
+    HelpCircle, Play, ClipboardList, Send, Download, FileSpreadsheet
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -313,6 +314,92 @@ const CourseContentManagement = () => {
         if (newQuestion.options.some(o => !o.trim())) { showToast('Fill all 4 options', 'error'); return; }
         setQuizQuestions(prev => [...prev, { ...newQuestion, _id: `q_${Date.now()}` }]);
         setNewQuestion({ question: '', options: ['', '', '', ''], correctIndex: 0, explanation: '' });
+    };
+
+    const downloadQuizExcelTemplate = () => {
+        const templateData = [
+            {
+                "Question": "What is the primary role of a Hospital Administrator?",
+                "Option A": "Managing healthcare facility operations and staff",
+                "Option B": "Performing surgeries",
+                "Option C": "Manufacturing medicines",
+                "Option D": "Designing architectural blueprints",
+                "Correct Option (A/B/C/D)": "A",
+                "Explanation": "Hospital administrators oversee the operational, financial, and organizational aspects of healthcare facilities."
+            },
+            {
+                "Question": "Which department handles patient billing and medical records?",
+                "Option A": "Emergency Room",
+                "Option B": "Health Information Management",
+                "Option C": "Radiology",
+                "Option D": "Pharmacy",
+                "Correct Option (A/B/C/D)": "B",
+                "Explanation": "HIM handles records, compliance, coding, and billing documentation."
+            }
+        ];
+
+        const worksheet = XLSX.utils.json_to_sheet(templateData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Quiz Template");
+        XLSX.writeFile(workbook, "quiz_questions_template.xlsx");
+        showToast('Quiz Excel Template downloaded!', 'success');
+    };
+
+    const handleQuizExcelBulkUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+                if (!jsonData || jsonData.length === 0) {
+                    showToast('Excel file is empty or formatted incorrectly', 'error');
+                    return;
+                }
+
+                const parsedQuestions = jsonData.map((row, idx) => {
+                    const questionText = row["Question"] || row["Question Text"] || row["question"] || `Question ${idx + 1}`;
+                    const optA = String(row["Option A"] || row["Option 1"] || row["option_a"] || '').trim();
+                    const optB = String(row["Option B"] || row["Option 2"] || row["option_b"] || '').trim();
+                    const optC = String(row["Option C"] || row["Option 3"] || row["option_c"] || '').trim();
+                    const optD = String(row["Option D"] || row["Option 4"] || row["option_d"] || '').trim();
+
+                    const options = [optA || 'Option A', optB || 'Option B', optC || 'Option C', optD || 'Option D'];
+
+                    const correctStr = String(row["Correct Option (A/B/C/D)"] || row["Correct Option"] || row["Correct Answer"] || row["Answer"] || 'A').toUpperCase().trim();
+
+                    let correctIndex = 0;
+                    if (correctStr === 'B' || correctStr === '2') correctIndex = 1;
+                    else if (correctStr === 'C' || correctStr === '3') correctIndex = 2;
+                    else if (correctStr === 'D' || correctStr === '4') correctIndex = 3;
+
+                    const explanation = String(row["Explanation"] || row["Solution"] || '');
+
+                    return {
+                        _id: `q_${Date.now()}_${idx}`,
+                        question: String(questionText).trim(),
+                        options: options,
+                        correctIndex: correctIndex,
+                        explanation: explanation
+                    };
+                });
+
+                setQuizQuestions(prev => [...prev, ...parsedQuestions]);
+                showToast(`Bulk imported ${parsedQuestions.length} questions from Excel!`, 'success');
+            } catch (err) {
+                console.error('Excel parse error:', err);
+                showToast('Failed to parse Excel file. Please use the downloaded template format.', 'error');
+            } finally {
+                if (e.target) e.target.value = '';
+            }
+        };
+        reader.readAsArrayBuffer(file);
     };
 
     const handleRemoveQuestion = (qid) => {
@@ -827,9 +914,36 @@ const CourseContentManagement = () => {
                             <h4 className="text-xl font-bold text-white flex items-center gap-2">
                                 <HelpCircle className="text-emerald-400" /> Module Assessment (Quiz)
                             </h4>
-                            <button onClick={() => setOpenQuizEditor(false)} className="text-white/40 hover:text-white">
-                                <X size={24} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={downloadQuizExcelTemplate}
+                                    className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                                    title="Download sample Excel template"
+                                >
+                                    <Download size={13} />
+                                    Template
+                                </button>
+                                <input
+                                    type="file"
+                                    id="univ-quiz-excel-upload"
+                                    accept=".xlsx, .xls, .csv"
+                                    className="hidden"
+                                    onChange={handleQuizExcelBulkUpload}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => document.getElementById('univ-quiz-excel-upload')?.click()}
+                                    className="px-3 py-1.5 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                                    title="Bulk upload questions from Excel"
+                                >
+                                    <FileSpreadsheet size={13} />
+                                    Bulk Upload Excel
+                                </button>
+                                <button onClick={() => setOpenQuizEditor(false)} className="text-white/40 hover:text-white ml-2">
+                                    <X size={24} />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="space-y-6">
