@@ -410,11 +410,11 @@ const ExamScheduler = () => {
                                 </div>
                             </div>
 
-                            {formData.course && batches.length > 0 && (
+                            {formData.course && batches.filter(b => b.is_active !== false).length > 0 && (
                                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                                     <label className="block text-white/70 text-xs mb-2">Target Batches (Optional - Leave empty for all batches)</label>
                                     <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 bg-white/5 border border-white/10 rounded-lg custom-scrollbar">
-                                        {batches.map((batch) => (
+                                        {batches.filter(b => b.is_active !== false).map((batch) => (
                                             <label key={batch.id} className="flex items-center space-x-2 cursor-pointer group p-1 hover:bg-white/5 rounded transition-colors">
                                                 <input
                                                     type="checkbox"

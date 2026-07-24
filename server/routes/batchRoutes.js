@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    createBatch, 
-    getCourseBatches, 
+const {
+    createBatch,
+    getCourseBatches,
     updateBatch,
-    deleteBatch 
+    deleteBatch,
+    toggleBatchStatus
 } = require('../controllers/batchController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -17,5 +18,7 @@ router.route('/course/:courseId')
 router.route('/:id')
     .put(protect, updateBatch)
     .delete(protect, deleteBatch);
+
+router.patch('/:id/status', protect, toggleBatchStatus);
 
 module.exports = router;

@@ -485,8 +485,7 @@ const Exams = () => {
         { value: 'all', label: 'All Exams', count: exams.length },
         { value: 'available', label: 'Available', count: exams.filter(e => getExamActualStatus(e) === 'available').length },
         { value: 'scheduled', label: 'Scheduled', count: exams.filter(e => getExamActualStatus(e) === 'scheduled').length },
-        { value: 'completed', label: 'Completed', count: exams.filter(e => getExamActualStatus(e) === 'completed').length },
-        { value: 'failed', label: 'Failed', count: exams.filter(e => getExamActualStatus(e) === 'failed').length }
+        { value: 'completed', label: 'Completed', count: exams.filter(e => getExamActualStatus(e) === 'completed').length }
     ];
 
     if (activeExam && examStarted) {

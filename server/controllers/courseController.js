@@ -143,12 +143,25 @@ const getCourse = asyncHandler(async (req, res) => {
 
     // Check enrollment if user is logged in
     let isEnrolled = false;
+    let studentBatchId = null;
     if (req.user) {
         const enrollRes = await query(`
-            SELECT id FROM enrollments 
+            SELECT id, batch_id FROM enrollments
             WHERE student_id = $1 AND course_id = $2 AND status = 'active'
         `, [req.user.id, id]);
         isEnrolled = enrollRes.rows.length > 0;
+        studentBatchId = enrollRes.rows[0]?.batch_id ? String(enrollRes.rows[0].batch_id) : null;
+    }
+
+    // Students only see modules that are either open to everyone (no publishedBatches
+    // set — the default for all existing content) or explicitly published to the batch
+    // they're enrolled in. Instructors/admins always see every module so they can manage
+    // and publish them.
+    if (req.user?.role === 'student' && Array.isArray(course.modules)) {
+        course.modules = course.modules.filter(m => {
+            if (!Array.isArray(m.publishedBatches)) return true;
+            return studentBatchId ? m.publishedBatches.includes(studentBatchId) : false;
+        });
     }
 
     res.status(200).json({
@@ -357,7 +370,42 @@ const updateModule = asyncHandler(async (req, res) => {
     
     modules[moduleIndex].title = title;
     await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-    
+
+    res.json(modules[moduleIndex]);
+});
+
+// @desc    Set which batches a module is published to (staggered per-cohort content release)
+// @route   PUT /api/courses/:id/modules/:moduleId/publish
+// @access  Private (Instructor/Admin)
+//
+// batchIds omitted/undefined on the module (legacy data, or never touched) means the
+// module is open to every enrolled student — matches today's behaviour, so existing
+// courses see zero change until an instructor explicitly publishes a module.
+// batchIds: [] means explicitly published to nobody yet (a real "draft" state).
+// batchIds: [...ids] restricts visibility to students enrolled in one of those batches;
+// students with no batch assigned won't see a batch-restricted module.
+const updateModulePublishTargets = asyncHandler(async (req, res) => {
+    const { id, moduleId } = req.params;
+    const { batchIds } = req.body;
+
+    if (!Array.isArray(batchIds)) {
+        return res.status(400).json({ message: 'batchIds must be an array' });
+    }
+
+    const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
+    if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
+
+    if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
+        return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    let modules = courseRes.rows[0].modules || [];
+    const moduleIndex = modules.findIndex(m => m._id === moduleId);
+    if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
+
+    modules[moduleIndex].publishedBatches = batchIds.map(String);
+    await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
+
     res.json(modules[moduleIndex]);
 });
 
@@ -665,6 +713,7 @@ module.exports = {
     }),
     addModule,
     updateModule,
+    updateModulePublishTargets,
     deleteModule,
     addVideo,
     updateVideo,

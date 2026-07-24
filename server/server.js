@@ -399,6 +399,14 @@ const startServer = async () => {
             await query('ALTER TABLE enquiries ADD COLUMN university_name VARCHAR(255)');
             console.log('[Migration] Added university_name to enquiries'.green);
         }
+
+        // Auto-migrate: ensure batches supports activate/deactivate
+        const batchColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['batches']);
+        const batchCols = batchColRes.rows.map(r => r.column_name);
+        if (!batchCols.includes('is_active')) {
+            await query('ALTER TABLE batches ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT true');
+            console.log('[Migration] Added is_active to batches'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

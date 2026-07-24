@@ -8,6 +8,7 @@ const {
     deleteCourse,
     addModule,
     updateModule,
+    updateModulePublishTargets,
     deleteModule,
     addVideo,
     updateVideo,
@@ -39,6 +40,7 @@ router.route('/:id/upload-thumbnail').post(protect, upload.single('thumbnail'), 
 router.route('/:id/upload-brochure').post(protect, upload.single('brochure'), uploadBrochure);
 router.route('/:id/modules').post(protect, addModule);
 router.route('/:id/modules/:moduleId').put(protect, updateModule).delete(protect, deleteModule);
+router.route('/:id/modules/:moduleId/publish').put(protect, updateModulePublishTargets);
 router.route('/:id/modules/:moduleId/videos').post(protect, addVideo);
 router.route('/:id/modules/:moduleId/videos/:videoId').put(protect, updateVideo).delete(protect, deleteVideo);
 router.route('/:id/modules/:moduleId/videos/:videoId/upload').post(protect, (req, res, next) => {

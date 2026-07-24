@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Plus, Trash2, Calendar, Loader2, AlertCircle, Pencil } from 'lucide-react';
+import { Users, Plus, Trash2, Calendar, Loader2, AlertCircle, Pencil, Power } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from './GlassCard';
 import ModernButton from './ModernButton';
@@ -82,6 +82,25 @@ const BatchManagement = ({ courseId }) => {
         } catch (err) {
             console.error('Error updating batch:', err);
             setError(err.response?.data?.message || 'Failed to update batch');
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleToggleStatus = async (batch) => {
+        setActionLoading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: { Authorization: `Bearer ${userInfo.token}` }
+            };
+            await axios.patch(`/api/batches/${batch.id}/status`, {
+                isActive: !(batch.is_active !== false)
+            }, config);
+            fetchBatches();
+        } catch (err) {
+            console.error('Error updating batch status:', err);
+            setError(err.response?.data?.message || 'Failed to update batch status');
         } finally {
             setActionLoading(false);
         }
@@ -224,7 +243,7 @@ const BatchManagement = ({ courseId }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {batches.length > 0 ? (
                     batches.map((batch) => (
-                        <GlassCard key={batch.id} className="p-5 group hover:border-primary/30 transition-all">
+                        <GlassCard key={batch.id} className={`p-5 group hover:border-primary/30 transition-all ${batch.is_active === false ? 'opacity-60' : ''}`}>
                             <div className="flex justify-between items-start">
                                 <div className="space-y-1">
                                     <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
@@ -259,10 +278,23 @@ const BatchManagement = ({ courseId }) => {
                             </div>
                             
                             <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-                                <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                    Active
-                                </div>
+                                <button
+                                    onClick={() => handleToggleStatus(batch)}
+                                    disabled={actionLoading}
+                                    title={batch.is_active !== false ? 'Deactivate batch (hides it from new enrollments and exam/session targeting)' : 'Activate batch'}
+                                    className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+                                        batch.is_active !== false
+                                            ? 'text-emerald-400 hover:text-emerald-300'
+                                            : 'text-white/30 hover:text-white/50'
+                                    }`}
+                                >
+                                    {batch.is_active !== false ? (
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                    ) : (
+                                        <Power size={12} />
+                                    )}
+                                    {batch.is_active !== false ? 'Active' : 'Inactive'}
+                                </button>
                                 <div className="text-[10px] font-black text-white/20 uppercase tracking-widest">
                                     ID: {batch.id}
                                 </div>

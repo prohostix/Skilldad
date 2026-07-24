@@ -1298,7 +1298,7 @@ const StudentManagement = () => {
                                         className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm font-medium"
                                     >
                                         <option value="" className="bg-slate-900">-- No Batch (Global) --</option>
-                                        {enrollBatches.map(batch => (
+                                        {enrollBatches.filter(batch => batch.is_active !== false).map(batch => (
                                             <option key={batch.id} value={batch.id} className="bg-slate-900">{batch.name}</option>
                                         ))}
                                     </select>

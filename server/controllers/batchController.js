@@ -124,9 +124,54 @@ const updateBatch = asyncHandler(async (req, res) => {
     res.json(result.rows[0]);
 });
 
+/**
+ * @desc    Activate or deactivate a batch
+ * @route   PATCH /api/batches/:id/status
+ * @access  Private (Instructor/Admin)
+ */
+const toggleBatchStatus = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    if (typeof isActive !== 'boolean') {
+        res.status(400);
+        throw new Error('isActive (boolean) is required');
+    }
+
+    // 1. Verify batch existence and course ownership
+    const batchRes = await query(`
+        SELECT b.*, c.instructor_id
+        FROM batches b
+        JOIN courses c ON b.course_id = c.id
+        WHERE b.id = $1
+    `, [id]);
+
+    if (batchRes.rows.length === 0) {
+        res.status(404);
+        throw new Error('Batch not found');
+    }
+
+    if (req.user.role !== 'admin' && batchRes.rows[0].instructor_id !== req.user.id) {
+        res.status(403);
+        throw new Error('Not authorized to update this batch');
+    }
+
+    // 2. Update status. Deactivating only stops the batch from being offered
+    // for new enrollments/exam/session targeting going forward — it does not
+    // touch students already assigned to it, their enrollments, or content
+    // already published to them.
+    const result = await query(
+        'UPDATE batches SET is_active = $1 WHERE id = $2 RETURNING *',
+        [isActive, id]
+    );
+
+    res.json(result.rows[0]);
+});
+
 module.exports = {
     createBatch,
     getCourseBatches,
     updateBatch,
-    deleteBatch
+    deleteBatch,
+    toggleBatchStatus
 };
