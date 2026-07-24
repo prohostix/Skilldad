@@ -865,7 +865,7 @@ const CourseManager = () => {
                 title="Delete this course?"
                 message="This permanently removes the course along with all linked enrollments, documents, exams, and other related data. This cannot be undone."
                 confirmLabel="Delete Course"
-                onConfirm={confirmDelete}
+                onConfirm={confirmDeleteCourse}
                 onCancel={() => setCourseToDelete(null)}
             />
         </div>
