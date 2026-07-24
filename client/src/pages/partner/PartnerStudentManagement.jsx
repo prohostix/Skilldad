@@ -412,21 +412,35 @@ const PartnerStudentManagement = () => {
                                                     {student.connection_type || 'Directly Registered'}
                                                 </span>
                                             </div>
-                                            <div className="flex flex-wrap gap-2 mt-1">
+                                            <div className="flex flex-wrap gap-2 mt-1.5">
                                                 {(student.enrollments && student.enrollments.length > 0) ? (
-                                                    student.enrollments.map((en, idx) => (
-                                                        <div key={idx} className="flex items-center gap-1.5 px-2 py-0.5 bg-white/5 rounded-md border border-white/5">
-                                                            <span className="text-xs font-medium text-white/70">{en.course_title}</span>
-                                                            {en.batch_name && (
-                                                                <>
-                                                                    <span className="w-1 h-1 rounded-full bg-white/20" />
-                                                                    <span className="text-[10px] font-bold text-primary uppercase">{en.batch_name}</span>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    ))
+                                                    student.enrollments.map((en, idx) => {
+                                                        const cTitle = en.courseTitle || en.course_title;
+                                                        const bName = en.batchName || en.batch_name;
+                                                        return (
+                                                            <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-lg border border-white/10">
+                                                                <span className="text-xs font-semibold text-white/80">{cTitle}</span>
+                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${
+                                                                    bName 
+                                                                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' 
+                                                                        : 'bg-white/5 text-gray-400 border-white/10'
+                                                                }`}>
+                                                                    Batch: {bName || 'No Batch Assigned'}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })
                                                 ) : (
-                                                    <p className="text-sm text-white/50">{student.course || 'Unassigned'}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-medium text-white/60">{student.course || 'Unassigned'}</span>
+                                                        <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold border ${
+                                                            student.batchName || student.batch_name
+                                                                ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' 
+                                                                : 'bg-white/5 text-gray-400 border-white/10'
+                                                        }`}>
+                                                            Batch: {student.batchName || student.batch_name || 'No Batch Assigned'}
+                                                        </span>
+                                                    </div>
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-4 mt-1 text-xs text-white/40">
