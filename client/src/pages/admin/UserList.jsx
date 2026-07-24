@@ -516,31 +516,42 @@ const UserList = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-6">
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => openPermissionModal(user)}
-                                                className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500/30 transition-all flex items-center gap-1"
-                                            >
-                                                <ShieldCheck size={14} />
-                                                Grant Permission
-                                            </button>
-                                            {user.isVerified && user.role !== 'student' && (
-                                                <button
-                                                    onClick={() => handleRevokePermission(user._id)}
-                                                    className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all"
-                                                >
-                                                    Revoke
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() => handleDeleteUser(user)}
-                                                className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all flex items-center gap-1"
-                                                title="Delete User"
-                                            >
-                                                <Trash2 size={14} />
-                                                Delete
-                                            </button>
-                                        </div>
+                                         <div className="flex items-center gap-2">
+                                             {user.isVerified ? (
+                                                 <button
+                                                     onClick={() => openPermissionModal(user)}
+                                                     className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-bold hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 shadow-sm"
+                                                     title="Permission Approved. Click to edit role."
+                                                 >
+                                                     <CheckCircle size={14} className="text-emerald-400" />
+                                                     Approved
+                                                 </button>
+                                             ) : (
+                                                 <button
+                                                     onClick={() => openPermissionModal(user)}
+                                                     className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500/30 transition-all flex items-center gap-1 shadow-sm"
+                                                 >
+                                                     <ShieldCheck size={14} />
+                                                     Grant Permission
+                                                 </button>
+                                             )}
+                                             {user.isVerified && user.role !== 'student' && (
+                                                 <button
+                                                     onClick={() => handleRevokePermission(user._id)}
+                                                     className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all"
+                                                 >
+                                                     Revoke
+                                                 </button>
+                                             )}
+                                             <button
+                                                 onClick={() => handleDeleteUser(user)}
+                                                 className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all flex items-center gap-1"
+                                                 title="Delete User"
+                                             >
+                                                 <Trash2 size={14} />
+                                                 Delete
+                                             </button>
+                                         </div>
                                     </td>
                                 </tr>
                             ))}
@@ -588,13 +599,23 @@ const UserList = () => {
                             </div>
 
                             <div className="flex flex-wrap gap-2 border-t border-white/5 pt-3">
-                                <button
-                                    onClick={() => openPermissionModal(user)}
-                                    className="flex-1 min-w-[120px] px-3 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-[11px] font-bold hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-1.5"
-                                >
-                                    <ShieldCheck size={14} />
-                                    Permissions
-                                </button>
+                                {user.isVerified ? (
+                                    <button
+                                        onClick={() => openPermissionModal(user)}
+                                        className="flex-1 min-w-[120px] px-3 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl text-[11px] font-bold hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-1.5"
+                                    >
+                                        <CheckCircle size={14} />
+                                        Approved
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={() => openPermissionModal(user)}
+                                        className="flex-1 min-w-[120px] px-3 py-2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-[11px] font-bold hover:bg-emerald-500/30 transition-all flex items-center justify-center gap-1.5"
+                                    >
+                                        <ShieldCheck size={14} />
+                                        Grant Permission
+                                    </button>
+                                )}
                                 {user.isVerified && user.role !== 'student' && (
                                     <button
                                         onClick={() => handleRevokePermission(user._id)}
