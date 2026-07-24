@@ -290,7 +290,7 @@ const HeroSection = () => {
                         <div
                             role="heading"
                             aria-level="1"
-                            className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-10 md:mb-14 font-space px-2 sm:px-0 text-center"
+                            className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-6 md:mb-8 font-space px-2 sm:px-0 text-center"
                         >
                             <span className="text-white">
                                 From{' '}
@@ -315,6 +315,11 @@ const HeroSection = () => {
                                 </span>
                             </span>
                         </div>
+
+                        {/* Subtitle */}
+                        <p className="text-white/60 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center">
+                            Turn uncertainty into clarity with industry-ready skills.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with Skilldad.
+                        </p>
 
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none">
