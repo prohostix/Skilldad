@@ -172,7 +172,7 @@ const TravelDot = ({ from, to, delay }) => {
 
 const NetworkDiagram = () => (
     <div
-        className="absolute -left-28 sm:-left-10 lg:left-0 top-[68%] sm:top-[62%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
+        className="absolute -left-28 sm:-left-10 lg:left-0 top-[78%] sm:top-[72%] md:top-[70%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
         style={{ width: 420, height: 580 }}
     >
         <div
