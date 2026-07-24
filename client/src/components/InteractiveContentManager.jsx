@@ -32,8 +32,8 @@ const InteractiveContentManager = () => {
                 config
             );
 
-            // Ensure data is an array
-            setContents(Array.isArray(data) ? data : []);
+            const contentList = Array.isArray(data?.content) ? data.content : (Array.isArray(data) ? data : []);
+            setContents(contentList);
             setError(null);
         } catch (err) {
             console.error('Error fetching contents:', err);

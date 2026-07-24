@@ -656,16 +656,9 @@ const CourseContentManagement = () => {
                                                     <button
                                                         className="p-1.5 text-white/20 hover:text-purple-400 hover:bg-purple-500/10 rounded-md transition-all mr-1"
                                                         onClick={(e) => { e.stopPropagation(); navigate(`/university/courses/${courseId}/modules/${mod._id}/content/manage`); }}
-                                                        title="Manage Interactive Content"
+                                                        title="Interactive Content (Manage & Add)"
                                                     >
                                                         <ClipboardList size={16} />
-                                                    </button>
-                                                    <button
-                                                        className="p-1.5 text-white/20 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-md transition-all mr-1"
-                                                        onClick={(e) => { e.stopPropagation(); navigate(`/university/courses/${courseId}/modules/${mod._id}/content/create`); }}
-                                                        title="Add Interactive Content"
-                                                    >
-                                                        <Plus size={16} />
                                                     </button>
                                                     <button
                                                         className="p-1.5 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all mr-1"
