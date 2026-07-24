@@ -14,6 +14,7 @@ import {
     Download
 } from 'lucide-react';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import { getMediaUrl } from '../../utils/media';
 
 const MyCourses = () => {
     const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -106,7 +107,7 @@ const MyCourses = () => {
                     <div className="flex gap-3">
                         <div className="w-20 h-14 rounded-lg bg-white/5 overflow-hidden shrink-0 border border-white/10">
                             <img 
-                                src={enrollment.course?.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'} 
+                                src={enrollment.course?.thumbnail ? getMediaUrl(enrollment.course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                                 alt={enrollment.course?.title}
                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}

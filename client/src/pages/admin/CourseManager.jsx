@@ -18,6 +18,7 @@ import {
     Filter
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
+import { getMediaUrl } from '../../utils/media';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
@@ -507,7 +508,7 @@ const CourseManager = () => {
                         <div className="mb-6 flex flex-col sm:flex-row items-center gap-6 p-4 bg-white/5 rounded-2xl border border-white/10">
                             <div className="w-40 h-24 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
                                 {formData.thumbnail ? (
-                                    <img src={formData.thumbnail} alt="Preview" className="w-full h-full object-cover" />
+                                    <img src={getMediaUrl(formData.thumbnail)} alt="Preview" className="w-full h-full object-cover" />
                                 ) : (
                                     <Image size={24} className="text-white/20" />
                                 )}

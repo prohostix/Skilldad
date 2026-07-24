@@ -22,6 +22,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import { getMediaUrl } from '../../utils/media';
 
 const PaymentHistory = () => {
     const navigate = useNavigate();
@@ -448,7 +449,7 @@ const PaymentHistory = () => {
                                         {/* Course Thumbnail */}
                                         <div className="flex-shrink-0">
                                             <img
-                                                src={transaction.course?.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                                src={transaction.course?.thumbnail ? getMediaUrl(transaction.course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                                 alt={transaction.course?.title}
                                                 className="w-24 h-16 object-cover rounded-lg"
                                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}

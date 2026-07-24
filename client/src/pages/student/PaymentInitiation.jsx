@@ -13,6 +13,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { loadRazorpayScript, initializeRazorpay } from '../../utils/razorpay';
+import { getMediaUrl } from '../../utils/media';
 
 const PaymentInitiation = () => {
     const { courseId } = useParams();
@@ -325,7 +326,7 @@ const PaymentInitiation = () => {
                         <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Course Details</h3>
                         <div className="flex gap-4">
                             <img
-                                src={course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                src={course.thumbnail ? getMediaUrl(course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                 alt={course.title}
                                 className="w-32 h-20 object-cover rounded-xl"
                                 onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}

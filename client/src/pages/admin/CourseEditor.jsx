@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import axios from 'axios';
+import { getMediaUrl } from '../../utils/media';
 
 const CourseEditor = () => {
     const { id } = useParams();
@@ -171,7 +172,7 @@ const CourseEditor = () => {
                         }}
                     >
                         {course.thumbnail ? (
-                            <img src={course.thumbnail} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <img src={getMediaUrl(course.thumbnail)} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                             <Typography color="text.secondary">No Thumbnail</Typography>
                         )}

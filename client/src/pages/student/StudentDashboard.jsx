@@ -31,6 +31,7 @@ import CountingNumber from '../../components/ui/CountingNumber';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import ReferralWidget from '../../components/student/ReferralWidget';
 import ReferralModal from '../../components/student/ReferralModal';
+import { getMediaUrl } from '../../utils/media';
 
 const StudentDashboard = () => {
     const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -295,7 +296,7 @@ const StudentDashboard = () => {
                                     onClick={() => navigate(`/dashboard/course/${enrollment.course._id}`)}
                                 >
                                     <div className="relative aspect-video sm:aspect-[16/6] overflow-hidden">
-                                        <img src={enrollment.course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'} alt={enrollment.course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }} />
+                                        <img src={enrollment.course.thumbnail ? getMediaUrl(enrollment.course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'} alt={enrollment.course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }} />
                                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
                                         <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[9px] font-bold text-white border border-white/10 uppercase tracking-widest">
                                             {enrollment.progress}% complete

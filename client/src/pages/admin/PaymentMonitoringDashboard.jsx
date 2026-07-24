@@ -26,6 +26,7 @@ import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
 import { useSocket } from '../../context/SocketContext';
+import { getMediaUrl } from '../../utils/media';
 
 const PaymentMonitoringDashboard = () => {
     const { showToast } = useToast();
@@ -315,7 +316,7 @@ const PaymentMonitoringDashboard = () => {
                                 >
                                     <div className="flex items-center space-x-4 flex-1">
                                         <img
-                                            src={proof.course?.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                            src={proof.course?.thumbnail ? getMediaUrl(proof.course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                             alt={proof.course?.title}
                                             className="w-16 h-12 object-cover rounded-lg"
                                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}

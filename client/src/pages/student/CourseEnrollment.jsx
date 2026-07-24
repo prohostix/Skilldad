@@ -22,6 +22,7 @@ import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import { getMediaUrl } from '../../utils/media';
 
 const CourseEnrollment = () => {
     const { courseId } = useParams();
@@ -312,7 +313,7 @@ const CourseEnrollment = () => {
                                     {/* Course Preview */}
                                     <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-800">
                                         <img
-                                            src={course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                            src={course.thumbnail ? getMediaUrl(course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                             alt={course.title}
                                             className="w-full h-full object-cover"
                                             onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}

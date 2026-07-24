@@ -22,6 +22,7 @@ import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import { getMediaUrl } from '../../utils/media';
 
 const PaymentStatus = () => {
     const { transactionId } = useParams();
@@ -268,7 +269,7 @@ const PaymentStatus = () => {
                             <div className="flex gap-4">
                                 {transaction.course?.thumbnail && (
                                     <img
-                                        src={transaction.course.thumbnail || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                        src={transaction.course.thumbnail ? getMediaUrl(transaction.course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
                                         alt={transaction.course.title}
                                         className="w-32 h-20 object-cover rounded-xl"
                                         onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
