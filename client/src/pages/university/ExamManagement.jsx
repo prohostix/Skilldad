@@ -40,6 +40,8 @@ const ExamManagement = () => {
 
     const [activeTab, setActiveTab] = useState('conduct');
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterCourse, setFilterCourse] = useState('all');
+    const [filterStatus, setFilterStatus] = useState('all');
     const [questionPapers, setQuestionPapers] = useState([]);
     const [answerKeys, setAnswerKeys] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -568,6 +570,29 @@ const ExamManagement = () => {
     };
 
     const renderTabContent = () => {
+        const filteredExams = exams.filter(exam => {
+            const titleMatch = exam.title?.toLowerCase().includes(searchTerm.toLowerCase());
+            const courseTitle = exam.course?.title || exam.course_title || '';
+            const courseMatch = courseTitle.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = !searchTerm || titleMatch || courseMatch;
+
+            const matchesCourse = filterCourse === 'all' || courseTitle === filterCourse || exam.course?._id === filterCourse || exam.course_id === filterCourse;
+
+            let matchesStatus = true;
+            const now = new Date();
+            const endTime = exam.scheduledEndTime ? new Date(exam.scheduledEndTime) : (exam.scheduled_end ? new Date(exam.scheduled_end) : null);
+            const isCompleted = exam.resultsPublished || (endTime && endTime < now) || exam.status === 'completed';
+            const isNew = !isCompleted;
+
+            if (filterStatus === 'new') {
+                matchesStatus = isNew;
+            } else if (filterStatus === 'completed') {
+                matchesStatus = isCompleted;
+            }
+
+            return matchesSearch && matchesCourse && matchesStatus;
+        });
+
         switch (activeTab) {
             case 'grading':
                 return renderGradingTab();
@@ -586,7 +611,12 @@ const ExamManagement = () => {
                             </button>
                         </div>
                         <div className="flex flex-col gap-2">
-                        {exams.length > 0 ? exams.map((exam) => (
+                        {filteredExams.length > 0 ? filteredExams.map((exam) => {
+                            const courseName = exam.course?.title || exam.course_title;
+                            const endTime = exam.scheduledEndTime ? new Date(exam.scheduledEndTime) : (exam.scheduled_end ? new Date(exam.scheduled_end) : null);
+                            const isCompleted = exam.resultsPublished || (endTime && endTime < new Date()) || exam.status === 'completed';
+
+                            return (
                             <div key={exam._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0 border border-emerald-500/10">
@@ -594,14 +624,24 @@ const ExamManagement = () => {
                                     </div>
                                     <div className="min-w-0">
                                         <h4 className="font-bold text-white text-sm truncate">{exam.title}</h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleDateString()}</span>
-                                            <span className="text-white/10">|</span>
-                                            <div className="flex gap-2">
-                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${exam.linkedPaper ? 'bg-indigo-500/10 text-indigo-400' : 'bg-red-500/10 text-red-400'}`}>
-                                                    {exam.linkedPaper ? 'Paper Active' : 'No Paper'}
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                            {courseName && (
+                                                <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-primary/20 text-primary border border-primary/30">
+                                                    {courseName}
                                                 </span>
-                                            </div>
+                                            )}
+                                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{new Date(exam.scheduledStartTime || exam.scheduledDate || exam.created_at).toLocaleDateString()}</span>
+                                            <span className="text-white/10">|</span>
+                                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase border ${
+                                                isCompleted
+                                                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                                                    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                            }`}>
+                                                {isCompleted ? 'Completed' : 'New Exam'}
+                                            </span>
+                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${exam.linkedPaper ? 'bg-indigo-500/10 text-indigo-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                {exam.linkedPaper ? 'Paper Active' : 'No Paper'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -621,10 +661,11 @@ const ExamManagement = () => {
                                     </button>
                                 </div>
                             </div>
-                        )) : (
+                            );
+                        }) : (
                             <div className="py-20 text-center text-white/20">
                                 <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                <p className="font-bold uppercase tracking-widest text-sm">No Active Exams</p>
+                                <p className="font-bold uppercase tracking-widest text-sm">No Exams Matching Selected Filters</p>
                             </div>
                         )}
                     </div>
@@ -632,9 +673,15 @@ const ExamManagement = () => {
                 );
 
             case 'schedule':
+                const uniFilteredExams = filteredExams.filter(ex => ex.createdBy?.role === 'university');
                 return (
                     <div className="flex flex-col gap-2">
-                        {exams.filter(ex => ex.createdBy?.role === 'university').length > 0 ? exams.filter(ex => ex.createdBy?.role === 'university').map((exam) => (
+                        {uniFilteredExams.length > 0 ? uniFilteredExams.map((exam) => {
+                            const courseName = exam.course?.title || exam.course_title;
+                            const endTime = exam.scheduledEndTime ? new Date(exam.scheduledEndTime) : (exam.scheduled_end ? new Date(exam.scheduled_end) : null);
+                            const isCompleted = exam.resultsPublished || (endTime && endTime < new Date()) || exam.status === 'completed';
+
+                            return (
                             <div key={exam._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
                                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/10">
@@ -642,14 +689,24 @@ const ExamManagement = () => {
                                     </div>
                                     <div className="min-w-0">
                                         <h4 className="font-bold text-white text-sm truncate">{exam.title}</h4>
-                                        <div className="flex items-center gap-3 mt-0.5">
-                                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleDateString()}</span>
-                                            <span className="text-white/10">|</span>
-                                            <div className="flex gap-2">
-                                                <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${exam.linkedPaper ? 'bg-indigo-500/10 text-indigo-400' : 'bg-red-500/10 text-red-400'}`}>
-                                                    {exam.linkedPaper ? 'Paper' : 'No Paper'}
+                                        <div className="flex items-center gap-3 mt-1 flex-wrap">
+                                            {courseName && (
+                                                <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-primary/20 text-primary border border-primary/30">
+                                                    {courseName}
                                                 </span>
-                                            </div>
+                                            )}
+                                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">{new Date(exam.scheduledStartTime || exam.scheduledDate || exam.created_at).toLocaleDateString()}</span>
+                                            <span className="text-white/10">|</span>
+                                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase border ${
+                                                isCompleted
+                                                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                                                    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                            }`}>
+                                                {isCompleted ? 'Completed' : 'New Exam'}
+                                            </span>
+                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${exam.linkedPaper ? 'bg-indigo-500/10 text-indigo-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                {exam.linkedPaper ? 'Paper' : 'No Paper'}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -665,7 +722,8 @@ const ExamManagement = () => {
                                     </button>
                                 </div>
                             </div>
-                        )) : (
+                            );
+                        }) : (
                             <div className="py-20 text-center text-white/20">
                                 <p className="font-bold uppercase tracking-widest text-sm">No University-scheduled History</p>
                             </div>
@@ -736,6 +794,33 @@ const ExamManagement = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-primary transition-all font-inter"
                         />
+                    </div>
+                    <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+                        <div className="relative">
+                            <select
+                                value={filterCourse}
+                                onChange={(e) => setFilterCourse(e.target.value)}
+                                className="w-full sm:w-auto bg-[#0D121F] border border-white/10 rounded-xl text-xs font-semibold text-white px-4 py-3 focus:outline-none focus:border-primary transition-all cursor-pointer appearance-none min-w-[160px]"
+                            >
+                                <option value="all" className="bg-slate-900">All Courses</option>
+                                {courses.map((c) => (
+                                    <option key={c._id || c.id} value={c.title || c.name} className="bg-slate-900">
+                                        {c.title || c.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="relative">
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                                className="w-full sm:w-auto bg-[#0D121F] border border-white/10 rounded-xl text-xs font-semibold text-white px-4 py-3 focus:outline-none focus:border-primary transition-all cursor-pointer appearance-none min-w-[150px]"
+                            >
+                                <option value="all" className="bg-slate-900">All Status</option>
+                                <option value="new" className="bg-slate-900">New Exams</option>
+                                <option value="completed" className="bg-slate-900">Completed Exams</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div className="grid gap-4">
