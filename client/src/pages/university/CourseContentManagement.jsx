@@ -143,6 +143,8 @@ const CourseContentManagement = () => {
         }
     };
 
+    const thumbnailInputRef = React.useRef(null);
+
     const handleThumbnailUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -158,13 +160,16 @@ const CourseContentManagement = () => {
                     ...getAuthConfig().headers
                 }
             };
-            await axios.post(`/api/courses/${courseId}/upload-thumbnail`, formData, config);
+            const { data } = await axios.post(`/api/courses/${courseId}/upload-thumbnail`, formData, config);
+            setCourse(prev => ({ ...prev, thumbnail: data.thumbnail }));
             fetchCourse();
             showToast('Thumbnail updated!', 'success');
         } catch (error) {
-            showToast('Thumbnail upload failed', 'error');
+            console.error('Thumbnail upload error:', error);
+            showToast(error.response?.data?.message || 'Thumbnail upload failed', 'error');
         } finally {
             setThumbnailUploading(false);
+            if (e.target) e.target.value = '';
         }
     };
 
@@ -394,19 +399,35 @@ const CourseContentManagement = () => {
                 <div className="lg:col-span-1 space-y-6">
                     <GlassCard className="p-6">
                         <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-4">Course Thumbnail</label>
-                        <div className="relative group overflow-hidden rounded-2xl bg-black border border-white/10 aspect-video flex items-center justify-center">
+                        <input
+                            type="file"
+                            ref={thumbnailInputRef}
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleThumbnailUpload}
+                        />
+                        <div 
+                            onClick={() => thumbnailInputRef.current?.click()}
+                            className="relative group overflow-hidden rounded-2xl bg-black border border-white/10 aspect-video flex items-center justify-center cursor-pointer"
+                        >
                             {course.thumbnail ? (
                                 <img src={course.thumbnail} alt="Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
                             ) : (
                                 <ImageIcon size={48} className="text-white/20" />
                             )}
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center backdrop-blur-[2px]">
-                                <label className="cursor-pointer">
-                                    <input type="file" accept="image/*" className="hidden" onChange={handleThumbnailUpload} />
-                                    <ModernButton variant="default" className="text-xs !py-2 !px-4 h-auto" disabled={thumbnailUploading}>
-                                        {thumbnailUploading ? 'UPDATING...' : 'CHANGE COVER'}
-                                    </ModernButton>
-                                </label>
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        thumbnailInputRef.current?.click();
+                                    }}
+                                    disabled={thumbnailUploading}
+                                    className="px-4 py-2 bg-primary text-black rounded-xl text-xs font-bold uppercase tracking-wider hover:brightness-110 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+                                >
+                                    <Upload size={14} className={thumbnailUploading ? "animate-spin" : ""} />
+                                    {thumbnailUploading ? 'UPDATING...' : 'CHANGE COVER'}
+                                </button>
                             </div>
                         </div>
                         <p className="text-[10px] text-white/30 mt-3 text-center uppercase tracking-wider font-medium">Recommended: 16:9 Aspect ratio (PNG/JPG)</p>
