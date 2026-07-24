@@ -315,7 +315,11 @@ const verifyUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const newStatus = !userRes.rows[0].is_verified;
+        const currentVerified = userRes.rows[0].is_verified;
+        const newStatus = typeof req.body?.isVerified === 'boolean' 
+            ? req.body.isVerified 
+            : !currentVerified;
+
         const result = await query('UPDATE users SET is_verified = $1, updated_at = NOW() WHERE id = $2 RETURNING id, is_verified as "isVerified"', [newStatus, req.params.id]);
         const updatedUser = result.rows[0];
 
@@ -325,11 +329,11 @@ const verifyUser = async (req, res) => {
         res.json({
             _id: updatedUser.id,
             isVerified: updatedUser.isVerified,
-            message: 'Verification status updated successfully'
+            message: `Student status updated to ${updatedUser.isVerified ? 'Active' : 'Inactive'}`
         });
     } catch (error) {
         console.error('Verify user error:', error);
-        res.status(500).json({ message: error.message || 'Failed to update verification status' });
+        res.status(500).json({ message: error.message || 'Failed to update user status' });
     }
 };
 

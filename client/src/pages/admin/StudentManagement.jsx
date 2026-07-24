@@ -287,14 +287,47 @@ const StudentManagement = () => {
         });
     };
 
+    const [selectedStatus, setSelectedStatus] = useState('all');
+
+    const handleToggleStudentStatus = async (student) => {
+        const targetStatus = !student.isVerified;
+        const actionText = targetStatus ? 'Activate' : 'Deactivate';
+
+        openConfirmModal({
+            title: `${actionText} Student`,
+            message: `Are you sure you want to mark ${student.name || 'this student'} as ${targetStatus ? 'ACTIVE' : 'INACTIVE'}?`,
+            confirmText: `${actionText} Account`,
+            type: targetStatus ? 'primary' : 'danger',
+            onConfirm: async () => {
+                try {
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                    await axios.put(`/api/admin/users/${student._id}/verify`, { isVerified: targetStatus }, config);
+                    showToast?.(`Student marked as ${targetStatus ? 'Active' : 'Inactive'}`, 'success');
+
+                    if (selectedStudent && selectedStudent._id === student._id) {
+                        setSelectedStudent({ ...selectedStudent, isVerified: targetStatus });
+                    }
+                    fetchStudents();
+                } catch (error) {
+                    console.error('Error updating student status:', error);
+                    showToast?.(error.response?.data?.message || 'Failed to update student status', 'error');
+                }
+            }
+        });
+    };
+
     const filteredStudents = students.filter(student => {
         const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-        // This logic is simple but since we don't have per-student enrollment titles pre-fetched for the whole list, 
-        // we'll rely on the existing searchTerm.
-        // For a more advanced "Web Development" specific check, we'd need a backend filtered route.
-        return matchesSearch;
+        const matchesStatus = selectedStatus === 'all'
+            ? true
+            : selectedStatus === 'active'
+                ? student.isVerified === true
+                : student.isVerified === false;
+
+        return matchesSearch && matchesStatus;
     });
 
     // Helper to get university display name
@@ -565,6 +598,15 @@ const StudentManagement = () => {
                 </GlassCard>
                 <GlassCard className="!p-2 flex flex-row gap-2 shrink-0">
                     <select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        className="w-32 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                    >
+                        <option value="all" className="bg-slate-900">All Status</option>
+                        <option value="active" className="bg-slate-900">Active</option>
+                        <option value="inactive" className="bg-slate-900">Inactive / Pending</option>
+                    </select>
+                    <select
                         value={selectedCourseId}
                         onChange={(e) => setSelectedCourseId(e.target.value)}
                         className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
@@ -668,12 +710,18 @@ const StudentManagement = () => {
                                     </td>
                                     <td className="px-6 py-4 text-sm text-white">{student.enrollmentCount || 0}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${student.isVerified
-                                            ? 'bg-emerald-500/20 text-emerald-400'
-                                            : 'bg-amber-500/20 text-amber-400'
-                                            }`}>
-                                            {student.isVerified ? 'Active' : 'Pending'}
-                                        </span>
+                                         <button
+                                             onClick={() => handleToggleStudentStatus(student)}
+                                             className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 border ${
+                                                 student.isVerified
+                                                     ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30'
+                                                     : 'bg-rose-500/20 text-rose-400 border-rose-500/30 hover:bg-rose-500/30'
+                                             }`}
+                                             title={`Click to mark student as ${student.isVerified ? 'Inactive' : 'Active'}`}
+                                         >
+                                             <span className={`w-1.5 h-1.5 rounded-full ${student.isVerified ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                                             {student.isVerified ? 'Active' : 'Inactive'}
+                                         </button>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end space-x-2">
@@ -958,14 +1006,26 @@ const StudentManagement = () => {
                                     </div>
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase tracking-wider">Status</label>
-                                        <p className="text-white mt-0.5">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-bold rounded-full ${selectedStudent.isVerified
-                                                ? 'bg-emerald-500/20 text-emerald-400'
-                                                : 'bg-amber-500/20 text-amber-400'
-                                                }`}>
-                                                {selectedStudent.isVerified ? 'Verified' : 'Pending'}
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full border ${
+                                                selectedStudent.isVerified
+                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                                    : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                                            }`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${selectedStudent.isVerified ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                                                {selectedStudent.isVerified ? 'Active' : 'Inactive'}
                                             </span>
-                                        </p>
+                                            <button
+                                                onClick={() => handleToggleStudentStatus(selectedStudent)}
+                                                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
+                                                    selectedStudent.isVerified
+                                                        ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
+                                                        : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                                                }`}
+                                            >
+                                                {selectedStudent.isVerified ? 'Mark as Inactive' : 'Mark as Active'}
+                                            </button>
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="text-xs text-gray-400 uppercase tracking-wider">Reward Wallet</label>
