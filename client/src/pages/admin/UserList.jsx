@@ -29,6 +29,7 @@ const UserList = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedRole, setSelectedRole] = useState('');
     const [inviteSending, setInviteSending] = useState(false);
+    const [toast, setToast] = useState(null); // { type: 'success'|'error', message: '' }
     const [confirmModal, setConfirmModal] = useState({
         isOpen: false,
         title: '',
