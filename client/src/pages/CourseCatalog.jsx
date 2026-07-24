@@ -77,14 +77,32 @@ const CourseCatalog = () => {
             const courseUniversity = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad';
             const matchesUniversity = selectedUniversity === 'All' || courseUniversity === selectedUniversity;
 
-            const matchesProgramType = (course.programType || course.program_type || 'course') === programType;
+            let matchesProgramType = false;
+            if (programType === 'featured') {
+                const pType = (course.programType || course.program_type || '').toLowerCase();
+                const instRole = (course.instructor_role || course.instructor?.role || course.submitted_by_role || '').toLowerCase();
+                const isFeat = course.is_featured || course.isFeatured;
+                const isCloudComp = (course.category || '').toLowerCase().includes('cloud') || (course.title || '').toLowerCase().includes('cloud computing');
+                matchesProgramType = pType === 'featured' || isFeat || instRole === 'partner' || isCloudComp;
+            } else {
+                matchesProgramType = (course.programType || course.program_type || 'course') === programType;
+            }
 
             return matchesSearch && matchesUniversity && matchesProgramType && (category === 'All' || course.category === category);
         });
     }, [courses, filter, category, selectedUniversity, programType]);
 
     const coursesForCategoryList = useMemo(
-        () => courses.filter(c => (c.programType || c.program_type || 'course') === programType),
+        () => courses.filter(c => {
+            if (programType === 'featured') {
+                const pType = (c.programType || c.program_type || '').toLowerCase();
+                const instRole = (c.instructor_role || c.instructor?.role || c.submitted_by_role || '').toLowerCase();
+                const isFeat = c.is_featured || c.isFeatured;
+                const isCloudComp = (c.category || '').toLowerCase().includes('cloud') || (c.title || '').toLowerCase().includes('cloud computing');
+                return pType === 'featured' || isFeat || instRole === 'partner' || isCloudComp;
+            }
+            return (c.programType || c.program_type || 'course') === programType;
+        }),
         [courses, programType]
     );
     const categories = useMemo(() => ['All', ...new Set(coursesForCategoryList.map(c => c.category))], [coursesForCategoryList]);
@@ -135,7 +153,7 @@ const CourseCatalog = () => {
 
                             {/* Program Type Toggle */}
                             <div className="flex justify-center pt-2">
-                                <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-2xl">
+                                <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-2xl flex-wrap justify-center">
                                     <button
                                         onClick={() => { setProgramType('course'); setCategory('All'); }}
                                         className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'course'
@@ -153,6 +171,15 @@ const CourseCatalog = () => {
                                             }`}
                                     >
                                         Skill Integrated Degree Programmes
+                                    </button>
+                                    <button
+                                        onClick={() => { setProgramType('featured'); setCategory('All'); }}
+                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'featured'
+                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white'
+                                            }`}
+                                    >
+                                        Featured Courses
                                     </button>
                                 </div>
                             </div>

@@ -585,6 +585,7 @@ const CourseManager = () => {
                                     >
                                         <option value="course" className="bg-[#0B071A]">Skill Course</option>
                                         <option value="degree_programme" className="bg-[#0B071A]">Skill Integrated Degree Programme</option>
+                                        <option value="featured" className="bg-[#0B071A]">Featured Course</option>
                                     </select>
                                 </div>
                             </div>
