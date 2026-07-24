@@ -19,23 +19,34 @@ const baseStyle = {
 };
 
 const getClientUrl = (path = '') => {
-    let baseUrl = process.env.CLIENT_URL || 'https://skilldad.com';
-    // Always convert localhost / 127.0.0.1 origins in email URLs to live https://skilldad.com
-    baseUrl = baseUrl.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, 'https://skilldad.com');
+    const liveDomain = 'https://skilldad.com';
+    let baseUrl = process.env.CLIENT_URL || liveDomain;
+
+    // Force liveDomain if baseUrl contains localhost, 127.0.0.1, an IP address, or is http
+    if (!baseUrl || baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1') || /^http:\/\/\d+\.\d+\.\d+\.\d+/i.test(baseUrl) || baseUrl.startsWith('http://')) {
+        baseUrl = liveDomain;
+    }
 
     if (!path) {
         return baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     }
-    
-    if (typeof path === 'string') {
-        if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('mailto:')) {
-            return path.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i, 'https://skilldad.com');
-        }
+
+    let cleanPath = String(path).trim();
+
+    if (cleanPath.startsWith('mailto:')) {
+        return cleanPath;
+    }
+
+    // If path is a full URL (http://... or https://...)
+    if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+        // Replace localhost, 127.0.0.1, raw IP address, or non-SSL origin with liveDomain
+        cleanPath = cleanPath.replace(/^https?:\/\/[^\/]+/i, liveDomain);
+        return cleanPath;
     }
 
     const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${base}${cleanPath}`;
+    const formattedPath = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`;
+    return `${base}${formattedPath}`;
 };
 
 const layout = (title, content, button = null) => {

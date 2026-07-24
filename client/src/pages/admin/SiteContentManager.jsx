@@ -95,12 +95,16 @@ const SiteContentManager = () => {
     };
 
     const handleEditStart = (item) => {
+        const id = item._id || item.id;
         setIsEditing(true);
-        setEditingId(item._id);
+        setEditingId(id);
         setFormData({
             ...formData,
             ...item,
-            _id: item._id // ensures ID is preserved
+            _id: id,
+            id: id,
+            logo: item.logo || item.imageUrl || item.image || '',
+            image: item.image || item.imageUrl || item.logo || ''
         });
         setShowAddModal(true);
     };
@@ -218,7 +222,7 @@ const SiteContentManager = () => {
 
     const tabs = [
         { id: 'corporate', label: 'Corporate Partners', icon: Building2 },
-        { id: 'university', label: 'University Partners', icon: GraduationCap },
+        { id: 'university', label: 'University Partners (Ticker Banner)', icon: GraduationCap },
         { id: 'directors', label: 'Team & Advisory', icon: UserIcon },
         { id: 'success_stories', label: 'Success Stories', icon: Heart },
         { id: 'about_cms', label: 'About Page CMS', icon: ImageIcon },
@@ -264,12 +268,14 @@ const SiteContentManager = () => {
                     <AboutCmsEditor data={cmsData} onUpdate={handleCmsUpdate} />
                 ) : (
                     <div className="space-y-6">
+
+
                         <div className="flex justify-between items-center">
                             <h2 className="text-xl font-black text-white px-2">
                                 {tabs.find(t => t.id === activeTab)?.label}
                             </h2>
                             <ModernButton onClick={() => { resetForm(); setShowAddModal(true); }}>
-                                Add {activeTab === 'directors' ? 'Member' : activeTab === 'success_stories' ? 'Story' : 'Logo'}
+                                Add {activeTab === 'directors' ? 'Member' : activeTab === 'success_stories' ? 'Story' : activeTab === 'university' ? 'Ticker Partner' : 'Logo'}
                             </ModernButton>
                         </div>
                         
@@ -298,99 +304,133 @@ const SiteContentManager = () => {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {(
-                                activeTab === 'directors' 
-                                    ? directors.filter(d => 
-                                        directorSubTab === 'IIT_LEADERSHIP' 
-                                            ? d.display_target === 'IIT_LEADERSHIP' 
-                                            : d.display_target !== 'IIT_LEADERSHIP'
-                                      )
-                                    : activeTab === 'success_stories' ? stories 
-                                    : logos.filter(l => l.type === activeTab)
-                            ).map(item => (
-                                <GlassCard key={item._id} className="relative group overflow-hidden border-white/5 hover:border-primary/30 transition-all duration-500">
-                                    <div className="flex flex-col items-center text-center p-6">
-                                        <div className="relative mb-4">
-                                            <div className="w-24 h-24 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all bg-black/40">
-                                                <img 
-                                                    src={
-                                                        (item.imageUrl || item.image || item.logo) 
-                                                            ? ( (item.imageUrl || item.image || item.logo).startsWith('http') 
-                                                                ? (item.imageUrl || item.image || item.logo) 
-                                                                : `${axios.defaults.baseURL || ''}${item.imageUrl || item.image || item.logo}` )
-                                                            : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'N/A')}&background=5B5CFF&color=fff&bold=true`
-                                                    } 
-                                                    alt={item.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            <label className="absolute -bottom-2 -right-2 p-2 bg-primary rounded-xl cursor-pointer hover:scale-110 transition-all shadow-lg">
-                                                <Upload size={14} className="text-white" />
-                                                <input 
-                                                    type="file" 
-                                                    className="hidden" 
-                                                    onChange={(e) => handleFileUpload(item._id, e.target.files[0])}
-                                                    disabled={uploading === item._id}
-                                                />
-                                            </label>
-                                            {uploading === item._id && (
-                                                <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center">
-                                                    <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                                                </div>
-                                            )}
-                                        </div>
+                        {(() => {
+                            const filteredItems = activeTab === 'directors' 
+                                ? directors.filter(d => 
+                                    directorSubTab === 'IIT_LEADERSHIP' 
+                                        ? d.display_target === 'IIT_LEADERSHIP' 
+                                        : d.display_target !== 'IIT_LEADERSHIP'
+                                  )
+                                : activeTab === 'success_stories' ? stories 
+                                : logos.filter(l => l.type === activeTab);
 
-                                        <div className="w-full">
-                                            <h3 className="text-sm font-bold text-white mb-1 text-center">{item.name}</h3>
-                                            <p className="text-[10px] text-white/50 uppercase tracking-widest text-center">{item.title || item.role || item.type || item.package}</p>
-                                            
-                                            <div className="text-center mt-2">
-                                                {activeTab === 'directors' && (
-                                                    <div className="text-[8px] font-black px-2 py-0.5 bg-primary/20 text-primary border border-primary/30 rounded-full inline-block">
-                                                        {item.display_target || 'ABOUT_DIRECTOR'}
-                                                    </div>
-                                                )}
-                                                {activeTab === 'success_stories' && (
-                                                    <div className="space-y-1">
-                                                        <div className="text-[8px] font-black px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full inline-block">
-                                                            {item.campus}
-                                                        </div>
-                                                        {/* Video upload button for success stories */}
-                                                        <div className="flex items-center justify-center mt-2">
-                                                            <label className={`flex items-center gap-1 px-3 py-1.5 rounded-xl cursor-pointer text-[9px] font-black uppercase tracking-widest transition-all ${item.video_url || item.videoUrl ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'}`}>
-                                                                {videoUploading === item._id ? (
-                                                                    <Loader2 size={10} className="animate-spin" />
-                                                                ) : (
-                                                                    <Upload size={10} />
-                                                                )}
-                                                                {item.video_url || item.videoUrl ? 'Change Video' : 'Upload Video'}
-                                                                <input
-                                                                    type="file"
-                                                                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
-                                                                    className="hidden"
-                                                                    onChange={(e) => handleVideoUpload(item._id, e.target.files[0])}
-                                                                    disabled={videoUploading === item._id}
-                                                                />
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex items-center justify-center space-x-2 mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleEditStart(item)} className="p-2 hover:bg-white/10 rounded-xl transition-colors text-white/50 hover:text-white">
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button onClick={() => handleDelete(item._id)} className="p-2 hover:bg-red-500/10 rounded-xl transition-colors text-white/50 hover:text-red-500">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </div>
+                            if (filteredItems.length === 0) {
+                                return (
+                                    <div className="p-12 text-center rounded-3xl bg-white/5 border border-dashed border-white/10 my-6">
+                                        <Building2 className="w-12 h-12 mx-auto text-white/20 mb-3" />
+                                        <h3 className="text-base font-bold text-white mb-1">
+                                            No {tabs.find(t => t.id === activeTab)?.label} Added Yet
+                                        </h3>
+                                        <p className="text-xs text-white/40 max-w-md mx-auto mb-5">
+                                            There are currently no items in this category. Click the button below to add your first item.
+                                        </p>
+                                        <ModernButton onClick={() => { resetForm(); setShowAddModal(true); }}>
+                                            <Plus size={16} className="mr-2" />
+                                            Add {activeTab === 'directors' ? 'Member' : activeTab === 'success_stories' ? 'Story' : activeTab === 'university' ? 'Ticker Partner' : 'Logo'}
+                                        </ModernButton>
                                     </div>
-                                </GlassCard>
-                            ))}
-                        </div>
+                                );
+                            }
+
+                            return (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {filteredItems.map(item => {
+                                        const itemId = item._id || item.id;
+                                        return (
+                                            <GlassCard key={itemId} className="relative group overflow-hidden border-white/5 hover:border-primary/30 transition-all duration-500">
+                                                <div className="flex flex-col items-center text-center p-6">
+                                                    <div className="relative mb-4">
+                                                        <div className="w-24 h-24 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all bg-black/40">
+                                                            <img 
+                                                                src={
+                                                                    (item.imageUrl || item.image || item.logo) 
+                                                                        ? ( (item.imageUrl || item.image || item.logo).startsWith('http') 
+                                                                            ? (item.imageUrl || item.image || item.logo) 
+                                                                            : `${axios.defaults.baseURL || ''}${item.imageUrl || item.image || item.logo}` )
+                                                                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'N/A')}&background=5B5CFF&color=fff&bold=true`
+                                                                } 
+                                                                alt={item.name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <label className="absolute -bottom-2 -right-2 p-2 bg-primary rounded-xl cursor-pointer hover:scale-110 transition-all shadow-lg" title="Change logo/image">
+                                                            <Upload size={14} className="text-white" />
+                                                            <input 
+                                                                type="file" 
+                                                                className="hidden" 
+                                                                onChange={(e) => handleFileUpload(itemId, e.target.files[0])}
+                                                                disabled={uploading === itemId}
+                                                            />
+                                                        </label>
+                                                        {uploading === itemId && (
+                                                            <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center">
+                                                                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="w-full">
+                                                        <h3 className="text-sm font-bold text-white mb-1 text-center">{item.name}</h3>
+                                                        <p className="text-[10px] text-white/50 uppercase tracking-widest text-center">{item.title || item.role || item.type || item.package}</p>
+                                                        
+                                                        <div className="text-center mt-2">
+                                                            {activeTab === 'directors' && (
+                                                                <div className="text-[8px] font-black px-2 py-0.5 bg-primary/20 text-primary border border-primary/30 rounded-full inline-block">
+                                                                    {item.display_target || 'ABOUT_DIRECTOR'}
+                                                                </div>
+                                                            )}
+                                                            {activeTab === 'success_stories' && (
+                                                                <div className="space-y-1">
+                                                                    <div className="text-[8px] font-black px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full inline-block">
+                                                                        {item.campus}
+                                                                    </div>
+                                                                    <div className="flex items-center justify-center mt-2">
+                                                                        <label className={`flex items-center gap-1 px-3 py-1.5 rounded-xl cursor-pointer text-[9px] font-black uppercase tracking-widest transition-all ${item.video_url || item.videoUrl ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'}`}>
+                                                                            {videoUploading === itemId ? (
+                                                                                <Loader2 size={10} className="animate-spin" />
+                                                                            ) : (
+                                                                                <Upload size={10} />
+                                                                            )}
+                                                                            {item.video_url || item.videoUrl ? 'Change Video' : 'Upload Video'}
+                                                                            <input
+                                                                                type="file"
+                                                                                accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                                                                                className="hidden"
+                                                                                onChange={(e) => handleVideoUpload(itemId, e.target.files[0])}
+                                                                                disabled={videoUploading === itemId}
+                                                                            />
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Action buttons - ALWAYS visible so user easily spots the Edit button */}
+                                                        <div className="flex items-center justify-center gap-2 mt-5 pt-3 border-t border-white/10 w-full">
+                                                            <button 
+                                                                onClick={() => handleEditStart(item)} 
+                                                                className="flex-1 py-2 px-3 bg-white/5 hover:bg-primary/20 hover:text-primary border border-white/10 hover:border-primary/30 rounded-xl text-xs font-bold text-white/90 flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                                                            >
+                                                                <Edit2 size={13} />
+                                                                <span>Edit</span>
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDelete(itemId)} 
+                                                                className="py-2 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                                                                title="Delete Item"
+                                                            >
+                                                                <Trash2 size={13} />
+                                                                <span>Delete</span>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </GlassCard>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })()}
                     </div>
                 )}
             </div>

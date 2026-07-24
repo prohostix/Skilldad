@@ -79,6 +79,29 @@ const StudentManagement = () => {
     });
     const [batchOptions, setBatchOptions] = useState([]);
 
+    // Custom Confirmation Modal state
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel',
+        type: 'danger',
+        onConfirm: () => {}
+    });
+
+    const openConfirmModal = ({ title, message, confirmText = 'Confirm', type = 'danger', onConfirm }) => {
+        setConfirmModal({
+            isOpen: true,
+            title,
+            message,
+            confirmText,
+            cancelText: 'Cancel',
+            type,
+            onConfirm
+        });
+    };
+
     useEffect(() => {
         fetchStudents();
         fetchCourses();
@@ -240,22 +263,28 @@ const StudentManagement = () => {
         }
     };
 
-    const handleDeleteStudent = async (studentId) => {
-        if (!window.confirm('Are you sure you want to delete this student?')) return;
+    const handleDeleteStudent = (studentId) => {
+        openConfirmModal({
+            title: 'Delete Student Account',
+            message: `Are you sure you want to delete ${selectedStudent?.name || 'this student'}? All associated enrollments and records will be deleted.`,
+            confirmText: 'Delete Student',
+            type: 'danger',
+            onConfirm: async () => {
+                try {
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-        try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                    await axios.delete(`/api/admin/students/${studentId}`, config);
 
-            await axios.delete(`/api/admin/students/${studentId}`, config);
-
-            showToast?.('Student deleted successfully', 'success');
-            fetchStudents();
-            setSelectedStudent(null);
-        } catch (error) {
-            console.error('Error deleting student:', error);
-            showToast?.('Failed to delete student', 'error');
-        }
+                    showToast?.('Student deleted successfully', 'success');
+                    fetchStudents();
+                    setSelectedStudent(null);
+                } catch (error) {
+                    console.error('Error deleting student:', error);
+                    showToast?.('Failed to delete student', 'error');
+                }
+            }
+        });
     };
 
     const filteredStudents = students.filter(student => {
@@ -399,6 +428,16 @@ const StudentManagement = () => {
         }
     };
 
+    const handleOpenEnrollModal = () => {
+        const studentUniId = selectedStudent?.universityId?._id || selectedStudent?.universityId || selectedStudent?.university_id || '';
+        setEnrollUniversityId(studentUniId);
+        setEnrollCourseId('');
+        setEnrollBatchId('');
+        setEnrollNote('');
+        setEnrollError('');
+        setEnrollModalOpen(true);
+    };
+
     const handleAdminEnroll = async () => {
         if (!enrollCourseId) {
             setEnrollError('Please select a course');
@@ -461,18 +500,25 @@ const StudentManagement = () => {
         }
     };
 
-    const handleAdminUnenroll = async (courseId, courseTitle) => {
-        if (!window.confirm(`Remove ${selectedStudent?.name} from "${courseTitle}"?`)) return;
-        try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            await axios.delete(`/api/admin/students/${selectedStudent._id}/enroll/${courseId}`, config);
-            showToast?.('Student unenrolled successfully', 'success');
-            await fetchStudentDetails(selectedStudent._id);
-            fetchStudents();
-        } catch (error) {
-            showToast?.(error.response?.data?.message || 'Failed to unenroll student', 'error');
-        }
+    const handleAdminUnenroll = (courseId, courseTitle) => {
+        openConfirmModal({
+            title: 'Remove Enrollment',
+            message: `Are you sure you want to remove ${selectedStudent?.name || 'student'} from "${courseTitle}"?`,
+            confirmText: 'Remove Course',
+            type: 'danger',
+            onConfirm: async () => {
+                try {
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                    await axios.delete(`/api/admin/students/${selectedStudent._id}/enroll/${courseId}`, config);
+                    showToast?.('Student unenrolled successfully', 'success');
+                    await fetchStudentDetails(selectedStudent._id);
+                    fetchStudents();
+                } catch (error) {
+                    showToast?.(error.response?.data?.message || 'Failed to unenroll student', 'error');
+                }
+            }
+        });
     };
 
     if (loading) {
@@ -952,12 +998,7 @@ const StudentManagement = () => {
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-semibold text-white">Enrollments ({enrollments.length})</h3>
                                     <button
-                                        onClick={() => {
-                                            setEnrollModalOpen(true);
-                                            setEnrollError('');
-                                            setEnrollCourseId('');
-                                            setEnrollNote('');
-                                        }}
+                                        onClick={handleOpenEnrollModal}
                                         className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500/30 transition-colors"
                                     >
                                         <GraduationCap size={14} />
@@ -1028,7 +1069,7 @@ const StudentManagement = () => {
                                             <GraduationCap className="text-gray-600 mx-auto mb-2" size={28} />
                                             <p className="text-gray-400 text-sm">No enrollments yet</p>
                                             <button
-                                                onClick={() => setEnrollModalOpen(true)}
+                                                onClick={handleOpenEnrollModal}
                                                 className="mt-2 text-xs text-emerald-400 hover:underline"
                                             >
                                                 + Enroll in a course
@@ -1147,34 +1188,114 @@ const StudentManagement = () => {
                                 <X size={20} />
                             </button>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
+                            {/* STEP 1: SELECT UNIVERSITY / INSTITUTION */}
                             <div>
-                                <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Select Course *</label>
+                                <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">
+                                    1. Choose University / Partner
+                                </label>
+                                <select
+                                    value={enrollUniversityId}
+                                    onChange={(e) => {
+                                        setEnrollUniversityId(e.target.value);
+                                        setEnrollCourseId('');
+                                        setEnrollError('');
+                                    }}
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm font-medium"
+                                >
+                                    <option value="" className="bg-slate-900">-- SkillDad Direct (Independent) --</option>
+                                    {universities.filter(u => u.role === 'university' || u.role === 'partner').map(u => (
+                                        <option key={u._id} value={u._id} className="bg-slate-900">
+                                            {u.profile?.universityName || u.name} {u.role === 'partner' ? '(B2B Partner)' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[10px] text-gray-400 mt-1">Select university/partner to view its courses, or choose SkillDad Direct</p>
+                            </div>
+
+                            {/* STEP 2: SELECT COURSE */}
+                            <div>
+                                <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">
+                                    2. Select Course *
+                                </label>
                                 <select
                                     value={enrollCourseId}
                                     onChange={(e) => { setEnrollCourseId(e.target.value); setEnrollError(''); }}
-                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm font-medium"
                                 >
                                     <option value="" className="bg-slate-900">-- Choose a course --</option>
                                     {courses
-                                        .filter(c => !enrollments.find(e => (e.course?._id || e.course_id) === c._id))
+                                        .filter(c => {
+                                            // Exclude already enrolled courses
+                                            const isEnrolled = enrollments.some(e => {
+                                                const enrolledId = e.course?._id || e.course_id || e.course;
+                                                return String(enrolledId) === String(c._id);
+                                            });
+                                            if (isEnrolled) return false;
+
+                                            // If a university / partner is selected: ONLY show courses provided by or assigned to that university
+                                            if (enrollUniversityId) {
+                                                const selectedUni = universities.find(u => String(u._id) === String(enrollUniversityId));
+                                                const assignedCourseIds = Array.isArray(selectedUni?.profile?.assigned_courses)
+                                                    ? selectedUni.profile.assigned_courses.map(id => String(id))
+                                                    : [];
+                                                const courseInstructorId = String(c.instructor_id || c.instructorId || c.submitted_by || c.instructor?._id || c.instructor || '');
+                                                const isProvidedByUni = courseInstructorId === String(enrollUniversityId);
+                                                const isAssignedToUni = assignedCourseIds.includes(String(c._id));
+
+                                                return isProvidedByUni || isAssignedToUni;
+                                            }
+
+                                            // If SkillDad Direct / Independent is selected, show courses provided directly by SkillDad or all courses
+                                            return true;
+                                        })
                                         .map(c => (
-                                            <option key={c._id} value={c._id} className="bg-slate-900">{c.title}</option>
+                                            <option key={c._id} value={c._id} className="bg-slate-900">
+                                                {c.title}
+                                            </option>
                                         ))
                                     }
                                 </select>
-                                {courses.filter(c => !enrollments.find(e => (e.course?._id || e.course_id) === c._id)).length === 0 && (
-                                    <p className="text-[10px] text-amber-400 mt-1">Student is already enrolled in all available courses.</p>
-                                )}
+                                {(() => {
+                                    const availableForUni = courses.filter(c => {
+                                        const isEnrolled = enrollments.some(e => {
+                                            const enrolledId = e.course?._id || e.course_id || e.course;
+                                            return String(enrolledId) === String(c._id);
+                                        });
+                                        if (isEnrolled) return false;
+
+                                        if (enrollUniversityId) {
+                                            const selectedUni = universities.find(u => String(u._id) === String(enrollUniversityId));
+                                            const assignedCourseIds = Array.isArray(selectedUni?.profile?.assigned_courses)
+                                                ? selectedUni.profile.assigned_courses.map(id => String(id))
+                                                : [];
+                                            const courseInstructorId = String(c.instructor_id || c.instructorId || c.submitted_by || c.instructor?._id || c.instructor || '');
+                                            const isProvidedByUni = courseInstructorId === String(enrollUniversityId);
+                                            const isAssignedToUni = assignedCourseIds.includes(String(c._id));
+
+                                            return isProvidedByUni || isAssignedToUni;
+                                        }
+                                        return true;
+                                    });
+
+                                    if (enrollUniversityId && availableForUni.length === 0) {
+                                        return (
+                                            <p className="text-[10px] text-amber-400 mt-1.5 font-medium">
+                                                ⚠️ No courses currently assigned to or provided by this university/partner.
+                                            </p>
+                                        );
+                                    }
+                                    return null;
+                                })()}
                             </div>
                             
                             {enrollCourseId && (
                                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                                    <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Assign to Batch (optional)</label>
+                                    <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">3. Assign to Batch (optional)</label>
                                     <select
                                         value={enrollBatchId}
                                         onChange={(e) => setEnrollBatchId(e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm"
+                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm font-medium"
                                     >
                                         <option value="" className="bg-slate-900">-- No Batch (Global) --</option>
                                         {enrollBatches.map(batch => (
@@ -1183,22 +1304,6 @@ const StudentManagement = () => {
                                     </select>
                                 </motion.div>
                             )}
-                            <div>
-                                <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Assign to University (optional)</label>
-                                <select
-                                    value={enrollUniversityId}
-                                    onChange={(e) => setEnrollUniversityId(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-emerald-500/50 focus:outline-none appearance-none cursor-pointer text-sm"
-                                >
-                                    <option value="" className="bg-slate-900">-- No University (Independent) --</option>
-                                    {universities.filter(u => u.role === 'university' || u.role === 'partner').map(u => (
-                                        <option key={u._id} value={u._id} className="bg-slate-900">
-                                            {u.profile?.universityName || u.name} {u.role === 'partner' ? '(B2B Partner)' : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                                <p className="text-[10px] text-gray-500 mt-1">If selected, student will be linked to this university</p>
-                            </div>
                             <div>
                                 <label className="block text-[11px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Note (optional)</label>
                                 <textarea
@@ -1351,6 +1456,48 @@ const StudentManagement = () => {
                     </motion.div>
                 </div>
             )}
+
+            {/* Custom Styled Confirmation Modal */}
+            <AnimatePresence>
+                {confirmModal.isOpen && (
+                    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[300000] p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                            className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl overflow-hidden"
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className="p-3 bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl shrink-0">
+                                    <Trash2 size={22} />
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-white">{confirmModal.title}</h3>
+                                    <p className="text-xs text-gray-300 mt-1.5 leading-relaxed">{confirmModal.message}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                                <button
+                                    onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                    className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white rounded-xl text-xs font-bold transition-all"
+                                >
+                                    {confirmModal.cancelText || 'Cancel'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                                        confirmModal.onConfirm?.();
+                                    }}
+                                    className="px-5 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-red-500/25"
+                                >
+                                    {confirmModal.confirmText}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

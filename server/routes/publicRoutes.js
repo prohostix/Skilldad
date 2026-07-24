@@ -8,7 +8,7 @@ const { getPageContent } = require('../controllers/cmsController');
 // @access  Public
 router.get('/partner-logos', async (req, res) => {
     try {
-        const logosRes = await query(`SELECT id as _id, name, logo as "imageUrl", "order", is_active as "isActive" FROM partner_logos WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
+        const logosRes = await query(`SELECT id as _id, name, logo as "imageUrl", type, "order", is_active as "isActive" FROM partner_logos WHERE is_active = true ORDER BY "order" ASC, created_at ASC`);
         res.json(logosRes.rows || []);
     } catch (error) {
         // Log error for debugging database connection issues

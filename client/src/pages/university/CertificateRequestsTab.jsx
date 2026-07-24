@@ -8,8 +8,10 @@ import {
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import { useToast } from '../../context/ToastContext';
 
 const CertificateRequestsTab = () => {
+    const { showToast } = useToast();
     const [requests, setRequests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -41,10 +43,10 @@ const CertificateRequestsTab = () => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             await axios.put(`/api/certificates/${id}/status`, { status, notes }, config);
-            alert(`Certificate ${status.toLowerCase()} successfully!`);
+            showToast(`Certificate ${status.toLowerCase()} successfully!`, 'success');
             fetchRequests();
         } catch (error) {
-            alert(error.response?.data?.message || 'Failed to update status');
+            showToast(error.response?.data?.message || 'Failed to update status', 'error');
         }
     };
 
@@ -65,12 +67,12 @@ const CertificateRequestsTab = () => {
                 } 
             };
             await axios.post(`/api/certificates/${selectedRequest.id}/upload`, formData, config);
-            alert('Certificate issued and uploaded successfully!');
+            showToast('Certificate issued and uploaded successfully!', 'success');
             setShowUploadModal(false);
             setFile(null);
             fetchRequests();
         } catch (error) {
-            alert(error.response?.data?.message || 'Failed to upload certificate');
+            showToast(error.response?.data?.message || 'Failed to upload certificate', 'error');
         } finally {
             setUploading(false);
         }

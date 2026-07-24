@@ -215,11 +215,12 @@ const getSessions = asyncHandler(async (req, res) => {
 const getSession = asyncHandler(async (req, res) => {
     const resSet = await query(`
         SELECT s.*, u.name as instructor_name, u.email as instructor_email, 
-               uni.name as university_name, p.name as partner_name
+               uni.name as university_name, p.name as partner_name, c.title as course_title
         FROM live_sessions s
         JOIN users u ON s.instructor_id = u.id
         LEFT JOIN users uni ON s.university_id = uni.id
         LEFT JOIN users p ON s.partner_id = p.id
+        LEFT JOIN courses c ON s.course_id = c.id
         WHERE s.id = $1 AND (s.is_deleted IS NULL OR s.is_deleted = false)
     `, [req.params.id]);
 
@@ -239,9 +240,31 @@ const getSession = asyncHandler(async (req, res) => {
         try { session.recording = JSON.parse(session.recording); } catch (e) {}
     }
 
+    // Calculate dynamic enrolled count for this session
+    let enrolledCount = 0;
+    if (session.course_id) {
+        if (session.batch_id) {
+            const countRes = await query(
+                'SELECT COUNT(*)::int as count FROM enrollments WHERE course_id = $1 AND batch_id = $2',
+                [session.course_id, session.batch_id]
+            );
+            enrolledCount = countRes.rows[0]?.count || 0;
+        } else {
+            const countRes = await query(
+                'SELECT COUNT(*)::int as count FROM enrollments WHERE course_id = $1',
+                [session.course_id]
+            );
+            enrolledCount = countRes.rows[0]?.count || 0;
+        }
+    }
+
     res.json({
         ...session,
         _id: session.id,
+        startTime: session.start_time,
+        course: { title: session.course_title },
+        enrolledStudents: enrolledCount,
+        enrolledCount: enrolledCount,
         instructor: {
             _id: session.instructor_id,
             id: session.instructor_id,

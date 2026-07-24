@@ -24,8 +24,10 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { getMediaUrl } from '../../utils/media';
+import { useToast } from '../../context/ToastContext';
 
 const GroupManagement = () => {
+    const { showToast } = useToast();
     const [groups, setGroups] = useState([]);
     const [students, setStudents] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
@@ -175,7 +177,7 @@ const GroupManagement = () => {
 
     const handleCreateGroup = async () => {
         try {
-            if (!newGroupName.trim()) return alert('Group name is required');
+            if (!newGroupName.trim()) return showToast('Group name is required', 'error');
             const { data } = await axios.post('/api/university/groups', {
                 name: newGroupName,
                 description: newGroupDescription
@@ -185,17 +187,17 @@ const GroupManagement = () => {
             setOpenDialog(false);
             setNewGroupName('');
             setNewGroupDescription('');
-            alert('Group created successfully!');
+            showToast('Group created successfully!', 'success');
         } catch (error) {
             console.error('Error creating group:', error);
-            alert(error.response?.data?.message || 'Failed to create group');
+            showToast(error.response?.data?.message || 'Failed to create group', 'error');
         }
     };
 
     const handleRegisterStudent = async () => {
         try {
             if (!newStudentData.name || !newStudentData.email || !newStudentData.phone) {
-                return alert('Please fill in Name, Email and Phone');
+                return showToast('Please fill in Name, Email and Phone', 'error');
             }
 
             const selectedCourse = universityCourses.find(c => c.title === newStudentData.course);
@@ -208,7 +210,7 @@ const GroupManagement = () => {
                 courseId: selectedCourse?.id || selectedCourse?._id
             }, config);
 
-            alert(data.message || 'Student registered successfully!');
+            showToast(data.message || 'Student registered successfully!', 'success');
             setShowRegisterStudentModal(false);
             setNewStudentData({ name: '', email: '', phone: '', course: '' });
 
@@ -216,7 +218,7 @@ const GroupManagement = () => {
             fetchStudents();
         } catch (error) {
             console.error('Error registering student:', error);
-            alert(error.response?.data?.message || 'Failed to register student');
+            showToast(error.response?.data?.message || 'Failed to register student', 'error');
         }
     };
 
@@ -224,7 +226,7 @@ const GroupManagement = () => {
         const studentInSystem = students.find(s => s.email.toLowerCase() === studentEmail.toLowerCase());
 
         if (!studentInSystem) {
-            alert('Student email not found in the system. Please ensure the student is registered.');
+            showToast('Student email not found in the system. Please ensure the student is registered.', 'error');
             return;
         }
 
@@ -238,30 +240,31 @@ const GroupManagement = () => {
 
             setStudentEmail('');
             setOpenAddStudent(false);
-            alert(`Student ${studentInSystem.name} added to group successfully!`);
+            showToast(`Student ${studentInSystem.name} added to group successfully!`, 'success');
         } catch (error) {
             console.error('Error adding student to group:', error);
-            alert(error.response?.data?.message || 'Failed to add student to group');
+            showToast(error.response?.data?.message || 'Failed to add student to group', 'error');
         }
     };
 
     const handleDeleteGroup = (groupId) => {
         if (window.confirm('Are you sure you want to delete this group?')) {
             setGroups(groups.filter(g => g._id !== groupId));
-            alert('Group deleted.');
+            showToast('Group deleted.', 'success');
         }
     };
 
     const handleDeleteStudent = (studentId) => {
         if (window.confirm('Are you sure you want to remove this student from the system?')) {
             setStudents(students.filter(s => s._id !== studentId));
+            showToast('Student removed successfully.', 'success');
         }
     };
 
     const handleAssignBatch = async () => {
         try {
             if (!assignBatchData.courseId) {
-                alert('Please select a course');
+                showToast('Please select a course', 'error');
                 return;
             }
             await axios.put('/api/enrollment/assign-batch', {
@@ -273,10 +276,10 @@ const GroupManagement = () => {
             // Re-fetch students to update the UI
             fetchStudents();
             setShowAssignBatchModal(false);
-            alert('Batch assigned successfully');
+            showToast('Batch assigned successfully!', 'success');
         } catch (error) {
             console.error('Error assigning batch:', error);
-            alert(error.response?.data?.message || 'Failed to assign batch');
+            showToast(error.response?.data?.message || 'Failed to assign batch', 'error');
         }
     };
 

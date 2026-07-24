@@ -284,10 +284,7 @@ const HeroSection = () => {
                         transition={{ duration: 0.9, ease: 'easeOut' }}
                         className="w-full flex flex-col items-center"
                     >
-                        {/* Eyebrow — subtle tag line */}
-                        <span className="inline-block text-[13px] xs:text-[15px] sm:text-[17px] font-semibold tracking-[0.35em] uppercase mb-5 md:mb-7">
-                            <span className="text-white/40">For the first time in </span><span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary" style={{ backgroundSize: '200% auto', animation: 'hero-text-gradient 5s linear infinite' }}>India</span>
-                        </span>
+
 
                         {/* Main Heading */}
                         <div
@@ -296,6 +293,7 @@ const HeroSection = () => {
                             className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-10 md:mb-14 font-space px-2 sm:px-0 text-center"
                         >
                             <span className="text-white">
+                                From{' '}
                                 <span
                                     className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
                                     style={{
@@ -303,18 +301,18 @@ const HeroSection = () => {
                                         animation: 'hero-text-gradient 5s linear infinite'
                                     }}
                                 >
-                                    Placement
-                                </span>{' '}Guaranteed{' '}
-                                <span
-                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
-                                    style={{
-                                        backgroundSize: '200% auto',
-                                        animation: 'hero-text-gradient 5s linear infinite'
-                                    }}
-                                >
-                                    European
+                                    Confusion
                                 </span>{' '}
-                                University Skill Programs with EU Credits
+                                To{' '}
+                                <span
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
+                                    style={{
+                                        backgroundSize: '200% auto',
+                                        animation: 'hero-text-gradient 5s linear infinite'
+                                    }}
+                                >
+                                    Career
+                                </span>
                             </span>
                         </div>
 

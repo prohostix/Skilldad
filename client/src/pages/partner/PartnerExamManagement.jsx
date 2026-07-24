@@ -470,21 +470,13 @@ const PartnerExamManagement = () => {
                             <RefreshCw size={14} className={`mr-2 transition-all ${loading ? 'animate-spin text-primary' : 'group-hover:rotate-180'}`} />
                             {loading ? 'Syncing...' : 'Sync System'}
                         </ModernButton>
-                        <ModernButton 
-                            onClick={() => setShowUploadModal(true)}
-                            className="!px-4 !py-2 !rounded-xl shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all !text-xs"
-                        >
-                            <Plus size={14} className="mr-2" />
-                            New Asset
-                        </ModernButton>
                     </div>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                     <StatCard title="Active Exams" value={stats.totalExams} icon={Activity} color="blue" />
                     <StatCard title="Pending Grading" value={stats.pendingGrading} icon={Clock} color="amber" />
-                    <StatCard title="Total Materials" value={stats.totalMaterials} icon={FileText} color="purple" />
                     <StatCard title="Enrolled Pulse" value={stats.activeStudents} icon={TrendingUp} color="emerald" />
                 </div>
 
@@ -493,7 +485,6 @@ const PartnerExamManagement = () => {
                     <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar px-1">
                         <TabButton id="conduct" label="Conduct" icon={Calendar} />
                         <TabButton id="grading" label="Grading" icon={Edit} />
-                        <TabButton id="questions" label="Vault" icon={ShieldCheck} />
                         <TabButton id="history" label="History" icon={Clock} />
                     </div>
                     <div className="relative group w-full xl:w-72 px-1">
@@ -884,90 +875,6 @@ const PartnerExamManagement = () => {
                             </div>
                         )}
 
-                        {/* VAULT TAB (Questions & Answers) */}
-                        {activeTab === 'questions' && (
-                            <div className="grid grid-cols-1 gap-4">
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-xl font-black text-white/90 tracking-tight flex items-center gap-3">
-                                        <div className="w-2 h-8 bg-purple-500 rounded-full" />
-                                        Secure Material Vault
-                                    </h3>
-                                    <ModernButton size="sm" onClick={() => setShowUploadModal(true)} className="!rounded-xl !bg-purple-500">
-                                        <Plus size={16} className="mr-2" /> Add Asset
-                                    </ModernButton>
-                                </div>
-
-                                <div className="flex items-center gap-2 mb-2 p-1 bg-white/[0.02] border border-white/5 rounded-xl w-fit">
-                                    <button 
-                                        onClick={() => setActiveVaultFolder('exam_paper')}
-                                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeVaultFolder === 'exam_paper' ? 'bg-purple-500 text-white' : 'text-white/40 hover:bg-white/5'}`}
-                                    >
-                                        Question Papers
-                                    </button>
-                                    <button 
-                                        onClick={() => setActiveVaultFolder('answer_sheet')}
-                                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeVaultFolder === 'answer_sheet' ? 'bg-emerald-500 text-white' : 'text-white/40 hover:bg-white/5'}`}
-                                    >
-                                        Solution Keys
-                                    </button>
-                                    <button 
-                                        onClick={() => setActiveVaultFolder('other')}
-                                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${activeVaultFolder === 'other' ? 'bg-blue-500 text-white' : 'text-white/40 hover:bg-white/5'}`}
-                                    >
-                                        General Assets
-                                    </button>
-                                </div>
-                                
-                                <div className="space-y-2">
-                                    {filteredVaultDocs.length > 0 ? filteredVaultDocs.map((paper) => (
-                                        <GlassCard key={paper._id} className="p-3 group hover:bg-white/[0.04] transition-all duration-500 relative overflow-hidden" style={{ borderRadius: '8px' }}>
-                                            <div className="absolute -right-8 -top-8 w-24 h-24 bg-purple-500/5 blur-3xl rounded-full" />
-                                            <div className="relative z-10 flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 border border-purple-500/20 shrink-0">
-                                                        <FileText size={20} />
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-sm font-bold text-white tracking-tight group-hover:text-purple-400 transition-colors">{paper.title}</h4>
-                                                        <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-white/30 mt-1">
-                                                            <span>{new Date(paper.createdAt).toLocaleDateString()}</span>
-                                                            <span className="w-1 h-1 bg-white/20 rounded-full" />
-                                                            <span>{(paper.fileSize / 1024 / 1024).toFixed(2)} MB</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <ModernButton 
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            setSelectedDoc(paper);
-                                                            setExamData({...examData, title: paper.title, linkedPaper: paper._id});
-                                                            setOpenSchedule(true);
-                                                        }}
-                                                        className="!bg-white/5 !border-white/10 hover:!bg-purple-500 !transition-all !rounded-lg text-[10px] !py-1.5 !px-3 font-black uppercase tracking-widest whitespace-nowrap"
-                                                    >
-                                                        Deploy
-                                                    </ModernButton>
-                                                    <div className="flex items-center gap-1 bg-white/5 rounded-lg p-0.5">
-                                                        <button onClick={() => {
-                                                            const url = paper.fileUrl?.startsWith('http') ? paper.fileUrl : `${import.meta.env.VITE_API_URL || ''}/${paper.fileUrl}`;
-                                                            window.open(url, '_blank');
-                                                        }} className="p-1.5 text-white/30 hover:text-white transition-all"><Eye size={14} /></button>
-                                                        <button onClick={() => handleDelete(paper._id)} className="p-1.5 text-white/30 hover:text-red-400 transition-all"><Trash2 size={14} /></button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </GlassCard>
-                                    )) : (
-                                        <div className="col-span-full py-16 text-center bg-white/[0.01] border border-dashed border-white/10 rounded-2xl">
-                                            <ShieldCheck size={32} className="mx-auto mb-3 text-white/10" />
-                                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">Vault Empty: Initialize Sequence Required</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
                         {/* HISTORY TAB */}
                         {activeTab === 'history' && (
                             <div className="space-y-6">
@@ -1122,54 +1029,6 @@ const PartnerExamManagement = () => {
                                 <div className="flex gap-3 pt-2">
                                     <button type="button" onClick={() => setOpenSchedule(false)} className="flex-1 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest text-white/40 hover:bg-white/10 transition-all">Abort</button>
                                     <button type="submit" className="flex-1 py-2 bg-primary rounded-xl text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-primary/30 hover:bg-primary/80 transition-all">Deploy System</button>
-                                </div>
-                            </form>
-                        </GlassCard>
-                    </motion.div>
-                </div>
-            )}
-
-            {showUploadModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-3xl bg-black/80">
-                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-sm">
-                        <GlassCard className="p-6 border-white/20">
-                            <div className="flex items-center justify-between mb-5">
-                                <h2 className="text-lg font-black text-white tracking-tighter uppercase">Secure Upload</h2>
-                                <button type="button" onClick={() => setShowUploadModal(false)} className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-white/40"><ArrowLeft size={16} className="rotate-45" /></button>
-                            </div>
-                            <form onSubmit={handleFileUpload} className="space-y-3">
-                                <div className="space-y-1">
-                                    <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Asset Label</label>
-                                    <input required type="text" value={uploadData.title} onChange={e => setUploadData({...uploadData, title: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm" placeholder="Document Title" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Classification</label>
-                                        <select value={uploadData.type} onChange={e => setUploadData({...uploadData, type: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm">
-                                            <option value="exam_paper">Question Protocol</option>
-                                            <option value="answer_sheet">Solution Key</option>
-                                            <option value="other">General Asset</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Domain Link</label>
-                                        <select value={uploadData.course} onChange={e => setUploadData({...uploadData, course: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm">
-                                            <option value="">Global Domain</option>
-                                            {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="p-4 border-2 border-dashed border-white/10 rounded-xl hover:border-primary/50 transition-all group text-center cursor-pointer relative">
-                                    <input type="file" onChange={e => setUploadFile(e.target.files[0])} className="absolute inset-0 opacity-0 cursor-pointer" />
-                                    <Upload size={20} className="mx-auto mb-2 text-white/20 group-hover:text-primary transition-colors" />
-                                    <p className="text-xs font-bold text-white/40">{uploadFile ? uploadFile.name : 'Click or Drop Asset Here'}</p>
-                                    <p className="text-[9px] text-white/10 mt-1 font-black uppercase tracking-widest">Max 50MB</p>
-                                </div>
-                                <div className="flex gap-3 pt-2">
-                                    <button type="button" onClick={() => setShowUploadModal(false)} className="flex-1 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white/40 uppercase tracking-widest">Cancel</button>
-                                    <button type="submit" disabled={uploading} className="flex-1 py-2 bg-primary rounded-xl text-xs font-black text-white uppercase tracking-widest shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
-                                        {uploading ? 'Securing...' : 'Seal & Upload'}
-                                    </button>
                                 </div>
                             </form>
                         </GlassCard>

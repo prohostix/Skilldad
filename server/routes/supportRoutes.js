@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createTicket, getTickets, updateTicketStatus } = require('../controllers/supportController');
+const { createTicket, getTickets, getMyTickets, updateTicketStatus } = require('../controllers/supportController');
 const { protect, optionalProtect } = require('../middleware/authMiddleware');
 
 const checkAdmin = (req, res, next) => {
@@ -12,7 +12,7 @@ const checkAdmin = (req, res, next) => {
 };
 
 router.post('/', optionalProtect, createTicket);
-
+router.get('/my', protect, getMyTickets);
 router.get('/', protect, checkAdmin, getTickets);
 router.put('/:id', protect, checkAdmin, updateTicketStatus);
 

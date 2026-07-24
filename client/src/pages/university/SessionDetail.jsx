@@ -364,7 +364,13 @@ const SessionDetail = () => {
               <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-white/40">Engagement</span>
-                  <span className="text-white font-bold">{session.enrolledStudents?.length || 0} Students</span>
+                  <span className="text-white font-bold">
+                    {typeof session.enrolledStudents === 'number'
+                      ? session.enrolledStudents
+                      : (Array.isArray(session.enrolledStudents)
+                        ? session.enrolledStudents.length
+                        : (session.enrolledCount || session.enrolled_count || 0))} Students
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-white/40">Broadcasting Type</span>

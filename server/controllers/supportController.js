@@ -99,7 +99,6 @@ const updateTicketStatus = async (req, res) => {
             });
         }
 
-
         res.json({ ...updatedTicket, _id: updatedTicket.id });
     } catch (error) {
         console.error('Update ticket error:', error);
@@ -107,8 +106,28 @@ const updateTicketStatus = async (req, res) => {
     }
 };
 
+// @desc    Get support tickets for logged-in user
+// @route   GET /api/support/my
+// @access  Private (User/Student)
+const getMyTickets = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const userEmail = req.user.email;
+        const ticketsResult = await query(
+            'SELECT * FROM support_tickets WHERE user_id = $1 OR email = $2 ORDER BY created_at DESC',
+            [userId, userEmail]
+        );
+        const tickets = ticketsResult.rows.map(t => ({ ...t, _id: t.id }));
+        res.json(tickets);
+    } catch (error) {
+        console.error('Get my tickets error:', error);
+        res.status(500).json({ message: 'Server error fetching your tickets' });
+    }
+};
+
 module.exports = {
     createTicket,
     getTickets,
+    getMyTickets,
     updateTicketStatus,
 };

@@ -38,7 +38,7 @@ const ExamManagement = () => {
         return new Date(d.getTime() - offset).toISOString().slice(0, 16);
     };
 
-    const [activeTab, setActiveTab] = useState('questions');
+    const [activeTab, setActiveTab] = useState('conduct');
     const [searchTerm, setSearchTerm] = useState('');
     const [questionPapers, setQuestionPapers] = useState([]);
     const [answerKeys, setAnswerKeys] = useState([]);
@@ -572,96 +572,6 @@ const ExamManagement = () => {
             case 'grading':
                 return renderGradingTab();
 
-            case 'questions':
-                return (
-                    <div className="flex flex-col gap-2">
-                        {questionPapers.length > 0 ? questionPapers.map((paper) => (
-                            <div key={paper._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
-                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shrink-0 border border-indigo-500/10">
-                                        <FileText size={20} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h4 className="font-bold text-white text-sm truncate">{paper.title}</h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Institutional Asset</span>
-                                            <span className="text-white/10">|</span>
-                                            <span className="text-[9px] text-white/30 font-bold uppercase tracking-wider">{new Date(paper.createdAt).toLocaleDateString()}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedDoc(paper);
-                                            setExamData(prev => ({ ...prev, title: paper.title, linkedPaper: paper._id }));
-                                            setOpenSchedule(true);
-                                        }}
-                                        className="px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-lg hover:bg-indigo-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
-                                    >
-                                        Deploy
-                                    </button>
-                                    <div className="flex items-center bg-white/5 rounded-lg p-0.5 ml-2">
-                                        <button onClick={() => handleView(paper)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="View"><Eye size={14} /></button>
-                                        <button onClick={() => handleDownload(paper)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="Download"><Download size={14} /></button>
-                                        <button onClick={() => handleDelete(paper._id)} className="p-1.5 text-white/30 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={14} /></button>
-                                    </div>
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="py-20 text-center text-white/20">
-                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                <p className="font-bold uppercase tracking-widest text-sm">No Question Papers Received</p>
-                            </div>
-                        )}
-                    </div>
-                );
-
-            case 'answers':
-                return (
-                    <div className="flex flex-col gap-2">
-                        {answerKeys.length > 0 ? answerKeys.map((key) => (
-                            <div key={key._id} className="p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group flex items-center justify-between">
-                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 shrink-0 border border-emerald-500/10">
-                                        <CheckCircle size={20} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h4 className="font-bold text-white text-sm truncate">{key.title}</h4>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-white/20">Solution Shield</span>
-                                            <span className="text-white/10">|</span>
-                                            <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase tracking-widest rounded">Official Key</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedDoc(key);
-                                            setExamData(prev => ({ ...prev, title: key.title, answerKey: key._id }));
-                                            setOpenSchedule(true);
-                                        }}
-                                        className="px-3 py-1.5 bg-emerald-500/10 border border-indigo-500/20 text-indigo-400 rounded-lg hover:bg-emerald-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-widest"
-                                    >
-                                        Deploy
-                                    </button>
-                                    <div className="flex items-center bg-white/5 rounded-lg p-0.5 ml-2">
-                                        <button onClick={() => handleView(key)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="View"><Eye size={14} /></button>
-                                        <button onClick={() => handleDownload(key)} className="p-1.5 text-white/30 hover:text-white transition-colors" title="Download"><Download size={14} /></button>
-                                        <button onClick={() => handleDelete(key._id)} className="p-1.5 text-white/30 hover:text-red-400 transition-colors" title="Delete"><Trash2 size={14} /></button>
-                                    </div>
-                                </div>
-                            </div>
-                        )) : (
-                            <div className="py-20 text-center text-white/20">
-                                <AlertCircle size={48} className="mx-auto mb-4 opacity-50" />
-                                <p className="font-bold uppercase tracking-widest text-sm">No Answer Sheets Received</p>
-                            </div>
-                        )}
-                    </div>
-                );
-
             case 'conduct':
                 return (
                     <div className="flex flex-col gap-4">
@@ -799,8 +709,6 @@ const ExamManagement = () => {
                 {[
                     { id: 'conduct', label: 'Conduct Exams', icon: Calendar },
                     { id: 'grading', label: 'Grade Submissions', icon: Edit },
-                    { id: 'questions', label: 'Question Bank', icon: FileText },
-                    { id: 'answers', label: 'Solution Vault', icon: CheckCircle },
                     { id: 'schedule', label: 'Schedule History', icon: ShieldCheck }
                 ].map(tab => (
                     <button

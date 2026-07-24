@@ -86,7 +86,7 @@ const MyCourses = () => {
                 <h2 className="text-base font-semibold text-white mb-1">Your shelf is empty!</h2>
                 <p className="text-white/40 mb-6 max-w-sm text-xs font-medium">You haven't enrolled in any courses yet. Start your journey today.</p>
                 <button 
-                    onClick={() => navigate('/dashboard/courses')}
+                    onClick={() => navigate('/courses')}
                     className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors border border-primary/20 shadow-lg shadow-primary/20"
                 >
                     Browse Catalog

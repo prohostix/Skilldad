@@ -5,7 +5,7 @@ import {
     Mail, MessageSquare, Phone, ChevronDown, ChevronUp, Send, Search,
     PlayCircle, BookOpen, Rocket, User, CreditCard, Award,
     Smartphone, RefreshCcw, Video, HelpCircle, ArrowRight, LifeBuoy,
-    Briefcase, Gift, Shield, Zap, Globe
+    Briefcase, Gift, Shield, Zap, Globe, CheckCircle2, Clock, AlertCircle, Ticket
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
@@ -13,6 +13,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import DashboardHeading from '../components/ui/DashboardHeading';
 import axios from 'axios';
+import { useToast } from '../context/ToastContext';
 
 const STATIC_FAQS = [];
 
@@ -137,11 +138,14 @@ const FAQItem = ({ faq }) => {
 const Support = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [faqs, setFaqs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [formData, setFormData] = useState({ name: '', email: '', subject: 'Technical Issue', message: '' });
     const [loading, setLoading] = useState(false);
+    const [myTickets, setMyTickets] = useState([]);
+    const [loadingMyTickets, setLoadingMyTickets] = useState(false);
 
     const isInDashboard = location.pathname.includes('/dashboard') ||
         location.pathname.includes('/admin') ||
@@ -164,11 +168,27 @@ const Support = () => {
         }
     };
 
+    const fetchMyTickets = async () => {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (!userInfo || !userInfo.token) return;
+        try {
+            setLoadingMyTickets(true);
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            const { data } = await axios.get('/api/support/my', config);
+            setMyTickets(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error('Failed to fetch my support tickets:', error);
+        } finally {
+            setLoadingMyTickets(false);
+        }
+    };
+
     useEffect(() => {
         fetchFaqs();
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         if (userInfo) {
             setFormData(prev => ({ ...prev, name: userInfo.name || '', email: userInfo.email || '' }));
+            fetchMyTickets();
         }
     }, []);
 
@@ -212,10 +232,11 @@ const Support = () => {
             setLoading(true);
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             await axios.post('/api/support', formData, config);
-            alert(`Ticket raised successfully! We'll get back to you shortly.`);
+            showToast('Ticket raised successfully! We will get back to you shortly.', 'success');
             setFormData(prev => ({ ...prev, message: '' }));
+            fetchMyTickets();
         } catch (error) {
-            alert('Failed to submit. Please try again.');
+            showToast('Failed to submit ticket. Please try again.', 'error');
         } finally { setLoading(false); }
     };
 
@@ -293,7 +314,87 @@ const Support = () => {
                 <div className="grid lg:grid-cols-12 gap-16">
                     {/* Main Content Area */}
                     <div className="lg:col-span-8 space-y-12">
-                        
+                        {/* Student Raised Tickets Section */}
+                        {myTickets.length > 0 && (
+                            <div className="space-y-4 mb-12">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+                                            <Ticket size={18} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-base font-bold text-white">My Support Tickets</h3>
+                                            <p className="text-xs text-white/40">Track your submitted queries and admin responses</p>
+                                        </div>
+                                    </div>
+                                    <span className="px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold">
+                                        {myTickets.length} Raised
+                                    </span>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {myTickets.map((ticket) => {
+                                        const isResolved = ticket.status?.toLowerCase() === 'resolved';
+                                        const isInProgress = ticket.status?.toLowerCase() === 'in progress' || ticket.status?.toLowerCase() === 'in_progress';
+                                        
+                                        return (
+                                            <GlassCard key={ticket._id || ticket.id} className="p-5 border-white/10 hover:border-primary/30 transition-all">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-mono text-white/60 font-bold uppercase">
+                                                            {ticket.subject || 'General'}
+                                                        </span>
+                                                        <span className="text-xs text-white/40 font-medium">
+                                                            • {new Date(ticket.created_at || ticket.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider border shrink-0 flex items-center gap-1.5 w-fit ${
+                                                        isResolved
+                                                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-950/20'
+                                                            : isInProgress
+                                                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                            : 'bg-primary/10 text-primary border-primary/20'
+                                                    }`}>
+                                                        {isResolved ? <CheckCircle2 size={12} /> : isInProgress ? <Clock size={12} /> : <AlertCircle size={12} />}
+                                                        {ticket.status || 'Open'}
+                                                    </span>
+                                                </div>
+
+                                                <p className="text-sm font-semibold text-white/90 mb-3 leading-relaxed">
+                                                    {ticket.message}
+                                                </p>
+
+                                                {/* Admin Response Box */}
+                                                {ticket.admin_response ? (
+                                                    <div className="mt-4 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 space-y-1.5 backdrop-blur-md">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                                                                <CheckCircle2 size={15} /> Admin Response & Resolution
+                                                            </div>
+                                                            <span className="text-[10px] text-emerald-400/60 font-mono">Official Support</span>
+                                                        </div>
+                                                        <p className="text-xs font-medium text-emerald-100/90 leading-relaxed whitespace-pre-wrap pl-0.5">
+                                                            {ticket.admin_response}
+                                                        </p>
+                                                        {ticket.updated_at && (
+                                                            <p className="text-[10px] text-emerald-400/40 pt-1">
+                                                                Resolved at: {new Date(ticket.updated_at).toLocaleString()}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="mt-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 text-white/30 text-[11px] flex items-center gap-2 italic">
+                                                        <Clock size={13} /> Waiting for admin review and response...
+                                                    </div>
+                                                )}
+                                            </GlassCard>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Dynamic Category Tabs */}
                         <div className="flex gap-2 mb-8 overflow-x-auto pb-4 no-scrollbar border-b border-white/5">
                             {categories.map((cat) => (
