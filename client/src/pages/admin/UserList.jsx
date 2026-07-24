@@ -30,6 +30,19 @@ const UserList = () => {
     const [selectedRole, setSelectedRole] = useState('');
     const [inviteSending, setInviteSending] = useState(false);
     const [toast, setToast] = useState(null); // { type: 'success'|'error', message: '' }
+    const [filters, setFilters] = useState({
+        role: 'all',
+        status: 'all',
+        sortBy: 'newest'
+    });
+    const [inviteData, setInviteData] = useState({
+        name: '',
+        email: '',
+        password: '',
+        role: 'student',
+        universityId: ''
+    });
+    const [universities, setUniversities] = useState([]);
     const [confirmModal, setConfirmModal] = useState({
         isOpen: false,
         title: '',
