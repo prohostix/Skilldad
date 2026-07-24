@@ -253,7 +253,15 @@ const ExamScheduler = () => {
                             <div>
                                 <p className="text-white/50 text-xs font-semibold uppercase">Ongoing</p>
                                 <p className="text-lg font-semibold text-white font-inter">
-                                    {exams.filter(e => e.status === 'ongoing').length}
+                                    {exams.filter(e => {
+                                        const now = new Date();
+                                        const start = new Date(e.scheduledStartTime || e.scheduled_start);
+                                        const end = new Date(e.scheduledEndTime || e.scheduled_end);
+                                        const hasQuestions = (Array.isArray(e.questions) && e.questions.length > 0) ||
+                                            Number(e.total_questions || e.questionCount || 0) > 0 ||
+                                            Boolean(e.question_paper_url || e.questionPaperUrl);
+                                        return (e.status === 'ongoing' || (now >= start && now <= end)) && hasQuestions;
+                                    }).length}
                                 </p>
                             </div>
                         </div>
@@ -292,8 +300,11 @@ const ExamScheduler = () => {
                             <tbody className="divide-y divide-white/10">
                                 {exams.map((exam) => {
                                     const now = new Date();
-                                    const start = new Date(exam.scheduledStartTime);
-                                    const end = new Date(exam.scheduledEndTime);
+                                    const start = new Date(exam.scheduledStartTime || exam.scheduled_start);
+                                    const end = new Date(exam.scheduledEndTime || exam.scheduled_end);
+                                    const hasQuestions = (Array.isArray(exam.questions) && exam.questions.length > 0) ||
+                                        Number(exam.total_questions || exam.questionCount || 0) > 0 ||
+                                        Boolean(exam.question_paper_url || exam.questionPaperUrl);
 
                                     let statusBadge;
                                     if (exam.status === 'published') {
@@ -302,7 +313,13 @@ const ExamScheduler = () => {
                                         statusBadge = <span className="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-[10px] font-black">GRADED</span>;
                                     } else if (exam.status === 'completed') {
                                         statusBadge = <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded text-[10px] font-black">COMPLETED</span>;
-                                    } else if (exam.status === 'ongoing' || (now >= start && now <= end)) {
+                                    } else if (now >= start && now <= end && !hasQuestions) {
+                                        statusBadge = (
+                                            <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded text-[10px] font-black" title="Time window active, but no questions have been uploaded by university/partner">
+                                                PENDING QUESTIONS
+                                            </span>
+                                        );
+                                    } else if ((exam.status === 'ongoing' || (now >= start && now <= end)) && hasQuestions) {
                                         statusBadge = <span className="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] font-black animate-pulse">ONGOING</span>;
                                     } else if (exam.status === 'scheduled' || now < start) {
                                         statusBadge = <span className="bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded text-[10px] font-black">SCHEDULED</span>;
