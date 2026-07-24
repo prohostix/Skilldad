@@ -121,6 +121,30 @@ const ExamScheduler = () => {
         fetchUniversities();
     }, []);
 
+    const availableCourses = React.useMemo(() => {
+        if (!formData.university) return [];
+
+        const selectedUni = universities.find(u => String(u._id || u.id) === String(formData.university));
+        const uniIdStr = String(formData.university);
+        const assignedCourses = Array.isArray(selectedUni?.profile?.assigned_courses) 
+            ? selectedUni.profile.assigned_courses.map(String) 
+            : [];
+        const uniNameStr = (selectedUni?.profile?.universityName || selectedUni?.name || '').toLowerCase().trim();
+
+        return courses.filter(c => {
+            const courseIdStr = String(c._id || c.id);
+            const instructorIdStr = String(c.instructor_id || c.instructorId || c.instructor?._id || c.instructor?.id || '');
+            const submittedByStr = String(c.submitted_by || c.submittedBy || '');
+            const courseUniNameStr = (c.university_name || c.universityName || c.instructor_name || c.instructorName || c.instructor?.profile?.universityName || c.instructor?.name || '').toLowerCase().trim();
+
+            if (instructorIdStr === uniIdStr || submittedByStr === uniIdStr) return true;
+            if (assignedCourses.includes(courseIdStr)) return true;
+            if (uniNameStr && courseUniNameStr && (courseUniNameStr.includes(uniNameStr) || uniNameStr.includes(courseUniNameStr))) return true;
+
+            return false;
+        });
+    }, [formData.university, universities, courses]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -378,12 +402,15 @@ const ExamScheduler = () => {
                                         required
                                         className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white"
                                         value={formData.university}
-                                        onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, university: e.target.value, course: '', batchIds: [] });
+                                            setBatches([]);
+                                        }}
                                     >
-                                        <option value="">Select University</option>
+                                        <option value="">Select University / Partner</option>
                                         {universities && universities.map((uni) => (
-                                            <option key={uni._id} value={uni._id} className="bg-[#0B0F1A]">
-                                                {uni.profile?.universityName || uni.name}
+                                            <option key={uni._id || uni.id} value={uni._id || uni.id} className="bg-[#0B0F1A]">
+                                                {uni.profile?.universityName || uni.name} {uni.role === 'partner' ? '(Partner)' : ''}
                                             </option>
                                         ))}
                                     </select>
@@ -392,17 +419,25 @@ const ExamScheduler = () => {
                                     <label className="block text-white/70 text-xs mb-1.5">Course *</label>
                                     <select
                                         required
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white disabled:opacity-50"
                                         value={formData.course}
+                                        disabled={!formData.university}
                                         onChange={(e) => {
                                             const courseId = e.target.value;
                                             setFormData({ ...formData, course: courseId, batchIds: [] });
                                             fetchBatches(courseId);
                                         }}
                                     >
-                                        <option value="">Select Course</option>
-                                        {courses.map((course) => (
-                                            <option key={course._id} value={course._id} className="bg-[#0B0F1A]">
+                                        <option value="">
+                                            {!formData.university 
+                                                ? 'First Select a University' 
+                                                : availableCourses.length > 0 
+                                                    ? 'Select Course' 
+                                                    : 'No Courses Found for this Institution'
+                                            }
+                                        </option>
+                                        {availableCourses.map((course) => (
+                                            <option key={course._id || course.id} value={course._id || course.id} className="bg-[#0B0F1A]">
                                                 {course.title}
                                             </option>
                                         ))}
