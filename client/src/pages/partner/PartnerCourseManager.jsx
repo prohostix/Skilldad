@@ -14,7 +14,8 @@ import {
     AlertCircle,
     XCircle,
     ChevronRight,
-    Play
+    Play,
+    Upload
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -27,6 +28,7 @@ const PartnerCourseManager = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [brochureUploading, setBrochureUploading] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -39,6 +41,34 @@ const PartnerCourseManager = () => {
     
     const navigate = useNavigate();
     const { showToast } = useToast();
+
+    const handleBrochureFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formDataUpload = new FormData();
+        formDataUpload.append('brochure', file);
+
+        setBrochureUploading(true);
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${userInfo.token}`
+                }
+            };
+
+            const { data } = await axios.post('/api/courses/upload-brochure-file', formDataUpload, config);
+            setFormData(prev => ({ ...prev, brochure_url: data.brochure_url }));
+            showToast('Brochure uploaded from device successfully!', 'success');
+        } catch (error) {
+            console.error('Brochure upload error:', error);
+            showToast(error.response?.data?.message || 'Failed to upload brochure file', 'error');
+        } finally {
+            setBrochureUploading(false);
+        }
+    };
 
     const fetchCourses = async () => {
         try {
@@ -294,16 +324,35 @@ const PartnerCourseManager = () => {
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Brochure URL (PDF Link)</label>
-                                    <input
-                                        type="url"
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 transition-all outline-none font-mono text-sm"
-                                        placeholder="https://example.com/syllabus.pdf"
-                                        value={formData.brochure_url}
-                                        onChange={(e) => setFormData({...formData, brochure_url: e.target.value})}
-                                    />
-                                </div>
+                                 <div>
+                                     <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Brochure (PDF / File)</label>
+                                     <div className="flex gap-2">
+                                         <input
+                                             type="text"
+                                             className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 transition-all outline-none font-mono text-sm"
+                                             placeholder="https://example.com/syllabus.pdf or upload file"
+                                             value={formData.brochure_url}
+                                             onChange={(e) => setFormData({...formData, brochure_url: e.target.value})}
+                                         />
+                                         <input
+                                             type="file"
+                                             id="partner-brochure-file-input"
+                                             className="hidden"
+                                             accept=".pdf,.doc,.docx"
+                                             onChange={handleBrochureFileUpload}
+                                         />
+                                         <button
+                                             type="button"
+                                             onClick={() => document.getElementById('partner-brochure-file-input')?.click()}
+                                             disabled={brochureUploading}
+                                             className="px-4 py-3 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-xl text-primary font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0"
+                                         >
+                                             <Upload size={14} className={brochureUploading ? "animate-spin" : ""} />
+                                             {brochureUploading ? 'Uploading...' : 'Upload File'}
+                                         </button>
+                                     </div>
+                                     <p className="text-[10px] text-white/40 mt-1.5 font-medium">Upload a brochure file from your device or paste a URL link above.</p>
+                                 </div>
                             </div>
 
                             <div className="flex gap-4 pt-4">
