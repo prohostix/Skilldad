@@ -29,20 +29,27 @@ const UserList = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedRole, setSelectedRole] = useState('');
     const [inviteSending, setInviteSending] = useState(false);
-    const [toast, setToast] = useState(null); // { type: 'success'|'error', message: '' }
-    const [filters, setFilters] = useState({
-        role: 'all',
-        status: 'all',
-        sortBy: 'newest'
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel',
+        type: 'danger',
+        onConfirm: null
     });
-    const [inviteData, setInviteData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        role: 'student',
-        universityId: ''
-    });
-    const [universities, setUniversities] = useState([]);
+
+    const openConfirmModal = ({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', type = 'danger', onConfirm }) => {
+        setConfirmModal({
+            isOpen: true,
+            title,
+            message,
+            confirmText,
+            cancelText,
+            type,
+            onConfirm
+        });
+    };
 
     const showToast = (type, message) => {
         setToast({ type, message });
@@ -211,58 +218,69 @@ const UserList = () => {
         }
     };
 
-    const handleRevokePermission = async (userId) => {
-        if (!window.confirm('Are you sure you want to revoke this user\'s permissions?')) return;
+    const handleRevokePermission = (targetUser) => {
+        openConfirmModal({
+            title: 'Revoke User Permission',
+            message: `Are you sure you want to revoke permissions for "${targetUser.name}" (${targetUser.email})? This will demote the user back to a standard unverified account.`,
+            confirmText: 'Revoke Access',
+            type: 'warning',
+            onConfirm: async () => {
+                try {
+                    const rawInfo = localStorage.getItem('userInfo');
+                    if (!rawInfo) return;
+                    const userInfo = JSON.parse(rawInfo);
 
-        try {
-            const rawInfo = localStorage.getItem('userInfo');
-            if (!rawInfo) return;
-            const userInfo = JSON.parse(rawInfo);
+                    const config = {
+                        headers: {
+                            Authorization: `Bearer ${userInfo.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    };
 
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                    'Content-Type': 'application/json'
+                    await axios.put(
+                        `/api/admin/users/${targetUser._id || targetUser.id}/revoke-permission`,
+                        {},
+                        config
+                    );
+
+                    showToast('success', `Permission revoked for ${targetUser.name}`);
+                    fetchUsers();
+                } catch (error) {
+                    console.error('Revoke permission error:', error);
+                    showToast('error', `Failed to revoke permission: ${error.response?.data?.message || error.message}`);
                 }
-            };
-
-            await axios.put(
-                `/api/admin/users/${userId}/revoke-permission`,
-                {},
-                config
-            );
-
-            showToast('success', 'Permission revoked successfully');
-            fetchUsers();
-        } catch (error) {
-            console.error('Revoke permission error:', error);
-            showToast('error', `Failed to revoke permission: ${error.response?.data?.message || error.message}`);
-        }
+            }
+        });
     };
 
-    const handleDeleteUser = async (user) => {
-        if (!window.confirm(`Are you sure you want to delete ${user.name} (${user.email})? This action cannot be undone.`)) return;
+    const handleDeleteUser = (user) => {
+        openConfirmModal({
+            title: 'Delete User Account',
+            message: `Are you sure you want to permanently delete "${user.name}" (${user.email})? This action cannot be undone.`,
+            confirmText: 'Delete User',
+            type: 'danger',
+            onConfirm: async () => {
+                try {
+                    const rawInfo = localStorage.getItem('userInfo');
+                    if (!rawInfo) return;
+                    const userInfo = JSON.parse(rawInfo);
 
-        try {
-            const rawInfo = localStorage.getItem('userInfo');
-            if (!rawInfo) return;
-            const userInfo = JSON.parse(rawInfo);
+                    const config = {
+                        headers: {
+                            Authorization: `Bearer ${userInfo.token}`,
+                        }
+                    };
 
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
+                    await axios.delete(`/api/admin/users/${user._id || user.id}`, config);
+
+                    showToast('success', `User ${user.name} deleted successfully`);
+                    fetchUsers();
+                } catch (error) {
+                    console.error('Delete user error:', error);
+                    showToast('error', `Failed to delete user: ${error.response?.data?.message || error.message}`);
                 }
-            };
-
-            await axios.delete(`/api/admin/users/${user._id}`, config);
-
-            showToast('success', `User ${user.name} deleted successfully`);
-            // The WebSocket will handle updating the list, but we can also fetch manually
-            fetchUsers();
-        } catch (error) {
-            console.error('Delete user error:', error);
-            showToast('error', `Failed to delete user: ${error.response?.data?.message || error.message}`);
-        }
+            }
+        });
     };
     const isSubmitting = useRef(false);
 
@@ -537,7 +555,7 @@ const UserList = () => {
                                              )}
                                              {user.isVerified && user.role !== 'student' && (
                                                  <button
-                                                     onClick={() => handleRevokePermission(user._id)}
+                                                     onClick={() => handleRevokePermission(user)}
                                                      className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all"
                                                  >
                                                      Revoke
@@ -618,7 +636,7 @@ const UserList = () => {
                                 )}
                                 {user.isVerified && user.role !== 'student' && (
                                     <button
-                                        onClick={() => handleRevokePermission(user._id)}
+                                        onClick={() => handleRevokePermission(user)}
                                         className="flex-1 min-w-[80px] px-3 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[11px] font-bold hover:bg-red-500/20 transition-all"
                                     >
                                         Revoke
@@ -814,6 +832,60 @@ const UserList = () => {
                     </div>
                 </div>
             )}
+
+            {/* Custom Styled Professional Confirmation Modal */}
+            <AnimatePresence>
+                {confirmModal.isOpen && (
+                    <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-[300000] p-4">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                            className="bg-[#0B0F1A] border border-white/15 rounded-2xl p-6 max-w-md w-full shadow-2xl overflow-hidden"
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className={`p-3 rounded-xl shrink-0 border ${
+                                    confirmModal.type === 'danger'
+                                        ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                                        : confirmModal.type === 'warning'
+                                            ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                                            : 'bg-primary/20 text-primary border-primary/30'
+                                }`}>
+                                    {confirmModal.type === 'danger' ? <Trash2 size={24} /> : <AlertCircle size={24} />}
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-white font-inter">{confirmModal.title}</h3>
+                                    <p className="text-xs text-white/70 mt-1.5 leading-relaxed font-inter">{confirmModal.message}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-white/10">
+                                <button
+                                    onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                    className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white rounded-xl text-xs font-bold transition-all"
+                                >
+                                    {confirmModal.cancelText || 'Cancel'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                                        confirmModal.onConfirm?.();
+                                    }}
+                                    className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-lg text-white ${
+                                        confirmModal.type === 'danger'
+                                            ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 shadow-red-500/20'
+                                            : confirmModal.type === 'warning'
+                                                ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-amber-500/20'
+                                                : 'bg-primary hover:bg-primary/80 shadow-primary/20'
+                                    }`}
+                                >
+                                    {confirmModal.confirmText}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
