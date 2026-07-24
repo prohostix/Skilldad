@@ -11,7 +11,11 @@ import {
     BookOpen,
     X,
     Upload,
-    Image
+    Image,
+    Clock,
+    CheckCircle2,
+    AlertCircle,
+    Filter
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -22,6 +26,7 @@ import { useToast } from '../../context/ToastContext';
 const CourseManager = () => {
     const [courses, setCourses] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
     const [formData, setFormData] = useState({
@@ -54,10 +59,10 @@ const CourseManager = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.get('/api/admin/universities', config);
+            const { data } = await axios.get('/api/users/universities', config);
             setUniversities(data);
         } catch (error) {
-            console.error('Error fetching universities:', error);
+            console.error(error);
         }
     };
 
@@ -65,26 +70,22 @@ const CourseManager = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.get('/api/admin/skilldad-universities', config);
-            setSkillDadUniversities(Array.isArray(data) ? data : []);
+            const { data } = await axios.get('/api/skilldad-universities', config);
+            setSkillDadUniversities(data);
         } catch (error) {
-            console.error('Error fetching SkillDad universities:', error);
+            console.error(error);
         }
     };
 
     const fetchCourses = async () => {
         try {
-            const rawInfo = localStorage.getItem('userInfo');
-            if (!rawInfo) return;
-            const userInfo = JSON.parse(rawInfo);
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.get('/api/courses/admin', config);
             setCourses(data);
         } catch (error) {
             console.error(error);
-            if (error.response?.status === 401) {
-                navigate('/login', { state: { from: window.location.pathname } });
-            }
+            showToast('Failed to fetch courses', 'error');
         }
     };
 
@@ -94,7 +95,7 @@ const CourseManager = () => {
         fetchSkillDadUniversities();
     }, []);
 
-    const handleCreate = async () => {
+    const handleCreate = () => {
         setFormData({
             title: '',
             description: '',
@@ -103,7 +104,7 @@ const CourseManager = () => {
             instructorId: '',
             instructorName: '',
             universityName: '',
-            isPublished: true,
+            isPublished: false,
             isFeatured: false,
             brochure_url: '',
             thumbnail: '',
@@ -121,9 +122,9 @@ const CourseManager = () => {
             description: course.description,
             category: course.category,
             price: course.price,
-            instructorId: course.instructor?._id || course.instructor || '',
-            instructorName: course.instructorName || '',
-            universityName: course.universityName || '',
+            instructorId: course.instructor_id || course.instructorId || '',
+            instructorName: course.instructorName || course.instructor?.name || '',
+            universityName: course.universityName || course.instructor?.profile?.universityName || '',
             isPublished: course.isPublished || false,
             isFeatured: course.isFeatured || false,
             brochure_url: course.brochure_url || '',
@@ -140,11 +141,6 @@ const CourseManager = () => {
         e.preventDefault();
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            if (!userInfo || !userInfo.token) {
-                showToast('Please login first', 'error');
-                return;
-            }
-
             const config = {
                 headers: {
                     Authorization: `Bearer ${userInfo.token}`,
@@ -152,19 +148,10 @@ const CourseManager = () => {
                 }
             };
 
-            // Validation: University is mandatory for Admin
-            const needsSkillDadUniversity = formData.programType === 'degree_programme';
-            if (userInfo.role === 'admin' && (needsSkillDadUniversity ? !formData.skillDadUniversityId : !formData.instructorId)) {
-                showToast('Please select a Provider University', 'error');
-                return;
-            }
-
             if (editingCourse) {
-                // Update existing course
                 await axios.put(`/api/courses/${editingCourse._id}`, formData, config);
                 showToast('Course updated successfully!', 'success');
             } else {
-                // Create new course
                 await axios.post('/api/courses', formData, config);
                 showToast('Course created successfully!', 'success');
             }
@@ -173,9 +160,6 @@ const CourseManager = () => {
             fetchCourses();
         } catch (error) {
             console.error('Error saving course:', error);
-            if (error.response?.status === 401) {
-                navigate('/login', { state: { from: window.location.pathname } });
-            }
             showToast(error.response?.data?.message || error.message, 'error');
         }
     };
@@ -196,13 +180,6 @@ const CourseManager = () => {
                     Authorization: `Bearer ${userInfo.token}`
                 }
             };
-            
-            // If editing, we use the course ID. If creating, we might need to upload after creation? 
-            // Actually, the backend uploadThumbnail requires a course ID.
-            // For brand-new courses, we can't upload until we have an ID.
-            // However, the user might want to upload BEFORE creation.
-            // Usually, we create the course then upload components.
-            // For now, I'll allow uploading only if editingCourse exists.
             
             if (!editingCourse) {
                 showToast('Please save the course first before uploading a thumbnail, or provide a direct URL.', 'info');
@@ -237,14 +214,8 @@ const CourseManager = () => {
                     Authorization: `Bearer ${userInfo.token}`
                 }
             };
-            
-            if (!editingCourse) {
-                showToast('Please save the course first before uploading a brochure.', 'info');
-                setBrochureUploading(false);
-                return;
-            }
 
-            const { data } = await axios.post(`/api/courses/${editingCourse._id}/upload-brochure`, formDataUpload, config);
+            const { data } = await axios.post('/api/courses/upload-brochure-file', formDataUpload, config);
             setFormData(prev => ({ ...prev, brochure_url: data.brochure_url }));
             showToast('Brochure uploaded successfully!', 'success');
         } catch (error) {
@@ -255,21 +226,23 @@ const CourseManager = () => {
         }
     };
 
-    const handleDelete = (id) => {
-        setCourseToDelete(id);
+    const handleDelete = async (id) => {
+        const course = courses.find(c => c._id === id);
+        setCourseToDelete(course || { _id: id });
     };
 
-    const confirmDelete = async () => {
-        const id = courseToDelete;
-        setCourseToDelete(null);
+    const confirmDeleteCourse = async () => {
+        if (!courseToDelete) return;
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         try {
-            await axios.delete(`/api/courses/${id}`, config);
-            showToast('Course deleted successfully', 'success');
+            await axios.delete(`/api/courses/${courseToDelete._id}`, config);
+            showToast('Course deleted', 'success');
             fetchCourses();
         } catch (error) {
             showToast('Error deleting course', 'error');
+        } finally {
+            setCourseToDelete(null);
         }
     };
 
@@ -285,12 +258,26 @@ const CourseManager = () => {
         }
     };
 
-    const filteredCourses = courses.filter(course =>
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (course.instructorName || course.instructor?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (course.universityName || course.instructor?.profile?.universityName || '').toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const pendingCount = courses.filter(c => c.status === 'pending').length;
+    const approvedCount = courses.filter(c => c.status === 'approved' || (!c.status && c.isPublished)).length;
+    const rejectedCount = courses.filter(c => c.status === 'rejected').length;
+
+    const filteredCourses = courses.filter(course => {
+        const matchesSearch =
+            course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            course.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (course.instructorName || course.instructor?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (course.universityName || course.instructor?.profile?.universityName || '').toLowerCase().includes(searchQuery.toLowerCase());
+
+        const cStatus = (course.status || 'approved').toLowerCase();
+        const matchesStatus =
+            statusFilter === 'all' ||
+            (statusFilter === 'pending' && cStatus === 'pending') ||
+            (statusFilter === 'approved' && cStatus === 'approved') ||
+            (statusFilter === 'rejected' && cStatus === 'rejected');
+
+        return matchesSearch && matchesStatus;
+    });
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -304,19 +291,75 @@ const CourseManager = () => {
             </div>
 
             <GlassCard className="!p-0 overflow-hidden">
-                <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="relative w-full sm:max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Filter courses..."
-                            className="w-full pl-10 pr-4 py-3 sm:py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-white placeholder-white/40 text-sm"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto hide-scrollbar w-full md:w-auto">
+                        <button
+                            onClick={() => setStatusFilter('all')}
+                            className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                                statusFilter === 'all'
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'text-white/50 hover:text-white'
+                            }`}
+                        >
+                            All Courses ({courses.length})
+                        </button>
+
+                        <button
+                            onClick={() => setStatusFilter('pending')}
+                            className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                                statusFilter === 'pending'
+                                    ? 'bg-amber-500 text-black shadow-sm font-black'
+                                    : 'text-amber-400 hover:text-amber-300 hover:bg-white/5'
+                            }`}
+                        >
+                            <Clock size={14} className={pendingCount > 0 ? "animate-pulse" : ""} />
+                            Pending Approval
+                            {pendingCount > 0 ? (
+                                <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-black animate-pulse">
+                                    {pendingCount}
+                                </span>
+                            ) : (
+                                <span className="text-[10px] opacity-70">(0)</span>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={() => setStatusFilter('approved')}
+                            className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                                statusFilter === 'approved'
+                                    ? 'bg-emerald-500 text-white shadow-sm'
+                                    : 'text-white/50 hover:text-white'
+                            }`}
+                        >
+                            Approved ({approvedCount})
+                        </button>
+
+                        <button
+                            onClick={() => setStatusFilter('rejected')}
+                            className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                                statusFilter === 'rejected'
+                                    ? 'bg-rose-500 text-white shadow-sm'
+                                    : 'text-white/50 hover:text-white'
+                            }`}
+                        >
+                            Rejected ({rejectedCount})
+                        </button>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <span className="text-xs sm:text-sm font-medium text-white/70 font-inter tracking-tight">Displaying {filteredCourses.length} results</span>
+
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <div className="relative flex-1 md:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                            <input
+                                type="text"
+                                placeholder="Filter courses..."
+                                className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-white placeholder-white/40 text-xs sm:text-sm font-inter"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <span className="text-xs font-medium text-white/50 whitespace-nowrap hidden sm:inline">
+                            Displaying {filteredCourses.length} results
+                        </span>
                     </div>
                 </div>
 
