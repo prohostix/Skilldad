@@ -55,10 +55,42 @@ const getModuleContent = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc    Update interactive content
+const updateContent = asyncHandler(async (req, res) => {
+    const { contentId } = req.params;
+    const { type, title, description, instructions, timeLimit, attemptsAllowed, passingScore, showSolutionAfter, questions } = req.body;
+
+    await query(`
+        UPDATE interactive_contents 
+        SET type = COALESCE($1, type),
+            title = COALESCE($2, title),
+            description = COALESCE($3, description),
+            instructions = COALESCE($4, instructions),
+            time_limit = COALESCE($5, time_limit),
+            attempts_allowed = COALESCE($6, attempts_allowed),
+            passing_score = COALESCE($7, passing_score),
+            show_solution_after = COALESCE($8, show_solution_after),
+            questions = COALESCE($9, questions),
+            updated_at = NOW()
+        WHERE id = $10
+    `, [type, title, description, instructions, timeLimit, attemptsAllowed, passingScore, showSolutionAfter, JSON.stringify(questions), contentId]);
+
+    res.status(200).json({ success: true, message: 'Content updated successfully' });
+});
+
+// @desc    Delete interactive content
+const deleteContent = asyncHandler(async (req, res) => {
+    const { contentId } = req.params;
+
+    await query('DELETE FROM interactive_contents WHERE id = $1', [contentId]);
+
+    res.status(200).json({ success: true, message: 'Content deleted successfully' });
+});
+
 module.exports = {
     createContent,
     getModuleContent,
-    updateContent: asyncHandler(async (req, res) => res.json({ success: true })),
-    deleteContent: asyncHandler(async (req, res) => res.json({ success: true })),
+    updateContent,
+    deleteContent,
     reorderContent: asyncHandler(async (req, res) => res.json({ success: true }))
 };

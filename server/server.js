@@ -407,6 +407,38 @@ const startServer = async () => {
             await query('ALTER TABLE batches ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT true');
             console.log('[Migration] Added is_active to batches'.green);
         }
+
+        // Auto-migrate: ensure interactive_contents table exists with all required columns
+        await query(`
+            CREATE TABLE IF NOT EXISTS interactive_contents (
+                id TEXT PRIMARY KEY,
+                type TEXT,
+                title TEXT,
+                description TEXT,
+                instructions TEXT,
+                time_limit INTEGER DEFAULT 0,
+                attempts_allowed INTEGER DEFAULT -1,
+                passing_score INTEGER DEFAULT 70,
+                show_solution_after TEXT DEFAULT 'submission',
+                questions JSONB DEFAULT '[]',
+                course_id TEXT,
+                module_id TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+        const icColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['interactive_contents']);
+        const icCols = icColRes.rows.map(r => r.column_name);
+        if (!icCols.includes('module_id')) await query('ALTER TABLE interactive_contents ADD COLUMN module_id TEXT');
+        if (!icCols.includes('course_id')) await query('ALTER TABLE interactive_contents ADD COLUMN course_id TEXT');
+        if (!icCols.includes('description')) await query('ALTER TABLE interactive_contents ADD COLUMN description TEXT');
+        if (!icCols.includes('instructions')) await query('ALTER TABLE interactive_contents ADD COLUMN instructions TEXT');
+        if (!icCols.includes('time_limit')) await query('ALTER TABLE interactive_contents ADD COLUMN time_limit INTEGER DEFAULT 0');
+        if (!icCols.includes('attempts_allowed')) await query('ALTER TABLE interactive_contents ADD COLUMN attempts_allowed INTEGER DEFAULT -1');
+        if (!icCols.includes('passing_score')) await query('ALTER TABLE interactive_contents ADD COLUMN passing_score INTEGER DEFAULT 70');
+        if (!icCols.includes('show_solution_after')) await query("ALTER TABLE interactive_contents ADD COLUMN show_solution_after TEXT DEFAULT 'submission'");
+        if (!icCols.includes('questions')) await query("ALTER TABLE interactive_contents ADD COLUMN questions JSONB DEFAULT '[]'");
+        console.log('[Migration] interactive_contents table columns verified/updated'.green);
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }
