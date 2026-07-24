@@ -52,14 +52,14 @@ const HERO_CSS = `
 
 /* ─── Node / Edge data ───────────────────────────────────────── */
 const nodes = [
-    { id: 'root', x: 160, y: 295, r: 20, label: 'SkillDad', delay: 0 },
-    { id: 'courses', x: 55, y: 175, r: 13, label: 'Courses', delay: 0.3 },
-    { id: 'university', x: 275, y: 155, r: 13, label: 'University', delay: 0.6 },
-    { id: 'partner', x: 315, y: 320, r: 13, label: 'Partners', delay: 0.9 },
-    { id: 'ai', x: 45, y: 410, r: 13, label: 'AI Engine', delay: 1.2 },
-    { id: 'cert', x: 225, y: 460, r: 11, label: 'Certs', delay: 1.5 },
-    { id: 'job', x: 350, y: 430, r: 11, label: 'Jobs', delay: 1.8 },
-    { id: 'student', x: 130, y: 535, r: 11, label: 'Student', delay: 2.1 },
+    { id: 'root', x: 160, y: 220, r: 20, label: 'SkillDad', delay: 0 },
+    { id: 'courses', x: 55, y: 100, r: 13, label: 'Courses', delay: 0.3 },
+    { id: 'university', x: 275, y: 80, r: 13, label: 'University', delay: 0.6 },
+    { id: 'partner', x: 315, y: 245, r: 13, label: 'Partners', delay: 0.9 },
+    { id: 'ai', x: 45, y: 335, r: 13, label: 'AI Engine', delay: 1.2 },
+    { id: 'cert', x: 225, y: 385, r: 11, label: 'Certs', delay: 1.5 },
+    { id: 'job', x: 350, y: 355, r: 11, label: 'Jobs', delay: 1.8 },
+    { id: 'student', x: 130, y: 460, r: 11, label: 'Student', delay: 2.1 },
 ];
 
 const edges = [
@@ -172,8 +172,8 @@ const TravelDot = ({ from, to, delay }) => {
 
 const NetworkDiagram = () => (
     <div
-        className="absolute -left-28 sm:-left-10 lg:left-0 top-[50%] translate-y-[-10%] sm:translate-y-[0%] z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
-        style={{ width: 420, height: 640 }}
+        className="absolute -left-28 sm:-left-10 lg:left-0 top-[40%] sm:top-[36%] md:top-[34%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
+        style={{ width: 420, height: 500 }}
     >
         <div
             style={{
@@ -182,7 +182,7 @@ const NetworkDiagram = () => (
                 animation: 'hero-diagram-float 20s ease-in-out infinite'
             }}
         >
-            <svg viewBox="-10 100 420 520" width="420" height="520" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="-10 40 420 480" width="420" height="480" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <radialGradient id="nGrad" cx="38%" cy="32%" r="65%">
                         <stop offset="0%" stopColor="#C026FF" />
