@@ -607,12 +607,12 @@ const getAllStudents = async (req, res) => {
         const { courseId, universityId, registeredBy } = req.query;
 
         let studentsQuery = `
-            SELECT 
-                u.id as _id, u.name, u.email, u.role, u.profile, 
-                u.university_id as "universityId", u.registered_by as "registeredBy", 
-                u.is_verified as "isVerified", u.created_at as "createdAt", u.partner_code,
+            SELECT u.id as _id, u.name, u.email, u.role, u.is_verified as "isVerified", 
+                u.university_id as "universityId", u.registered_by as "registeredBy",
+                u.partner_code, u.profile, u.created_at as "createdAt",
                 COALESCE(e_count.count, 0) as "enrollmentCount",
                 c.title as "course",
+                b.name as "batchName",
                 reg.name as "registeredByName", reg.role as "registeredByRole",
                 p.name as "partnerName",
                 uni.name as "universityName"
@@ -624,6 +624,7 @@ const getAllStudents = async (req, res) => {
             ) e_count ON u.id = e_count.student_id
             LEFT JOIN enrollments e_latest ON u.id = e_latest.student_id AND e_latest.created_at = e_count.last_enrollment
             LEFT JOIN courses c ON e_latest.course_id = c.id
+            LEFT JOIN batches b ON e_latest.batch_id = b.id
             LEFT JOIN users reg ON u.registered_by = reg.id
             LEFT JOIN discounts d ON u.partner_code = d.code
             LEFT JOIN users p ON d.partner_id = p.id
@@ -713,16 +714,20 @@ const getStudentEnrollments = async (req, res) => {
     try {
         const enrollmentsRes = await query(`
             SELECT e.*, c.title as course_title, c.thumbnail as course_thumbnail, c.category as course_category,
-                   u.name as instructor_name, u.profile as instructor_profile
+                   u.name as instructor_name, u.profile as instructor_profile,
+                   b.name as batch_name
             FROM enrollments e
             JOIN courses c ON e.course_id = c.id
             LEFT JOIN users u ON c.instructor_id = u.id
+            LEFT JOIN batches b ON e.batch_id = b.id
             WHERE e.student_id = $1
         `, [req.params.id]);
 
         res.json(enrollmentsRes.rows.map(e => ({
             ...e,
             _id: e.id,
+            batchId: e.batch_id,
+            batchName: e.batch_name,
             course: {
                 _id: e.course_id,
                 title: e.course_title,

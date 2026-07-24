@@ -660,6 +660,11 @@ const StudentManagement = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-xs text-white/70 font-medium italic">{student.course || 'No Course'}</div>
+                                        {student.batchName && (
+                                            <span className="inline-block mt-1 px-2 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded text-[9px] font-bold">
+                                                Batch: {student.batchName}
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-white">{student.enrollmentCount || 0}</td>
                                     <td className="px-6 py-4">
@@ -1016,7 +1021,16 @@ const StudentManagement = () => {
                                                             {enrollment.course.universityName || enrollment.course.instructor?.profile?.universityName || enrollment.course.instructor?.name}
                                                         </p>
                                                     )}
-                                                    <p className="text-xs text-gray-400 mt-1">Progress: {enrollment.progress || 0}%</p>
+                                                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                                         <p className="text-xs text-gray-400">Progress: {enrollment.progress || 0}%</p>
+                                                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                                                             enrollment.batchName || enrollment.batch_name
+                                                                 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                                                                 : 'bg-white/5 text-gray-400 border-white/10'
+                                                         }`}>
+                                                             Batch: {enrollment.batchName || enrollment.batch_name || 'No Batch Assigned'}
+                                                         </span>
+                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 ml-3">
                                                     <button
@@ -1024,7 +1038,7 @@ const StudentManagement = () => {
                                                             setSelectedEnrollmentForBatch(enrollment);
                                                             setAssignBatchData({ 
                                                                 courseId: enrollment.course?._id, 
-                                                                batchId: enrollment.batchId || '' 
+                                                                batchId: enrollment.batchId || enrollment.batch_id || '' 
                                                             });
                                                             setShowAssignBatchModal(true);
                                                             // Fetch batches for this course
@@ -1042,10 +1056,10 @@ const StudentManagement = () => {
                                                             fetchBatches();
                                                         }}
                                                         className="p-1.5 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors text-[10px] font-bold flex items-center gap-1"
-                                                        title="Assign Batch"
+                                                        title="Assign or Change Batch"
                                                     >
                                                         <Users size={12} />
-                                                        {enrollment.batchName || 'Assign Batch'}
+                                                        {enrollment.batchName || enrollment.batch_name ? `Batch: ${enrollment.batchName || enrollment.batch_name}` : 'Assign Batch'}
                                                     </button>
                                                     <span className={`px-2 py-1 text-xs font-bold rounded-full ${enrollment.status === 'active'
                                                         ? 'bg-emerald-500/20 text-emerald-400'
