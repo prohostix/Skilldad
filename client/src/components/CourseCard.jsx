@@ -10,12 +10,15 @@ import {
 import GlassCard from './ui/GlassCard';
 import ModernButton from './ui/ModernButton';
 import EnrollEnquiryModal from './ui/EnrollEnquiryModal';
+import { getMediaUrl } from '../utils/media';
 
 const CourseCard = ({ course }) => {
     const navigate = useNavigate();
     const [showEnquiry, setShowEnquiry] = useState(false);
 
     const handleEnroll = () => setShowEnquiry(true);
+
+    const thumbnailUrl = course.thumbnail ? getMediaUrl(course.thumbnail) : `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800`;
 
     return (
         <>
@@ -29,7 +32,7 @@ const CourseCard = ({ course }) => {
                 onClick={() => navigate(`/course/${course._id}`)}
             >
                 <img
-                    src={course.thumbnail || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800`}
+                    src={thumbnailUrl}
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-20"
                     onError={(e) => {

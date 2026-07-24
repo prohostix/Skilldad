@@ -21,6 +21,7 @@ import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
+import { getMediaUrl } from '../../utils/media';
 
 const PartnerCourseManager = () => {
     const [courses, setCourses] = useState([]);
@@ -196,7 +197,7 @@ const PartnerCourseManager = () => {
                     <GlassCard key={course._id} className="group overflow-hidden flex flex-col border-white/10 hover:border-primary/30 transition-all duration-300">
                         <div className="relative h-40 bg-zinc-900 overflow-hidden">
                             {course.thumbnail ? (
-                                <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <img src={getMediaUrl(course.thumbnail)} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-primary/5">
                                     <BookOpen size={40} className="text-primary/20" />

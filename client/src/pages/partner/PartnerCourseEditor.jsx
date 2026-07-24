@@ -13,6 +13,7 @@ import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
 import BatchManagement from '../../components/ui/BatchManagement';
+import { getMediaUrl } from '../../utils/media';
 
 const PartnerCourseEditor = () => {
     const { id } = useParams();
@@ -439,7 +440,7 @@ const PartnerCourseEditor = () => {
                             className="relative group overflow-hidden rounded-2xl bg-black border border-white/10 aspect-video flex items-center justify-center cursor-pointer"
                         >
                             {course.thumbnail ? (
-                                <img src={course.thumbnail} alt="Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
+                                <img src={getMediaUrl(course.thumbnail)} alt="Thumbnail" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
                             ) : (
                                 <ImageIcon size={48} className="text-white/20" />
                             )}
