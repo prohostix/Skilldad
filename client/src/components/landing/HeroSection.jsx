@@ -318,7 +318,7 @@ const HeroSection = () => {
 
                         {/* Subtitle */}
                         <p className="text-white/60 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center">
-                            Turn uncertainty into clarity with industry-ready skills.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with Skilldad.
+                            Turn uncertainty into clarity with industry-ready <span className="text-primary font-semibold">skills</span>.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with <span className="text-primary font-semibold">Skilldad</span>.
                         </p>
 
                         {/* CTA Buttons */}
