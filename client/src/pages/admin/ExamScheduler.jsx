@@ -257,9 +257,8 @@ const ExamScheduler = () => {
                                         const now = new Date();
                                         const start = new Date(e.scheduledStartTime || e.scheduled_start);
                                         const end = new Date(e.scheduledEndTime || e.scheduled_end);
-                                        const hasQuestions = (Array.isArray(e.questions) && e.questions.length > 0) ||
-                                            Number(e.total_questions || e.questionCount || 0) > 0 ||
-                                            Boolean(e.question_paper_url || e.questionPaperUrl);
+                                        const qCount = Number(e.questionCount || e.question_count || (Array.isArray(e.questions) ? e.questions.length : 0));
+                                        const hasQuestions = qCount > 0 || Boolean(e.linked_paper_id || e.question_paper_url || e.questionPaperUrl);
                                         return (e.status === 'ongoing' || (now >= start && now <= end)) && hasQuestions;
                                     }).length}
                                 </p>
@@ -302,9 +301,8 @@ const ExamScheduler = () => {
                                     const now = new Date();
                                     const start = new Date(exam.scheduledStartTime || exam.scheduled_start);
                                     const end = new Date(exam.scheduledEndTime || exam.scheduled_end);
-                                    const hasQuestions = (Array.isArray(exam.questions) && exam.questions.length > 0) ||
-                                        Number(exam.total_questions || exam.questionCount || 0) > 0 ||
-                                        Boolean(exam.question_paper_url || exam.questionPaperUrl);
+                                    const qCount = Number(exam.questionCount || exam.question_count || (Array.isArray(exam.questions) ? exam.questions.length : 0));
+                                    const hasQuestions = qCount > 0 || Boolean(exam.linked_paper_id || exam.question_paper_url || exam.questionPaperUrl);
 
                                     let statusBadge;
                                     if (exam.status === 'published') {

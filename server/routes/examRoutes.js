@@ -125,7 +125,8 @@ router.get('/', protect, authorize('admin', 'university', 'partner'), async (req
                    e.exam_type as "examType",
                    c.id as course_id, c.title as course_title,
                    u.id as university_id, u.name as university_name, u.profile as university_profile,
-                   cr.name as creator_name, cr.role as creator_role
+                   cr.name as creator_name, cr.role as creator_role,
+                   (SELECT COUNT(*) FROM questions q WHERE q.exam_id = e.id) as question_count
             FROM exams e
             LEFT JOIN courses c ON e.course_id = c.id
             LEFT JOIN users u ON e.university_id = u.id
@@ -142,6 +143,7 @@ router.get('/', protect, authorize('admin', 'university', 'partner'), async (req
 
         const exams = examsRes.rows.map(row => ({
             ...row,
+            questionCount: parseInt(row.question_count || 0, 10),
             university: { _id: row.university_id, name: row.university_name, profile: row.university_profile },
             course: { _id: row.course_id, title: row.course_title },
             createdBy: { name: row.creator_name, role: row.creator_role }
@@ -165,7 +167,8 @@ router.get('/admin/all', protect, authorize('admin', 'university', 'partner'), a
                    e.exam_type as "examType",
                    c.id as course_id, c.title as course_title,
                    u.id as university_id, u.name as university_name, u.profile as university_profile,
-                   cr.name as creator_name, cr.role as creator_role
+                   cr.name as creator_name, cr.role as creator_role,
+                   (SELECT COUNT(*) FROM questions q WHERE q.exam_id = e.id) as question_count
             FROM exams e
             LEFT JOIN courses c ON e.course_id = c.id
             LEFT JOIN users u ON e.university_id = u.id
@@ -176,6 +179,7 @@ router.get('/admin/all', protect, authorize('admin', 'university', 'partner'), a
 
         const exams = examsRes.rows.map(row => ({
             ...row,
+            questionCount: parseInt(row.question_count || 0, 10),
             university: { _id: row.university_id, name: row.university_name, profile: row.university_profile },
             course: { _id: row.course_id, title: row.course_title },
             createdBy: { name: row.creator_name, role: row.creator_role }
