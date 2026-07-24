@@ -81,9 +81,8 @@ const CourseCatalog = () => {
             if (programType === 'featured') {
                 const pType = (course.programType || course.program_type || '').toLowerCase();
                 const instRole = (course.instructor_role || course.instructor?.role || course.submitted_by_role || '').toLowerCase();
-                const isFeat = course.is_featured || course.isFeatured;
-                const isCloudComp = (course.category || '').toLowerCase().includes('cloud') || (course.title || '').toLowerCase().includes('cloud computing');
-                matchesProgramType = pType === 'featured' || isFeat || instRole === 'partner' || isCloudComp;
+                const univName = (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '').toLowerCase();
+                matchesProgramType = pType === 'featured' || instRole === 'partner' || univName.includes('skilldad');
             } else {
                 matchesProgramType = (course.programType || course.program_type || 'course') === programType;
             }
@@ -97,9 +96,8 @@ const CourseCatalog = () => {
             if (programType === 'featured') {
                 const pType = (c.programType || c.program_type || '').toLowerCase();
                 const instRole = (c.instructor_role || c.instructor?.role || c.submitted_by_role || '').toLowerCase();
-                const isFeat = c.is_featured || c.isFeatured;
-                const isCloudComp = (c.category || '').toLowerCase().includes('cloud') || (c.title || '').toLowerCase().includes('cloud computing');
-                return pType === 'featured' || isFeat || instRole === 'partner' || isCloudComp;
+                const univName = (c.universityName || c.instructor?.profile?.universityName || c.instructor?.name || '').toLowerCase();
+                return pType === 'featured' || instRole === 'partner' || univName.includes('skilldad');
             }
             return (c.programType || c.program_type || 'course') === programType;
         }),
