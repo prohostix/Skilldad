@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-    ChevronLeft, Plus, Save, Trash2, Video, 
+import {
+    ChevronLeft, Plus, Save, Trash2, Video,
     Upload, FileText, CheckCircle2, AlertCircle, X,
     Layout, BookOpen, Clock, Users, Link,
     ChevronDown, ChevronUp, ArrowLeft, Image as ImageIcon,
-    HelpCircle, Play
+    HelpCircle, Play, Send
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -21,6 +21,7 @@ const PartnerCourseEditor = () => {
     
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [batches, setBatches] = useState([]);
     const [openAddModule, setOpenAddModule] = useState(false);
     const [newModuleTitle, setNewModuleTitle] = useState('');
     
@@ -47,6 +48,12 @@ const PartnerCourseEditor = () => {
         question: '', options: ['', '', '', ''], correctIndex: 0, explanation: ''
     });
 
+    // Publish-to-batch state
+    const [openPublishModal, setOpenPublishModal] = useState(false);
+    const [activePublishModuleId, setActivePublishModuleId] = useState(null);
+    const [selectedPublishBatchIds, setSelectedPublishBatchIds] = useState([]);
+    const [publishSaving, setPublishSaving] = useState(false);
+
     const fetchCourse = async () => {
         try {
             setLoading(true);
@@ -60,8 +67,18 @@ const PartnerCourseEditor = () => {
         }
     };
 
+    const fetchBatches = async () => {
+        try {
+            const { data } = await axios.get(`/api/batches/course/${id}`);
+            setBatches(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error('Error fetching batches:', error);
+        }
+    };
+
     useEffect(() => {
         fetchCourse();
+        fetchBatches();
     }, [id]);
 
     const handleUpdate = async (e) => {

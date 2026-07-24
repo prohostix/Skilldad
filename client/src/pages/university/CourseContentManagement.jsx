@@ -6,7 +6,7 @@ import {
     Upload, FileText, CheckCircle2, AlertCircle, X,
     Layout, BookOpen, Clock, Users, Link,
     ChevronDown, ChevronUp, ArrowLeft, Image as ImageIcon,
-    HelpCircle, Play, ClipboardList
+    HelpCircle, Play, ClipboardList, Send
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -21,6 +21,7 @@ const CourseContentManagement = () => {
 
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [batches, setBatches] = useState([]);
     const [openAddModule, setOpenAddModule] = useState(false);
     const [newModuleTitle, setNewModuleTitle] = useState('');
 
@@ -46,6 +47,12 @@ const CourseContentManagement = () => {
         question: '', options: ['', '', '', ''], correctIndex: 0, explanation: ''
     });
 
+    // Publish-to-batch state
+    const [openPublishModal, setOpenPublishModal] = useState(false);
+    const [activePublishModuleId, setActivePublishModuleId] = useState(null);
+    const [selectedPublishBatchIds, setSelectedPublishBatchIds] = useState([]);
+    const [publishSaving, setPublishSaving] = useState(false);
+
     const getAuthConfig = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         return { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -64,8 +71,18 @@ const CourseContentManagement = () => {
         }
     };
 
+    const fetchBatches = async () => {
+        try {
+            const { data } = await axios.get(`/api/batches/course/${courseId}`);
+            setBatches(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error('Error fetching batches:', error);
+        }
+    };
+
     useEffect(() => {
         fetchCourse();
+        fetchBatches();
     }, [courseId]);
 
     const handleUpdate = async (e) => {
@@ -317,6 +334,27 @@ const CourseContentManagement = () => {
         }));
     };
 
+    // ---- Publish to Batch ----
+    const handleOpenPublishModal = (mod) => {
+        setActivePublishModuleId(mod._id);
+        setSelectedPublishBatchIds(Array.isArray(mod.publishedBatches) ? mod.publishedBatches : []);
+        setOpenPublishModal(true);
+    };
+
+    const handleSavePublishTargets = async () => {
+        setPublishSaving(true);
+        try {
+            await axios.put(`/api/courses/${courseId}/modules/${activePublishModuleId}/publish`, { batchIds: selectedPublishBatchIds }, getAuthConfig());
+            showToast('Publish settings saved!', 'success');
+            setOpenPublishModal(false);
+            fetchCourse();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to save publish settings', 'error');
+        } finally {
+            setPublishSaving(false);
+        }
+    };
+
     if (loading || !course) return (
         <div className="flex items-center justify-center min-h-[400px]">
             <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -485,7 +523,27 @@ const CourseContentManagement = () => {
                                                         ✓ {mod.quiz.questions.length}Q Quiz
                                                     </span>
                                                 )}
+                                                {!Array.isArray(mod.publishedBatches) ? (
+                                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-white/10 text-white/40 border border-white/10" title="Visible to every enrolled student (default)">
+                                                        OPEN TO ALL
+                                                    </span>
+                                                ) : mod.publishedBatches.length === 0 ? (
+                                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/15 text-amber-400 border border-amber-500/20" title="Not visible to any students yet">
+                                                        DRAFT
+                                                    </span>
+                                                ) : (
+                                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-500/15 text-blue-400 border border-blue-500/20" title="Only visible to students in the selected batch(es)">
+                                                        {mod.publishedBatches.length} BATCH{mod.publishedBatches.length > 1 ? 'ES' : ''}
+                                                    </span>
+                                                )}
                                                 <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        className="p-1.5 text-white/20 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all mr-1"
+                                                        onClick={(e) => { e.stopPropagation(); handleOpenPublishModal(mod); }}
+                                                        title="Publish to Batch(es)"
+                                                    >
+                                                        <Send size={16} />
+                                                    </button>
                                                     <button
                                                         className="p-1.5 text-white/20 hover:text-purple-400 hover:bg-purple-500/10 rounded-md transition-all mr-1"
                                                         onClick={(e) => { e.stopPropagation(); navigate(`/university/courses/${courseId}/modules/${mod._id}/content/manage`); }}
@@ -842,6 +900,59 @@ const CourseContentManagement = () => {
                                     {quizSaving ? 'Saving...' : 'Save Quiz Assessment'}
                                 </ModernButton>
                             </div>
+                        </div>
+                    </GlassCard>
+                </div>
+            )}
+
+            {openPublishModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[300] flex items-center justify-center p-4" onClick={() => setOpenPublishModal(false)}>
+                    <GlassCard className="w-full max-w-md p-8 border-white/20" onClick={e => e.stopPropagation()}>
+                        <h4 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                            <Send size={18} className="text-blue-400" /> Publish to Batch(es)
+                        </h4>
+                        <p className="text-xs text-white/40 mb-6 leading-relaxed">
+                            Select which batch(es) can access this section. Leave everything unchecked to keep it as a draft
+                            (hidden from all students). If you never publish a section at all, it stays open to every
+                            enrolled student by default.
+                        </p>
+
+                        <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                            {batches.filter(b => b.is_active !== false).length === 0 ? (
+                                <p className="text-xs text-white/30 italic text-center py-6">
+                                    No active batches for this course yet. Create one in the Student Batches tab first.
+                                </p>
+                            ) : (
+                                batches.filter(b => b.is_active !== false).map(batch => (
+                                    <label key={batch.id} className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:border-blue-500/30 transition-all">
+                                        <input
+                                            type="checkbox"
+                                            className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/50"
+                                            checked={selectedPublishBatchIds.includes(String(batch.id))}
+                                            onChange={(e) => {
+                                                const batchIdStr = String(batch.id);
+                                                setSelectedPublishBatchIds(prev =>
+                                                    e.target.checked ? [...prev, batchIdStr] : prev.filter(id => id !== batchIdStr)
+                                                );
+                                            }}
+                                        />
+                                        <span className="text-sm text-white/80 font-medium">{batch.name}</span>
+                                    </label>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="flex gap-4 mt-6">
+                            <ModernButton variant="secondary" className="flex-1 border border-white/10" onClick={() => setOpenPublishModal(false)}>
+                                Cancel
+                            </ModernButton>
+                            <ModernButton
+                                className="flex-1 bg-blue-500 hover:bg-blue-400"
+                                onClick={handleSavePublishTargets}
+                                disabled={publishSaving}
+                            >
+                                {publishSaving ? 'Saving...' : 'Save'}
+                            </ModernButton>
                         </div>
                     </GlassCard>
                 </div>
