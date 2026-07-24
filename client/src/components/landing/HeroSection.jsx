@@ -52,14 +52,14 @@ const HERO_CSS = `
 
 /* ─── Node / Edge data ───────────────────────────────────────── */
 const nodes = [
-    { id: 'root', x: 160, y: 330, r: 20, label: 'SkillDad', delay: 0 },
-    { id: 'courses', x: 55, y: 210, r: 13, label: 'Courses', delay: 0.3 },
-    { id: 'university', x: 275, y: 190, r: 13, label: 'University', delay: 0.6 },
-    { id: 'partner', x: 315, y: 355, r: 13, label: 'Partners', delay: 0.9 },
-    { id: 'ai', x: 45, y: 445, r: 13, label: 'AI Engine', delay: 1.2 },
-    { id: 'cert', x: 225, y: 495, r: 11, label: 'Certs', delay: 1.5 },
-    { id: 'job', x: 350, y: 465, r: 11, label: 'Jobs', delay: 1.8 },
-    { id: 'student', x: 130, y: 570, r: 11, label: 'Student', delay: 2.1 },
+    { id: 'root', x: 160, y: 295, r: 20, label: 'SkillDad', delay: 0 },
+    { id: 'courses', x: 55, y: 175, r: 13, label: 'Courses', delay: 0.3 },
+    { id: 'university', x: 275, y: 155, r: 13, label: 'University', delay: 0.6 },
+    { id: 'partner', x: 315, y: 320, r: 13, label: 'Partners', delay: 0.9 },
+    { id: 'ai', x: 45, y: 410, r: 13, label: 'AI Engine', delay: 1.2 },
+    { id: 'cert', x: 225, y: 460, r: 11, label: 'Certs', delay: 1.5 },
+    { id: 'job', x: 350, y: 430, r: 11, label: 'Jobs', delay: 1.8 },
+    { id: 'student', x: 130, y: 535, r: 11, label: 'Student', delay: 2.1 },
 ];
 
 const edges = [
@@ -182,7 +182,7 @@ const NetworkDiagram = () => (
                 animation: 'hero-diagram-float 20s ease-in-out infinite'
             }}
         >
-            <svg viewBox="-10 140 420 520" width="420" height="520" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="-10 100 420 520" width="420" height="520" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <radialGradient id="nGrad" cx="38%" cy="32%" r="65%">
                         <stop offset="0%" stopColor="#C026FF" />
