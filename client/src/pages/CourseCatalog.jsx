@@ -256,12 +256,6 @@ const CourseCatalog = () => {
                                         </div>
                                     </div>
                                 )}
-
-                                {/* View Toggle */}
-                                <div className="flex items-center space-x-1 bg-white/5 p-1 rounded-xl border border-white/10">
-                                    <button className="p-2 md:p-2 bg-primary text-white rounded-lg shadow-glow-purple"><LayoutGrid size={14} /></button>
-                                    <button className="p-2 md:p-2 text-white/30 hover:text-white transition-colors"><List size={14} /></button>
-                                </div>
                             </div>
                         </div>
                     </div>
