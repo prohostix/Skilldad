@@ -21,16 +21,14 @@ const CourseCard = ({ course }) => {
 
     const thumbnailUrl = course.thumbnail ? getMediaUrl(course.thumbnail) : `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800`;
 
-    const univName = (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '').toLowerCase();
-    const instRole = (course.instructor_role || course.instructor?.role || course.submitted_by_role || '').toLowerCase();
-    const isSkillDad = !univName || univName.includes('skilldad') || instRole === 'admin' || instRole === 'superadmin' || course.is_skilldad_official || course.isFeatured;
+    const isFeatured = Boolean(course.isFeatured || course.is_featured);
 
     return (
         <>
         <GlassCard
             lowBlur={true}
             className={`group overflow-hidden !p-0 h-full flex flex-col hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 gpu-accelerated ${
-                isSkillDad ? '!border-primary/50 hover:!border-primary shadow-[0_0_25px_rgba(192,38,255,0.15)]' : ''
+                isFeatured ? '!border-amber-500/40 hover:!border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : ''
             }`}
         >
             {/* Thumbnail Section */}
@@ -56,12 +54,12 @@ const CourseCard = ({ course }) => {
                     </span>
                 </div>
 
-                {/* SkillDad Highlighter Badge Right */}
-                {isSkillDad && (
+                {/* Featured Badge Right - Admin Controlled Only */}
+                {isFeatured && (
                     <div className="absolute top-2 right-2 z-30">
-                        <span className="px-2.5 py-1 bg-gradient-to-r from-primary via-[#C026FF] to-primary text-white text-[8px] font-black uppercase tracking-wider rounded-lg border border-white/20 shadow-lg shadow-primary/40 flex items-center gap-1">
-                            <Sparkles size={10} className="text-yellow-300 animate-pulse" />
-                            <span>FEATURED • SKILLDAD</span>
+                        <span className="px-2.5 py-1 bg-gradient-to-r from-amber-500 via-[#C026FF] to-amber-500 text-white text-[8px] font-black uppercase tracking-wider rounded-lg border border-white/20 shadow-lg shadow-amber-500/30 flex items-center gap-1">
+                            <Sparkles size={10} className="text-yellow-200 animate-pulse" />
+                            <span>FEATURED COURSE</span>
                         </span>
                     </div>
                 )}

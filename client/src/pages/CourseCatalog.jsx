@@ -88,8 +88,12 @@ const CourseCatalog = () => {
             return matchesSearch && matchesUniversity && matchesProgramType && (category === 'All' || course.category === category);
         });
 
-        // Sort SkillDad provided courses to the TOP PLACE!
+        // Sort admin-featured courses first, then SkillDad provided courses to the top!
         return filtered.sort((a, b) => {
+            const aFeatured = Boolean(a.isFeatured || a.is_featured) ? 1 : 0;
+            const bFeatured = Boolean(b.isFeatured || b.is_featured) ? 1 : 0;
+            if (bFeatured !== aFeatured) return bFeatured - aFeatured;
+
             const aVal = isSkillDadCourse(a) ? 1 : 0;
             const bVal = isSkillDadCourse(b) ? 1 : 0;
             return bVal - aVal;

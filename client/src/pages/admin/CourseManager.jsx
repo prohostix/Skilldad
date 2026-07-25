@@ -15,7 +15,9 @@ import {
     Clock,
     CheckCircle2,
     AlertCircle,
-    Filter
+    Filter,
+    Star,
+    Sparkles
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import { getMediaUrl } from '../../utils/media';
@@ -259,6 +261,19 @@ const CourseManager = () => {
         }
     };
 
+    const handleToggleFeatured = async (course) => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}`, 'Content-Type': 'application/json' } };
+            const nextFeaturedState = !(course.isFeatured || course.is_featured);
+            await axios.put(`/api/courses/${course._id}`, { ...course, isFeatured: nextFeaturedState }, config);
+            showToast(nextFeaturedState ? `"${course.title}" marked as Featured!` : `Featured badge removed from "${course.title}".`, 'success');
+            fetchCourses();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Error updating featured status', 'error');
+        }
+    };
+
     const pendingCount = courses.filter(c => c.status === 'pending').length;
     const approvedCount = courses.filter(c => c.status === 'approved' || (!c.status && c.isPublished)).length;
     const rejectedCount = courses.filter(c => c.status === 'rejected').length;
@@ -461,7 +476,18 @@ const CourseManager = () => {
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex items-center justify-end space-x-1">
+                                            <button
+                                                onClick={() => handleToggleFeatured(course)}
+                                                className={`p-2 rounded-lg transition-all ${
+                                                    (course.isFeatured || course.is_featured)
+                                                        ? 'text-amber-400 bg-amber-400/10 border border-amber-400/30'
+                                                        : 'text-white/30 hover:text-amber-400 hover:bg-amber-400/10'
+                                                }`}
+                                                title={(course.isFeatured || course.is_featured) ? 'Featured Course (Click to remove badge)' : 'Click to mark as Featured'}
+                                            >
+                                                <Star size={17} className={(course.isFeatured || course.is_featured) ? 'fill-amber-400' : ''} />
+                                            </button>
                                             <button
                                                 onClick={() => handleEdit(course)}
                                                 className="p-2 text-white/40 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
