@@ -293,7 +293,6 @@ const HeroSection = () => {
                             className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-6 md:mb-8 font-space px-2 sm:px-0 text-center"
                         >
                             <span className="text-white">
-                                From{' '}
                                 <span
                                     className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
                                     style={{
