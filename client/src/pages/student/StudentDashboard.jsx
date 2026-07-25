@@ -22,7 +22,8 @@ import {
     Gift,
     Copy,
     Check,
-    Share2
+    Share2,
+    AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
@@ -53,6 +54,20 @@ const StudentDashboard = () => {
     const [isReferModalOpen, setIsReferModalOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const navigate = useNavigate();
+
+    const STANDARD_REQUIRED_SLOTS = [
+        { id: 'std_id_proof', title: 'Identity Proof', type: 'id_proof', matchKeywords: ['identity', 'id proof', 'aadhaar', 'passport', 'id_proof', 'govt id', 'voter'] },
+        { id: 'std_sslc', title: '10th / SSLC Certificate', type: 'sslc_certificate', matchKeywords: ['sslc', '10th', 'secondary school', 'sslc_certificate', 'tenth'] },
+        { id: 'std_12th', title: '12th Marksheet', type: '12th_marksheet', matchKeywords: ['12th', 'higher secondary', 'plus two', '+2', '12th_marksheet', 'twelfth'] }
+    ];
+
+    const pendingRequiredDocs = STANDARD_REQUIRED_SLOTS.filter(slot => {
+        return !documents.some(d => {
+            const titleLower = (d.title || '').toLowerCase();
+            const typeLower = (d.type || '').toLowerCase();
+            return slot.matchKeywords.some(kw => titleLower.includes(kw) || typeLower.includes(kw));
+        });
+    });
 
     // Mock data for demonstration
     useEffect(() => {
@@ -203,6 +218,36 @@ const StudentDashboard = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Pending Document Verification Banner */}
+            {pendingRequiredDocs.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
+                    <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/5">
+                        <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 mt-0.5 sm:mt-0">
+                                <AlertCircle size={18} />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider">Document Verification Pending</h4>
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                        {pendingRequiredDocs.length} Mandatory {pendingRequiredDocs.length === 1 ? 'Doc' : 'Docs'} Missing
+                                    </span>
+                                </div>
+                                <p className="text-xs text-white/70 mt-1 leading-relaxed">
+                                    Please upload mandatory documents (<span className="text-amber-200 font-semibold">{pendingRequiredDocs.map(d => d.title).join(', ')}</span>) to complete student verification & course access.
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => navigate('/dashboard/documents')}
+                            className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold rounded-xl text-xs transition-all shadow-md shadow-amber-500/20 shrink-0 flex items-center justify-center gap-2"
+                        >
+                            <Upload size={14} /> Upload Documents Now
+                        </button>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Enrolled Universities */}
             {enrolledUniversities.length > 0 && (
@@ -467,6 +512,23 @@ const StudentDashboard = () => {
                         </div>
                         
                         <div className="flex flex-col gap-2">
+                            {/* Render missing required documents first with PENDING UPLOAD badges */}
+                            {pendingRequiredDocs.map((docSlot) => (
+                                <div key={docSlot.id} onClick={() => navigate('/dashboard/documents')} className="p-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:border-amber-500/50 hover:bg-amber-500/15 transition-all flex items-center gap-3 group cursor-pointer">
+                                    <div className="w-7 h-7 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                        <AlertCircle size={12} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="text-[10px] font-bold text-amber-200 truncate group-hover:text-amber-300 transition-colors">{docSlot.title}</h3>
+                                        <p className="text-[8px] text-amber-400/70 font-bold uppercase tracking-widest">Mandatory Verification Doc</p>
+                                    </div>
+                                    <span className="text-[8px] font-extrabold text-amber-400 bg-amber-500/20 border border-amber-500/30 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+                                        PENDING UPLOAD
+                                    </span>
+                                </div>
+                            ))}
+
+                            {/* Render uploaded documents */}
                             {documents.map((doc) => (
                                 <div key={doc._id} onClick={() => navigate('/dashboard/documents')} className="p-2.5 rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all flex items-center gap-3 group cursor-pointer">
                                     <div className="w-7 h-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 transition-transform">

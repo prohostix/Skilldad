@@ -335,6 +335,28 @@ const Documents = () => {
                 <p className="text-xs text-white/40 mt-0.5 font-medium">Securely manage and track your academic credentials and verification files.</p>
             </div>
 
+            {/* Pending Mandatory Documents Alert Banner */}
+            {processedDocuments.filter(d => d.status === 'pending').length > 0 && (
+                <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/5">
+                    <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                            <AlertCircle size={18} />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider">Document Verification Pending</h4>
+                                <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                    {processedDocuments.filter(d => d.status === 'pending').length} Mandatory Docs Missing
+                                </span>
+                            </div>
+                            <p className="text-xs text-white/70 mt-1 leading-relaxed">
+                                Please upload your mandatory verification files (<span className="text-amber-200 font-semibold">{processedDocuments.filter(d => d.status === 'pending').map(d => d.title).join(', ')}</span>) using the upload boxes below.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Graduation & Certification Section (Compact) */}
             {enrollments.length > 0 && (
                 <div className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden">
@@ -499,9 +521,15 @@ const Documents = () => {
                                                         Required
                                                     </span>
                                                 )}
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 ${sc.text}`}>
-                                                    {doc.status}
-                                                </span>
+                                                {doc.status === 'pending' ? (
+                                                    <span className="shrink-0 px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1">
+                                                        <AlertCircle size={11} /> PENDING UPLOAD
+                                                    </span>
+                                                ) : (
+                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 ${sc.text}`}>
+                                                        {doc.status}
+                                                    </span>
+                                                )}
                                             </div>
                                             <p className="text-sm text-white/50 leading-relaxed mt-1.5 line-clamp-2 pr-4">
                                                 {doc.description}
