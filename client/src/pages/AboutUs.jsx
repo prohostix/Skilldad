@@ -11,69 +11,88 @@ import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 
-// Animation Variants
+// Enhanced Animation Variants
 const fadeInUp = {
-    hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+    hidden: { opacity: 0, y: 35 },
+    visible: { 
+        opacity: 1, 
+        y: 0, 
+        transition: { duration: 0.7, ease: [0.215, 0.61, 0.355, 1] } 
+    }
+};
+
+const fadeInLeft = {
+    hidden: { opacity: 0, x: -40 },
+    visible: { 
+        opacity: 1, 
+        x: 0, 
+        transition: { duration: 0.8, ease: "easeOut" } 
+    }
+};
+
+const fadeInRight = {
+    hidden: { opacity: 0, x: 40 },
+    visible: { 
+        opacity: 1, 
+        x: 0, 
+        transition: { duration: 0.8, ease: "easeOut" } 
+    }
+};
+
+const scaleIn = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: { 
+        opacity: 1, 
+        scale: 1, 
+        transition: { duration: 0.6, ease: "easeOut" } 
+    }
 };
 
 const staggerContainer = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { staggerChildren: 0.15, delayChildren: 0.2 }
+        transition: { staggerChildren: 0.12, delayChildren: 0.15 }
     }
 };
 
 const floatAnimation = {
-    y: ["-3%", "3%"],
+    y: ["-4%", "4%"],
     transition: {
-        duration: 4,
+        duration: 4.5,
         repeat: Infinity,
         repeatType: "reverse",
         ease: "easeInOut"
     }
 };
 
-// ── ELABORATED EXECUTIVE LEADERSHIP CARD (BIG IMAGE & DETAILED NARRATIVE) ──
+// ── EXECUTIVE LEADERSHIP CARD WITH RICH MOTION & BALANCED SIZE ──
 const ExecutiveLeadershipCard = ({ member }) => {
     const memberName = member.name || member.title || 'Executive Leader';
     const memberRole = member.role || member.title || 'Leadership';
     const memberImg = member.imageUrl || member.image || member.logo;
     const linkedinUrl = member.linkedinUrl || member.linkedin_url;
 
-    // Default bios if not provided in database
+    // Clear, simple, human-readable bios
     const getExecutiveBio = () => {
         if (member.bio && member.bio.trim().length > 10) return member.bio;
         if (memberName.toLowerCase().includes('basil')) {
-            return "Visionary global educational leader orchestrating SkillDad's strategic university alliances, international expansion, and enterprise placement ecosystem. Championing outcome-driven higher education across global academic & industry markets.";
+            return "Drives SkillDad's global vision, university collaborations, and strategic hiring networks to connect students with top institutions and corporate careers.";
         }
         if (memberName.toLowerCase().includes('dilshad')) {
-            return "Driving SkillDad's core platform innovation, curriculum engineering, and corporate hiring partnerships. Dedicated to transforming student potential into high-growth tech and business careers through practical hands-on mastery.";
+            return "Leads SkillDad's course engineering, technology platform, and corporate hiring partnerships to help students acquire practical skills and land high-paying jobs.";
         }
-        return "Guiding the strategic alignment of SkillDad's academic matrix, industry partnership networks, and student career placement initiatives.";
+        return "Guiding SkillDad's academic partnerships, practical skill programs, and student career placement initiatives.";
     };
 
     const getPillars = () => {
         if (memberName.toLowerCase().includes('basil')) {
-            return [
-                'Global Academic Alliances',
-                'University Degree Integration',
-                'Enterprise Placement Ecosystem'
-            ];
+            return ['University Alliances', 'Global Growth', 'Career Matrix'];
         }
         if (memberName.toLowerCase().includes('dilshad')) {
-            return [
-                'Skill-First Learning Architecture',
-                'Corporate Hiring Networks',
-                'Practical Curriculum Mastery'
-            ];
+            return ['Skill Curriculums', 'Corporate Hiring', 'Live Projects'];
         }
-        return [
-            'Academic Governance',
-            'Industry Curriculum Alignment',
-            'Student Placement Matrix'
-        ];
+        return ['Academic Governance', 'Skill Training', 'Job Placements'];
     };
 
     const pillars = getPillars();
@@ -87,7 +106,10 @@ const ExecutiveLeadershipCard = ({ member }) => {
         >
             <GlassCard className="relative group overflow-hidden p-6 sm:p-7 md:p-8 !bg-[#0A0A12]/95 backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-[0_0_40px_rgba(192,38,255,0.18)]">
                 {/* Ambient Glow */}
-                <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none"></div>
+                <motion.div 
+                    animate={floatAnimation}
+                    className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/25 transition-all duration-700 pointer-events-none" 
+                />
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 sm:gap-8">
                     
@@ -110,9 +132,12 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         <div 
                             className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 via-[#C026FF]/20 to-[#0A0A12] border border-primary/20 ${memberImg ? 'hidden' : 'flex'}`}
                         >
-                            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-4xl sm:text-5xl font-space shadow-xl shadow-primary/20 mb-2">
+                            <motion.div 
+                                whileHover={{ rotate: 5, scale: 1.05 }}
+                                className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-4xl sm:text-5xl font-space shadow-xl shadow-primary/20 mb-2"
+                            >
                                 {memberName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                            </div>
+                            </motion.div>
                             <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">
                                 Leadership
                             </span>
@@ -132,10 +157,13 @@ const ExecutiveLeadershipCard = ({ member }) => {
                     <div className="flex-1 space-y-4 flex flex-col justify-between py-1">
                         <div>
                             {/* Role Badge */}
-                            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider mb-2.5">
+                            <motion.div 
+                                whileHover={{ scale: 1.03 }}
+                                className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider mb-2.5"
+                            >
                                 <ShieldCheck size={13} />
                                 <span>{memberRole}</span>
-                            </div>
+                            </motion.div>
 
                             {/* Executive Name */}
                             <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-space leading-snug group-hover:text-primary-light transition-colors">
@@ -152,10 +180,14 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         <div className="space-y-2 pt-3.5 border-t border-white/10">
                             <div className="flex flex-wrap gap-2">
                                 {pillars.map((pillar, idx) => (
-                                    <span key={idx} className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-xl text-[11px] font-medium text-gray-200 flex items-center gap-1.5">
+                                    <motion.span 
+                                        key={idx} 
+                                        whileHover={{ scale: 1.05, y: -2 }}
+                                        className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-xl text-[11px] font-medium text-gray-200 flex items-center gap-1.5 cursor-default transition-all"
+                                    >
                                         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                                         {pillar}
-                                    </span>
+                                    </motion.span>
                                 ))}
                             </div>
                         </div>
@@ -163,7 +195,9 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         {/* LinkedIn / Action */}
                         {linkedinUrl ? (
                             <div className="pt-3.5 border-t border-white/5 flex items-center justify-between gap-3">
-                                <a
+                                <motion.a
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.98 }}
                                     href={linkedinUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -171,7 +205,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                                 >
                                     <Linkedin size={15} fill="currentColor" stroke="none" />
                                     <span>Connect on LinkedIn</span>
-                                </a>
+                                </motion.a>
                             </div>
                         ) : (
                             <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
@@ -215,14 +249,14 @@ const AboutUs = () => {
             name: 'Dr. Basil Thomas',
             role: 'GROUP CEO & DIRECTOR',
             university: 'SKILLDAD GLOBAL',
-            bio: "Visionary global educational leader orchestrating SkillDad's strategic university alliances, international expansion, and enterprise placement ecosystem. Championing outcome-driven higher education across global academic & industry markets."
+            bio: "Drives SkillDad's global vision, university collaborations, and strategic hiring networks to connect students with top institutions and corporate careers."
         },
         {
             _id: 'dir_2',
             name: 'Dilshad Ashraf',
             role: 'CEO',
             university: 'SKILLDAD',
-            bio: "Driving SkillDad's core platform innovation, curriculum engineering, and corporate hiring partnerships. Dedicated to transforming student potential into high-growth tech and business careers through practical hands-on mastery."
+            bio: "Leads SkillDad's course engineering, technology platform, and corporate hiring partnerships to help students acquire practical skills and land high-paying jobs."
         }
     ];
 
@@ -247,49 +281,75 @@ const AboutUs = () => {
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] overflow-hidden text-white">
             <Navbar />
 
-            {/* Floating Background Elements */}
-            <motion.div animate={floatAnimation} className="absolute top-[8%] left-[5%] w-[350px] md:w-[600px] h-[350px] md:h-[600px] bg-primary/10 blur-[140px] rounded-full pointer-events-none -z-10" />
-            <motion.div animate={{ ...floatAnimation, transition: { ...floatAnimation.transition, delay: 1.5 } }} className="absolute top-[35%] right-[0%] w-[400px] md:w-[700px] h-[400px] md:h-[700px] bg-[#C026FF]/10 blur-[160px] rounded-full pointer-events-none -z-10" />
+            {/* Floating Background Orbs with Animated Glow */}
+            <motion.div animate={floatAnimation} className="absolute top-[6%] left-[4%] w-[400px] md:w-[650px] h-[400px] md:h-[650px] bg-primary/10 blur-[150px] rounded-full pointer-events-none -z-10" />
+            <motion.div animate={{ ...floatAnimation, transition: { ...floatAnimation.transition, delay: 2 } }} className="absolute top-[32%] right-[0%] w-[450px] md:w-[750px] h-[450px] md:h-[750px] bg-[#C026FF]/10 blur-[170px] rounded-full pointer-events-none -z-10" />
+            <motion.div animate={{ ...floatAnimation, transition: { ...floatAnimation.transition, delay: 3.5 } }} className="absolute top-[65%] left-[10%] w-[350px] md:w-[550px] h-[350px] md:h-[550px] bg-emerald-500/5 blur-[140px] rounded-full pointer-events-none -z-10" />
 
             {/* ── HERO SECTION ── */}
             <section className="relative pt-24 md:pt-32 pb-16 px-4 md:px-6 flex flex-col items-center justify-center">
                 <div className="max-w-5xl mx-auto text-center z-10 w-full space-y-6">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-                        animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                        initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                         transition={{ duration: 0.9, ease: "easeOut" }}
                     >
                         {/* Top Badge */}
-                        <div className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/15 rounded-full border border-primary/30 text-primary text-xs font-black uppercase tracking-widest mb-6 shadow-lg shadow-primary/10">
+                        <motion.div 
+                            initial={{ scale: 0.85, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/15 rounded-full border border-primary/30 text-primary text-xs font-black uppercase tracking-widest mb-6 shadow-lg shadow-primary/10"
+                        >
                             <Sparkles size={14} className="animate-pulse" />
                             <span>Official Skill-to-Career Launchpad</span>
-                        </div>
+                        </motion.div>
 
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white font-space tracking-tight leading-[1.1] mb-6">
+                        <motion.h1 
+                            initial={{ opacity: 0, y: 25 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white font-space tracking-tight leading-[1.1] mb-6"
+                        >
                             Empowering Students to <br className="hidden sm:inline" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-light">
                                 Learn High-Demand Skills & Get Hired
                             </span>
-                        </h1>
+                        </motion.h1>
 
-                        <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto font-inter leading-relaxed font-normal px-2">
+                        <motion.p 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.45 }}
+                            className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto font-inter leading-relaxed font-normal px-2"
+                        >
                             {cms.hero?.story || 'SkillDad is an outcome-driven skill learning and career enablement platform. We bridge the gap between academic education and real-world corporate expectations by equipping students with job-ready technical skills, practical project experience, and direct placement access to top-tier employers.'}
-                        </p>
+                        </motion.p>
 
                         {/* Pillar Pills */}
-                        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-8 pt-4">
+                        <motion.div 
+                            variants={staggerContainer}
+                            initial="hidden"
+                            animate="visible"
+                            className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mt-8 pt-4"
+                        >
                             {[
                                 { label: 'Skill-First Curriculum', icon: Laptop },
                                 { label: 'Real-World Projects', icon: Layers },
                                 { label: 'Recognized Certifications', icon: Award },
                                 { label: 'Direct Placement Network', icon: Briefcase }
                             ].map((pill, i) => (
-                                <div key={i} className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold text-gray-200 backdrop-blur-md">
+                                <motion.div 
+                                    key={i} 
+                                    variants={fadeInUp}
+                                    whileHover={{ scale: 1.06, y: -3 }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-xs font-bold text-gray-200 backdrop-blur-md hover:border-primary/40 transition-all cursor-default shadow-md"
+                                >
                                     <pill.icon size={14} className="text-primary" />
                                     <span>{pill.label}</span>
-                                </div>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </motion.div>
                 </div>
             </section>
@@ -300,19 +360,23 @@ const AboutUs = () => {
 
                     {/* SECTION 1: OUR MISSION */}
                     <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial="hidden"
+                        whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.8 }}
+                        variants={fadeInUp}
                     >
                         <GlassCard className="p-8 md:p-12 lg:p-14 !bg-[#0A0718]/90 border-primary/30 hover:border-primary/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                                <div className="lg:col-span-5 space-y-5">
-                                    <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-lg shadow-primary/20">
+                                <motion.div variants={fadeInLeft} className="lg:col-span-5 space-y-5">
+                                    <motion.div 
+                                        whileHover={{ rotate: 12, scale: 1.1 }}
+                                        transition={{ type: "spring", stiffness: 300 }}
+                                        className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-lg shadow-primary/20"
+                                    >
                                         <Rocket size={28} strokeWidth={2.5} />
-                                    </div>
+                                    </motion.div>
                                     <div className="space-y-2">
                                         <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Core Pillar 01</span>
                                         <h2 className="text-3xl md:text-4xl font-black text-white font-space">
@@ -323,14 +387,20 @@ const AboutUs = () => {
                                         {cms.mission?.description || 'Our mission is to democratize high-value industry education and build a direct pipeline for students to transform theoretical knowledge into high-paying corporate roles.'}
                                     </p>
                                     <div className="pt-2">
-                                        <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center gap-3">
-                                            <CheckCircle2 size={20} className="text-primary shrink-0" />
+                                        <motion.div 
+                                            whileHover={{ scale: 1.02 }}
+                                            className="p-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center gap-3"
+                                        >
+                                            <CheckCircle2 size={20} className="text-primary shrink-0 animate-pulse" />
                                             <span className="text-xs font-bold text-white">Focused on measurable career outcomes & student placements.</span>
-                                        </div>
+                                        </motion.div>
                                     </div>
-                                </div>
+                                </motion.div>
 
-                                <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <motion.div 
+                                    variants={staggerContainer}
+                                    className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4"
+                                >
                                     {[
                                         {
                                             title: 'Industry-Driven Curriculum',
@@ -357,34 +427,43 @@ const AboutUs = () => {
                                             color: '#C026FF'
                                         }
                                     ].map((pillar, idx) => (
-                                        <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-primary/40 hover:bg-white/[0.04] transition-all duration-300 group">
+                                        <motion.div 
+                                            key={idx} 
+                                            variants={fadeInUp}
+                                            whileHover={{ y: -5, scale: 1.02 }}
+                                            className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-primary/40 hover:bg-white/[0.04] transition-all duration-300 group cursor-default"
+                                        >
                                             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: pillar.color }}>
                                                 <pillar.icon size={20} />
                                             </div>
                                             <h4 className="text-sm font-bold text-white mb-1 font-space">{pillar.title}</h4>
                                             <p className="text-xs text-gray-400 font-inter leading-relaxed">{pillar.desc}</p>
-                                        </div>
+                                        </motion.div>
                                     ))}
-                                </div>
+                                </motion.div>
                             </div>
                         </GlassCard>
                     </motion.div>
 
                     {/* SECTION 2: OUR VISION */}
                     <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial="hidden"
+                        whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.8 }}
+                        variants={fadeInUp}
                     >
                         <GlassCard className="p-8 md:p-12 lg:p-14 !bg-[#0E061A]/90 border-[#C026FF]/30 hover:border-[#C026FF]/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                                <div className="lg:col-span-5 space-y-5 lg:order-2">
-                                    <div className="w-14 h-14 rounded-2xl bg-[#C026FF]/20 border border-[#C026FF]/40 flex items-center justify-center text-[#C026FF] shadow-lg shadow-[#C026FF]/20">
+                                <motion.div variants={fadeInRight} className="lg:col-span-5 space-y-5 lg:order-2">
+                                    <motion.div 
+                                        whileHover={{ rotate: -12, scale: 1.1 }}
+                                        transition={{ type: "spring", stiffness: 300 }}
+                                        className="w-14 h-14 rounded-2xl bg-[#C026FF]/20 border border-[#C026FF]/40 flex items-center justify-center text-[#C026FF] shadow-lg shadow-[#C026FF]/20"
+                                    >
                                         <Globe size={28} strokeWidth={2.5} />
-                                    </div>
+                                    </motion.div>
                                     <div className="space-y-2">
                                         <span className="text-xs font-black uppercase tracking-[0.3em] text-[#C026FF]">Core Pillar 02</span>
                                         <h2 className="text-3xl md:text-4xl font-black text-white font-space">
@@ -395,14 +474,20 @@ const AboutUs = () => {
                                         {cms.vision?.description || 'We envision a global education ecosystem where degree qualifications are unified with actual practical mastery—allowing learners to seamlessly transition into high-growth global careers.'}
                                     </p>
                                     <div className="pt-2">
-                                        <div className="p-4 rounded-2xl bg-[#C026FF]/10 border border-[#C026FF]/20 flex items-center gap-3">
-                                            <CheckCircle2 size={20} className="text-[#C026FF] shrink-0" />
+                                        <motion.div 
+                                            whileHover={{ scale: 1.02 }}
+                                            className="p-4 rounded-2xl bg-[#C026FF]/10 border border-[#C026FF]/20 flex items-center gap-3"
+                                        >
+                                            <CheckCircle2 size={20} className="text-[#C026FF] shrink-0 animate-pulse" />
                                             <span className="text-xs font-bold text-white">Unifying universities, students, and employers into one matrix.</span>
-                                        </div>
+                                        </motion.div>
                                     </div>
-                                </div>
+                                </motion.div>
 
-                                <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:order-1">
+                                <motion.div 
+                                    variants={staggerContainer}
+                                    className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:order-1"
+                                >
                                     {[
                                         {
                                             title: 'Global Career Mobility',
@@ -429,25 +514,30 @@ const AboutUs = () => {
                                             color: '#5B5CFF'
                                         }
                                     ].map((pillar, idx) => (
-                                        <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-[#C026FF]/40 hover:bg-white/[0.04] transition-all duration-300 group">
+                                        <motion.div 
+                                            key={idx} 
+                                            variants={fadeInUp}
+                                            whileHover={{ y: -5, scale: 1.02 }}
+                                            className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-[#C026FF]/40 hover:bg-white/[0.04] transition-all duration-300 group cursor-default"
+                                        >
                                             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: pillar.color }}>
                                                 <pillar.icon size={20} />
                                             </div>
                                             <h4 className="text-sm font-bold text-white mb-1 font-space">{pillar.title}</h4>
                                             <p className="text-xs text-gray-400 font-inter leading-relaxed">{pillar.desc}</p>
-                                        </div>
+                                        </motion.div>
                                     ))}
-                                </div>
+                                </motion.div>
                             </div>
                         </GlassCard>
                     </motion.div>
 
                     {/* SECTION 3: OUR CORE VALUES */}
                     <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial="hidden"
+                        whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.8 }}
+                        variants={fadeInUp}
                     >
                         <GlassCard className="p-8 md:p-12 lg:p-14 !bg-[#060D1A]/90 border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -456,9 +546,12 @@ const AboutUs = () => {
                                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/20">
+                                            <motion.div 
+                                                whileHover={{ scale: 1.1, rotate: 10 }}
+                                                className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/20"
+                                            >
                                                 <Award size={24} strokeWidth={2.5} />
-                                            </div>
+                                            </motion.div>
                                             <span className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400">Core Pillar 03</span>
                                         </div>
                                         <h2 className="text-3xl md:text-4xl font-black text-white font-space">
@@ -470,7 +563,10 @@ const AboutUs = () => {
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <motion.div 
+                                    variants={staggerContainer}
+                                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                                >
                                     {[
                                         {
                                             title: 'Student Success First',
@@ -497,7 +593,12 @@ const AboutUs = () => {
                                             tag: 'Future Ready'
                                         }
                                     ].map((val, idx) => (
-                                        <div key={idx} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-emerald-500/40 hover:bg-white/[0.04] transition-all duration-300 flex flex-col justify-between group">
+                                        <motion.div 
+                                            key={idx} 
+                                            variants={fadeInUp}
+                                            whileHover={{ y: -6, scale: 1.02 }}
+                                            className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-emerald-500/40 hover:bg-white/[0.04] transition-all duration-300 flex flex-col justify-between group cursor-default"
+                                        >
                                             <div>
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
@@ -510,9 +611,9 @@ const AboutUs = () => {
                                                 <h4 className="text-base font-bold text-white mb-2 font-space">{val.title}</h4>
                                                 <p className="text-xs text-gray-400 font-inter leading-relaxed">{val.desc}</p>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
-                                </div>
+                                </motion.div>
                             </div>
                         </GlassCard>
                     </motion.div>
@@ -523,7 +624,13 @@ const AboutUs = () => {
             {/* ── HOW SKILLDAD WORKS (LEARN SKILLS & GET JOB) ── */}
             <section className="py-16 md:py-24 px-4 md:px-6 relative bg-white/[0.01] border-y border-white/5">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16 space-y-4">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="text-center mb-16 space-y-4"
+                    >
                         <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Student Career Engine</span>
                         <h2 className="text-3xl md:text-5xl font-black text-white font-space tracking-tight">
                             How Students <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-light">Learn Skills & Get Hired</span>
@@ -531,9 +638,15 @@ const AboutUs = () => {
                         <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto font-inter">
                             A structured 4-step framework designed to take students from foundational learning to landing high-paying corporate roles.
                         </p>
-                    </div>
+                    </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <motion.div 
+                        variants={staggerContainer}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-50px" }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                    >
                         {[
                             {
                                 step: '01',
@@ -560,30 +673,32 @@ const AboutUs = () => {
                                 icon: Briefcase
                             }
                         ].map((item, idx) => (
-                            <GlassCard key={idx} className="p-6 relative group hover:border-primary/50 transition-all duration-300 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black font-mono">
-                                            <item.icon size={22} />
+                            <motion.div variants={fadeInUp} key={idx} whileHover={{ y: -6, scale: 1.02 }}>
+                                <GlassCard className="p-6 relative group hover:border-primary/50 transition-all duration-300 rounded-2xl flex flex-col justify-between h-full">
+                                    <div>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black font-mono group-hover:scale-110 transition-transform">
+                                                <item.icon size={22} />
+                                            </div>
+                                            <span className="text-2xl font-black text-white/20 font-mono group-hover:text-primary transition-colors">
+                                                {item.step}
+                                            </span>
                                         </div>
-                                        <span className="text-2xl font-black text-white/20 font-mono group-hover:text-primary transition-colors">
-                                            {item.step}
-                                        </span>
+                                        <h3 className="text-lg font-bold text-white mb-2 font-space">{item.title}</h3>
+                                        <p className="text-xs text-gray-400 font-inter leading-relaxed">{item.desc}</p>
                                     </div>
-                                    <h3 className="text-lg font-bold text-white mb-2 font-space">{item.title}</h3>
-                                    <p className="text-xs text-gray-400 font-inter leading-relaxed">{item.desc}</p>
-                                </div>
-                                <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-primary text-xs font-bold">
-                                    <span>Career Stage {idx + 1}</span>
-                                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                                </div>
-                            </GlassCard>
+                                    <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-primary text-xs font-bold">
+                                        <span>Career Stage {idx + 1}</span>
+                                        <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                                    </div>
+                                </GlassCard>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
-            {/* ── EXECUTIVE LEADERSHIP SECTION (ELABORATED WITH BIG IMAGES) ── */}
+            {/* ── EXECUTIVE LEADERSHIP SECTION ── */}
             {directors.length > 0 && (
                 <section className="py-20 md:py-32 px-4 md:px-6 relative border-t border-white/5">
                     <div className="max-w-7xl mx-auto">
@@ -669,7 +784,7 @@ const AboutUs = () => {
 
             {/* ── CALL TO ACTION SECTION ── */}
             <section className="py-24 md:py-32 px-4 md:px-6 border-t border-white/5 relative overflow-hidden">
-                <motion.div animate={floatAnimation} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-[300px] bg-primary/10 blur-[120px] rounded-full -z-10"></motion.div>
+                <motion.div animate={floatAnimation} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl h-[300px] bg-primary/15 blur-[130px] rounded-full -z-10"></motion.div>
                 <div className="max-w-4xl mx-auto text-center relative z-10 space-y-6">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -687,12 +802,19 @@ const AboutUs = () => {
                             Join over 1.2M+ students learning in-demand skills and landing corporate placements with SkillDad.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-                            <ModernButton onClick={() => window.location.href = '/courses'} className="px-10 py-4 w-full sm:w-auto !text-xs uppercase tracking-widest shadow-[0_0_30px_rgba(91,92,255,0.3)] hover:shadow-[0_0_50px_rgba(91,92,255,0.5)]">
-                                Explore Skill Programs
-                            </ModernButton>
-                            <button onClick={() => window.location.href = '/register'} className="text-white font-bold uppercase tracking-widest text-xs py-4 px-8 rounded-xl border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all w-full sm:w-auto">
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+                                <ModernButton onClick={() => window.location.href = '/courses'} className="px-10 py-4 w-full sm:w-auto !text-xs uppercase tracking-widest shadow-[0_0_30px_rgba(91,92,255,0.3)] hover:shadow-[0_0_50px_rgba(91,92,255,0.5)]">
+                                    Explore Skill Programs
+                                </ModernButton>
+                            </motion.div>
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }} 
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => window.location.href = '/register'} 
+                                className="text-white font-bold uppercase tracking-widest text-xs py-4 px-8 rounded-xl border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all w-full sm:w-auto"
+                            >
                                 Register Now
-                            </button>
+                            </motion.button>
                         </div>
                     </motion.div>
                 </div>
