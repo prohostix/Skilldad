@@ -81,109 +81,116 @@ const ExecutiveLeadershipCard = ({ member }) => {
     return (
         <motion.div
             variants={fadeInUp}
-            whileHover={{ y: -8, scale: 1.01 }}
+            whileHover={{ y: -6, scale: 1.01 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="h-full"
+            className="w-full"
         >
-            <GlassCard className="relative group overflow-hidden flex flex-col p-6 sm:p-8 lg:p-10 !bg-[#0A0A12]/95 backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-2xl hover:shadow-[0_0_50px_rgba(192,38,255,0.2)] h-full">
-                {/* Glow backdrop */}
+            <GlassCard className="relative group overflow-hidden p-6 sm:p-8 lg:p-10 !bg-[#0A0A12]/95 backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-2xl hover:shadow-[0_0_50px_rgba(192,38,255,0.2)]">
+                {/* Ambient Glow backdrop */}
                 <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none"></div>
 
-                {/* Top Image Frame — BIG IMAGE */}
-                <div className="relative w-full h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden mb-6 border border-white/10 group-hover:border-primary/40 transition-all duration-500 bg-[#06040B] flex items-center justify-center shrink-0">
-                    {memberImg ? (
-                        <img
-                            src={memberImg.startsWith('http') ? memberImg : `${axios.defaults.baseURL || ''}${memberImg}`}
-                            alt={memberName}
-                            className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.style.display = 'none';
-                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                            }}
-                        />
-                    ) : null}
-
-                    {/* High-Impact Fallback Initial Avatar */}
-                    <div 
-                        className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 via-[#C026FF]/20 to-[#0A0A12] border border-primary/20 ${memberImg ? 'hidden' : 'flex'}`}
-                    >
-                        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-primary/20 border-2 border-primary/40 flex items-center justify-center text-primary font-black text-4xl sm:text-5xl font-space shadow-2xl shadow-primary/30 mb-2">
-                            {memberName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                        </div>
-                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
-                            Executive Leadership
-                        </span>
-                    </div>
-
-                    {/* Gradient Overlay at Bottom of Image */}
-                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/60 to-transparent pointer-events-none" />
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 lg:gap-10">
                     
-                    {/* Organization Tag */}
-                    <div className="absolute top-4 left-4 px-3.5 py-1.5 bg-black/75 backdrop-blur-md border border-white/15 rounded-full text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
-                        <Building2 size={13} className="text-primary" />
-                        <span>{member.university || 'SKILLDAD GLOBAL'}</span>
-                    </div>
-                </div>
+                    {/* LEFT COLUMN: BIG IMAGE (Row layout left side) */}
+                    <div className="relative w-full lg:w-80 xl:w-96 h-80 sm:h-96 lg:h-[420px] rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/40 transition-all duration-500 bg-[#06040B] flex items-center justify-center shrink-0">
+                        {memberImg ? (
+                            <img
+                                src={memberImg.startsWith('http') ? memberImg : `${axios.defaults.baseURL || ''}${memberImg}`}
+                                alt={memberName}
+                                className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.style.display = 'none';
+                                    if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                }}
+                            />
+                        ) : null}
 
-                {/* Content Section */}
-                <div className="space-y-5 flex-grow flex flex-col justify-between">
-                    <div>
-                        {/* Role Pill */}
-                        <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider mb-3">
-                            <ShieldCheck size={13} />
-                            <span>{memberRole}</span>
+                        {/* High-Impact Fallback Initial Avatar */}
+                        <div 
+                            className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 via-[#C026FF]/20 to-[#0A0A12] border border-primary/20 ${memberImg ? 'hidden' : 'flex'}`}
+                        >
+                            <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-3xl bg-primary/20 border-2 border-primary/40 flex items-center justify-center text-primary font-black text-5xl sm:text-6xl font-space shadow-2xl shadow-primary/30 mb-3">
+                                {memberName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                            </div>
+                            <span className="text-[11px] font-black text-primary uppercase tracking-[0.3em]">
+                                Executive Leadership
+                            </span>
                         </div>
 
-                        {/* Name */}
-                        <h3 className="text-2xl sm:text-3xl font-black text-white font-space leading-snug group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:via-primary-light group-hover:to-primary transition-all duration-500">
-                            {memberName}
-                        </h3>
-
-                        {/* Bio */}
-                        <p className="text-xs sm:text-sm text-gray-300 font-inter leading-relaxed mt-3 font-normal">
-                            {getExecutiveBio()}
-                        </p>
+                        {/* Gradient Overlay at Bottom of Image */}
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/60 to-transparent pointer-events-none" />
+                        
+                        {/* Organization Tag */}
+                        <div className="absolute top-4 left-4 px-3.5 py-1.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-full text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+                            <Building2 size={13} className="text-primary" />
+                            <span>{member.university || 'SKILLDAD GLOBAL'}</span>
+                        </div>
                     </div>
 
-                    {/* Key Pillars */}
-                    <div className="space-y-3 pt-4 border-t border-white/10">
-                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 block">Strategic Focus & Leadership</span>
-                        <div className="flex flex-wrap gap-2">
-                            {pillars.map((pillar, idx) => (
-                                <span key={idx} className="px-3 py-1 bg-white/[0.03] border border-white/10 rounded-lg text-[11px] font-semibold text-gray-300 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                    {pillar}
+                    {/* RIGHT COLUMN: ELABORATED DETAILS & NARRATIVE (Row layout right side) */}
+                    <div className="flex-1 space-y-5 flex flex-col justify-between py-2">
+                        <div>
+                            {/* Role Pill */}
+                            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider mb-3">
+                                <ShieldCheck size={13} />
+                                <span>{memberRole}</span>
+                            </div>
+
+                            {/* Executive Name */}
+                            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-space leading-snug group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:via-primary-light group-hover:to-primary transition-all duration-500">
+                                {memberName}
+                            </h3>
+
+                            {/* Elaborated Narrative Bio */}
+                            <p className="text-xs sm:text-sm text-gray-300 font-inter leading-relaxed mt-4 font-normal">
+                                {getExecutiveBio()}
+                            </p>
+                        </div>
+
+                        {/* Strategic Focus Pillars */}
+                        <div className="space-y-2.5 pt-4 border-t border-white/10">
+                            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 block">Strategic Focus & Leadership</span>
+                            <div className="flex flex-wrap gap-2">
+                                {pillars.map((pillar, idx) => (
+                                    <span key={idx} className="px-3.5 py-1.5 bg-white/[0.03] border border-white/10 rounded-xl text-[11px] font-semibold text-gray-200 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-primary" />
+                                        {pillar}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Executive Quote Box */}
+                        <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 italic text-xs sm:text-sm text-gray-300 font-inter leading-relaxed flex items-start gap-3">
+                            <span className="text-primary font-serif text-2xl leading-none">“</span>
+                            <span>Pioneering transparent, outcome-focused education to empower next-generation talent and bridge corporate placement gaps globally.</span>
+                        </div>
+
+                        {/* LinkedIn Link / Action */}
+                        {linkedinUrl ? (
+                            <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-4">
+                                <a
+                                    href={linkedinUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-6 py-3 bg-white/5 hover:bg-[#0077B5] hover:text-white text-gray-200 font-bold text-xs rounded-xl flex items-center gap-2 border border-white/10 hover:border-[#0077B5] transition-all shadow-md"
+                                >
+                                    <Linkedin size={16} fill="currentColor" stroke="none" />
+                                    <span>Connect on LinkedIn</span>
+                                </a>
+                                <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider hidden sm:inline">
+                                    Executive Director
                                 </span>
-                            ))}
-                        </div>
+                            </div>
+                        ) : (
+                            <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
+                                <span>SkillDad Executive Board</span>
+                                <span className="text-primary font-black">● Active Director</span>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Quote Box */}
-                    <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 italic text-xs text-gray-400 font-inter leading-relaxed flex items-start gap-2">
-                        <span className="text-primary font-serif text-lg leading-none">“</span>
-                        <span>Championing outcome-based skill development to ensure every student achieves high-impact career growth.</span>
-                    </div>
-
-                    {/* LinkedIn Button */}
-                    {linkedinUrl ? (
-                        <div className="pt-4 border-t border-white/5">
-                            <a
-                                href={linkedinUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full py-3 bg-white/5 hover:bg-[#0077B5] hover:text-white text-gray-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/10 hover:border-[#0077B5] transition-all shadow-md group/btn"
-                            >
-                                <Linkedin size={16} fill="currentColor" stroke="none" />
-                                <span>Connect on LinkedIn</span>
-                            </a>
-                        </div>
-                    ) : (
-                        <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
-                            <span>SkillDad Executive Board</span>
-                            <span className="text-primary font-black">● Active Director</span>
-                        </div>
-                    )}
                 </div>
             </GlassCard>
         </motion.div>
@@ -616,7 +623,7 @@ const AboutUs = () => {
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: true, margin: "-50px" }}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto"
+                            className="flex flex-col gap-8 lg:gap-12 max-w-5xl mx-auto"
                         >
                             {directors.map((member) => (
                                 <ExecutiveLeadershipCard key={member._id || member.name} member={member} />
@@ -660,7 +667,7 @@ const AboutUs = () => {
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: true, margin: "-50px" }}
-                            className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto"
+                            className="flex flex-col gap-8 lg:gap-12 max-w-5xl mx-auto"
                         >
                             {advisory.map((member) => (
                                 <ExecutiveLeadershipCard key={member._id || member.name} member={member} />
