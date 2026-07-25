@@ -54,25 +54,39 @@ const ExecutiveLeadershipCard = ({ member }) => {
         return "Guiding the strategic alignment of SkillDad's academic matrix, industry partnership networks, and student career placement initiatives.";
     };
 
+    // Additional quote / statement per executive
+    const getExecutiveQuote = () => {
+        if (memberName.toLowerCase().includes('basil')) {
+            return "Building global educational bridges between accredited universities, ambitious learners, and international hiring leaders.";
+        }
+        if (memberName.toLowerCase().includes('dilshad')) {
+            return "Dedicated to creating outcome-driven skill tracks that convert student potential directly into high-paying corporate roles.";
+        }
+        return "Pioneering transparent, skill-first education to empower next-generation talent and bridge corporate placement gaps globally.";
+    };
+
     const getPillars = () => {
         if (memberName.toLowerCase().includes('basil')) {
             return [
-                'Global Academic Alliances',
-                'University Degree Integration',
-                'Enterprise Placement Ecosystem'
+                'University Alliances',
+                'Global Expansion',
+                'Degree Integration',
+                'Enterprise Hiring Matrix'
             ];
         }
         if (memberName.toLowerCase().includes('dilshad')) {
             return [
-                'Skill-First Learning Architecture',
+                'Skill-First Architecture',
                 'Corporate Hiring Networks',
-                'Practical Curriculum Mastery'
+                'Curriculum Engineering',
+                'Direct Placement Mentorship'
             ];
         }
         return [
             'Academic Governance',
-            'Industry Curriculum Alignment',
-            'Student Placement Matrix'
+            'Skill Training',
+            'Industry Alignment',
+            'Career Acceleration'
         ];
     };
 
@@ -103,7 +117,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.1 }}
-                        className="relative w-full sm:w-64 md:w-72 lg:w-[310px] h-72 sm:h-76 md:h-80 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all duration-500 bg-[#06040B] flex items-center justify-center shrink-0"
+                        className="relative w-full sm:w-64 md:w-72 lg:w-[310px] h-72 sm:h-80 md:h-[340px] rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all duration-500 bg-[#06040B] flex items-center justify-center shrink-0"
                     >
                         {memberImg ? (
                             <img
@@ -157,16 +171,21 @@ const ExecutiveLeadershipCard = ({ member }) => {
                     {/* RIGHT SIDE: Animated Content & Details */}
                     <div className="flex-1 space-y-4 flex flex-col justify-between py-1">
                         <div>
-                            {/* Role Badge */}
+                            {/* Role & Department Badges */}
                             <motion.div 
                                 initial={{ opacity: 0, x: 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.15 }}
-                                className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider mb-2.5 shadow-sm"
+                                className="flex flex-wrap items-center gap-2 mb-2.5"
                             >
-                                <ShieldCheck size={13} className="text-primary" />
-                                <span>{memberRole}</span>
+                                <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider shadow-sm">
+                                    <ShieldCheck size={13} className="text-primary" />
+                                    <span>{memberRole}</span>
+                                </div>
+                                <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 bg-white/[0.03] px-2.5 py-0.5 rounded border border-white/10">
+                                    {memberName.toLowerCase().includes('basil') ? 'Global Strategy' : 'Platform & Hiring'}
+                                </span>
                             </motion.div>
 
                             {/* Executive Name */}
@@ -180,7 +199,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                                 {memberName}
                             </motion.h3>
 
-                            {/* Clear Bio */}
+                            {/* Bio */}
                             <motion.p 
                                 initial={{ opacity: 0, y: 15 }}
                                 whileInView={{ opacity: 1, y: 0 }}
@@ -192,13 +211,25 @@ const ExecutiveLeadershipCard = ({ member }) => {
                             </motion.p>
                         </div>
 
-                        {/* Focus Badges with Hover Pop */}
+                        {/* Executive Quote Box */}
+                        <motion.div 
+                            initial={{ opacity: 0, y: 15 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.28 }}
+                            className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 italic text-xs text-gray-300 font-inter leading-relaxed flex items-start gap-2.5"
+                        >
+                            <span className="text-primary font-serif text-xl leading-none">“</span>
+                            <span>{getExecutiveQuote()}</span>
+                        </motion.div>
+
+                        {/* Strategic Focus Badges with Hover Pop */}
                         <motion.div 
                             initial={{ opacity: 0, y: 15 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.3 }}
-                            className="space-y-2 pt-3.5 border-t border-white/10"
+                            className="space-y-2 pt-3 border-t border-white/10"
                         >
                             <div className="flex flex-wrap gap-2">
                                 {pillars.map((pillar, idx) => (
@@ -222,7 +253,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.35 }}
-                                className="pt-3.5 border-t border-white/5 flex items-center justify-between gap-3"
+                                className="pt-3 border-t border-white/5 flex items-center justify-between gap-3"
                             >
                                 <motion.a
                                     whileHover={{ scale: 1.03 }}
@@ -238,10 +269,10 @@ const ExecutiveLeadershipCard = ({ member }) => {
                             </motion.div>
                         ) : (
                             <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
-                                <span>SkillDad Executive Board</span>
+                                <span>SKILLDAD EXECUTIVE BOARD</span>
                                 <div className="flex items-center gap-1.5">
                                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-emerald-400 font-black">Active Director</span>
+                                    <span className="text-emerald-400 font-black">ACTIVE DIRECTOR</span>
                                 </div>
                             </div>
                         )}
