@@ -4,7 +4,8 @@ import {
     Star,
     Clock,
     PlayCircle,
-    ArrowRight
+    ArrowRight,
+    Sparkles
 } from 'lucide-react';
 
 import GlassCard from './ui/GlassCard';
@@ -20,11 +21,17 @@ const CourseCard = ({ course }) => {
 
     const thumbnailUrl = course.thumbnail ? getMediaUrl(course.thumbnail) : `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800`;
 
+    const univName = (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '').toLowerCase();
+    const instRole = (course.instructor_role || course.instructor?.role || course.submitted_by_role || '').toLowerCase();
+    const isSkillDad = !univName || univName.includes('skilldad') || instRole === 'admin' || instRole === 'superadmin' || course.is_skilldad_official || course.isFeatured;
+
     return (
         <>
         <GlassCard
             lowBlur={true}
-            className="group overflow-hidden !p-0 h-full flex flex-col hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 gpu-accelerated"
+            className={`group overflow-hidden !p-0 h-full flex flex-col hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 gpu-accelerated ${
+                isSkillDad ? '!border-primary/50 hover:!border-primary shadow-[0_0_25px_rgba(192,38,255,0.15)]' : ''
+            }`}
         >
             {/* Thumbnail Section */}
             <div
@@ -42,12 +49,22 @@ const CourseCard = ({ course }) => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent z-21"></div>
 
-                {/* Badge */}
+                {/* Category Badge Left */}
                 <div className="absolute top-2 left-2 z-30">
                     <span className="px-2 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[8px] font-bold uppercase tracking-widest rounded-lg">
                         {course.category}
                     </span>
                 </div>
+
+                {/* SkillDad Highlighter Badge Right */}
+                {isSkillDad && (
+                    <div className="absolute top-2 right-2 z-30">
+                        <span className="px-2.5 py-1 bg-gradient-to-r from-primary via-[#C026FF] to-primary text-white text-[8px] font-black uppercase tracking-wider rounded-lg border border-white/20 shadow-lg shadow-primary/40 flex items-center gap-1">
+                            <Sparkles size={10} className="text-yellow-300 animate-pulse" />
+                            <span>FEATURED • SKILLDAD</span>
+                        </span>
+                    </div>
+                )}
 
                 {/* Play Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-90 group-hover:scale-100 transform transition-transform z-30">

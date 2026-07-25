@@ -65,7 +65,13 @@ const CourseCatalog = () => {
     }, []);
 
     const filteredCourses = useMemo(() => {
-        return courses.filter(course => {
+        const isSkillDadCourse = (course) => {
+            const univ = (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '').toLowerCase();
+            const instRole = (course.instructor_role || course.instructor?.role || course.submitted_by_role || '').toLowerCase();
+            return !univ || univ.includes('skilldad') || instRole === 'admin' || instRole === 'superadmin' || course.is_skilldad_official || course.isFeatured;
+        };
+
+        const filtered = courses.filter(course => {
             const searchText = filter.toLowerCase();
 
             const matchesSearch =
@@ -77,30 +83,21 @@ const CourseCatalog = () => {
             const courseUniversity = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad';
             const matchesUniversity = selectedUniversity === 'All' || courseUniversity === selectedUniversity;
 
-            let matchesProgramType = false;
-            if (programType === 'featured') {
-                const pType = (course.programType || course.program_type || '').toLowerCase();
-                const instRole = (course.instructor_role || course.instructor?.role || course.submitted_by_role || '').toLowerCase();
-                const univName = (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '').toLowerCase();
-                matchesProgramType = pType === 'featured' || instRole === 'partner' || univName.includes('skilldad');
-            } else {
-                matchesProgramType = (course.programType || course.program_type || 'course') === programType;
-            }
+            const matchesProgramType = (course.programType || course.program_type || 'course') === programType;
 
             return matchesSearch && matchesUniversity && matchesProgramType && (category === 'All' || course.category === category);
+        });
+
+        // Sort SkillDad provided courses to the TOP PLACE!
+        return filtered.sort((a, b) => {
+            const aVal = isSkillDadCourse(a) ? 1 : 0;
+            const bVal = isSkillDadCourse(b) ? 1 : 0;
+            return bVal - aVal;
         });
     }, [courses, filter, category, selectedUniversity, programType]);
 
     const coursesForCategoryList = useMemo(
-        () => courses.filter(c => {
-            if (programType === 'featured') {
-                const pType = (c.programType || c.program_type || '').toLowerCase();
-                const instRole = (c.instructor_role || c.instructor?.role || c.submitted_by_role || '').toLowerCase();
-                const univName = (c.universityName || c.instructor?.profile?.universityName || c.instructor?.name || '').toLowerCase();
-                return pType === 'featured' || instRole === 'partner' || univName.includes('skilldad');
-            }
-            return (c.programType || c.program_type || 'course') === programType;
-        }),
+        () => courses.filter(c => (c.programType || c.program_type || 'course') === programType),
         [courses, programType]
     );
     const categories = useMemo(() => ['All', ...new Set(coursesForCategoryList.map(c => c.category))], [coursesForCategoryList]);
@@ -169,15 +166,6 @@ const CourseCatalog = () => {
                                             }`}
                                     >
                                         Skill Integrated Degree Programmes
-                                    </button>
-                                    <button
-                                        onClick={() => { setProgramType('featured'); setCategory('All'); }}
-                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'featured'
-                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
-                                            : 'text-white/50 hover:text-white'
-                                            }`}
-                                    >
-                                        Featured Courses
                                     </button>
                                 </div>
                             </div>
