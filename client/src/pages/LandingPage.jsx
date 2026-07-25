@@ -977,28 +977,6 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* Floating Light / Dark Mode Switcher Widget */}
-            <div className="fixed bottom-6 right-20 z-[200]">
-                <button
-                    onClick={() => setIsLightMode(!isLightMode)}
-                    className={`px-4 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-2.5 shadow-2xl border backdrop-blur-xl transform hover:scale-105 active:scale-95 ${
-                        isLightMode
-                            ? 'bg-slate-900 text-white border-slate-700 shadow-slate-900/30 hover:bg-slate-800'
-                            : 'bg-white/90 text-slate-900 border-white/40 shadow-purple-500/30 hover:bg-white'
-                    }`}
-                >
-                    {isLightMode ? (
-                        <>
-                            <Moon size={16} className="text-purple-400" /> Dark Mode
-                        </>
-                    ) : (
-                        <>
-                            <Sun size={16} className="text-amber-500" /> Light Mode
-                        </>
-                    )}
-                </button>
-            </div>
-
             <FloatingHelpWidget />
             <Footer />
         </div>

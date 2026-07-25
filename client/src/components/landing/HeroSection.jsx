@@ -139,10 +139,10 @@ const DiagramNode = ({ node, index }) => (
         <text
             x={node.x} y={node.y + node.r + 14}
             textAnchor="middle"
-            fill="rgba(210,180,255,0.7)"
-            fontSize="9"
+            fill="#3B0764"
+            fontSize="10"
             fontFamily="Inter, sans-serif"
-            fontWeight="700"
+            fontWeight="900"
             letterSpacing="0.07em"
         >
             {node.label}

@@ -58,15 +58,14 @@ const Navbar = ({ compact = false }) => {
     return (
         <>
             <nav
-                className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? 'border-b border-white/5 shadow-2xl' : 'border-b border-transparent'}`}
-                style={{
-                    backgroundColor: shouldBeTransparent ? 'transparent' : '#000000',
-                    backdropFilter: shouldBeTransparent ? 'none' : 'blur(20px)',
-                }}
+                className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+                    !shouldBeTransparent 
+                        ? 'bg-white/95 backdrop-blur-2xl border-b border-purple-200/80 shadow-md text-slate-900' 
+                        : 'bg-white/70 backdrop-blur-xl border-b border-purple-100/50 shadow-sm text-slate-900'
+                }`}
             >
-                {/* Gradient Border Bottom Glow - Only visible on scroll */}
-                <div className={`absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary to-primary-light transition-opacity duration-500 ${!shouldBeTransparent ? 'opacity-30' : 'opacity-0'}`}></div>
-
+                {/* Gradient Border Bottom Glow */}
+                <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-primary-light/40"></div>
 
                 <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-500 ${compact ? 'h-14' : 'h-20'}`}>
                     {/* Logo - Image based */}
@@ -77,7 +76,7 @@ const Navbar = ({ compact = false }) => {
                             />
                         </div>
                         {/* Text - 'SkillDad' */}
-                        <span className={`font-bold font-space text-white uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
+                        <span className={`font-black font-space text-slate-900 uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
                             SkillDad
                         </span>
                     </div>
@@ -89,10 +88,10 @@ const Navbar = ({ compact = false }) => {
                                 <Link
                                     key={item.name}
                                     to={item.href}
-                                    className={`relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`}
+                                    className={`relative font-extrabold text-slate-800 hover:text-primary transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`}
                                 >
                                     {item.name}
-                                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-primary-dark to-primary group-hover:w-full transition-all duration-300 shadow-glow-purple"></span>
+                                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-primary to-primary-light group-hover:w-full transition-all duration-300"></span>
                                 </Link>
                             ))}
                         </div>
@@ -104,7 +103,7 @@ const Navbar = ({ compact = false }) => {
                             {user ? (
                                 <button
                                     onClick={() => navigate(getDashboardLink())}
-                                    className={`flex items-center gap-2 rounded-lg font-bold text-white relative overflow-hidden group transition-all duration-300 border border-primary/50 bg-gradient-to-r from-primary/30 via-blue-500/30 to-primary/30 backdrop-blur-sm hover:from-primary/60 hover:via-blue-500/60 hover:to-primary/60 hover:border-primary/80 shadow-[0_0_20px_rgba(110,40,255,0.4)] hover:shadow-[0_0_30px_rgba(110,40,255,0.6)] ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
+                                    className={`flex items-center gap-2 rounded-xl font-black text-white relative overflow-hidden group transition-all duration-300 border border-primary/50 bg-gradient-to-r from-primary via-[#C026FF] to-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)] hover:shadow-[0_0_30px_rgba(110,40,255,0.5)] hover:scale-105 active:scale-95 ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
                                 >
                                     <LayoutDashboard size={compact ? 14 : 16} className="relative z-10" />
                                     <span className="relative z-10">Dashboard</span>
@@ -113,13 +112,13 @@ const Navbar = ({ compact = false }) => {
                                 <>
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className={`font-medium text-white hover:text-primary transition-colors ${compact ? 'text-xs' : 'text-sm'}`}
+                                        className={`font-black text-slate-900 hover:text-primary transition-colors ${compact ? 'text-xs' : 'text-sm'}`}
                                     >
                                         Login
                                     </button>
                                     <button
                                         onClick={() => navigate('/register')}
-                                        className={`rounded-lg font-bold text-white relative overflow-hidden group transition-all duration-300 border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-sm hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
+                                        className={`rounded-xl font-black text-white relative overflow-hidden group transition-all duration-300 bg-gradient-to-r from-primary via-[#C026FF] to-primary shadow-md hover:scale-105 active:scale-95 ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
                                     >
                                         <span className="relative z-10">Sign Up</span>
                                     </button>
@@ -131,7 +130,7 @@ const Navbar = ({ compact = false }) => {
                     {/* Mobile Menu Button - Hide on auth pages */}
                     {!isAuthPage && (
                         <div className="lg:hidden">
-                            <button onClick={() => setMobileMenuOpen(true)} className="text-white">
+                            <button onClick={() => setMobileMenuOpen(true)} className="text-slate-900">
                                 <Menu size={compact ? 20 : 24} />
                             </button>
                         </div>
