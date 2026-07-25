@@ -21,7 +21,9 @@ import {
     TrendingUp,
     Zap,
     Book,
-    Building2
+    Building2,
+    Sun,
+    Moon
 } from 'lucide-react';
 import axios from 'axios';
 import ModernButton from '../components/ui/ModernButton';
@@ -40,6 +42,7 @@ import { getMediaUrl } from '../utils/media';
 
 const LandingPage = () => {
     const navigate = useNavigate();
+    const [isLightMode, setIsLightMode] = useState(true);
     const [dynamicDirectors, setDynamicDirectors] = useState([]);
     const [dynamicLogos, setDynamicLogos] = useState([]);
     const [featuredCourses, setFeaturedCourses] = useState([]);
@@ -282,10 +285,14 @@ const LandingPage = () => {
     // No need to enrich logos - they're already complete in the static arrays
 
     return (
-        <div className="min-h-screen selection:bg-primary/30 relative overflow-x-hidden text-text-primary bg-black">
+        <div className={`min-h-screen selection:bg-primary/30 relative overflow-x-hidden transition-colors duration-500 ${
+            isLightMode 
+                ? 'bg-[#F8F9FD] text-slate-900' 
+                : 'bg-black text-text-primary'
+        }`}>
             <Navbar />
 
-            <HeroSection />
+            <HeroSection isLightMode={isLightMode} />
 
             <CapabilitiesSection />
             <AnimatedLogoSection />
@@ -297,7 +304,7 @@ const LandingPage = () => {
                     <motion.h2
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        className="text-base md:text-xl font-black text-white font-jakarta tracking-tight uppercase break-words"
+                        className={isLightMode ? "text-base md:text-xl font-black text-slate-900 font-jakarta tracking-tight uppercase break-words" : "text-base md:text-xl font-black text-white font-jakarta tracking-tight uppercase break-words"}
                     >
                         Companies That <span className="text-primary block sm:inline mt-1 sm:mt-0">Trust SkillDad</span>
                     </motion.h2>
@@ -310,23 +317,23 @@ const LandingPage = () => {
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-primary/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14">
+                                <div className={isLightMode ? "px-4 s:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-md rounded-xl border border-purple-200/60 shadow-md shadow-purple-500/5 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14" : "px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-primary/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14"}>
                                     {company.logo ? (
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
+                                            className={isLightMode ? "h-5 sm:h-7 w-auto object-contain opacity-80 group-hover:opacity-100 transition-all duration-500" : "h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"}
                                         />
                                     ) : (
-                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
+                                        <span className={isLightMode ? "text-slate-800 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap" : "text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors"}>{company.name}</span>
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
                     {/* Edge fades */}
-                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-transparent to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-transparent to-transparent z-10 pointer-events-none" />
                 </div>
 
                 {/* Row 2 — Scrolls Right */}
@@ -335,23 +342,20 @@ const LandingPage = () => {
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
-                                <div className="px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-purple-400/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14">
+                                <div className={isLightMode ? "px-4 s:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-md rounded-xl border border-purple-200/60 shadow-md shadow-purple-500/5 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14" : "px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-purple-400/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14"}>
                                     {company.logo ? (
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
+                                            className={isLightMode ? "h-5 sm:h-7 w-auto object-contain opacity-80 group-hover:opacity-100 transition-all duration-500" : "h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"}
                                         />
                                     ) : (
-                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
+                                        <span className={isLightMode ? "text-slate-800 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap" : "text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors"}>{company.name}</span>
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
-                    {/* Edge fades */}
-                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
                 </div>
             </section>
 
@@ -980,6 +984,28 @@ const LandingPage = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Floating Light / Dark Mode Switcher Widget */}
+            <div className="fixed bottom-6 right-20 z-[200]">
+                <button
+                    onClick={() => setIsLightMode(!isLightMode)}
+                    className={`px-4 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all duration-300 flex items-center gap-2.5 shadow-2xl border backdrop-blur-xl transform hover:scale-105 active:scale-95 ${
+                        isLightMode
+                            ? 'bg-slate-900 text-white border-slate-700 shadow-slate-900/30 hover:bg-slate-800'
+                            : 'bg-white/90 text-slate-900 border-white/40 shadow-purple-500/30 hover:bg-white'
+                    }`}
+                >
+                    {isLightMode ? (
+                        <>
+                            <Moon size={16} className="text-purple-400" /> Dark Mode
+                        </>
+                    ) : (
+                        <>
+                            <Sun size={16} className="text-amber-500" /> Light Mode
+                        </>
+                    )}
+                </button>
+            </div>
 
             <FloatingHelpWidget />
             <Footer />

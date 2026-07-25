@@ -223,7 +223,7 @@ const NetworkDiagram = () => (
 );
 
 /* ─── HeroSection ────────────────────────────────────────────── */
-const HeroSection = () => {
+const HeroSection = ({ isLightMode = true }) => {
     const { user } = useUser();
     const navigate = useNavigate();
     const [partners, setPartners] = React.useState([
@@ -292,7 +292,7 @@ const HeroSection = () => {
                             aria-level="1"
                             className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-6 md:mb-8 font-space px-2 sm:px-0 text-center"
                         >
-                            <span className="text-white">
+                            <span className={isLightMode ? "text-slate-900" : "text-white"}>
                                 <span
                                     className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
                                     style={{
@@ -316,8 +316,8 @@ const HeroSection = () => {
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-white/60 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center">
-                            Turn uncertainty into clarity with industry-ready <span className="text-primary font-semibold">skills</span>.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with <span className="text-primary font-semibold">Skilldad</span>.
+                        <p className={isLightMode ? "text-slate-600 font-semibold text-xs sm:text-sm md:text-base max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center" : "text-white/60 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center"}>
+                            Turn uncertainty into clarity with industry-ready <span className="text-primary font-bold">skills</span>.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with <span className="text-primary font-bold">Skilldad</span>.
                         </p>
 
                         {/* CTA Buttons */}
