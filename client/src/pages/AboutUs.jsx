@@ -81,18 +81,18 @@ const ExecutiveLeadershipCard = ({ member }) => {
     return (
         <motion.div
             variants={fadeInUp}
-            whileHover={{ y: -4, scale: 1.005 }}
+            whileHover={{ y: -5, scale: 1.008 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="w-full"
         >
-            <GlassCard className="relative group overflow-hidden p-5 sm:p-6 md:p-7 !bg-[#0A0A12]/95 backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/50 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-[0_0_35px_rgba(192,38,255,0.15)]">
+            <GlassCard className="relative group overflow-hidden p-6 sm:p-7 md:p-8 !bg-[#0A0A12]/95 backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-[0_0_40px_rgba(192,38,255,0.18)]">
                 {/* Ambient Glow */}
-                <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none"></div>
+                <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none"></div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 sm:gap-7">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 sm:gap-8">
                     
-                    {/* LEFT SIDE: Compact Image */}
-                    <div className="relative w-full sm:w-52 md:w-60 h-56 sm:h-60 md:h-64 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/40 transition-all duration-500 bg-[#06040B] flex items-center justify-center shrink-0">
+                    {/* LEFT SIDE: Medium-Large Image */}
+                    <div className="relative w-full sm:w-64 md:w-72 lg:w-[310px] h-72 sm:h-76 md:h-80 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/40 transition-all duration-500 bg-[#06040B] flex items-center justify-center shrink-0">
                         {memberImg ? (
                             <img
                                 src={memberImg.startsWith('http') ? memberImg : `${axios.defaults.baseURL || ''}${memberImg}`}
@@ -110,49 +110,49 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         <div 
                             className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 via-[#C026FF]/20 to-[#0A0A12] border border-primary/20 ${memberImg ? 'hidden' : 'flex'}`}
                         >
-                            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-3xl sm:text-4xl font-space shadow-xl shadow-primary/20 mb-2">
+                            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-4xl sm:text-5xl font-space shadow-xl shadow-primary/20 mb-2">
                                 {memberName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                             </div>
-                            <span className="text-[9px] font-black text-primary uppercase tracking-[0.25em]">
+                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.25em]">
                                 Leadership
                             </span>
                         </div>
 
                         {/* Gradient Bottom Overlay */}
-                        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/40 to-transparent pointer-events-none" />
+                        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/40 to-transparent pointer-events-none" />
                         
                         {/* Organization Tag */}
-                        <div className="absolute top-3 left-3 px-3 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-full text-[9px] font-black text-white uppercase tracking-widest flex items-center gap-1 shadow-md">
-                            <Building2 size={11} className="text-primary" />
+                        <div className="absolute top-3.5 left-3.5 px-3.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-full text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 shadow-md">
+                            <Building2 size={12} className="text-primary" />
                             <span>{member.university || 'SKILLDAD GLOBAL'}</span>
                         </div>
                     </div>
 
-                    {/* RIGHT SIDE: Simple, Clear Content */}
-                    <div className="flex-1 space-y-3.5 flex flex-col justify-between py-1">
+                    {/* RIGHT SIDE: Clear & Balanced Content */}
+                    <div className="flex-1 space-y-4 flex flex-col justify-between py-1">
                         <div>
                             {/* Role Badge */}
-                            <div className="inline-flex items-center space-x-1.5 px-3 py-0.5 bg-primary/15 rounded-full border border-primary/30 text-primary text-[10px] font-black uppercase tracking-wider mb-2">
-                                <ShieldCheck size={12} />
+                            <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider mb-2.5">
+                                <ShieldCheck size={13} />
                                 <span>{memberRole}</span>
                             </div>
 
                             {/* Executive Name */}
-                            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white font-space leading-snug group-hover:text-primary-light transition-colors">
+                            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-space leading-snug group-hover:text-primary-light transition-colors">
                                 {memberName}
                             </h3>
 
                             {/* Clear Bio */}
-                            <p className="text-xs md:text-sm text-gray-300 font-inter leading-relaxed mt-2 font-normal">
+                            <p className="text-xs sm:text-sm text-gray-300 font-inter leading-relaxed mt-2.5 font-normal">
                                 {getExecutiveBio()}
                             </p>
                         </div>
 
-                        {/* Simple Focus Badges */}
-                        <div className="space-y-2 pt-3 border-t border-white/10">
-                            <div className="flex flex-wrap gap-1.5">
+                        {/* Focus Badges */}
+                        <div className="space-y-2 pt-3.5 border-t border-white/10">
+                            <div className="flex flex-wrap gap-2">
                                 {pillars.map((pillar, idx) => (
-                                    <span key={idx} className="px-2.5 py-1 bg-white/[0.03] border border-white/10 rounded-lg text-[10px] sm:text-[11px] font-medium text-gray-300 flex items-center gap-1.5">
+                                    <span key={idx} className="px-3 py-1 bg-white/[0.04] border border-white/10 rounded-xl text-[11px] font-medium text-gray-200 flex items-center gap-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                                         {pillar}
                                     </span>
@@ -162,21 +162,21 @@ const ExecutiveLeadershipCard = ({ member }) => {
 
                         {/* LinkedIn / Action */}
                         {linkedinUrl ? (
-                            <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-3">
+                            <div className="pt-3.5 border-t border-white/5 flex items-center justify-between gap-3">
                                 <a
                                     href={linkedinUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-4 py-2 bg-white/5 hover:bg-[#0077B5] hover:text-white text-gray-300 font-bold text-xs rounded-lg flex items-center gap-2 border border-white/10 hover:border-[#0077B5] transition-all"
+                                    className="px-5 py-2.5 bg-white/5 hover:bg-[#0077B5] hover:text-white text-gray-200 font-bold text-xs rounded-xl flex items-center gap-2 border border-white/10 hover:border-[#0077B5] transition-all shadow-sm"
                                 >
-                                    <Linkedin size={14} fill="currentColor" stroke="none" />
+                                    <Linkedin size={15} fill="currentColor" stroke="none" />
                                     <span>Connect on LinkedIn</span>
                                 </a>
                             </div>
                         ) : (
-                            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                                <span>SkillDad Leadership</span>
-                                <span className="text-primary font-black">● Executive Director</span>
+                            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
+                                <span>SkillDad Executive Board</span>
+                                <span className="text-primary font-black">● Active Director</span>
                             </div>
                         )}
                     </div>
