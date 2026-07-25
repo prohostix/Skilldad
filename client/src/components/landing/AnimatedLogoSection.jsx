@@ -137,8 +137,12 @@ const AnimatedLogoSection = () => {
                             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                             <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-primary/50" />
                         </div>
-                        <p className="text-text-muted text-base md:text-xl leading-relaxed font-inter font-medium opacity-70">
-                            Aquire skills from European universities with EU credits and placed globally - one of its kind for the first time India (PLACEMENT GURANTEED EUROPEAN UNIVERSITY SKILLS PROGRAMS WITH 'EU' CREDITS)
+                        <div className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 border border-primary/25 rounded-full text-xs font-black uppercase tracking-widest text-primary shadow-sm mb-1">
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <span>First in India • EU ECTS Credit Accredited</span>
+                        </div>
+                        <p className="text-gray-300 text-base md:text-xl leading-relaxed font-inter font-normal opacity-90 max-w-3xl mx-auto">
+                            Acquire industry-aligned tech and business competencies certified by premier European universities with transferable ECTS credits. SkillDad bridges academic learning with real-world corporate placements, empowering learners with globally recognized qualifications and career growth.
                         </p>
                     </motion.div>
                 </div>
