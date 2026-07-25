@@ -48,7 +48,7 @@ const ORBITALS = Array.from({ length: 8 }, (_, i) => {
     };
 });
 
-const AnimatedLogoSection = () => {
+const AnimatedLogoSection = ({ isLightMode = true }) => {
     return (
         <section className="relative py-12 md:py-16 overflow-hidden bg-transparent" style={{ perspective: "1200px" }}>
             {/* Background Glows — Static */}
@@ -129,7 +129,7 @@ const AnimatedLogoSection = () => {
                         transition={{ delay: 0.4, duration: 1 }}
                         className="space-y-6 max-w-2xl"
                     >
-                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-[-0.02em] leading-tight font-space">
+                        <h2 className={`text-3xl md:text-5xl font-black tracking-[-0.02em] leading-tight font-space ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
                             Powered by <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8A2BE2] via-[#C026FF] to-[#007BFF]">SkillDad</span>
                         </h2>
                         <div className="flex items-center justify-center space-x-4">
@@ -137,7 +137,7 @@ const AnimatedLogoSection = () => {
                             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                             <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-primary/50" />
                         </div>
-                        <p className="text-text-muted text-base md:text-xl leading-relaxed font-inter font-medium opacity-70">
+                        <p className={`text-base md:text-xl leading-relaxed font-inter font-medium ${isLightMode ? 'text-slate-700 font-semibold' : 'text-text-muted opacity-70'}`}>
                             Aquire skills from European universities with EU credits and placed globally - one of its kind for the first time India (PLACEMENT GURANTEED EUROPEAN UNIVERSITY SKILLS PROGRAMS WITH 'EU' CREDITS)
                         </p>
                     </motion.div>

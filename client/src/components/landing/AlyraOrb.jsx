@@ -9,13 +9,14 @@ import React, { useEffect, useRef } from 'react';
  * 3. Reduced blur passes on mobile devices.
  * 4. Used 'screen' blending for better performance than 'lighter' where possible.
  */
-const AlyraOrb = () => {
+const AlyraOrb = ({ isLightMode = true }) => {
     const canvasRef = useRef(null);
     const mouseRef = useRef({ targetX: 0, targetY: 0, currentX: 0, currentY: 0 });
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d', { alpha: false }); // Optimization: Disable alpha channel if opaque background
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
         let animationFrameId;
 
         const LOOP_DURATION = 8000;
@@ -26,7 +27,6 @@ const AlyraOrb = () => {
 
         const resize = () => {
             isMobile = window.innerWidth < 768;
-            // Cap DPR to 1.0 to significantly reduce pixel processing load
             const dpr = 1.0;
 
             canvas.width = window.innerWidth * dpr;
@@ -35,10 +35,15 @@ const AlyraOrb = () => {
             canvas.style.width = `${window.innerWidth}px`;
             canvas.style.height = `${window.innerHeight}px`;
 
-            // Deep satin black background foundation
             cachedBgGrad = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
-            cachedBgGrad.addColorStop(0, 'rgba(4, 2, 10, 1)');
-            cachedBgGrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+            if (isLightMode) {
+                cachedBgGrad.addColorStop(0, '#F8F9FD');
+                cachedBgGrad.addColorStop(0.5, '#F4F1FD');
+                cachedBgGrad.addColorStop(1, '#FAF8FF');
+            } else {
+                cachedBgGrad.addColorStop(0, 'rgba(4, 2, 10, 1)');
+                cachedBgGrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+            }
         };
 
         const handleMouseMove = (e) => {
@@ -52,18 +57,12 @@ const AlyraOrb = () => {
             const phaseShift = (loopT * Math.PI * 2) + phaseOffset;
 
             const points = [];
-            // Optimization: Increased step size to reduce point count (45 mobile, 30 desktop)
             const step = isMobile ? 45 : 30;
 
             for (let y = -200; y < window.innerHeight + 200; y += step) {
                 const yNorm = y / window.innerHeight;
-
-                // Pure majestic S-curve
                 const waveX = Math.sin(yNorm * 1.4 * Math.PI - (phaseShift * 0.4 * direction)) * amp;
-
-                // Organic slant
                 const slantOffset = slant * (yNorm - 0.5);
-
                 const mouseShift = mouseRef.current.currentX * (0.12 + (1 - yNorm) * 0.18);
                 const x = xBase + slantOffset + waveX + mouseShift;
                 points.push({ x, y });
@@ -82,7 +81,6 @@ const AlyraOrb = () => {
 
         let isVisible = true;
         let lastFrameTime = 0;
-        // Target ~45fps (22ms) on desktop, ~30fps (33ms) on mobile to reduce CPU pressure
         const FRAME_BUDGET = isMobile ? 33 : 22;
 
         const render = (timestamp = 0) => {
@@ -91,7 +89,6 @@ const AlyraOrb = () => {
                 return;
             }
 
-            // Frame throttle — skip frame if budget not elapsed
             if (timestamp - lastFrameTime < FRAME_BUDGET) {
                 animationFrameId = requestAnimationFrame(render);
                 return;
@@ -102,26 +99,24 @@ const AlyraOrb = () => {
             mouseRef.current.currentX += (mouseRef.current.targetX - mouseRef.current.currentX) * 0.04;
             mouseRef.current.currentY += (mouseRef.current.targetY - mouseRef.current.currentY) * 0.04;
 
-            ctx.fillStyle = cachedBgGrad || '#000';
+            ctx.fillStyle = cachedBgGrad || (isLightMode ? '#F8F9FD' : '#000');
             ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
             ctx.save();
 
-            // Subtle camera movement
             const camOsc = Math.sin(currentTime * 0.0006) * 12;
             ctx.translate(camOsc, 0);
 
             const areaWidth = window.innerWidth * 0.15;
 
             const configs = [
-                { x: window.innerWidth - areaWidth * 0.7, slant: 60, amp: areaWidth * 0.6, color: '#e000ff', dir: 1, phase: 0 },
-                { x: window.innerWidth - areaWidth * 0.3, slant: -60, amp: areaWidth * 0.5, color: '#0084ff', dir: -1, phase: Math.PI }
+                { x: window.innerWidth - areaWidth * 0.7, slant: 60, amp: areaWidth * 0.6, color: '#9333ea', dir: 1, phase: 0 },
+                { x: window.innerWidth - areaWidth * 0.3, slant: -60, amp: areaWidth * 0.5, color: '#3b82f6', dir: -1, phase: Math.PI }
             ];
 
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            // 'lighter' is expensive, consider reducing usage or switching to screen if possible, but lighter looks best for glowing energy
-            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalCompositeOperation = isLightMode ? 'source-over' : 'lighter';
 
             configs.forEach(cfg => {
                 const mainPath = generateRibbonPath(cfg.x, cfg.slant, cfg.amp, currentTime, cfg.dir, cfg.phase);

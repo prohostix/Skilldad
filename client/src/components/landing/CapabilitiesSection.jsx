@@ -30,21 +30,21 @@ if (typeof document !== 'undefined' && !injected) {
     document.head.appendChild(st);
 }
 
-const AnimatedText = ({ text }) => {
+const AnimatedText = ({ text, isLightMode = true }) => {
     return (
         <motion.h3
             initial={{ opacity: 0, x: -10 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="text-lg md:text-xl font-bold text-white font-space tracking-tight group-hover/cap:text-primary transition-colors flex flex-wrap"
+            className={`text-lg md:text-xl font-bold font-space tracking-tight group-hover/cap:text-primary transition-colors flex flex-wrap ${isLightMode ? 'text-slate-900' : 'text-white'}`}
         >
             {text}
         </motion.h3>
     );
 };
 
-const CapabilitiesSection = () => {
+const CapabilitiesSection = ({ isLightMode = true }) => {
     const sectionRef = useRef(null);
 
     const { scrollYProgress } = useScroll({
@@ -99,7 +99,7 @@ const CapabilitiesSection = () => {
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] font-jakarta"
+                        className={`text-3xl md:text-5xl lg:text-6xl font-black leading-[1.1] font-jakarta ${isLightMode ? 'text-slate-900' : 'text-white'}`}
                     >
                         Intelligent Tools <br />
                         For <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-accent">Dynamic</span> Teams
@@ -115,7 +115,7 @@ const CapabilitiesSection = () => {
                         <ModernButton className="!px-8 !py-3 font-black uppercase tracking-widest text-[10px]">
                             Explore
                         </ModernButton>
-                        <button className="flex items-center space-x-2 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[8px] hover:bg-white/10 transition-all group">
+                        <button className={`flex items-center space-x-2 px-8 py-3 rounded-full border font-black uppercase tracking-widest text-[8px] transition-all group ${isLightMode ? 'bg-white/90 border-purple-200 text-slate-900 hover:bg-white hover:border-primary shadow-sm' : 'bg-white/5 border-white/10 text-white hover:bg-white/10'}`}>
                             <span>Demo</span>
                             <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                         </button>
@@ -126,7 +126,7 @@ const CapabilitiesSection = () => {
                 <div className="relative pl-12 md:pl-24 py-12">
                     {/* Vertical Line Container */}
                     <div className="absolute left-4 md:left-10 top-0 bottom-0 w-[2px]">
-                        <div className="absolute inset-0 bg-white/10 rounded-full" />
+                        <div className={`absolute inset-0 rounded-full ${isLightMode ? 'bg-purple-200' : 'bg-white/10'}`} />
 
                         <motion.div
                             style={{
@@ -137,7 +137,6 @@ const CapabilitiesSection = () => {
                             className="absolute inset-0 z-10 rounded-full overflow-hidden"
                         >
                             <div className="absolute inset-0 bg-gradient-to-b from-[#6D28FF] via-[#C026FF] to-[#6D28FF]" />
-                            {/* Static Glow instead of heavy Blur */}
                             <div className="absolute inset-0 bg-primary/20 blur-[2px]" />
                         </motion.div>
 
@@ -160,20 +159,20 @@ const CapabilitiesSection = () => {
                                     whileInView={{ scale: 1, opacity: 1 }}
                                     viewport={{ once: true, margin: "-100px" }}
                                     transition={{ duration: 0.5, delay: 0.1 }}
-                                    className="absolute left-[-28px] md:left-[-50px] top-0 w-8 md:w-10 h-8 md:h-10 rounded-full bg-[#05030B] border border-white/10 z-20 flex items-center justify-center group-hover/cap:border-primary group-hover/cap:bg-primary/5 transition-all duration-500 shadow-2xl"
+                                    className={`absolute left-[-28px] md:left-[-50px] top-0 w-8 md:w-10 h-8 md:h-10 rounded-full border z-20 flex items-center justify-center transition-all duration-500 shadow-2xl ${isLightMode ? 'bg-white border-purple-200 group-hover/cap:border-primary group-hover/cap:bg-purple-50' : 'bg-[#05030B] border-white/10 group-hover/cap:border-primary group-hover/cap:bg-primary/5'}`}
                                 >
-                                    <cap.icon size={16} className="text-white group-hover/cap:text-primary transition-colors" />
+                                    <cap.icon size={16} className={isLightMode ? "text-slate-800 group-hover/cap:text-primary transition-colors" : "text-white group-hover/cap:text-primary transition-colors"} />
                                 </motion.div>
 
                                 <div className="pl-6 md:pl-8 space-y-3">
-                                    <AnimatedText text={cap.title} />
+                                    <AnimatedText text={cap.title} isLightMode={isLightMode} />
 
                                     <motion.p
                                         initial={{ opacity: 0, y: 10 }}
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true, margin: "-100px" }}
                                         transition={{ delay: 0.4 }}
-                                        className="text-text-secondary text-xs md:text-sm leading-relaxed max-w-sm font-inter opacity-60 group-hover/cap:opacity-100 transition-opacity"
+                                        className={`text-xs md:text-sm leading-relaxed max-w-sm font-inter transition-opacity ${isLightMode ? 'text-slate-700 font-medium' : 'text-text-secondary opacity-60 group-hover/cap:opacity-100'}`}
                                     >
                                         {cap.desc}
                                     </motion.p>
