@@ -385,10 +385,10 @@ const LandingPage = () => {
             </section>
 
             {/* Service Synergy - Feature Grid */}
-            <section id="features" className="py-8 md:py-12 bg-transparent relative overflow-hidden px-6 section-optimize">
+            <section id="features" className="py-2 md:py-4 bg-transparent relative overflow-hidden px-6 section-optimize">
 
                 <div className="max-w-7xl mx-auto relative z-10 w-full">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center mb-12 sm:mb-24">
+                    <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
                         {/* Left Side - Text Content */}
                         <div className="text-center lg:text-left">
                             <motion.div
@@ -426,7 +426,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1, delay: 0.3 }}
-                            className="hidden lg:block h-[400px] gpu-accelerated"
+                            className="hidden lg:block h-[320px] gpu-accelerated"
                         >
                             <Animated3DShape />
                         </motion.div>
@@ -435,7 +435,7 @@ const LandingPage = () => {
             </section>
 
             {/* Featured Courses Section */}
-            <section id="courses" className="relative pt-16 md:pt-24 pb-0 px-6 z-10 section-optimize">
+            <section id="courses" className="relative pt-6 md:pt-10 pb-0 px-6 z-10 section-optimize">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12 md:mb-20 space-y-4">
                         <motion.div
