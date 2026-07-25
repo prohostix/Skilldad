@@ -4,9 +4,8 @@ import { motion } from 'framer-motion';
 import { 
     Rocket, Globe, Award, Users, Book, Target, Linkedin, Loader2, 
     Activity, CheckCircle2, Briefcase, GraduationCap, Zap, ShieldCheck, 
-    TrendingUp, Sparkles, ArrowRight, Laptop, Layers
+    TrendingUp, Sparkles, ArrowRight, Laptop, Layers, Building2
 } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
@@ -36,98 +35,203 @@ const floatAnimation = {
     }
 };
 
-const TeamCard = ({ member }) => (
-    <motion.div
-        variants={fadeInUp}
-        whileHover={{ y: -8, scale: 1.02 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-    >
-        <GlassCard className="relative group overflow-hidden flex flex-col items-center text-center p-6 lg:p-8 !bg-[#0A0A10]/90 backdrop-blur-xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-2xl hover:shadow-[0_0_30px_rgba(192,38,255,0.15)] h-full">
-            {/* Background Glow on Hover */}
-            <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-            
-            {/* Image Section */}
-            <div className="relative mb-6 w-full flex justify-center">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 bg-primary/30 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full p-1 border-2 border-white/10 group-hover:border-primary/50 transition-all duration-500 relative z-10 overflow-hidden bg-[#0A0A10]">
-                    <img
-                        src={
-                            (member.imageUrl || member.image) 
-                                ? ( (member.imageUrl || member.image).startsWith('http') 
-                                    ? (member.imageUrl || member.image) 
-                                    : `${axios.defaults.baseURL || ''}${member.imageUrl || member.image}` )
-                                : `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=200&background=5B5CFF&color=fff&bold=true`
-                        }
-                        alt={member.name}
-                        className="w-full h-full object-cover rounded-full transform group-hover:scale-105 transition-all duration-700"
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=200&background=5B5CFF&color=fff&bold=true`;
-                        }}
-                    />
-                </div>
-            </div>
+// ── ELABORATED EXECUTIVE LEADERSHIP CARD (BIG IMAGE & DETAILED NARRATIVE) ──
+const ExecutiveLeadershipCard = ({ member }) => {
+    const memberName = member.name || member.title || 'Executive Leader';
+    const memberRole = member.role || member.title || 'Leadership';
+    const memberImg = member.imageUrl || member.image || member.logo;
+    const linkedinUrl = member.linkedinUrl || member.linkedin_url;
 
-            {/* Info Section */}
-            <div className="relative z-10 w-full mb-3 flex-grow flex flex-col items-center">
-                <h3 className="text-lg md:text-xl font-black text-white mb-1.5 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-primary-light transition-all duration-500">{member.name}</h3>
-                <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-primary/90 mb-1.5">{member.role}</p>
-                
-                {member.university && (
-                    <div className="mt-3 pt-3 border-t border-white/5 w-full">
-                        <p className="text-[9px] uppercase tracking-widest font-bold text-white/40 leading-relaxed italic">
-                            {member.university}
+    // Default bios if not provided in database
+    const getExecutiveBio = () => {
+        if (member.bio && member.bio.trim().length > 10) return member.bio;
+        if (memberName.toLowerCase().includes('basil')) {
+            return "Visionary global educational leader orchestrating SkillDad's strategic university alliances, international expansion, and enterprise placement ecosystem. Championing outcome-driven higher education across global academic & industry markets.";
+        }
+        if (memberName.toLowerCase().includes('dilshad')) {
+            return "Driving SkillDad's core platform innovation, curriculum engineering, and corporate hiring partnerships. Dedicated to transforming student potential into high-growth tech and business careers through practical hands-on mastery.";
+        }
+        return "Guiding the strategic alignment of SkillDad's academic matrix, industry partnership networks, and student career placement initiatives.";
+    };
+
+    const getPillars = () => {
+        if (memberName.toLowerCase().includes('basil')) {
+            return [
+                'Global Academic Alliances',
+                'University Degree Integration',
+                'Enterprise Placement Ecosystem'
+            ];
+        }
+        if (memberName.toLowerCase().includes('dilshad')) {
+            return [
+                'Skill-First Learning Architecture',
+                'Corporate Hiring Networks',
+                'Practical Curriculum Mastery'
+            ];
+        }
+        return [
+            'Academic Governance',
+            'Industry Curriculum Alignment',
+            'Student Placement Matrix'
+        ];
+    };
+
+    const pillars = getPillars();
+
+    return (
+        <motion.div
+            variants={fadeInUp}
+            whileHover={{ y: -8, scale: 1.01 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="h-full"
+        >
+            <GlassCard className="relative group overflow-hidden flex flex-col p-6 sm:p-8 lg:p-10 !bg-[#0A0A12]/95 backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-2xl hover:shadow-[0_0_50px_rgba(192,38,255,0.2)] h-full">
+                {/* Glow backdrop */}
+                <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none"></div>
+
+                {/* Top Image Frame — BIG IMAGE */}
+                <div className="relative w-full h-72 sm:h-80 md:h-96 rounded-2xl overflow-hidden mb-6 border border-white/10 group-hover:border-primary/40 transition-all duration-500 bg-[#06040B] flex items-center justify-center shrink-0">
+                    {memberImg ? (
+                        <img
+                            src={memberImg.startsWith('http') ? memberImg : `${axios.defaults.baseURL || ''}${memberImg}`}
+                            alt={memberName}
+                            className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.style.display = 'none';
+                                if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
+                        />
+                    ) : null}
+
+                    {/* High-Impact Fallback Initial Avatar */}
+                    <div 
+                        className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 via-[#C026FF]/20 to-[#0A0A12] border border-primary/20 ${memberImg ? 'hidden' : 'flex'}`}
+                    >
+                        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-primary/20 border-2 border-primary/40 flex items-center justify-center text-primary font-black text-4xl sm:text-5xl font-space shadow-2xl shadow-primary/30 mb-2">
+                            {memberName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
+                            Executive Leadership
+                        </span>
+                    </div>
+
+                    {/* Gradient Overlay at Bottom of Image */}
+                    <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/60 to-transparent pointer-events-none" />
+                    
+                    {/* Organization Tag */}
+                    <div className="absolute top-4 left-4 px-3.5 py-1.5 bg-black/75 backdrop-blur-md border border-white/15 rounded-full text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+                        <Building2 size={13} className="text-primary" />
+                        <span>{member.university || 'SKILLDAD GLOBAL'}</span>
+                    </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="space-y-5 flex-grow flex flex-col justify-between">
+                    <div>
+                        {/* Role Pill */}
+                        <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider mb-3">
+                            <ShieldCheck size={13} />
+                            <span>{memberRole}</span>
+                        </div>
+
+                        {/* Name */}
+                        <h3 className="text-2xl sm:text-3xl font-black text-white font-space leading-snug group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:via-primary-light group-hover:to-primary transition-all duration-500">
+                            {memberName}
+                        </h3>
+
+                        {/* Bio */}
+                        <p className="text-xs sm:text-sm text-gray-300 font-inter leading-relaxed mt-3 font-normal">
+                            {getExecutiveBio()}
                         </p>
                     </div>
-                )}
-                
-                {member.bio && (
-                    <p className="text-xs text-gray-400 font-inter leading-relaxed px-2 line-clamp-3 group-hover:line-clamp-none transition-all duration-500 mt-3">
-                        {member.bio}
-                    </p>
-                )}
-            </div>
 
-            {/* Social Link */}
-            {member.linkedinUrl && (
-                <div className="mt-auto pt-5 w-full flex justify-center border-t border-white/5 relative z-10">
-                    <a 
-                        href={member.linkedinUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="p-2.5 bg-white/5 rounded-xl text-white/40 hover:text-white hover:bg-[#0077B5] hover:shadow-[0_0_15px_rgba(0,119,181,0.5)] transition-all duration-300 transform hover:scale-110"
-                    >
-                        <Linkedin size={16} fill="currentColor" stroke="none" />
-                    </a>
+                    {/* Key Pillars */}
+                    <div className="space-y-3 pt-4 border-t border-white/10">
+                        <span className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-400 block">Strategic Focus & Leadership</span>
+                        <div className="flex flex-wrap gap-2">
+                            {pillars.map((pillar, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-white/[0.03] border border-white/10 rounded-lg text-[11px] font-semibold text-gray-300 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                    {pillar}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Quote Box */}
+                    <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 italic text-xs text-gray-400 font-inter leading-relaxed flex items-start gap-2">
+                        <span className="text-primary font-serif text-lg leading-none">“</span>
+                        <span>Championing outcome-based skill development to ensure every student achieves high-impact career growth.</span>
+                    </div>
+
+                    {/* LinkedIn Button */}
+                    {linkedinUrl ? (
+                        <div className="pt-4 border-t border-white/5">
+                            <a
+                                href={linkedinUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full py-3 bg-white/5 hover:bg-[#0077B5] hover:text-white text-gray-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-white/10 hover:border-[#0077B5] transition-all shadow-md group/btn"
+                            >
+                                <Linkedin size={16} fill="currentColor" stroke="none" />
+                                <span>Connect on LinkedIn</span>
+                            </a>
+                        </div>
+                    ) : (
+                        <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
+                            <span>SkillDad Executive Board</span>
+                            <span className="text-primary font-black">● Active Director</span>
+                        </div>
+                    )}
                 </div>
-            )}
-        </GlassCard>
-    </motion.div>
-);
+            </GlassCard>
+        </motion.div>
+    );
+};
 
 const AboutUs = () => {
     const [team, setTeam] = React.useState([]);
     const [cms, setCms] = React.useState({});
-    const [loading, setLoading] = React.useState(true);
+    const [loading, setLoading] = React.useState(false);
 
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                setLoading(true);
                 const [teamRes, cmsRes] = await Promise.all([
                     axios.get('/api/public/directors'),
                     axios.get('/api/public/cms/about_us')
                 ]);
-                setTeam(teamRes.data);
-                setCms(cmsRes.data);
-                setLoading(false);
+                setTeam(teamRes.data || []);
+                setCms(cmsRes.data || {});
             } catch (err) {
                 console.error('Failed to fetch data:', err);
-                setLoading(false);
             }
         };
         fetchData();
     }, []);
+
+    // Fallback static leaders if server list is empty
+    const staticDirectors = [
+        {
+            _id: 'dir_1',
+            name: 'Dr. Basil Thomas',
+            role: 'GROUP CEO & DIRECTOR',
+            university: 'SKILLDAD GLOBAL',
+            bio: "Visionary global educational leader orchestrating SkillDad's strategic university alliances, international expansion, and enterprise placement ecosystem. Championing outcome-driven higher education across global academic & industry markets."
+        },
+        {
+            _id: 'dir_2',
+            name: 'Dilshad Ashraf',
+            role: 'CEO',
+            university: 'SKILLDAD',
+            bio: "Driving SkillDad's core platform innovation, curriculum engineering, and corporate hiring partnerships. Dedicated to transforming student potential into high-growth tech and business careers through practical hands-on mastery."
+        }
+    ];
+
+    const fetchedDirectors = team.filter(m => m.display_target === 'ABOUT_DIRECTOR' || (!m.display_target && (m.category === 'DIRECTOR' || !m.category)));
+    const directors = fetchedDirectors.length > 0 ? fetchedDirectors : staticDirectors;
+    const advisory = team.filter(m => m.display_target === 'ABOUT_ADVISORY' || (!m.display_target && m.category === 'ADVISORY'));
 
     if (loading) {
         return (
@@ -141,9 +245,6 @@ const AboutUs = () => {
             </div>
         );
     }
-
-    const directors = team.filter(m => m.display_target === 'ABOUT_DIRECTOR' || (!m.display_target && (m.category === 'DIRECTOR' || !m.category)));
-    const advisory = team.filter(m => m.display_target === 'ABOUT_ADVISORY' || (!m.display_target && m.category === 'ADVISORY'));
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] overflow-hidden text-white">
@@ -211,7 +312,6 @@ const AboutUs = () => {
                             <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                                {/* Left Info Column */}
                                 <div className="lg:col-span-5 space-y-5">
                                     <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-lg shadow-primary/20">
                                         <Rocket size={28} strokeWidth={2.5} />
@@ -233,7 +333,6 @@ const AboutUs = () => {
                                     </div>
                                 </div>
 
-                                {/* Right Cards Grid Column */}
                                 <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {[
                                         {
@@ -285,7 +384,6 @@ const AboutUs = () => {
                             <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                                {/* Right Info Column (Swapped layout for visual rhythm) */}
                                 <div className="lg:col-span-5 space-y-5 lg:order-2">
                                     <div className="w-14 h-14 rounded-2xl bg-[#C026FF]/20 border border-[#C026FF]/40 flex items-center justify-center text-[#C026FF] shadow-lg shadow-[#C026FF]/20">
                                         <Globe size={28} strokeWidth={2.5} />
@@ -307,7 +405,6 @@ const AboutUs = () => {
                                     </div>
                                 </div>
 
-                                {/* Left Cards Grid Column */}
                                 <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:order-1">
                                     {[
                                         {
@@ -359,7 +456,6 @@ const AboutUs = () => {
                             <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="space-y-10">
-                                {/* Top Header */}
                                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-3">
@@ -377,7 +473,6 @@ const AboutUs = () => {
                                     </p>
                                 </div>
 
-                                {/* 4 Pillars Grid */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                     {[
                                         {
@@ -491,35 +586,29 @@ const AboutUs = () => {
                 </div>
             </section>
 
-
-
-            {/* ── DIRECTORS & CEO SECTION ── */}
+            {/* ── EXECUTIVE LEADERSHIP SECTION (ELABORATED WITH BIG IMAGES) ── */}
             {directors.length > 0 && (
-                <section className="py-16 md:py-24 px-4 md:px-6 relative border-t border-white/5">
+                <section className="py-20 md:py-32 px-4 md:px-6 relative border-t border-white/5">
                     <div className="max-w-7xl mx-auto">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6 }}
-                            className="text-center mb-12"
+                            className="text-center mb-16 space-y-3"
                         >
-                            <span className="text-xs font-black uppercase tracking-[0.3em] text-primary">Executive Leadership</span>
-                            <h2 className="text-3xl md:text-5xl font-black text-white font-space mt-2 mb-4 uppercase tracking-tighter">
-                                {cms.directors_header?.title && cms.directors_header.title.includes(' ') ? (
-                                    <>
-                                        {cms.directors_header.title.split(' ').slice(0, -1).join(' ')} <span className="text-primary">{cms.directors_header.title.split(' ').slice(-1)}</span>
-                                    </>
-                                ) : (
-                                    <span className="text-primary">{cms.directors_header?.title || 'Directors & CEO'}</span>
-                                )}
+                            <div className="inline-flex items-center space-x-2 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[10px] font-black uppercase tracking-[0.3em]">
+                                <ShieldCheck size={14} />
+                                <span>Executive Leadership</span>
+                            </div>
+
+                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white font-space tracking-tight leading-tight uppercase">
+                                SkillDad <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-light">Coordinates With</span>
                             </h2>
-                            {cms.directors_header?.subtitle && (
-                                <p className="text-sm md:text-base text-gray-400 font-inter max-w-2xl mx-auto mb-6 italic leading-relaxed">
-                                    "{cms.directors_header.subtitle}"
-                                </p>
-                            )}
-                            <div className="h-1.5 w-16 bg-gradient-to-r from-primary to-transparent mx-auto rounded-full mt-4"></div>
+                            <p className="text-sm md:text-base text-gray-300 font-inter max-w-2xl mx-auto leading-relaxed">
+                                Visionary executive leadership guiding the nexus of global institutional excellence, corporate partnerships, and student placement success.
+                            </p>
+                            <div className="h-1.5 w-20 bg-gradient-to-r from-primary via-[#C026FF] to-transparent mx-auto rounded-full mt-4"></div>
                         </motion.div>
 
                         <motion.div 
@@ -527,10 +616,10 @@ const AboutUs = () => {
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: true, margin: "-50px" }}
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto"
                         >
                             {directors.map((member) => (
-                                <TeamCard key={member._id} member={member} />
+                                <ExecutiveLeadershipCard key={member._id || member.name} member={member} />
                             ))}
                         </motion.div>
                     </div>
@@ -571,10 +660,10 @@ const AboutUs = () => {
                             initial="hidden"
                             whileInView="visible"
                             viewport={{ once: true, margin: "-50px" }}
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto"
                         >
                             {advisory.map((member) => (
-                                <TeamCard key={member._id} member={member} />
+                                <ExecutiveLeadershipCard key={member._id || member.name} member={member} />
                             ))}
                         </motion.div>
                     </div>
