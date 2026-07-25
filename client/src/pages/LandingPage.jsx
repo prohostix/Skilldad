@@ -355,40 +355,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* Institutional Pulse - Real-time Stats Visualization */}
-            <section className="relative pb-4 pt-4 px-6 section-optimize">
-                <div className="max-w-7xl mx-auto px-0 md:px-6 relative z-10 w-full overflow-hidden">
-                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                        {[
-                            { label: 'Neural Scholars', value: '1.2M+', icon: Users },
-                            { label: 'Global Intuition', value: '99.4%', icon: Globe },
-                            { label: 'Sync Resilience', value: '24/7', icon: Zap },
-                            { label: 'Institutional AP', value: '150+', icon: Activity }
-                        ].map((stat, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-150px" }}
-                                transition={{ delay: i * 0.03, duration: 0.25 }}
-                            >
-                                <GlassCard className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-6 text-left hover:shadow-glow-purple">
-                                    <div className="flex items-center space-x-2 sm:space-x-4 mb-4 w-full">
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[20px] bg-primary/20 text-primary flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-2xl border border-primary/30 group-hover:border-primary/50">
-                                            <stat.icon size={20} />
-                                        </div>
-                                        <div className="h-[1px] flex-1 bg-white/10 group-hover:bg-primary/30 transition-all"></div>
-                                    </div>
-                                    <h3 className="text-xl sm:text-2xl font-black text-white font-inter-tight mb-1 tracking-tighter">
-                                        <CountingNumber value={stat.value} />
-                                    </h3>
-                                    <p className="text-[8px] sm:text-[10px] font-black text-text-muted uppercase tracking-[0.2em] font-inter">{stat.label}</p>
-                                </GlassCard>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
+
 
             {/* Service Synergy - Feature Grid */}
             <section id="features" className="py-2 md:py-4 bg-transparent relative overflow-hidden px-6 section-optimize">
