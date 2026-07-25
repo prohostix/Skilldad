@@ -491,27 +491,7 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* ── IMPACT & PLATFORM STATS ── */}
-            <section className="py-16 md:py-24 px-4 md:px-6 relative">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[
-                            { value: '1.2M+', label: 'Active Students & Alumni', icon: Users, color: '#5B5CFF' },
-                            { value: '450+', label: 'University & Hiring Partners', icon: GraduationCap, color: '#C026FF' },
-                            { value: '94%', label: 'Career Placement Rate', icon: Target, color: '#10B981' },
-                            { value: '200+', label: 'Specialized Skill Programs', icon: Book, color: '#3B82F6' }
-                        ].map((stat, idx) => (
-                            <GlassCard key={idx} className="p-6 md:p-8 text-center flex flex-col items-center justify-center border-white/10 hover:border-primary/40 transition-all rounded-3xl">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4 border" style={{ backgroundColor: `${stat.color}15`, borderColor: `${stat.color}30`, color: stat.color }}>
-                                    <stat.icon size={24} />
-                                </div>
-                                <h3 className="text-3xl md:text-4xl font-black text-white font-space mb-1">{stat.value}</h3>
-                                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{stat.label}</p>
-                            </GlassCard>
-                        ))}
-                    </div>
-                </div>
-            </section>
+
 
             {/* ── DIRECTORS & CEO SECTION ── */}
             {directors.length > 0 && (

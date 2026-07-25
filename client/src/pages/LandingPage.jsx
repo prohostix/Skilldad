@@ -21,9 +21,7 @@ import {
     TrendingUp,
     Zap,
     Book,
-    Building2,
-    Sun,
-    Moon
+    Building2
 } from 'lucide-react';
 import axios from 'axios';
 import ModernButton from '../components/ui/ModernButton';
@@ -42,7 +40,6 @@ import { getMediaUrl } from '../utils/media';
 
 const LandingPage = () => {
     const navigate = useNavigate();
-    const [isLightMode, setIsLightMode] = useState(true);
     const [dynamicDirectors, setDynamicDirectors] = useState([]);
     const [dynamicLogos, setDynamicLogos] = useState([]);
     const [featuredCourses, setFeaturedCourses] = useState([]);
@@ -285,17 +282,13 @@ const LandingPage = () => {
     // No need to enrich logos - they're already complete in the static arrays
 
     return (
-        <div className={`min-h-screen selection:bg-primary/30 relative overflow-x-hidden transition-colors duration-500 ${
-            isLightMode 
-                ? 'bg-[#F8F9FD] text-slate-900' 
-                : 'bg-black text-text-primary'
-        }`}>
+        <div className="min-h-screen selection:bg-primary/30 relative overflow-x-hidden text-text-primary bg-black">
             <Navbar />
 
-            <HeroSection isLightMode={isLightMode} />
+            <HeroSection />
 
-            <CapabilitiesSection isLightMode={isLightMode} />
-            <AnimatedLogoSection isLightMode={isLightMode} />
+            <CapabilitiesSection />
+            <AnimatedLogoSection />
 
             {/* Hiring Partners Marquee Banner */}
             <section className="relative py-16 md:py-20 overflow-hidden bg-transparent z-10 section-optimize">
@@ -304,7 +297,7 @@ const LandingPage = () => {
                     <motion.h2
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        className={isLightMode ? "text-base md:text-xl font-black text-slate-900 font-jakarta tracking-tight uppercase break-words" : "text-base md:text-xl font-black text-white font-jakarta tracking-tight uppercase break-words"}
+                        className="text-base md:text-xl font-black text-white font-jakarta tracking-tight uppercase break-words"
                     >
                         Companies That <span className="text-primary block sm:inline mt-1 sm:mt-0">Trust SkillDad</span>
                     </motion.h2>
@@ -317,23 +310,23 @@ const LandingPage = () => {
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className={isLightMode ? "px-4 s:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-md rounded-xl border border-purple-200/60 shadow-md shadow-purple-500/5 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14" : "px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-primary/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14"}>
+                                <div className="px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-primary/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14">
                                     {company.logo ? (
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            className={isLightMode ? "h-5 sm:h-7 w-auto object-contain opacity-80 group-hover:opacity-100 transition-all duration-500" : "h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"}
+                                            className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
-                                        <span className={isLightMode ? "text-slate-800 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap" : "text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors"}>{company.name}</span>
+                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
                     {/* Edge fades */}
-                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-transparent to-transparent z-10 pointer-events-none" />
-                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-transparent to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
                 </div>
 
                 {/* Row 2 — Scrolls Right */}
@@ -342,20 +335,23 @@ const LandingPage = () => {
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="mx-8 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-purple-400/40 group-hover:bg-purple-400 transition-colors" />
-                                <div className={isLightMode ? "px-4 s:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-md rounded-xl border border-purple-200/60 shadow-md shadow-purple-500/5 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14" : "px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-purple-400/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14"}>
+                                <div className="px-4 s:px-6 py-2.5 sm:py-3 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 group-hover:border-purple-400/50 transition-all duration-300 group-hover:bg-white/10 flex items-center justify-center min-w-[120px] sm:min-w-[140px] h-12 sm:h-14">
                                     {company.logo ? (
                                         <img
                                             src={company.logo}
                                             alt={company.name}
-                                            className={isLightMode ? "h-5 sm:h-7 w-auto object-contain opacity-80 group-hover:opacity-100 transition-all duration-500" : "h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"}
+                                            className="h-5 sm:h-7 w-auto object-contain brightness-0 invert opacity-60 group-hover:opacity-100 transition-all duration-500"
                                         />
                                     ) : (
-                                        <span className={isLightMode ? "text-slate-800 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap" : "text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors"}>{company.name}</span>
+                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
                                     )}
                                 </div>
                             </div>
                         ))}
                     </div>
+                    {/* Edge fades */}
+                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
                 </div>
             </section>
 
@@ -430,7 +426,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.7, delay: 0.1 }}
-                            className={isLightMode ? "text-lg sm:text-2xl font-black text-slate-900 font-jakarta tracking-tight" : "text-lg sm:text-2xl font-black text-white font-jakarta tracking-tight"}
+                            className="text-lg sm:text-2xl font-black text-white font-jakarta tracking-tight"
                         >
                             Master the <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Future Matrix</span>
                         </motion.h2>
@@ -439,7 +435,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.7, delay: 0.2 }}
-                            className={isLightMode ? "text-slate-600 max-w-2xl mx-auto font-inter text-base md:text-lg font-medium" : "text-text-secondary max-w-2xl mx-auto font-inter text-base md:text-lg"}
+                            className="text-text-secondary max-w-2xl mx-auto font-inter text-base md:text-lg"
                         >
                             Experience high-fidelity learning with our industry-leading certification tracks.
                         </motion.p>
@@ -468,13 +464,13 @@ const LandingPage = () => {
                                     key={i}
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true, margin: "-100px" }}
-                                    transition={{ delay: i * 0.05, duration: 0.3 }}
+                                    viewport={{ once: true, margin: "-150px" }}
+                                    transition={{ delay: i * 0.03, duration: 0.25 }}
                                     whileHover={{ y: -6 }}
                                     className="h-full"
                                 >
                                     <GlassCard
-                                        className={isLightMode ? "!bg-white/90 border-purple-200/60 shadow-xl shadow-purple-500/5 hover:border-primary/50 text-slate-900 transition-all duration-300 h-full group flex flex-col items-start p-6 text-left cursor-pointer" : "!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-6 text-left hover:shadow-glow-purple cursor-pointer"}
+                                        className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-6 text-left hover:shadow-glow-purple cursor-pointer"
                                         onClick={() => c._id && navigate(`/course/${c._id}`)}
                                     >
                                         <div className="w-12 h-12 rounded-[20px] bg-primary/20 text-primary flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-105 shadow-2xl border border-primary/30 group-hover:border-primary/50">
@@ -483,7 +479,7 @@ const LandingPage = () => {
                                         <div className="flex flex-col mb-3">
                                             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-1 block">{c.category}</span>
                                             <div className="flex flex-col">
-                                                <p className={isLightMode ? "text-[9px] font-black text-slate-700 uppercase tracking-widest leading-none" : "text-[9px] font-black text-white/50 uppercase tracking-widest leading-none"}>
+                                                <p className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none">
                                                     {c.instructorName || c.instructor?.name || 'Academic Lead'}
                                                 </p>
                                                 {(c.universityName || c.instructor?.profile?.universityName || (c.instructor?.role === 'university' && c.instructor?.name)) && (
@@ -493,8 +489,8 @@ const LandingPage = () => {
                                                 )}
                                             </div>
                                         </div>
-                                        <h3 className={isLightMode ? "text-lg font-bold text-slate-900 mb-4 group-hover:text-primary transition-colors font-poppins" : "text-lg font-bold text-white mb-4 group-hover:text-primary transition-colors font-poppins"}>{c.title}</h3>
-                                        <p className={isLightMode ? "text-slate-600 font-inter text-sm leading-relaxed mb-6 font-medium line-clamp-2" : "text-text-secondary font-inter text-sm leading-relaxed mb-6 opacity-80 group-hover:opacity-100 transition-opacity line-clamp-2"}>
+                                        <h3 className="text-lg font-bold text-white mb-4 group-hover:text-primary transition-colors font-poppins">{c.title}</h3>
+                                        <p className="text-text-secondary font-inter text-sm leading-relaxed mb-6 opacity-80 group-hover:opacity-100 transition-opacity line-clamp-2">
                                             {c.description || `Experience high-fidelity education in ${c.category} with our institutional track.`}
                                         </p>
                                         <div className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-end group/link">
@@ -526,6 +522,12 @@ const LandingPage = () => {
                         >
                             Explore Full Catalog
                         </ModernButton>
+                        <button
+                            onClick={() => navigate('/support')}
+                            className="font-black text-[10px] uppercase tracking-widest text-text-secondary hover:text-primary transition-colors flex items-center group"
+                        >
+                            Direct Neural Inquiry <ChevronRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                        </button>
                     </div>
                 </div>
             </section>
@@ -553,7 +555,7 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.7, delay: 0.1 }}
-                                className={isLightMode ? "text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 font-jakarta tracking-tight leading-tight" : "text-xl sm:text-2xl lg:text-3xl font-black text-white font-jakarta tracking-tight leading-tight"}
+                                className="text-xl sm:text-2xl lg:text-3xl font-black text-white font-jakarta tracking-tight leading-tight"
                             >
                                 Partnered with <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Leading Universities</span>
@@ -563,7 +565,7 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.7, delay: 0.2 }}
-                                className={isLightMode ? "text-slate-600 max-w-xl mx-auto lg:mx-0 font-inter text-base md:text-lg font-medium" : "text-text-secondary max-w-xl mx-auto lg:mx-0 font-inter text-base md:text-lg"}
+                                className="text-text-secondary max-w-xl mx-auto lg:mx-0 font-inter text-base md:text-lg"
                             >
                                 Collaborate with world-class institutions to deliver exceptional learning experiences.
                             </motion.p>
@@ -595,7 +597,7 @@ const LandingPage = () => {
                                 className="h-full"
                             >
                                 <GlassCard
-                                    className={isLightMode ? "!bg-white/90 border-purple-200/60 shadow-xl shadow-purple-500/5 hover:border-primary/50 text-slate-900 transition-all duration-300 h-full group flex flex-col items-start p-4 text-left cursor-pointer" : "!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"}
+                                    className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"
                                     onClick={() => {
                                         navigate(`/university-profile/${encodeURIComponent(uni.name)}`, { state: { university: uni } });
                                     }}
@@ -617,8 +619,8 @@ const LandingPage = () => {
                                     </div>
 
                                     {/* University Name */}
-                                    <h3 className={isLightMode ? "text-base font-bold text-slate-900 mb-1 group-hover:text-primary transition-colors font-poppins" : "text-base font-bold text-white mb-1 group-hover:text-primary transition-colors font-poppins"}>{uni.name}</h3>
-                                    <p className={isLightMode ? "text-[11px] text-slate-600 mb-3 flex items-center gap-1 font-inter font-medium" : "text-[11px] text-text-muted mb-3 flex items-center gap-1 font-inter"}>
+                                    <h3 className="text-base font-bold text-white mb-1 group-hover:text-primary transition-colors font-poppins">{uni.name}</h3>
+                                    <p className="text-[11px] text-text-muted mb-3 flex items-center gap-1 font-inter">
                                         <Globe size={11} />
                                         {uni.location}
                                     </p>
@@ -626,12 +628,12 @@ const LandingPage = () => {
                                     {/* Stats */}
                                     <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5 w-full mb-3">
                                         <div>
-                                            <p className={isLightMode ? "text-[9px] text-slate-500 uppercase tracking-wider mb-0.5 font-black" : "text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black"}>Scholars</p>
-                                            <p className={isLightMode ? "text-xs font-bold text-slate-900" : "text-xs font-bold text-white"}>{uni.students}</p>
+                                            <p className="text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black">Scholars</p>
+                                            <p className="text-xs font-bold text-white">{uni.students}</p>
                                         </div>
                                         <div>
-                                            <p className={isLightMode ? "text-[9px] text-slate-500 uppercase tracking-wider mb-0.5 font-black" : "text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black"}>Modules</p>
-                                            <p className={isLightMode ? "text-xs font-bold text-slate-900" : "text-xs font-bold text-white"}>{uni.programs}</p>
+                                            <p className="text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black">Modules</p>
+                                            <p className="text-xs font-bold text-white">{uni.programs}</p>
                                         </div>
                                     </div>
 
@@ -642,7 +644,7 @@ const LandingPage = () => {
                                         }}
                                         className="mt-auto pt-3 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer hover:bg-white/[0.02] transition-colors -mx-6 px-6"
                                     >
-                                        <span className={isLightMode ? "text-[9px] font-black text-slate-700 uppercase tracking-widest group-hover/link:text-primary transition-colors" : "text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors"}>Expand Logic</span>
+                                        <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Expand Logic</span>
                                         <ArrowRight size={14} className="text-text-muted group-hover/link:text-primary transition-all group-hover/link:translate-x-1" />
                                     </div>
                                 </GlassCard>
@@ -653,7 +655,7 @@ const LandingPage = () => {
             </section>
 
             {/* ── Managed by IITans Section ── */}
-            <section className={`relative py-16 md:py-24 px-6 z-10 overflow-hidden section-optimize ${isLightMode ? 'bg-[#F8F9FD]' : 'bg-black'}`}>
+            <section className="relative py-16 md:py-24 px-6 z-10 bg-black overflow-hidden section-optimize">
                 <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
                 
                 <div className="max-w-7xl mx-auto">
@@ -664,7 +666,7 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5 }}
-                                className="inline-flex items-center space-x-2 px-4 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-emerald-600 font-black uppercase tracking-widest text-xs"
+                                className="inline-flex items-center space-x-2 px-4 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest"
                             >
                                 <Zap size={14} />
                                 <span>Innovation Leadership</span>
@@ -674,16 +676,16 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.7, delay: 0.1 }}
-                                className={isLightMode ? "text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 font-jakarta tracking-tight leading-tight" : "text-2xl sm:text-3xl lg:text-4xl font-black text-white font-jakarta tracking-tight leading-tight"}
+                                className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-jakarta tracking-tight leading-tight"
                             >
-                                Managed by <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-primary to-primary-dark">IITans in INDIA</span>
+                                Managed by <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-primary to-primary-dark">IITans in INDIA</span>
                             </motion.h2>
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.7, delay: 0.2 }}
-                                className={isLightMode ? "text-slate-600 max-w-xl mx-auto lg:mx-0 font-inter text-base font-medium" : "text-text-secondary max-w-xl mx-auto lg:mx-0 font-inter text-base"}
+                                className="text-text-secondary max-w-xl mx-auto lg:mx-0 font-inter text-base"
                             >
                                 Our platform is architected and operated by elite graduates from India’s premier institutes, bringing industry-standard functional expertise to global education.
                             </motion.p>
@@ -705,7 +707,7 @@ const LandingPage = () => {
                                 whileHover={{ y: -12, scale: 1.02 }}
                                 className="h-full group"
                             >
-                                <GlassCard className={isLightMode ? "!bg-white/90 border-purple-200/60 shadow-xl shadow-purple-500/5 group-hover:border-primary/50 transition-all duration-500 h-full p-0 overflow-hidden text-left" : "!bg-white/[0.02] border-white/5 group-hover:border-primary/40 transition-all duration-500 h-full p-0 overflow-hidden text-left hover:shadow-2xl hover:shadow-primary/10"}>
+                                <GlassCard className="!bg-white/[0.02] border-white/5 group-hover:border-primary/40 transition-all duration-500 h-full p-0 overflow-hidden text-left hover:shadow-2xl hover:shadow-primary/10">
                                     <div className="aspect-[4/5] overflow-hidden relative">
                                         <img 
                                             src={getMediaUrl(lead.image || lead.imageUrl || lead.img)} 
@@ -713,7 +715,7 @@ const LandingPage = () => {
                                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" 
                                             onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.name)}&background=5B5CFF&color=fff&bold=true`; }}
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                                         <div className="absolute bottom-6 left-6 right-6">
                                             <div className="inline-flex items-center space-x-2 px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-[9px] font-black uppercase tracking-widest text-white mb-2">
                                                 <span className={`w-1.5 h-1.5 rounded-full bg-${lead.accent_color || lead.color || 'primary'}`} />
@@ -724,11 +726,11 @@ const LandingPage = () => {
                                         </div>
                                     </div>
                                     <div className="p-6">
-                                        <p className={isLightMode ? "text-xs text-slate-600 leading-relaxed font-inter font-medium" : "text-xs text-text-muted leading-relaxed font-inter opacity-80 group-hover:opacity-100 transition-opacity"}>
+                                        <p className="text-xs text-text-muted leading-relaxed font-inter opacity-80 group-hover:opacity-100 transition-opacity">
                                             {lead.bio || "Driving the core functional strategy and system reliability for SkillDad’s pan-India academic operations."}
                                         </p>
                                         <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
-                                            <span className={isLightMode ? "text-[9px] font-black text-slate-500 uppercase tracking-widest" : "text-[9px] font-black text-white/30 uppercase tracking-widest"}>Functional Leadership</span>
+                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Functional Leadership</span>
                                             <Activity size={14} className="text-primary/40 group-hover:text-primary transition-colors" />
                                         </div>
                                     </div>
@@ -742,6 +744,8 @@ const LandingPage = () => {
             {/* ── Student Success & Videos Section (Campus Impact) ── */}
             {cmsSettings.campus_impact?.show_section === true && (
                 <section className="relative py-16 md:py-24 px-6 z-10 bg-transparent section-optimize">
+                    <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
+                    
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-16 space-y-4">
                             <motion.div
@@ -921,7 +925,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.7 }}
-                            className={isLightMode ? "text-lg sm:text-2xl font-black text-slate-900 font-jakarta tracking-tight mb-4" : "text-lg sm:text-2xl font-black text-white font-jakarta tracking-tight mb-4"}
+                            className="text-lg sm:text-2xl font-black text-white font-jakarta tracking-tight mb-4"
                         >
                             SKILLDAD <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Cordinates With</span>
                         </motion.h2>
@@ -930,7 +934,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.7, delay: 0.1 }}
-                            className={isLightMode ? "text-slate-600 max-w-2xl mx-auto font-inter text-base font-medium" : "text-text-secondary max-w-2xl mx-auto font-inter text-base"}
+                            className="text-text-secondary max-w-2xl mx-auto font-inter text-base"
                         >
                             Visionary leadership guiding the nexus of global institutional excellence.
                         </motion.p>
@@ -947,7 +951,7 @@ const LandingPage = () => {
                                 whileHover={{ y: -10 }}
                                 className="h-full"
                             >
-                                <GlassCard className={isLightMode ? "!bg-white/90 border-purple-200/60 shadow-xl shadow-purple-500/5 hover:border-primary/50 transition-all duration-300 h-full group flex flex-col items-center p-8 text-center" : "!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-center p-8 text-center hover:shadow-glow-purple"}>
+                                <GlassCard className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-center p-8 text-center hover:shadow-glow-purple">
                                     <div className="relative mb-6">
                                         <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                         <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-primary/40 group-hover:border-primary transition-all relative">
@@ -962,11 +966,11 @@ const LandingPage = () => {
                                             />
                                         </div>
                                     </div>
-                                    <h3 className={isLightMode ? "text-lg font-bold text-slate-900 mb-2 font-poppins group-hover:text-primary transition-colors" : "text-lg font-bold text-white mb-2 font-poppins group-hover:text-primary transition-colors"}>{director.name}</h3>
+                                    <h3 className="text-lg font-bold text-white mb-2 font-poppins group-hover:text-primary transition-colors">{director.name}</h3>
                                     <p className="text-xs text-primary font-black uppercase tracking-[0.2em]">{director.role || director.title}</p>
 
                                     <div className="mt-8 pt-6 border-t border-white/5 w-full">
-                                        <p className={isLightMode ? "text-[10px] text-slate-600 leading-relaxed font-inter italic font-medium" : "text-[10px] text-text-muted leading-relaxed font-inter italic"}>
+                                        <p className="text-[10px] text-text-muted leading-relaxed font-inter italic">
                                             Guiding the strategic synchronization of SkillDad's global academic matrix.
                                         </p>
                                     </div>

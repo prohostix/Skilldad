@@ -139,10 +139,10 @@ const DiagramNode = ({ node, index }) => (
         <text
             x={node.x} y={node.y + node.r + 14}
             textAnchor="middle"
-            fill="#3B0764"
-            fontSize="10"
+            fill="rgba(210,180,255,0.7)"
+            fontSize="9"
             fontFamily="Inter, sans-serif"
-            fontWeight="900"
+            fontWeight="700"
             letterSpacing="0.07em"
         >
             {node.label}
@@ -170,14 +170,15 @@ const TravelDot = ({ from, to, delay }) => {
     );
 };
 
-/* ─── NetworkDiagram ─────────────────────────────────────────── */
-const NetworkDiagram = ({ isLightMode = true }) => (
-    <div className="absolute left-[3%] top-[45%] -translate-y-1/2 z-[10] hidden xl:block pointer-events-none">
+const NetworkDiagram = () => (
+    <div
+        className="absolute -left-28 sm:-left-10 lg:left-0 top-[40%] sm:top-[36%] md:top-[34%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
+        style={{ width: 420, height: 500 }}
+    >
         <div
-            className="relative"
             style={{
-                width: '420px',
-                height: '500px',
+                width: '100%',
+                height: '100%',
                 animation: 'hero-diagram-float 20s ease-in-out infinite'
             }}
         >
@@ -216,13 +217,13 @@ const NetworkDiagram = ({ isLightMode = true }) => (
         {/* Fade right edge to blend into hero */}
         <div
             className="absolute inset-y-0 right-0 w-20 pointer-events-none"
-            style={{ background: isLightMode ? 'linear-gradient(to right, transparent, #F8F9FD)' : 'linear-gradient(to right, transparent, #000)' }}
+            style={{ background: 'linear-gradient(to right, transparent, #000)' }}
         />
     </div>
 );
 
 /* ─── HeroSection ────────────────────────────────────────────── */
-const HeroSection = ({ isLightMode = true }) => {
+const HeroSection = () => {
     const { user } = useUser();
     const navigate = useNavigate();
     const [partners, setPartners] = React.useState([
@@ -262,16 +263,16 @@ const HeroSection = ({ isLightMode = true }) => {
     };
 
     return (
-        <section className={`relative min-h-[90vh] md:min-h-[100vh] flex items-center overflow-hidden transition-colors duration-500 ${isLightMode ? 'bg-[#F8F9FD]' : 'bg-black'}`}>
+        <section className="relative min-h-[90vh] md:min-h-[100vh] flex items-center overflow-hidden bg-transparent">
             <style dangerouslySetInnerHTML={{ __html: HERO_CSS }} />
 
             <div className="absolute inset-0 z-0 gpu-accelerated">
-                <AlyraOrb isLightMode={isLightMode} />
+                <AlyraOrb />
             </div>
 
             {/* Purple Network Diagram — left */}
             <div className="gpu-accelerated">
-                <NetworkDiagram isLightMode={isLightMode} />
+                <NetworkDiagram />
             </div>
 
             {/* Hero Content */}
@@ -291,7 +292,7 @@ const HeroSection = ({ isLightMode = true }) => {
                             aria-level="1"
                             className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-6 md:mb-8 font-space px-2 sm:px-0 text-center"
                         >
-                            <span className={isLightMode ? "text-slate-900" : "text-white"}>
+                            <span className="text-white">
                                 <span
                                     className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
                                     style={{
@@ -315,8 +316,8 @@ const HeroSection = ({ isLightMode = true }) => {
                         </div>
 
                         {/* Subtitle */}
-                        <p className={isLightMode ? "text-slate-700 font-semibold text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center" : "text-white/60 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center"}>
-                            Turn uncertainty into clarity with industry-ready <span className="text-primary font-bold">skills</span>.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with <span className="text-primary font-bold">Skilldad</span>.
+                        <p className="text-white/60 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center">
+                            Turn uncertainty into clarity with industry-ready <span className="text-primary font-semibold">skills</span>.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with <span className="text-primary font-semibold">Skilldad</span>.
                         </p>
 
                         {/* CTA Buttons */}
@@ -332,7 +333,7 @@ const HeroSection = ({ isLightMode = true }) => {
                             {!user && (
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className={isLightMode ? "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-white/90 backdrop-blur-md border-2 border-purple-200 text-slate-900 font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:bg-white hover:border-primary shadow-md active:scale-95" : "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-black/40 backdrop-blur-md border-[1.5px] border-white/20 text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:bg-white/10 hover:border-white/60 active:scale-95"}
+                                    className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-black/40 backdrop-blur-md border-[1.5px] border-white/20 text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:bg-white/10 hover:border-white/60 active:scale-95"
                                 >
                                     Login Now
                                 </button>
@@ -347,17 +348,21 @@ const HeroSection = ({ isLightMode = true }) => {
                 <div className="flex animate-scroll hover:pause-on-desktop will-change-transform" style={{ animationDuration: '150s' }}>
                     {[...partners, ...partners, ...partners].map((partner, i) => (
                         <div key={i} className="mx-6 sm:mx-16 md:mx-28 flex items-center transition-all hover:scale-110 cursor-default">
-                            <span className={isLightMode ? "text-xs xs:text-sm md:text-[22px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-slate-800 hover:text-slate-950 font-inter" : "text-xs xs:text-sm md:text-[22px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 hover:text-white font-inter"}>{partner}</span>
+                            <span className="text-xs xs:text-sm md:text-[22px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 hover:text-white font-inter">{partner}</span>
                         </div>
                     ))}
                 </div>
                 {/* Subtle edge fades */}
-                <div className={isLightMode ? "absolute inset-y-0 left-0 w-32 md:w-64 bg-gradient-to-r from-[#F8F9FD] via-[#F8F9FD]/40 to-transparent z-10 pointer-events-none" : "absolute inset-y-0 left-0 w-32 md:w-64 bg-gradient-to-r from-black via-black/40 to-transparent z-10 pointer-events-none"} />
-                <div className={isLightMode ? "absolute inset-y-0 right-0 w-32 md:w-64 bg-gradient-to-l from-[#F8F9FD] via-[#F8F9FD]/40 to-transparent z-10 pointer-events-none" : "absolute inset-y-0 right-0 w-32 md:w-64 bg-gradient-to-l from-black via-black/40 to-transparent z-10 pointer-events-none"} />
+                <div className="absolute inset-y-0 left-0 w-32 md:w-64 bg-gradient-to-r from-black via-black/40 to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-y-0 right-0 w-32 md:w-64 bg-gradient-to-l from-black via-black/40 to-transparent z-10 pointer-events-none" />
             </div>
 
+
+
+
+
             {/* Bottom transition gradient */}
-            <div className={isLightMode ? "absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#F8F9FD] to-transparent z-10 pointer-events-none" : "absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none"} />
+            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
         </section>
     );
 };
