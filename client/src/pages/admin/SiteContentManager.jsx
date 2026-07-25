@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Edit2, Trash2, Save, X, Building2, User as UserIcon, Users,
     Image as ImageIcon, LayoutGrid, List, Heart, Upload, Loader2,
-    Target, Rocket, Globe, Award, Activity, GraduationCap
+    Target, Rocket, Globe, Award, Activity, GraduationCap, Eye, EyeOff, Sliders
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -19,6 +19,7 @@ const SiteContentManager = () => {
     const [directors, setDirectors] = useState([]);
     const [stories, setStories] = useState([]);
     const [cmsData, setCmsData] = useState({});
+    const [landingCmsData, setLandingCmsData] = useState({});
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -47,16 +48,18 @@ const SiteContentManager = () => {
             const config = {
                 headers: { Authorization: `Bearer ${userInfo?.token}` }
             };
-            const [logosRes, directorsRes, storiesRes, cmsRes] = await Promise.all([
+            const [logosRes, directorsRes, storiesRes, cmsRes, landingCmsRes] = await Promise.all([
                 axios.get('/api/admin/partner-logos', config),
                 axios.get('/api/admin/directors', config),
                 axios.get('/api/admin/success-stories', config),
-                axios.get('/api/public/cms/about_us')
+                axios.get('/api/public/cms/about_us'),
+                axios.get('/api/public/cms/landing_page')
             ]);
             setLogos(logosRes.data);
             setDirectors(directorsRes.data);
             setStories(storiesRes.data);
             setCmsData(cmsRes.data);
+            setLandingCmsData(landingCmsRes.data || {});
             setLoading(false);
         } catch (error) {
             showToast('Failed to fetch data', 'error');
@@ -131,18 +134,28 @@ const SiteContentManager = () => {
         }
     };
 
-    const handleCmsUpdate = async (section, content) => {
+    const handleCmsUpdate = async (pageOrSection, sectionOrContent, maybeContent) => {
         try {
+            let page = 'about_us';
+            let section = pageOrSection;
+            let content = sectionOrContent;
+
+            if (maybeContent !== undefined) {
+                page = pageOrSection;
+                section = sectionOrContent;
+                content = maybeContent;
+            }
+
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
             const config = {
                 headers: { Authorization: `Bearer ${userInfo?.token}` }
             };
 
-            await axios.put(`/api/admin/cms/about_us/${section}`, { content }, config);
-            showToast(`${section} updated successfully`, 'success');
+            await axios.put(`/api/admin/cms/${page}/${section}`, { content }, config);
+            showToast(`${section.replace('_', ' ')} updated successfully`, 'success');
             fetchAll();
         } catch (error) {
-            showToast(`Failed to update ${section}`, 'error');
+            showToast(`Failed to update ${sectionOrContent}`, 'error');
         }
     };
 
@@ -225,6 +238,7 @@ const SiteContentManager = () => {
         { id: 'university', label: 'University Partners (Ticker Banner)', icon: GraduationCap },
         { id: 'directors', label: 'Team & Advisory', icon: UserIcon },
         { id: 'success_stories', label: 'Success Stories', icon: Heart },
+        { id: 'page_sections', label: 'Landing Page Controls', icon: Sliders },
         { id: 'about_cms', label: 'About Page CMS', icon: ImageIcon },
     ];
 
@@ -264,10 +278,15 @@ const SiteContentManager = () => {
 
             {/* Content Section */}
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {activeTab === 'about_cms' ? (
+                {activeTab === 'page_sections' ? (
+                    <LandingPageControls landingCmsData={landingCmsData} onUpdate={handleCmsUpdate} />
+                ) : activeTab === 'about_cms' ? (
                     <AboutCmsEditor data={cmsData} onUpdate={handleCmsUpdate} />
                 ) : (
                     <div className="space-y-6">
+                        {activeTab === 'success_stories' && (
+                            <LandingPageControls landingCmsData={landingCmsData} onUpdate={handleCmsUpdate} />
+                        )}
 
 
                         <div className="flex justify-between items-center">
@@ -772,6 +791,83 @@ const CmsSectionCard = ({ title, icon: Icon, fields, onSave }) => {
                 Save {title.split(' ')[0]} Section
             </button>
         </GlassCard>
+    );
+};
+
+const LandingPageControls = ({ landingCmsData, onUpdate }) => {
+    const isCampusImpactVisible = landingCmsData?.campus_impact?.show_section === true;
+
+    return (
+        <div className="space-y-6 text-left my-2">
+            <GlassCard className="p-6 md:p-8 border-primary/30">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/10">
+                    <div className="flex items-start gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 ${
+                            isCampusImpactVisible 
+                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
+                                : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                        }`}>
+                            {isCampusImpactVisible ? <Eye size={24} /> : <EyeOff size={24} />}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <h3 className="text-lg font-black text-white font-jakarta">Campus Impact & Testimonials Section</h3>
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                                    isCampusImpactVisible 
+                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+                                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                }`}>
+                                    {isCampusImpactVisible ? '● VISIBLE ON LANDING PAGE' : '○ TEMPORARILY HIDDEN'}
+                                </span>
+                            </div>
+                            <p className="text-xs text-white/60 mt-1 max-w-2xl leading-relaxed font-medium">
+                                Control whether the <span className="text-white font-semibold">Campus Impact</span> section (Student Success Stories video cards & testimonials) is displayed on the public landing page (`/`).
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => onUpdate('landing_page', 'campus_impact', { show_section: !isCampusImpactVisible })}
+                        className={`w-full md:w-auto px-6 py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shrink-0 ${
+                            isCampusImpactVisible
+                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black shadow-amber-500/20'
+                                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-black shadow-emerald-500/20'
+                        }`}
+                    >
+                        {isCampusImpactVisible ? (
+                            <>
+                                <EyeOff size={16} /> Temporarily Hide Section
+                            </>
+                        ) : (
+                            <>
+                                <Eye size={16} /> Show Section on Landing Page
+                            </>
+                        )}
+                    </button>
+                </div>
+
+                <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                            <Sliders size={16} />
+                        </div>
+                        <div>
+                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Instant Toggle Control</h4>
+                            <p className="text-[11px] text-white/40">Toggle visibility anytime without losing student video data.</p>
+                        </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                            <Heart size={16} />
+                        </div>
+                        <div>
+                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Success Stories Preserved</h4>
+                            <p className="text-[11px] text-white/40">All saved student testimonials remain intact in the database.</p>
+                        </div>
+                    </div>
+                </div>
+            </GlassCard>
+        </div>
     );
 };
 

@@ -46,6 +46,7 @@ const LandingPage = () => {
     const [dynamicUniversities, setDynamicUniversities] = useState([]);
     const [dynamicSkillDadUniversities, setDynamicSkillDadUniversities] = useState([]);
     const [dynamicSuccessStories, setDynamicSuccessStories] = useState([]);
+    const [cmsSettings, setCmsSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [activeVideo, setActiveVideo] = useState(null); // { url, name }
     const [successIndex, setSuccessIndex] = useState(0);
@@ -61,13 +62,14 @@ const LandingPage = () => {
         const fetchPublicData = async () => {
             try {
                 setLoading(true);
-                const [directorsRes, logosRes, coursesRes, universitiesRes, skillDadUniversitiesRes, storiesRes] = await Promise.all([
+                const [directorsRes, logosRes, coursesRes, universitiesRes, skillDadUniversitiesRes, storiesRes, cmsRes] = await Promise.all([
                     axios.get('/api/public/directors'),
                     axios.get('/api/public/partner-logos'),
                     axios.get('/api/courses'),
                     axios.get('/api/public/universities'),
                     axios.get('/api/public/skilldad-universities'),
-                    axios.get('/api/public/success-stories')
+                    axios.get('/api/public/success-stories'),
+                    axios.get('/api/public/cms/landing_page')
                 ]);
 
                 if (directorsRes.data) {
@@ -92,6 +94,10 @@ const LandingPage = () => {
 
                 if (storiesRes.data) {
                     setDynamicSuccessStories(storiesRes.data);
+                }
+
+                if (cmsRes.data) {
+                    setCmsSettings(cmsRes.data);
                 }
             } catch (error) {
                 console.error('Failed to fetch public data:', error);
@@ -768,147 +774,147 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* ── Student Success & Videos Section ── */}
-            <section className="relative py-16 md:py-24 px-6 z-10 bg-transparent section-optimize">
-                <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
-                
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16 space-y-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5 }}
-                            className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
-                        >
-                            <Play size={14} />
-                            <span>Campus Impact</span>
-                        </motion.div>
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: 0.1 }}
-                            className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-jakarta tracking-tight"
-                        >
-                            Student <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Success Stories</span>
-                        </motion.h2>
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: 0.2 }}
-                            className="text-text-secondary max-w-2xl mx-auto font-inter text-base"
-                        >
-                            Witness the transformative journey of students from partnered campuses into high-growth corporate roles.
-                        </motion.p>
-                    </div>
-
-                    <div className="overflow-hidden">
-                        <AnimatePresence mode="popLayout">
+            {/* ── Student Success & Videos Section (Campus Impact) ── */}
+            {cmsSettings.campus_impact?.show_section === true && (
+                <section className="relative py-16 md:py-24 px-6 z-10 bg-transparent section-optimize">
+                    <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
+                    
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16 space-y-4">
                             <motion.div
-                                key={successIndex}
-                                initial={{ opacity: 0, x: 50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -50 }}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
                                 transition={{ duration: 0.5 }}
-                                className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                                className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
                             >
-                                {(() => {
-                                    const allStories = dynamicSuccessStories.length > 0 ? dynamicSuccessStories : [
-                                        { name: 'Rahul Kumar', campus: 'CIT Campus', package: '18 LPA', role: 'Full Stack Dev', imageUrl: '/assets/success/student1.png', story: 'Transformed his technical core within 6 months.' },
-                                        { name: 'Sanya Sharma', campus: 'Global University', package: '24 LPA', role: 'AI Researcher', imageUrl: '/assets/success/student2.png', story: 'Mastered neural architectures and secured top ranking.' },
-                                        { name: 'Arjun Mehta', campus: 'Tech Institute', package: '15 LPA', role: 'Product Manager', imageUrl: '/assets/success/student3.png', story: 'Achieved career momentum through strategic sync.' },
-                                        { name: 'Priya Singh', campus: 'Data Institute', package: '14 LPA', role: 'Data Scientist', imageUrl: '/assets/success/student1.png', story: 'Built predictive models for global finance platforms.' },
-                                        { name: 'Vikram Patel', campus: 'Cloud Academy', package: '20 LPA', role: 'Cloud Engineer', imageUrl: '/assets/success/student2.png', story: 'Architected scalable microservices for enterprise clients.' },
-                                        { name: 'Anita Desai', campus: 'Cyber Hub', package: '16 LPA', role: 'Cyber Security', imageUrl: '/assets/success/student3.png', story: 'Secured critical infrastructure using modern cryptographic standards.' }
-                                    ];
-                                    
-                                    const num = allStories.length;
-                                    if (num === 0) return null;
-                                    
-                                    const visibleStories = [
-                                        allStories[successIndex % num],
-                                        allStories[(successIndex + 1) % num],
-                                        allStories[(successIndex + 2) % num],
-                                    ];
+                                <Play size={14} />
+                                <span>Campus Impact</span>
+                            </motion.div>
+                            <motion.h2
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.1 }}
+                                className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-jakarta tracking-tight"
+                            >
+                                Student <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Success Stories</span>
+                            </motion.h2>
+                            <motion.p
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.7, delay: 0.2 }}
+                                className="text-text-secondary max-w-2xl mx-auto font-inter text-base"
+                            >
+                                Witness the transformative journey of students from partnered campuses into high-growth corporate roles.
+                            </motion.p>
+                        </div>
 
-                                    return visibleStories.map((student, i) => {
-                                        const videoSrc = student.videoUrl || student.video_url;
-                                        return (
-                                        <motion.div
-                                            key={student.name + i}
-                                            initial={{ opacity: 0, y: 30 }}
-                                            whileInView={{ opacity: 1, y: 0 }}
-                                            viewport={{ once: true, margin: "-50px" }}
-                                            transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 100 }}
-                                            whileHover={{ y: -12, scale: 1.02 }}
-                                            className="group cursor-pointer"
-                                            onMouseEnter={(e) => {
-                                                const vid = e.currentTarget.querySelector('video');
-                                                if (vid) { vid.currentTime = 0; vid.play().catch(() => {}); }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                const vid = e.currentTarget.querySelector('video');
-                                                if (vid) { vid.pause(); vid.currentTime = 0; }
-                                            }}
-                                            onClick={() => videoSrc && setActiveVideo({ url: videoSrc, name: student.name })}
-                                        >
-                                            <GlassCard className="p-4 !bg-white/[0.03] border-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden hover:shadow-glow-purple">
-                                                <div className="aspect-video rounded-xl overflow-hidden mb-5 relative group-hover:shadow-2xl transition-all">
-                                                    <img
-                                                        src={getMediaUrl(student.imageUrl || student.image || student.img)}
-                                                        alt={student.name}
-                                                        className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
-                                                        onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=5B5CFF&color=fff&bold=true`; }}
-                                                    />
-                                                    {videoSrc && (
-                                                        <video
-                                                            src={videoSrc.startsWith('http') ? videoSrc : getMediaUrl(videoSrc)}
-                                                            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                                                            muted
-                                                            playsInline
-                                                            loop
-                                                            preload="metadata"
+                        <div className="overflow-hidden">
+                            <AnimatePresence mode="popLayout">
+                                <motion.div
+                                    key={successIndex}
+                                    initial={{ opacity: 0, x: 50 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -50 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                                >
+                                    {(() => {
+                                        const allStories = dynamicSuccessStories.length > 0 ? dynamicSuccessStories : [
+                                            { name: 'Rahul Kumar', campus: 'CIT Campus', package: '18 LPA', role: 'Full Stack Dev', imageUrl: '/assets/success/student1.png', story: 'Transformed his technical core within 6 months.' },
+                                            { name: 'Sanya Sharma', campus: 'Global University', package: '24 LPA', role: 'AI Researcher', imageUrl: '/assets/success/student2.png', story: 'Mastered neural architectures and secured top ranking.' },
+                                            { name: 'Arjun Mehta', campus: 'Tech Institute', package: '15 LPA', role: 'Product Manager', imageUrl: '/assets/success/student3.png', story: 'Achieved career momentum through strategic sync.' },
+                                            { name: 'Priya Singh', campus: 'Data Institute', package: '14 LPA', role: 'Data Scientist', imageUrl: '/assets/success/student1.png', story: 'Built predictive models for global finance platforms.' },
+                                            { name: 'Vikram Patel', campus: 'Cloud Academy', package: '20 LPA', role: 'Cloud Engineer', imageUrl: '/assets/success/student2.png', story: 'Architected scalable microservices for enterprise clients.' },
+                                            { name: 'Anita Desai', campus: 'Cyber Hub', package: '16 LPA', role: 'Cyber Security', imageUrl: '/assets/success/student3.png', story: 'Secured critical infrastructure using modern cryptographic standards.' }
+                                        ];
+                                        
+                                        const num = allStories.length;
+                                        if (num === 0) return null;
+                                        
+                                        const visibleStories = [
+                                            allStories[successIndex % num],
+                                            allStories[(successIndex + 1) % num],
+                                            allStories[(successIndex + 2) % num],
+                                        ];
+
+                                        return visibleStories.map((student, i) => {
+                                            const videoSrc = student.videoUrl || student.video_url;
+                                            return (
+                                            <motion.div
+                                                key={student.name + i}
+                                                initial={{ opacity: 0, y: 30 }}
+                                                whileInView={{ opacity: 1, y: 0 }}
+                                                viewport={{ once: true, margin: "-50px" }}
+                                                transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 100 }}
+                                                whileHover={{ y: -12, scale: 1.02 }}
+                                                className="group cursor-pointer"
+                                                onMouseEnter={(e) => {
+                                                    const vid = e.currentTarget.querySelector('video');
+                                                    if (vid) { vid.currentTime = 0; vid.play().catch(() => {}); }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    const vid = e.currentTarget.querySelector('video');
+                                                    if (vid) { vid.pause(); vid.currentTime = 0; }
+                                                }}
+                                                onClick={() => videoSrc && setActiveVideo({ url: videoSrc, name: student.name })}
+                                            >
+                                                <GlassCard className="p-4 !bg-white/[0.03] border-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden hover:shadow-glow-purple">
+                                                    <div className="aspect-video rounded-xl overflow-hidden mb-5 relative group-hover:shadow-2xl transition-all">
+                                                        <img
+                                                            src={getMediaUrl(student.imageUrl || student.image || student.img)}
+                                                            alt={student.name}
+                                                            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
+                                                            onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=5B5CFF&color=fff&bold=true`; }}
                                                         />
-                                                    )}
-                                                    <div className={`absolute inset-0 bg-black/40 transition-all duration-500 flex items-center justify-center ${videoSrc ? 'group-hover:bg-transparent' : 'group-hover:bg-black/20'}`}>
-                                                        <div className={`w-12 h-12 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-glow-primary transform scale-90 group-hover:scale-100 transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : ''}`}>
-                                                            <Play size={20} fill="currentColor" />
+                                                        {videoSrc && (
+                                                            <video
+                                                                src={videoSrc.startsWith('http') ? videoSrc : getMediaUrl(videoSrc)}
+                                                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                                muted
+                                                                playsInline
+                                                                loop
+                                                                preload="metadata"
+                                                            />
+                                                        )}
+                                                        <div className={`absolute inset-0 bg-black/40 transition-all duration-500 flex items-center justify-center ${videoSrc ? 'group-hover:bg-transparent' : 'group-hover:bg-black/20'}`}>
+                                                            <div className={`w-12 h-12 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-glow-primary transform scale-90 group-hover:scale-100 transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : ''}`}>
+                                                                <Play size={20} fill="currentColor" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white uppercase tracking-widest">
+                                                            Success Story
                                                         </div>
                                                     </div>
-                                                    <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white uppercase tracking-widest">
-                                                        Success Story
+                                                    <div className="px-2">
+                                                        <div className="flex items-center justify-between mb-3">
+                                                            <h3 className="text-lg font-bold text-white font-jakarta">{student.name}</h3>
+                                                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded border border-emerald-500/30">
+                                                                {student.package}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mb-4">{student.campus} · {student.role}</p>
+                                                        <p className="text-xs text-text-muted leading-relaxed font-inter mb-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                            {student.story} Leveraging SkillDad’s neural learning path to master advanced industry modules.
+                                                        </p>
+                                                        <div className="pt-4 border-t border-white/5 flex items-center gap-2">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Hired by Global HQ</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="px-2">
-                                                    <div className="flex items-center justify-between mb-3">
-                                                        <h3 className="text-lg font-bold text-white font-jakarta">{student.name}</h3>
-                                                        <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded border border-emerald-500/30">
-                                                            {student.package}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mb-4">{student.campus} · {student.role}</p>
-                                                    <p className="text-xs text-text-muted leading-relaxed font-inter mb-4 opacity-80 group-hover:opacity-100 transition-opacity">
-                                                        {student.story} Leveraging SkillDad’s neural learning path to master advanced industry modules.
-                                                    </p>
-                                                    <div className="pt-4 border-t border-white/5 flex items-center gap-2">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                                                        <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Hired by Global HQ</span>
-                                                    </div>
-                                                </div>
-                                            </GlassCard>
-                                        </motion.div>
-                                        );
-                                    });
-                                })()}
-                            </motion.div>
-                        </AnimatePresence>
+                                                </GlassCard>
+                                            </motion.div>
+                                            );
+                                        });
+                                    })()}
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
                     </div>
-                    
-
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* Video Modal */}
             {activeVideo && (
