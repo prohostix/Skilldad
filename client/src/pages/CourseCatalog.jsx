@@ -268,7 +268,7 @@ const CourseCatalog = () => {
                 </div>
 
                 {/* Grid Section */}
-                <div className="max-w-[1300px] mx-auto px-4">
+                <div className="max-w-[1180px] mx-auto px-4">
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 md:py-40 space-y-8">
                             <div className="relative">
@@ -295,7 +295,7 @@ const CourseCatalog = () => {
                             </ModernButton>
                         </motion.div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 gpu-accelerated">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4.5 sm:gap-5 gpu-accelerated">
                             {filteredCourses.map((course) => (
                                 <CourseCard key={course._id} course={course} />
                             ))}

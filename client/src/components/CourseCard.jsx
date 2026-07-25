@@ -84,9 +84,9 @@ const CourseCard = ({ course }) => {
             </div>
 
             {/* Content Section */}
-            <div className="p-4 flex-1 flex flex-col text-left">
-                <div className="flex items-center space-x-2 mb-2">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-black text-primary overflow-hidden border border-primary/20">
+            <div className="p-3.5 flex-1 flex flex-col text-left">
+                <div className="flex items-center space-x-2 mb-1.5">
+                    <div className="w-4.5 h-4.5 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-black text-primary overflow-hidden border border-primary/20 shrink-0">
                         {(course.instructorName || course.instructor?.name || 'I')[0]}
                     </div>
                     <div className="flex flex-col min-w-0">
@@ -102,22 +102,22 @@ const CourseCard = ({ course }) => {
                 </div>
 
                 <h3
-                    className="text-base font-black text-white font-space mb-2 line-clamp-2 leading-[1.3] cursor-pointer hover:text-primary transition-colors"
+                    className="text-sm font-black text-white font-space mb-1.5 line-clamp-2 leading-[1.3] cursor-pointer hover:text-primary transition-colors"
                     onClick={() => navigate(`/course/${course._id}`)}
                 >
                     {course.title}
                 </h3>
 
-                <p className="text-xs font-inter text-white/50 line-clamp-2 mb-4 flex-1 leading-relaxed">
+                <p className="text-[11px] font-inter text-white/50 line-clamp-2 mb-3 flex-1 leading-relaxed">
                     {course.description}
                 </p>
 
-                <div className="flex items-center justify-end pt-3 border-t border-white/5 mt-auto">
+                <div className="flex items-center justify-end pt-2.5 border-t border-white/5 mt-auto">
                     <ModernButton
                         onClick={handleEnroll}
-                        className="!px-4 !py-2 font-black uppercase tracking-widest text-[8px] group/btn shadow-glow-purple"
+                        className="!px-3.5 !py-1.5 font-black uppercase tracking-widest text-[8px] group/btn shadow-glow-purple"
                     >
-                        <span className="mr-1">Enroll</span> <ArrowRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
+                        <span className="mr-1">Enroll</span> <ArrowRight size={11} className="group-hover/btn:translate-x-1 transition-transform" />
                     </ModernButton>
                 </div>
 
