@@ -405,29 +405,43 @@ const CourseDetail = () => {
                             </section>
                         )}
 
-                        <div>
-                            <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
-                                <BookOpen className="text-purple-400" size={24} />
-                                <span>What You'll Learn</span>
-                            </h2>
-                            <div className="grid sm:grid-cols-2 gap-6">
-                                {[
-                                    "Master industry-standard global frameworks",
-                                    "Architect production-grade secure systems",
-                                    "Lead cross-functional technical teams",
-                                    "Deploy advanced AI-driven solutions",
-                                    "Analyze deep-learning neural matrices",
-                                    "Accelerate your professional trajectory"
-                                ].map((outcome, i) => (
-                                    <div key={i} className="flex items-center space-x-4 p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-emerald-500/20 transition-all group">
-                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                                            <CheckCircle2 size={20} />
+                        {course.learning_outcomes && course.learning_outcomes.length > 0 && (
+                            <div>
+                                <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
+                                    <BookOpen className="text-purple-400" size={24} />
+                                    <span>What You'll Learn</span>
+                                </h2>
+                                <div className="grid sm:grid-cols-2 gap-6">
+                                    {course.learning_outcomes.map((outcome, i) => (
+                                        <div key={i} className="flex items-center space-x-4 p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-emerald-500/20 transition-all group">
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                                <CheckCircle2 size={20} />
+                                            </div>
+                                            <span className="text-base font-bold text-text-secondary group-hover:text-white transition-colors">{outcome}</span>
                                         </div>
-                                        <span className="text-base font-bold text-text-secondary group-hover:text-white transition-colors">{outcome}</span>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {course.features && course.features.length > 0 && (
+                            <div>
+                                <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
+                                    <Sparkles className="text-primary" size={24} />
+                                    <span>Course Highlights</span>
+                                </h2>
+                                <div className="grid sm:grid-cols-2 gap-6">
+                                    {course.features.map((feature, i) => (
+                                        <div key={i} className="flex items-center space-x-4 p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-primary/30 transition-all group">
+                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                                                <ShieldCheck size={20} />
+                                            </div>
+                                            <span className="text-base font-bold text-text-secondary group-hover:text-white transition-colors">{feature}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
 

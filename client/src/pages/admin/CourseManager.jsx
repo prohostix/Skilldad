@@ -45,6 +45,8 @@ const CourseManager = () => {
         brochure_url: '',
         thumbnail: '',
         university_tools: [],
+        features: [],
+        learning_outcomes: [],
         programType: 'course',
         skillDadUniversityId: ''
     });
@@ -112,6 +114,8 @@ const CourseManager = () => {
             brochure_url: '',
             thumbnail: '',
             university_tools: [],
+            features: [],
+            learning_outcomes: [],
             programType: 'course',
             skillDadUniversityId: ''
         });
@@ -133,6 +137,8 @@ const CourseManager = () => {
             brochure_url: course.brochure_url || '',
             thumbnail: course.thumbnail || '',
             university_tools: course.university_tools || [],
+            features: course.features || [],
+            learning_outcomes: course.learning_outcomes || [],
             programType: course.programType || course.program_type || 'course',
             skillDadUniversityId: course.skillDadUniversityId || course.skill_dad_university_id || ''
         });
@@ -822,6 +828,76 @@ const CourseManager = () => {
                                     className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors"
                                 >
                                     + Add Tool or Resource
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-sm font-medium text-white/70 font-inter">
+                                    Course Highlights
+                                </label>
+                                {(formData.features || []).map((feature, idx) => (
+                                    <div key={idx} className="flex gap-2 items-center bg-white/5 p-3 rounded-xl border border-white/10">
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Live Doubt-Clearing Sessions"
+                                            className="flex-1 px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-xs text-white"
+                                            value={feature}
+                                            onChange={(e) => {
+                                                const updated = [...formData.features];
+                                                updated[idx] = e.target.value;
+                                                setFormData({ ...formData, features: updated });
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, features: formData.features.filter((_, i) => i !== idx) })}
+                                            className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, features: [...(formData.features || []), ''] })}
+                                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors"
+                                >
+                                    + Add Highlight
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-sm font-medium text-white/70 font-inter">
+                                    What Students Will Learn
+                                </label>
+                                {(formData.learning_outcomes || []).map((outcome, idx) => (
+                                    <div key={idx} className="flex gap-2 items-center bg-white/5 p-3 rounded-xl border border-white/10">
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Manage day-to-day hospital operations"
+                                            className="flex-1 px-3 py-1.5 bg-black/40 border border-white/10 rounded-lg text-xs text-white"
+                                            value={outcome}
+                                            onChange={(e) => {
+                                                const updated = [...formData.learning_outcomes];
+                                                updated[idx] = e.target.value;
+                                                setFormData({ ...formData, learning_outcomes: updated });
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, learning_outcomes: formData.learning_outcomes.filter((_, i) => i !== idx) })}
+                                            className="p-1.5 text-rose-500 hover:bg-rose-500/10 rounded-lg"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, learning_outcomes: [...(formData.learning_outcomes || []), ''] })}
+                                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors"
+                                >
+                                    + Add Learning Outcome
                                 </button>
                             </div>
 

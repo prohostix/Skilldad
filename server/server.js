@@ -408,6 +408,16 @@ const startServer = async () => {
             console.log('[Migration] Added is_active to batches'.green);
         }
 
+        // Auto-migrate: ensure courses support highlights and learning outcomes
+        if (!courseCols.includes('features')) {
+            await query("ALTER TABLE courses ADD COLUMN features JSONB NOT NULL DEFAULT '[]'::jsonb");
+            console.log('[Migration] Added features to courses'.green);
+        }
+        if (!courseCols.includes('learning_outcomes')) {
+            await query("ALTER TABLE courses ADD COLUMN learning_outcomes JSONB NOT NULL DEFAULT '[]'::jsonb");
+            console.log('[Migration] Added learning_outcomes to courses'.green);
+        }
+
         // Auto-migrate: ensure interactive_contents table exists with all required columns
         await query(`
             CREATE TABLE IF NOT EXISTS interactive_contents (

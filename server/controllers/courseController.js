@@ -185,7 +185,7 @@ const getCourse = asyncHandler(async (req, res) => {
 
 // @desc    Create new course
 const createCourse = asyncHandler(async (req, res) => {
-    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId } = req.body;
+    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes } = req.body;
     const isDegreeProgramme = (programType || 'course') === 'degree_programme';
 
     // For Admin, a provider is mandatory — a real university for Skill Courses, a SkillDad University for Degree Programmes
@@ -207,9 +207,9 @@ const createCourse = asyncHandler(async (req, res) => {
     const initialStatus = req.user.role === 'admin' ? 'approved' : 'pending';
 
     await query(`
-        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, status, submitted_by, program_type, skill_dad_university_id, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW(), NOW())
-    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '', initialStatus, req.user.id, programType || 'course', finalSkillDadUniversityId]);
+        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, status, submitted_by, program_type, skill_dad_university_id, features, learning_outcomes, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW())
+    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '', initialStatus, req.user.id, programType || 'course', finalSkillDadUniversityId, JSON.stringify(features || []), JSON.stringify(learning_outcomes || [])]);
 
     // Auto-sync with University profile.assigned_courses
     try {
@@ -244,7 +244,7 @@ const createCourse = asyncHandler(async (req, res) => {
 // @desc    Update course
 const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId } = req.body;
+    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes } = req.body;
 
     // Get old course to check for instructor changes
     const oldCourseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
@@ -269,9 +269,11 @@ const updateCourse = asyncHandler(async (req, res) => {
             university_tools = COALESCE($10, university_tools),
             thumbnail = COALESCE($11, thumbnail),
             program_type = COALESCE($12, program_type),
+            features = COALESCE($13, features),
+            learning_outcomes = COALESCE($14, learning_outcomes),
             updated_at = NOW()
-        WHERE id = $13
-    `, [title, description, category, price, isPublished, isFeatured, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, programType, id]);
+        WHERE id = $15
+    `, [title, description, category, price, isPublished, isFeatured, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, programType, features ? JSON.stringify(features) : null, learning_outcomes ? JSON.stringify(learning_outcomes) : null, id]);
 
     // instructor_id and skill_dad_university_id are mutually exclusive — a Degree Programme is
     // linked to a SkillDad University (no login account), a Skill Course to a real instructor user.
