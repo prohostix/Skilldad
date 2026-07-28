@@ -101,11 +101,11 @@ class WhatsAppService {
             timeStyle: 'short'
         });
 
-        // common_status [Item, NewStatus]
+        // skilldad_exam_scheduled [Name, CourseTitle, ExamTitle, DateTime]
         return this.sendTemplateMessage(
             phone,
             process.env.GUPSHUP_TEMPLATE_EXAM || 'common_status',
-            [`Exam: ${examTitle}`, `Scheduled for ${formattedDate}`]
+            [studentName, courseTitle || 'Your Course', examTitle, formattedDate]
         );
     }
 
