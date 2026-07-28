@@ -4,7 +4,6 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import {
     BookOpen,
-    Clock,
     Users,
     Star,
     Layout,
@@ -213,10 +212,6 @@ const CourseDetail = () => {
                                 <div className="flex items-center gap-2">
                                     <Users size={16} />
                                     <span>1,240+ students</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock size={16} />
-                                    <span>Approx. 12h content</span>
                                 </div>
                             </div>
                             

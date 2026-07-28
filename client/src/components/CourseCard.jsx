@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Star,
-    Clock,
     PlayCircle,
     ArrowRight,
     Sparkles
@@ -71,14 +70,10 @@ const CourseCard = ({ course }) => {
                     </div>
                 </div>
 
-                <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center text-white z-30">
+                <div className="absolute bottom-2 left-2 right-2 flex items-center text-white z-30">
                     <div className="flex items-center space-x-1">
                         <Star size={12} className="text-amber-400 fill-amber-400" />
                         <span className="text-[10px] font-bold">4.8</span>
-                    </div>
-                    <div className="flex items-center space-x-1 opacity-80">
-                        <Clock size={12} />
-                        <span className="text-[10px] font-bold">12h</span>
                     </div>
                 </div>
             </div>
