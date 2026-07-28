@@ -113,13 +113,14 @@ class WhatsAppService {
      * Notify about exam results
      */
     async notifyExamResult(studentName, phone, examTitle, score, percentage, passed) {
-        const resultStatus = passed ? 'PASSED' : 'RECALIBRATION REQUIRED';
+        const resultStatus = passed ? 'Passed ✅' : 'Not Cleared ❌';
+        const scoreText = `${score} (${percentage.toFixed(2)}%)`;
 
-        // common_status [Item, NewStatus]
+        // skilldad_exam_result [Name, ExamTitle, Score, Status]
         return this.sendTemplateMessage(
             phone,
             process.env.GUPSHUP_TEMPLATE_RESULT || 'common_status',
-            [`Result for ${examTitle}`, `${score} (${percentage.toFixed(2)}%) - ${resultStatus}`]
+            [studentName, examTitle, scoreText, resultStatus]
         );
     }
 
