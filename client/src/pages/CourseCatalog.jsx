@@ -105,10 +105,6 @@ const CourseCatalog = () => {
         [courses, programType]
     );
 
-    const featuredCourses = useMemo(
-        () => coursesForCategoryList.filter(c => Boolean(c.isFeatured || c.is_featured)),
-        [coursesForCategoryList]
-    );
     const categories = useMemo(() => ['All', ...new Set(coursesForCategoryList.map(c => c.category))], [coursesForCategoryList]);
 
     // Check if the user is already filtering uniquely by backend so we hide the filter
@@ -178,28 +174,6 @@ const CourseCatalog = () => {
                                     </button>
                                 </div>
                             </div>
-
-                            {/* Featured Courses Spotlight */}
-                            {featuredCourses.length > 0 && (
-                                <div className="relative overflow-hidden rounded-[24px] border border-primary/30 bg-gradient-to-br from-primary/10 via-white/[0.02] to-purple-900/10 p-4 md:p-5 shadow-glow-purple text-left mt-4">
-                                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                                    <div className="relative z-10">
-                                        <div className="flex mb-4">
-                                            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-primary/25 via-primary/15 to-transparent border border-primary/50 rounded-full shadow-glow-purple">
-                                                <Sparkles className="text-primary animate-pulse" size={13} />
-                                                <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                                                    Featured <span className="text-primary">— Powered by SkillDad</span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className={`grid gap-4.5 sm:gap-5 ${featuredCourses.length === 1 ? 'max-w-sm' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
-                                            {featuredCourses.map((course) => (
-                                                <CourseCard key={course._id} course={course} compact hideDescription />
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
