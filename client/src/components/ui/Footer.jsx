@@ -64,7 +64,7 @@ const Footer = ({ forceVisible = false }) => {
                                 { icon: Linkedin, href: 'https://linkedin.com/company/skilldad', color: 'hover:bg-primary' },
                                 { icon: Twitter, href: 'https://twitter.com/skilldad', color: 'hover:bg-primary-light' },
                                 { icon: Youtube, href: 'https://youtube.com/@skilldad', color: 'hover:bg-primary-dark' },
-                                { icon: Instagram, href: 'https://instagram.com/skilldad', color: 'hover:bg-pink-600' }
+                                { icon: Instagram, href: 'https://www.instagram.com/skilldad_', color: 'hover:bg-pink-600' }
                             ].map((social, idx) => (
                                 <a
                                     key={idx}
