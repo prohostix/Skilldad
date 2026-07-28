@@ -128,11 +128,11 @@ class WhatsAppService {
      * Notify about course completion and certificate
      */
     async notifyCourseCompletion(studentName, phone, courseTitle) {
-        // common_status [Item, NewStatus]
+        // skilldad_certificate [Name, CourseTitle]
         return this.sendTemplateMessage(
             phone,
             process.env.GUPSHUP_TEMPLATE_CERT || 'common_status',
-            [`Course: ${courseTitle}`, 'Completed successfully!']
+            [studentName, courseTitle]
         );
     }
 
