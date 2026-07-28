@@ -46,13 +46,6 @@ const CourseCard = ({ course }) => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent z-21"></div>
 
-                {/* Category Badge Left */}
-                <div className="absolute top-2 left-2 z-30">
-                    <span className="px-2 py-0.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[8px] font-bold uppercase tracking-widest rounded-lg">
-                        {course.category}
-                    </span>
-                </div>
-
                 {/* Featured Badge Right - Admin Controlled Only */}
                 {isFeatured && (
                     <div className="absolute top-2 right-2 z-30">

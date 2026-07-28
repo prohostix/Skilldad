@@ -215,8 +215,7 @@ const PartnerCourseManager = () => {
                         </div>
                         
                         <div className="p-5 flex-1 flex flex-col">
-                            <div className="flex justify-between items-start mb-2">
-                                <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{course.category || 'Course'}</span>
+                            <div className="flex justify-end items-start mb-2">
                                 <span className="text-sm font-bold text-white">₹{course.price}</span>
                             </div>
                             <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{course.title}</h3>
@@ -287,30 +286,17 @@ const PartnerCourseManager = () => {
                                     />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Category</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 transition-all outline-none"
-                                            placeholder="e.g. Design"
-                                            value={formData.category}
-                                            onChange={(e) => setFormData({...formData, category: e.target.value})}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Price (₹)</label>
-                                        <input
-                                            type="number"
-                                            required
-                                            min="0"
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 transition-all outline-none"
-                                            placeholder="499"
-                                            value={formData.price || ''}
-                                            onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : parseFloat(e.target.value)})}
-                                        />
-                                    </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Price (₹)</label>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="0"
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary/50 transition-all outline-none"
+                                        placeholder="499"
+                                        value={formData.price || ''}
+                                        onChange={(e) => setFormData({...formData, price: e.target.value === '' ? '' : parseFloat(e.target.value)})}
+                                    />
                                 </div>
 
                                 <div>

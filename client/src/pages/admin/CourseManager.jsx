@@ -391,7 +391,6 @@ const CourseManager = () => {
                             <tr>
                                 <th className="px-6 py-4">Course Info</th>
                                 <th className="px-6 py-4">Instructor</th>
-                                <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Price</th>
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4">Approval</th>
@@ -409,6 +408,11 @@ const CourseManager = () => {
                                             <div>
                                                 <p className="text-sm font-semibold text-white">{course.title}</p>
                                                 <p className="text-xs text-white/50">ID: {course._id.slice(-6).toUpperCase()}</p>
+                                                {(course.programType || course.program_type) === 'degree_programme' && (
+                                                    <span className="inline-block mt-1 px-2.5 py-0.5 bg-primary/20 text-primary rounded-full text-[9px] font-bold uppercase tracking-tight">
+                                                        Degree Programme
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </td>
@@ -431,18 +435,6 @@ const CourseManager = () => {
                                                     </span>
                                                 )}
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-col items-start gap-1">
-                                            <span className="px-2.5 py-1 bg-white/10 text-white/70 rounded-full text-[10px] font-bold uppercase tracking-tight">
-                                                {course.category}
-                                            </span>
-                                            {(course.programType || course.program_type) === 'degree_programme' && (
-                                                <span className="px-2.5 py-1 bg-primary/20 text-primary rounded-full text-[9px] font-bold uppercase tracking-tight">
-                                                    Degree Programme
-                                                </span>
-                                            )}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
@@ -607,40 +599,24 @@ const CourseManager = () => {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
-                                        Category
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
-                                        placeholder="e.g., Programming"
-                                        value={formData.category}
-                                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
-                                        Price (₹)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        required
-                                        min="0"
-                                        step="0.01"
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
-                                        placeholder="0.00"
-                                        value={formData.price}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            const parsed = parseFloat(val);
-                                            setFormData({ ...formData, price: isNaN(parsed) ? 0 : parsed });
-                                        }}
-                                    />
-                                </div>
+                            <div>
+                                <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
+                                    Price (₹)
+                                </label>
+                                <input
+                                    type="number"
+                                    required
+                                    min="0"
+                                    step="0.01"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
+                                    placeholder="0.00"
+                                    value={formData.price}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        const parsed = parseFloat(val);
+                                        setFormData({ ...formData, price: isNaN(parsed) ? 0 : parsed });
+                                    }}
+                                />
                             </div>
 
                             <div className="grid grid-cols-1 gap-4">

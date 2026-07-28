@@ -570,15 +570,6 @@ const PartnerCourseEditor = () => {
                                     onChange={e => setCourse({...course, price: e.target.value === '' ? '' : parseFloat(e.target.value)})}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-1.5 ml-1">Category</label>
-                                <input 
-                                    type="text" 
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm outline-none focus:border-primary/50 transition-all shadow-inner font-bold"
-                                    value={course.category}
-                                    onChange={e => setCourse({...course, category: e.target.value})}
-                                />
-                            </div>
                         </div>
                     </GlassCard>
                 </div>

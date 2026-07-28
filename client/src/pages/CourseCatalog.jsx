@@ -25,7 +25,6 @@ const CourseCatalog = () => {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('');
-    const [category, setCategory] = useState('All');
     const [programType, setProgramType] = useState('course');
     const [selectedUniversity, setSelectedUniversity] = useState('All');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -76,7 +75,6 @@ const CourseCatalog = () => {
 
             const matchesSearch =
                 course.title?.toLowerCase().includes(searchText) ||
-                course.category?.toLowerCase().includes(searchText) ||
                 (course.instructorName || course.instructor?.name || '').toLowerCase().includes(searchText) ||
                 (course.universityName || course.instructor?.profile?.universityName || '').toLowerCase().includes(searchText);
 
@@ -85,7 +83,7 @@ const CourseCatalog = () => {
 
             const matchesProgramType = (course.programType || course.program_type || 'course') === programType;
 
-            return matchesSearch && matchesUniversity && matchesProgramType && (category === 'All' || course.category === category);
+            return matchesSearch && matchesUniversity && matchesProgramType;
         });
 
         // Sort admin-featured courses first, then SkillDad provided courses to the top!
@@ -98,14 +96,7 @@ const CourseCatalog = () => {
             const bVal = isSkillDadCourse(b) ? 1 : 0;
             return bVal - aVal;
         });
-    }, [courses, filter, category, selectedUniversity, programType]);
-
-    const coursesForCategoryList = useMemo(
-        () => courses.filter(c => (c.programType || c.program_type || 'course') === programType),
-        [courses, programType]
-    );
-
-    const categories = useMemo(() => ['All', ...new Set(coursesForCategoryList.map(c => c.category))], [coursesForCategoryList]);
+    }, [courses, filter, selectedUniversity, programType]);
 
     // Check if the user is already filtering uniquely by backend so we hide the filter
     const isFixedUniversity = !!universityName;
@@ -155,7 +146,7 @@ const CourseCatalog = () => {
                             <div className="flex justify-center pt-2">
                                 <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-2xl flex-wrap justify-center">
                                     <button
-                                        onClick={() => { setProgramType('course'); setCategory('All'); }}
+                                        onClick={() => setProgramType('course')}
                                         className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'course'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white'
@@ -164,7 +155,7 @@ const CourseCatalog = () => {
                                         Skill Courses
                                     </button>
                                     <button
-                                        onClick={() => { setProgramType('degree_programme'); setCategory('All'); }}
+                                        onClick={() => setProgramType('degree_programme')}
                                         className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'degree_programme'
                                             ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white'
@@ -213,30 +204,14 @@ const CourseCatalog = () => {
                                 className="md:hidden p-3.5 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 text-white/70 hover:text-white transition-colors flex shrink-0 items-center justify-center relative"
                             >
                                 <Filter size={20} />
-                                {(category !== 'All' || selectedUniversity !== 'All') && (
+                                {selectedUniversity !== 'All' && (
                                     <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-primary border border-[#0A0714]"></span>
                                 )}
                             </button>
                         </div>
 
-                        {/* Category Filter and View Toggle Row Tracker */}
-                        <div className="hidden md:flex items-center justify-between gap-4 flex-wrap md:flex-nowrap">
-                            {/* Category Filter Desktop */}
-                            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar scroll-smooth flex-1 min-w-0">
-                                {categories.map((cat) => (
-                                    <button
-                                        key={cat}
-                                        onClick={() => setCategory(cat)}
-                                        className={`px-3 md:px-5 py-2 md:py-2.5 rounded-xl font-black font-inter text-[8px] md:text-[9px] uppercase tracking-[0.15em] whitespace-nowrap transition-all duration-300 border ${category === cat
-                                            ? 'bg-primary text-white border-primary shadow-[0_0_20px_rgba(110,40,255,0.3)]'
-                                            : 'bg-white/5 text-white/50 border-white/5 hover:border-primary/30 hover:text-white hover:bg-white/10'
-                                            }`}
-                                    >
-                                        {cat}
-                                    </button>
-                                ))}
-                            </div>
-
+                        {/* View Toggle Row Tracker */}
+                        <div className="hidden md:flex items-center justify-end gap-4 flex-wrap md:flex-nowrap">
                             {/* Actions Right */}
                             <div className="flex items-center gap-3 flex-shrink-0">
                                 {/* University Filter */}
@@ -285,7 +260,7 @@ const CourseCatalog = () => {
                                 <h3 className="text-3xl font-black text-white font-space">No matches found</h3>
                                 <p className="text-text-muted font-inter max-w-sm mx-auto text-lg leading-relaxed">Try adjusting your search or filters to find what you're looking for.</p>
                             </div>
-                            <ModernButton variant="secondary" onClick={() => { setFilter(''); setCategory('All'); }} className="!px-10 !py-5 uppercase tracking-widest font-black text-xs">
+                            <ModernButton variant="secondary" onClick={() => setFilter('')} className="!px-10 !py-5 uppercase tracking-widest font-black text-xs">
                                 Reset Filters
                             </ModernButton>
                         </motion.div>
@@ -423,25 +398,6 @@ const CourseCatalog = () => {
                                             </div>
                                         </div>
                                     )}
-
-                                    {/* Mobile Categories */}
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-black text-white/40 uppercase tracking-widest">Category</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {categories.map((cat) => (
-                                                <button
-                                                    key={cat}
-                                                    onClick={() => setCategory(cat)}
-                                                    className={`px-4 py-2.5 rounded-xl font-black font-inter text-[10px] uppercase tracking-widest whitespace-nowrap transition-all duration-300 border ${category === cat
-                                                        ? 'bg-primary text-white border-primary shadow-[0_0_20px_rgba(110,40,255,0.3)]'
-                                                        : 'bg-white/5 text-white/50 border-white/5 hover:border-primary/30 hover:text-white hover:bg-white/10'
-                                                        }`}
-                                                >
-                                                    {cat}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
                                 </div>
                                 
                                 <ModernButton
