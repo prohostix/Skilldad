@@ -10,7 +10,12 @@ const notificationService = require('../services/NotificationService');
 const notifyEnrolledStudents = async (session, title, message) => {
     try {
         let studentIds = [];
-        
+        let courseTitle = 'Your Course';
+        if (session.course_id) {
+            const courseRes = await query('SELECT title FROM courses WHERE id = $1', [session.course_id]);
+            if (courseRes.rows.length > 0) courseTitle = courseRes.rows[0].title;
+        }
+
         if (session.course_id) {
             let enrollSql = "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'";
             let enrollParams = [session.course_id];
@@ -66,7 +71,8 @@ const notifyEnrolledStudents = async (session, title, message) => {
                         {
                             topic: session.topic,
                             startTime: session.start_time,
-                            description: session.description || 'No description provided'
+                            description: session.description || 'No description provided',
+                            courseTitle
                         },
                         { email: true, whatsapp: true }
                     );

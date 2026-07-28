@@ -78,17 +78,17 @@ class WhatsAppService {
     /**
      * Notify about a newly scheduled live session
      */
-    async notifyLiveSessionScheduled(studentName, phone, topic, startTime) {
+    async notifyLiveSessionScheduled(studentName, phone, topic, startTime, courseTitle) {
         const formattedTime = new Date(startTime).toLocaleString('en-IN', {
             dateStyle: 'medium',
             timeStyle: 'short'
         });
 
-        // common_status [Item, NewStatus]
+        // skilldad_live_session [Name, CourseTitle, Topic, DateTime]
         return this.sendTemplateMessage(
             phone,
             process.env.GUPSHUP_TEMPLATE_LIVE || 'common_status',
-            [`Live Session: ${topic}`, `Scheduled for ${formattedTime}`]
+            [studentName, courseTitle || 'Your Course', topic, formattedTime]
         );
     }
 

@@ -157,7 +157,7 @@ class NotificationService {
                     result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_ENROLL || 'common_status', [user.name, data.courseTitle]);
                     break;
                 case 'liveSession':
-                    result = await whatsAppService.notifyLiveSessionScheduled(user.name, phone, data.topic, data.startTime);
+                    result = await whatsAppService.notifyLiveSessionScheduled(user.name, phone, data.topic, data.startTime, data.courseTitle);
                     break;
                 case 'liveSessionUpdate':
                     const updateMsg = `Session "${data.topic}" has been recalibrated.`;
