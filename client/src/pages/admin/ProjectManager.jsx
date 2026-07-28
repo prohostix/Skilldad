@@ -42,9 +42,11 @@ const ProjectManager = () => {
         points: 100,
         difficulty: 'Intermediate',
         requirements: '',
-        submissionGuidelines: ''
+        submissionGuidelines: '',
+        batchIds: []
     });
     const [universities, setUniversities] = useState([]);
+    const [projectBatches, setProjectBatches] = useState([]);
 
     const fetchProjects = async () => {
         try {
@@ -98,6 +100,26 @@ const ProjectManager = () => {
         fetchUniversities();
     }, []);
 
+    // Load available batches whenever the target course changes
+    useEffect(() => {
+        const fetchProjectBatches = async () => {
+            if (!formData.course) {
+                setProjectBatches([]);
+                return;
+            }
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                const { data } = await axios.get(`/api/batches/course/${formData.course}`, config);
+                setProjectBatches(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error('Error fetching batches:', error);
+                setProjectBatches([]);
+            }
+        };
+        fetchProjectBatches();
+    }, [formData.course]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -118,16 +140,17 @@ const ProjectManager = () => {
             }
             setShowModal(false);
             setEditingProject(null);
-            setFormData({ 
-                title: '', 
-                description: '', 
-                course: '', 
-                universityId: '', 
-                deadline: '', 
+            setFormData({
+                title: '',
+                description: '',
+                course: '',
+                universityId: '',
+                deadline: '',
                 points: 100,
                 difficulty: 'Intermediate',
                 requirements: '',
-                submissionGuidelines: ''
+                submissionGuidelines: '',
+                batchIds: []
             });
             fetchProjects();
         } catch (error) {
@@ -171,7 +194,7 @@ const ProjectManager = () => {
                     <p className="text-white/40 text-sm font-inter">Manage project definitions and review student submissions across courses.</p>
                 </div>
                 {activeTab === 'projects' && (
-                    <ModernButton onClick={() => { setShowModal(true); setEditingProject(null); setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100 }); }} className="!px-6 !py-3">
+                    <ModernButton onClick={() => { setShowModal(true); setEditingProject(null); setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100, batchIds: [] }); }} className="!px-6 !py-3">
                         <Plus size={18} className="mr-2" /> Create Project
                     </ModernButton>
                 )}
@@ -262,7 +285,8 @@ const ProjectManager = () => {
                                                                     points: project.points,
                                                                     difficulty: project.difficulty || 'Intermediate',
                                                                     requirements: Array.isArray(project.requirements) ? project.requirements.join('\n') : (project.requirements || ''),
-                                                                    submissionGuidelines: project.submissionGuidelines || ''
+                                                                    submissionGuidelines: project.submissionGuidelines || '',
+                                                                    batchIds: Array.isArray(project.batchIds) ? project.batchIds.map(String) : []
                                                                 });
                                                                 setShowModal(true);
                                                             }}
@@ -461,6 +485,45 @@ const ProjectManager = () => {
                                         </select>
                                     </div>
                                 </div>
+
+                                {formData.course && (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">
+                                            Target Batches <span className="normal-case font-normal text-white/25">(leave none selected to assign to all batches)</span>
+                                        </label>
+                                        {projectBatches.length > 0 ? (
+                                            <div className="flex flex-wrap gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl">
+                                                {projectBatches.map((batch) => {
+                                                    const isSelected = formData.batchIds.includes(String(batch.id));
+                                                    return (
+                                                        <button
+                                                            type="button"
+                                                            key={batch.id}
+                                                            onClick={() => {
+                                                                const batchId = String(batch.id);
+                                                                setFormData({
+                                                                    ...formData,
+                                                                    batchIds: isSelected
+                                                                        ? formData.batchIds.filter(id => id !== batchId)
+                                                                        : [...formData.batchIds, batchId]
+                                                                });
+                                                            }}
+                                                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
+                                                                isSelected
+                                                                    ? 'bg-primary text-white border-primary'
+                                                                    : 'bg-white/5 text-white/50 border-white/10 hover:border-primary/40 hover:text-white'
+                                                            }`}
+                                                        >
+                                                            {batch.name}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <p className="text-xs text-white/25 italic px-1">No batches created yet for this course — the project will be open to all enrolled students.</p>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest ml-1">Project Objective</label>

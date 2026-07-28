@@ -53,6 +53,8 @@ const StudentManagement = () => {
     const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState('all');
     const [universities, setUniversities] = useState([]);
+    const [selectedBatchId, setSelectedBatchId] = useState('all');
+    const [batchFilterOptions, setBatchFilterOptions] = useState([]);
 
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -139,7 +141,29 @@ const StudentManagement = () => {
             if (socket) socket.off('userListUpdate', handleUserListUpdate);
             clearInterval(interval);
         };
-    }, [selectedCourseId, selectedUniversityId, socket]);
+    }, [selectedCourseId, selectedUniversityId, selectedBatchId, socket]);
+
+    // Fetch batches for the batch filter when the course filter changes
+    useEffect(() => {
+        const fetchFilterBatches = async () => {
+            if (selectedCourseId === 'all') {
+                setBatchFilterOptions([]);
+                setSelectedBatchId('all');
+                return;
+            }
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                const { data } = await axios.get(`/api/batches/course/${selectedCourseId}`, config);
+                setBatchFilterOptions(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error('Error fetching filter batches:', err);
+                setBatchFilterOptions([]);
+            }
+            setSelectedBatchId('all');
+        };
+        fetchFilterBatches();
+    }, [selectedCourseId]);
 
     // Update state when URL changes
     useEffect(() => {
@@ -199,7 +223,8 @@ const StudentManagement = () => {
                 headers: { Authorization: `Bearer ${userInfo.token}` },
                 params: {
                     courseId: selectedCourseId,
-                    universityId: selectedUniversityId
+                    universityId: selectedUniversityId,
+                    batchId: selectedBatchId
                 }
             };
             const { data } = await axios.get('/api/admin/students', config);
@@ -614,6 +639,18 @@ const StudentManagement = () => {
                         <option value="all" className="bg-slate-900">All Courses</option>
                         {courses.map(c => (
                             <option key={c._id} value={c._id} className="bg-slate-900">{c.title}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={selectedBatchId}
+                        onChange={(e) => setSelectedBatchId(e.target.value)}
+                        disabled={selectedCourseId === 'all' || batchFilterOptions.length === 0}
+                        title={selectedCourseId === 'all' ? 'Select a course first to filter by batch' : ''}
+                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        <option value="all" className="bg-slate-900">All Batches</option>
+                        {batchFilterOptions.map(b => (
+                            <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>
                         ))}
                     </select>
                     <select

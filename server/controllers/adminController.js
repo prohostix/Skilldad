@@ -608,7 +608,7 @@ const revokePermission = async (req, res) => {
 // @access  Private (Admin)
 const getAllStudents = async (req, res) => {
     try {
-        const { courseId, universityId, registeredBy } = req.query;
+        const { courseId, universityId, registeredBy, batchId } = req.query;
 
         let studentsQuery = `
             SELECT u.id as _id, u.name, u.email, u.role, u.is_verified as "isVerified", 
@@ -650,6 +650,11 @@ const getAllStudents = async (req, res) => {
         if (registeredBy) {
             studentsQuery += ` AND u.registered_by = $${params.length + 1}`;
             params.push(registeredBy);
+        }
+
+        if (batchId && batchId !== 'all') {
+            studentsQuery += ` AND EXISTS (SELECT 1 FROM enrollments e3 WHERE e3.student_id = u.id AND e3.batch_id = $${params.length + 1})`;
+            params.push(batchId);
         }
 
         studentsQuery += ' ORDER BY u.created_at DESC';

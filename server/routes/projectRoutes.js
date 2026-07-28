@@ -58,6 +58,7 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
                 p_def->>'maxFileSize' as "maxFileSize",
                 p_def->'allowedFormats' as "allowedFormats",
                 p_def->>'universityId' as "universityId",
+                p_def->'batchIds' as "batchIds",
                 u.name as "instructorName",
                 u.email as "instructorEmail"
             FROM courses c
@@ -107,9 +108,15 @@ router.get('/course/:courseId', protect, async (req, res) => {
             LEFT JOIN users u ON c.instructor_id = u.id
             CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
             LEFT JOIN projects ps ON ps.course_id = c.id AND ps.student_id = $2 AND (ps.project_id = p_def->>'_id' OR ps.id = p_def->>'_id')
+            LEFT JOIN enrollments en ON en.course_id = c.id AND en.student_id = $2 AND en.status = 'active'
             WHERE c.id = $1 AND c.is_published = true
+            AND (
+                $3 != 'student'
+                OR NOT (p_def ? 'batchIds') OR jsonb_array_length(p_def->'batchIds') = 0
+                OR (en.batch_id IS NOT NULL AND p_def->'batchIds' @> to_jsonb(en.batch_id::text))
+            )
             ORDER BY p_def->>'deadline' ASC
-        `, [req.params.courseId, studentId]);
+        `, [req.params.courseId, studentId, req.user.role]);
 
         res.json(result.rows);
     } catch (error) {
@@ -152,6 +159,10 @@ router.get('/my-projects', protect, async (req, res) => {
             CROSS JOIN LATERAL jsonb_array_elements(c.projects) p_def
             LEFT JOIN projects ps ON (ps.project_id = p_def->>'_id' OR ps.id = p_def->>'_id') AND ps.student_id = e.student_id AND ps.course_id = c.id
             WHERE e.student_id = $1 AND e.status = 'active' AND c.is_published = true
+            AND (
+                NOT (p_def ? 'batchIds') OR jsonb_array_length(p_def->'batchIds') = 0
+                OR (e.batch_id IS NOT NULL AND p_def->'batchIds' @> to_jsonb(e.batch_id::text))
+            )
             ORDER BY p_def->>'deadline' ASC
         `, [studentId]);
 
@@ -233,8 +244,8 @@ router.get('/:id', protect, async (req, res) => {
 // @access  Private (Instructor/Admin)
 router.post('/', protect, authorize('university', 'admin'), async (req, res) => {
     try {
-        const { title, description, deadline, rubric, courseId, universityId, points, difficulty, requirements, submissionGuidelines, maxFileSize, allowedFormats } = req.body;
-        
+        const { title, description, deadline, rubric, courseId, universityId, points, difficulty, requirements, submissionGuidelines, maxFileSize, allowedFormats, batchIds } = req.body;
+
         const newProject = {
             _id: 'proj_' + Date.now(),
             title,
@@ -248,6 +259,7 @@ router.post('/', protect, authorize('university', 'admin'), async (req, res) => 
             submissionGuidelines: submissionGuidelines || '',
             maxFileSize: maxFileSize || '50MB',
             allowedFormats: Array.isArray(allowedFormats) ? allowedFormats : (typeof allowedFormats === 'string' ? allowedFormats.split(',').map(f => f.trim()) : ['.pdf', '.zip', '.doc', '.docx']),
+            batchIds: Array.isArray(batchIds) ? batchIds.map(String) : [],
             instructorId: req.user.id,
             createdAt: new Date().toISOString()
         };
@@ -310,8 +322,9 @@ router.put('/:id', protect, authorize('university', 'admin'), async (req, res) =
                 requirements: typeof req.body.requirements === 'string' ? req.body.requirements.split('\n').filter(r => r.trim()) : req.body.requirements,
                 submissionGuidelines: req.body.submissionGuidelines,
                 maxFileSize: req.body.maxFileSize,
-                allowedFormats: req.body.allowedFormats
-            }), 
+                allowedFormats: req.body.allowedFormats,
+                batchIds: Array.isArray(req.body.batchIds) ? req.body.batchIds.map(String) : []
+            }),
             courseId, 
             userId, 
             req.user.role
