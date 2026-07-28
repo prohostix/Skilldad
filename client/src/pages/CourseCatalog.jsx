@@ -186,9 +186,9 @@ const CourseCatalog = () => {
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-1.5 mb-3">
                                             <Sparkles className="text-primary" size={14} />
-                                            <h2 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                                            <div className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white">
                                                 Featured — Powered by <span className="text-primary">SkillDad</span>
-                                            </h2>
+                                            </div>
                                         </div>
                                         <div className={`grid gap-4.5 sm:gap-5 ${featuredCourses.length === 1 ? 'max-w-sm' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
                                             {featuredCourses.map((course) => (
