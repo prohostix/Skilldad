@@ -104,6 +104,11 @@ const CourseCatalog = () => {
         () => courses.filter(c => (c.programType || c.program_type || 'course') === programType),
         [courses, programType]
     );
+
+    const featuredCourses = useMemo(
+        () => coursesForCategoryList.filter(c => Boolean(c.isFeatured || c.is_featured)),
+        [coursesForCategoryList]
+    );
     const categories = useMemo(() => ['All', ...new Set(coursesForCategoryList.map(c => c.category))], [coursesForCategoryList]);
 
     // Check if the user is already filtering uniquely by backend so we hide the filter
@@ -173,6 +178,26 @@ const CourseCatalog = () => {
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Featured Courses Spotlight */}
+                            {featuredCourses.length > 0 && (
+                                <div className="relative overflow-hidden rounded-[32px] border border-primary/30 bg-gradient-to-br from-primary/10 via-white/[0.02] to-purple-900/10 p-6 md:p-8 shadow-glow-purple text-left mt-4">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-2 mb-6">
+                                            <Sparkles className="text-primary" size={20} />
+                                            <h2 className="text-xs md:text-sm font-black uppercase tracking-[0.25em] text-white">
+                                                Featured — Powered by <span className="text-primary">SkillDad</span>
+                                            </h2>
+                                        </div>
+                                        <div className={`grid gap-4.5 sm:gap-5 ${featuredCourses.length === 1 ? 'max-w-sm' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+                                            {featuredCourses.map((course) => (
+                                                <CourseCard key={course._id} course={course} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
