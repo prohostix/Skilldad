@@ -199,6 +199,25 @@ const CourseCatalog = () => {
                                     }}
                                 />
                             </div>
+                            {/* University Filter - same row as search on desktop */}
+                            {!isFixedUniversity && universities.length > 2 && (
+                                <div className="relative group/univ hidden md:block shrink-0">
+                                    <select
+                                        value={selectedUniversity}
+                                        onChange={(e) => setSelectedUniversity(e.target.value)}
+                                        className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-10 py-2.5 md:py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-xs md:text-sm shadow-xl min-w-[140px] max-w-[200px] truncate"
+                                    >
+                                        <option value="All" className="bg-[#050514]">All Providers</option>
+                                        {universities.filter(u => u !== 'All').map(uni => (
+                                            <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
+                                        <Filter size={14} />
+                                    </div>
+                                </div>
+                            )}
+
                             <button
                                 onClick={() => setIsMobileFilterOpen(true)}
                                 className="md:hidden p-3.5 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 text-white/70 hover:text-white transition-colors flex shrink-0 items-center justify-center relative"
@@ -208,31 +227,6 @@ const CourseCatalog = () => {
                                     <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-primary border border-[#0A0714]"></span>
                                 )}
                             </button>
-                        </div>
-
-                        {/* View Toggle Row Tracker */}
-                        <div className="hidden md:flex items-center justify-end gap-4 flex-wrap md:flex-nowrap">
-                            {/* Actions Right */}
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                                {/* University Filter */}
-                                {!isFixedUniversity && universities.length > 2 && (
-                                    <div className="relative group/univ hidden md:block">
-                                        <select
-                                            value={selectedUniversity}
-                                            onChange={(e) => setSelectedUniversity(e.target.value)}
-                                            className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-10 py-2.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-xs md:text-sm shadow-xl min-w-[140px] max-w-[200px] truncate"
-                                        >
-                                            <option value="All" className="bg-[#050514]">All Providers</option>
-                                            {universities.filter(u => u !== 'All').map(uni => (
-                                                <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
-                                            <Filter size={14} />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
                         </div>
                     </div>
                 </div>
