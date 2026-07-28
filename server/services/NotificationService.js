@@ -149,8 +149,8 @@ class NotificationService {
             let result;
             switch (type) {
                 case 'welcome':
-                    // common_status [Item, Status]
-                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_WELCOME || 'common_status', [`Welcome ${user.name}`, 'Account Active']);
+                    // skilldad_welcome [Name, Status] — template body already says "Welcome {{1}}"
+                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_WELCOME || 'common_status', [user.name, 'Account Active']);
                     break;
                 case 'enrollment':
                     // common_status [Item, Status]
