@@ -12,7 +12,7 @@ import ModernButton from './ui/ModernButton';
 import EnrollEnquiryModal from './ui/EnrollEnquiryModal';
 import { getMediaUrl } from '../utils/media';
 
-const CourseCard = ({ course, compact = false }) => {
+const CourseCard = ({ course, compact = false, hideDescription = false }) => {
     const navigate = useNavigate();
     const [showEnquiry, setShowEnquiry] = useState(false);
 
@@ -103,9 +103,11 @@ const CourseCard = ({ course, compact = false }) => {
                     {course.title}
                 </h3>
 
-                <p className="text-[11px] font-inter text-white/50 line-clamp-2 mb-3 flex-1 leading-relaxed">
-                    {course.description}
-                </p>
+                {!hideDescription && (
+                    <p className="text-[11px] font-inter text-white/50 line-clamp-2 mb-3 flex-1 leading-relaxed">
+                        {course.description}
+                    </p>
+                )}
 
                 <div className="flex items-center justify-end pt-2.5 border-t border-white/5 mt-auto">
                     <ModernButton
