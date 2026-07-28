@@ -87,7 +87,7 @@ class WhatsAppService {
         // common_status [Item, NewStatus]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_EXAM || 'common_status',
+            process.env.GUPSHUP_TEMPLATE_LIVE || 'common_status',
             [`Live Session: ${topic}`, `Scheduled for ${formattedTime}`]
         );
     }
@@ -142,7 +142,7 @@ class WhatsAppService {
         // common_status [Item, NewStatus]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_ENROLLMENT || 'common_status',
+            process.env.GUPSHUP_TEMPLATE_ENROLL || 'common_status',
             [`Enrollment in ${courseTitle}`, `Activated by ${enrolledBy}`]
         );
     }

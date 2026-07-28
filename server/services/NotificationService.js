@@ -109,6 +109,9 @@ class NotificationService {
                 case 'submissionConfirmation':
                     log.status.email = await this._execEmail(user, `Exam Submission Confirmed: ${data.examTitle}`, emailTemplates.submissionConfirmation(user.name, data.examTitle, data.submittedAt, data.isAutoSubmitted));
                     break;
+                case 'courseCompletion':
+                    log.status.email = await this._execEmail(user, `Course Completion Confirmed: ${data.courseTitle}`, emailTemplates.courseCompletion(user.name, data.courseTitle, data.certUrl));
+                    break;
                 default:
                     log.status.email = await this._execEmail(user, 'SkillDad Notification', `<p>Hello ${user.name}, you have a new notification from SkillDad.</p>`);
             }
@@ -175,6 +178,9 @@ class NotificationService {
                     break;
                 case 'submissionConfirmation':
                     result = await whatsAppService.sendTemplateMessage(phone, 'exam_submitted', [user.name, data.examTitle]);
+                    break;
+                case 'courseCompletion':
+                    result = await whatsAppService.notifyCourseCompletion(user.name, phone, data.courseTitle);
                     break;
                 default:
                     result = null;

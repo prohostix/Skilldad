@@ -253,7 +253,7 @@ class ExamNotificationService {
             'examCancelled',
             {
                 examTitle: exam.title,
-                courseTitle: courseTitle,
+                courseTitle: course,
                 reason: reason
             },
             { email: true, whatsapp: false }

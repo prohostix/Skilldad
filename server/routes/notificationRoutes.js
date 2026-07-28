@@ -61,7 +61,7 @@ router.get('/status', protect, authorize('admin'), async (req, res) => {
     res.json({
         whatsapp: {
             enabled: whatsAppService.isEnabled,
-            provider: 'Interakt',
+            provider: 'Gupshup',
             baseUrl: whatsAppService.baseUrl
         },
         email: {

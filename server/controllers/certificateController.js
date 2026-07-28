@@ -1,6 +1,33 @@
 const { query } = require('../config/postgres');
 const FileUploadService = require('../services/FileUploadService');
+const notificationService = require('../services/NotificationService');
 const { v4: uuidv4 } = require('uuid');
+
+// Notify the student that their certificate is ready, once a certificate transitions to ISSUED
+const notifyCertificateIssued = async (certificate) => {
+    try {
+        const [studentRes, courseRes] = await Promise.all([
+            query('SELECT id, name, email, phone, profile FROM users WHERE id = $1', [certificate.student_id]),
+            query('SELECT title FROM courses WHERE id = $1', [certificate.course_id])
+        ]);
+        const student = studentRes.rows[0];
+        if (!student) return;
+
+        let phone = student.phone;
+        if (!phone && student.profile) {
+            const profile = typeof student.profile === 'string' ? JSON.parse(student.profile) : student.profile;
+            phone = profile?.phone;
+        }
+
+        await notificationService.send(
+            { _id: student.id, name: student.name, email: student.email, phone },
+            'courseCompletion',
+            { courseTitle: courseRes.rows[0]?.title || 'Your Course', certUrl: certificate.file_url }
+        );
+    } catch (error) {
+        console.error('[Certificate] Failed to send completion notification:', error.message);
+    }
+};
 
 /**
  * @desc    Apply for a certificate
@@ -162,6 +189,10 @@ const updateCertificateStatus = async (req, res) => {
             return res.status(404).json({ message: 'Certificate not found' });
         }
 
+        if (status === 'ISSUED') {
+            notifyCertificateIssued(certRes.rows[0]).catch(() => {});
+        }
+
         res.json({ message: 'Certificate status updated', certificate: certRes.rows[0] });
     } catch (error) {
         console.error('Update Status Error:', error);
@@ -202,10 +233,12 @@ const uploadCertificateFile = async (req, res) => {
         const uploadResult = await FileUploadService.uploadToLocal(file, relativePath);
 
         // 3. Update DB
-        await query(
-            'UPDATE certificates SET file_url = $1, status = $2, issue_date = NOW(), updated_at = NOW() WHERE id = $3',
+        const updatedRes = await query(
+            'UPDATE certificates SET file_url = $1, status = $2, issue_date = NOW(), updated_at = NOW() WHERE id = $3 RETURNING *',
             [uploadResult.url, 'ISSUED', id]
         );
+
+        notifyCertificateIssued(updatedRes.rows[0]).catch(() => {});
 
         res.json({ message: 'Certificate uploaded and issued successfully', url: uploadResult.url });
     } catch (error) {
