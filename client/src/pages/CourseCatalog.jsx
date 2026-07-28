@@ -181,12 +181,12 @@ const CourseCatalog = () => {
 
                             {/* Featured Courses Spotlight */}
                             {featuredCourses.length > 0 && (
-                                <div className="relative overflow-hidden rounded-[32px] border border-primary/30 bg-gradient-to-br from-primary/10 via-white/[0.02] to-purple-900/10 p-6 md:p-8 shadow-glow-purple text-left mt-4">
+                                <div className="relative overflow-hidden rounded-[24px] border border-primary/30 bg-gradient-to-br from-primary/10 via-white/[0.02] to-purple-900/10 p-4 md:p-5 shadow-glow-purple text-left mt-4">
                                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                                     <div className="relative z-10">
-                                        <div className="flex items-center gap-2 mb-6">
-                                            <Sparkles className="text-primary" size={20} />
-                                            <h2 className="text-xs md:text-sm font-black uppercase tracking-[0.25em] text-white">
+                                        <div className="flex items-center gap-1.5 mb-3">
+                                            <Sparkles className="text-primary" size={14} />
+                                            <h2 className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white">
                                                 Featured — Powered by <span className="text-primary">SkillDad</span>
                                             </h2>
                                         </div>
