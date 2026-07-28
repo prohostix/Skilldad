@@ -153,8 +153,8 @@ class NotificationService {
                     result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_WELCOME || 'common_status', [user.name]);
                     break;
                 case 'enrollment':
-                    // common_status [Item, Status]
-                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_ENROLL || 'common_status', [`Course: ${data.courseTitle}`, 'Enrollment Confirmed']);
+                    // skilldad_enrollment [Name, CourseTitle]
+                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_ENROLL || 'common_status', [user.name, data.courseTitle]);
                     break;
                 case 'liveSession':
                     result = await whatsAppService.notifyLiveSessionScheduled(user.name, phone, data.topic, data.startTime);
