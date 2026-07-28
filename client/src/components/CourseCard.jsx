@@ -12,7 +12,7 @@ import ModernButton from './ui/ModernButton';
 import EnrollEnquiryModal from './ui/EnrollEnquiryModal';
 import { getMediaUrl } from '../utils/media';
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, compact = false }) => {
     const navigate = useNavigate();
     const [showEnquiry, setShowEnquiry] = useState(false);
 
@@ -32,7 +32,7 @@ const CourseCard = ({ course }) => {
         >
             {/* Thumbnail Section */}
             <div
-                className="relative aspect-video w-full overflow-hidden bg-white/5 cursor-pointer"
+                className={`relative w-full overflow-hidden bg-white/5 cursor-pointer ${compact ? 'aspect-[21/9]' : 'aspect-video'}`}
                 onClick={() => navigate(`/course/${course._id}`)}
             >
                 <img
