@@ -81,11 +81,11 @@ const CapabilitiesSection = () => {
     ];
 
     return (
-        <div ref={sectionRef} id="capabilities" style={{ position: 'relative' }} className="py-8 md:py-16 px-6 bg-transparent relative overflow-hidden block">
+        <div ref={sectionRef} id="capabilities" style={{ position: 'relative' }} className="py-6 md:py-10 px-6 bg-transparent relative overflow-hidden block">
             <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
 
                 {/* Left Side: Content */}
-                <div className="space-y-6 lg:sticky lg:top-32 py-12">
+                <div className="space-y-6 lg:sticky lg:top-32 py-4">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -105,6 +105,16 @@ const CapabilitiesSection = () => {
                         For <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-accent">Dynamic</span> Teams
                     </motion.h2>
 
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1 }}
+                        className="text-text-secondary text-sm md:text-base leading-relaxed max-w-md font-inter"
+                    >
+                        A growing toolkit built to keep students, universities, and enterprise partners moving in sync — from adaptive scaling to real-time insight, without the operational overhead.
+                    </motion.p>
+
                     <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
@@ -123,7 +133,7 @@ const CapabilitiesSection = () => {
                 </div>
 
                 {/* Right Side: Animated Timeline */}
-                <div className="relative pl-12 md:pl-24 py-12">
+                <div className="relative pl-12 md:pl-24 py-4">
                     {/* Vertical Line Container */}
                     <div className="absolute left-4 md:left-10 top-0 bottom-0 w-[2px]">
                         <div className="absolute inset-0 bg-white/10 rounded-full" />
@@ -152,7 +162,7 @@ const CapabilitiesSection = () => {
                         />
                     </div>
 
-                    <div className="space-y-12 md:space-y-24">
+                    <div className="space-y-8 md:space-y-14">
                         {capabilities.map((cap, index) => (
                             <div key={index} className="relative group/cap px-4">
                                 <motion.div
