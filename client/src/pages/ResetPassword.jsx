@@ -10,9 +10,7 @@ import {
     CheckCircle2,
     ShieldAlert,
     Eye,
-    EyeOff,
-    ShieldCheck,
-    Check
+    EyeOff
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
@@ -78,11 +76,7 @@ const ResetPassword = () => {
                 className="w-full max-w-md relative z-10"
             >
                 <div className="text-center mb-8 space-y-2">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/20 border border-primary/30 text-primary mb-4">
-                        <Lock size={32} />
-                    </div>
-                    <h1 className="text-sm font-black text-primary uppercase tracking-[0.4em] font-inter">Security Protocol</h1>
-                    <p className="text-2xl font-bold text-white font-jakarta tracking-tight">Reset Password</p>
+                    <h1 className="text-2xl font-bold text-white font-jakarta tracking-tight">Reset Password</h1>
                 </div>
 
                 <GlassCard className="!p-6 md:!p-8 shadow-glow-purple border-white/20">
@@ -178,14 +172,11 @@ const ResetPassword = () => {
                             </div>
 
                             <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl space-y-3">
-                                <div className="flex items-center space-x-2 text-primary">
-                                    <ShieldCheck size={16} />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Security Protocol</span>
-                                </div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider font-inter text-primary">Password Requirements</span>
                                 <ul className="space-y-1.5">
                                     {[
                                         'Minimum 8 characters',
-                                        'Include uppercase & lowercase',
+                                        'Include an uppercase letter',
                                         'Include at least one number',
                                         'Include a special character'
                                     ].map((req, i) => (
