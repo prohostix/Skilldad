@@ -79,6 +79,28 @@ const countryCodes = [
     { code: '+977', name: 'Nepal', flag: '🇳🇵', iso: 'np' },
 ];
 
+// Exact national mobile-number digit count (excluding country code) for the
+// countries above where the length is fixed. Countries not listed here (or
+// with genuinely variable-length numbers) fall back to a generic 7-14 digit
+// range check.
+const countryPhoneLengths = {
+    '+91': 10,   // India
+    '+1': 10,    // USA/Canada
+    '+44': 10,   // UK
+    '+971': 9,   // UAE
+    '+61': 9,    // Australia
+    '+65': 8,    // Singapore
+    '+966': 9,   // Saudi Arabia
+    '+974': 8,   // Qatar
+    '+965': 8,   // Kuwait
+    '+968': 8,   // Oman
+    '+973': 8,   // Bahrain
+    '+92': 10,   // Pakistan
+    '+880': 10,  // Bangladesh
+    '+94': 9,    // Sri Lanka
+    '+977': 10,  // Nepal
+};
+
 const Register = () => {
     const { user, updateUser } = useUser();
     const [formData, setFormData] = useState({
@@ -107,6 +129,12 @@ const Register = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handlePhoneChange = (e) => {
+        const digitsOnly = e.target.value.replace(/\D/g, '');
+        const maxLength = countryPhoneLengths[formData.countryCode] || 14;
+        setFormData({ ...formData, phone: digitsOnly.slice(0, maxLength) });
     };
 
     const handleSubmit = async (e) => {
@@ -164,10 +192,23 @@ const Register = () => {
     };
 
     const nextStep = () => {
-        if (!formData.phone || formData.phone.trim() === '') {
+        const digitsOnly = formData.phone.replace(/\D/g, '');
+        if (!digitsOnly) {
             setError('WhatsApp number is required.');
             return;
         }
+
+        const expectedLength = countryPhoneLengths[formData.countryCode];
+        if (expectedLength) {
+            if (digitsOnly.length !== expectedLength) {
+                setError(`Enter a valid ${expectedLength}-digit number for ${formData.countryCode}.`);
+                return;
+            }
+        } else if (digitsOnly.length < 7 || digitsOnly.length > 14) {
+            setError('Enter a valid phone number.');
+            return;
+        }
+
         setError('');
         setStep(step + 1);
     };
@@ -268,10 +309,10 @@ const Register = () => {
                                         <div className="space-y-1.5 text-left">
                                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 font-inter">WhatsApp Number</label>
                                             <div className={`flex items-center gap-2 transition-all duration-300 ${isFocused === 'phone' ? 'scale-[1.01]' : ''}`}>
-                                                <CountrySelector 
-                                                    countryCodes={countryCodes} 
-                                                    selectedCode={formData.countryCode} 
-                                                    onSelect={(code) => setFormData({ ...formData, countryCode: code })} 
+                                                <CountrySelector
+                                                    countryCodes={countryCodes}
+                                                    selectedCode={formData.countryCode}
+                                                    onSelect={(code) => setFormData({ ...formData, countryCode: code, phone: '' })}
                                                 />
                                                 <div className="relative flex-1">
                                                     <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'phone' ? 'text-primary' : 'text-slate-400'}`}>
@@ -279,17 +320,24 @@ const Register = () => {
                                                     </div>
                                                     <input
                                                         type="tel"
+                                                        inputMode="numeric"
                                                         name="phone"
                                                         required
                                                         placeholder="98765 43210"
+                                                        maxLength={countryPhoneLengths[formData.countryCode] || 14}
                                                         onFocus={() => setIsFocused('phone')}
                                                         onBlur={() => setIsFocused('')}
-                                                        onChange={handleChange}
+                                                        onChange={handlePhoneChange}
                                                         value={formData.phone}
                                                         className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white placeholder:text-slate-500 text-sm font-medium"
                                                     />
                                                 </div>
                                             </div>
+                                            {countryPhoneLengths[formData.countryCode] && (
+                                                <p className="text-[10px] text-slate-500 ml-1 font-inter">
+                                                    {formData.phone.length}/{countryPhoneLengths[formData.countryCode]} digits
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     {/* Account Tier selection removed as per requirements */}
