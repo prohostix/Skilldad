@@ -97,11 +97,11 @@ const templates = {
     welcome: (name, role) => {
         const content = `
             <p style="${baseStyle.p}">Hello <strong>${name}</strong>,</p>
-            <p style="${baseStyle.p}">Welcome to the network. Your account as a <strong>${role}</strong> is now initialized and ready for deployment.</p>
-            <p style="${baseStyle.p}">Explore our curriculum matrix and start expanding your neural horizons today.</p>
+            <p style="${baseStyle.p}">Welcome to SkillDad! Your account has been created successfully as a <strong>${role}</strong>.</p>
+            <p style="${baseStyle.p}">You can now log in and start exploring our courses.</p>
         `;
-        return layout('Integration Successful', content, {
-            text: 'Launch Dashboard',
+        return layout('Welcome to SkillDad', content, {
+            text: 'Go to Dashboard',
             url: getClientUrl('/login')
         });
     },
