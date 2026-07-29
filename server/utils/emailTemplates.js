@@ -155,11 +155,11 @@ const templates = {
     passwordReset: (name, url) => {
         const content = `
             <p style="${baseStyle.p}">Hello <strong>${name}</strong>,</p>
-            <p style="${baseStyle.p}">A neural sync reset was requested for your account. If this wasn't you, please disregard this message.</p>
-            <p style="${baseStyle.p}">This link is valid for 10 cycles (10 minutes).</p>
+            <p style="${baseStyle.p}">We received a request to reset your SkillDad account password. If you didn't request this, you can safely ignore this email.</p>
+            <p style="${baseStyle.p}">This link will expire in 10 minutes.</p>
         `;
-        return layout('Security Protocol: Password Reset', content, {
-            text: 'Reset Passphrase',
+        return layout('Reset Your Password', content, {
+            text: 'Reset Password',
             url: url // URL passed from controller which already has host
         });
     },

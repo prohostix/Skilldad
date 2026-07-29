@@ -373,7 +373,7 @@ module.exports = {
                 const html = emailTemplates.passwordReset(user.name, resetUrl);
                 await sendEmail({
                     email: user.email,
-                    subject: 'SkillDad: Password Recovery Protocol',
+                    subject: 'Reset Your SkillDad Password',
                     html: html
                 });
 
