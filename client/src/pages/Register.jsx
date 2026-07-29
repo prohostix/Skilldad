@@ -101,6 +101,21 @@ const countryPhoneLengths = {
     '+977': 10,  // Nepal
 };
 
+// Catches obviously-fake placeholder numbers that pass a plain length check
+// (e.g. 1234567890, 0000000000, 9876543210) — a real number is never a
+// simple run of identical or consecutive digits.
+const isSequentialOrRepeated = (digits) => {
+    if (/^(\d)\1+$/.test(digits)) return true; // all the same digit
+    let ascending = true, descending = true;
+    for (let i = 1; i < digits.length; i++) {
+        const prev = Number(digits[i - 1]);
+        const curr = Number(digits[i]);
+        if (curr !== (prev + 1) % 10) ascending = false;
+        if (curr !== (prev + 9) % 10) descending = false;
+    }
+    return ascending || descending;
+};
+
 const Register = () => {
     const { user, updateUser } = useUser();
     const [formData, setFormData] = useState({
@@ -206,6 +221,17 @@ const Register = () => {
             }
         } else if (digitsOnly.length < 7 || digitsOnly.length > 14) {
             setError('Enter a valid phone number.');
+            return;
+        }
+
+        // Indian mobile numbers always start with 6, 7, 8, or 9
+        if (formData.countryCode === '+91' && !/^[6-9]/.test(digitsOnly)) {
+            setError('Enter a valid Indian mobile number (must start with 6, 7, 8, or 9).');
+            return;
+        }
+
+        if (isSequentialOrRepeated(digitsOnly)) {
+            setError('Enter a real phone number — that looks like a placeholder.');
             return;
         }
 

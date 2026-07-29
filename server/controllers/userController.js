@@ -12,6 +12,21 @@ const generateToken = (id) => {
     });
 };
 
+// A real phone number is never a simple run of identical or consecutive
+// digits (e.g. 1234567890, 0000000000, 9876543210) — catches placeholder
+// values that would otherwise pass a plain length check.
+const isSequentialOrRepeated = (digits) => {
+    if (/^(\d)\1+$/.test(digits)) return true;
+    let ascending = true, descending = true;
+    for (let i = 1; i < digits.length; i++) {
+        const prev = Number(digits[i - 1]);
+        const curr = Number(digits[i]);
+        if (curr !== (prev + 1) % 10) ascending = false;
+        if (curr !== (prev + 9) % 10) descending = false;
+    }
+    return ascending || descending;
+};
+
 // @desc    Register new user
 // @route   POST /api/users
 // @access  Public
@@ -19,6 +34,32 @@ const registerUser = async (req, res) => {
     try {
         const { name, email, password, phone, role = 'student', discountRate = 0, universityId } = req.body;
         const lowerEmail = email.toLowerCase().trim();
+
+        // This route also doubles as the endpoint admin/university/partner panels use
+        // to create student accounts directly, where the phone field is optional. Only
+        // enforce a required, validated phone for genuine public self-registration
+        // (no auth token) — for admin-initiated creation, just sanity-check it if given.
+        const isAdminInitiated = !!req.headers.authorization;
+        const phoneDigits = (phone || '').replace(/^\+/, '').replace(/\D/g, '');
+        // The sequential/repeated check must run on the national number alone —
+        // a country code prefix (e.g. "91") breaks the digit pattern of an
+        // otherwise-obvious placeholder like 9876543210.
+        const isIndianWithCode = phoneDigits.startsWith('91') && phoneDigits.length === 12;
+        const nationalNumber = isIndianWithCode ? phoneDigits.slice(2) : phoneDigits;
+
+        if (!isAdminInitiated) {
+            if (!phoneDigits || phoneDigits.length < 7 || phoneDigits.length > 15) {
+                return res.status(400).json({ message: 'Please provide a valid phone number.' });
+            }
+            if (isIndianWithCode && !/^[6-9]/.test(nationalNumber)) {
+                return res.status(400).json({ message: 'Enter a valid Indian mobile number (must start with 6, 7, 8, or 9).' });
+            }
+            if (isSequentialOrRepeated(nationalNumber)) {
+                return res.status(400).json({ message: 'Enter a real phone number — that looks like a placeholder.' });
+            }
+        } else if (phoneDigits && (phoneDigits.length < 7 || phoneDigits.length > 15 || isSequentialOrRepeated(nationalNumber))) {
+            return res.status(400).json({ message: 'Enter a valid phone number, or leave it blank.' });
+        }
 
         // 1. Check if user exists
         const userExists = await query('SELECT id FROM users WHERE email = $1', [lowerEmail]);
