@@ -246,6 +246,21 @@ const templates = {
         });
     },
 
+    sessionCompleted: (name, topic, courseTitle) => {
+        const content = `
+            <p style="${baseStyle.p}">Hello <strong>${name}</strong>,</p>
+            <p style="${baseStyle.p}">The live session for <strong>${courseTitle}</strong> has ended.</p>
+            <div style="${baseStyle.highlight}">
+                <p style="margin: 0;"><strong style="color: #7C3AED;">Topic:</strong> ${topic}</p>
+            </div>
+            <p style="${baseStyle.p}">If a recording is available, you can find it in your dashboard under Live Classes.</p>
+        `;
+        return layout('Live Session Completed', content, {
+            text: 'View Live Classes',
+            url: getClientUrl('/dashboard/live-classes')
+        });
+    },
+
     examScheduledStudent: (name, examTitle, courseTitle, scheduledDate) => {
         const content = `
             <p style="${baseStyle.p}">Hello <strong>${name}</strong>,</p>

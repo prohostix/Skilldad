@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const { query } = require('../config/postgres');
 const resultService = require('../services/resultService');
 const auditLogService = require('../services/auditLogService');
+const notificationService = require('../services/NotificationService');
 
 /**
  * @desc    Publish results for an exam
@@ -44,10 +45,16 @@ const publishResults = asyncHandler(async (req, res) => {
 
   // 4. Update exam status
   await query(`
-    UPDATE exams 
-    SET status = 'published', updated_at = NOW() 
+    UPDATE exams
+    SET status = 'published', updated_at = NOW()
     WHERE id = $1
   `, [examId]);
+
+  // 5. Notify every student who has a result for this exam — scoped by construction
+  // to only students who actually took it (which is itself batch-gated at submission time).
+  notifyResultRecipients(examId, exam.title).catch(err =>
+    console.error('[Result Notify] Failed to notify students:', err.message)
+  );
 
   res.json({
     success: true,
@@ -55,6 +62,36 @@ const publishResults = asyncHandler(async (req, res) => {
     publishedAt
   });
 });
+
+const notifyResultRecipients = async (examId, examTitle) => {
+  const recipientsRes = await query(`
+    SELECT r.obtained_marks as "obtainedMarks", r.total_marks as "totalMarks",
+           r.percentage, r.is_passed as "isPassed",
+           u.id, u.name, u.email, u.phone, u.profile
+    FROM results r
+    JOIN users u ON r.student_id = u.id
+    WHERE r.exam_id = $1
+  `, [examId]);
+
+  for (const student of recipientsRes.rows) {
+    let phone = student.phone;
+    if (!phone && student.profile) {
+      const profile = typeof student.profile === 'string' ? JSON.parse(student.profile) : student.profile;
+      phone = profile?.phone;
+    }
+
+    notificationService.send(
+      { _id: student.id, name: student.name, email: student.email, phone },
+      'examResult',
+      {
+        examTitle,
+        score: `${student.obtainedMarks}/${student.totalMarks}`,
+        percentage: parseFloat(student.percentage),
+        passed: student.isPassed
+      }
+    ).catch(err => console.error(`[Result Notify] Failed for student ${student.id}:`, err.message));
+  }
+};
 
 /**
  * @desc    Get all results for an exam

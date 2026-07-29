@@ -7,7 +7,7 @@ const notificationService = require('../services/NotificationService');
 /**
  * Helper to notify all students enrolled in a course or all students in a university
  */
-const notifyEnrolledStudents = async (session, title, message) => {
+const notifyEnrolledStudents = async (session, title, message, notificationType = 'liveSession', notificationOptions = { email: true, whatsapp: true }) => {
     try {
         let studentIds = [];
         let courseTitle = 'Your Course';
@@ -67,14 +67,14 @@ const notifyEnrolledStudents = async (session, title, message) => {
                 try {
                     await notificationService.send(
                         student,
-                        'liveSession',
+                        notificationType,
                         {
                             topic: session.topic,
                             startTime: session.start_time,
                             description: session.description || 'No description provided',
                             courseTitle
                         },
-                        { email: true, whatsapp: true }
+                        notificationOptions
                     );
                 } catch (err) {
                     console.error(`[Notification] Failed to send WhatsApp/Email to ${student.name}:`, err.message);
@@ -315,10 +315,25 @@ const startSession = asyncHandler(async (req, res) => {
 // @desc    End session
 const endSession = asyncHandler(async (req, res) => {
     const { id } = req.params;
+
+    const resSet = await query("SELECT * FROM live_sessions WHERE id = $1", [id]);
+    const session = resSet.rows[0];
+
     await query("UPDATE live_sessions SET status = 'ended' WHERE id = $1", [id]);
-    
+
     // Jitsi recording syncing logic will be handled via webhooks or manual trigger
     // placeholder for future Jitsi recording sync integration
+
+    if (session) {
+        // Email only — no approved WhatsApp template exists for session completion
+        notifyEnrolledStudents(
+            session,
+            'Live Class Completed',
+            `The session "${session.topic}" has ended.`,
+            'liveSessionCompleted',
+            { email: true, whatsapp: false }
+        );
+    }
 
     res.json({ success: true, message: 'Session ended' });
 });

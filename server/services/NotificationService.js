@@ -92,6 +92,9 @@ class NotificationService {
                 case 'liveSessionUpdate':
                     log.status.email = await this._execEmail(user, 'Session Recalibration', emailTemplates.sessionUpdate(user.name, data.topic, data.startTime, data.changes));
                     break;
+                case 'liveSessionCompleted':
+                    log.status.email = await this._execEmail(user, `Live Session Completed: ${data.topic}`, emailTemplates.sessionCompleted(user.name, data.topic, data.courseTitle));
+                    break;
                 case 'exam_scheduled':
                 case 'exam':
                     log.status.email = await this._execEmail(user, `Exam Protocol: ${data.examTitle}`, emailTemplates.examScheduledStudent(user.name, data.examTitle, data.courseTitle, data.scheduledDate));
