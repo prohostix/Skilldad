@@ -187,6 +187,13 @@ const Login = () => {
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
+                            <Link
+                                to="/forgot-password"
+                                title="Recover Access"
+                                className="self-end text-[10px] font-bold text-primary hover:text-primary-light transition-colors uppercase tracking-wider"
+                            >
+                                Forgot Password?
+                            </Link>
                         </div>
 
                         <ModernButton
