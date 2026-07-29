@@ -6,8 +6,7 @@ import {
     Mail,
     ArrowLeft,
     ChevronRight,
-    Loader2,
-    ShieldCheck
+    Loader2
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
@@ -56,11 +55,7 @@ const ForgotPassword = () => {
                 className="w-full max-w-md relative z-10"
             >
                 <div className="text-center mb-8 space-y-2">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/20 border border-primary/30 text-primary mb-4">
-                        <ShieldCheck size={32} />
-                    </div>
-                    <h1 className="text-sm font-black text-primary uppercase tracking-[0.4em] font-inter">Security Protocol</h1>
-                    <p className="text-2xl font-bold text-white font-jakarta tracking-tight">Recover Password</p>
+                    <h1 className="text-2xl font-bold text-white font-jakarta tracking-tight">Recover Password</h1>
                 </div>
 
                 <GlassCard className="!p-6 md:!p-8 shadow-glow-purple border-white/20">
