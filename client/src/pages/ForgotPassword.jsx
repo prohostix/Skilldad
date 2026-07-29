@@ -27,7 +27,7 @@ const ForgotPassword = () => {
         setLoading(true);
         try {
             const { data } = await axios.post('/api/users/forgotpassword', { email });
-            setMessage('Neural reset link dispatched to your inbox. Please check your mail within 10 minutes.');
+            setMessage("We've sent a password reset link to your email. Please check your inbox within the next 10 minutes.");
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to dispatch reset link. Please check the email address.');
         } finally {
