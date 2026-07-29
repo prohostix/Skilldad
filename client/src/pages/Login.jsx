@@ -160,18 +160,9 @@ const Login = () => {
 
                         {/* Password Field */}
                         <div className="flex flex-col gap-1.5 text-left">
-                            <div className="flex justify-between items-center ml-0.5">
-                                <label className="text-[10px] font-bold text-white/70 uppercase tracking-[0.15em] font-inter">
-                                    Password
-                                </label>
-                                <Link 
-                                    to="/forgot-password" 
-                                    title="Recover Access" 
-                                    className="text-[10px] font-bold text-primary hover:text-primary-light transition-colors uppercase tracking-wider"
-                                >
-                                    Forgot Password?
-                                </Link>
-                            </div>
+                            <label className="text-[10px] font-bold text-white/70 uppercase tracking-[0.15em] ml-0.5 font-inter">
+                                Password
+                            </label>
                             <div className={`relative transition-all duration-300 ${isFocused === 'password' ? 'scale-[1.01]' : ''}`}>
                                 <div className={`absolute inset-y-0 left-3.5 flex items-center pointer-events-none transition-colors ${isFocused === 'password' ? 'text-primary' : 'text-white/40'}`}>
                                     <Lock size={16} />
