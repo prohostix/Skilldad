@@ -612,7 +612,7 @@ const LandingPage = () => {
             </section>
 
             {/* ── Managed by IITans Section ── */}
-            <section className="relative pt-8 md:pt-12 pb-16 md:pb-24 px-6 z-10 bg-black overflow-hidden section-optimize">
+            <section className="relative pt-8 md:pt-12 pb-8 md:pb-12 px-6 z-10 bg-black overflow-hidden section-optimize">
                 <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
                 
                 <div className="max-w-7xl mx-auto">
@@ -874,7 +874,7 @@ const LandingPage = () => {
             )}
 
             {/* SkillDad Directors Section */}
-            <section className="relative py-16 md:py-24 px-6 z-10 bg-transparent section-optimize">
+            <section className="relative pt-8 md:pt-12 pb-16 md:pb-24 px-6 z-10 bg-transparent section-optimize">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <motion.h2
