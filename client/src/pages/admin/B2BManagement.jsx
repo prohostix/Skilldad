@@ -15,8 +15,6 @@ import {
     Layers,
     BarChart3,
     Edit3,
-    FileText,
-    Upload,
     Eye,
     Wallet,
     Ticket,
@@ -67,13 +65,6 @@ const B2BManagement = () => {
     const [selectedCourse, setSelectedCourse] = useState('');
     const [timeframe, setTimeframe] = useState('monthly');
     const [loading, setLoading] = useState(false);
-    const [openSendDoc, setOpenSendDoc] = useState(false);
-    const [uploading, setUploading] = useState(false);
-    const [docData, setDocData] = useState({
-        title: '',
-        type: 'exam_paper',
-        file: null
-    });
     const [openGenerateCode, setOpenGenerateCode] = useState(false);
     const [codeData, setCodeData] = useState({
         code: '',
@@ -295,40 +286,6 @@ const B2BManagement = () => {
     const confirmAssignment = (partnerName) => {
         showToast(`Assigned ${selectedCourse} curriculum to ${partnerName}`, 'success');
         setOpenAssign(false);
-    };
-
-    const handleSendDocument = async (e) => {
-        e.preventDefault();
-        if (!docData.file || !docData.title) {
-            showToast('Please provide a title and select a file', 'warning');
-            return;
-        }
-
-        setUploading(true);
-        try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
-            const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${userInfo.token}`
-                }
-            };
-
-            const formData = new FormData();
-            formData.append('document', docData.file);
-            formData.append('title', docData.title);
-            formData.append('type', docData.type);
-            formData.append('recipientUniversity', selectedPartner._id);
-
-            await axios.post('/api/documents/upload', formData, config);
-            showToast(`Document sent successfully to ${selectedPartner.name}`, 'success');
-            setOpenSendDoc(false);
-            setDocData({ title: '', type: 'exam_paper', file: null });
-        } catch (error) {
-            showToast(error.response?.data?.message || 'Upload failed', 'error');
-        } finally {
-            setUploading(false);
-        }
     };
 
     const handleGenerateCode = async (e) => {
@@ -632,17 +589,6 @@ const B2BManagement = () => {
                                             title="View Partner Statistics"
                                         >
                                             <Eye size={18} />
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedPartner(partner);
-                                                setOpenSendDoc(true);
-                                            }}
-                                            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-indigo-400"
-                                            title="Send Exam Documents"
-                                        >
-                                            <Upload size={18} />
                                         </button>
                                         <button
                                             onClick={(e) => {
@@ -1007,90 +953,6 @@ const B2BManagement = () => {
                             </button>
                         </GlassCard>
                     </div >
-                )
-            }
-
-            {/* Send Exam Documents Modal */}
-            {
-                openSendDoc && (
-                    <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenSendDoc(false)}>
-                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl" onClick={e => e.stopPropagation()}>
-                            <h3 className="text-lg font-semibold text-white font-inter mb-2">Send Official Documents</h3>
-                            <p className="text-sm text-white/60 mb-6 font-inter">Target: <span className="text-indigo-400 font-bold">{selectedPartner?.name}</span></p>
-
-                            <form onSubmit={handleSendDocument} className="space-y-5">
-                                <div>
-                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Document Title</label>
-                                    <input
-                                        type="text"
-                                        required
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-indigo-500 font-inter"
-                                        placeholder="e.g. Final Exam Paper - Spring 2024"
-                                        value={docData.title}
-                                        onChange={e => setDocData({ ...docData, title: e.target.value })}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Document Category</label>
-                                    <select
-                                        className="w-full px-4 py-3 bg-slate-900 border border-white/20 rounded-xl text-white focus:outline-none focus:border-indigo-500 font-inter"
-                                        value={docData.type}
-                                        onChange={e => setDocData({ ...docData, type: e.target.value })}
-                                    >
-                                        <option value="exam_paper">Exam Question Paper</option>
-                                        <option value="answer_sheet">Official Answer Sheet</option>
-                                        <option value="academic">Academic Material</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Select File (PDF/DOCX/ZIP)</label>
-                                    <div className="relative group">
-                                        <input
-                                            type="file"
-                                            accept=".pdf,.doc,.docx,.zip,.rar"
-                                            required
-                                            className="hidden"
-                                            id="doc-file-upload"
-                                            onChange={e => setDocData({ ...docData, file: e.target.files[0] })}
-                                        />
-                                        <label
-                                            htmlFor="doc-file-upload"
-                                            className="w-full flex flex-col items-center justify-center px-4 py-8 border-2 border-dashed border-white/10 hover:border-indigo-500/50 rounded-2xl bg-white/5 cursor-pointer transition-all"
-                                        >
-                                            <FileText className={`${docData.file ? 'text-indigo-400' : 'text-white/20'} mb-2`} size={32} />
-                                            <span className="text-sm text-white/60 font-medium">
-                                                {docData.file ? docData.file.name : 'Click to select or drag file'}
-                                            </span>
-                                            {docData.file && (
-                                                <span className="text-[10px] text-white/30 mt-1">
-                                                    {(docData.file.size / (1024 * 1024)).toFixed(2)} MB
-                                                </span>
-                                            )}
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-3 pt-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setOpenSendDoc(false)}
-                                        className="flex-1 py-3 text-sm font-bold text-white/40 hover:text-white transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <ModernButton
-                                        type="submit"
-                                        className="flex-1 !py-3 tracking-widest font-black uppercase text-xs"
-                                        disabled={uploading}
-                                    >
-                                        {uploading ? 'Transmitting...' : 'Send Securely'}
-                                    </ModernButton>
-                                </div>
-                            </form>
-                        </GlassCard>
-                    </div>
                 )
             }
 
