@@ -451,6 +451,28 @@ const LandingPage = () => {
                             >
                                 Experience a platform where students, companies, and universities harmonize in a singular high-fidelity learning matrix.
                             </motion.p>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: 0.3 }}
+                                className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 max-w-xl mx-auto lg:mx-0 px-4 sm:px-0"
+                            >
+                                {[
+                                    { icon: Users, title: 'Students', desc: 'Learn in-demand skills through guided, outcome-driven tracks.' },
+                                    { icon: Building2, title: 'Universities', desc: 'Deliver accredited programs through a modern digital campus.' },
+                                    { icon: Briefcase, title: 'Companies', desc: 'Hire job-ready talent straight from certified skill tracks.' }
+                                ].map((item, i) => (
+                                    <div key={i} className="flex flex-col items-center lg:items-start text-center lg:text-left p-4 bg-white/[0.03] rounded-2xl border border-white/10 hover:border-primary/30 transition-all">
+                                        <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-3">
+                                            <item.icon size={18} />
+                                        </div>
+                                        <h4 className="text-sm font-bold text-white mb-1">{item.title}</h4>
+                                        <p className="text-xs text-text-secondary leading-relaxed">{item.desc}</p>
+                                    </div>
+                                ))}
+                            </motion.div>
                         </div>
 
                         {/* Right Side - 3D Animation */}
