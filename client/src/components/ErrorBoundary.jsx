@@ -53,6 +53,21 @@ class ErrorBoundary extends React.Component {
     window.location.href = '/';
   };
 
+  handleHardReload = () => {
+    window.location.reload();
+  };
+
+  // A stale-chunk failure means the tab was open across a deploy and the old
+  // hashed chunk filename no longer exists on the server. lazyRetry already
+  // reloads once automatically to recover from this — if the error still
+  // reached here, that one retry wasn't enough (e.g. another deploy landed
+  // in between), so "Try Again" (a React state reset) won't help; only a
+  // real page reload fetches the current build.
+  isStaleChunkError = () => {
+    const message = this.state.error?.message || '';
+    return /Failed to fetch dynamically imported module|Loading chunk|Importing a module script failed|error loading dynamically imported module/i.test(message);
+  };
+
   render() {
     if (this.state.hasError) {
       const { error, errorInfo, errorCount } = this.state;
@@ -65,6 +80,32 @@ class ErrorBoundary extends React.Component {
           errorInfo,
           resetError: this.handleReset
         });
+      }
+
+      if (this.isStaleChunkError()) {
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+            <GlassCard className="max-w-2xl w-full p-8">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/20 rounded-full mb-6">
+                  <RefreshCw size={40} className="text-primary" />
+                </div>
+                <h1 className="text-3xl font-black text-white mb-3">
+                  A New Version Is Available
+                </h1>
+                <p className="text-white/60 mb-6">
+                  SkillDad was updated while this page was open. Please refresh to load the latest version.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <ModernButton onClick={this.handleHardReload} className="!bg-primary hover:!bg-primary-dark">
+                    <RefreshCw size={18} className="mr-2" />
+                    Refresh Now
+                  </ModernButton>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        );
       }
 
       // Default error UI
