@@ -13,6 +13,7 @@ import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const CertificateManagement = () => {
     const [certificates, setCertificates] = useState([]);
+    const [universities, setUniversities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -73,7 +74,7 @@ const CertificateManagement = () => {
             
             const [certRes, uniRes] = await Promise.all([
                 axios.get('/api/certificates/admin/all', config),
-                axios.get('/api/users/universities', config).catch(() => ({ data: [] }))
+                axios.get('/api/admin/universities', config).catch(() => ({ data: [] }))
             ]);
             
             setCertificates(certRes.data);
