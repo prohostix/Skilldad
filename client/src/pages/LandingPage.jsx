@@ -490,7 +490,7 @@ const LandingPage = () => {
             </section>
 
             {/* University Partners Section */}
-            <section className="relative pt-16 md:pt-24 pb-16 md:pb-24 px-6 z-10 bg-transparent section-optimize">
+            <section className="relative pt-16 md:pt-24 pb-8 md:pb-12 px-6 z-10 bg-transparent section-optimize">
                 <div className="max-w-7xl mx-auto">
                     {/* Heading row — text left, 3D orb right */}
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12 md:mb-16">
@@ -612,7 +612,7 @@ const LandingPage = () => {
             </section>
 
             {/* ── Managed by IITans Section ── */}
-            <section className="relative py-16 md:py-24 px-6 z-10 bg-black overflow-hidden section-optimize">
+            <section className="relative pt-8 md:pt-12 pb-16 md:pb-24 px-6 z-10 bg-black overflow-hidden section-optimize">
                 <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
                 
                 <div className="max-w-7xl mx-auto">
