@@ -12,6 +12,12 @@ const csvField = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
 const STATUS_OPTIONS = ['new', 'contacted', 'closed'];
 
+const STATUS_LABELS = {
+    new: 'Pending',
+    contacted: 'Contacted',
+    closed: 'Closed'
+};
+
 const STATUS_STYLES = {
     new: 'bg-primary/20 text-primary border-primary/30',
     contacted: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
@@ -53,6 +59,13 @@ const CourseEnquiries = () => {
         } catch (error) {
             showToast('Error updating status', 'error');
         }
+    };
+
+    const statusCounts = {
+        all: enquiries.length,
+        new: enquiries.filter(e => (e.status || 'new') === 'new').length,
+        contacted: enquiries.filter(e => e.status === 'contacted').length,
+        closed: enquiries.filter(e => e.status === 'closed').length
     };
 
     const filteredEnquiries = enquiries.filter(e => {
@@ -106,7 +119,7 @@ const CourseEnquiries = () => {
                 </div>
                 <ModernButton variant="secondary" onClick={handleDownload}>
                     <Download size={16} className="mr-2" />
-                    Download {statusFilter !== 'all' ? `(${statusFilter})` : 'All'}
+                    Download {statusFilter !== 'all' ? `(${STATUS_LABELS[statusFilter]})` : 'All'}
                 </ModernButton>
             </div>
 
@@ -126,9 +139,9 @@ const CourseEnquiries = () => {
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-lg capitalize transition-all ${statusFilter === status ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${statusFilter === status ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
                         >
-                            {status}
+                            {status === 'all' ? 'All' : STATUS_LABELS[status]} ({statusCounts[status]})
                         </button>
                     ))}
                 </div>
@@ -169,7 +182,7 @@ const CourseEnquiries = () => {
                                     className={`text-[10px] font-bold uppercase px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
                                 >
                                     {STATUS_OPTIONS.map(s => (
-                                        <option key={s} value={s} className="bg-black text-white capitalize">{s}</option>
+                                        <option key={s} value={s} className="bg-black text-white">{STATUS_LABELS[s]}</option>
                                     ))}
                                 </select>
                             </div>
