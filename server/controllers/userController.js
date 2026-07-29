@@ -12,6 +12,23 @@ const generateToken = (id) => {
     });
 };
 
+// Mirrors the client-side rules (Register.jsx, ResetPassword.jsx) so a weak
+// password can't be set by calling the API directly, bypassing the browser form.
+const PASSWORD_REQUIREMENTS = [
+    { regex: /.{8,}/, message: 'Password must be at least 8 characters long.' },
+    { regex: /[A-Z]/, message: 'Password must include an uppercase letter.' },
+    { regex: /[0-9]/, message: 'Password must include a number.' },
+    { regex: /[^A-Za-z0-9]/, message: 'Password must include a special character.' }
+];
+
+const getPasswordError = (password) => {
+    if (!password) return 'Password is required.';
+    for (const req of PASSWORD_REQUIREMENTS) {
+        if (!req.regex.test(password)) return req.message;
+    }
+    return null;
+};
+
 // A real phone number is never a simple run of identical or consecutive
 // digits (e.g. 1234567890, 0000000000, 9876543210) — catches placeholder
 // values that would otherwise pass a plain length check.
@@ -59,6 +76,18 @@ const registerUser = async (req, res) => {
             }
         } else if (phoneDigits && (phoneDigits.length < 7 || phoneDigits.length > 15 || isSequentialOrRepeated(nationalNumber))) {
             return res.status(400).json({ message: 'Enter a valid phone number, or leave it blank.' });
+        }
+
+        // Full password strength policy for public self-registration; admin/university/
+        // partner panels creating a student account just need a non-empty password —
+        // they don't currently offer the same strength UI, so don't break that flow.
+        if (!isAdminInitiated) {
+            const passwordError = getPasswordError(password);
+            if (passwordError) {
+                return res.status(400).json({ message: passwordError });
+            }
+        } else if (!password) {
+            return res.status(400).json({ message: 'Password is required.' });
         }
 
         // 1. Check if user exists
@@ -384,6 +413,11 @@ module.exports = {
                 return res.status(400).json({ message: 'Invalid or expired recovery link' });
             }
 
+            const passwordError = getPasswordError(req.body.password);
+            if (passwordError) {
+                return res.status(400).json({ message: passwordError });
+            }
+
             // Set new password
             const hashedPassword = await bcrypt.hash(req.body.password, 8);
 
@@ -427,6 +461,11 @@ module.exports = {
             const isMatch = await bcrypt.compare(currentPassword, user.password);
             if (!isMatch) {
                 return res.status(401).json({ message: 'Current password mismatch' });
+            }
+
+            const passwordError = getPasswordError(newPassword);
+            if (passwordError) {
+                return res.status(400).json({ message: passwordError });
             }
 
             const hashedNewPassword = await bcrypt.hash(newPassword, 8);
