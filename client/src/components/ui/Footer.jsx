@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin, Youtube, Heart, Globe } from 'lucide-react';
+import { Facebook, Linkedin, Instagram, Mail, Phone, MapPin, Youtube, Heart, Globe } from 'lucide-react';
 import logoImg from '../../assets/logo.png';
 import { useUser } from '../../context/UserContext';
 
@@ -62,7 +62,7 @@ const Footer = ({ forceVisible = false }) => {
                         <div className="flex gap-3">
                             {[
                                 { icon: Linkedin, href: 'https://linkedin.com/company/skilldad', color: 'hover:bg-primary' },
-                                { icon: Twitter, href: 'https://twitter.com/skilldad', color: 'hover:bg-primary-light' },
+                                { icon: Facebook, href: 'https://www.facebook.com/profile.php?id=61585350489284', color: 'hover:bg-primary-light' },
                                 { icon: Youtube, href: 'https://youtube.com/@skilldad', color: 'hover:bg-primary-dark' },
                                 { icon: Instagram, href: 'https://www.instagram.com/skilldad_', color: 'hover:bg-pink-600' }
                             ].map((social, idx) => (
