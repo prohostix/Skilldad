@@ -14,18 +14,17 @@ import {
     Briefcase,
     Sparkles,
     Cpu,
-    Network,
     Shield,
     Users,
     Layers,
     TrendingUp,
     Zap,
-    Book,
     Building2
 } from 'lucide-react';
 import axios from 'axios';
 import ModernButton from '../components/ui/ModernButton';
 import GlassCard from '../components/ui/GlassCard';
+import CourseCard from '../components/CourseCard';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import FloatingHelpWidget from '../components/ui/FloatingHelpWidget';
@@ -81,7 +80,7 @@ const LandingPage = () => {
                 }
 
                 if (coursesRes.data) {
-                    setFeaturedCourses(coursesRes.data.slice(0, 3));
+                    setFeaturedCourses(coursesRes.data.filter(c => c.isFeatured || c.is_featured));
                 }
 
                 if (universitiesRes.data) {
@@ -287,6 +286,67 @@ const LandingPage = () => {
 
             <HeroSection />
 
+            {/* Trending / Featured Courses Section — admin-curated via the Featured toggle */}
+            {featuredCourses.length > 0 && (
+                <section id="courses" className="relative pt-16 md:pt-20 pb-16 md:pb-20 px-6 z-10 section-optimize">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 md:mb-12">
+                            <div className="text-center sm:text-left space-y-3">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5 }}
+                                    className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
+                                >
+                                    <TrendingUp size={14} />
+                                    <span>Trending Now</span>
+                                </motion.div>
+                                <motion.h2
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.7, delay: 0.1 }}
+                                    className="text-2xl sm:text-3xl font-black text-white font-jakarta tracking-tight"
+                                >
+                                    <span className="opacity-40">Featured</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Courses</span>
+                                </motion.h2>
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.7, delay: 0.2 }}
+                                    className="text-text-secondary font-inter text-sm sm:text-base max-w-xl"
+                                >
+                                    Hand-picked by our team — the courses learners are enrolling in right now.
+                                </motion.p>
+                            </div>
+                            <ModernButton
+                                onClick={() => navigate('/courses')}
+                                className="hidden sm:inline-flex !px-6 !py-3 !text-[10px] uppercase tracking-widest font-black shrink-0"
+                            >
+                                Explore Full Catalog <ChevronRight size={14} className="ml-1" />
+                            </ModernButton>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4.5 sm:gap-5">
+                            {featuredCourses.slice(0, 6).map((course) => (
+                                <CourseCard key={course._id} course={course} />
+                            ))}
+                        </div>
+
+                        <div className="flex justify-center mt-10 sm:hidden">
+                            <ModernButton
+                                onClick={() => navigate('/courses')}
+                                className="w-full !py-4 !text-[10px] uppercase tracking-widest font-black"
+                            >
+                                Explore Full Catalog
+                            </ModernButton>
+                        </div>
+                    </div>
+                </section>
+            )}
+
             <CapabilitiesSection />
             <AnimatedLogoSection />
 
@@ -403,131 +463,6 @@ const LandingPage = () => {
                         >
                             <Animated3DShape />
                         </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Featured Courses Section */}
-            <section id="courses" className="relative pt-6 md:pt-10 pb-0 px-6 z-10 section-optimize">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-12 md:mb-20 space-y-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5 }}
-                            className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
-                        >
-                            <Book size={14} />
-                            <span>Institutional Tracks</span>
-                        </motion.div>
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: 0.1 }}
-                            className="text-lg sm:text-2xl font-black text-white font-jakarta tracking-tight"
-                        >
-                            Master the <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Future Matrix</span>
-                        </motion.h2>
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, delay: 0.2 }}
-                            className="text-text-secondary max-w-2xl mx-auto font-inter text-base md:text-lg"
-                        >
-                            Experience high-fidelity learning with our industry-leading certification tracks.
-                        </motion.p>
-                    </div>
-
-                    {/* Featured Course Preview */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16 md:mb-20">
-                        {(featuredCourses.length > 0 ? featuredCourses : [
-                            { title: 'Neural Network Architecture', category: 'AI & Data', icon: Cpu, description: 'Experience the next generation of AI & Data education with high-fidelity modules.' },
-                            { title: 'Cryptographic Governance', category: 'Security', icon: ShieldCheck, description: 'Experience the next generation of Security education with high-fidelity modules.' },
-                            { title: 'Quantum Financial Systems', category: 'Finance', icon: BarChart, description: 'Experience the next generation of Finance education with high-fidelity modules.' }
-                        ]).map((c, i) => {
-                            // Map icon based on category for dynamic courses
-                            const getIcon = (category) => {
-                                const cat = category?.toLowerCase() || '';
-                                if (cat.includes('ai') || cat.includes('data') || cat.includes('neural')) return Cpu;
-                                if (cat.includes('security') || cat.includes('governance') || cat.includes('cryptographic')) return ShieldCheck;
-                                if (cat.includes('finance') || cat.includes('quantum') || cat.includes('economic')) return BarChart;
-                                if (cat.includes('network') || cat.includes('system')) return Network;
-                                return Book;
-                            };
-                            const Icon = c.icon || getIcon(c.category);
-
-                            return (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true, margin: "-150px" }}
-                                    transition={{ delay: i * 0.03, duration: 0.25 }}
-                                    whileHover={{ y: -6 }}
-                                    className="h-full"
-                                >
-                                    <GlassCard
-                                        className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-6 text-left hover:shadow-glow-purple cursor-pointer"
-                                        onClick={() => c._id && navigate(`/course/${c._id}`)}
-                                    >
-                                        <div className="w-12 h-12 rounded-[20px] bg-primary/20 text-primary flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-105 shadow-2xl border border-primary/30 group-hover:border-primary/50">
-                                            <Icon size={24} strokeWidth={2.5} />
-                                        </div>
-                                        <div className="flex flex-col mb-3">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary mb-1 block">{c.category}</span>
-                                            <div className="flex flex-col">
-                                                <p className="text-[9px] font-black text-white/50 uppercase tracking-widest leading-none">
-                                                    {c.instructorName || c.instructor?.name || 'Academic Lead'}
-                                                </p>
-                                                {(c.universityName || c.instructor?.profile?.universityName || (c.instructor?.role === 'university' && c.instructor?.name)) && (
-                                                    <p className="text-[8px] font-bold text-primary/70 uppercase tracking-wider mt-0.5">
-                                                        {c.universityName || c.instructor?.profile?.universityName || c.instructor?.name}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <h3 className="text-lg font-bold text-white mb-4 group-hover:text-primary transition-colors font-poppins">{c.title}</h3>
-                                        <p className="text-text-secondary font-inter text-sm leading-relaxed mb-6 opacity-80 group-hover:opacity-100 transition-opacity line-clamp-2">
-                                            {c.description || `Experience high-fidelity education in ${c.category} with our institutional track.`}
-                                        </p>
-                                        <div className="mt-auto pt-6 border-t border-white/10 w-full flex items-center justify-end group/link">
-                                            <ModernButton
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                                                    if (userInfo) {
-                                                        navigate(`/dashboard/payment/${c._id}`);
-                                                    } else {
-                                                        navigate('/login', { state: { from: `/course/${c._id}` } });
-                                                    }
-                                                }}
-                                                className="!px-6 !py-2.5 !text-[9px] uppercase tracking-widest font-black"
-                                            >
-                                                Enroll Now
-                                            </ModernButton>
-                                        </div>
-                                    </GlassCard>
-                                </motion.div>
-                            );
-                        })}
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-8">
-                        <ModernButton
-                            onClick={() => navigate('/courses')}
-                            className="w-full sm:w-auto px-16 !py-6 !text-xs shadow-glow-gradient transform hover:scale-105 transition-all font-black uppercase tracking-widest"
-                        >
-                            Explore Full Catalog
-                        </ModernButton>
-                        <button
-                            onClick={() => navigate('/support')}
-                            className="font-black text-[10px] uppercase tracking-widest text-text-secondary hover:text-primary transition-colors flex items-center group"
-                        >
-                            Direct Neural Inquiry <ChevronRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                        </button>
                     </div>
                 </div>
             </section>
