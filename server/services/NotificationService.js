@@ -125,7 +125,13 @@ class NotificationService {
                 timestamp: new Date()
             };
         }
-        await query('UPDATE notification_logs SET delivery_status = $1, updated_at = NOW() WHERE id = $2', [log.status, log.id]);
+        // Merge only our own 'email' key — a blind full-column overwrite here would
+        // race with the parallel WhatsApp write (and any webhook-driven update to
+        // the whatsapp key) and clobber whichever finished last.
+        await query(
+            "UPDATE notification_logs SET delivery_status = COALESCE(delivery_status, '{}'::jsonb) || jsonb_build_object('email', $1::jsonb), updated_at = NOW() WHERE id = $2",
+            [JSON.stringify(log.status.email), log.id]
+        );
     }
 
     async _execEmail(user, subject, html) {
@@ -202,7 +208,11 @@ class NotificationService {
                 timestamp: new Date()
             };
         }
-        await query('UPDATE notification_logs SET delivery_status = $1, updated_at = NOW() WHERE id = $2', [log.status, log.id]);
+        // Merge only our own 'whatsapp' key — see note in _executeEmail.
+        await query(
+            "UPDATE notification_logs SET delivery_status = COALESCE(delivery_status, '{}'::jsonb) || jsonb_build_object('whatsapp', $1::jsonb), updated_at = NOW() WHERE id = $2",
+            [JSON.stringify(log.status.whatsapp), log.id]
+        );
     }
 }
 
