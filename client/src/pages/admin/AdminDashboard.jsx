@@ -360,49 +360,51 @@ const AdminDashboard = () => {
                         </GlassCard>
                     </motion.div>
 
-                    {/* Infrastructure Status */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.6 }}
-                    >
-                        <GlassCard className="bg-transparent border-primary/20">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="font-semibold text-white flex items-center">
-                                    <Shield size={18} className="mr-2 text-primary" /> Infrastructure
-                                </h3>
-                                <MoreVertical size={16} className="text-white/50" />
-                            </div>
-                            <div className="space-y-6 text-left">
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center text-xs">
-                                        <span className="text-white/50 font-bold uppercase tracking-widest">Database Size (Allocated)</span>
-                                        <span className="font-bold text-primary">{stats.dbSize}</span>
-                                    </div>
-                                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: '100%' }}
-                                            transition={{ duration: 2, ease: "easeOut" }}
-                                            className="h-full bg-gradient-to-r from-primary via-primary-light to-primary-dark rounded-full shadow-glow-purple"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-3 text-[10px] text-white/50 font-inter">
-                                    <div className="flex items-center">
-                                        <span className="w-2 h-2 rounded-full bg-primary mr-2 shadow-glow-purple"></span>
-                                        API: Healthy
-                                    </div>
-                                    <div className="flex items-center">
-                                        <span className="w-2 h-2 rounded-full bg-primary mr-2 shadow-glow-purple"></span>
-                                        DB: {stats.dbSize ? 'Active' : 'Optimized'}
-                                    </div>
-                                </div>
-                            </div>
-                        </GlassCard>
-                    </motion.div>
                 </div>
             </div>
+
+            {/* Infrastructure Status — its own full-width row so it isn't squeezed
+                to the bottom of the taller Live Pulse column and cut off by the footer */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+            >
+                <GlassCard className="bg-transparent border-primary/20">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="font-semibold text-white flex items-center">
+                            <Shield size={18} className="mr-2 text-primary" /> Infrastructure
+                        </h3>
+                        <MoreVertical size={16} className="text-white/50" />
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-6 text-left">
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="text-white/50 font-bold uppercase tracking-widest">Database Size (Allocated)</span>
+                                <span className="font-bold text-primary">{stats.dbSize}</span>
+                            </div>
+                            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: '100%' }}
+                                    transition={{ duration: 2, ease: "easeOut" }}
+                                    className="h-full bg-gradient-to-r from-primary via-primary-light to-primary-dark rounded-full shadow-glow-purple"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex items-center space-x-3 text-[10px] text-white/50 font-inter">
+                            <div className="flex items-center">
+                                <span className="w-2 h-2 rounded-full bg-primary mr-2 shadow-glow-purple"></span>
+                                API: Healthy
+                            </div>
+                            <div className="flex items-center">
+                                <span className="w-2 h-2 rounded-full bg-primary mr-2 shadow-glow-purple"></span>
+                                DB: {stats.dbSize ? 'Active' : 'Optimized'}
+                            </div>
+                        </div>
+                    </div>
+                </GlassCard>
+            </motion.div>
         </div>
     );
 };
