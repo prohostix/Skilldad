@@ -6,7 +6,7 @@ import {
     BookOpen,
     GraduationCap,
     Globe,
-    DollarSign,
+    Mail,
     TrendingUp,
     ArrowUpRight,
     MoreVertical,
@@ -29,6 +29,7 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState({
         totalUsers: 0, totalCourses: 0, totalStudents: 0,
         totalPartners: 0, totalRevenue: 0, totalTickets: 0,
+        pendingEnquiries: 0,
         dbSize: 'Calculating...',
         chartData: [
             { name: 'Mon', value: 0 },
@@ -179,7 +180,7 @@ const AdminDashboard = () => {
         { title: 'Active Courses', value: stats.totalCourses || '48', icon: BookOpen, color: '#7A5CFF', trend: '+5.2%' },
         { title: 'Partner Network', value: stats.totalPartners || '12', icon: Globe, color: '#B05CFF', trend: '+8.1%' },
         { title: 'Job Applications', value: stats.totalApplications || '0', icon: Briefcase, color: '#FFAC5C', trend: 'Career' },
-        { title: 'Total Revenue', value: stats.totalRevenue ? `₹${stats.totalRevenue.toLocaleString()}` : '₹24.5k', icon: DollarSign, color: '#5B5CFF', trend: '+15.3%' },
+        { title: 'Course Enquiries', value: stats.pendingEnquiries ?? '0', icon: Mail, color: '#5B5CFF', trend: 'Pending' },
         { title: 'Open Tickets', value: stats.totalTickets || '0', icon: FileText, color: '#FF5C5C', trend: 'Active' },
     ];
 
@@ -250,7 +251,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Matrix Stats Grid */}
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
                 {widgetStats.map((item, i) => (
                     <motion.div
                         key={i}
@@ -258,32 +259,32 @@ const AdminDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                     >
-                        <GlassCard className="hover:border-primary/40 hover:shadow-glow-purple group relative overflow-hidden !p-4">
+                        <GlassCard className="hover:border-primary/40 hover:shadow-glow-purple group relative overflow-hidden !p-3">
                             <div
-                                className="absolute top-0 right-0 w-20 h-20 -mr-10 -mt-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 opacity-20"
+                                className="absolute top-0 right-0 w-16 h-16 -mr-8 -mt-8 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 opacity-20"
                                 style={{ backgroundColor: item.color }}
                             ></div>
 
-                            <div className="flex justify-between items-start mb-4 relative z-10">
+                            <div className="flex justify-between items-start mb-3 relative z-10">
                                 <div
-                                    className="p-2.5 rounded-2xl group-hover:scale-110 transition-transform duration-300 border"
+                                    className="p-2 rounded-xl group-hover:scale-110 transition-transform duration-300 border"
                                     style={{
                                         backgroundColor: `${item.color}20`,
                                         color: item.color,
                                         borderColor: `${item.color}30`
                                     }}
                                 >
-                                    <item.icon size={22} />
+                                    <item.icon size={18} />
                                 </div>
-                                <div className="flex items-center space-x-1 text-primary font-bold text-xs bg-primary/10 backdrop-blur-sm px-2 py-1 rounded-xl border border-primary/30">
-                                    <TrendingUp size={10} />
+                                <div className="flex items-center space-x-1 text-primary font-bold text-[11px] bg-primary/10 backdrop-blur-sm px-1.5 py-0.5 rounded-lg border border-primary/30">
+                                    <TrendingUp size={9} />
                                     <span>{item.trend}</span>
                                 </div>
                             </div>
 
                             <div className="text-left relative z-10">
-                                <p className="text-white/50 text-[10px] font-bold uppercase tracking-[0.2em] font-inter opacity-70 mb-1">{item.title}</p>
-                                <p className="text-xl sm:text-2xl font-black text-white font-jakarta">{item.value}</p>
+                                <p className="text-white/50 text-[9px] font-bold uppercase tracking-[0.2em] font-inter opacity-70 mb-1">{item.title}</p>
+                                <p className="text-lg sm:text-xl font-black text-white font-jakarta">{item.value}</p>
                             </div>
                         </GlassCard>
                     </motion.div>

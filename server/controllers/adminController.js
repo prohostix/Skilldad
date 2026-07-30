@@ -144,6 +144,9 @@ const getGlobalStats = async (req, res) => {
         console.log('[getGlobalStats] Querying careerAppCount...');
         const careerAppCount = await query('SELECT COUNT(*) FROM skilldad_applications').catch(e => { console.error('careerAppCount Error:', e.message); return { rows: [{ count: 0 }] }; });
 
+        console.log('[getGlobalStats] Querying pendingEnquiryCount...');
+        const pendingEnquiryCount = await query("SELECT COUNT(*) FROM enquiries WHERE status = 'new' OR status IS NULL").catch(e => { console.error('pendingEnquiryCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+
         console.log('[getGlobalStats] Querying dbSizeRes...');
         const dbSizeRes = await query("SELECT pg_database_size(current_database()) as size").catch(e => { console.error('dbSizeRes Error (falling back to 0):', e.message); return { rows: [{ size: 0 }] }; });
         
@@ -214,6 +217,7 @@ const getGlobalStats = async (req, res) => {
             totalPartners: parseInt(partnerCount.rows[0].count),
             totalTickets: parseInt(ticketCount.rows[0].count),
             totalApplications: parseInt(careerAppCount.rows[0].count),
+            pendingEnquiries: parseInt(pendingEnquiryCount.rows[0].count),
             totalRevenue: totalRevenue,
             dbSize: `${dbSizeMB} MB`,
             chartData: chartRes.rows,
