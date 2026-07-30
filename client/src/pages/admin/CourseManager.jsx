@@ -383,7 +383,7 @@ const CourseManager = () => {
                     </div>
 
                     <div className="flex items-center gap-3 w-full md:flex-1">
-                        <div className="relative flex-1">
+                        <div className="relative flex-1 min-w-[220px] sm:min-w-[320px] md:min-w-[420px] lg:min-w-[520px]">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
                             <input
                                 type="text"
