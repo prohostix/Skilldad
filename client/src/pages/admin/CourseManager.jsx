@@ -326,7 +326,8 @@ const CourseManager = () => {
             </div>
 
             <GlassCard className="!p-0 overflow-hidden">
-                <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="p-4 sm:p-6 border-b border-white/10 space-y-4">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto hide-scrollbar w-full md:w-auto">
                         <button
                             onClick={() => setStatusFilter('all')}
@@ -405,9 +406,11 @@ const CourseManager = () => {
                                 ))}
                             </select>
                         </div>
-                        <span className="text-xs font-medium text-white/50 whitespace-nowrap hidden sm:inline">
-                            Displaying {filteredCourses.length} results
-                        </span>
+                    </div>
+                    </div>
+
+                    <div className="text-xs font-medium text-white/50">
+                        Displaying {filteredCourses.length} results
                     </div>
                 </div>
 
