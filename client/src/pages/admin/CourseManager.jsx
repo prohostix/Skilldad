@@ -328,7 +328,7 @@ const CourseManager = () => {
             <GlassCard className="!p-0 overflow-hidden">
                 <div className="p-4 sm:p-6 border-b border-white/10 space-y-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto hide-scrollbar w-full md:flex-1">
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto hide-scrollbar w-full md:w-auto">
                         <button
                             onClick={() => setStatusFilter('all')}
                             className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
@@ -382,8 +382,8 @@ const CourseManager = () => {
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full md:w-auto">
-                        <div className="relative flex-1 md:w-64">
+                    <div className="flex items-center gap-3 w-full md:flex-1">
+                        <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
                             <input
                                 type="text"
