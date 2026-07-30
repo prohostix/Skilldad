@@ -383,7 +383,7 @@ const CourseManager = () => {
                     </div>
 
                     <div className="flex items-center gap-3 w-full md:w-auto">
-                        <div className="relative flex-1 md:w-96">
+                        <div className="relative flex-1 md:w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
                             <input
                                 type="text"
@@ -393,16 +393,20 @@ const CourseManager = () => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="relative flex-1 md:w-24">
-                            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" size={14} />
+                        <div
+                            className={`relative w-10 flex-shrink-0 ${providerFilter !== 'all' ? 'ring-2 ring-primary/50 rounded-xl' : ''}`}
+                            title={providerFilter !== 'all' ? `Filtered by: ${providerFilter}` : 'Filter by university or partner'}
+                        >
+                            <Filter className="absolute inset-0 m-auto text-white/40 pointer-events-none" size={14} />
                             <select
+                                aria-label="Filter by university or partner"
                                 value={providerFilter}
                                 onChange={(e) => setProviderFilter(e.target.value)}
-                                className="w-full appearance-none pl-9 pr-8 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-white text-xs sm:text-sm font-inter cursor-pointer"
+                                className="w-10 h-9 appearance-none bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-transparent cursor-pointer"
                             >
-                                <option value="all" className="bg-[#0B071A]">Provided By</option>
+                                <option value="all" className="bg-[#0B071A] text-white">Provided By</option>
                                 {providerOptions.map((name) => (
-                                    <option key={name} value={name} className="bg-[#0B071A]">{name}</option>
+                                    <option key={name} value={name} className="bg-[#0B071A] text-white">{name}</option>
                                 ))}
                             </select>
                         </div>
