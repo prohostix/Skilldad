@@ -288,7 +288,7 @@ const CourseManager = () => {
     // Same fallback chain the table uses to display the provider name, so the
     // filter dropdown and what's shown in each row always agree.
     const getProviderName = (course) =>
-        course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '';
+        course.universityName || course.instructor?.profile?.universityName || course.instructorName || course.instructor?.name || '';
 
     const providerOptions = Array.from(
         new Set(courses.map(getProviderName).filter(Boolean))
