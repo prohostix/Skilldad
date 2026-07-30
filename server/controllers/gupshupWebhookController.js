@@ -45,7 +45,10 @@ const handleGupshupWebhook = async (req, res) => {
         `, [eventType, failReason, gsMessageId]);
 
         if (result.rowCount === 0) {
-            console.log(`[Gupshup Webhook] No matching notification_log for message id ${gsMessageId}`);
+            // Dump the full payload (not just the id) — Gupshup appears to reference
+            // messages by a different id scheme partway through the lifecycle, and we
+            // need the raw shape to figure out what field actually links back to ours.
+            console.log(`[Gupshup Webhook] No matching notification_log for message id ${gsMessageId}. Full payload:`, JSON.stringify(body));
         } else {
             console.log(`[Gupshup Webhook] ${gsMessageId} -> ${eventType}${failReason ? ' (' + failReason + ')' : ''}`);
         }
