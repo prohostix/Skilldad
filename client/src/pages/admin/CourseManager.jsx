@@ -30,6 +30,7 @@ const CourseManager = () => {
     const [courses, setCourses] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [providerFilter, setProviderFilter] = useState('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingCourse, setEditingCourse] = useState(null);
     const [formData, setFormData] = useState({
@@ -284,6 +285,15 @@ const CourseManager = () => {
     const approvedCount = courses.filter(c => c.status === 'approved' || (!c.status && c.isPublished)).length;
     const rejectedCount = courses.filter(c => c.status === 'rejected').length;
 
+    // Same fallback chain the table uses to display the provider name, so the
+    // filter dropdown and what's shown in each row always agree.
+    const getProviderName = (course) =>
+        course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || '';
+
+    const providerOptions = Array.from(
+        new Set(courses.map(getProviderName).filter(Boolean))
+    ).sort((a, b) => a.localeCompare(b));
+
     const filteredCourses = courses.filter(course => {
         const matchesSearch =
             course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -298,7 +308,10 @@ const CourseManager = () => {
             (statusFilter === 'approved' && cStatus === 'approved') ||
             (statusFilter === 'rejected' && cStatus === 'rejected');
 
-        return matchesSearch && matchesStatus;
+        const matchesProvider =
+            providerFilter === 'all' || getProviderName(course) === providerFilter;
+
+        return matchesSearch && matchesStatus && matchesProvider;
     });
 
     return (
@@ -378,6 +391,19 @@ const CourseManager = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
+                        </div>
+                        <div className="relative flex-1 md:w-56">
+                            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" size={14} />
+                            <select
+                                value={providerFilter}
+                                onChange={(e) => setProviderFilter(e.target.value)}
+                                className="w-full appearance-none pl-9 pr-8 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-white text-xs sm:text-sm font-inter cursor-pointer"
+                            >
+                                <option value="all" className="bg-[#0B071A]">All Universities & Partners</option>
+                                {providerOptions.map((name) => (
+                                    <option key={name} value={name} className="bg-[#0B071A]">{name}</option>
+                                ))}
+                            </select>
                         </div>
                         <span className="text-xs font-medium text-white/50 whitespace-nowrap hidden sm:inline">
                             Displaying {filteredCourses.length} results
