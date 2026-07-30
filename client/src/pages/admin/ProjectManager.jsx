@@ -436,22 +436,22 @@ const ProjectManager = () => {
             {/* Project Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[99999] flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="w-full max-w-2xl my-auto animate-in fade-in zoom-in duration-300">
-                        <GlassCard className="!p-8 relative bg-[#0B0F1A] border-white/10 shadow-2xl">
-                            <div className="flex justify-between items-center mb-8">
+                    <div className="w-full max-w-lg my-auto animate-in fade-in zoom-in duration-300">
+                        <GlassCard className="!p-6 relative bg-[#0B0F1A] border-white/10 shadow-2xl">
+                            <div className="flex justify-between items-center mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-3 bg-primary/10 rounded-2xl">
-                                        <Plus size={24} className="text-primary" />
+                                    <div className="p-2.5 bg-primary/10 rounded-2xl">
+                                        <Plus size={20} className="text-primary" />
                                     </div>
-                                    <h3 className="text-2xl font-black text-white tracking-tight">
+                                    <h3 className="text-xl font-black text-white tracking-tight">
                                         {editingProject ? 'Edit Project Definition' : 'Define New Project'}
                                     </h3>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setShowModal(false)}
                                     className="p-2 text-white/20 hover:text-white transition-colors"
                                 >
-                                    <Trash2 size={24} />
+                                    <Trash2 size={20} />
                                 </button>
                             </div>
                             
