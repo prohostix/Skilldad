@@ -337,7 +337,7 @@ const CourseManager = () => {
                                     : 'text-white/50 hover:text-white'
                             }`}
                         >
-                            All Courses ({courses.length})
+                            All ({courses.length})
                         </button>
 
                         <button
