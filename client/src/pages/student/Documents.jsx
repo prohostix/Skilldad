@@ -222,7 +222,7 @@ const Documents = () => {
             title: 'Higher Secondary (12th) Marksheet',
             type: '12th_marksheet',
             description: 'Upload your Higher Secondary Examination (12th Class / Pre-Degree) mark statement.',
-            required: true,
+            required: false,
             format: 'PDF, JPG, PNG',
             maxSize: '10MB',
             matchKeywords: ['12th', 'higher secondary', 'plus two', '+2', '12th_marksheet', 'twelfth']

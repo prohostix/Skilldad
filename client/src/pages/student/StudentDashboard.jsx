@@ -57,8 +57,7 @@ const StudentDashboard = () => {
 
     const STANDARD_REQUIRED_SLOTS = [
         { id: 'std_id_proof', title: 'Identity Proof', type: 'id_proof', matchKeywords: ['identity', 'id proof', 'aadhaar', 'passport', 'id_proof', 'govt id', 'voter'] },
-        { id: 'std_sslc', title: '10th / SSLC Certificate', type: 'sslc_certificate', matchKeywords: ['sslc', '10th', 'secondary school', 'sslc_certificate', 'tenth'] },
-        { id: 'std_12th', title: '12th Marksheet', type: '12th_marksheet', matchKeywords: ['12th', 'higher secondary', 'plus two', '+2', '12th_marksheet', 'twelfth'] }
+        { id: 'std_sslc', title: '10th / SSLC Certificate', type: 'sslc_certificate', matchKeywords: ['sslc', '10th', 'secondary school', 'sslc_certificate', 'tenth'] }
     ];
 
     const pendingRequiredDocs = STANDARD_REQUIRED_SLOTS.filter(slot => {
