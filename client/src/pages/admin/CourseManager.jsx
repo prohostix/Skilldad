@@ -393,7 +393,7 @@ const CourseManager = () => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="relative flex-1 md:w-36">
+                        <div className="relative flex-1 md:w-28">
                             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" size={14} />
                             <select
                                 value={providerFilter}
