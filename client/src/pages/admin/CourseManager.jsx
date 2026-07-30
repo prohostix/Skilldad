@@ -400,7 +400,7 @@ const CourseManager = () => {
                                 onChange={(e) => setProviderFilter(e.target.value)}
                                 className="w-full appearance-none pl-9 pr-8 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-white text-xs sm:text-sm font-inter cursor-pointer"
                             >
-                                <option value="all" className="bg-[#0B071A]">All Universities & Partners</option>
+                                <option value="all" className="bg-[#0B071A]">Provided By</option>
                                 {providerOptions.map((name) => (
                                     <option key={name} value={name} className="bg-[#0B071A]">{name}</option>
                                 ))}
