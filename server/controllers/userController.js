@@ -125,7 +125,7 @@ const registerUser = async (req, res) => {
         setImmediate(async () => {
             try {
                 const notificationService = require('../services/NotificationService');
-                await notificationService.send({ name: user.name, email: user.email, phone }, 'welcome');
+                await notificationService.send({ id: user.id, name: user.name, email: user.email, phone }, 'welcome');
             } catch (err) {
                 console.error('Welcome notification failed:', err.message);
             }

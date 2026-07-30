@@ -1231,7 +1231,7 @@ async function inviteUser(req, res) {
             if (phone) {
                 try {
                     const notificationService = require('../services/NotificationService');
-                    await notificationService.send({ name, email: normalizedEmail, phone }, 'welcome');
+                    await notificationService.send({ id: newId, name, email: normalizedEmail, phone }, 'welcome');
                 } catch (err) {
                     console.error('[inviteUser] WhatsApp notification failed:', err.message);
                 }
