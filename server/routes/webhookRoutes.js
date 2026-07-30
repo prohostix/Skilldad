@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { handleZoomWebhook } = require('../controllers/webhookController');
+const { handleGupshupWebhook } = require('../controllers/gupshupWebhookController');
 
 /**
  * Zoom Webhook Routes
@@ -27,6 +28,18 @@ router.get('/zoom', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Zoom webhook endpoint is active',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Gupshup WhatsApp message-event webhook (delivery/read/failed status)
+// Note: No auth middleware - Gupshup calls this directly, matched by message id
+router.post('/gupshup', handleGupshupWebhook);
+
+router.get('/gupshup', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Gupshup webhook endpoint is active',
     timestamp: new Date().toISOString()
   });
 });
