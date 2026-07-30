@@ -19,7 +19,11 @@ const handleGupshupWebhook = async (req, res) => {
     try {
         const body = req.body || {};
         const eventPayload = body.payload || {};
-        const gsMessageId = eventPayload.id || eventPayload.gsId;
+        // The first ("enqueued") event's `id` is the Gupshup message id we stored.
+        // Every later-lifecycle event (sent/delivered/read/failed) reuses `id` for
+        // WhatsApp's own internal message id instead, and carries our original
+        // Gupshup id back in `gsId` — so gsId must win whenever it's present.
+        const gsMessageId = eventPayload.gsId || eventPayload.id;
         const eventType = eventPayload.type; // enqueued | sent | delivered | read | failed
         const failReason = eventPayload.payload?.reason || eventPayload.reason || null;
 
