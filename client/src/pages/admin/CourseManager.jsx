@@ -328,7 +328,7 @@ const CourseManager = () => {
             <GlassCard className="!p-0 overflow-hidden">
                 <div className="p-4 sm:p-6 border-b border-white/10 space-y-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto hide-scrollbar w-full md:w-auto">
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 overflow-x-auto hide-scrollbar w-full md:flex-1">
                         <button
                             onClick={() => setStatusFilter('all')}
                             className={`px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
@@ -349,7 +349,7 @@ const CourseManager = () => {
                             }`}
                         >
                             <Clock size={14} className={pendingCount > 0 ? "animate-pulse" : ""} />
-                            Pending Approval
+                            Pending
                             {pendingCount > 0 ? (
                                 <span className="px-2 py-0.5 rounded-full bg-amber-400 text-black text-[10px] font-black animate-pulse">
                                     {pendingCount}
@@ -393,7 +393,7 @@ const CourseManager = () => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <div className="relative flex-1 md:w-56">
+                        <div className="relative flex-1 md:w-36">
                             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" size={14} />
                             <select
                                 value={providerFilter}
