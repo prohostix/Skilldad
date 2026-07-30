@@ -77,7 +77,7 @@ const Services = () => {
                     >
                         Comprehensive, outcome-focused educational services designed to empower students, academic institutions, and enterprise partners — featuring{' '}
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary font-bold">
-                            Guaranteed Placement Acceleration
+                            100% Placement Assurance
                         </span>.
                     </motion.p>
                 </div>

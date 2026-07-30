@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import {
     BookOpen,
     Users,
-    Star,
     Layout,
     PlayCircle,
     CheckCircle2,
@@ -144,12 +143,14 @@ const CourseDetail = () => {
         );
     }
 
+    const totalLessons = course.modules?.reduce((acc, m) => acc + (m.videos?.length || 0), 0) || 0;
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] text-white selection:bg-primary/30 relative">
             <Navbar />
 
-            {/* Hero Header standard e-learning format */}
-            <section className="pt-24 pb-16 px-6 relative overflow-hidden bg-black/40 border-b border-white/5">
+            {/* Course Details */}
+            <section className="pt-20 pb-16 px-6 relative overflow-hidden bg-black/40">
                 <div className="absolute inset-0 z-0 pointer-events-none opacity-20">
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary blur-[120px] rounded-full opacity-10"></div>
                 </div>
@@ -159,146 +160,64 @@ const CourseDetail = () => {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         onClick={() => navigate('/courses')}
-                        className="flex items-center space-x-2 text-text-secondary hover:text-white transition-colors mb-8 group"
+                        className="flex items-center space-x-1.5 text-text-secondary hover:text-white transition-colors mb-4 group"
                     >
-                        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                        <span className="text-sm font-semibold uppercase tracking-wider">Back to catalog</span>
+                        <ArrowLeft size={13} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-xs font-semibold uppercase tracking-wider">Back to catalog</span>
                     </motion.button>
 
                     <div className="grid lg:grid-cols-12 gap-12 items-start">
-                        {/* Left Side: Title and Details */}
+                    {/* Left column: title, meta, curriculum & details */}
+                    <div className="lg:col-span-8 space-y-12">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="lg:col-span-8"
                         >
-                            <div className="flex flex-col mb-4">
-                                <div className="flex items-center gap-4 mb-4">
-                                    <div className="inline-flex items-center space-x-2 px-3 py-1 bg-primary/20 rounded-md font-bold text-xs text-primary border border-primary/30">
-                                        <BookOpen size={14} /> <span>{course.category}</span>
-                                    </div>
-                                    {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && (
-                                        <div className="flex items-center gap-3 border-l border-white/20 pl-4">
-                                            {(course.instructor?.profile?.profileImage || course.instructor?.profileImage) && (
-                                                <div className="w-6 h-6 rounded bg-white/5 border border-white/10 overflow-hidden flex-shrink-0">
-                                                    <img 
-                                                        src={getMediaUrl(course.instructor?.profile?.profileImage || course.instructor?.profileImage)} 
-                                                        alt="University Logo" 
-                                                        className="w-full h-full object-contain"
-                                                        onError={(e) => { e.target.style.display = 'none'; }}
-                                                    />
-                                                </div>
-                                            )}
-                                            <div className="text-xs font-semibold text-white/50">
-                                                Offered by <span className="text-white ml-1">{course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}</span>
-                                            </div>
-                                        </div>
-                                    )}
+                            <div className="flex items-center gap-4 mb-3 flex-wrap">
+                                <div className="inline-flex items-center space-x-2 px-3 py-1 bg-primary/20 rounded-md font-bold text-xs text-primary border border-primary/30">
+                                    <BookOpen size={14} /> <span>{course.category}</span>
                                 </div>
+                                {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && (
+                                    <div className="flex items-center gap-3 border-l border-white/20 pl-4">
+                                        {(course.instructor?.profile?.profileImage || course.instructor?.profileImage) && (
+                                            <div className="w-6 h-6 rounded bg-white/5 border border-white/10 overflow-hidden flex-shrink-0">
+                                                <img
+                                                    src={getMediaUrl(course.instructor?.profile?.profileImage || course.instructor?.profileImage)}
+                                                    alt="University Logo"
+                                                    className="w-full h-full object-contain"
+                                                    onError={(e) => { e.target.style.display = 'none'; }}
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="text-xs font-semibold text-white/50">
+                                            Offered by <span className="text-white ml-1">{course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            
-                            <h1 className="text-2xl sm:text-4xl font-bold mb-4 leading-tight tracking-tight">
+
+                            <h1 className="text-2xl sm:text-4xl font-bold mb-3 leading-tight tracking-tight">
                                 {course.title}
                             </h1>
-                            <p className="text-base text-text-secondary mb-6 leading-relaxed font-inter opacity-90">
+                            <p className="text-base text-text-secondary mb-4 leading-relaxed font-inter opacity-90">
                                 {course.description}
                             </p>
 
-                            <div className="flex items-center gap-6 text-sm text-text-secondary mb-8 flex-wrap">
+                            <div className="flex items-center gap-6 text-sm text-text-secondary flex-wrap">
                                 <div className="flex items-center gap-2">
-                                    <Star size={16} className="text-amber-400 fill-amber-400" />
-                                    <span className="font-semibold text-white">4.9/5.0</span>
+                                    <Layout size={16} className="text-primary" />
+                                    <span>{course.modules?.length || 0} modules</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Users size={16} />
-                                    <span>1,240+ students</span>
+                                    <PlayCircle size={16} className="text-primary" />
+                                    <span>{totalLessons} lessons</span>
                                 </div>
-                            </div>
-                            
-                            <div className="text-sm text-text-muted">
-                                Instructed by <span className="text-primary font-medium">{course.instructorName || course.instructor?.name || 'Academic Facilitator'}</span>
+                                <div className="text-text-muted">
+                                    Instructed by <span className="text-primary font-medium">{course.instructorName || course.instructor?.name || 'Academic Facilitator'}</span>
+                                </div>
                             </div>
                         </motion.div>
 
-                        {/* Right Side: Image and Pricing Card */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="lg:col-span-4 relative z-20"
-                        >
-                            <div className="bg-[#120D26] rounded-2xl border border-white/10 shadow-2xl p-1 overflow-hidden sticky top-24">
-                                <div className="relative aspect-video rounded-xl overflow-hidden group">
-                                    <img
-                                        src={getMediaUrl(course.thumbnail) || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200`}
-                                        alt={course.title}
-                                        className={`w-full h-full object-cover transition-all duration-300 ${uploadingImage ? 'opacity-50 blur-sm' : ''}`}
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200";
-                                        }}
-                                    />
-                                    
-                                    {/* Edit Course Cover Image Overlay */}
-                                    {isOwnerOrAdmin && (
-                                        <label className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full cursor-pointer backdrop-blur-sm border border-white/20 transition-all shadow-lg z-10 flex items-center justify-center" title="Update Course Cover">
-                                            {uploadingImage ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-                                            <input 
-                                                type="file" 
-                                                className="hidden" 
-                                                accept="image/*"
-                                                onChange={handleImageUpload}
-                                                disabled={uploadingImage}
-                                            />
-                                        </label>
-                                    )}
-
-                                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                        <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
-                                            <PlayCircle size={32} className="text-white ml-1" />
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div className="p-5">
-                                    <div className="space-y-3">
-                                        <ModernButton
-                                            className="w-full justify-center !py-3 text-[15px] font-semibold"
-                                            onClick={() => setShowEnrollModal(true)}
-                                        >
-                                            Enroll Now
-                                        </ModernButton>
-
-                                        {course.brochure_url && (
-                                            <div className="flex gap-2 w-full">
-                                                <button 
-                                                    onClick={() => handleSecureAction(() => window.open(getMediaUrl(course.brochure_url), '_blank'))}
-                                                    className="flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold border border-white/20 rounded-xl hover:bg-white/5 transition-colors text-white"
-                                                >
-                                                    <BookOpen size={16} />
-                                                    Download
-                                                </button>
-                                                <button
-                                                    onClick={() => handleSecureAction(handleShareBrochure)}
-                                                    className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold border border-white/20 rounded-xl hover:bg-white/5 transition-colors text-white"
-                                                    title="Share Brochure"
-                                                >
-                                                    <Share2 size={16} />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Curriculum & Details */}
-            <section className="py-16 px-6 bg-white/[0.02] border-y border-white/10">
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-12 items-start">
-                    {/* Syllabus */}
-                    <div className="lg:col-span-2 space-y-12">
                         {course.university_tools && course.university_tools.length > 0 && (
                             <section className="relative overflow-hidden p-10 rounded-[48px] border border-primary/20 bg-primary/5 shadow-glow-purple/10">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[90px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
@@ -329,40 +248,35 @@ const CourseDetail = () => {
                                 <Layout className="text-primary" size={24} />
                                 <span>Course Curriculum</span>
                             </h2>
-                            <div className="space-y-6">
+                            <div className="space-y-3">
                                 {course.modules?.map((module, idx) => (
-                                    <motion.div
+                                    <div
                                         key={idx}
-                                        whileHover={{ x: 10 }}
-                                        className="transition-all"
+                                        className="rounded-xl border border-white/10 bg-white/[0.03] hover:border-primary/30 transition-colors"
                                     >
-                                        <GlassCard className="!p-8 border-white/5 hover:border-primary/30 transition-all shadow-xl hover:bg-white/[0.04]">
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                                                <h3 className="font-bold text-lg flex items-center space-x-3">
-                                                    <span className="text-primary text-sm font-bold w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                                                        {idx + 1}
-                                                    </span>
-                                                    <span>{module.title}</span>
-                                                </h3>
-                                                <div className="flex items-center gap-4">
-                                                    <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-text-muted">
-                                                        {module.videos?.length || 0} Lessons
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="grid sm:grid-cols-2 gap-4">
-                                                {module.videos?.map((video, vIdx) => (
-                                                    <div key={vIdx} className="flex items-center space-x-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-sm text-text-secondary hover:text-white transition-colors group">
-                                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-white/30 group-hover:text-primary transition-colors">
-                                                            <PlayCircle size={16} />
-                                                        </div>
-                                                        <span className="font-bold flex-1">{video.title}</span>
-                                                        <span className="text-[10px] font-black opacity-30">{video.duration}</span>
+                                        <div className="flex items-center justify-between gap-4 px-5 py-4">
+                                            <h3 className="font-bold text-sm sm:text-base flex items-center gap-3">
+                                                <span className="flex-shrink-0 text-primary text-xs font-bold w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                                                    {idx + 1}
+                                                </span>
+                                                <span>{module.title}</span>
+                                            </h3>
+                                            <span className="flex-shrink-0 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-text-muted">
+                                                {module.videos?.length || 0} Lessons
+                                            </span>
+                                        </div>
+                                        {module.videos && module.videos.length > 0 && (
+                                            <div className="grid sm:grid-cols-2 gap-3 px-5 pb-4 pt-1 border-t border-white/5">
+                                                {module.videos.map((video, vIdx) => (
+                                                    <div key={vIdx} className="flex items-center space-x-3 py-2 text-sm text-text-secondary hover:text-white transition-colors group">
+                                                        <PlayCircle size={14} className="text-white/30 group-hover:text-primary transition-colors flex-shrink-0" />
+                                                        <span className="flex-1 truncate">{video.title}</span>
+                                                        <span className="text-[10px] font-black opacity-30 flex-shrink-0">{video.duration}</span>
                                                     </div>
                                                 ))}
                                             </div>
-                                        </GlassCard>
-                                    </motion.div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
                         </div>
@@ -400,48 +314,78 @@ const CourseDetail = () => {
                             </section>
                         )}
 
-                        {course.learning_outcomes && course.learning_outcomes.length > 0 && (
-                            <div>
-                                <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
-                                    <BookOpen className="text-purple-400" size={24} />
-                                    <span>What You'll Learn</span>
-                                </h2>
-                                <div className="grid sm:grid-cols-2 gap-6">
-                                    {course.learning_outcomes.map((outcome, i) => (
-                                        <div key={i} className="flex items-center space-x-4 p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-emerald-500/20 transition-all group">
-                                            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                                                <CheckCircle2 size={20} />
-                                            </div>
-                                            <span className="text-base font-bold text-text-secondary group-hover:text-white transition-colors">{outcome}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {course.features && course.features.length > 0 && (
-                            <div>
-                                <h2 className="text-2xl font-bold mb-8 flex items-center space-x-3">
-                                    <Sparkles className="text-primary" size={24} />
-                                    <span>Course Highlights</span>
-                                </h2>
-                                <div className="grid sm:grid-cols-2 gap-6">
-                                    {course.features.map((feature, i) => (
-                                        <div key={i} className="flex items-center space-x-4 p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:border-primary/30 transition-all group">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                                                <ShieldCheck size={20} />
-                                            </div>
-                                            <span className="text-base font-bold text-text-secondary group-hover:text-white transition-colors">{feature}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </div>
 
+                    {/* Sticky Sidebar: Enroll Card, Course Includes, Inquiry, Safe Payment */}
+                    <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-[#120D26] rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+                        >
+                            <div className="relative aspect-video overflow-hidden group">
+                                <img
+                                    src={getMediaUrl(course.thumbnail) || `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200`}
+                                    alt={course.title}
+                                    className={`w-full h-full object-cover transition-all duration-300 ${uploadingImage ? 'opacity-50 blur-sm' : ''}`}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200";
+                                    }}
+                                />
 
-                    {/* Inquiry Form */}
-                    <div className="space-y-8 sticky top-32 h-fit self-start">
+                                {/* Edit Course Cover Image Overlay */}
+                                {isOwnerOrAdmin && (
+                                    <label className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2.5 rounded-full cursor-pointer backdrop-blur-sm border border-white/20 transition-all shadow-lg z-10 flex items-center justify-center" title="Update Course Cover">
+                                        {uploadingImage ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            disabled={uploadingImage}
+                                        />
+                                    </label>
+                                )}
+
+                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
+                                        <PlayCircle size={32} className="text-white ml-1" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-5 space-y-5">
+                                <div className="space-y-3">
+                                    <ModernButton
+                                        className="w-full justify-center !py-3 text-[15px] font-semibold"
+                                        onClick={() => setShowEnrollModal(true)}
+                                    >
+                                        Enroll Now
+                                    </ModernButton>
+
+                                    {course.brochure_url && (
+                                        <div className="flex gap-2 w-full">
+                                            <button
+                                                onClick={() => handleSecureAction(() => window.open(getMediaUrl(course.brochure_url), '_blank'))}
+                                                className="flex flex-1 items-center justify-center gap-2 py-3 text-sm font-semibold border border-white/20 rounded-xl hover:bg-white/5 transition-colors text-white"
+                                            >
+                                                <BookOpen size={16} />
+                                                Download
+                                            </button>
+                                            <button
+                                                onClick={() => handleSecureAction(handleShareBrochure)}
+                                                className="flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold border border-white/20 rounded-xl hover:bg-white/5 transition-colors text-white"
+                                                title="Share Brochure"
+                                            >
+                                                <Share2 size={16} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+
                         <GlassCard className="!p-8 border-primary/20 shadow-glow-purple">
                             <h3 className="text-xl font-black mb-6 flex items-center space-x-3">
                                 <MessageSquare className="text-primary" size={20} />
@@ -507,17 +451,62 @@ const CourseDetail = () => {
                                 )}
                             </form>
                         </GlassCard>
-
-                        <div className="p-6 bg-white/5 border border-white/10 rounded-3xl">
-                            <div className="flex items-center space-x-3 mb-4">
-                                <ShieldCheck className="text-emerald-400" size={20} />
-                                <span className="text-sm font-bold">Safe & Secure Payment</span>
-                            </div>
-                            <p className="text-xs text-text-muted leading-relaxed">
-                                Experience bank-grade encrypted transactions and a 30-day money-back guarantee.
-                            </p>
-                        </div>
                     </div>
+                    </div>
+
+                    {course.learning_outcomes && course.learning_outcomes.length > 0 && (
+                        <div className="mt-12">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-2xl font-bold flex items-center space-x-3">
+                                    <span className="w-11 h-11 rounded-xl bg-purple-400/10 flex items-center justify-center text-purple-400">
+                                        <BookOpen size={20} />
+                                    </span>
+                                    <span>What You'll Learn</span>
+                                </h2>
+                                <span className="hidden sm:block text-xs font-semibold text-text-muted uppercase tracking-widest">{course.learning_outcomes.length} Outcomes</span>
+                            </div>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-fr">
+                                {course.learning_outcomes.map((outcome, i) => (
+                                    <div key={i} className="h-full flex flex-col p-6 bg-white/[0.03] rounded-2xl border border-white/[0.06] hover:bg-white/[0.06] hover:border-emerald-500/30 hover:-translate-y-0.5 transition-all duration-300 group">
+                                        <div className="flex items-center justify-between mb-5">
+                                            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 transition-colors">
+                                                <CheckCircle2 size={18} />
+                                            </div>
+                                            <span className="text-[11px] font-bold text-white/15 tracking-widest">{String(i + 1).padStart(2, '0')}</span>
+                                        </div>
+                                        <span className="text-[15px] font-semibold text-text-secondary group-hover:text-white transition-colors leading-relaxed">{outcome}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {course.features && course.features.length > 0 && (
+                        <div className="mt-12">
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-2xl font-bold flex items-center space-x-3">
+                                    <span className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                        <Sparkles size={20} />
+                                    </span>
+                                    <span>Course Highlights</span>
+                                </h2>
+                                <span className="hidden sm:block text-xs font-semibold text-text-muted uppercase tracking-widest">{course.features.length} Highlights</span>
+                            </div>
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 auto-rows-fr">
+                                {course.features.map((feature, i) => (
+                                    <div key={i} className="h-full flex flex-col p-6 bg-white/[0.03] rounded-2xl border border-white/[0.06] hover:bg-white/[0.06] hover:border-primary/30 hover:-translate-y-0.5 transition-all duration-300 group">
+                                        <div className="flex items-center justify-between mb-5">
+                                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+                                                <ShieldCheck size={18} />
+                                            </div>
+                                            <span className="text-[11px] font-bold text-white/15 tracking-widest">{String(i + 1).padStart(2, '0')}</span>
+                                        </div>
+                                        <span className="text-[15px] font-semibold text-text-secondary group-hover:text-white transition-colors leading-relaxed">{feature}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
 
