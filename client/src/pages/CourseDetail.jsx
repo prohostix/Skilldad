@@ -296,7 +296,7 @@ const CourseDetail = () => {
 
             {/* Curriculum & Details */}
             <section className="py-16 px-6 bg-white/[0.02] border-y border-white/10">
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-12">
+                <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-12 items-start">
                     {/* Syllabus */}
                     <div className="lg:col-span-2 space-y-12">
                         {course.university_tools && course.university_tools.length > 0 && (
@@ -441,7 +441,7 @@ const CourseDetail = () => {
 
 
                     {/* Inquiry Form */}
-                    <div className="space-y-8 sticky top-32 h-fit">
+                    <div className="space-y-8 sticky top-32 h-fit self-start">
                         <GlassCard className="!p-8 border-primary/20 shadow-glow-purple">
                             <h3 className="text-xl font-black mb-6 flex items-center space-x-3">
                                 <MessageSquare className="text-primary" size={20} />
