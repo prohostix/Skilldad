@@ -101,7 +101,7 @@ const notifyEnrolledStudents = async (session, title, message) => {
                     { 
                         examTitle: title.replace('📝', '').trim(), 
                         courseTitle: courseTitle,
-                        scheduledDate: new Date(session.scheduled_start).toLocaleString()
+                        scheduledDate: new Date(session.scheduled_start).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
                     }
                 ).catch(err => console.error(`[ExamNotify] Failed for student ${student.id}:`, err.message));
             }

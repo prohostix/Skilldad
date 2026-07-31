@@ -80,6 +80,7 @@ class WhatsAppService {
      */
     async notifyLiveSessionScheduled(studentName, phone, topic, startTime, courseTitle) {
         const formattedTime = new Date(startTime).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
             dateStyle: 'medium',
             timeStyle: 'short'
         });
@@ -97,6 +98,7 @@ class WhatsAppService {
      */
     async notifyExamScheduled(studentName, phone, examTitle, courseTitle, scheduledDate) {
         const formattedDate = new Date(scheduledDate).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
             dateStyle: 'medium',
             timeStyle: 'short'
         });
