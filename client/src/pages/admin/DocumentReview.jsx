@@ -143,75 +143,87 @@ const DocumentReview = () => {
                     <p className="text-white/40 text-sm animate-pulse">Syncing document database...</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="space-y-3">
                     {filteredDocs.map((doc) => (
                         <motion.div
                             layout
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             key={doc._id}
                         >
-                            <GlassCard className="h-full flex flex-col hover:border-primary/30 transition-all group relative overflow-hidden">
-                                {/* Status Badge */}
-                                <div className={`absolute top-4 right-4 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyle(doc.status)}`}>
-                                    {doc.status}
-                                </div>
-
-                                <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                                        <FileText size={24} />
+                            <GlassCard className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-primary/30 transition-all group">
+                                {/* Document Info */}
+                                <div className="flex items-center gap-3.5 min-w-[240px]">
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                                        <FileText size={20} />
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-white font-bold truncate pr-16">{doc.title}</h3>
-                                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{doc.type}</p>
+                                    <div className="min-w-0">
+                                        <h3 className="text-white font-bold text-sm tracking-tight">{doc.title}</h3>
+                                        <p className="text-white/40 text-[10px] font-black uppercase tracking-wider mt-0.5">{doc.type}</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 flex-1">
-                                    <div className="flex items-center gap-3 text-white/60">
-                                        <User size={14} className="text-primary/50" />
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-bold text-white truncate">{doc.student_name}</p>
-                                            <p className="text-[10px] truncate">{doc.student_email}</p>
-                                        </div>
+                                {/* Student Info */}
+                                <div className="flex items-center gap-3 text-white/70 min-w-[200px]">
+                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary/70 shrink-0">
+                                        <User size={14} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-white truncate">{doc.student_name || 'Student'}</p>
+                                        <p className="text-[10px] text-white/40 truncate">{doc.student_email}</p>
+                                    </div>
+                                </div>
+
+                                {/* Date & University */}
+                                <div className="hidden lg:flex flex-col text-[11px] text-white/50 min-w-[150px]">
+                                    <div className="flex items-center gap-1.5 font-mono">
+                                        <Calendar size={12} className="text-emerald-400/70" />
+                                        <span>Submitted {new Date(doc.created_at).toLocaleDateString()}</span>
                                     </div>
                                     {doc.university_name && (
-                                        <div className="flex items-center gap-3 text-white/60">
-                                            <Building2 size={14} className="text-indigo-400/50" />
-                                            <p className="text-[10px] font-medium truncate">{doc.university_name}</p>
+                                        <div className="flex items-center gap-1.5 text-[10px] text-white/40 truncate mt-0.5">
+                                            <Building2 size={12} className="text-indigo-400/70" />
+                                            <span className="truncate">{doc.university_name}</span>
                                         </div>
                                     )}
-                                    <div className="flex items-center gap-3 text-white/60">
-                                        <Calendar size={14} className="text-emerald-400/50" />
-                                        <p className="text-[10px] font-medium">Submitted {new Date(doc.created_at).toLocaleDateString()}</p>
-                                    </div>
                                 </div>
 
-                                <div className="pt-6 mt-6 border-t border-white/5 flex gap-2">
-                                    <ModernButton 
-                                        variant="secondary" 
-                                        className="flex-1 !py-2 text-[10px] font-black"
-                                        onClick={() => setSelectedDoc(doc)}
-                                    >
-                                        <Eye size={14} className="mr-1.5" /> REVIEW
-                                    </ModernButton>
-                                    <a 
-                                        href={getMediaUrl(doc.file_url)} 
-                                        target="_blank" 
-                                        rel="noreferrer"
-                                        className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-xl transition-all"
-                                    >
-                                        <Download size={16} />
-                                    </a>
+                                {/* Status Badge & Actions */}
+                                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-3 md:pt-0">
+                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shrink-0 ${getStatusStyle(doc.status)}`}>
+                                        {doc.status}
+                                    </span>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <ModernButton 
+                                            variant="secondary" 
+                                            className="!py-2 !px-3 text-[11px] font-bold"
+                                            onClick={() => setSelectedDoc(doc)}
+                                        >
+                                            <Eye size={14} className="mr-1.5" /> Review
+                                        </ModernButton>
+                                        {doc.file_url && (
+                                            <a 
+                                                href={getMediaUrl(doc.file_url)} 
+                                                target="_blank" 
+                                                rel="noreferrer"
+                                                download
+                                                className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-xl transition-all flex items-center justify-center"
+                                                title="Download Document"
+                                            >
+                                                <Download size={15} />
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
                             </GlassCard>
                         </motion.div>
                     ))}
 
                     {filteredDocs.length === 0 && (
-                        <div className="col-span-full py-20 text-center">
-                            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-                                <FileText size={32} className="text-white/20" />
+                        <div className="py-20 text-center bg-white/[0.01] border border-dashed border-white/5 rounded-3xl">
+                            <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3 border border-white/10">
+                                <FileText size={28} className="text-white/20" />
                             </div>
                             <h3 className="text-white/60 font-bold">No documents found</h3>
                             <p className="text-white/20 text-xs mt-1">Try adjusting your search or filters</p>
