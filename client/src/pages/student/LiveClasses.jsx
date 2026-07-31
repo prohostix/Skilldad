@@ -282,11 +282,14 @@ const LiveClasses = () => {
                     {/* Upcoming & Live Section */}
                     <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                            <h2 className="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-                                Upcoming & Live
-                            </h2>
-                            <div className="h-px flex-1 bg-gradient-to-r from-primary/20 to-transparent"></div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-primary rounded-full animate-pulse shrink-0"></div>
+                                <h2 className="text-sm font-semibold text-white tracking-normal">Upcoming & Live</h2>
+                                <span className="px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-wider">
+                                    {filteredSessions.filter(s => s.status !== 'ended' && s.status !== 'archived').length}
+                                </span>
+                            </div>
+                            <div className="h-px flex-1 bg-white/5"></div>
                         </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -309,11 +312,14 @@ const LiveClasses = () => {
                     {/* Complete Sessions Section */}
                     <div className="space-y-3">
                         <div className="flex items-center gap-3">
-                            <h2 className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-1.5">
-                                <Clock size={10} />
-                                Complete Sessions
-                            </h2>
-                            <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                            <div className="flex items-center gap-2">
+                                <Clock size={14} className="text-white/30 shrink-0" />
+                                <h2 className="text-sm font-semibold text-white/60 tracking-normal">Completed Sessions</h2>
+                                <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-bold text-white/30 uppercase tracking-wider">
+                                    {filteredSessions.filter(s => s.status === 'ended' || s.status === 'archived').length}
+                                </span>
+                            </div>
+                            <div className="h-px flex-1 bg-white/5"></div>
                         </div>
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -336,11 +342,14 @@ const LiveClasses = () => {
             {activeTab === 'recorded' && (
                 <div className="space-y-2.5 pt-2">
                     <div className="flex items-center gap-3">
-                        <h2 className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                            <Clock size={10} />
-                            Recorded Sessions
-                        </h2>
-                        <div className="h-px flex-1 bg-gradient-to-r from-emerald-400/20 to-transparent"></div>
+                        <div className="flex items-center gap-2">
+                            <Clock size={14} className="text-emerald-400 shrink-0" />
+                            <h2 className="text-sm font-semibold text-white tracking-normal">Recorded Sessions</h2>
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-400/10 border border-emerald-400/20 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                                {filteredSessions.filter(s => s.status === 'ended' || s.status === 'archived').length}
+                            </span>
+                        </div>
+                        <div className="h-px flex-1 bg-white/5"></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                         {filteredSessions.filter(s => s.status === 'ended' || s.status === 'archived').length === 0 ? (
