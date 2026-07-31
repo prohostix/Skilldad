@@ -801,16 +801,6 @@ const PartnerStudentManagement = () => {
                                                             </button>
                                                         </div>
                                                     )}
-                                                    <a
-                                                        href={getMediaUrl(doc.file_url || doc.fileUrl)}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        download
-                                                        className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
-                                                        title="Download"
-                                                    >
-                                                        <Download size={16} />
-                                                    </a>
                                                 </div>
                                             </div>
                                         ))}
