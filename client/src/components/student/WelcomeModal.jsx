@@ -9,19 +9,15 @@ const WelcomeModal = ({ isOpen, onClose, name }) => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 sm:px-6">
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        className="absolute inset-0 bg-black/80 backdrop-blur-md"
-                    />
+                <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 sm:pt-24 px-4 sm:px-6">
+                    {/* Invisible click-outside-to-close layer — no dark/blur tint, so the
+                        dashboard behind stays fully visible instead of being hidden. */}
+                    <div onClick={onClose} className="absolute inset-0" />
 
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.95, y: -20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
                         className="relative w-full max-w-lg bg-[#0A0514] border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
                     >
                         <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent pointer-events-none">
