@@ -80,11 +80,14 @@ const UniversityDocumentReview = () => {
         }
     };
 
-    const filteredDocs = documents.filter(doc => 
-        doc.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doc.student_email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredDocs = documents.filter(doc => {
+        const matchesSearch = doc.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            doc.student_email?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const matchesStatus = statusFilter === 'all' ? true : doc.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
 
     const getStatusStyle = (status) => {
         switch (status) {
@@ -102,20 +105,34 @@ const UniversityDocumentReview = () => {
                     <DashboardHeading title="Student Documents" />
                     <p className="text-white/40 text-sm font-inter">Review and verify documents submitted by your registered students</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
                     <ModernButton 
                         variant={statusFilter === 'all' ? 'primary' : 'secondary'}
                         onClick={() => setStatusFilter('all')}
-                        className="!px-4 !py-2 text-xs"
+                        className="!px-3.5 !py-1.5 text-xs"
                     >
                         All
                     </ModernButton>
                     <ModernButton 
                         variant={statusFilter === 'submitted' ? 'primary' : 'secondary'}
                         onClick={() => setStatusFilter('submitted')}
-                        className="!px-4 !py-2 text-xs"
+                        className="!px-3.5 !py-1.5 text-xs"
                     >
-                        Pending Review
+                        Pending
+                    </ModernButton>
+                    <ModernButton 
+                        variant={statusFilter === 'approved' ? 'primary' : 'secondary'}
+                        onClick={() => setStatusFilter('approved')}
+                        className="!px-3.5 !py-1.5 text-xs"
+                    >
+                        Approved
+                    </ModernButton>
+                    <ModernButton 
+                        variant={statusFilter === 'rejected' ? 'primary' : 'secondary'}
+                        onClick={() => setStatusFilter('rejected')}
+                        className="!px-3.5 !py-1.5 text-xs"
+                    >
+                        Rejected
                     </ModernButton>
                 </div>
             </div>
