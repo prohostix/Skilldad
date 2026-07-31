@@ -93,32 +93,90 @@ const SessionDetail = () => {
 
   const startRecording = async () => {
     try {
-      // Prompt user to select screen/window/tab to capture, requesting system audio too
+      // 1. Prompt user to select screen/window/tab to capture, requesting system audio
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true
       });
+
+      // 2. Request local microphone access to mix in host's own voice
+      let micStream = null;
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        });
+      } catch (micErr) {
+        console.warn('[Recording] Microphone access denied or unavailable, recording system audio only:', micErr.message);
+      }
 
       const tracks = [];
       if (displayStream.getVideoTracks().length > 0) {
         tracks.push(displayStream.getVideoTracks()[0]);
       }
 
-      // Mix tab audio and mic audio if possible
-      const audioTracks = displayStream.getAudioTracks();
-      let mixedStream = displayStream;
+      // 3. Audio mixing setup using Web Audio API
+      let mixedAudioTrack = null;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      
+      if (AudioContextClass) {
+        try {
+          const audioCtx = new AudioContextClass();
+          const dest = audioCtx.createMediaStreamDestination();
+          let hasAudioSource = false;
 
-      if (audioTracks.length > 0) {
-        mixedStream = new MediaStream([displayStream.getVideoTracks()[0], audioTracks[0]]);
+          // Connect system/tab audio
+          if (displayStream.getAudioTracks().length > 0) {
+            const systemSource = audioCtx.createMediaStreamSource(new MediaStream([displayStream.getAudioTracks()[0]]));
+            systemSource.connect(dest);
+            hasAudioSource = true;
+          }
+
+          // Connect host microphone audio
+          if (micStream && micStream.getAudioTracks().length > 0) {
+            const micSource = audioCtx.createMediaStreamSource(new MediaStream([micStream.getAudioTracks()[0]]));
+            micSource.connect(dest);
+            hasAudioSource = true;
+          }
+
+          if (hasAudioSource) {
+            mixedAudioTrack = dest.stream.getAudioTracks()[0];
+          }
+        } catch (mixErr) {
+          console.warn('[Recording] Audio mixing failed, falling back to display audio:', mixErr.message);
+          if (displayStream.getAudioTracks().length > 0) {
+            mixedAudioTrack = displayStream.getAudioTracks()[0];
+          }
+        }
+      } else {
+        if (displayStream.getAudioTracks().length > 0) {
+          mixedAudioTrack = displayStream.getAudioTracks()[0];
+        }
       }
 
+      if (mixedAudioTrack) {
+        tracks.push(mixedAudioTrack);
+      }
+
+      const mixedStream = new MediaStream(tracks);
       recordedChunksRef.current = [];
-      let options = { mimeType: 'video/webm;codecs=vp9' };
+
+      // Determine supported mimeTypes
+      let options = { mimeType: 'video/webm;codecs=vp9,opus' };
       if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/webm;codecs=vp8' };
+        options = { mimeType: 'video/webm;codecs=vp8,opus' };
+      }
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm;codecs=h264,opus' };
       }
       if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         options = { mimeType: 'video/webm' };
+      }
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/mp4' };
       }
 
       const recorder = new MediaRecorder(mixedStream, options);
@@ -131,7 +189,11 @@ const SessionDetail = () => {
       };
 
       recorder.onstop = () => {
+        // Stop all tracks on both streams to release camera/mic/screen share
         displayStream.getTracks().forEach(t => t.stop());
+        if (micStream) {
+          micStream.getTracks().forEach(t => t.stop());
+        }
         mixedStream.getTracks().forEach(t => t.stop());
 
         const blob = new Blob(recordedChunksRef.current, { type: options.mimeType });
@@ -152,6 +214,7 @@ const SessionDetail = () => {
         setIsRecording(false);
       };
 
+      // Stop if screen sharing is canceled
       displayStream.getVideoTracks()[0].onended = () => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
           mediaRecorderRef.current.stop();
