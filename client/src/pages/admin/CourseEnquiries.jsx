@@ -157,12 +157,12 @@ const CourseEnquiries = () => {
                     <p className="text-white/30 text-sm">No enquiries found.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-3">
                     {filteredEnquiries.map((enquiry) => (
-                        <GlassCard key={enquiry.id} className="!p-6 space-y-4">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0 space-y-1">
-                                    <h3 className="text-white font-semibold text-base truncate">{enquiry.name}</h3>
+                        <GlassCard key={enquiry.id} className="!p-4 sm:!p-5">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                                <div className="min-w-0 sm:w-52 flex-shrink-0 space-y-1">
+                                    <h3 className="text-white font-semibold text-sm truncate">{enquiry.name}</h3>
                                     {enquiry.course_name && (
                                         <div className="flex items-center gap-1.5 text-primary text-xs font-bold min-w-0">
                                             <BookOpen size={12} className="flex-shrink-0" />
@@ -170,44 +170,50 @@ const CourseEnquiries = () => {
                                         </div>
                                     )}
                                     {enquiry.university_name && (
-                                        <div className="flex items-center gap-1.5 text-white/50 text-[11px] font-bold uppercase tracking-wider min-w-0">
-                                            <Building2 size={12} className="flex-shrink-0" />
+                                        <div className="flex items-center gap-1.5 text-white/50 text-[10px] font-bold uppercase tracking-wider min-w-0">
+                                            <Building2 size={11} className="flex-shrink-0" />
                                             <span className="truncate">{enquiry.university_name}</span>
                                         </div>
                                     )}
                                 </div>
+
+                                <div className="min-w-0 sm:w-52 flex-shrink-0 space-y-1 text-xs sm:border-l sm:border-white/5 sm:pl-6">
+                                    <div className="flex items-center text-white/60 min-w-0">
+                                        <Mail size={13} className="mr-1.5 flex-shrink-0" />
+                                        <a href={`mailto:${enquiry.email}`} className="truncate hover:text-primary transition-colors">{enquiry.email}</a>
+                                    </div>
+                                    <div className="flex items-center text-white/60">
+                                        <Phone size={13} className="mr-1.5 flex-shrink-0" />
+                                        <a href={`tel:${enquiry.phone}`} className="hover:text-primary transition-colors">{enquiry.phone}</a>
+                                    </div>
+                                </div>
+
+                                <div className="min-w-0 flex-1 sm:border-l sm:border-white/5 sm:pl-6">
+                                    {enquiry.message ? (
+                                        <div className="flex items-start gap-1.5 text-white/50 text-xs italic">
+                                            <MessageSquare size={12} className="flex-shrink-0 mt-0.5 text-white/30" />
+                                            <p className="line-clamp-2">{enquiry.message}</p>
+                                        </div>
+                                    ) : (
+                                        <span className="text-white/20 text-xs italic">No message</span>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center text-white/40 text-xs flex-shrink-0 sm:w-36 sm:border-l sm:border-white/5 sm:pl-6">
+                                    <Calendar size={12} className="mr-1.5 flex-shrink-0" />
+                                    <span>{new Date(enquiry.created_at).toLocaleString()}</span>
+                                </div>
+
                                 <select
                                     value={enquiry.status || 'new'}
                                     onChange={(e) => handleStatusChange(enquiry.id, e.target.value)}
-                                    className={`flex-shrink-0 text-[10px] font-bold uppercase px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
+                                    className={`flex-shrink-0 self-start sm:self-center text-[10px] font-bold uppercase px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
                                 >
                                     {STATUS_OPTIONS.map(s => (
                                         <option key={s} value={s} className="bg-black text-white">{STATUS_LABELS[s]}</option>
                                     ))}
                                 </select>
                             </div>
-
-                            <div className="space-y-2 text-sm pt-3 border-t border-white/5">
-                                <div className="flex items-center text-white/60">
-                                    <Mail size={14} className="mr-2 flex-shrink-0" />
-                                    <a href={`mailto:${enquiry.email}`} className="truncate hover:text-primary transition-colors">{enquiry.email}</a>
-                                </div>
-                                <div className="flex items-center text-white/60">
-                                    <Phone size={14} className="mr-2 flex-shrink-0" />
-                                    <a href={`tel:${enquiry.phone}`} className="hover:text-primary transition-colors">{enquiry.phone}</a>
-                                </div>
-                                <div className="flex items-center text-white/40 text-xs">
-                                    <Calendar size={12} className="mr-2 flex-shrink-0" />
-                                    <span>{new Date(enquiry.created_at).toLocaleString()}</span>
-                                </div>
-                            </div>
-
-                            {enquiry.message && (
-                                <div className="flex items-start gap-2 pt-3 border-t border-white/5">
-                                    <MessageSquare size={12} className="flex-shrink-0 mt-0.5 text-white/30" />
-                                    <p className="text-white/50 text-xs italic line-clamp-2">{enquiry.message}</p>
-                                </div>
-                            )}
                         </GlassCard>
                     ))}
                 </div>
