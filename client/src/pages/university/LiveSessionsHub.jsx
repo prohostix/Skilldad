@@ -972,15 +972,6 @@ const LiveSessionsHub = () => {
                                 </div>
                             </GlassCard>
                         ))}
-
-                        {/* Pro tip */}
-                        <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex gap-3 items-start">
-                            <Sparkles size={15} className="text-amber-500 mt-0.5 shrink-0" />
-                            <p className="text-[11px] text-white/45 leading-relaxed">
-                                <span className="text-amber-400 font-bold">Pro Tip:</span> Sessions scheduled mid-week typically achieve
-                                <span className="text-white/65"> 40% higher</span> attendance rates.
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>
