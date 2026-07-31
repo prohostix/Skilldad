@@ -864,7 +864,7 @@ const LiveSessionsHub = () => {
                                                     {notifyBtn(session.id)}
                                                     
                                                     <ModernButton
-                                                        variant={session.status === 'live' ? 'primary' : 'secondary'}
+                                                        variant={(session.status === 'live' || (session.isOwner && !session.meetingLink)) ? 'primary' : 'secondary'}
                                                         className={`text-[10px] md:text-xs px-4 md:px-5 py-2 h-10 font-bold shadow-md tracking-wider uppercase transition-all ${session.status === 'live' ? '!bg-red-500 !border-red-500 !text-white' : ''}`}
                                                         onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
                                                     >
