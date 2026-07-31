@@ -407,7 +407,7 @@ router.put('/:id/review', protect, authorize('admin', 'university', 'partner'), 
                     hasAccess = true;
                 } else {
                     const relCheck = await query(`
-                        SELECT id FROM users WHERE id = $1 AND university_id = $2
+                        SELECT id FROM users WHERE id = $1 AND (university_id = $2 OR registered_by = $2)
                         UNION
                         SELECT student_id FROM enrollments e 
                         JOIN courses c ON e.course_id = c.id 
@@ -416,14 +416,20 @@ router.put('/:id/review', protect, authorize('admin', 'university', 'partner'), 
                     if (relCheck.rows.length > 0) hasAccess = true;
                 }
             } else if (req.user.role === 'partner') {
-                // Check if partner is direct owner or has student relationship
+                // Check if partner is direct owner, registered the student, or has partner code/course relationship
                 if (doc.uploaded_by_id === userId) {
                     hasAccess = true;
                 } else {
                     const relCheck = await query(`
-                        SELECT id FROM users WHERE id = $1 AND partner_code IN (
-                            SELECT code FROM discounts WHERE partner_id = $2
+                        SELECT id FROM users WHERE id = $1 AND (
+                            registered_by = $2 OR partner_code IN (
+                                SELECT code FROM discounts WHERE partner_id = $2
+                            )
                         )
+                        UNION
+                        SELECT student_id FROM enrollments e 
+                        JOIN courses c ON e.course_id = c.id 
+                        WHERE student_id = $1 AND c.instructor_id = $2
                     `, [doc.student_id, userId]);
                     if (relCheck.rows.length > 0) hasAccess = true;
                 }
