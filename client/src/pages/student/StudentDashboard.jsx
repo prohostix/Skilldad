@@ -206,7 +206,7 @@ const StudentDashboard = () => {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-white/5">
                 <div>
-                    <DashboardHeading title={`Student Dashboard`} className="mb-0.5" />
+                    <DashboardHeading title={`Student Dashboard`} className="mb-0.5" uniform />
                     <p className="text-white/40 text-xs font-medium">
                         {userInfo.isFirstLogin ? 'Welcome' : 'Welcome back'}, <span className="text-white font-bold">{userInfo.name?.split(' ')[0] || 'Scholar'}</span>.
                     </p>
