@@ -114,7 +114,7 @@ const CourseEnquiries = () => {
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <DashboardHeading title="Course Enquiries" />
+                    <DashboardHeading title="Course Enquiries" uniform />
                     <p className="text-white/50 text-sm mt-2">Students who submitted the Enroll form, waiting for a counsellor follow-up</p>
                 </div>
                 <ModernButton variant="secondary" onClick={handleDownload}>

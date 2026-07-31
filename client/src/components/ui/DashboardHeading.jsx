@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const DashboardHeading = ({ title, className = '' }) => {
+const DashboardHeading = ({ title, className = '', uniform = false }) => {
     const words = title.split(' ');
     const lastWord = words.pop();
     const restOfTitle = words.join(' ');
@@ -13,8 +13,14 @@ const DashboardHeading = ({ title, className = '' }) => {
             className={`flex flex-col ${className}`}
         >
             <h1 className="text-xl font-black tracking-tight flex flex-wrap items-baseline gap-x-3 gap-y-0">
-                <span className="opacity-40">{restOfTitle}</span>
-                <span className="premium-gradient-text">{lastWord}</span>
+                {uniform ? (
+                    <span className="premium-gradient-text">{title}</span>
+                ) : (
+                    <>
+                        <span className="opacity-40">{restOfTitle}</span>
+                        <span className="premium-gradient-text">{lastWord}</span>
+                    </>
+                )}
             </h1>
         </motion.div>
     );
