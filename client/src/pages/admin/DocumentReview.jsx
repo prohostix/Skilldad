@@ -144,57 +144,72 @@ const DocumentReview = () => {
                 </div>
             ) : (
                 <div className="space-y-3">
+                    {/* Table Header Bar */}
+                    {filteredDocs.length > 0 && (
+                        <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/5">
+                            <div className="col-span-4">Document Details</div>
+                            <div className="col-span-3">Student</div>
+                            <div className="col-span-2">Submitted Date</div>
+                            <div className="col-span-1 text-center">Status</div>
+                            <div className="col-span-2 text-right">Actions</div>
+                        </div>
+                    )}
+
                     {filteredDocs.map((doc) => (
                         <motion.div
                             layout
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             key={doc._id}
                         >
-                            <GlassCard className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:border-primary/30 transition-all group">
-                                {/* Document Info */}
-                                <div className="flex items-center gap-3.5 min-w-[240px]">
-                                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                                        <FileText size={20} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="text-white font-bold text-sm tracking-tight">{doc.title}</h3>
-                                        <p className="text-white/40 text-[10px] font-black uppercase tracking-wider mt-0.5">{doc.type}</p>
-                                    </div>
-                                </div>
-
-                                {/* Student Info */}
-                                <div className="flex items-center gap-3 text-white/70 min-w-[200px]">
-                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary/70 shrink-0">
-                                        <User size={14} />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="text-xs font-bold text-white truncate">{doc.student_name || 'Student'}</p>
-                                        <p className="text-[10px] text-white/40 truncate">{doc.student_email}</p>
-                                    </div>
-                                </div>
-
-                                {/* Date & University */}
-                                <div className="hidden lg:flex flex-col text-[11px] text-white/50 min-w-[150px]">
-                                    <div className="flex items-center gap-1.5 font-mono">
-                                        <Calendar size={12} className="text-emerald-400/70" />
-                                        <span>Submitted {new Date(doc.created_at).toLocaleDateString()}</span>
-                                    </div>
-                                    {doc.university_name && (
-                                        <div className="flex items-center gap-1.5 text-[10px] text-white/40 truncate mt-0.5">
-                                            <Building2 size={12} className="text-indigo-400/70" />
-                                            <span className="truncate">{doc.university_name}</span>
+                            <GlassCard className="p-4 hover:border-primary/30 transition-all group">
+                                <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-4">
+                                    
+                                    {/* 1. Document Info (col-span-4) */}
+                                    <div className="col-span-1 sm:col-span-4 flex items-center gap-3.5 min-w-0">
+                                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                                            <FileText size={20} />
                                         </div>
-                                    )}
-                                </div>
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="text-white font-bold text-sm tracking-tight truncate">{doc.title}</h3>
+                                            <p className="text-white/40 text-[10px] font-black uppercase tracking-wider mt-0.5">{doc.type}</p>
+                                        </div>
+                                    </div>
 
-                                {/* Status Badge & Actions */}
-                                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-white/5 pt-3 md:pt-0">
-                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shrink-0 ${getStatusStyle(doc.status)}`}>
-                                        {doc.status}
-                                    </span>
+                                    {/* 2. Student Info (col-span-3) */}
+                                    <div className="col-span-1 sm:col-span-3 flex items-center gap-3 text-white/70 min-w-0">
+                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary/70 shrink-0">
+                                            <User size={14} />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-xs font-bold text-white truncate">{doc.student_name || 'Student'}</p>
+                                            <p className="text-[10px] text-white/40 truncate">{doc.student_email}</p>
+                                        </div>
+                                    </div>
 
-                                    <div className="flex items-center gap-2 shrink-0">
+                                    {/* 3. Date & University (col-span-2) */}
+                                    <div className="col-span-1 sm:col-span-2 flex flex-col text-[11px] text-white/50 min-w-0">
+                                        <div className="flex items-center gap-1.5 font-mono">
+                                            <Calendar size={12} className="text-emerald-400/70 shrink-0" />
+                                            <span className="truncate">{new Date(doc.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                        {doc.university_name && (
+                                            <div className="flex items-center gap-1.5 text-[10px] text-white/40 truncate mt-0.5">
+                                                <Building2 size={12} className="text-indigo-400/70 shrink-0" />
+                                                <span className="truncate">{doc.university_name}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 4. Status Badge (col-span-1) */}
+                                    <div className="col-span-1 flex items-center sm:justify-center">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shrink-0 ${getStatusStyle(doc.status)}`}>
+                                            {doc.status}
+                                        </span>
+                                    </div>
+
+                                    {/* 5. Actions (col-span-2) */}
+                                    <div className="col-span-1 sm:col-span-2 flex items-center justify-start sm:justify-end gap-2 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
                                         <ModernButton 
                                             variant="secondary" 
                                             className="!py-2 !px-3 text-[11px] font-bold"
@@ -208,13 +223,14 @@ const DocumentReview = () => {
                                                 target="_blank" 
                                                 rel="noreferrer"
                                                 download
-                                                className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-xl transition-all flex items-center justify-center"
+                                                className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-xl transition-all flex items-center justify-center shrink-0"
                                                 title="Download Document"
                                             >
                                                 <Download size={15} />
                                             </a>
                                         )}
                                     </div>
+
                                 </div>
                             </GlassCard>
                         </motion.div>
