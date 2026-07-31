@@ -904,30 +904,6 @@ const LiveSessionsHub = () => {
 
                     {/* Right Sidebar */}
                     <div className="space-y-5">
-                        {/* Quick schedule CTA */}
-                        <GlassCard
-                            className="p-5 bg-gradient-to-br from-primary/10 to-transparent border-primary/20 relative overflow-hidden group cursor-pointer hover:border-primary/40 transition-all"
-                            onClick={() => setShowModal(true)}
-                        >
-                            <div className="absolute -top-6 -right-6 w-24 h-24 bg-primary/20 blur-2xl group-hover:bg-primary/40 transition-all pointer-events-none" />
-                            <div className="relative z-10">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="p-2.5 bg-primary/20 rounded-xl text-primary">
-                                        <Plus size={20} />
-                                    </div>
-                                    <div>
-                                        <p className="text-white font-black text-sm uppercase tracking-wider">New Session</p>
-                                        <p className="text-white/35 text-[11px]">Click to schedule</p>
-                                    </div>
-                                </div>
-                                <p className="text-white/45 text-xs leading-relaxed mb-3">
-                                    Pick a course, set the date & time, add your meeting link. Students get notified the moment you hit Schedule.
-                                </p>
-                                <span className="flex items-center gap-1.5 text-primary text-[11px] font-black uppercase tracking-widest">
-                                    Schedule Now <ArrowRight size={12} />
-                                </span>
-                            </div>
-                        </GlassCard>
 
                         {/* Spotlight cards */}
                         {upcoming.slice(0, 2).map((session, i) => (
