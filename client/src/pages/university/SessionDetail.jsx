@@ -94,7 +94,7 @@ const SessionDetail = () => {
     setInMeeting(false);
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     const role = userInfo.role || 'student';
-    navigate(`/${role}/live-sessions`);
+    navigate(role === 'student' ? '/dashboard/live-classes' : `/${role}/live-sessions`);
   };
 
   const handleMeetingError = (errorMessage) => {
@@ -170,7 +170,7 @@ const SessionDetail = () => {
             onClick={() => {
               const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
               const role = userInfo.role || 'student';
-              navigate(`/${role}/live-sessions`);
+              navigate(role === 'student' ? '/dashboard/live-classes' : `/${role}/live-sessions`);
             }}
             variant="secondary"
           >
@@ -249,7 +249,7 @@ const SessionDetail = () => {
           onClick={() => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
             const role = userInfo.role || 'student';
-            navigate(`/${role}/live-sessions`);
+            navigate(role === 'student' ? '/dashboard/live-classes' : `/${role}/live-sessions`);
           }}
           className="group flex items-center gap-3 text-white/40 hover:text-primary mb-10 transition-all"
         >
