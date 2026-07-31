@@ -1,10 +1,8 @@
-name: Backend Deployment
+name: Backend & Live Deployment
 
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'server/**'
   workflow_dispatch:
 
 jobs:
@@ -23,10 +21,6 @@ jobs:
       - name: Install Dependencies
         run: cd server && npm install
 
-
-
-      # Note: Actual deployment step depends on the specific AWS service (EC2, App Runner, etc.)
-      # This is a placeholder for AWS App Runner deployment
       - name: Deploy to EC2 via SSH
         if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1.0.3
@@ -44,9 +38,14 @@ jobs:
             cd server
             npm install --production
             
-            # Ensure certificates/RDS setup is intact
+            # Build client on EC2
+            cd ../client
+            npm install
+            NODE_OPTIONS=--max-old-space-size=1536 npm run build
+            
             # PM2 Manage
+            cd ../server
             pm2 restart skilldad-backend || pm2 start server.js --name skilldad-backend
             pm2 save
             
-            echo "Deployment to 13.233.85.18 successful!"
+            echo "Deployment to 13.234.186.48 successful!"
