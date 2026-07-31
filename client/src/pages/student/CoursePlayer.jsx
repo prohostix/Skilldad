@@ -620,16 +620,16 @@ const CoursePlayer = () => {
                                 </div>
                             </div>
                             
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2">
                                 {isSidebarOpen && (
                                     <button 
                                         onClick={() => setIsSidebarOpen(false)}
-                                        className="hidden lg:flex items-center px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-all rounded-xl border border-white/10 font-bold text-[10px] uppercase tracking-widest"
+                                        className="hidden lg:flex items-center px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-all rounded-lg border border-white/10 font-bold text-[9px] uppercase tracking-widest"
                                     >
-                                        <Layout size={14} className="mr-2" /> Hide Index
+                                        <Layout size={12} className="mr-1.5" /> Hide Index
                                     </button>
                                 )}
-                                <ModernButton onClick={handleVideoEnd} className="!py-2 !px-6 !text-xs">
+                                <ModernButton onClick={handleVideoEnd} className="!py-1.5 !px-3.5 !text-[10px] !rounded-lg">
                                     Mark Done
                                 </ModernButton>
                             </div>
