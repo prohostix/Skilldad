@@ -903,9 +903,7 @@ const LiveSessionsHub = () => {
                                                                 </button>
                                                             )}
 
-                                                            <button className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/30 hover:text-white hover:bg-white/10 transition-all focus:ring-1 focus:ring-primary/40">
-                                                                <MoreVertical size={18} />
-                                                            </button>
+
                                                         </div>
                                                     </div>
                                                 </div>
