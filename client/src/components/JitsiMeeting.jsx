@@ -131,7 +131,7 @@ const JitsiMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, on
           disabledSounds: [],
           toolbarButtons: isHost ? [
             'microphone', 'camera', 'desktop', 'fullscreen',
-            'fodeviceselection', 'hangup', 'chat', 'recording',
+            'fodeviceselection', 'hangup', 'chat', 'recording', 'local-recording',
             'settings', 'raisehand', 'videoquality', 'filmstrip',
             'tileview', 'help', 'mute-everyone', 'security', 'whiteboard'
           ] : [
