@@ -477,6 +477,14 @@ module.exports = {
 
         let playUrl = recording.playUrl || recording.play_url;
 
+        if (playUrl && !playUrl.startsWith('http') && !playUrl.startsWith('/')) {
+            if (playUrl.startsWith('rec_') || playUrl.endsWith('.webm') || playUrl.endsWith('.mp4')) {
+                playUrl = `/uploads/recordings/${playUrl}`;
+            } else {
+                playUrl = `/uploads/${playUrl}`;
+            }
+        }
+
         // Fallback to a mock video for development/testing if URL is not present
         if (!playUrl) {
             playUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
