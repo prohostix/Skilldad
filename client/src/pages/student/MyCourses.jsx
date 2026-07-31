@@ -11,7 +11,15 @@ import {
     History,
     ChevronRight,
     Play,
-    Download
+    Download,
+    X,
+    CheckCircle2,
+    Sparkles,
+    Sun,
+    Moon,
+    Sunset,
+    Zap,
+    Save
 } from 'lucide-react';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import { getMediaUrl } from '../../utils/media';
@@ -20,6 +28,22 @@ const MyCourses = () => {
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [certificates, setCertificates] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showPlannerModal, setShowPlannerModal] = useState(false);
+    const [plannerSavedToast, setPlannerSavedToast] = useState(false);
+    const [plannerConfig, setPlannerConfig] = useState(() => {
+        try {
+            const saved = localStorage.getItem('skilldad_study_planner');
+            return saved ? JSON.parse(saved) : {
+                weeklyHours: 5,
+                pace: 'Balanced',
+                selectedDays: ['Mon', 'Wed', 'Fri'],
+                preferredTime: 'Evening'
+            };
+        } catch (e) {
+            return { weeklyHours: 5, pace: 'Balanced', selectedDays: ['Mon', 'Wed', 'Fri'], preferredTime: 'Evening' };
+        }
+    });
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -52,6 +76,18 @@ const MyCourses = () => {
 
         fetchData();
     }, [navigate]);
+
+    const handleSavePlanner = (updatedConfig) => {
+        setPlannerConfig(updatedConfig);
+        try {
+            localStorage.setItem('skilldad_study_planner', JSON.stringify(updatedConfig));
+        } catch (e) {
+            console.error('Failed to save study planner:', e);
+        }
+        setPlannerSavedToast(true);
+        setTimeout(() => setPlannerSavedToast(false), 3000);
+        setShowPlannerModal(false);
+    };
 
     const handleApplyCertificate = async (courseId) => {
         try {
@@ -139,12 +175,18 @@ const MyCourses = () => {
                     </div>
                 </div>
                 
-                <div className="px-4 py-2 border-t border-white/5 bg-white/[0.015] flex items-center justify-between gap-3 min-h-[44px]">
-                    <span className="text-[10px] font-medium text-white/30 flex items-center gap-1.5">
-                        <Clock size={10} className="text-white/20" /> {isCompleted ? 'Completed' : 'In Progress'}
-                    </span>
-                    <div className="flex gap-2">
-                        {isCompleted && !cert && (
+                <div className="px-4 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-between gap-2 mt-auto">
+                    <div className="text-[10px] font-medium text-white/40 truncate">
+                        {isCompleted ? (
+                            <span className="text-emerald-400 font-bold flex items-center gap-1">
+                                <CheckCircle2 size={12} /> Completed
+                            </span>
+                        ) : (
+                            <span>{progress}% Finished</span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {isCompleted && (!cert || cert.status === 'NOT_APPLIED') && (
                             <button 
                                 onClick={(e) => { e.stopPropagation(); handleApplyCertificate(enrollment.course?._id || enrollment.course_id); }}
                                 className="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white px-3 py-1.5 rounded border border-emerald-500/20 hover:border-emerald-500 transition-all flex items-center gap-1.5 shadow-sm shrink-0"
@@ -183,6 +225,13 @@ const MyCourses = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+            {/* Toast Notification when Plan Saved */}
+            {plannerSavedToast && (
+                <div className="fixed top-20 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-emerald-500 text-white font-bold text-xs rounded-2xl shadow-xl shadow-emerald-500/20 animate-in slide-in-from-top-4 duration-300">
+                    <CheckCircle2 size={16} /> Study Plan updated successfully!
+                </div>
+            )}
+
             {/* Page Header */}
             <div className="pb-3 border-b border-white/5 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
@@ -190,8 +239,13 @@ const MyCourses = () => {
                     <p className="text-xs text-white/40 mt-0.5 font-medium">Pick up exactly where you left off.</p>
                 </div>
                 <div className="flex shrink-0">
-                    <button className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-semibold text-white transition-colors">
-                        <Calendar size={14} className="text-white/50" /> Study Planner
+                    <button
+                        onClick={() => setShowPlannerModal(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 rounded-lg text-xs font-semibold text-white transition-all shadow-sm group"
+                    >
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <Calendar size={14} className="text-primary group-hover:scale-110 transition-transform" />
+                        <span>Study Planner ({plannerConfig.weeklyHours}h/wk)</span>
                     </button>
                 </div>
             </div>
@@ -271,6 +325,169 @@ const MyCourses = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Study Planner Modal */}
+            {showPlannerModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-300">
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0, y: 15 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 15 }}
+                        className="w-full max-w-2xl bg-slate-900/95 border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-primary/20 overflow-y-auto max-h-[90vh] space-y-6 text-white"
+                    >
+                        {/* Header */}
+                        <div className="flex items-start justify-between border-b border-white/10 pb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 rounded-2xl bg-primary/20 border border-primary/30 text-primary">
+                                    <Sparkles size={22} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                        Personalized Study Planner
+                                    </h3>
+                                    <p className="text-xs text-white/50">Organize your weekly learning pace and daily study schedule</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setShowPlannerModal(false)}
+                                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* Weekly Commitment Slider */}
+                        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-white/80 flex items-center gap-2">
+                                    <Clock size={14} className="text-primary" /> Weekly Target Hours
+                                </label>
+                                <span className="text-sm font-black text-primary px-3 py-1 rounded-lg bg-primary/10 border border-primary/20">
+                                    {plannerConfig.weeklyHours} Hours / Week
+                                </span>
+                            </div>
+                            <input
+                                type="range"
+                                min="1"
+                                max="20"
+                                value={plannerConfig.weeklyHours}
+                                onChange={(e) => setPlannerConfig({ ...plannerConfig, weeklyHours: parseInt(e.target.value) })}
+                                className="w-full accent-primary cursor-pointer"
+                            />
+                            <div className="flex justify-between items-center gap-2 pt-1">
+                                {[3, 5, 10, 15].map((h) => (
+                                    <button
+                                        key={h}
+                                        onClick={() => setPlannerConfig({ ...plannerConfig, weeklyHours: h })}
+                                        className={`px-3 py-1 text-xs font-bold rounded-lg border transition-all ${plannerConfig.weeklyHours === h ? 'bg-primary text-white border-primary' : 'bg-white/5 text-white/50 border-white/10 hover:text-white'}`}
+                                    >
+                                        {h}h / week
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Pace & Preferred Days */}
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            {/* Study Days Selection */}
+                            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+                                <label className="text-xs font-bold text-white/80 flex items-center gap-2">
+                                    <Calendar size={14} className="text-emerald-400" /> Active Study Days
+                                </label>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
+                                        const active = plannerConfig.selectedDays.includes(day);
+                                        return (
+                                            <button
+                                                key={day}
+                                                onClick={() => {
+                                                    const updated = active
+                                                        ? plannerConfig.selectedDays.filter(d => d !== day)
+                                                        : [...plannerConfig.selectedDays, day];
+                                                    setPlannerConfig({ ...plannerConfig, selectedDays: updated.length ? updated : ['Mon'] });
+                                                }}
+                                                className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${active ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-white/5 text-white/40 border-white/10 hover:text-white'}`}
+                                            >
+                                                {day}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Preferred Time of Day */}
+                            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+                                <label className="text-xs font-bold text-white/80 flex items-center gap-2">
+                                    <Sun size={14} className="text-amber-400" /> Preferred Study Time
+                                </label>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    {[
+                                        { key: 'Morning', icon: Sun, label: 'Morning (8-12)' },
+                                        { key: 'Afternoon', icon: Sunset, label: 'Afternoon (12-5)' },
+                                        { key: 'Evening', icon: Sunset, label: 'Evening (5-9)' },
+                                        { key: 'Night', icon: Moon, label: 'Night (9-12)' }
+                                    ].map((t) => (
+                                        <button
+                                            key={t.key}
+                                            onClick={() => setPlannerConfig({ ...plannerConfig, preferredTime: t.key })}
+                                            className={`px-2.5 py-1.5 text-[11px] font-bold rounded-lg border flex items-center gap-1.5 transition-all ${plannerConfig.preferredTime === t.key ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-white/5 text-white/40 border-white/10 hover:text-white'}`}
+                                        >
+                                            <t.icon size={12} />
+                                            <span>{t.key}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Smart Weekly Routine Breakdown */}
+                        <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-3">
+                            <h4 className="text-xs font-bold text-white/80 flex items-center gap-2">
+                                <Zap size={14} className="text-purple-400" /> Recommended Weekly Routine
+                            </h4>
+                            <div className="space-y-2">
+                                {plannerConfig.selectedDays.map((day, idx) => {
+                                    const assignedCourse = enrolledCourses[idx % enrolledCourses.length];
+                                    const dailyMins = Math.round((plannerConfig.weeklyHours * 60) / plannerConfig.selectedDays.length);
+                                    return (
+                                        <div key={day} className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 text-xs">
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-bold text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/20">
+                                                    {day}
+                                                </span>
+                                                <span className="text-white/80 font-medium truncate max-w-[240px]">
+                                                    {assignedCourse?.course?.title || 'Course Learning Session'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-white/50 text-[11px] font-mono">
+                                                <span>{plannerConfig.preferredTime}</span>
+                                                <span>•</span>
+                                                <span className="text-emerald-400 font-bold">{dailyMins} mins</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Footer Action */}
+                        <div className="flex items-center justify-end gap-3 pt-2">
+                            <button
+                                onClick={() => setShowPlannerModal(false)}
+                                className="px-4 py-2 text-xs font-bold text-white/50 hover:text-white transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() => handleSavePlanner(plannerConfig)}
+                                className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all border border-primary/30 shadow-lg shadow-primary/20 flex items-center gap-2"
+                            >
+                                <Save size={14} /> Save Study Plan
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
