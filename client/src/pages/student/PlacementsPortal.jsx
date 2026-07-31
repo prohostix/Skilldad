@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Briefcase, Building2, DollarSign, Clock,
     Trophy, Upload, FileText,
-    CheckCircle, Search, AlertCircle, MessageSquare
+    CheckCircle, Search, AlertCircle
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -143,17 +143,6 @@ const PlacementsPortal = () => {
                     <DashboardHeading title="Career & Placements" />
                     <p className="text-xs text-white/40 mt-0.5 font-medium">Browse open roles, apply, and celebrate our placement success stories.</p>
                 </div>
-                <button 
-                    onClick={() => {
-                        // Small delay to ensure the widget is ready or handle specific state
-                        const event = new CustomEvent('open-career-guide');
-                        window.dispatchEvent(event);
-                    }}
-                    className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-bold text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all flex items-center gap-2 w-fit shadow-lg shadow-emerald-500/10"
-                >
-                    <MessageSquare size={14} className="animate-pulse" />
-                    Application Process Guide
-                </button>
             </div>
 
             {/* Toolbar */}
