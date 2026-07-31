@@ -157,12 +157,12 @@ const CourseEnquiries = () => {
                     <p className="text-white/30 text-sm">No enquiries found.</p>
                 </div>
             ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                     {filteredEnquiries.map((enquiry) => (
-                        <GlassCard key={enquiry.id} className="!p-4 sm:!p-5">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-                                <div className="min-w-0 sm:w-52 flex-shrink-0 space-y-1">
-                                    <h3 className="text-white font-semibold text-sm truncate">{enquiry.name}</h3>
+                        <GlassCard key={enquiry.id} className="!p-2.5 sm:!p-3.5">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
+                                <div className="min-w-0 sm:w-48 flex-shrink-0 space-y-0.5">
+                                    <h3 className="text-white font-semibold text-sm truncate leading-snug">{enquiry.name}</h3>
                                     {enquiry.course_name && (
                                         <div className="flex items-center gap-1.5 text-primary text-xs font-bold min-w-0">
                                             <BookOpen size={12} className="flex-shrink-0" />
@@ -177,37 +177,43 @@ const CourseEnquiries = () => {
                                     )}
                                 </div>
 
-                                <div className="min-w-0 sm:w-52 flex-shrink-0 space-y-1 text-xs sm:border-l sm:border-white/5 sm:pl-6">
-                                    <div className="flex items-center text-white/60 min-w-0">
-                                        <Mail size={13} className="mr-1.5 flex-shrink-0" />
-                                        <a href={`mailto:${enquiry.email}`} className="truncate hover:text-primary transition-colors">{enquiry.email}</a>
-                                    </div>
-                                    <div className="flex items-center text-white/60">
-                                        <Phone size={13} className="mr-1.5 flex-shrink-0" />
-                                        <a href={`tel:${enquiry.phone}`} className="hover:text-primary transition-colors">{enquiry.phone}</a>
-                                    </div>
+                                <div className="min-w-0 sm:w-52 flex-shrink-0 space-y-1 text-xs sm:border-l sm:border-white/5 sm:pl-4">
+                                    <a
+                                        href={`mailto:${enquiry.email}`}
+                                        className="flex items-center gap-2 text-white/70 hover:text-primary transition-colors min-w-0 group"
+                                    >
+                                        <Mail size={13} className="flex-shrink-0 text-white/40 group-hover:text-primary transition-colors" />
+                                        <span className="truncate">{enquiry.email}</span>
+                                    </a>
+                                    <a
+                                        href={`tel:${enquiry.phone}`}
+                                        className="flex items-center gap-2 text-white/70 hover:text-primary transition-colors min-w-0 group"
+                                    >
+                                        <Phone size={13} className="flex-shrink-0 text-white/40 group-hover:text-primary transition-colors" />
+                                        <span className="truncate">{enquiry.phone}</span>
+                                    </a>
                                 </div>
 
-                                <div className="min-w-0 flex-1 sm:border-l sm:border-white/5 sm:pl-6">
+                                <div className="min-w-0 flex-1 sm:border-l sm:border-white/5 sm:pl-4">
                                     {enquiry.message ? (
                                         <div className="flex items-start gap-1.5 text-white/50 text-xs italic">
                                             <MessageSquare size={12} className="flex-shrink-0 mt-0.5 text-white/30" />
-                                            <p className="line-clamp-2">{enquiry.message}</p>
+                                            <p className="line-clamp-1">{enquiry.message}</p>
                                         </div>
                                     ) : (
                                         <span className="text-white/20 text-xs italic">No message</span>
                                     )}
                                 </div>
 
-                                <div className="flex items-center text-white/40 text-xs flex-shrink-0 sm:w-36 sm:border-l sm:border-white/5 sm:pl-6">
+                                <div className="flex items-center text-white/40 text-xs flex-shrink-0 sm:w-36 sm:border-l sm:border-white/5 sm:pl-4">
                                     <Calendar size={12} className="mr-1.5 flex-shrink-0" />
-                                    <span>{new Date(enquiry.created_at).toLocaleString()}</span>
+                                    <span className="text-[11px]">{new Date(enquiry.created_at).toLocaleString()}</span>
                                 </div>
 
                                 <select
                                     value={enquiry.status || 'new'}
                                     onChange={(e) => handleStatusChange(enquiry.id, e.target.value)}
-                                    className={`flex-shrink-0 self-start sm:self-center text-[10px] font-bold uppercase px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
+                                    className={`flex-shrink-0 self-start sm:self-center text-[10px] font-bold uppercase px-2 py-1 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
                                 >
                                     {STATUS_OPTIONS.map(s => (
                                         <option key={s} value={s} className="bg-black text-white">{STATUS_LABELS[s]}</option>

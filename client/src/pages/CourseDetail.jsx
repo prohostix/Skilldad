@@ -15,8 +15,7 @@ import {
     ArrowLeft,
     Camera,
     Loader2,
-    Share2,
-    Lock
+    Share2
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
@@ -266,34 +265,6 @@ const CourseDetail = () => {
                                                 {module.videos?.length || 0} Lessons
                                             </span>
                                         </div>
-                                        {module.videos && module.videos.length > 0 && (
-                                            <div className="grid sm:grid-cols-2 gap-3 px-5 pb-4 pt-1 border-t border-white/5">
-                                                {module.videos.map((video, vIdx) => (
-                                                    userInfo ? (
-                                                        <div key={vIdx} className="flex items-center space-x-3 py-2 text-sm text-text-secondary hover:text-white transition-colors group">
-                                                            <PlayCircle size={14} className="text-white/30 group-hover:text-primary transition-colors flex-shrink-0" />
-                                                            <span className="flex-1 truncate">{video.title}</span>
-                                                            <span className="text-[10px] font-black opacity-30 flex-shrink-0">{video.duration}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <div key={vIdx} className="flex items-center space-x-3 py-2 text-sm text-text-secondary/40">
-                                                            <Lock size={14} className="flex-shrink-0" />
-                                                            <span className="flex-1 truncate">Lesson {vIdx + 1}</span>
-                                                        </div>
-                                                    )
-                                                ))}
-                                            </div>
-                                        )}
-                                        {!userInfo && module.videos && module.videos.length > 0 && (
-                                            <div className="px-5 pb-4">
-                                                <button
-                                                    onClick={() => navigate('/login', { state: { from: `/course/${courseId}` } })}
-                                                    className="text-xs font-bold text-primary hover:text-primary-light transition-colors"
-                                                >
-                                                    Login to view lesson names
-                                                </button>
-                                            </div>
-                                        )}
                                     </div>
                                 ))}
                             </div>
