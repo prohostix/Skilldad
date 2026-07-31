@@ -27,6 +27,11 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const screenVideoRef = useRef(null);
 
+  // Real browser screen/audio recording refs
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+  const recordingStreamRef = useRef(null);
+
   // ── Meeting State ─────────────────────────────────────────────────────────
   const [loading, setLoading]   = useState(true);
   const [joined, setJoined]     = useState(false);
@@ -228,6 +233,135 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
       });
     } catch (e) { console.error('[MockJitsi]', e.message); }
     finally { exitMeeting(); }
+  };
+
+  const startRecording = async () => {
+    try {
+      // 1. Request display stream with audio support
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+      });
+
+      const tracks = [];
+      if (displayStream.getVideoTracks().length > 0) {
+        tracks.push(displayStream.getVideoTracks()[0]);
+      }
+
+      // Collect audio sources: display audio + mic audio
+      const audioTracks = [];
+      if (displayStream.getAudioTracks().length > 0) {
+        audioTracks.push(displayStream.getAudioTracks()[0]);
+      }
+      if (streamRef.current && streamRef.current.getAudioTracks().length > 0) {
+        audioTracks.push(streamRef.current.getAudioTracks()[0]);
+      }
+
+      // Mix audio tracks if possible
+      let combinedAudioStream = null;
+      if (audioTracks.length > 0) {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (audioTracks.length > 1 && AudioContextClass) {
+            const ctx = new AudioContextClass();
+            const dest = ctx.createMediaStreamDestination();
+            
+            audioTracks.forEach(t => {
+              const sourceStream = new MediaStream([t]);
+              const src = ctx.createMediaStreamSource(sourceStream);
+              src.connect(dest);
+            });
+            combinedAudioStream = dest.stream;
+          } else {
+            combinedAudioStream = new MediaStream([audioTracks[0]]);
+          }
+        } catch (e) {
+          console.warn('[Recording] Audio mixing failed, falling back to display audio:', e.message);
+          combinedAudioStream = new MediaStream([audioTracks[0]]);
+        }
+      }
+
+      if (combinedAudioStream && combinedAudioStream.getAudioTracks().length > 0) {
+        tracks.push(combinedAudioStream.getAudioTracks()[0]);
+      }
+
+      const mixedStream = new MediaStream(tracks);
+      recordingStreamRef.current = mixedStream;
+      recordedChunksRef.current = [];
+
+      // Determine supported mimeType (VP9/VP8/H264 on WebM/MP4)
+      let options = { mimeType: 'video/webm;codecs=vp9' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm;codecs=vp8' };
+      }
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+      }
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/mp4' };
+      }
+
+      const recorder = new MediaRecorder(mixedStream, options);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          recordedChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        // Stop all tracks on the capture display stream and mixed stream
+        displayStream.getTracks().forEach(t => t.stop());
+        mixedStream.getTracks().forEach(t => t.stop());
+
+        // Process recorded video Blob
+        const blob = new Blob(recordedChunksRef.current, { type: options.mimeType });
+        const url = URL.createObjectURL(blob);
+        
+        // Trigger auto-download
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `SkillDad-Session-${sessionId}-${Date.now()}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+
+        setIsRecording(false);
+      };
+
+      // Set listener for when the user clicks "Stop Sharing" on browser banner
+      displayStream.getVideoTracks()[0].onended = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop();
+        }
+      };
+
+      recorder.start(1000);
+      setIsRecording(true);
+    } catch (err) {
+      console.error('[Recording] Failed to start browser recording:', err.message);
+      alert(`Recording could not be started: ${err.message}`);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
   };
 
   const exitMeeting = () => {
@@ -522,8 +656,8 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
 
           {/* Record */}
           <button
-            onClick={() => setIsRecording(v => !v)}
-            className={`p-3.5 rounded-xl transition-all ${isRecording ? 'text-red-400 hover:bg-red-500/10' : 'text-white hover:bg-white/10'}`}
+            onClick={toggleRecording}
+            className={`p-3.5 rounded-xl transition-all ${isRecording ? 'text-red-400 hover:bg-red-500/10 animate-pulse' : 'text-white hover:bg-white/10'}`}
             title={isRecording ? 'Stop recording' : 'Record'}
           >
             {isRecording ? <StopCircle size={21} /> : <Circle size={21} />}
