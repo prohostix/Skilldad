@@ -386,7 +386,14 @@ const PartnerStudentManagement = () => {
 
             {/* Students List */}
             <GlassCard className="p-4">
-                <h2 className="text-xl font-bold text-white mb-4">My Network Students</h2>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
+                        <span>My Network Students</span>
+                        <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                            {filteredStudents.length}
+                        </span>
+                    </h2>
+                </div>
                 {filteredStudents.length === 0 ? (
                     <div className="text-center py-8 text-white/50">
                         <Users className="mx-auto mb-2 opacity-50" size={32} />
