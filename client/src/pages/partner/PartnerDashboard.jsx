@@ -35,6 +35,7 @@ import {
     Clock,
     CheckCircle2,
     AlertCircle,
+    AlertTriangle,
     Plus,
     XCircle,
     Trash2,
@@ -56,6 +57,8 @@ const PartnerDashboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
     const [selectedStudent, setSelectedStudent] = useState(null);
+    const [rejectingDoc, setRejectingDoc] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState('');
     const [discountCodes, setDiscountCodes] = useState([]);
     const [payoutRequests, setPayoutRequests] = useState([]);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -793,8 +796,8 @@ const PartnerDashboard = () => {
                                                                         </button>
                                                                         <button 
                                                                             onClick={() => {
-                                                                                const reason = prompt('Reason for rejection:');
-                                                                                if (reason) handleDocumentReview(doc.id || doc._id, 'rejected', reason);
+                                                                                setRejectingDoc(doc);
+                                                                                setRejectionReason('');
                                                                             }}
                                                                             className="flex-1 py-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-xl text-[10px] font-bold transition-all"
                                                                         >
@@ -890,6 +893,74 @@ const PartnerDashboard = () => {
                                         </section>
                                     </div>
                                 )}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+            {/* Document Rejection Reason Modal */}
+            <AnimatePresence>
+                {rejectingDoc && (
+                    <div className="fixed inset-0 z-[2500] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setRejectingDoc(null)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                            className="relative w-full max-w-md bg-[#0B0F1A] border border-rose-500/20 rounded-2xl p-6 shadow-2xl space-y-5"
+                        >
+                            <div className="flex items-start gap-4">
+                                <div className="p-3 bg-rose-500/10 rounded-xl text-rose-400">
+                                    <AlertTriangle size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white">Reject Document</h3>
+                                    <p className="text-xs text-white/50 mt-1">
+                                        Specify rejection reason for <span className="text-white font-medium">{rejectingDoc.title || rejectingDoc.type || 'this document'}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[11px] font-bold text-white/70 uppercase tracking-wider">Rejection Reason</label>
+                                <textarea 
+                                    rows={3}
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    placeholder="e.g. Document image is blurry or expired. Please upload a clear copy."
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-rose-500/50 transition-all resize-none"
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/5">
+                                <button
+                                    type="button"
+                                    onClick={() => setRejectingDoc(null)}
+                                    className="px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-xl text-xs font-semibold transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        if (!rejectionReason.trim()) {
+                                            showToast('Please enter a reason for rejection', 'error');
+                                            return;
+                                        }
+                                        await handleDocumentReview(rejectingDoc.id || rejectingDoc._id, 'rejected', rejectionReason);
+                                        setRejectingDoc(null);
+                                    }}
+                                    className="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-rose-500/20"
+                                >
+                                    Confirm Rejection
+                                </button>
                             </div>
                         </motion.div>
                     </div>
