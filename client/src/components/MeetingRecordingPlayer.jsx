@@ -148,7 +148,6 @@ const MeetingRecordingPlayer = ({ recordingUrl, sessionId, title, onEnded, onErr
           controlsList="nodownload"
           onError={handleVideoError}
           onEnded={handleVideoEnded}
-          poster={`https://via.placeholder.com/1280x720/1a1a1a/ffffff?text=${encodeURIComponent(title || 'Session Recording')}`}
           autoPlay
         >
           <source src={url} />

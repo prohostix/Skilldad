@@ -146,7 +146,6 @@ const ZoomRecordingPlayer = ({ recordingUrl, sessionId, title, onEnded, onError 
           controlsList="nodownload"
           onError={handleVideoError}
           onEnded={handleVideoEnded}
-          poster={`https://via.placeholder.com/1280x720/1a1a1a/ffffff?text=${encodeURIComponent(title || 'Recording')}`}
           autoPlay
         >
           <source src={url} type="video/mp4" />
