@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Mail, Phone, BookOpen, Building2, Calendar, Search, Download } from 'lucide-react';
+import { Mail, Phone, BookOpen, Building2, Calendar, Search, Download, MessageSquare } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -160,26 +160,26 @@ const CourseEnquiries = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredEnquiries.map((enquiry) => (
                         <GlassCard key={enquiry.id} className="!p-6 space-y-4">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <h3 className="text-white font-semibold text-base">{enquiry.name}</h3>
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 space-y-1">
+                                    <h3 className="text-white font-semibold text-base truncate">{enquiry.name}</h3>
                                     {enquiry.course_name && (
-                                        <div className="flex items-center gap-1.5 text-primary text-xs font-bold mt-1">
-                                            <BookOpen size={12} />
-                                            <span>{enquiry.course_name}</span>
+                                        <div className="flex items-center gap-1.5 text-primary text-xs font-bold min-w-0">
+                                            <BookOpen size={12} className="flex-shrink-0" />
+                                            <span className="truncate">{enquiry.course_name}</span>
                                         </div>
                                     )}
                                     {enquiry.university_name && (
-                                        <div className="flex items-center gap-1.5 text-white/50 text-[11px] font-bold uppercase tracking-wider mt-1">
-                                            <Building2 size={12} />
-                                            <span>{enquiry.university_name}</span>
+                                        <div className="flex items-center gap-1.5 text-white/50 text-[11px] font-bold uppercase tracking-wider min-w-0">
+                                            <Building2 size={12} className="flex-shrink-0" />
+                                            <span className="truncate">{enquiry.university_name}</span>
                                         </div>
                                     )}
                                 </div>
                                 <select
                                     value={enquiry.status || 'new'}
                                     onChange={(e) => handleStatusChange(enquiry.id, e.target.value)}
-                                    className={`text-[10px] font-bold uppercase px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
+                                    className={`flex-shrink-0 text-[10px] font-bold uppercase px-2.5 py-1.5 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
                                 >
                                     {STATUS_OPTIONS.map(s => (
                                         <option key={s} value={s} className="bg-black text-white">{STATUS_LABELS[s]}</option>
@@ -187,7 +187,7 @@ const CourseEnquiries = () => {
                                 </select>
                             </div>
 
-                            <div className="space-y-2 text-sm">
+                            <div className="space-y-2 text-sm pt-3 border-t border-white/5">
                                 <div className="flex items-center text-white/60">
                                     <Mail size={14} className="mr-2 flex-shrink-0" />
                                     <a href={`mailto:${enquiry.email}`} className="truncate hover:text-primary transition-colors">{enquiry.email}</a>
@@ -203,7 +203,10 @@ const CourseEnquiries = () => {
                             </div>
 
                             {enquiry.message && (
-                                <p className="text-white/50 text-xs pt-3 border-t border-white/5 line-clamp-3">{enquiry.message}</p>
+                                <div className="flex items-start gap-2 pt-3 border-t border-white/5">
+                                    <MessageSquare size={12} className="flex-shrink-0 mt-0.5 text-white/30" />
+                                    <p className="text-white/50 text-xs italic line-clamp-2">{enquiry.message}</p>
+                                </div>
                             )}
                         </GlassCard>
                     ))}
