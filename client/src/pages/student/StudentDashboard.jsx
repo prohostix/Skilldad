@@ -64,14 +64,34 @@ const StudentDashboard = () => {
     ];
 
     const pendingRequiredDocs = STANDARD_REQUIRED_SLOTS.filter(slot => {
-        return !documents.some(d => {
+        // Only show pending banner if there's NO doc at all (not even a rejected one that was re-uploaded)
+        const matchingDocs = documents.filter(d => {
             const titleLower = (d.title || '').toLowerCase();
             const typeLower = (d.type || '').toLowerCase();
             return slot.matchKeywords.some(kw => titleLower.includes(kw) || typeLower.includes(kw));
         });
+        // Hide the pending banner if there are any matching docs (even rejected ones)
+        return matchingDocs.length === 0;
     });
 
-    const rejectedDocs = documents.filter(d => d.status === 'rejected');
+    // Only show rejection notification for docs that have NOT been re-uploaded.
+    // If a newer doc of the same type/title exists with status 'submitted' or 'approved', hide the rejection.
+    const rejectedDocs = documents.filter(d => {
+        if (d.status !== 'rejected') return false;
+        const rejectedAt = new Date(d.created_at || d.updated_at || 0).getTime();
+        const hasNewerResubmission = documents.some(other => {
+            if (String(other._id || other.id) === String(d._id || d.id)) return false; // skip self
+            if (other.status === 'rejected') return false; // skip other rejected docs
+            // Match by type or title similarity
+            const sameType = other.type && d.type && other.type === d.type;
+            const sameTitle = other.title && d.title &&
+                other.title.toLowerCase().trim() === d.title.toLowerCase().trim();
+            if (!sameType && !sameTitle) return false;
+            const otherAt = new Date(other.created_at || other.updated_at || 0).getTime();
+            return otherAt > rejectedAt; // newer doc exists
+        });
+        return !hasNewerResubmission;
+    });
 
     // Mock data for demonstration
     useEffect(() => {
@@ -133,7 +153,7 @@ const StudentDashboard = () => {
                     const startTime = new Date(e.scheduledStartTime);
                     return e.status === 'scheduled' && startTime > now;
                 }).slice(0, 3));
-                setDocuments(docs.slice(0, 5));
+                setDocuments(docs); // Keep all docs for accurate notification logic
 
                 // Extract unique universities from enrolled courses
                 const universities = new Map();
