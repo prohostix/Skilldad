@@ -778,178 +778,183 @@ const LiveSessionsHub = () => {
                     ))}
                 </div>
 
-                {/* ── Main Grid ── */}
-                <div className="grid lg:grid-cols-3 gap-8">
+                {/* ── Main Layout (Full Width Sessions List) ── */}
+                <div className="space-y-10">
+                    <section className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                                <Video size={20} className="text-primary" />
+                                All Live Sessions
+                            </h2>
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-bold hover:bg-primary/20 transition-all flex items-center gap-2"
+                            >
+                                <Plus size={16} /> Schedule New
+                            </button>
+                        </div>
 
-                    {/* Left: Session Lists */}
-                    <div className="lg:col-span-2 space-y-10">
-
-                        <section className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                    <Video size={20} className="text-primary" />
-                                    All Live Sessions
-                                </h2>
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20 text-primary text-xs font-bold hover:bg-primary/20 transition-all flex items-center gap-2"
-                                >
-                                    <Plus size={16} /> Schedule New
-                                </button>
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center min-h-[200px] gap-4">
+                                <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                                <p className="text-white/30 text-sm font-medium animate-pulse">Loading sessions…</p>
                             </div>
-
-                            {loading ? (
-                                <div className="flex flex-col items-center justify-center min-h-[200px] gap-4">
-                                    <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                                    <p className="text-white/30 text-sm font-medium animate-pulse">Loading sessions…</p>
-                                </div>
-                            ) : liveSessions.length === 0 ? (
-                                <div
-                                    onClick={() => setShowModal(true)}
-                                    className="py-20 text-center border-2 border-dashed border-white/10 bg-white/[0.01] rounded-3xl cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all group"
-                                >
-                                    <Video size={40} className="mx-auto mb-4 text-white/10 group-hover:text-primary/40 transition-all" />
-                                    <p className="text-base font-medium text-white/20 group-hover:text-white/40 mb-1">
-                                        No live sessions found
-                                    </p>
-                                    <p className="text-xs text-white/10 group-hover:text-white/20">Click to schedule your first session</p>
-                                </div>
-                            ) : (
-                                <div className="grid gap-5">
-                                    {liveSessions
-                                        .sort((a, b) => {
-                                            const timeA = new Date(a.created_at || a.startTime).getTime();
-                                            const timeB = new Date(b.created_at || b.startTime).getTime();
-                                            return timeB - timeA;
-                                        })
-                                        .map((session, idx) => (
-                                            <GlassCard key={session.id || `sess-${idx}`} className={`p-5 md:p-6 group relative overflow-hidden transition-all duration-300 border-white/10 hover:border-primary/20 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/20' : ''}`}>
-                                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/10 transition-all pointer-events-none" />
-                                                
-                                                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-                                                    {/* Left Side: Icon & Session Details */}
-                                                    <div className="flex items-start gap-4 min-w-0">
-                                                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border shadow-md transition-all duration-300 group-hover:scale-105 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/20 text-red-500' : 'bg-primary/10 border-primary/15 text-primary'}`}>
-                                                            {session.status === 'live' ? <Radio size={20} className="animate-pulse" /> : <Video size={20} />}
-                                                        </div>
-                                                        
-                                                        <div className="min-w-0 flex-1">
-                                                            <div className="flex items-center flex-wrap gap-2 mb-1.5">
-                                                                <h4 className="font-semibold text-white text-base md:text-lg group-hover:text-primary transition-colors truncate tracking-tight">{session.title}</h4>
-                                                                {session.status === 'live' && (
-                                                                    <span className="px-2 py-0.5 rounded-full bg-red-500 text-[9px] font-bold text-white uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.4)]">Live</span>
-                                                                )}
-                                                            </div>
-                                                            
-                                                            {/* Course, Batch, Instructor info */}
-                                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-white/40 text-[11px] font-medium mb-3">
-                                                                <span className="text-primary/90 font-semibold">{session.course}</span>
-                                                                {session.batchName && (
-                                                                    <>
-                                                                        <span className="opacity-20">|</span>
-                                                                        <span className="text-amber-500/90 font-semibold">Batch: {session.batchName}</span>
-                                                                    </>
-                                                                )}
-                                                                <span className="opacity-20">|</span>
-                                                                <span className="truncate">{session.instructor}</span>
-                                                            </div>
-
-                                                            {/* Date, Time, Enrolled metadata */}
-                                                            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-white/50 text-[11px] font-medium">
-                                                                <span className="flex items-center gap-1.5"><Calendar size={12} className="text-primary/70" /> {session.date}</span>
-                                                                <span className="flex items-center gap-1.5"><Clock size={12} className="text-primary/70" /> {session.time} <span className="opacity-30">({session.duration})</span></span>
-                                                                <span className="flex items-center gap-1.5"><Users size={12} className="text-primary/70" /> {session.enrolledStudents} Enrolled</span>
-                                                            </div>
-                                                        </div>
+                        ) : liveSessions.length === 0 ? (
+                            <div
+                                onClick={() => setShowModal(true)}
+                                className="py-20 text-center border-2 border-dashed border-white/10 bg-white/[0.01] rounded-3xl cursor-pointer hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                            >
+                                <Video size={40} className="mx-auto mb-4 text-white/10 group-hover:text-primary/40 transition-all" />
+                                <p className="text-base font-medium text-white/20 group-hover:text-white/40 mb-1">
+                                    No live sessions found
+                                </p>
+                                <p className="text-xs text-white/10 group-hover:text-white/20">Click to schedule your first session</p>
+                            </div>
+                        ) : (
+                            <div className="grid gap-5">
+                                {liveSessions
+                                    .sort((a, b) => {
+                                        const timeA = new Date(a.created_at || a.startTime).getTime();
+                                        const timeB = new Date(b.created_at || b.startTime).getTime();
+                                        return timeB - timeA;
+                                    })
+                                    .map((session, idx) => (
+                                        <GlassCard key={session.id || `sess-${idx}`} className={`p-5 md:p-6 group relative overflow-hidden transition-all duration-300 border-white/10 hover:border-primary/20 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/20' : ''}`}>
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/10 transition-all pointer-events-none" />
+                                            
+                                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                                                {/* Left Side: Icon & Session Details */}
+                                                <div className="flex items-start gap-4 min-w-0">
+                                                    <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border shadow-md transition-all duration-300 group-hover:scale-105 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/20 text-red-500' : 'bg-primary/10 border-primary/15 text-primary'}`}>
+                                                        {session.status === 'live' ? <Radio size={20} className="animate-pulse" /> : <Video size={20} />}
                                                     </div>
-
-                                                    {/* Right Side: Action Group */}
-                                                    <div className="flex flex-wrap items-center gap-2 shrink-0 self-end md:self-center">
-                                                        {notifyBtn(session.id)}
+                                                    
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center flex-wrap gap-2 mb-1.5">
+                                                            <h4 className="font-semibold text-white text-base md:text-lg group-hover:text-primary transition-colors truncate tracking-tight">{session.title}</h4>
+                                                            {session.status === 'live' && (
+                                                                <span className="px-2 py-0.5 rounded-full bg-red-500 text-[9px] font-bold text-white uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.4)]">Live</span>
+                                                            )}
+                                                        </div>
                                                         
-                                                        <ModernButton
-                                                            variant={session.status === 'live' ? 'primary' : 'secondary'}
-                                                            className={`text-[10px] md:text-xs px-4 md:px-5 py-2 h-10 font-bold shadow-md tracking-wider uppercase transition-all ${session.status === 'live' ? '!bg-red-500 !border-red-500 !text-white' : ''}`}
-                                                            onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
-                                                        >
-                                                            {session.status === 'live' ? 'Studio' : (session.isOwner && !session.meetingLink ? 'Start Session' : (session.meetingLink ? 'Join' : 'Prepare'))}
-                                                        </ModernButton>
-                                                        
-                                                        {session.status === 'live' && (
-                                                            <button 
-                                                                onClick={() => handleEndSession(session.id)}
-                                                                className="h-10 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all"
-                                                            >
-                                                                End
-                                                            </button>
-                                                        )}
+                                                        {/* Course, Batch, Instructor info */}
+                                                        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-white/40 text-[11px] font-medium mb-3">
+                                                            <span className="text-primary/90 font-semibold">{session.course}</span>
+                                                            {session.batchName && (
+                                                                <>
+                                                                    <span className="opacity-20">|</span>
+                                                                    <span className="text-amber-500/90 font-semibold">Batch: {session.batchName}</span>
+                                                                </>
+                                                            )}
+                                                            <span className="opacity-20">|</span>
+                                                            <span className="truncate">{session.instructor}</span>
+                                                        </div>
 
-                                                        {(session.status === 'completed' || session.status === 'ended') && (
-                                                            <button 
-                                                                onClick={() => setRecordModalData(session)}
-                                                                className={`h-10 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border ${session.recording && session.recording.status === 'available' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white' : 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10'}`}
-                                                            >
-                                                                <UploadCloud size={14} className="mr-1.5 inline-block" /> 
-                                                                Rec
-                                                            </button>
-                                                        )}
+                                                        {/* Date, Time, Enrolled metadata */}
+                                                        <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-white/50 text-[11px] font-medium">
+                                                            <span className="flex items-center gap-1.5"><Calendar size={12} className="text-primary/70" /> {session.date}</span>
+                                                            <span className="flex items-center gap-1.5"><Clock size={12} className="text-primary/70" /> {session.time} <span className="opacity-30">({session.duration})</span></span>
+                                                            <span className="flex items-center gap-1.5"><Users size={12} className="text-primary/70" /> {session.enrolledStudents} Enrolled</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </GlassCard>
-                                        ))}
-                                </div>
-                            )}
-                        </section>
-                    </div>
 
-                    {/* Right Sidebar */}
-                    <div className="space-y-5">
+                                                {/* Right Side: Action Group */}
+                                                <div className="flex flex-wrap items-center gap-2 shrink-0 self-end md:self-center">
+                                                    {notifyBtn(session.id)}
+                                                    
+                                                    <ModernButton
+                                                        variant={session.status === 'live' ? 'primary' : 'secondary'}
+                                                        className={`text-[10px] md:text-xs px-4 md:px-5 py-2 h-10 font-bold shadow-md tracking-wider uppercase transition-all ${session.status === 'live' ? '!bg-red-500 !border-red-500 !text-white' : ''}`}
+                                                        onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
+                                                    >
+                                                        {session.status === 'live' ? 'Studio' : (session.isOwner && !session.meetingLink ? 'Start Session' : (session.meetingLink ? 'Join' : 'Prepare'))}
+                                                    </ModernButton>
+                                                    
+                                                    {session.status === 'live' && (
+                                                        <button 
+                                                            onClick={() => handleEndSession(session.id)}
+                                                            className="h-10 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all"
+                                                        >
+                                                            End
+                                                        </button>
+                                                    )}
 
-                        {/* Spotlight cards */}
-                        {upcoming.slice(0, 2).map((session, i) => (
-                            <GlassCard
-                                key={session.id || `spotlight-${i}`}
-                                className={`p-5 border-l-4 overflow-hidden relative ${i === 0 ? 'border-primary' : 'border-amber-500'}`}
-                            >
-                                <div className={`absolute top-0 right-0 p-1.5 ${i === 0 ? 'bg-primary/10' : 'bg-amber-500/10'} rounded-bl-xl`}>
-                                    <Sparkles size={11} className={i === 0 ? 'text-primary' : 'text-amber-500'} />
-                                </div>
-                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${i === 0 ? 'bg-primary text-white' : 'bg-amber-500 text-black'}`}>
-                                    {i === 0 ? 'High Impact' : 'Most Anticipated'}
-                                </span>
-                                <h4 className="text-sm font-bold text-white leading-snug mt-3 mb-1">{session.title}</h4>
-                                <p className="text-white/35 text-[11px] mb-3 leading-relaxed">
-                                    {session.description || 'An engaging live learning session for enrolled students.'}
-                                </p>
-                                <div className="space-y-1.5 mb-3">
-                                    <div className="flex items-center gap-2 text-[11px] text-white/45">
-                                        <Calendar size={11} className={i === 0 ? 'text-primary' : 'text-amber-500'} />
-                                        {session.date} · {session.time}
-                                    </div>
-                                    <div className="flex items-center gap-2 text-[11px] text-white/45">
-                                        <Users size={11} className={i === 0 ? 'text-primary' : 'text-amber-500'} />
-                                        {session.enrolledStudents}+ students enrolled
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleNotifyStudents(session.id)}
-                                        disabled={notifyingId === session.id}
-                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-50"
-                                    >
-                                        <Bell size={12} /> Notify
-                                    </button>
-                                    <button
-                                        onClick={() => handleEnterStudio(session.id)}
-                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-white text-[11px] font-black uppercase tracking-wider transition-all ${i === 0 ? 'bg-primary hover:bg-primary/85' : 'bg-amber-500 hover:bg-amber-400'}`}
-                                    >
-                                        <Video size={12} /> Studio
-                                    </button>
-                                </div>
-                            </GlassCard>
-                        ))}
-                    </div>
+                                                    {(session.status === 'completed' || session.status === 'ended') && (
+                                                        <button 
+                                                            onClick={() => setRecordModalData(session)}
+                                                            className={`h-10 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border ${session.recording && session.recording.status === 'available' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white' : 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10'}`}
+                                                        >
+                                                            <UploadCloud size={14} className="mr-1.5 inline-block" /> 
+                                                            Rec
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </GlassCard>
+                                    ))}
+                            </div>
+                        )}
+                    </section>
                 </div>
+
+                {/* ── Spotlight Sessions Section (At the bottom, side-by-side) ── */}
+                {upcoming.filter(s => s.status !== 'live').length > 0 && (
+                    <div className="space-y-4 pt-10 border-t border-white/5">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <Sparkles size={16} className="text-primary animate-pulse" /> Spotlight Sessions
+                        </h3>
+                        <div className="grid md:grid-cols-2 gap-5">
+                            {upcoming
+                                .filter(s => s.status !== 'live')
+                                .slice(0, 2)
+                                .map((session, i) => (
+                                    <GlassCard
+                                        key={session.id || `spotlight-${i}`}
+                                        className={`p-5 border-l-4 overflow-hidden relative ${i === 0 ? 'border-primary' : 'border-amber-500'}`}
+                                    >
+                                        <div className={`absolute top-0 right-0 p-1.5 ${i === 0 ? 'bg-primary/10' : 'bg-amber-500/10'} rounded-bl-xl`}>
+                                            <Sparkles size={11} className={i === 0 ? 'text-primary' : 'text-amber-500'} />
+                                        </div>
+                                        <div className="mb-3">
+                                            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${i === 0 ? 'bg-primary text-white' : 'bg-amber-500 text-black'}`}>
+                                                {i === 0 ? 'High Impact' : 'Most Anticipated'}
+                                            </span>
+                                        </div>
+                                        <h4 className="text-sm font-bold text-white leading-snug mb-1">{session.title}</h4>
+                                        <p className="text-white/35 text-[11px] mb-3 leading-relaxed">
+                                            {session.description || 'An engaging live learning session for enrolled students.'}
+                                        </p>
+                                        <div className="space-y-1.5 mb-3">
+                                            <div className="flex items-center gap-2 text-[11px] text-white/45">
+                                                <Calendar size={11} className={i === 0 ? 'text-primary' : 'text-amber-500'} />
+                                                {session.date} · {session.time}
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[11px] text-white/45">
+                                                <Users size={11} className={i === 0 ? 'text-primary' : 'text-amber-500'} />
+                                                {session.enrolledStudents}+ students enrolled
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => handleNotifyStudents(session.id)}
+                                                disabled={notifyingId === session.id}
+                                                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 text-[11px] font-black uppercase tracking-wider transition-all disabled:opacity-50"
+                                            >
+                                                <Bell size={12} /> Notify
+                                            </button>
+                                            <button
+                                                onClick={() => handleEnterStudio(session.id)}
+                                                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-white text-[11px] font-black uppercase tracking-wider transition-all ${i === 0 ? 'bg-primary hover:bg-primary/85' : 'bg-amber-500 hover:bg-amber-400'}`}
+                                            >
+                                                <Video size={12} /> Studio
+                                            </button>
+                                        </div>
+                                    </GlassCard>
+                                ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ── Schedule Modal ── */}
