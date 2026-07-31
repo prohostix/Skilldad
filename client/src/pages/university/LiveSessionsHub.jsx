@@ -823,88 +823,76 @@ const LiveSessionsHub = () => {
                                             return timeB - timeA;
                                         })
                                         .map((session, idx) => (
-                                            <GlassCard key={session.id || `sess-${idx}`} className={`p-5 md:p-6 group relative overflow-hidden transition-all duration-400 border-white/10 hover:border-primary/30 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/30' : ''}`}>
+                                            <GlassCard key={session.id || `sess-${idx}`} className={`p-5 md:p-6 group relative overflow-hidden transition-all duration-300 border-white/10 hover:border-primary/20 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/20' : ''}`}>
                                                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/10 transition-all pointer-events-none" />
                                                 
-                                                <div className="relative z-10 flex flex-col gap-6">
-                                                    {/* Top Section: Icon + Title + Status */}
-                                                    <div className="flex items-start gap-4 md:gap-5 min-w-0">
-                                                        <div className={`h-12 w-12 md:h-14 md:w-14 rounded-2xl flex items-center justify-center shrink-0 border shadow-lg transition-all duration-400 group-hover:scale-110 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/30 text-red-500' : 'bg-primary/10 border-primary/20 text-primary'}`}>
-                                                            {session.status === 'live' ? <Radio size={24} className="animate-pulse" /> : <Video size={24} />}
+                                                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                                                    {/* Left Side: Icon & Session Details */}
+                                                    <div className="flex items-start gap-4 min-w-0">
+                                                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border shadow-md transition-all duration-300 group-hover:scale-105 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/20 text-red-500' : 'bg-primary/10 border-primary/15 text-primary'}`}>
+                                                            {session.status === 'live' ? <Radio size={20} className="animate-pulse" /> : <Video size={20} />}
                                                         </div>
                                                         
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center flex-wrap gap-2 mb-1">
-                                                                <h4 className="font-black text-white text-lg md:text-xl group-hover:text-primary transition-colors truncate uppercase tracking-tight">{session.title}</h4>
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="flex items-center flex-wrap gap-2 mb-1.5">
+                                                                <h4 className="font-semibold text-white text-base md:text-lg group-hover:text-primary transition-colors truncate tracking-tight">{session.title}</h4>
                                                                 {session.status === 'live' && (
-                                                                    <span className="px-2 py-0.5 rounded-full bg-red-500 text-[9px] font-black text-white uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.4)]">Live</span>
+                                                                    <span className="px-2 py-0.5 rounded-full bg-red-500 text-[9px] font-bold text-white uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.4)]">Live</span>
                                                                 )}
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-widest">
-                                                                <span className="text-primary/70">{session.course}</span>
+                                                            
+                                                            {/* Course, Batch, Instructor info */}
+                                                            <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-white/40 text-[11px] font-medium mb-3">
+                                                                <span className="text-primary/90 font-semibold">{session.course}</span>
                                                                 {session.batchName && (
                                                                     <>
-                                                                        <span className="w-1 h-1 bg-white/20 rounded-full" />
-                                                                        <span className="text-amber-500/80">Batch: {session.batchName}</span>
+                                                                        <span className="opacity-20">|</span>
+                                                                        <span className="text-amber-500/90 font-semibold">Batch: {session.batchName}</span>
                                                                     </>
                                                                 )}
-                                                                <span className="w-1 h-1 bg-white/20 rounded-full" />
+                                                                <span className="opacity-20">|</span>
                                                                 <span className="truncate">{session.instructor}</span>
+                                                            </div>
+
+                                                            {/* Date, Time, Enrolled metadata */}
+                                                            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-white/50 text-[11px] font-medium">
+                                                                <span className="flex items-center gap-1.5"><Calendar size={12} className="text-primary/70" /> {session.date}</span>
+                                                                <span className="flex items-center gap-1.5"><Clock size={12} className="text-primary/70" /> {session.time} <span className="opacity-30">({session.duration})</span></span>
+                                                                <span className="flex items-center gap-1.5"><Users size={12} className="text-primary/70" /> {session.enrolledStudents} Enrolled</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    {/* Middle/Bottom: Metadata & Actions Grid-like Flex */}
-                                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pt-2 border-t border-white/5">
-                                                        {/* Metadata Row */}
-                                                        <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                                                            <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/10 text-[10px] md:text-[11px] font-bold text-white/60">
-                                                                <Calendar size={12} className="text-primary" />
-                                                                {session.date}
-                                                            </div>
-                                                            <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/10 text-[10px] md:text-[11px] font-bold text-white/60">
-                                                                <Clock size={12} className="text-primary" />
-                                                                {session.time} <span className="opacity-20 mx-0.5">|</span> {session.duration}
-                                                            </div>
-                                                            <div className="flex items-center gap-2 px-2.5 py-1.5 bg-white/5 rounded-xl border border-white/10 text-[10px] md:text-[11px] font-bold text-white/60">
-                                                                <Users size={12} className="text-primary" />
-                                                                {session.enrolledStudents} Enrolled
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Action Group */}
-                                                        <div className="flex flex-wrap items-center gap-2 shrink-0">
-                                                            {notifyBtn(session.id)}
-                                                            
-                                                            <ModernButton
-                                                                variant={session.status === 'live' ? 'primary' : 'secondary'}
-                                                                className={`text-[10px] md:text-xs px-4 md:px-5 py-2 h-10 font-bold shadow-lg tracking-wider uppercase transition-all ${session.status === 'live' ? '!bg-red-500 !border-red-500 !text-white' : ''}`}
-                                                                onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
+                                                    {/* Right Side: Action Group */}
+                                                    <div className="flex flex-wrap items-center gap-2 shrink-0 self-end md:self-center">
+                                                        {notifyBtn(session.id)}
+                                                        
+                                                        <ModernButton
+                                                            variant={session.status === 'live' ? 'primary' : 'secondary'}
+                                                            className={`text-[10px] md:text-xs px-4 md:px-5 py-2 h-10 font-bold shadow-md tracking-wider uppercase transition-all ${session.status === 'live' ? '!bg-red-500 !border-red-500 !text-white' : ''}`}
+                                                            onClick={() => (session.status === 'live' || !session.meetingLink) ? handleEnterStudio(session.id) : handleJoinMeeting(session.meetingLink)}
+                                                        >
+                                                            {session.status === 'live' ? 'Studio' : (session.isOwner && !session.meetingLink ? 'Start Session' : (session.meetingLink ? 'Join' : 'Prepare'))}
+                                                        </ModernButton>
+                                                        
+                                                        {session.status === 'live' && (
+                                                            <button 
+                                                                onClick={() => handleEndSession(session.id)}
+                                                                className="h-10 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all"
                                                             >
-                                                                {session.status === 'live' ? 'Studio' : (session.isOwner && !session.meetingLink ? 'Start Session' : (session.meetingLink ? 'Join' : 'Prepare'))}
-                                                            </ModernButton>
-                                                            
-                                                            {session.status === 'live' && (
-                                                                <button 
-                                                                    onClick={() => handleEndSession(session.id)}
-                                                                    className="h-10 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all"
-                                                                >
-                                                                    End
-                                                                </button>
-                                                            )}
+                                                                End
+                                                            </button>
+                                                        )}
 
-                                                            {(session.status === 'completed' || session.status === 'ended') && (
-                                                                <button 
-                                                                    onClick={() => setRecordModalData(session)}
-                                                                    className={`h-10 px-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${session.recording && session.recording.status === 'available' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white' : 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10'}`}
-                                                                >
-                                                                    <UploadCloud size={14} className="mr-1.5 inline-block" /> 
-                                                                    Rec
-                                                                </button>
-                                                            )}
-
-
-                                                        </div>
+                                                        {(session.status === 'completed' || session.status === 'ended') && (
+                                                            <button 
+                                                                onClick={() => setRecordModalData(session)}
+                                                                className={`h-10 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border ${session.recording && session.recording.status === 'available' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white' : 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10'}`}
+                                                            >
+                                                                <UploadCloud size={14} className="mr-1.5 inline-block" /> 
+                                                                Rec
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </GlassCard>
