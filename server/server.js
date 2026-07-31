@@ -449,6 +449,16 @@ const startServer = async () => {
         if (!icCols.includes('show_solution_after')) await query("ALTER TABLE interactive_contents ADD COLUMN show_solution_after TEXT DEFAULT 'submission'");
         if (!icCols.includes('questions')) await query("ALTER TABLE interactive_contents ADD COLUMN questions JSONB DEFAULT '[]'");
         console.log('[Migration] interactive_contents table columns verified/updated'.green);
+
+        // Auto-migrate: track last_login_at so we can detect a genuine first-ever login
+        // (column stays null until the first successful login/registration) to drive the
+        // first-time welcome experience.
+        const userColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['users']);
+        const userCols = userColRes.rows.map(r => r.column_name);
+        if (!userCols.includes('last_login_at')) {
+            await query('ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP WITH TIME ZONE');
+            console.log('[Migration] Added last_login_at to users'.green);
+        }
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }

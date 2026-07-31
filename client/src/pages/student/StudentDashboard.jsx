@@ -32,6 +32,7 @@ import CountingNumber from '../../components/ui/CountingNumber';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import ReferralWidget from '../../components/student/ReferralWidget';
 import ReferralModal from '../../components/student/ReferralModal';
+import WelcomeModal from '../../components/student/WelcomeModal';
 import { getMediaUrl } from '../../utils/media';
 
 const StudentDashboard = () => {
@@ -52,6 +53,7 @@ const StudentDashboard = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [referralData, setReferralData] = useState({ code: '', link: '' });
     const [isReferModalOpen, setIsReferModalOpen] = useState(false);
+    const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const navigate = useNavigate();
 
@@ -77,6 +79,13 @@ const StudentDashboard = () => {
                 return;
             }
             setUserInfo(storedUser);
+
+            // Shown exactly once per real first login/registration — strip the flag
+            // from localStorage immediately so a page refresh doesn't re-trigger it.
+            if (storedUser.isFirstLogin) {
+                setIsWelcomeModalOpen(true);
+                localStorage.setItem('userInfo', JSON.stringify({ ...storedUser, isFirstLogin: false }));
+            }
 
             const config = { headers: { Authorization: `Bearer ${storedUser.token}` } };
             setLoading(true);
@@ -199,7 +208,7 @@ const StudentDashboard = () => {
                 <div>
                     <DashboardHeading title={`Student Dashboard`} className="mb-0.5" />
                     <p className="text-white/40 text-xs font-medium">
-                        Welcome back, <span className="text-white font-bold">{userInfo.name?.split(' ')[0] || 'Scholar'}</span>.
+                        {userInfo.isFirstLogin ? 'Welcome' : 'Welcome back'}, <span className="text-white font-bold">{userInfo.name?.split(' ')[0] || 'Scholar'}</span>.
                     </p>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -550,6 +559,12 @@ const StudentDashboard = () => {
 
                 </div>
             </div>
+
+            <WelcomeModal
+                isOpen={isWelcomeModalOpen}
+                onClose={() => setIsWelcomeModalOpen(false)}
+                name={userInfo.name?.split(' ')[0] || 'Scholar'}
+            />
         </div>
     );
 };

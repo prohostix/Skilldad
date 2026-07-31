@@ -101,9 +101,12 @@ const registerUser = async (req, res) => {
         const newId = `user_${Date.now()}`;
 
         // 3. Insert into PG
+        // last_login_at is set here too, since registration immediately hands back a
+        // usable token — without this, a user who never visits /login separately would
+        // have last_login_at stay null forever and re-trigger the first-login welcome.
         const newUser = await query(`
-            INSERT INTO users (id, name, email, password, role, discount_rate, profile, university_id, is_verified, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW(), NOW())
+            INSERT INTO users (id, name, email, password, role, discount_rate, profile, university_id, is_verified, last_login_at, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, NOW(), NOW(), NOW())
             RETURNING id, name, email, role, university_id
         `, [
             newId, name, lowerEmail, hashedPassword, role, discountRate,
@@ -118,6 +121,7 @@ const registerUser = async (req, res) => {
             email: user.email,
             role: user.role,
             discountRate: user.discount_rate || 0,
+            isFirstLogin: true,
             token: generateToken(user.id)
         });
 
@@ -163,6 +167,11 @@ const loginUser = async (req, res) => {
 
         console.log(`[Login] Success for user: ${user.email} (Role: ${user.role})`);
 
+        // A user who has never logged in before (last_login_at still null) is
+        // shown the first-time welcome experience exactly once, right here.
+        const isFirstLogin = !user.last_login_at;
+        await query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [user.id]);
+
         res.json({
             _id: user.id,
             name: user.name,
@@ -171,6 +180,7 @@ const loginUser = async (req, res) => {
             partnerCode: user.partner_code,
             discountRate: user.discount_rate || 0,
             isVerified: user.is_verified,
+            isFirstLogin,
             token: generateToken(user.id)
         });
     } catch (error) {
