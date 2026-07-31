@@ -41,6 +41,11 @@ const SessionDetail = () => {
   const [studentCanDraw, setStudentCanDraw] = useState(true);
   const { socket } = useSocket();
 
+  // Browser Screen/Audio Recording Engine
+  const [isRecording, setIsRecording] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+
   useEffect(() => {
     if (!socket) return;
     const onPermission = ({ canStudentsDraw }) => setStudentCanDraw(canStudentsDraw !== false);
@@ -83,6 +88,95 @@ const SessionDetail = () => {
       console.error('[SessionDetail] Error fetching session:', err);
       setError(err.response?.data?.message || 'Failed to load session details');
       setLoading(false);
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      // Prompt user to select screen/window/tab to capture, requesting system audio too
+      const displayStream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+      });
+
+      const tracks = [];
+      if (displayStream.getVideoTracks().length > 0) {
+        tracks.push(displayStream.getVideoTracks()[0]);
+      }
+
+      // Mix tab audio and mic audio if possible
+      const audioTracks = displayStream.getAudioTracks();
+      let mixedStream = displayStream;
+
+      if (audioTracks.length > 0) {
+        mixedStream = new MediaStream([displayStream.getVideoTracks()[0], audioTracks[0]]);
+      }
+
+      recordedChunksRef.current = [];
+      let options = { mimeType: 'video/webm;codecs=vp9' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm;codecs=vp8' };
+      }
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+      }
+
+      const recorder = new MediaRecorder(mixedStream, options);
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          recordedChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        displayStream.getTracks().forEach(t => t.stop());
+        mixedStream.getTracks().forEach(t => t.stop());
+
+        const blob = new Blob(recordedChunksRef.current, { type: options.mimeType });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `SkillDad-Session-${sessionId}-${Date.now()}.webm`;
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }, 100);
+
+        setIsRecording(false);
+      };
+
+      displayStream.getVideoTracks()[0].onended = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop();
+        }
+      };
+
+      recorder.start(1000);
+      setIsRecording(true);
+    } catch (err) {
+      console.error('[Recording] Failed to start browser recording:', err.message);
+      alert(`Recording could not be started: ${err.message}`);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
     }
   };
 
@@ -204,6 +298,22 @@ const SessionDetail = () => {
               </p>
             </div>
             
+            {/* If host, show custom recording controls */}
+            {isHost && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleRecording}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
+                    isRecording 
+                      ? 'bg-red-500/20 border-red-500/35 text-red-400 animate-pulse' 
+                      : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className={`w-2.5 h-2.5 rounded-full ${isRecording ? 'bg-red-500' : 'bg-white/40'}`} />
+                  {isRecording ? 'Recording (Click to Stop)' : 'Record Session'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

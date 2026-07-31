@@ -30,15 +30,12 @@ const JitsiMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, on
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // ── Decide mock vs real ─────────────────────────────────────────────
-      // Mock mode: JITSI_MOCK_MODE=true on server generates MOCK_ prefixed tokens
-      if (!data.token || data.token.startsWith('MOCK_') || !data.roomName || !data.domain) {
-        setUseMockMode(true);
-        setLoading(false);
-        return;
-      }
-
-      setConfig(data);
+      // Force disable mock mode in production so they use real Jitsi Meet channels
+      const cleanToken = (data.token && data.token.startsWith('MOCK_')) ? null : data.token;
+      setConfig({
+        ...data,
+        token: cleanToken
+      });
       setLoading(false);
     } catch (err) {
       console.error('[Jitsi] Config Error:', err);
