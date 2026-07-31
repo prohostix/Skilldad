@@ -447,7 +447,36 @@ router.put('/:id/review', protect, authorize('admin', 'university', 'partner'), 
             RETURNING *, id as _id
         `, [status, rejectionReason || null, userId, req.params.id]);
 
-        res.json(result.rows[0]);
+        const updatedDoc = result.rows[0];
+
+        // Send notification log to student
+        if (updatedDoc && updatedDoc.student_id) {
+            try {
+                if (status === 'rejected') {
+                    await query(`
+                        INSERT INTO notification_logs (user_id, type, message, metadata, delivery_status, created_at, updated_at)
+                        VALUES ($1, 'DOCUMENT_REJECTED', $2, $3, 'sent', NOW(), NOW())
+                    `, [
+                        updatedDoc.student_id,
+                        `Document Rejected: Your document "${updatedDoc.title || updatedDoc.type}" was rejected. ${rejectionReason ? `Reason: ${rejectionReason}` : 'Please upload a clear copy.'}`,
+                        JSON.stringify({ docId: updatedDoc.id, docTitle: updatedDoc.title, reason: rejectionReason })
+                    ]);
+                } else if (status === 'approved') {
+                    await query(`
+                        INSERT INTO notification_logs (user_id, type, message, metadata, delivery_status, created_at, updated_at)
+                        VALUES ($1, 'DOCUMENT_APPROVED', $2, $3, 'sent', NOW(), NOW())
+                    `, [
+                        updatedDoc.student_id,
+                        `Document Verified: Your document "${updatedDoc.title || updatedDoc.type}" has been approved.`,
+                        JSON.stringify({ docId: updatedDoc.id, docTitle: updatedDoc.title })
+                    ]);
+                }
+            } catch (notifErr) {
+                console.error('Failed to log document review notification:', notifErr);
+            }
+        }
+
+        res.json(updatedDoc);
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

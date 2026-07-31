@@ -23,7 +23,8 @@ import {
     Copy,
     Check,
     Share2,
-    AlertCircle
+    AlertCircle,
+    XCircle
 } from 'lucide-react';
 import axios from 'axios';
 import GlassCard from '../../components/ui/GlassCard';
@@ -69,6 +70,8 @@ const StudentDashboard = () => {
             return slot.matchKeywords.some(kw => titleLower.includes(kw) || typeLower.includes(kw));
         });
     });
+
+    const rejectedDocs = documents.filter(d => d.status === 'rejected');
 
     // Mock data for demonstration
     useEffect(() => {
@@ -226,6 +229,36 @@ const StudentDashboard = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Document Rejection Notification Banner */}
+            {rejectedDocs.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
+                    <div className="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-rose-500/5">
+                        <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0 mt-0.5 sm:mt-0">
+                                <XCircle size={18} />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider">Document Verification Rejected</h4>
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                                        {rejectedDocs.length} {rejectedDocs.length === 1 ? 'Action Required' : 'Actions Required'}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-white/70 mt-1 leading-relaxed">
+                                    The following document(s) were rejected: <span className="text-rose-200 font-semibold">{rejectedDocs.map(d => `${d.title || d.type}${d.rejection_reason ? ` (Reason: "${d.rejection_reason}")` : ''}`).join(', ')}</span>. Please re-upload clear copies.
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => navigate('/dashboard/documents')}
+                            className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-rose-500/20 shrink-0 flex items-center justify-center gap-2"
+                        >
+                            <Upload size={14} /> Re-upload Documents
+                        </button>
+                    </div>
+                </motion.div>
+            )}
 
             {/* Pending Document Verification Banner */}
             {pendingRequiredDocs.length > 0 && (
