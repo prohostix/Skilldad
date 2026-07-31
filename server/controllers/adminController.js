@@ -1737,6 +1737,49 @@ const adminEnrollStudent = async (req, res) => {
                 }
             });
 
+            // Send notification email to associated University / Partner accounts
+            setImmediate(async () => {
+                try {
+                    const partnerIdsToNotify = Array.from(new Set([
+                        assignedUniversityId,
+                        partnerId,
+                        student.university_id,
+                        student.registered_by,
+                        course.instructor_id
+                    ].filter(Boolean)));
+
+                    if (partnerIdsToNotify.length > 0) {
+                        const partnerUsersRes = await query(
+                            `SELECT id, name, email, role FROM users WHERE id = ANY($1::varchar[]) AND role IN ('university', 'partner')`,
+                            [partnerIdsToNotify]
+                        );
+
+                        for (const pUser of partnerUsersRes.rows) {
+                            if (pUser.email) {
+                                try {
+                                    await sendEmail({
+                                        email: pUser.email,
+                                        subject: `New Student Enrolled: ${student.name} in ${course.title}`,
+                                        html: emailTemplates.partnerStudentEnrolled(
+                                            pUser.name || 'Partner/University',
+                                            student.name,
+                                            student.email,
+                                            course.title,
+                                            enrolledBy
+                                        )
+                                    });
+                                    console.log(`[AdminEnroll] Sent notification email to ${pUser.role}: ${pUser.email}`);
+                                } catch (pEmailErr) {
+                                    console.error(`[AdminEnroll] Failed to send email to ${pUser.role} (${pUser.email}):`, pEmailErr.message);
+                                }
+                            }
+                        }
+                    }
+                } catch (pNotifErr) {
+                    console.error('[AdminEnroll] Partner/University Notification error:', pNotifErr.message);
+                }
+            });
+
             // Keep socket notification for real-time UI update
             socketService.sendToUser(studentId, 'ENROLLMENT_CREATED', {
                 courseId,

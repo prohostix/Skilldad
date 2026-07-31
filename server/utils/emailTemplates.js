@@ -396,6 +396,24 @@ const templates = {
 
     enrollmentConfirmed: (name, courseTitle, enrolledBy) => {
         return templates.adminEnrollment(name, courseTitle, enrolledBy);
+    },
+
+    partnerStudentEnrolled: (partnerName, studentName, studentEmail, courseTitle, enrolledBy) => {
+        const content = `
+            <p style="${baseStyle.p}">Hello <strong>${partnerName}</strong>,</p>
+            <p style="${baseStyle.p}">A new student has been enrolled in a course associated with your organization by <strong>${enrolledBy}</strong>.</p>
+            <div style="${baseStyle.highlight}">
+                <p style="margin: 0 0 6px 0;"><strong style="color: #7C3AED;">Student Name:</strong> ${studentName}</p>
+                <p style="margin: 0 0 6px 0;"><strong style="color: #7C3AED;">Student Email:</strong> ${studentEmail}</p>
+                <p style="margin: 0 0 6px 0;"><strong style="color: #7C3AED;">Course Title:</strong> ${courseTitle}</p>
+                <p style="margin: 0;"><strong style="color: #7C3AED;">Enrolled By:</strong> ${enrolledBy}</p>
+            </div>
+            <p style="${baseStyle.p}">Log in to your portal to manage your enrolled students and monitor their progress.</p>
+        `;
+        return layout('New Student Enrolled in Course', content, {
+            text: 'View Dashboard',
+            url: getClientUrl('/dashboard')
+        });
     }
 };
 
