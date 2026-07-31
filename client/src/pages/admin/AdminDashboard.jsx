@@ -291,77 +291,69 @@ const AdminDashboard = () => {
                 ))}
             </div>
 
-            {/* Analytics Surface */}
-            <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="bg-white/5 rounded-3xl p-1"
-                    >
-                        <div className="h-[400px] w-full">
-                            <ChartCard
-                                title="Enrollment Momentum"
-                                subtitle="Last 7 Days"
-                                data={displayChartData}
-                                type="area"
-                                color="#5B5CFF"
-                            />
-                        </div>
-                    </motion.div>
+            {/* Enrollment Momentum — full width, no longer sharing a grid row with Live Pulse */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/5 rounded-3xl p-1"
+            >
+                <div className="h-[400px] w-full">
+                    <ChartCard
+                        title="Enrollment Momentum"
+                        subtitle="Last 7 Days"
+                        data={displayChartData}
+                        type="area"
+                        color="#5B5CFF"
+                    />
                 </div>
+            </motion.div>
 
-                <div className="space-y-8">
-                    {/* Activity Pulse */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="h-full"
+            {/* Live Pulse — its own full-width row instead of being squeezed under/beside the graph */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+            >
+                <GlassCard className="flex flex-col">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-base font-semibold text-white font-poppins flex items-center">
+                            <Activity size={18} className="mr-2 text-primary" /> Live Pulse
+                        </h2>
+                        <span className="flex h-2 w-2 relative">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                        </span>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {(stats.recentActivities && stats.recentActivities.length > 0 ? stats.recentActivities : [
+                            { user: 'Sarah Jenkins', action: 'Enrolled in Python Masterclass', time: '2m ago', initial: 'SJ' },
+                            { user: 'Tech University', action: 'Added 50 new seats', time: '1h ago', initial: 'TU' },
+                            { user: 'Marcus Thorne', action: 'Certificate generated', time: '5h ago', initial: 'MT' },
+                            { user: 'Fin Global', action: 'Payout approved', time: '1d ago', initial: 'FG' },
+                        ]).map((activity, i) => (
+                            <div key={i} className="flex items-center space-x-4 group cursor-pointer">
+                                <div className="w-10 h-10 rounded-xl bg-white/5 flex-shrink-0 flex items-center justify-center text-xs font-bold text-white/50 border border-white/10 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                                    {activity.initial}
+                                </div>
+                                <div className="flex-1 min-w-0 text-left">
+                                    <p className="text-sm font-bold text-white truncate group-hover:text-primary transition-colors">{activity.user}</p>
+                                    <p className="text-xs text-white/50 truncate">{activity.action}</p>
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-tighter whitespace-nowrap">{activity.time}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => toast.success('Activity logs fetched for the last 30 days')}
+                        className="w-full mt-8 py-3 text-xs font-bold text-primary hover:bg-primary/10 rounded-xl border border-dashed border-primary/30 transition-all uppercase tracking-widest"
                     >
-                        <GlassCard className="h-full min-h-[350px] flex flex-col">
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-base font-semibold text-white font-poppins flex items-center">
-                                    <Activity size={18} className="mr-2 text-primary" /> Live Pulse
-                                </h2>
-                                <span className="flex h-2 w-2 relative">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-                                </span>
-                            </div>
-
-                            <div className="space-y-6">
-                                {(stats.recentActivities && stats.recentActivities.length > 0 ? stats.recentActivities : [
-                                    { user: 'Sarah Jenkins', action: 'Enrolled in Python Masterclass', time: '2m ago', initial: 'SJ' },
-                                    { user: 'Tech University', action: 'Added 50 new seats', time: '1h ago', initial: 'TU' },
-                                    { user: 'Marcus Thorne', action: 'Certificate generated', time: '5h ago', initial: 'MT' },
-                                    { user: 'Fin Global', action: 'Payout approved', time: '1d ago', initial: 'FG' },
-                                ]).map((activity, i) => (
-                                    <div key={i} className="flex items-center space-x-4 group cursor-pointer">
-                                        <div className="w-10 h-10 rounded-xl bg-white/5 flex-shrink-0 flex items-center justify-center text-xs font-bold text-white/50 border border-white/10 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/30 transition-colors">
-                                            {activity.initial}
-                                        </div>
-                                        <div className="flex-1 min-w-0 text-left">
-                                            <p className="text-sm font-bold text-white truncate group-hover:text-primary transition-colors">{activity.user}</p>
-                                            <p className="text-xs text-white/50 truncate">{activity.action}</p>
-                                        </div>
-                                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-tighter whitespace-nowrap">{activity.time}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <button
-                                onClick={() => toast.success('Activity logs fetched for the last 30 days')}
-                                className="w-full mt-8 py-3 text-xs font-bold text-primary hover:bg-primary/10 rounded-xl border border-dashed border-primary/30 transition-all uppercase tracking-widest"
-                            >
-                                Comprehensive Logs
-                            </button>
-                        </GlassCard>
-                    </motion.div>
-
-                </div>
-            </div>
+                        Comprehensive Logs
+                    </button>
+                </GlassCard>
+            </motion.div>
 
             {/* Infrastructure Status — its own full-width row so it isn't squeezed
                 to the bottom of the taller Live Pulse column and cut off by the footer */}
