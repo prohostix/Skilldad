@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const DashboardHeading = ({ title, className = '', uniform = false }) => {
+const DashboardHeading = ({ title, className = '', uniform = true }) => {
     const words = title.split(' ');
     const lastWord = words.pop();
     const restOfTitle = words.join(' ');
