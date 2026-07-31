@@ -277,79 +277,76 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
         }
     };
 
-    const inputCls = "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-primary/60 focus:bg-white/8 transition-all placeholder:text-white/25 text-sm";
-    const labelCls = "block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 ml-0.5";
+    const inputCls = "w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-primary/60 focus:bg-white/8 transition-all placeholder:text-white/25 text-xs";
+    const labelCls = "block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1 ml-0.5";
 
     return (
         <div
-            className="fixed inset-0 z-[9999] flex items-start justify-center p-4 overflow-y-auto"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto"
             style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}
             onClick={onClose}
         >
-            <div className="w-full max-w-2xl my-8" onClick={e => e.stopPropagation()}>
-                <GlassCard className="border-primary/20 shadow-2xl shadow-primary/10">
+            <div className="w-full max-w-lg my-4" onClick={e => e.stopPropagation()}>
+                <GlassCard className="border-primary/20 shadow-2xl shadow-primary/10 !p-5">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-primary/15 rounded-xl text-primary">
-                                <Video size={20} />
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-primary/15 rounded-lg text-primary">
+                                <Video size={16} />
                             </div>
                             <div>
-                                <h2 className="text-base font-black text-white">Schedule Live Session</h2>
-                                <p className="text-[11px] text-white/40 font-medium">Enrolled students are notified automatically</p>
+                                <h2 className="text-sm font-black text-white">Schedule Live Session</h2>
+                                <p className="text-[10px] text-white/40 font-medium">Enrolled students are notified automatically</p>
                             </div>
                         </div>
                         <button
                             onClick={onClose}
-                            className="p-2 text-white/30 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                            className="p-1.5 text-white/30 hover:text-white hover:bg-white/10 rounded-lg transition-all"
                         >
-                            <X size={18} />
+                            <X size={16} />
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-3">
                         {/* Topic */}
                         <div>
                             <label className={labelCls}>Session Topic *</label>
                             <div className="relative group">
-                                <Target size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
+                                <Target size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
                                 <input
                                     type="text"
                                     name="topic"
                                     required
                                     value={form.topic}
                                     onChange={handleChange}
-                                    className={`${inputCls} pl-10 font-bold`}
+                                    className={`${inputCls} pl-8 font-bold`}
                                     placeholder="e.g. Mastering Advanced React Patterns"
                                 />
                             </div>
                         </div>
 
                         {/* Course & Duration */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className={labelCls}>Select Course (Targets Students) *</label>
+                                <label className={labelCls}>Course *</label>
                                 <div className="relative group">
-                                    <BookOpen size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
+                                    <BookOpen size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
                                     <select
                                         name="courseId"
                                         required
                                         value={form.courseId || form.category}
                                         onChange={handleCourseChange}
-                                        className={`${inputCls} pl-10 cursor-pointer text-white`}
+                                        className={`${inputCls} pl-8 cursor-pointer text-white`}
                                     >
                                         <option value="" className="bg-[#0B0F1A] text-white">
-                                            {JSON.parse(localStorage.getItem('userInfo') || '{}').role === 'partner' ? 'All Partner Students' : 'University-wide (All Students)'}
+                                            {JSON.parse(localStorage.getItem('userInfo') || '{}').role === 'partner' ? 'All Partner Students' : 'University-wide'}
                                         </option>
-
                                         {Array.isArray(courses) && courses.length > 0 ? (
                                             courses.map((c, idx) => (
-                                                 <option key={c._id || `course-${idx}`} value={c._id} className="bg-[#0B0F1A] text-white">
-                                                    {c.title}
-                                                </option>
+                                                <option key={c._id || `course-${idx}`} value={c._id} className="bg-[#0B0F1A] text-white">{c.title}</option>
                                             ))
                                         ) : (
-                                            <option disabled className="bg-[#0B0F1A] text-white/50">No assigned courses available</option>
+                                            <option disabled className="bg-[#0B0F1A] text-white/50">No courses available</option>
                                         )}
                                     </select>
                                 </div>
@@ -374,34 +371,28 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                             <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                                 <label className={labelCls}>Target Batch (Optional)</label>
                                 <div className="relative group">
-                                    <Users size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
+                                    <Users size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors pointer-events-none" />
                                     <select
                                         name="batchId"
                                         value={form.batchId}
                                         onChange={handleChange}
-                                        className={`${inputCls} pl-10 cursor-pointer text-white`}
+                                        className={`${inputCls} pl-8 cursor-pointer text-white`}
                                     >
                                         <option value="" className="bg-[#0B0F1A] text-white">All Students in Course</option>
                                         {availableBatches.map((b) => (
-                                            <option key={b.id || b._id} value={b.id || b._id} className="bg-[#0B0F1A] text-white">
-                                                {b.name}
-                                            </option>
+                                            <option key={b.id || b._id} value={b.id || b._id} className="bg-[#0B0F1A] text-white">{b.name}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <p className="text-[10px] text-white/30 mt-1.5 ml-1">
-                                    Restricts the session to students belonging to this specific batch.
-                                </p>
                             </div>
                         )}
 
-                        {/* Start Date & Time — two separate inputs for reliable cross-browser UX */}
+                        {/* Start Date & Time */}
                         <div>
                             <label className={labelCls}>Start Date & Time *</label>
-                            <div className="grid grid-cols-2 gap-3">
-                                {/* Date */}
+                            <div className="grid grid-cols-2 gap-2">
                                 <div className="relative">
-                                    <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 pointer-events-none" />
+                                    <Calendar size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 pointer-events-none" />
                                     <input
                                         type="date"
                                         name="startDate"
@@ -409,27 +400,26 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                                         min={new Date().toISOString().split('T')[0]}
                                         value={form.startDate}
                                         onChange={handleChange}
-                                        className={`${inputCls} pl-9 cursor-pointer`}
+                                        className={`${inputCls} pl-8 cursor-pointer`}
                                         style={{ colorScheme: 'dark' }}
                                     />
                                 </div>
-                                {/* Time */}
                                 <div className="relative">
-                                    <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 pointer-events-none" />
+                                    <Clock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 pointer-events-none" />
                                     <input
                                         type="time"
                                         name="startHour"
                                         required
                                         value={form.startHour}
                                         onChange={handleChange}
-                                        className={`${inputCls} pl-9 cursor-pointer`}
+                                        className={`${inputCls} pl-8 cursor-pointer`}
                                         style={{ colorScheme: 'dark' }}
                                     />
                                 </div>
                             </div>
                             {form.startDate && form.startHour && (
-                                <p className="text-[11px] text-emerald-400 mt-1.5 ml-1 flex items-center gap-1">
-                                    <CheckCircle2 size={11} /> Scheduled for{' '}
+                                <p className="text-[10px] text-emerald-400 mt-1 ml-1 flex items-center gap-1">
+                                    <CheckCircle2 size={10} /> Scheduled for{' '}
                                     {(() => {
                                         const [y, m, day] = form.startDate.split('-').map(Number);
                                         const [h, min] = form.startHour.split(':').map(Number);
@@ -442,17 +432,13 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                         </div>
 
                         {/* Meeting Link (Auto-Generated) */}
-                        <div>
-                            <label className={labelCls}>Secure Video Meeting</label>
-                            <div className="flex items-center gap-3 p-3.5 bg-primary/10 border border-primary/20 rounded-xl relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-16 h-16 bg-primary/20 blur-2xl group-hover:bg-primary/30 transition-all pointer-events-none" />
-                                <div className="p-2 bg-primary/20 rounded-lg shrink-0">
-                                    <Video size={16} className="text-primary" />
-                                </div>
-                                <div>
-                                    <p className="text-[13px] font-bold text-white mb-0.5">Jitsi Meet Room</p>
-                                    <p className="text-[11px] text-white/50">A secure meeting link will be automatically generated upon scheduling.</p>
-                                </div>
+                        <div className="flex items-center gap-2.5 px-3 py-2 bg-primary/10 border border-primary/20 rounded-lg">
+                            <div className="p-1.5 bg-primary/20 rounded-md shrink-0">
+                                <Video size={13} className="text-primary" />
+                            </div>
+                            <div>
+                                <p className="text-[11px] font-bold text-white">Jitsi Meet Room</p>
+                                <p className="text-[10px] text-white/50">Secure link auto-generated on scheduling.</p>
                             </div>
                         </div>
 
@@ -461,41 +447,40 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                             <label className={labelCls}>Description & Agenda</label>
                             <textarea
                                 name="description"
-                                rows={3}
+                                rows={2}
                                 value={form.description}
                                 onChange={handleChange}
                                 className={inputCls}
-                                placeholder="What will students learn? Include key topics and prerequisites."
+                                placeholder="Topics, prerequisites, agenda..."
                             />
                         </div>
 
                         {/* Auto-notify banner */}
-                        <div className="flex items-start gap-3 p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
-                            <Bell size={15} className="text-emerald-400 mt-0.5 shrink-0" />
-                            <p className="text-[11px] text-white/55 leading-relaxed">
-                                <span className="text-emerald-400 font-bold">Smart-Notify Enabled:</span> {form.batchId ? 'Only students in the selected batch' : (form.courseId ? 'Only students enrolled in this course' : (JSON.parse(localStorage.getItem('userInfo') || '{}').role === 'partner' ? 'All your registered students' : 'All university students'))} will receive an
-                                email and WhatsApp notification immediately.
+                        <div className="flex items-center gap-2 px-3 py-2 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
+                            <Bell size={12} className="text-emerald-400 shrink-0" />
+                            <p className="text-[10px] text-white/55">
+                                <span className="text-emerald-400 font-bold">Auto-Notify:</span> Students will receive email & WhatsApp notifications.
                             </p>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-3 pt-1">
-                            <ModernButton type="submit" className="flex-1 justify-center" disabled={submitting}>
+                        <div className="flex gap-2 pt-1">
+                            <ModernButton type="submit" className="flex-1 justify-center !py-2 !text-xs" disabled={submitting}>
                                 {submitting ? (
-                                    <span className="flex items-center gap-2">
-                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <span className="flex items-center gap-1.5">
+                                        <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                         Scheduling...
                                     </span>
                                 ) : (
-                                    <span className="flex items-center gap-2">
-                                        <Send size={15} /> Schedule & Notify Students
+                                    <span className="flex items-center gap-1.5">
+                                        <Send size={13} /> Schedule & Notify
                                     </span>
                                 )}
                             </ModernButton>
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-5 py-2 text-sm font-bold text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                                className="px-4 py-2 text-xs font-bold text-white/40 hover:text-white hover:bg-white/5 rounded-lg transition-all"
                             >
                                 Cancel
                             </button>
