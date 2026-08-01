@@ -177,8 +177,11 @@ const ExamScheduler = () => {
             </div>
 
             {/* Filter Bar */}
-            <GlassCard className="!p-3 flex flex-row flex-nowrap gap-3 items-center overflow-x-auto">
-                <div className="relative flex-1 min-w-[160px]">
+            <GlassCard
+                className="!p-3"
+                style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px', alignItems: 'center', overflowX: 'auto' }}
+            >
+                <div className="relative" style={{ flex: '1 1 auto', minWidth: '160px' }}>
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-white/30" />
                     <input
                         type="text"
@@ -188,8 +191,8 @@ const ExamScheduler = () => {
                         className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white placeholder-white/30 focus:border-primary/50 transition-all outline-none"
                     />
                 </div>
-                
-                <div className="flex gap-3 flex-shrink-0">
+
+                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px', flexShrink: 0 }}>
                     <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
