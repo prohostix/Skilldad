@@ -177,7 +177,7 @@ const ExamScheduler = () => {
             </div>
 
             {/* Filter Bar */}
-            <GlassCard className="p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <GlassCard className="p-4 flex flex-row flex-wrap gap-4 items-center">
                 <div className="relative w-full md:w-96">
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-white/30" />
                     <input
@@ -189,7 +189,7 @@ const ExamScheduler = () => {
                     />
                 </div>
                 
-                <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end">
+                <div className="flex gap-3">
                     <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
