@@ -177,8 +177,8 @@ const ExamScheduler = () => {
             </div>
 
             {/* Filter Bar */}
-            <GlassCard className="p-4 flex flex-row flex-wrap gap-4 items-center">
-                <div className="relative flex-1 min-w-[220px]">
+            <GlassCard className="!p-3 flex flex-row flex-nowrap gap-3 items-center overflow-x-auto">
+                <div className="relative flex-1 min-w-[160px]">
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-white/30" />
                     <input
                         type="text"
