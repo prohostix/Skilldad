@@ -159,20 +159,6 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-            // Get existing questions
-            const existingResponse = await axios.get(`/api/exams/${examId}/questions`, config);
-            const existingQuestions = existingResponse.data.questions || [];
-            
-            // Delete all existing questions first to avoid order conflicts
-            if (existingQuestions.length > 0) {
-                await Promise.all(
-                    existingQuestions.map(q => 
-                        axios.delete(`/api/questions/${q._id}`, config).catch(err => {
-                            console.warn('Failed to delete question:', q._id, err);
-                        })
-                    )
-                );
-            }
 
             // Prepare all questions for saving (both new and updated)
             const questionsToSave = questions.map((q, index) => {

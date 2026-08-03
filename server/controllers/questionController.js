@@ -42,9 +42,8 @@ const createOnlineQuestions = async (req, res) => {
             await query("UPDATE exams SET exam_type = 'online-mcq' WHERE id = $1", [examId]);
         }
 
-        // Get existing questions from PG to check for order conflicts
-        const existingQRes = await query('SELECT "order" FROM questions WHERE exam_id = $1', [examId]);
-        const existingOrders = new Set(existingQRes.rows.map(q => q.order));
+        // If creating/replacing batch of questions for this exam, clear old questions first to prevent order conflicts
+        await query('DELETE FROM questions WHERE exam_id = $1', [examId]);
 
         // Validate each question
         const validationErrors = [];
@@ -81,10 +80,6 @@ const createOnlineQuestions = async (req, res) => {
                 errors.push(`duplicate order ${q.order} within the batch`);
             }
             orderSet.add(q.order);
-
-            if (existingOrders.has(q.order)) {
-                errors.push(`order ${q.order} already exists in the exam`);
-            }
 
             if (errors.length > 0) {
                 validationErrors.push({ questionIndex: index, errors });
