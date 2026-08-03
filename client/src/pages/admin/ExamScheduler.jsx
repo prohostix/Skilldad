@@ -11,9 +11,14 @@ import { useToast } from '../../context/ToastContext';
 const ExamScheduler = () => {
     const [exams, setExams] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState('all');
-    const [selectedType, setSelectedType] = useState('all');
+    const [selectedProvider, setSelectedProvider] = useState('all');
     const [selectedExam, setSelectedExam] = useState(null);
     const { showToast } = useToast();
+
+    // Same fallback chain the table's Institution column uses, so the filter
+    // dropdown and what's displayed per-row always agree.
+    const getExamProvider = (exam) =>
+        exam.university?.profile?.universityName || exam.university?.name || 'SkillDad';
 
     const getAuthConfig = () => {
         const rawInfo = localStorage.getItem('userInfo');
@@ -74,11 +79,16 @@ const ExamScheduler = () => {
             }
 
             const matchesStatus = selectedStatus === 'all' || status === selectedStatus;
-            const matchesType = selectedType === 'all' || exam.examType === selectedType;
+            const matchesProvider = selectedProvider === 'all' || getExamProvider(exam) === selectedProvider;
 
-            return matchesStatus && matchesType;
+            return matchesStatus && matchesProvider;
         });
-    }, [exams, selectedStatus, selectedType]);
+    }, [exams, selectedStatus, selectedProvider]);
+
+    const providerOptions = useMemo(() =>
+        Array.from(new Set(exams.map(getExamProvider).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+        [exams]
+    );
 
     const getStatusBadge = (exam) => {
         const now = new Date();
@@ -191,15 +201,14 @@ const ExamScheduler = () => {
                     </select>
 
                     <select
-                        value={selectedType}
-                        onChange={(e) => setSelectedType(e.target.value)}
+                        value={selectedProvider}
+                        onChange={(e) => setSelectedProvider(e.target.value)}
                         className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-primary/50"
                     >
-                        <option value="all" className="bg-[#0f0720]">All Types</option>
-                        <option value="online-mcq" className="bg-[#0f0720]">Online MCQ</option>
-                        <option value="online-descriptive" className="bg-[#0f0720]">Online Descriptive</option>
-                        <option value="pdf-based" className="bg-[#0f0720]">PDF-Based</option>
-                        <option value="mixed" className="bg-[#0f0720]">Mixed</option>
+                        <option value="all" className="bg-[#0f0720]">All Universities</option>
+                        {providerOptions.map((name) => (
+                            <option key={name} value={name} className="bg-[#0f0720]">{name}</option>
+                        ))}
                     </select>
                 </div>
             </GlassCard>
