@@ -169,7 +169,7 @@ router.get(
 router.get(
     '/:id/jitsi-config',
     protect,
-    authorize('university', 'admin', 'student'),
+    authorize('university', 'admin', 'partner', 'student'),
     getJitsiSDKConfig
 );
 
