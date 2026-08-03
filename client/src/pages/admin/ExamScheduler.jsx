@@ -111,39 +111,39 @@ const ExamScheduler = () => {
             </div>
 
             {/* Statistics Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <GlassCard className="hover:border-primary/30 transition-all duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-primary/10 text-primary rounded-2xl">
-                            <Trophy size={24} />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <GlassCard className="!p-4 hover:border-primary/30 transition-all duration-300">
+                    <div className="flex items-center space-x-3">
+                        <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
+                            <Trophy size={20} />
                         </div>
                         <div>
                             <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Total Exams</p>
-                            <p className="text-2xl font-bold text-white font-inter mt-1">{exams.length}</p>
+                            <p className="text-xl font-bold text-white font-inter mt-1">{exams.length}</p>
                         </div>
                     </div>
                 </GlassCard>
-                <GlassCard className="hover:border-indigo-500/30 transition-all duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-2xl">
-                            <Calendar size={24} />
+                <GlassCard className="!p-4 hover:border-indigo-500/30 transition-all duration-300">
+                    <div className="flex items-center space-x-3">
+                        <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
+                            <Calendar size={20} />
                         </div>
                         <div>
                             <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Scheduled</p>
-                            <p className="text-2xl font-bold text-white font-inter mt-1">
+                            <p className="text-xl font-bold text-white font-inter mt-1">
                                 {exams.filter(e => e.status === 'scheduled').length}
                             </p>
                         </div>
                     </div>
                 </GlassCard>
-                <GlassCard className="hover:border-red-500/30 transition-all duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-red-500/10 text-red-400 rounded-2xl">
-                            <Clock size={24} />
+                <GlassCard className="!p-4 hover:border-red-500/30 transition-all duration-300">
+                    <div className="flex items-center space-x-3">
+                        <div className="p-2.5 bg-red-500/10 text-red-400 rounded-xl">
+                            <Clock size={20} />
                         </div>
                         <div>
                             <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Ongoing</p>
-                            <p className="text-2xl font-bold text-white font-inter mt-1">
+                            <p className="text-xl font-bold text-white font-inter mt-1">
                                 {exams.filter(e => {
                                     const now = new Date();
                                     const start = new Date(e.scheduledStartTime || e.scheduled_start);
@@ -156,14 +156,14 @@ const ExamScheduler = () => {
                         </div>
                     </div>
                 </GlassCard>
-                <GlassCard className="hover:border-emerald-500/30 transition-all duration-300">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl">
-                            <FileText size={24} />
+                <GlassCard className="!p-4 hover:border-emerald-500/30 transition-all duration-300">
+                    <div className="flex items-center space-x-3">
+                        <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl">
+                            <FileText size={20} />
                         </div>
                         <div>
                             <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Published Results</p>
-                            <p className="text-2xl font-bold text-white font-inter mt-1">
+                            <p className="text-xl font-bold text-white font-inter mt-1">
                                 {exams.filter(e => e.status === 'published').length}
                             </p>
                         </div>
