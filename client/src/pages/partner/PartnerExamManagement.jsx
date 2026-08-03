@@ -16,6 +16,7 @@ import {
     ShieldCheck,
     Calendar,
     AlertCircle,
+    AlertTriangle,
     RefreshCw,
     Edit,
     Users,
@@ -48,6 +49,7 @@ const PartnerExamManagement = () => {
     const [activeTab, setActiveTab] = useState('conduct');
     const [activeVaultFolder, setActiveVaultFolder] = useState('exam_paper');
     const [searchTerm, setSearchTerm] = useState('');
+    const [confirmModal, setConfirmModal] = useState({ open: false, examId: null });
     const [questionPapers, setQuestionPapers] = useState([]);
     const [answerKeys, setAnswerKeys] = useState([]);
     const [allDocuments, setAllDocuments] = useState([]);
@@ -369,7 +371,12 @@ const PartnerExamManagement = () => {
     };
 
     const handleDeleteExam = async (examId) => {
-        if (!window.confirm('Permanently delete this exam? This action cannot be undone.')) return;
+        setConfirmModal({ open: true, examId });
+    };
+
+    const confirmDeleteExam = async () => {
+        const examId = confirmModal.examId;
+        setConfirmModal({ open: false, examId: null });
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -1035,6 +1042,66 @@ const PartnerExamManagement = () => {
                     </motion.div>
                 </div>
             )}
+
+            {/* Custom Delete Confirmation Modal */}
+            <AnimatePresence>
+                {confirmModal.open && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.92, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                            className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                        >
+                            {/* Red accent bar */}
+                            <div className="h-1 w-full bg-gradient-to-r from-red-600 via-red-500 to-orange-500" />
+
+                            <div className="p-6">
+                                {/* Icon + Title */}
+                                <div className="flex items-start gap-4 mb-4">
+                                    <div className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                                        <AlertTriangle size={22} className="text-red-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white font-poppins">Delete Exam</h3>
+                                        <p className="text-xs text-white/50 mt-0.5">This action is permanent and irreversible</p>
+                                    </div>
+                                </div>
+
+                                {/* Message */}
+                                <div className="pl-[60px]">
+                                    <p className="text-sm text-white/70 leading-relaxed">
+                                        Are you sure you want to permanently delete this exam? All associated questions, student results, and submissions will be <span className="text-red-400 font-semibold">permanently removed</span>.
+                                    </p>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex items-center justify-end gap-3 mt-6">
+                                    <button
+                                        onClick={() => setConfirmModal({ open: false, examId: null })}
+                                        className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmDeleteExam}
+                                        className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 rounded-xl shadow-lg shadow-red-900/30 transition-all active:scale-95 flex items-center gap-2"
+                                    >
+                                        <Trash2 size={15} />
+                                        Delete Exam
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

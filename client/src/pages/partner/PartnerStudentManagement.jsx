@@ -167,7 +167,8 @@ const PartnerStudentManagement = () => {
             ...prev,
             course: courseId,
             courseFee: selectedCourse ? selectedCourse.price : '',
-            batch_id: '' // Reset batch when course changes
+            batch_id: '', // Reset batch when course changes
+            university: selectedCourse ? (selectedCourse.instructorId || selectedCourse.instructor_id || prev.university) : prev.university
         }));
 
         if (courseId) {
@@ -179,6 +180,29 @@ const PartnerStudentManagement = () => {
                 setAvailableBatches([]);
             }
         } else {
+            setAvailableBatches([]);
+        }
+    };
+
+    const handleUniversityChange = (universityId) => {
+        setNewStudentData(prev => {
+            const currentCourse = availableCourses.find(c => c._id === prev.course);
+            const courseInstructorId = currentCourse ? (currentCourse.instructorId || currentCourse.instructor_id) : null;
+            const keepCourse = universityId && courseInstructorId === universityId;
+            
+            return {
+                ...prev,
+                university: universityId,
+                course: keepCourse ? prev.course : '',
+                courseFee: keepCourse ? prev.courseFee : '',
+                batch_id: keepCourse ? prev.batch_id : ''
+            };
+        });
+        
+        // Handle batches reset if course changes
+        const currentCourse = availableCourses.find(c => c._id === newStudentData.course);
+        const courseInstructorId = currentCourse ? (currentCourse.instructorId || currentCourse.instructor_id) : null;
+        if (universityId && courseInstructorId !== universityId) {
             setAvailableBatches([]);
         }
     };
@@ -325,6 +349,34 @@ const PartnerStudentManagement = () => {
     });
 
     const courses = [...new Set((students || []).map(s => s.course).filter(Boolean))];
+
+    const getCombinedProviders = () => {
+        const providers = [];
+        const seenIds = new Set();
+
+        availableCourses.forEach(c => {
+            const id = c.instructorId || c.instructor_id;
+            const name = c.instructorName || c.universityName || 'Partner';
+            if (id && !seenIds.has(id)) {
+                seenIds.add(id);
+                providers.push({ _id: id, name: name });
+            }
+        });
+
+        availableUniversities.forEach(uni => {
+            if (uni._id && !seenIds.has(uni._id)) {
+                seenIds.add(uni._id);
+                providers.push({ 
+                    _id: uni._id, 
+                    name: uni.profile?.universityName || uni.name || uni.email 
+                });
+            }
+        });
+
+        return providers;
+    };
+
+    const combinedProviders = getCombinedProviders();
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
@@ -518,199 +570,209 @@ const PartnerStudentManagement = () => {
 
             {/* Register New Student Modal */}
             {showRegisterStudentModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[250] flex items-start justify-center p-4 pt-20 overflow-y-auto" onClick={(e) => { 
-                    if (e.target === e.currentTarget) {
-                        setShowRegisterStudentModal(false);
-                        setShowCustomCodeInput(false);
-                        setNewStudentData({ 
-                            name: '', 
-                            email: '', 
-                            phone: '', 
-                            password: '', 
-                            course: '', 
-                            courseFee: '',
-                            university: '',
-                            partnerCode: partnerCodes.length > 0 ? partnerCodes[0].code : '',
-                            customCode: ''
-                        });
-                    }
-                }}>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-[#0B0F1A] border border-white/10 rounded-2xl p-6 max-w-md w-full"
-                    >
-                        <h2 className="text-xl font-bold text-white mb-4">Register New Student</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Full Name *</label>
-                                <input
-                                    type="text"
-                                    value={newStudentData.name}
-                                    onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
-                                    placeholder="Enter student's full name"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Email Address *</label>
-                                <input
-                                    type="email"
-                                    value={newStudentData.email}
-                                    onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
-                                    placeholder="student@example.com"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Password *</label>
-                                <input
-                                    type="password"
-                                    value={newStudentData.password}
-                                    onChange={(e) => setNewStudentData({ ...newStudentData, password: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
-                                    placeholder="Temporary password"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Phone Number</label>
-                                <input
-                                    type="text"
-                                    value={newStudentData.phone}
-                                    onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary"
-                                    placeholder="+1 (555) 000-0000"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Course *</label>
-                                <select
-                                    value={newStudentData.course}
-                                    onChange={(e) => handleCourseChange(e.target.value)}
-                                    className="w-full px-4 py-2 bg-[#0B0F1A] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
-                                    required
-                                >
-                                    <option value="">Select a course</option>
-                                    {availableCourses.map(course => (
-                                        <option key={course._id} value={course._id}>
-                                            {course.title}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            {availableBatches.length > 0 && (
-                                <div>
-                                    <label className="block text-sm font-bold text-white/70 mb-2">Select Batch</label>
-                                    <select
-                                        value={newStudentData.batch_id}
-                                        onChange={(e) => setNewStudentData({ ...newStudentData, batch_id: e.target.value })}
-                                        className="w-full px-4 py-2 bg-[#0B0F1A] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
-                                    >
-                                        <option value="">No Batch (Global)</option>
-                                        {availableBatches.map(batch => (
-                                            <option key={batch.id} value={batch.id}>
-                                                {batch.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Course Fee</label>
-                                <input
-                                    type="text"
-                                    value={newStudentData.courseFee ? `₹${newStudentData.courseFee}` : ''}
-                                    readOnly
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 cursor-not-allowed"
-                                    placeholder="Auto-filled based on course"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">University *</label>
-                                <select
-                                    value={newStudentData.university}
-                                    onChange={(e) => {
-                                        setNewStudentData({ ...newStudentData, university: e.target.value });
-                                    }}
-                                    className="w-full px-4 py-2 bg-[#0B0F1A] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
-                                    required
-                                >
-                                    <option value="">Select a university</option>
-                                    {availableUniversities.length > 0 ? (
-                                        availableUniversities.map(uni => (
-                                            <option key={uni._id} value={uni._id}>
-                                                {uni.profile?.universityName || uni.name || uni.email}
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option value="" disabled>Loading universities...</option>
-                                    )}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-white/70 mb-2">Affiliation Code *</label>
-                                <select
-                                    value={showCustomCodeInput ? 'custom' : newStudentData.partnerCode}
-                                    onChange={(e) => {
-                                        if (e.target.value === 'custom') {
-                                            setShowCustomCodeInput(true);
-                                            setNewStudentData({ ...newStudentData, partnerCode: '' });
-                                        } else {
-                                            setShowCustomCodeInput(false);
-                                            setNewStudentData({ ...newStudentData, partnerCode: e.target.value, customCode: '' });
-                                        }
-                                    }}
-                                    className="w-full px-4 py-2 bg-[#0B0F1A] border border-white/10 rounded-xl text-white focus:outline-none focus:border-primary"
-                                    required
-                                >
-                                    <option value="" disabled>Select an affiliation code</option>
-                                    {partnerCodes.map(c => (
-                                        <option key={c._id} value={c.code}>{c.code} ({c.type === 'percentage' ? `${c.value}%` : `₹${c.value}`} off)</option>
-                                    ))}
-                                    <option value="custom">Custom Code</option>
-                                </select>
-                                {showCustomCodeInput && (
-                                    <input
-                                        type="text"
-                                        value={newStudentData.customCode}
-                                        onChange={(e) => setNewStudentData({ ...newStudentData, customCode: e.target.value })}
-                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary mt-2"
-                                        placeholder="Enter custom affiliation code"
-                                        required
-                                    />
-                                )}
-                            </div>
-                        </div>
-                        <div className="flex gap-3 mt-6">
-                            <ModernButton
-                                variant="secondary"
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm overflow-y-auto">
+                    <GlassCard className="w-full max-w-2xl shadow-2xl border-primary/20 bg-[#0B0F1A] my-8 p-6 text-left">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-white font-poppins">Register New Student</h3>
+                            <button 
                                 onClick={() => {
                                     setShowRegisterStudentModal(false);
                                     setShowCustomCodeInput(false);
-                                    setNewStudentData({ 
-                                        name: '', 
-                                        email: '', 
-                                        phone: '', 
-                                        password: '', 
-                                        course: '', 
-                                        courseFee: '',
-                                        university: '',
-                                        partnerCode: partnerCodes.length > 0 ? partnerCodes[0].code : '',
-                                        customCode: ''
-                                    });
-                                }}
-                                className="flex-1 border !border-white/10"
+                                }} 
+                                className="text-white/30 hover:text-white transition-colors"
                             >
-                                Cancel
-                            </ModernButton>
-                            <ModernButton onClick={handleRegisterStudent} className="flex-1">
-                                Register
-                            </ModernButton>
+                                <XCircle size={20} />
+                            </button>
                         </div>
-                    </motion.div>
+
+                        <form onSubmit={(e) => { e.preventDefault(); handleRegisterStudent(); }} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Left Column: Personal Info */}
+                                <div className="space-y-4">
+                                    <h4 className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-1">Student Details</h4>
+                                    
+                                    <div>
+                                        <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Full Name *</label>
+                                        <input
+                                            type="text"
+                                            value={newStudentData.name}
+                                            onChange={(e) => setNewStudentData({ ...newStudentData, name: e.target.value })}
+                                            className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                                            placeholder="Enter student's full name"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Email Address *</label>
+                                        <input
+                                            type="email"
+                                            value={newStudentData.email}
+                                            onChange={(e) => setNewStudentData({ ...newStudentData, email: e.target.value })}
+                                            className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                                            placeholder="student@example.com"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Password *</label>
+                                            <input
+                                                type="password"
+                                                value={newStudentData.password}
+                                                onChange={(e) => setNewStudentData({ ...newStudentData, password: e.target.value })}
+                                                className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                                                placeholder="Password"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Phone</label>
+                                            <input
+                                                type="text"
+                                                value={newStudentData.phone}
+                                                onChange={(e) => setNewStudentData({ ...newStudentData, phone: e.target.value })}
+                                                className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                                                placeholder="+1 (555) 000-0000"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Column: Enrollment Info */}
+                                <div className="space-y-4">
+                                    <h4 className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-1">Course Assignment</h4>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Course *</label>
+                                            <select
+                                                value={newStudentData.course}
+                                                onChange={(e) => handleCourseChange(e.target.value)}
+                                                className="w-full px-3 py-1.5 bg-[#0B0F1A] border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none cursor-pointer focus:ring-1 focus:ring-primary/30 transition-all"
+                                                required
+                                            >
+                                                <option value="">Select Course</option>
+                                                {availableCourses
+                                                    .filter(c => !newStudentData.university || c.instructorId === newStudentData.university || c.instructor_id === newStudentData.university)
+                                                    .map(course => (
+                                                        <option key={course._id} value={course._id}>
+                                                            {course.title} ({course.instructorName || course.universityName || 'Partner'})
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Course Fee</label>
+                                            <input
+                                                type="text"
+                                                value={newStudentData.courseFee ? `₹${newStudentData.courseFee}` : ''}
+                                                readOnly
+                                                className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white/40 text-xs cursor-not-allowed"
+                                                placeholder="Auto-filled"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">University / Partner *</label>
+                                            <select
+                                                value={newStudentData.university}
+                                                onChange={(e) => handleUniversityChange(e.target.value)}
+                                                className="w-full px-3 py-1.5 bg-[#0B0F1A] border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none cursor-pointer focus:ring-1 focus:ring-primary/30 transition-all"
+                                                required
+                                            >
+                                                <option value="">Select Provider</option>
+                                                {combinedProviders.length > 0 ? (
+                                                    combinedProviders.map(provider => (
+                                                        <option key={provider._id} value={provider._id}>
+                                                            {provider.name}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <option value="" disabled>Loading...</option>
+                                                )}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Select Batch</label>
+                                            <select
+                                                value={newStudentData.batch_id}
+                                                onChange={(e) => setNewStudentData({ ...newStudentData, batch_id: e.target.value })}
+                                                className="w-full px-3 py-1.5 bg-[#0B0F1A] border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none cursor-pointer focus:ring-1 focus:ring-primary/30 transition-all"
+                                                disabled={availableBatches.length === 0}
+                                            >
+                                                <option value="">No Batch (Global)</option>
+                                                {availableBatches.map(batch => (
+                                                    <option key={batch.id} value={batch.id}>
+                                                        {batch.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Affiliation Code *</label>
+                                        <select
+                                            value={showCustomCodeInput ? 'custom' : newStudentData.partnerCode}
+                                            onChange={(e) => {
+                                                if (e.target.value === 'custom') {
+                                                    setShowCustomCodeInput(true);
+                                                    setNewStudentData({ ...newStudentData, partnerCode: '' });
+                                                } else if (e.target.value === 'none') {
+                                                    setShowCustomCodeInput(false);
+                                                    setNewStudentData({ ...newStudentData, partnerCode: 'none', customCode: '' });
+                                                } else {
+                                                    setShowCustomCodeInput(false);
+                                                    setNewStudentData({ ...newStudentData, partnerCode: e.target.value, customCode: '' });
+                                                }
+                                            }}
+                                            className="w-full px-3 py-1.5 bg-[#0B0F1A] border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none cursor-pointer focus:ring-1 focus:ring-primary/30 transition-all"
+                                            required
+                                        >
+                                            <option value="" disabled>Select code</option>
+                                            <option value="none">No Discount (0% Off)</option>
+                                            {partnerCodes.map(c => (
+                                                <option key={c._id} value={c.code}>{c.code} ({c.type === 'percentage' ? `${c.value}%` : `₹${c.value}`} off)</option>
+                                            ))}
+                                            <option value="custom">Custom Code</option>
+                                        </select>
+                                        {showCustomCodeInput && (
+                                            <input
+                                                type="text"
+                                                value={newStudentData.customCode}
+                                                onChange={(e) => setNewStudentData({ ...newStudentData, customCode: e.target.value })}
+                                                className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all mt-2"
+                                                placeholder="Enter custom affiliation code"
+                                                required
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+                                <button 
+                                    onClick={() => {
+                                        setShowRegisterStudentModal(false);
+                                        setShowCustomCodeInput(false);
+                                    }} 
+                                    type="button" 
+                                    className="px-5 py-2 text-xs font-bold text-white/40 hover:text-white transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <ModernButton type="submit" className="px-6 py-2 text-xs font-bold">
+                                    Register
+                                </ModernButton>
+                            </div>
+                        </form>
+                    </GlassCard>
                 </div>
             )}
 

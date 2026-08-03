@@ -62,6 +62,8 @@ const PartnerDashboard = () => {
     const [discountCodes, setDiscountCodes] = useState([]);
     const [payoutRequests, setPayoutRequests] = useState([]);
     const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [filterUniversity, setFilterUniversity] = useState('all');
+    const [filterCourse, setFilterCourse] = useState('all');
     const [registerData, setRegisterData] = useState({
         name: '',
         email: '',
@@ -73,6 +75,8 @@ const PartnerDashboard = () => {
     const [studentDocs, setStudentDocs] = useState([]);
     const [studentCerts, setStudentCerts] = useState([]);
     const [assetsLoading, setAssetsLoading] = useState(false);
+    const [showPayoutModal, setShowPayoutModal] = useState(false);
+    const [payoutAmount, setPayoutAmount] = useState('');
     const { showToast } = useToast();
 
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -102,8 +106,28 @@ const PartnerDashboard = () => {
         }
     };
 
-    const myCourses = courses.filter(c => c.instructorId === userInfo?._id || c.instructor_id === userInfo?._id);
-    const universityCourses = courses.filter(c => c.instructorId !== userInfo?._id && c.instructor_id !== userInfo?._id);
+    const myCourses = courses.filter(c => c.instructorId === userInfo?._id || c.instructor_id === userInfo?._id || c.instructorId === userInfo?.id || c.instructor_id === userInfo?.id);
+    // Separate: true university courses vs other partner courses
+    const universityCoursesList = courses.filter(c =>
+        c.instructorId !== userInfo?._id && c.instructor_id !== userInfo?._id &&
+        c.instructorId !== userInfo?.id && c.instructor_id !== userInfo?.id &&
+        (c.universityName || c.instructorRole === 'university')
+    );
+    const otherPartnerCourses = courses.filter(c =>
+        c.instructorId !== userInfo?._id && c.instructor_id !== userInfo?._id &&
+        c.instructorId !== userInfo?.id && c.instructor_id !== userInfo?.id &&
+        !c.universityName && c.instructorRole !== 'university'
+    );
+    // Combined for backward compat
+    const universityCourses = [...universityCoursesList, ...otherPartnerCourses];
+
+    // Unique providers for filter dropdown
+    const uniqueProviders = [
+        ...new Map(universityCourses.map(c => [
+            c.instructorId || c.instructor_id,
+            { id: c.instructorId || c.instructor_id, name: c.universityName || c.instructorName || 'Partner' }
+        ])).values()
+    ];
 
     const toggleCourseSelection = (courseId) => {
         if (!courseId) return;
@@ -132,7 +156,7 @@ const PartnerDashboard = () => {
 
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text);
-        alert('Copied to clipboard!');
+        showToast?.('Copied to clipboard!', 'success');
     };
 
     const filteredStudents = students.filter(student => {
@@ -143,23 +167,45 @@ const PartnerDashboard = () => {
         const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             email.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = filterStatus === 'all' || sStatus === filterStatus;
-        return matchesSearch && matchesFilter;
+
+        // University/Partner filter
+        const matchesUniversity = filterUniversity === 'all' ||
+            student.university_id === filterUniversity ||
+            (student.enrollments || []).some(e =>
+                courses.find(c => (c.id || c._id) === e.course_id && (c.instructorId || c.instructor_id) === filterUniversity)
+            );
+
+        // Course filter
+        const matchesCourse = filterCourse === 'all' ||
+            (student.enrollments || []).some(e => e.course_id === filterCourse || e.course_title === filterCourse);
+
+        return matchesSearch && matchesFilter && matchesUniversity && matchesCourse;
     });
 
     const totalDiscountSavings = students.reduce((sum, student) => sum + (student.discountSaved || 0), 0);
     const totalRevenue = students.reduce((sum, student) => sum + (student.totalSpent || 0), 0);
 
-    const handleRequestPayout = async () => {
-        const amount = prompt('Enter amount to withdraw:', stats.totalEarnings);
-        if (!amount || isNaN(amount) || amount <= 0) return;
+    const handleRequestPayout = () => {
+        setPayoutAmount(stats.totalEarnings || '');
+        setShowPayoutModal(true);
+    };
+
+    const submitPayoutRequest = async (e) => {
+        e.preventDefault();
+        const amt = Number(payoutAmount);
+        if (!amt || isNaN(amt) || amt <= 0) {
+            showToast('Please enter a valid amount', 'error');
+            return;
+        }
 
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            await axios.post('/api/partner/payout', { amount: Number(amount) }, config);
-            alert('Payout request submitted successfully!');
+            await axios.post('/api/partner/payout', { amount: amt }, config);
+            showToast('Payout request submitted successfully!', 'success');
+            setShowPayoutModal(false);
             fetchStats();
         } catch (error) {
-            alert('Failed to submit payout request.');
+            showToast(error.response?.data?.message || 'Failed to submit payout request.', 'error');
         }
     };
 
@@ -326,45 +372,36 @@ const PartnerDashboard = () => {
             <AnimatePresence mode="wait">
                 {activeTab === 'overview' && (
                     <motion.div key="overview" className="space-y-8">
-                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                            <GlassCard className="group hover:border-primary/40 transition-all text-left">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="p-3 bg-primary/10 text-primary rounded-2xl group-hover:scale-110 transition-transform">
-                                        <Users size={26} />
-                                    </div>
-                                    <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2.5 py-1.5 rounded-xl border border-emerald-100 uppercase tracking-widest">Active</span>
-                                </div>
-                                <h3 className="text-white text-xs font-bold uppercase tracking-widest font-inter mb-1">Affiliated Students</h3>
-                                <p className="text-xl font-semibold text-white font-poppins">{students.length}</p>
-                            </GlassCard>
-
-                            <GlassCard className="group hover:border-emerald-500/40 transition-all text-left">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="p-3 bg-emerald-100 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
-                                        <DollarSign size={26} />
-                                    </div>
-                                </div>
-                                <h3 className="text-white text-xs font-bold uppercase tracking-widest font-inter mb-1">Total Revenue</h3>
-                                <p className="text-xl font-semibold text-white font-space">₹{totalRevenue.toLocaleString()}</p>
-                            </GlassCard>
-
-                            <GlassCard className="group hover:border-amber-500/40 transition-all text-left">
-                                <div className="flex justify-between items-start mb-6">
-                                    <div className="p-3 bg-amber-100 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
-                                        <Percent size={26} />
-                                    </div>
-                                </div>
-                                <h3 className="text-white text-xs font-bold uppercase tracking-widest font-inter mb-1">Discount Rate</h3>
-                                <p className="text-xl font-semibold text-white font-space">15%</p>
-                            </GlassCard>
-
-                            <GlassCard className="bg-white/5 text-white border-white/10 text-left">
-                                <div className="p-3 bg-white/10 rounded-2xl w-fit mb-6">
-                                    <Coins size={26} className="text-amber-400" />
-                                </div>
-                                <h3 className="text-white text-xs font-bold uppercase tracking-widest font-inter mb-1">Discount Savings</h3>
-                                <p className="text-xl font-semibold font-poppins">₹{totalDiscountSavings.toLocaleString()}</p>
-                            </GlassCard>
+                        <div className="flex flex-wrap gap-3 w-full">
+                            {[
+                                { label: 'Affiliated Students', val: students.length, icon: Users, color: 'primary', status: 'Active' },
+                                { label: 'Total Revenue', val: `₹${totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'emerald' },
+                                { label: 'Discount Rate', val: '15%', icon: Percent, color: 'amber' },
+                                { label: 'Discount Savings', val: `₹${totalDiscountSavings.toLocaleString()}`, icon: Coins, color: 'purple' }
+                            ].map((stat, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="flex-1 min-w-[200px] sm:min-w-[220px]"
+                                >
+                                    <GlassCard className="py-1.5 px-3 bg-slate-900/10 flex items-center justify-between gap-2 border border-white/5 rounded-md hover:border-white/10 transition-all w-full h-full">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`p-1 bg-${stat.color === 'primary' ? 'primary/10 text-primary' : stat.color === 'emerald' ? 'emerald-500/10 text-emerald-400' : stat.color === 'amber' ? 'amber-500/10 text-amber-400' : 'purple-500/10 text-purple-400'} rounded shrink-0`}>
+                                                <stat.icon size={14} />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="text-slate-500 uppercase font-bold tracking-wider text-[9px] leading-tight">{stat.label}</span>
+                                                <span className="font-extrabold text-white text-[13px] mt-0.5">{stat.val}</span>
+                                            </div>
+                                        </div>
+                                        {stat.status && (
+                                            <span className="text-[8px] font-bold text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0 bg-emerald-500/10">{stat.status}</span>
+                                        )}
+                                    </GlassCard>
+                                </motion.div>
+                            ))}
                         </div>
 
                         <GlassCard className="text-left">
@@ -426,159 +463,204 @@ const PartnerDashboard = () => {
                                         <option value="active">Active</option>
                                         <option value="completed">Completed</option>
                                     </select>
+                                    {/* University / Partner Filter */}
+                                    <select
+                                        value={filterUniversity}
+                                        onChange={(e) => { setFilterUniversity(e.target.value); setFilterCourse('all'); }}
+                                        className="px-4 py-3 bg-[#0B0F1A] border border-white/10 rounded-xl text-white text-xs outline-none"
+                                    >
+                                        <option value="all">All Providers</option>
+                                        {uniqueProviders.map(p => (
+                                            <option key={p.id} value={p.id}>{p.name}</option>
+                                        ))}
+                                    </select>
+                                    {/* Course Filter */}
+                                    <select
+                                        value={filterCourse}
+                                        onChange={(e) => setFilterCourse(e.target.value)}
+                                        className="px-4 py-3 bg-[#0B0F1A] border border-white/10 rounded-xl text-white text-xs outline-none"
+                                    >
+                                        <option value="all">All Courses</option>
+                                        {courses
+                                            .filter(c => filterUniversity === 'all' || (c.instructorId || c.instructor_id) === filterUniversity)
+                                            .map(c => (
+                                                <option key={c.id || c._id} value={c.id || c._id}>{c.title}</option>
+                                            ))}
+                                    </select>
                                 </div>
                             </div>
                         </GlassCard>
 
                         {/* Register Student Modal */}
                         {showRegisterModal && (
-                            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-                                <GlassCard className="w-full max-w-4xl shadow-2xl border-primary/20 bg-[#0B0F1A] my-8">
-                                    <div className="flex justify-between items-center mb-8">
-                                        <h3 className="text-xl font-bold text-white">Register & Enroll Student</h3>
-                                        <button onClick={() => setShowRegisterModal(false)} className="text-white/30 hover:text-white">
-                                            <XCircle size={24} />
+                            <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm overflow-y-auto">
+                                <GlassCard className="w-full max-w-2xl shadow-2xl border-primary/20 bg-[#0B0F1A] my-8 p-6 text-left">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-lg font-bold text-white font-poppins">Register & Enroll Student</h3>
+                                        <button onClick={() => setShowRegisterModal(false)} className="text-white/30 hover:text-white transition-colors">
+                                            <XCircle size={20} />
                                         </button>
                                     </div>
 
-                                    <form onSubmit={handleRegisterStudent} className="space-y-8">
-                                        <div className="grid md:grid-cols-2 gap-8">
-                                            {/* Left Column: Form */}
-                                            <div className="space-y-4 text-left">
-                                                <h4 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-4">Student Details</h4>
+                                    <form onSubmit={handleRegisterStudent} className="space-y-4">
+                                        {/* Student Details Section */}
+                                        <div className="space-y-3">
+                                            <h4 className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-1">Student Details</h4>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
-                                                    <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Full Name</label>
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Full Name</label>
                                                     <input
                                                         type="text"
                                                         required
-                                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary outline-none"
+                                                        className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
                                                         value={registerData.name}
                                                         onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Email</label>
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Email</label>
                                                     <input
                                                         type="email"
                                                         required
-                                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary outline-none"
+                                                        className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
                                                         value={registerData.email}
                                                         onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
                                                     />
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Phone</label>
-                                                        <input
-                                                            type="tel"
-                                                            required
-                                                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary outline-none"
-                                                            value={registerData.phone}
-                                                            onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Password</label>
-                                                        <input
-                                                            type="password"
-                                                            required
-                                                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary outline-none"
-                                                            value={registerData.password}
-                                                            onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                                                        />
-                                                    </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div>
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Phone</label>
+                                                    <input
+                                                        type="tel"
+                                                        required
+                                                        className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                                                        value={registerData.phone}
+                                                        onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                                                    />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5">Partner Code</label>
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Password</label>
+                                                    <input
+                                                        type="password"
+                                                        required
+                                                        className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all"
+                                                        value={registerData.password}
+                                                        onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Partner Code</label>
                                                     <input
                                                         type="text"
                                                         required
-                                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:border-primary outline-none uppercase"
+                                                        className="w-full px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs focus:border-primary outline-none focus:ring-1 focus:ring-primary/30 transition-all uppercase"
                                                         value={registerData.partnerCode}
                                                         onChange={(e) => setRegisterData({ ...registerData, partnerCode: e.target.value.toUpperCase() })}
                                                     />
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            {/* Right Column: Course Dropdowns */}
-                                            <div className="space-y-6 text-left">
-                                                <h4 className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-4">Course Assignment</h4>
-                                                
-                                                <div className="space-y-4">
-                                                    {/* My Courses Dropdown */}
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 flex items-center">
-                                                            <GraduationCap size={14} className="mr-2" /> Select My Courses
-                                                        </label>
-                                                        <div className="relative">
-                                                            <select
-                                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white appearance-none focus:border-primary outline-none cursor-pointer"
-                                                                onChange={(e) => toggleCourseSelection(e.target.value)}
-                                                                value=""
-                                                            >
-                                                                <option value="" className="bg-[#0B0F1A]">-- Choose from My Courses --</option>
-                                                                {myCourses.map(c => (
-                                                                    <option key={c.id || c._id} value={c.id || c._id} className="bg-[#0B0F1A]">
-                                                                        {c.title}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                            <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-                                                        </div>
+                                        {/* Course Assignment Section */}
+                                        <div className="space-y-3 pt-4 border-t border-white/5">
+                                            <h4 className="text-xs font-bold text-primary uppercase tracking-[0.2em] mb-1">Course Assignment</h4>
+                                            
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {/* My Courses Dropdown */}
+                                                <div>
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 flex items-center">
+                                                        <GraduationCap size={12} className="mr-1.5 text-primary" /> Select My Courses
+                                                    </label>
+                                                    <div className="relative">
+                                                        <select
+                                                            className="w-full pl-3 pr-8 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-[11px] appearance-none focus:border-primary outline-none cursor-pointer focus:ring-1 focus:ring-primary/30 transition-all"
+                                                            onChange={(e) => toggleCourseSelection(e.target.value)}
+                                                            value=""
+                                                        >
+                                                            <option value="" className="bg-[#0B0F1A]">-- Choose from My Courses --</option>
+                                                            {myCourses.map(c => (
+                                                                <option key={c.id || c._id} value={c.id || c._id} className="bg-[#0B0F1A]">
+                                                                    {c.title}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
                                                     </div>
+                                                </div>
 
-                                                    {/* University Courses Dropdown */}
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 flex items-center">
-                                                            <School size={14} className="mr-2" /> Select University Courses
-                                                        </label>
-                                                        <div className="relative">
-                                                            <select
-                                                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white appearance-none focus:border-primary outline-none cursor-pointer"
-                                                                onChange={(e) => toggleCourseSelection(e.target.value)}
-                                                                value=""
-                                                            >
-                                                                <option value="" className="bg-[#0B0F1A]">-- Choose from Other Universities --</option>
-                                                                {universityCourses.map(c => (
-                                                                    <option key={c.id || c._id} value={c.id || c._id} className="bg-[#0B0F1A]">
-                                                                        {c.title} ({c.universityName || 'Partner'})
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                            <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Selected Courses Display */}
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">Selected Assignments ({registerData.selectedCourses.length})</label>
-                                                        <div className="flex flex-wrap gap-2 p-3 bg-white/[0.02] border border-white/5 rounded-xl min-h-[100px]">
-                                                            {registerData.selectedCourses.length > 0 ? registerData.selectedCourses.map(id => (
-                                                                <div 
-                                                                    key={id}
-                                                                    className="flex items-center gap-2 px-3 py-1.5 bg-primary/20 border border-primary/30 rounded-lg text-[11px] text-white animate-in zoom-in duration-200"
-                                                                >
-                                                                    <span className="font-bold truncate max-w-[150px]">{getCourseTitle(id)}</span>
-                                                                    <button 
-                                                                        type="button"
-                                                                        onClick={() => removeCourse(id)}
-                                                                        className="hover:text-red-400 transition-colors"
-                                                                    >
-                                                                        <X size={14} />
-                                                                    </button>
-                                                                </div>
-                                                            )) : (
-                                                                <p className="text-[10px] text-white/20 italic p-2">No courses selected yet. Use the dropdowns above to add.</p>
+                                                {/* University Courses Dropdown */}
+                                                <div>
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 flex items-center">
+                                                        <School size={12} className="mr-1.5 text-emerald-400" /> Select University / Partner Courses
+                                                    </label>
+                                                    <div className="relative">
+                                                        <select
+                                                            className="w-full pl-3 pr-8 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-[11px] appearance-none focus:border-primary outline-none cursor-pointer focus:ring-1 focus:ring-primary/30 transition-all"
+                                                            onChange={(e) => toggleCourseSelection(e.target.value)}
+                                                            value=""
+                                                        >
+                                                            <option value="" className="bg-[#0B0F1A]">-- Choose from Other Providers --</option>
+                                                            {universityCoursesList.length > 0 && (
+                                                                <optgroup label="🏫 Universities">
+                                                                    {universityCoursesList.map(c => (
+                                                                        <option key={c.id || c._id} value={c.id || c._id} className="bg-[#0B0F1A]">
+                                                                            {c.title} ({c.universityName || 'University'})
+                                                                        </option>
+                                                                    ))}
+                                                                </optgroup>
                                                             )}
-                                                        </div>
+                                                            {otherPartnerCourses.length > 0 && (
+                                                                <optgroup label="🤝 Other Partners">
+                                                                    {otherPartnerCourses.map(c => (
+                                                                        <option key={c.id || c._id} value={c.id || c._id} className="bg-[#0B0F1A]">
+                                                                            {c.title} ({c.instructorName || 'Partner'})
+                                                                        </option>
+                                                                    ))}
+                                                                </optgroup>
+                                                            )}
+                                                        </select>
+                                                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+                                                    </div>
+                                                </div>
+
+                                                {/* Selected Courses Display */}
+                                                <div className="sm:col-span-2">
+                                                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Selected Assignments ({registerData.selectedCourses.length})</label>
+                                                    <div className="flex flex-wrap gap-1.5 p-2 bg-white/[0.02] border border-white/5 rounded-xl min-h-[50px]">
+                                                        {registerData.selectedCourses.length > 0 ? registerData.selectedCourses.map(id => (
+                                                            <div 
+                                                                key={id}
+                                                                className="flex items-center gap-1.5 px-2 py-0.5 bg-primary/20 border border-primary/30 rounded-lg text-[9px] text-white animate-in zoom-in duration-200"
+                                                            >
+                                                                <span className="font-bold truncate max-w-[180px]">{getCourseTitle(id)}</span>
+                                                                <button 
+                                                                    type="button"
+                                                                    onClick={() => removeCourse(id)}
+                                                                    className="hover:text-red-400 transition-colors"
+                                                                >
+                                                                    <X size={10} />
+                                                                </button>
+                                                            </div>
+                                                        )) : (
+                                                            <p className="text-[9px] text-white/20 italic p-0.5">No courses selected yet.</p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div className="pt-8 border-t border-white/10 flex justify-end gap-4">
-                                            <button onClick={() => setShowRegisterModal(false)} type="button" className="px-8 py-3 text-sm font-bold text-white/30 hover:text-white">Cancel</button>
-                                            <ModernButton type="submit" className="px-10" disabled={loading}>Register & Enroll</ModernButton>
+                                        <div className="pt-4 border-t border-white/10 flex justify-end gap-3">
+                                            <button 
+                                                onClick={() => setShowRegisterModal(false)} 
+                                                type="button" 
+                                                className="px-5 py-2 text-xs font-bold text-white/40 hover:text-white transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <ModernButton type="submit" className="px-6 py-2 text-xs font-bold" disabled={loading}>
+                                                Register & Enroll
+                                            </ModernButton>
                                         </div>
                                     </form>
                                 </GlassCard>
@@ -600,7 +682,14 @@ const PartnerDashboard = () => {
                                         </div>
                                         <div className="flex items-center gap-6">
                                             <div className="text-right">
-                                                <p className="text-xs font-bold text-white">{s.enrollments_count || 0} Courses</p>
+                                                <p className="text-xs font-bold text-white">
+                                                    {Array.isArray(s.enrollments) ? s.enrollments.length : 0} Courses
+                                                </p>
+                                                {Array.isArray(s.enrollments) && s.enrollments.length > 0 && (
+                                                    <p className="text-[9px] text-white/30 max-w-[200px] truncate text-right">
+                                                        {s.enrollments.map(e => e.course_title).filter(Boolean).join(', ')}
+                                                    </p>
+                                                )}
                                                 <p className="text-[10px] text-emerald-400">₹{s.discountSaved || 0} saved</p>
                                             </div>
                                             <div className="flex gap-2">
@@ -966,6 +1055,66 @@ const PartnerDashboard = () => {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Payout Request Modal */}
+            {showPayoutModal && (
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-300">
+                    <GlassCard className="w-full max-w-md shadow-2xl border-primary/20 bg-[#0B0F1A] p-6 text-left">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
+                                    <Wallet size={20} />
+                                </div>
+                                <h3 className="text-lg font-bold text-white font-poppins">Request Payout</h3>
+                            </div>
+                            <button onClick={() => setShowPayoutModal(false)} className="text-white/30 hover:text-white transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={submitPayoutRequest} className="space-y-5">
+                            <div>
+                                <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mb-1.5">
+                                    <span className="text-white/40">Amount to Withdraw</span>
+                                    <span className="text-amber-400 cursor-pointer hover:underline animate-pulse" onClick={() => setPayoutAmount(stats.totalEarnings || '')}>
+                                        Available: ₹{stats.totalEarnings?.toLocaleString()}
+                                    </span>
+                                </div>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 text-sm font-bold">₹</span>
+                                    <input
+                                        type="number"
+                                        required
+                                        min="1"
+                                        max={stats.totalEarnings}
+                                        step="any"
+                                        className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                                        value={payoutAmount}
+                                        onChange={(e) => setPayoutAmount(e.target.value)}
+                                        placeholder="Enter amount"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-white/5 flex justify-end gap-3">
+                                <button 
+                                    onClick={() => setShowPayoutModal(false)} 
+                                    type="button" 
+                                    className="px-4 py-2 text-xs font-bold text-white/40 hover:text-white transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <ModernButton 
+                                    type="submit" 
+                                    className="px-6 py-2 text-xs font-bold"
+                                >
+                                    Submit Request
+                                </ModernButton>
+                            </div>
+                        </form>
+                    </GlassCard>
+                </div>
+            )}
         </div>
     );
 };

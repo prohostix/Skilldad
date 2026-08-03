@@ -416,19 +416,19 @@ const UniversityDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                     >
-                        <GlassCard className={`p-4 sm:p-6 border-b-2 ${stat.border} group hover:scale-[1.02] transition-all duration-300`}>
+                        <GlassCard className={`p-3 sm:p-4 border-b-2 ${stat.border} group hover:scale-[1.02] transition-all duration-300`}>
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-1">{stat.label}</p>
-                                    <div className="text-3xl font-black text-white">
+                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">{stat.label}</p>
+                                    <div className="text-2xl font-black text-white">
                                         <CountingNumber value={parseInt(stat.value) || 0} suffix={stat.value.toString().includes('%') ? '%' : ''} />
                                     </div>
                                 </div>
-                                <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color} ${stat.text} shadow-inner`}>
-                                    <stat.icon size={24} />
+                                <div className={`p-2 rounded-xl bg-gradient-to-br ${stat.color} ${stat.text} shadow-inner`}>
+                                    <stat.icon size={20} />
                                 </div>
                             </div>
-                            <div className="mt-4 flex items-center gap-2">
+                            <div className="mt-2.5 flex items-center gap-2">
                                 <span className="text-[10px] font-bold text-emerald-400">+12%</span>
                                 <span className="text-[10px] text-white/20 uppercase tracking-tighter">vs last month</span>
                             </div>

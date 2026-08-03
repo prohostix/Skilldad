@@ -9,6 +9,8 @@ import { toast } from 'react-hot-toast';
 const CommissionWallet = () => {
     const [payouts, setPayouts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [screenshotFile, setScreenshotFile] = useState(null);
+    const [screenshotPreview, setScreenshotPreview] = useState(null);
 
     // Form state
     const [studentCount, setStudentCount] = useState('');
@@ -69,19 +71,28 @@ const CommissionWallet = () => {
             return;
         }
 
-        const payoutDetails = {
-            amount: finalAmount,
-            notes: studentCount && feePerStudent
-                ? `Commission for ${studentCount} students @ ₹${feePerStudent} each. Rate: ${commissionRate}%`
-                : `Manual commission claim: ₹${finalAmount}`
-        };
+        const formData = new FormData();
+        formData.append('amount', finalAmount);
+        formData.append('notes', studentCount && feePerStudent
+            ? `Commission for ${studentCount} students @ ₹${feePerStudent} each. Rate: ${commissionRate}%`
+            : `Manual commission claim: ₹${finalAmount}`);
+        if (screenshotFile) {
+            formData.append('screenshot', screenshotFile);
+        }
 
         try {
-            await axios.post('/api/partner/payout', payoutDetails, config);
+            await axios.post('/api/partner/payout', formData, {
+                headers: { 
+                    Authorization: `Bearer ${userInfo?.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             toast.success('Commission payout requested successfully!');
             setStudentCount('');
             setFeePerStudent('');
             setManualAmount('');
+            setScreenshotFile(null);
+            setScreenshotPreview(null);
             fetchPayouts();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to submit request');
@@ -180,6 +191,49 @@ const CommissionWallet = () => {
                              </div>
                         </div>
 
+                        {/* Payment Screenshot Upload */}
+                        <div>
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                Payment Proof Screenshot <span className="text-gray-600 normal-case font-normal">(optional but recommended)</span>
+                            </label>
+                            <div
+                                className="relative border-2 border-dashed border-white/10 rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors bg-white/5"
+                                onClick={() => document.getElementById('payoutScreenshot').click()}
+                            >
+                                <input
+                                    id="payoutScreenshot"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setScreenshotFile(file);
+                                            setScreenshotPreview(URL.createObjectURL(file));
+                                        }
+                                    }}
+                                />
+                                {screenshotPreview ? (
+                                    <div className="flex items-center gap-3">
+                                        <img src={screenshotPreview} alt="Preview" className="h-14 w-14 object-cover rounded-lg border border-white/10" />
+                                        <div>
+                                            <p className="text-sm text-white font-medium">{screenshotFile?.name}</p>
+                                            <button
+                                                type="button"
+                                                onClick={(ev) => { ev.stopPropagation(); setScreenshotFile(null); setScreenshotPreview(null); }}
+                                                className="text-xs text-red-400 hover:text-red-300 mt-1"
+                                            >Remove</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-2">
+                                        <p className="text-sm text-gray-500">Click to upload bank transfer / UPI receipt screenshot</p>
+                                        <p className="text-xs text-gray-600 mt-1">PNG, JPG up to 10MB</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Manual Amount Override */}
                         <div>
                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
@@ -196,8 +250,8 @@ const CommissionWallet = () => {
                                     onChange={e => setManualAmount(e.target.value)}
                                 />
                             </div>
-
                         </div>
+
 
                         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>

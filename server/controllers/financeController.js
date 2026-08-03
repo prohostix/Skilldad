@@ -302,12 +302,13 @@ const getEnrollmentSummaries = async (req, res) => {
                 p.profile as partner_profile,
                 COUNT(DISTINCT e.id) as total_enrollments,
                 COALESCE(SUM(t.final_amount), 0) as total_amount,
-                COUNT(DISTINCT CASE WHEN t.status = 'pending' THEN t.id END) as pending_payments
+                COUNT(DISTINCT CASE WHEN t.status = 'pending' THEN t.id END) as pending_payments,
+                COUNT(DISTINCT CASE WHEN t.status = 'success' THEN t.id END) as approved_payments
             FROM users p
-            JOIN users s ON s.registered_by = p.id
+            JOIN users s ON (s.university_id = p.id OR s.registered_by = p.id)
             JOIN enrollments e ON e.student_id = s.id
             LEFT JOIN transactions t ON (e.student_id = t.student_id AND e.course_id = t.course_id)
-            WHERE p.role = 'partner'
+            WHERE p.role IN ('partner', 'university')
             GROUP BY p.id, p.name, p.profile
             HAVING COUNT(DISTINCT e.id) > 0
         `;
@@ -324,7 +325,8 @@ const getEnrollmentSummaries = async (req, res) => {
                 center: profile.partnerName || r.partner_name,
                 totalEnrollments: parseInt(r.total_enrollments),
                 totalAmount: parseFloat(r.total_amount) || 0,
-                pendingPayments: parseInt(r.pending_payments)
+                pendingPayments: parseInt(r.pending_payments),
+                approvedPayments: parseInt(r.approved_payments)
             };
         }));
     } catch (error) {

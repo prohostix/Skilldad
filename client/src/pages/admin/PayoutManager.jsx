@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { DollarSign, CheckCircle, XCircle, Eye, Download } from 'lucide-react';
+import { DollarSign, CheckCircle, XCircle, Eye, Download, Search, Filter } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -10,6 +10,9 @@ const PayoutManager = () => {
     const [payouts, setPayouts] = useState([]);
     const [selectedPayout, setSelectedPayout] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
     const { showToast } = useToast();
 
     const fetchPayouts = async () => {
@@ -54,15 +57,34 @@ const PayoutManager = () => {
         }
     };
 
+    const filteredPayouts = payouts
+        .filter(payout => {
+            const matchesSearch = !searchTerm || payout.partner?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesStatus = statusFilter === 'all' || payout.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        })
+        .sort((a, b) => {
+            if (sortBy === 'newest') {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            } else if (sortBy === 'oldest') {
+                return new Date(a.createdAt) - new Date(b.createdAt);
+            } else if (sortBy === 'amount-high') {
+                return b.amount - a.amount;
+            } else if (sortBy === 'amount-low') {
+                return a.amount - b.amount;
+            }
+            return 0;
+        });
+
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in duration-500 pb-20">
             <div className="flex justify-between items-center">
                 <div>
                     <DashboardHeading title="Payout Management" />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <GlassCard>
                     <div className="flex items-center space-x-4">
                         <div className="p-3 bg-primary/10 text-primary rounded-2xl">
@@ -115,10 +137,46 @@ const PayoutManager = () => {
                 </GlassCard>
             </div>
 
+            {/* Filters Bar */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="relative flex-1 w-full">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                    <input
+                        type="text"
+                        placeholder="Search by partner name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:border-primary transition-all text-sm font-inter"
+                    />
+                </div>
+                <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full md:w-auto">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full md:w-auto bg-[#0B0F1A] border border-white/10 rounded-xl text-xs font-semibold text-white px-4 py-3.5 focus:outline-none focus:border-primary transition-all cursor-pointer min-w-[140px]"
+                    >
+                        <option value="all" className="bg-[#0D121F]">All Status</option>
+                        <option value="pending" className="bg-[#0D121F]">Pending</option>
+                        <option value="approved" className="bg-[#0D121F]">Approved</option>
+                        <option value="rejected" className="bg-[#0D121F]">Rejected</option>
+                    </select>
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="w-full md:w-auto bg-[#0B0F1A] border border-white/10 rounded-xl text-xs font-semibold text-white px-4 py-3.5 focus:outline-none focus:border-primary transition-all cursor-pointer min-w-[150px]"
+                    >
+                        <option value="newest" className="bg-[#0D121F]">Newest First</option>
+                        <option value="oldest" className="bg-[#0D121F]">Oldest First</option>
+                        <option value="amount-high" className="bg-[#0D121F]">Amount: High to Low</option>
+                        <option value="amount-low" className="bg-[#0D121F]">Amount: Low to High</option>
+                    </select>
+                </div>
+            </div>
+
             <GlassCard className="!p-0">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-white/5 text-white/70 text-xs uppercase">
+                        <thead className="bg-white/5 text-white/70 text-xs uppercase border-b border-white/10">
                             <tr>
                                 <th className="px-6 py-4">Partner</th>
                                 <th className="px-6 py-4">Amount</th>
@@ -129,7 +187,7 @@ const PayoutManager = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/10">
-                            {payouts.map((payout) => (
+                            {filteredPayouts.map((payout) => (
                                 <tr key={payout._id} className="hover:bg-white/5">
                                     <td className="px-6 py-4 text-white font-semibold">
                                         {payout.partner?.name || 'N/A'}
@@ -235,14 +293,24 @@ const PayoutManager = () => {
                                 </div>
                             </div>
                             <div className="bg-white/5 rounded-xl p-4">
-                                <img
-                                    src={selectedPayout.screenshotUrl || 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?q=80&w=1000&auto=format&fit=crop'}
-                                    alt="Payout Screenshot"
-                                    className="w-full h-auto max-h-[500px] object-contain rounded-lg mx-auto"
-                                    onError={(e) => {
-                                        e.target.src = 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?q=80&w=1000&auto=format&fit=crop';
-                                    }}
-                                />
+                                {selectedPayout.screenshotUrl ? (
+                                    <img
+                                        src={`/${selectedPayout.screenshotUrl}`}
+                                        alt="Payout Screenshot"
+                                        className="w-full h-auto max-h-[500px] object-contain rounded-lg mx-auto"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
+                                        }}
+                                    />
+                                ) : null}
+                                <div
+                                    style={{ display: selectedPayout.screenshotUrl ? 'none' : 'flex' }}
+                                    className="flex-col items-center justify-center py-12 text-white/30"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    <p className="text-sm">No screenshot attached</p>
+                                </div>
                             </div>
                             {selectedPayout.status === 'pending' && (
                                 <div className="flex gap-3">

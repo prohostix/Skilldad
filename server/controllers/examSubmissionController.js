@@ -131,12 +131,27 @@ const submitExam = asyncHandler(async (req, res) => {
     const isMCQ = question.question_type === 'mcq' || question.question_type === 'online-mcq';
 
     if (isMCQ) {
-      const options = typeof question.options === 'string' ? JSON.parse(question.options) : (question.options || []);
+      let options = [];
+      try {
+        options = typeof question.options === 'string' ? JSON.parse(question.options) : (question.options || []);
+      } catch (e) {
+        options = question.options || [];
+      }
+
       const selectedIdx = ans.selectedOption !== undefined ? ans.selectedOption : ans.answer;
       
-      const correctOptionIndex = options.findIndex(opt => opt.isCorrect === true || opt.isCorrect === 'true' || opt.isCorrect === 1);
-      const studentSelectedIndex = (selectedIdx !== undefined && selectedIdx !== null) ? Number(selectedIdx) : -1;
-      const isCorrect = studentSelectedIndex !== -1 && studentSelectedIndex === correctOptionIndex;
+      // Support flexible boolean checking for correct option (isCorrect, correct, is_correct)
+      const correctOptionIndex = options.findIndex(opt => {
+        if (typeof opt === 'object' && opt !== null) {
+          return opt.isCorrect === true || opt.isCorrect === 'true' || opt.isCorrect === 1 ||
+                 opt.correct === true || opt.correct === 'true' || opt.correct === 1 ||
+                 opt.is_correct === true || opt.is_correct === 'true' || opt.is_correct === 1;
+        }
+        return false;
+      });
+
+      const studentSelectedIndex = (selectedIdx !== undefined && selectedIdx !== null && selectedIdx !== '') ? Number(selectedIdx) : -1;
+      const isCorrect = studentSelectedIndex !== -1 && correctOptionIndex !== -1 && studentSelectedIndex === correctOptionIndex;
 
       let marksAwarded = 0;
       if (isCorrect) {
@@ -165,10 +180,14 @@ const submitExam = asyncHandler(async (req, res) => {
     }
   });
 
-  // Calculate percentage and pass status
-  const totalExamMarks = Number(submission.total_marks) || 100;
+  // Calculate total exam weight dynamically if total_marks is unset or invalid
+  const totalQuestionsWeight = questions.reduce((sum, q) => sum + (Number(q.marks) || 1), 0);
+  const totalExamMarks = Number(submission.total_marks) > 0 ? Number(submission.total_marks) : (totalQuestionsWeight || 1);
   const passingScore = Number(submission.passing_score) || 40;
-  const percentage = (totalObtainedMarks / totalExamMarks) * 100;
+  
+  // Percentage based on total available question marks or total_marks
+  const maxPossibleMarks = Math.max(totalExamMarks, totalQuestionsWeight);
+  const percentage = maxPossibleMarks > 0 ? Math.max(0, (totalObtainedMarks / maxPossibleMarks) * 100) : 0;
   const passed = percentage >= passingScore;
 
   // 4. Update status and timestamps

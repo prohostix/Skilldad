@@ -147,6 +147,9 @@ const getGlobalStats = async (req, res) => {
         console.log('[getGlobalStats] Querying pendingEnquiryCount...');
         const pendingEnquiryCount = await query("SELECT COUNT(*) FROM enquiries WHERE status = 'new' OR status IS NULL").catch(e => { console.error('pendingEnquiryCount Error:', e.message); return { rows: [{ count: 0 }] }; });
 
+        console.log('[getGlobalStats] Querying pendingPayoutsCount...');
+        const pendingPayoutsCount = await query("SELECT COUNT(*) FROM payouts WHERE status = 'pending'").catch(e => { console.error('pendingPayoutsCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+
         console.log('[getGlobalStats] Querying dbSizeRes...');
         const dbSizeRes = await query("SELECT pg_database_size(current_database()) as size").catch(e => { console.error('dbSizeRes Error (falling back to 0):', e.message); return { rows: [{ size: 0 }] }; });
         
@@ -218,6 +221,7 @@ const getGlobalStats = async (req, res) => {
             totalTickets: parseInt(ticketCount.rows[0].count),
             totalApplications: parseInt(careerAppCount.rows[0].count),
             pendingEnquiries: parseInt(pendingEnquiryCount.rows[0].count),
+            pendingPayouts: parseInt(pendingPayoutsCount.rows[0].count),
             totalRevenue: totalRevenue,
             dbSize: `${dbSizeMB} MB`,
             chartData: chartRes.rows,
@@ -2160,7 +2164,13 @@ const getAllPayouts = async (req, res) => {
             JOIN users u ON p.partner_id = u.id
             ORDER BY p.created_at DESC
         `);
-        res.json(payoutRes.rows);
+        const rows = payoutRes.rows.map(r => ({
+            ...r,
+            screenshotUrl: r.screenshot_url || null,
+            createdAt: r.created_at,
+            partner: { name: r.partner_name, email: r.partner_email }
+        }));
+        res.json(rows);
     } catch (error) {
         console.error('[getAllPayouts] Error:', error);
         res.status(500).json({ message: error.message });

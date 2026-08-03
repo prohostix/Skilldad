@@ -20,9 +20,11 @@ import {
     Flag,
     X,
     LifeBuoy,
-    Timer
+    Timer,
+    Send,
+    HelpCircle
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import axios from 'axios';
@@ -40,6 +42,7 @@ const Exams = () => {
     const [timeRemaining, setTimeRemaining] = useState(0);
     const [examStarted, setExamStarted] = useState(false);
     const [flaggedQuestions, setFlaggedQuestions] = useState(new Set());
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
 
     // Mock exam data
     const mockExams = [
@@ -729,9 +732,7 @@ const Exams = () => {
                                     </ModernButton>
                                 ) : (
                                     <ModernButton
-                                        onClick={() => {
-                                            if (window.confirm('Final submission?')) handleSubmitExam();
-                                        }}
+                                        onClick={() => setShowSubmitModal(true)}
                                         className="!bg-emerald-600 !text-white !px-10 !h-12 !rounded-xl shadow-lg shadow-emerald-600/20"
                                     >
                                         Review & Finish <Activity size={18} className="ml-2" />
@@ -1011,6 +1012,82 @@ const Exams = () => {
                     )}
                 </div>
             )}
+
+            {/* Professional Final Exam Submission Modal */}
+            <AnimatePresence>
+                {showSubmitModal && activeExam && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.92, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', damping: 24, stiffness: 300 }}
+                            className="w-full max-w-md bg-[#0F1420] border border-white/10 rounded-2xl shadow-2xl overflow-hidden text-left"
+                        >
+                            {/* Emerald top accent bar */}
+                            <div className="h-1.5 w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500" />
+
+                            <div className="p-6">
+                                <div className="flex items-start gap-4 mb-4">
+                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                        <Send size={22} className="text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-white font-poppins">Ready to Submit?</h3>
+                                        <p className="text-xs text-white/50 mt-0.5">Please review your exam progress before finalizing</p>
+                                    </div>
+                                </div>
+
+                                {/* Summary Stats Box */}
+                                <div className="grid grid-cols-3 gap-2 p-3 bg-white/5 border border-white/5 rounded-xl my-5 text-center">
+                                    <div className="p-2">
+                                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider">Total</p>
+                                        <p className="text-lg font-bold text-white mt-0.5">{activeExam.questions?.length || 0}</p>
+                                    </div>
+                                    <div className="p-2 border-x border-white/10">
+                                        <p className="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">Answered</p>
+                                        <p className="text-lg font-bold text-emerald-400 mt-0.5">
+                                            {activeExam.questions?.filter(q => answers[q._id || q.id] !== undefined).length || 0}
+                                        </p>
+                                    </div>
+                                    <div className="p-2">
+                                        <p className="text-[10px] text-amber-400 uppercase font-bold tracking-wider">Flagged</p>
+                                        <p className="text-lg font-bold text-amber-400 mt-0.5">{flaggedQuestions.size}</p>
+                                    </div>
+                                </div>
+
+                                <p className="text-xs text-white/60 leading-relaxed mb-6">
+                                    Once submitted, your answers will be locked and sent for evaluation. You will not be able to modify your choices.
+                                </p>
+
+                                {/* Action Buttons */}
+                                <div className="flex items-center justify-end gap-3">
+                                    <button
+                                        onClick={() => setShowSubmitModal(false)}
+                                        className="px-5 py-2.5 text-xs font-bold text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+                                    >
+                                        Return to Exam
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowSubmitModal(false);
+                                            handleSubmitExam();
+                                        }}
+                                        className="px-6 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl shadow-lg shadow-emerald-900/30 transition-all active:scale-95 flex items-center gap-2"
+                                    >
+                                        <CheckCircle size={15} /> Confirm & Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

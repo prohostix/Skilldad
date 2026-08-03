@@ -211,52 +211,23 @@ const getPayoutHistory = async (req, res) => {
 const requestPayout = async (req, res) => {
     const { amount, notes } = req.body;
     const partnerId = req.user.id || req.user._id;
+    const screenshotUrl = req.file ? `uploads/${req.file.filename}` : null;
 
     try {
-        console.log(`[requestPayout] Request from ${partnerId}:`, { amount, notes });
+        console.log(`[requestPayout] Request from ${partnerId}:`, { amount, notes, screenshotUrl });
 
         if (!amount || Number(amount) <= 0) {
             console.warn(`[requestPayout] Invalid amount: ${amount}`);
             return res.status(400).json({ message: `Invalid amount received: ${amount}` });
         }
 
-        // Calculate current withdrawable balance
-        const userRes = await query('SELECT discount_rate FROM users WHERE id = $1', [partnerId]);
-        const commissionRate = (parseFloat(userRes.rows[0]?.discount_rate) || 15) / 100;
-
-        const earningsRes = await query(`
-            SELECT SUM(CAST(c.price AS NUMERIC) * $2) as total_earned
-            FROM users u
-            JOIN enrollments e ON u.id = e.student_id
-            JOIN courses c ON e.course_id = c.id
-            WHERE (u.registered_by = $1 OR u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1))
-            AND u.role = 'student'
-        `, [partnerId, commissionRate]);
-
-        const lifetimeEarnings = Math.round(parseFloat(earningsRes.rows[0]?.total_earned || 0));
-
-        const payoutRes = await query(`
-            SELECT SUM(CAST(amount AS NUMERIC)) as total_payouts
-            FROM payouts
-            WHERE partner_id = $1 AND status != 'rejected'
-        `, [partnerId]);
-
-        const totalPayouts = Math.round(parseFloat(payoutRes.rows[0]?.total_payouts || 0));
-        const withdrawableBalance = Math.max(0, lifetimeEarnings - totalPayouts);
-
-        if (amount > withdrawableBalance) {
-            return res.status(400).json({
-                message: `Insufficient balance. Max withdrawable: ₹${withdrawableBalance.toLocaleString()}`
-            });
-        }
-
         const id = `payout_${Date.now()}`;
         console.log(`[requestPayout] Creating payout record: ${id}`);
         
         await query(`
-            INSERT INTO payouts (id, partner_id, amount, status, notes, created_at, updated_at)
-            VALUES ($1, $2, $3, 'pending', $4, NOW(), NOW())
-        `, [id, partnerId, amount, notes || 'Payout request from dashboard']);
+            INSERT INTO payouts (id, partner_id, amount, status, notes, screenshot_url, created_at, updated_at)
+            VALUES ($1, $2, $3, 'pending', $4, $5, NOW(), NOW())
+        `, [id, partnerId, amount, notes || 'Payout request from dashboard', screenshotUrl]);
 
         console.log(`[requestPayout] Success: ${id}`);
         res.status(201).json({ success: true, message: 'Payout request submitted successfully' });

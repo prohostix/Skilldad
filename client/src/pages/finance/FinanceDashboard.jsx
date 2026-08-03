@@ -623,7 +623,7 @@ const FinanceDashboard = () => {
 
             {/* Compact Stats Grid - Only show on main dashboard */}
             {!isPayoutsPage && !isReportsPage && (
-                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="flex flex-wrap gap-3 w-full">
                     {[
                         { label: 'Revenue', val: `₹${stats.totalRevenue?.toLocaleString()}`, icon: DollarSign, color: 'emerald', trend: '+22.5%' },
                         { label: 'Pending', val: stats.pendingPaymentsCount, icon: Clock, color: 'amber', trend: 'Active' },
@@ -632,23 +632,22 @@ const FinanceDashboard = () => {
                     ].map((stat, i) => (
                         <motion.div
                             key={i}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="flex-1 min-w-[200px] sm:min-w-[220px]"
                         >
-                            <GlassCard className="group hover:border-white/10 transition-all relative overflow-hidden h-full p-4 bg-slate-900/10">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className={`p-2 bg-${stat.color}-500/10 text-${stat.color === 'emerald' ? 'emerald-400' : stat.color === 'amber' ? 'amber-400' : stat.color === 'primary' ? 'primary' : 'purple-400'} rounded-lg group-hover:bg-${stat.color}-500/20 transition-colors`}>
-                                        <stat.icon size={18} />
+                            <GlassCard className="py-1.5 px-3 bg-slate-900/10 flex items-center justify-between gap-2 border border-white/5 rounded-md hover:border-white/10 transition-all w-full h-full">
+                                <div className="flex items-center gap-2">
+                                    <div className={`p-1 bg-${stat.color}-500/10 text-${stat.color === 'emerald' ? 'emerald-400' : stat.color === 'amber' ? 'amber-400' : stat.color === 'primary' ? 'primary' : 'purple-400'} rounded shrink-0`}>
+                                        <stat.icon size={14} />
                                     </div>
-                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded bg-${stat.color}-500/10 text-${stat.color}-400 border border-${stat.color}-500/20 uppercase tracking-tighter`}>
-                                        {stat.trend}
-                                    </span>
+                                    <div className="flex flex-col">
+                                        <span className="text-slate-500 uppercase font-bold tracking-wider text-[9px] leading-tight">{stat.label}</span>
+                                        <span className="font-extrabold text-white text-[13px] mt-0.5">{stat.val}</span>
+                                    </div>
                                 </div>
-                                <div className="text-left space-y-0.5">
-                                    <div className="text-slate-500 text-[10px] font-semibold uppercase tracking-widest">{stat.label}</div>
-                                    <div className="text-xl font-bold text-white tracking-tight">{stat.val}</div>
-                                </div>
+                                <span className="text-[8px] font-bold text-slate-400 border border-white/5 px-1.5 py-0.5 rounded shrink-0 bg-white/5">{stat.trend}</span>
                             </GlassCard>
                         </motion.div>
                     ))}

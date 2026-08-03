@@ -94,14 +94,21 @@ const notifyEnrolledStudents = async (session, title, message) => {
             }
 
             for (const student of studentsRes.rows) {
-                const phone = student.profile?.phone || null;
+                let phone = student.phone;
+                if (!phone && student.profile) {
+                    let p = student.profile;
+                    if (typeof p === 'string') {
+                        try { p = JSON.parse(p); } catch(e) { p = {}; }
+                    }
+                    phone = p.phone || p.phoneNumber || p.contact;
+                }
                 notificationService.send(
                     { ...student, phone }, 
                     'exam_scheduled', 
                     { 
                         examTitle: title.replace('📝', '').trim(), 
                         courseTitle: courseTitle,
-                        scheduledDate: new Date(session.scheduled_start).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })
+                        scheduledDate: session.scheduled_start
                     }
                 ).catch(err => console.error(`[ExamNotify] Failed for student ${student.id}:`, err.message));
             }
