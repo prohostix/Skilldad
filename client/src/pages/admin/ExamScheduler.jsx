@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { 
-    Calendar, Clock, Trophy, FileText, Search, X, 
+    Calendar, Clock, Trophy, FileText, X,
     BookOpen, GraduationCap, Info, Eye, CheckCircle2, AlertCircle 
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
@@ -10,7 +10,6 @@ import { useToast } from '../../context/ToastContext';
 
 const ExamScheduler = () => {
     const [exams, setExams] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [selectedType, setSelectedType] = useState('all');
     const [selectedExam, setSelectedExam] = useState(null);
@@ -60,10 +59,6 @@ const ExamScheduler = () => {
     // Filter Logic
     const filteredExams = useMemo(() => {
         return exams.filter(exam => {
-            const matchesSearch = exam.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                exam.course?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (exam.university?.profile?.universityName || exam.university?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
-            
             // Status determination
             const now = new Date();
             const start = new Date(exam.scheduledStartTime || exam.scheduled_start);
@@ -81,9 +76,9 @@ const ExamScheduler = () => {
             const matchesStatus = selectedStatus === 'all' || status === selectedStatus;
             const matchesType = selectedType === 'all' || exam.examType === selectedType;
 
-            return matchesSearch && matchesStatus && matchesType;
+            return matchesStatus && matchesType;
         });
-    }, [exams, searchQuery, selectedStatus, selectedType]);
+    }, [exams, selectedStatus, selectedType]);
 
     const getStatusBadge = (exam) => {
         const now = new Date();
@@ -179,20 +174,9 @@ const ExamScheduler = () => {
             {/* Filter Bar */}
             <GlassCard
                 className="!p-3"
-                style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px', alignItems: 'center', overflowX: 'auto' }}
+                style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px', alignItems: 'center' }}
             >
-                <div className="relative" style={{ flex: '1 1 auto', minWidth: '160px' }}>
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-white/30" />
-                    <input
-                        type="text"
-                        placeholder="Search exam, course, or university..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white placeholder-white/30 focus:border-primary/50 transition-all outline-none"
-                    />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px', flexShrink: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px' }}>
                     <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
