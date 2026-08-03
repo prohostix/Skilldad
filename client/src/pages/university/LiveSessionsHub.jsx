@@ -9,6 +9,7 @@ import {
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 
 /* ═══════════════════════════════════════════════════════════════
    Inline Toast (self-contained, no external context needed)
@@ -584,6 +585,7 @@ const LiveSessionsHub = () => {
     const [showModal, setShowModal] = useState(false);
     const [recordModalData, setRecordModalData] = useState(null);
     const [notifyingId, setNotifyingId] = useState(null);
+    const [sessionToEnd, setSessionToEnd] = useState(null);
     const [toasts, setToasts] = useState([]);
 
     /* ── Toast helpers ── */
@@ -693,9 +695,15 @@ const LiveSessionsHub = () => {
         window.open(link, '_blank');
     };
 
-    const handleEndSession = async (sessionId) => {
-        if (!window.confirm('Are you sure you want to end this live session for everyone?')) return;
-        
+    const handleEndSession = (sessionId) => {
+        setSessionToEnd(sessionId);
+    };
+
+    const confirmEndSession = async () => {
+        const sessionId = sessionToEnd;
+        setSessionToEnd(null);
+        if (!sessionId) return;
+
         try {
             const config = getAuthConfig();
             await axios.put(`/api/sessions/${sessionId}/end`, {}, config);
@@ -980,6 +988,17 @@ const LiveSessionsHub = () => {
                     }}
                 />
             )}
+
+            <ConfirmDialog
+                open={!!sessionToEnd}
+                title="End this live session?"
+                message="This will end the session for everyone currently in it. The recording will be processed afterward."
+                confirmLabel="End Session"
+                cancelLabel="Cancel"
+                danger
+                onConfirm={confirmEndSession}
+                onCancel={() => setSessionToEnd(null)}
+            />
         </>
     );
 };
