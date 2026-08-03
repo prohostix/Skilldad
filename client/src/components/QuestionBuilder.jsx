@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Edit2, Save, X, CheckCircle, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, X, CheckCircle, AlertCircle, AlertTriangle } from 'lucide-react';
 import GlassCard from './ui/GlassCard';
 import ModernButton from './ui/ModernButton';
 import axios from 'axios';
@@ -20,6 +20,7 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
     const [saving, setSaving] = useState(false);
     const [uploadingExcel, setUploadingExcel] = useState(false);
     const [excelFile, setExcelFile] = useState(null);
+    const [confirmDeleteModal, setConfirmDeleteModal] = useState({ open: false, index: null });
     const { showToast } = useToast();
 
     const fetchQuestions = useCallback(async () => {
@@ -130,16 +131,21 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
     };
 
     const handleDeleteQuestion = (index) => {
-        if (window.confirm('Are you sure you want to delete this question?')) {
-            const updatedQuestions = questions.filter((_, i) => i !== index);
-            // Update order for remaining questions
-            const reorderedQuestions = updatedQuestions.map((q, i) => ({
-                ...q,
-                order: i + 1
-            }));
-            setQuestions(reorderedQuestions);
-            showToast('Question deleted', 'success');
-        }
+        setConfirmDeleteModal({ open: true, index });
+    };
+
+    const confirmDeleteQuestion = () => {
+        const index = confirmDeleteModal.index;
+        setConfirmDeleteModal({ open: false, index: null });
+        if (index === null || index === undefined) return;
+        const updatedQuestions = questions.filter((_, i) => i !== index);
+        // Update order for remaining questions
+        const reorderedQuestions = updatedQuestions.map((q, i) => ({
+            ...q,
+            order: i + 1
+        }));
+        setQuestions(reorderedQuestions);
+        showToast('Question deleted', 'success');
     };
 
     const handleSaveAllQuestions = async () => {
@@ -632,6 +638,56 @@ const QuestionBuilder = ({ examId, onSuccess }) => {
                     </div>
                 </GlassCard>
             )}
+
+            {/* Professional Question Delete Confirmation Modal */}
+            <AnimatePresence>
+                {confirmDeleteModal.open && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.92, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', damping: 24, stiffness: 300 }}
+                            className="w-full max-w-sm bg-[#0D1117] border border-white/10 rounded-2xl shadow-2xl overflow-hidden text-left"
+                        >
+                            <div className="h-1 w-full bg-gradient-to-r from-red-500 to-amber-500" />
+                            <div className="p-6">
+                                <div className="flex items-start gap-3.5 mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                                        <AlertTriangle size={20} className="text-red-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white font-poppins">Delete Question</h3>
+                                        <p className="text-xs text-white/50 mt-0.5">This item will be removed from the draft</p>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-white/70 leading-relaxed mb-5 pl-1">
+                                    Are you sure you want to delete Question #{confirmDeleteModal.index !== null ? confirmDeleteModal.index + 1 : ''}?
+                                </p>
+                                <div className="flex items-center justify-end gap-2.5">
+                                    <button
+                                        onClick={() => setConfirmDeleteModal({ open: false, index: null })}
+                                        className="px-4 py-2 text-xs font-bold text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmDeleteQuestion}
+                                        className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 rounded-xl shadow-lg shadow-red-900/30 transition-all active:scale-95 flex items-center gap-1.5"
+                                    >
+                                        <Trash2 size={14} /> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
