@@ -956,306 +956,193 @@ const StudentManagement = () => {
                         </form>
                     </motion.div>
                 </div>
-            )}
-
-            {/* Student Detail Modal */}
+            )}            {/* Student Detail Modal */}
             {selectedStudent && (
                 <div className="fixed inset-0 bg-black/80 flex items-start justify-center z-[99999] p-4 pt-20 overflow-y-auto">
-                    <div className="bg-slate-900 rounded-2xl p-6 max-w-4xl w-full relative z-[100000] max-h-[90vh] overflow-y-auto border border-white/10">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-semibold text-white">Student Details</h2>
+                    <div className="bg-[#0F1424]/95 backdrop-blur-md rounded-2xl p-6 md:p-8 max-w-4xl w-full relative z-[100000] max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
+                        {/* Header */}
+                        <div className="flex justify-between items-center pb-5 border-b border-white/5 mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
+                                    <Users size={22} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">Student Profile</h2>
+                                    <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Management Hub</p>
+                                </div>
+                            </div>
                             <div className="flex items-center space-x-2">
                                 {!editMode && (
                                     <button
                                         onClick={handleEditStudent}
-                                        className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/20 text-primary border border-primary/30 rounded-xl hover:bg-primary/30 transition-all text-xs font-bold"
                                     >
-                                        <Edit size={18} />
+                                        <Edit size={14} />
+                                        <span>Edit Profile</span>
                                     </button>
                                 )}
                                 <button
                                     onClick={() => setSelectedStudent(null)}
-                                    className="p-2 text-gray-400 hover:text-white transition-colors"
+                                    className="p-1.5 bg-white/5 text-gray-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors border border-white/10"
                                 >
-                                    <X size={24} />
+                                    <X size={20} />
                                 </button>
                             </div>
                         </div>
 
                         <div className="space-y-6">
-                            {/* Personal Information */}
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-4">Personal Information</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Full Name</label>
-                                        {editMode ? (
-                                            <input
-                                                type="text"
-                                                value={editData.name || ''}
-                                                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                                                className="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                            />
-                                        ) : (
-                                            <p className="text-white mt-1">{selectedStudent.name}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Email</label>
-                                        {editMode ? (
-                                            <input
-                                                type="email"
-                                                value={editData.email || ''}
-                                                onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                                                className="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                            />
-                                        ) : (
-                                            <p className="text-white mt-1">{selectedStudent.email}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Phone Number</label>
-                                        {editMode ? (
-                                            <input
-                                                type="text"
-                                                value={editData.phone || ''}
-                                                onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                                                className="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                                placeholder="e.g. 919999999999"
-                                            />
-                                        ) : (
-                                            <p className="text-white mt-1">{selectedStudent.profile?.phone || 'No phone number'}</p>
-                                        )}
-                                    </div>
+                            {/* Personal Details & System Stats */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Left Card: Personal Information */}
+                                <GlassCard className="p-5 border border-white/5 flex flex-col gap-4 bg-white/5">
+                                    <h3 className="text-xs font-black text-primary uppercase tracking-widest border-b border-white/5 pb-2 mb-1">
+                                        Personal Information
+                                    </h3>
+                                    
+                                    <div className="flex flex-col gap-4">
+                                        <div>
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                                <Users size={12} className="text-white/30" />
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em]">Full Name</label>
+                                            </div>
+                                            {editMode ? (
+                                                <input
+                                                    type="text"
+                                                    value={editData.name || ''}
+                                                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                                />
+                                            ) : (
+                                                <p className="text-sm font-semibold text-white/95">{selectedStudent.name}</p>
+                                            )}
+                                        </div>
 
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Bio</label>
-                                        {editMode ? (
-                                            <textarea
-                                                value={editData.bio || ''}
-                                                onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-                                                rows="2"
-                                                className="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                            />
-                                        ) : (
-                                            <p className="text-white mt-1">{selectedStudent.bio || 'No bio'}</p>
-                                        )}
+                                        <div>
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                                <Mail size={12} className="text-white/30" />
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em]">Email Address</label>
+                                            </div>
+                                            {editMode ? (
+                                                <input
+                                                    type="email"
+                                                    value={editData.email || ''}
+                                                    onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                                />
+                                            ) : (
+                                                <a href={`mailto:${selectedStudent.email}`} className="text-sm font-semibold text-primary hover:underline">{selectedStudent.email}</a>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                                <Phone size={12} className="text-white/30" />
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em]">Phone Number</label>
+                                            </div>
+                                            {editMode ? (
+                                                <input
+                                                    type="text"
+                                                    value={editData.phone || ''}
+                                                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                                    placeholder="e.g. 919999999999"
+                                                />
+                                            ) : (
+                                                <p className="text-sm font-semibold text-white/95">{selectedStudent.profile?.phone || 'No phone number'}</p>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                                <BookOpen size={12} className="text-white/30" />
+                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em]">Bio Description</label>
+                                            </div>
+                                            {editMode ? (
+                                                <textarea
+                                                    value={editData.bio || ''}
+                                                    onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                                                    rows="2"
+                                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                                                />
+                                            ) : (
+                                                <p className="text-sm text-white/70 italic leading-relaxed">{selectedStudent.bio || 'No bio written'}</p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Status</label>
-                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full border ${
-                                                selectedStudent.isVerified
-                                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                                    : 'bg-rose-500/20 text-rose-400 border-rose-500/30'
-                                            }`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${selectedStudent.isVerified ? 'bg-emerald-400' : 'bg-rose-400'}`} />
-                                                {selectedStudent.isVerified ? 'Active' : 'Inactive'}
-                                            </span>
-                                            <button
-                                                onClick={() => handleToggleStudentStatus(selectedStudent)}
-                                                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
+                                </GlassCard>
+
+                                {/* Right Card: System Status & Wallet */}
+                                <GlassCard className="p-5 border border-white/5 flex flex-col gap-4 bg-white/5">
+                                    <h3 className="text-xs font-black text-primary uppercase tracking-widest border-b border-white/5 pb-2 mb-1">
+                                        System Meta & Status
+                                    </h3>
+
+                                    <div className="flex flex-col gap-4">
+                                        <div>
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em] mb-1.5 block">Account Status</label>
+                                            <div className="flex items-center gap-3 mt-1 flex-wrap">
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl border ${
                                                     selectedStudent.isVerified
-                                                        ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
-                                                        : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
-                                                }`}
-                                            >
-                                                {selectedStudent.isVerified ? 'Mark as Inactive' : 'Mark as Active'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Reward Wallet</label>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <div className="px-2 py-1 bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-black">
-                                                {rewardWallet.total} PTS
-                                            </div>
-                                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">Balance</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Institution / University</label>
-                                        <p className="text-white mt-1">{getUniversityName(selectedStudent)}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-gray-400 uppercase tracking-wider">Registered By</label>
-                                        {selectedStudent.registeredBy ? (
-                                            <div className="mt-1">
-                                                <p className="text-white font-medium">{selectedStudent.registeredBy.name}</p>
-                                                <p className="text-xs text-primary uppercase">{selectedStudent.registeredBy.role}</p>
-                                                <p className="text-xs text-gray-400">{selectedStudent.registeredBy.email}</p>
-                                                {selectedStudent.partnerCode && (
-                                                    <p className="text-xs text-amber-400 font-mono mt-1">Code: {selectedStudent.partnerCode}</p>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <p className="text-white mt-1 italic text-sm text-gray-400">Self-registered</p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Enrollments */}
-                            <div>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold text-white">Enrollments ({enrollments.length})</h3>
-                                    <button
-                                        onClick={handleOpenEnrollModal}
-                                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500/30 transition-colors"
-                                    >
-                                        <GraduationCap size={14} />
-                                        Enroll in Course
-                                    </button>
-                                </div>
-                                <div className="space-y-2">
-                                    {enrollments.map((enrollment) => (
-                                        <div key={enrollment._id} className="p-3 bg-white/5 rounded-lg border border-white/10">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-white font-medium truncate">{enrollment.course?.title || 'Unknown Course'}</p>
-                                                    {(enrollment.course?.universityName || enrollment.course?.instructor?.profile?.universityName || enrollment.course?.instructor?.name) && (
-                                                        <p className="text-[10px] font-black text-primary uppercase tracking-widest leading-none mt-1">
-                                                            {enrollment.course.universityName || enrollment.course.instructor?.profile?.universityName || enrollment.course.instructor?.name}
-                                                        </p>
-                                                    )}
-                                                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                                         <p className="text-xs text-gray-400">Progress: {enrollment.progress || 0}%</p>
-                                                         <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${
-                                                             enrollment.batchName || enrollment.batch_name
-                                                                 ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                                                                 : 'bg-white/5 text-gray-400 border-white/10'
-                                                         }`}>
-                                                             Batch: {enrollment.batchName || enrollment.batch_name || 'No Batch Assigned'}
-                                                         </span>
-                                                     </div>
-                                                </div>
-                                                <div className="flex items-center gap-2 ml-3">
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedEnrollmentForBatch(enrollment);
-                                                            setAssignBatchData({ 
-                                                                courseId: enrollment.course?._id, 
-                                                                batchId: enrollment.batchId || enrollment.batch_id || '' 
-                                                            });
-                                                            setShowAssignBatchModal(true);
-                                                            // Fetch batches for this course
-                                                            const fetchBatches = async () => {
-                                                                try {
-                                                                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                                                                    const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                                                                    const { data } = await axios.get(`/api/batches/course/${enrollment.course?._id}`, config);
-                                                                    setBatchOptions(data);
-                                                                } catch (err) {
-                                                                    console.error('Error fetching batches:', err);
-                                                                    setBatchOptions([]);
-                                                                }
-                                                            };
-                                                            fetchBatches();
-                                                        }}
-                                                        className="p-1.5 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors text-[10px] font-bold flex items-center gap-1"
-                                                        title="Assign or Change Batch"
-                                                    >
-                                                        <Users size={12} />
-                                                        {enrollment.batchName || enrollment.batch_name ? `Batch: ${enrollment.batchName || enrollment.batch_name}` : 'Assign Batch'}
-                                                    </button>
-                                                    <span className={`px-2 py-1 text-xs font-bold rounded-full ${enrollment.status === 'active'
-                                                        ? 'bg-emerald-500/20 text-emerald-400'
-                                                        : 'bg-gray-500/20 text-gray-400'
-                                                        }`}>
-                                                        {enrollment.status}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => handleAdminUnenroll(enrollment.course?._id, enrollment.course?.title)}
-                                                        title="Unenroll"
-                                                        className="p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors text-xs"
-                                                    >
-                                                        <UserMinus size={12} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {enrollments.length === 0 && (
-                                        <div className="text-center py-6 border border-dashed border-white/10 rounded-xl">
-                                            <GraduationCap className="text-gray-600 mx-auto mb-2" size={28} />
-                                            <p className="text-gray-400 text-sm">No enrollments yet</p>
-                                            <button
-                                                onClick={handleOpenEnrollModal}
-                                                className="mt-2 text-xs text-emerald-400 hover:underline"
-                                            >
-                                                + Enroll in a course
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Documents */}
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-4">Uploaded Documents ({documents.length})</h3>
-                                <div className="space-y-2">
-                                    {documents.map((doc) => (
-                                        <div key={doc._id} className="p-3 bg-white/5 rounded-lg border border-white/10 flex justify-between items-center">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="p-2 bg-primary/10 rounded-lg">
-                                                    <FileText size={18} className="text-primary" />
-                                                </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="text-sm font-bold text-white">{doc.title}</p>
-                                                        <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded border ${
-                                                            doc.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-                                                            doc.status === 'rejected' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
-                                                            'bg-amber-500/20 text-amber-400 border-amber-500/30'
-                                                        }`}>
-                                                            {doc.status}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-[10px] text-gray-400 font-medium">
-                                                        {doc.type} • {new Date(doc.created_at || doc.createdAt).toLocaleDateString()}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                {(doc.file_url || doc.fileUrl) && (
-                                                    <button
-                                                        onClick={() => setPreviewDoc(doc)}
-                                                        className="p-2 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 transition-colors"
-                                                        title="Preview Document"
-                                                    >
-                                                        <Eye size={14} />
-                                                    </button>
-                                                )}
-                                                {doc.status === 'submitted' && (
-                                                    <button
-                                                        onClick={() => navigate('/admin/document-review')}
-                                                        className="p-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500/30 transition-colors"
-                                                        title="Go to Review Hub"
-                                                    >
-                                                        <Clock size={14} />
-                                                    </button>
-                                                )}
-                                                <a
-                                                    href={getMediaUrl(doc.file_url || doc.fileUrl)}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
-                                                    title="Download"
+                                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                        : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                                }`}>
+                                                    <span className={`w-1.5 h-1.5 rounded-full ${selectedStudent.isVerified ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+                                                    {selectedStudent.isVerified ? 'Active' : 'Inactive'}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleToggleStudentStatus(selectedStudent)}
+                                                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all border ${
+                                                        selectedStudent.isVerified
+                                                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
+                                                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                                                    }`}
                                                 >
-                                                    <Download size={14} />
-                                                </a>
+                                                    {selectedStudent.isVerified ? 'Mark as Inactive' : 'Mark as Active'}
+                                                </button>
                                             </div>
                                         </div>
-                                    ))}
-                                    {documents.length === 0 && (
-                                        <p className="text-gray-400 text-sm">No documents uploaded</p>
-                                    )}
-                                </div>
+
+                                        <div>
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em] mb-1.5 block">Reward Wallet Balance</label>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-xl text-xs font-black">
+                                                    <Award size={14} />
+                                                    <span>{rewardWallet.total} PTS</span>
+                                                </div>
+                                                <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest leading-none">Available Balance</span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em] mb-1 block">Institution / University</label>
+                                            <p className="text-sm font-semibold text-white/95">{getUniversityName(selectedStudent)}</p>
+                                        </div>
+
+                                        <div>
+                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.15em] mb-1 block">Registration Source</label>
+                                            {selectedStudent.registeredBy ? (
+                                                <div className="p-2.5 bg-white/5 rounded-xl border border-white/5">
+                                                    <p className="text-sm font-semibold text-white/95 leading-tight">{selectedStudent.registeredBy.name}</p>
+                                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                                        <span className="text-[10px] text-primary uppercase font-bold tracking-wider">{selectedStudent.registeredBy.role}</span>
+                                                        <span className="text-white/20 text-xs">•</span>
+                                                        <span className="text-[10px] text-gray-400">{selectedStudent.registeredBy.email}</span>
+                                                    </div>
+                                                    {selectedStudent.partnerCode && (
+                                                        <p className="text-[10px] text-amber-400 font-mono mt-1">Partner Code: {selectedStudent.partnerCode}</p>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-gray-400 italic font-medium">Self-registered student</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </GlassCard>
                             </div>
 
-                            {/* Action Buttons */}
+                            {/* Save/Cancel actions for Edit Mode */}
                             {editMode && (
-                                <div className="flex space-x-3 pt-4 border-t border-white/10">
+                                <div className="flex space-x-3 pt-4 border-t border-white/5">
                                     <ModernButton onClick={handleSaveStudent} className="flex-1">
                                         <Save size={16} className="mr-2" />
                                         Save Changes
@@ -1272,6 +1159,177 @@ const StudentManagement = () => {
                                     </ModernButton>
                                 </div>
                             )}
+
+                            {/* Course Enrollments */}
+                            <div>
+                                <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <GraduationCap className="text-primary" size={18} />
+                                        <h3 className="text-sm font-black text-white uppercase tracking-widest">
+                                            Course Enrollments ({enrollments.length})
+                                        </h3>
+                                    </div>
+                                    <button
+                                        onClick={handleOpenEnrollModal}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold hover:bg-emerald-500/30 transition-all"
+                                    >
+                                        <Plus size={14} />
+                                        <span>Enroll in Course</span>
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {enrollments.map((enrollment) => (
+                                        <div key={enrollment._id} className="p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold text-white truncate">{enrollment.course?.title || 'Unknown Course'}</p>
+                                                {(enrollment.course?.universityName || enrollment.course?.instructor?.profile?.universityName || enrollment.course?.instructor?.name) && (
+                                                    <p className="text-[9px] font-black text-primary uppercase tracking-[0.2em] leading-none mt-1">
+                                                        {enrollment.course.universityName || enrollment.course.instructor?.profile?.universityName || enrollment.course.instructor?.name}
+                                                    </p>
+                                                )}
+                                                
+                                                {/* Real Progress Bar */}
+                                                <div className="mt-3 flex items-center gap-3 max-w-md">
+                                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Progress:</span>
+                                                    <div className="flex-1 bg-white/5 rounded-full h-1.5 relative overflow-hidden">
+                                                        <div 
+                                                            className="bg-primary h-full rounded-full transition-all duration-500" 
+                                                            style={{ width: `${enrollment.progress || 0}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-xs text-white/80 font-black">{enrollment.progress || 0}%</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-3 flex-wrap md:flex-nowrap justify-start md:justify-end">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedEnrollmentForBatch(enrollment);
+                                                        setAssignBatchData({ 
+                                                            courseId: enrollment.course?._id, 
+                                                            batchId: enrollment.batchId || enrollment.batch_id || '' 
+                                                        });
+                                                        setShowAssignBatchModal(true);
+                                                        const fetchBatches = async () => {
+                                                            try {
+                                                                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                                                                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                                                                const { data } = await axios.get(`/api/batches/course/${enrollment.course?._id}`, config);
+                                                                setBatchOptions(data);
+                                                            } catch (err) {
+                                                                console.error('Error fetching batches:', err);
+                                                                setBatchOptions([]);
+                                                            }
+                                                        };
+                                                        fetchBatches();
+                                                    }}
+                                                    className="px-2.5 py-1.5 bg-primary/20 text-primary border border-primary/30 rounded-xl hover:bg-primary/30 transition-colors text-[10px] font-bold flex items-center gap-1.5"
+                                                    title="Assign or Change Batch"
+                                                >
+                                                    <Users size={12} />
+                                                    <span>{enrollment.batchName || enrollment.batch_name ? `Batch: ${enrollment.batchName || enrollment.batch_name}` : 'Assign Batch'}</span>
+                                                </button>
+                                                <span className={`px-2.5 py-1 text-[10px] font-black uppercase rounded-xl border ${enrollment.status === 'active'
+                                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                    : 'bg-gray-500/10 text-gray-400 border-white/10'
+                                                    }`}>
+                                                    {enrollment.status}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleAdminUnenroll(enrollment.course?._id, enrollment.course?.title)}
+                                                    title="Unenroll"
+                                                    className="p-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/25 transition-colors"
+                                                >
+                                                    <UserMinus size={13} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {enrollments.length === 0 && (
+                                        <div className="text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/5">
+                                            <GraduationCap className="text-white/20 mx-auto mb-2" size={32} />
+                                            <p className="text-gray-400 text-sm">No course enrollments found</p>
+                                            <button
+                                                onClick={handleOpenEnrollModal}
+                                                className="mt-2 text-xs text-emerald-400 hover:underline font-bold"
+                                            >
+                                                + Enroll in a course now
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Uploaded Documents */}
+                            <div>
+                                <div className="flex items-center gap-2 border-b border-white/5 pb-3 mb-4">
+                                    <FileText className="text-primary" size={18} />
+                                    <h3 className="text-sm font-black text-white uppercase tracking-widest">
+                                        Uploaded Documents ({documents.length})
+                                    </h3>
+                                </div>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {documents.map((doc) => (
+                                        <div key={doc._id} className="p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-all flex justify-between items-center gap-4">
+                                            <div className="flex items-center space-x-3 min-w-0">
+                                                <div className="p-2.5 bg-primary/10 rounded-xl text-primary flex-shrink-0">
+                                                    <FileText size={18} />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <p className="text-sm font-bold text-white truncate">{doc.title}</p>
+                                                        <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded border ${
+                                                            doc.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                                            doc.status === 'rejected' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :
+                                                            'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                                                        }`}>
+                                                            {doc.status}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[10px] text-gray-400 font-medium mt-0.5">
+                                                        {doc.type} • {new Date(doc.created_at || doc.createdAt).toLocaleDateString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                {(doc.file_url || doc.fileUrl) && (
+                                                    <button
+                                                        onClick={() => setPreviewDoc(doc)}
+                                                        className="p-2 bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-xl transition-all"
+                                                        title="Preview Document"
+                                                    >
+                                                        <Eye size={14} />
+                                                    </button>
+                                                )}
+                                                {doc.status === 'submitted' && (
+                                                    <button
+                                                        onClick={() => navigate('/admin/document-review')}
+                                                        className="p-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl hover:bg-amber-500/25 transition-all"
+                                                        title="Go to Review Hub"
+                                                    >
+                                                        <Clock size={14} />
+                                                    </button>
+                                                )}
+                                                <a
+                                                    href={getMediaUrl(doc.file_url || doc.fileUrl)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="p-2 bg-primary/20 border border-primary/30 text-primary rounded-xl hover:bg-primary/30 transition-all"
+                                                    title="Download"
+                                                >
+                                                    <Download size={14} />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {documents.length === 0 && (
+                                        <div className="text-center py-8 border border-dashed border-white/10 rounded-xl bg-white/5">
+                                            <FileText className="text-white/20 mx-auto mb-2" size={32} />
+                                            <p className="text-gray-400 text-sm">No documents uploaded</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
