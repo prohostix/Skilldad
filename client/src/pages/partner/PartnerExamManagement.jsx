@@ -416,8 +416,10 @@ const PartnerExamManagement = () => {
     };
 
     const isExamCompleted = (exam) => {
-        if (exam.status === 'completed') return true;
-        if (exam.scheduledEndTime && new Date(exam.scheduledEndTime) < new Date()) return true;
+        if (exam.status === 'completed' || exam.status === 'finished' || exam.status === 'archived') return true;
+        if (exam.isPublished === false && exam.scheduledEndTime) return true;
+        if (exam.scheduledEndTime && new Date(exam.scheduledEndTime).getTime() <= Date.now()) return true;
+        if (exam.scheduledStartTime && new Date(exam.scheduledStartTime).getTime() < Date.now() && !exam.scheduledEndTime) return true;
         return false;
     };
 
@@ -979,15 +981,33 @@ const PartnerExamManagement = () => {
                                                 </div>
                                                 <div>
                                                     <h5 className="font-bold text-white tracking-tight">{exam.title}</h5>
-                                                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Finalized {new Date(exam.createdAt).toLocaleDateString()}</p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <p className="text-[10px] text-white/40 font-medium">{exam.course?.title || 'General Assessment'}</p>
+                                                        {exam.batchId?.name && (
+                                                            <span className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary-light text-[9px] font-bold">
+                                                                Batch: {exam.batchId.name}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">
+                                                        Ended {new Date(exam.scheduledEndTime || exam.scheduledStartTime || exam.createdAt).toLocaleDateString()}
+                                                    </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-8">
-                                                <div className="text-right">
-                                                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Pass Rate</p>
-                                                    <p className="text-lg font-black text-emerald-400">92%</p>
-                                                </div>
-                                                <ModernButton size="sm" variant="secondary" onClick={() => fetchSubmissions(exam._id)} className="!rounded-xl !bg-white/5 !border-white/10">View Audit</ModernButton>
+                                            <div className="flex items-center gap-4">
+                                                <ModernButton size="sm" variant="secondary" onClick={() => {
+                                                    setActiveTab('grading');
+                                                    fetchSubmissions(exam._id);
+                                                }} className="!rounded-xl !bg-white/5 !border-white/10 !text-[10px]">
+                                                    View Submissions
+                                                </ModernButton>
+                                                <button
+                                                    onClick={() => handlePublishResults(exam._id)}
+                                                    className="px-3 py-1.5 bg-primary/20 border border-primary/30 rounded-xl text-[10px] font-bold text-primary-light hover:bg-primary hover:text-white transition-all flex items-center gap-1.5"
+                                                >
+                                                    <Send size={12} />
+                                                    Publish Results
+                                                </button>
                                             </div>
                                         </div>
                                     )) : (
