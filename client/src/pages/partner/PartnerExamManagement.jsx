@@ -191,6 +191,8 @@ const PartnerExamManagement = () => {
         }
     };
 
+    const [publishModal, setPublishModal] = useState({ open: false, examId: null });
+
     const handlePublishResults = (examId) => {
         setPublishModal({ open: true, examId });
     };
@@ -1099,207 +1101,13 @@ const PartnerExamManagement = () => {
                                     >
                                         <Trash2 size={15} />
                                         Delete Exam
-                                            </div>
-                                            <div className="flex items-center gap-8">
-                                                <div className="text-right">
-                                                    <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Pass Rate</p>
-                                                    <p className="text-lg font-black text-emerald-400">92%</p>
-                                                </div>
-                                                <ModernButton size="sm" variant="secondary" onClick={() => fetchSubmissions(exam._id)} className="!rounded-xl !bg-white/5 !border-white/10">View Audit</ModernButton>
-                                            </div>
-                                        </div>
-                                    )) : (
-                                        <div className="py-24 text-center space-y-6 bg-white/[0.01] border border-dashed border-white/10 rounded-[2rem]">
-                                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                                                <Activity size={32} className="text-white/20" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <p className="text-white font-bold text-xl tracking-tight">No Deployment History</p>
-                                                <p className="text-white/30 text-sm max-w-xs mx-auto">Completed examinations will appear here for auditing.</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-
-            {/* MODALS (Simplified Styles) */}
-            {openSchedule && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-3xl bg-black/80">
-                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md">
-                        <GlassCard className="p-6 border-white/20 shadow-[0_0_60px_rgba(var(--primary-rgb),0.1)]">
-                            <div className="flex items-center justify-between mb-5">
-                                <h2 className="text-lg font-black text-white tracking-tighter uppercase">Deploy Protocol</h2>
-                                <button onClick={() => setOpenSchedule(false)} className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-white/40"><ArrowLeft size={16} className="rotate-45" /></button>
-                            </div>
-                            <form onSubmit={handleScheduleExam} className="space-y-4">
-                                {examData.linkedPaper && (
-                                    <div className="flex bg-white/5 rounded-xl p-1 mb-2 border border-white/10">
-                                        <button 
-                                            type="button"
-                                            onClick={() => setExamData({...examData, deploymentMode: 'new'})} 
-                                            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${examData.deploymentMode === 'new' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
-                                        >
-                                            New Slot
-                                        </button>
-                                        <button 
-                                            type="button"
-                                            onClick={() => setExamData({...examData, deploymentMode: 'existing'})} 
-                                            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${examData.deploymentMode === 'existing' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
-                                        >
-                                            Existing Slot
-                                        </button>
-                                    </div>
-                                )}
-
-                                {(!examData.linkedPaper || examData.deploymentMode === 'new') ? (
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="space-y-1 col-span-2">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Protocol Label</label>
-                                            <input required type="text" value={examData.title} onChange={e => setExamData({...examData, title: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white text-sm" placeholder="Exam Title" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Subject Vector</label>
-                                            <select
-                                                required
-                                                value={examData.course}
-                                                onChange={async (e) => {
-                                                    const courseId = e.target.value;
-                                                    setExamData({ ...examData, course: courseId, batchId: '' });
-                                                    if (courseId) {
-                                                        try {
-                                                            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-                                                            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-                                                            const { data } = await axios.get(`/api/batches/course/${courseId}`, config);
-                                                            setAvailableBatches(data);
-                                                        } catch (err) {
-                                                            console.error('Error fetching batches:', err);
-                                                            setAvailableBatches([]);
-                                                        }
-                                                    } else {
-                                                        setAvailableBatches([]);
-                                                    }
-                                                }}
-                                                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/60 text-sm"
-                                            >
-                                                <option value="">Select Domain</option>
-                                                {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
-                                            </select>
-                                        </div>
-                                        {examData.course && (
-                                            <div className="space-y-1 col-span-2">
-                                                <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Target Batch (Optional)</label>
-                                                <select
-                                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/60 text-sm"
-                                                    value={examData.batchId}
-                                                    onChange={e => setExamData({ ...examData, batchId: e.target.value })}
-                                                >
-                                                    <option value="">All Students in Course</option>
-                                                    {availableBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                                                </select>
-                                            </div>
-                                        )}
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Duration (MIN)</label>
-                                            <input type="number" value={examData.duration} onChange={e => setExamData({...examData, duration: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Launch Sequence</label>
-                                            <input required type="datetime-local" value={examData.scheduledStartTime} onChange={e => setExamData({...examData, scheduledStartTime: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Termination Sequence</label>
-                                            <input required type="datetime-local" value={examData.scheduledEndTime} onChange={e => setExamData({...examData, scheduledEndTime: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Total Marks</label>
-                                            <input required type="number" value={examData.totalMarks} onChange={e => setExamData({...examData, totalMarks: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Passing Score</label>
-                                            <input required type="number" value={examData.passingScore} onChange={e => setExamData({...examData, passingScore: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm" />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Select Target Slot</label>
-                                        <select required value={examData.existingExamId} onChange={e => setExamData({...examData, existingExamId: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/60 text-sm">
-                                            <option value="">Choose an existing examination...</option>
-                                            {exams.map(e => <option key={e._id} value={e._id}>{e.title}</option>)}
-                                        </select>
-                                    </div>
-                                )}
-                                <div className="flex gap-3 pt-2">
-                                    <button type="button" onClick={() => setOpenSchedule(false)} className="flex-1 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest text-white/40 hover:bg-white/10 transition-all">Abort</button>
-                                    <button type="submit" className="flex-1 py-2 bg-primary rounded-xl text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-primary/30 hover:bg-primary/80 transition-all">Deploy System</button>
-                                </div>
-                            </form>
-                        </GlassCard>
-                    </motion.div>
-                </div>
-            )}
-
-            {/* Custom Delete Confirmation Modal */}
-            <AnimatePresence>
-                {confirmModal.open && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.92, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.92, opacity: 0, y: 20 }}
-                            transition={{ type: 'spring', damping: 22, stiffness: 280 }}
-                            className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
-                        >
-                            {/* Red accent bar */}
-                            <div className="h-1 w-full bg-gradient-to-r from-red-600 via-red-500 to-orange-500" />
-
-                            <div className="p-6">
-                                {/* Icon + Title */}
-                                <div className="flex items-start gap-4 mb-4">
-                                    <div className="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
-                                        <AlertTriangle size={22} className="text-red-400" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold text-white font-poppins">Delete Exam</h3>
-                                        <p className="text-xs text-white/50 mt-0.5">This action is permanent and irreversible</p>
-                                    </div>
-                                </div>
-
-                                {/* Message */}
-                                <div className="pl-[60px]">
-                                    <p className="text-sm text-white/70 leading-relaxed">
-                                        Are you sure you want to permanently delete this exam? All associated questions, student results, and submissions will be <span className="text-red-400 font-semibold">permanently removed</span>.
-                                    </p>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex items-center justify-end gap-3 mt-6">
-                                    <button
-                                        onClick={() => setConfirmModal({ open: false, examId: null })}
-                                        className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={confirmDeleteExam}
-                                        className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 rounded-xl shadow-lg shadow-red-900/30 transition-all active:scale-95 flex items-center gap-2"
-                                    >
-                                        <Trash2 size={15} />
-                                        Delete Exam
                                     </button>
                                 </div>
                             </div>
                         </motion.div>
                     </motion.div>
                 )}
+
                 {/* Broadcast / Publish Results Modal */}
                 {publishModal.open && (
                     <motion.div
