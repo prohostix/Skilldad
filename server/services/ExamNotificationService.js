@@ -43,6 +43,7 @@ class ExamNotificationService {
                         _id: student._id,
                         name: student.name,
                         email: student.email,
+                        profile: student.profile,
                         phone: student.profile?.phone || student.phone
                     },
                     'exam',
@@ -137,6 +138,7 @@ class ExamNotificationService {
                 _id: student._id,
                 name: student.name,
                 email: student.email,
+                profile: student.profile,
                 phone: student.profile?.phone || student.phone
             },
             'examReminder',
@@ -248,6 +250,7 @@ class ExamNotificationService {
                 _id: student._id,
                 name: student.name,
                 email: student.email,
+                profile: student.profile,
                 phone: student.profile?.phone || student.phone
             },
             'examCancelled',
