@@ -18,7 +18,7 @@ class ExamNotificationService {
             if (!students) {
                 const courseId = exam.course_id || exam.course?._id || exam.course;
                 const enrollmentsRes = await query(`
-                    SELECT u.id as _id, u.name, u.email, u.profile, u.phone 
+                    SELECT u.id as _id, u.name, u.email, u.profile 
                     FROM enrollments e
                     JOIN users u ON e.student_id = u.id
                     WHERE e.course_id = $1 AND e.status = 'active'
@@ -84,7 +84,7 @@ class ExamNotificationService {
             if (!students) {
                 const courseId = exam.course_id || exam.course?._id || exam.course;
                 const enrollmentsRes = await query(`
-                    SELECT u.id as _id, u.name, u.email, u.profile, u.phone 
+                    SELECT u.id as _id, u.name, u.email, u.profile 
                     FROM enrollments e
                     JOIN users u ON e.student_id = u.id
                     WHERE e.course_id = $1 AND e.status = 'active'
@@ -195,7 +195,7 @@ class ExamNotificationService {
             if (!students) {
                 const courseId = exam.course_id || exam.course?._id || exam.course;
                 const enrollmentsRes = await query(`
-                    SELECT u.id as _id, u.name, u.email, u.profile, u.phone 
+                    SELECT u.id as _id, u.name, u.email, u.profile 
                     FROM enrollments e
                     JOIN users u ON e.student_id = u.id
                     WHERE e.course_id = $1 AND e.status = 'active'

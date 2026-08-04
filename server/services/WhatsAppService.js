@@ -106,7 +106,7 @@ class WhatsAppService {
         // skilldad_exam_scheduled [Name, CourseTitle, ExamTitle, DateTime]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_EXAM || 'common_status',
+            process.env.GUPSHUP_TEMPLATE_EXAM || 'skilldad_exam_scheduled',
             [studentName, courseTitle || 'Your Course', examTitle, formattedDate]
         );
     }
