@@ -1023,7 +1023,7 @@ const PartnerExamManagement = () => {
                     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md">
                         <GlassCard className="p-6 border-white/20 shadow-[0_0_60px_rgba(var(--primary-rgb),0.1)]">
                             <div className="flex items-center justify-between mb-5">
-                                <h2 className="text-lg font-black text-white tracking-tighter uppercase">Deploy Protocol</h2>
+                                <h2 className="text-lg font-black text-white tracking-tighter uppercase">Schedule Exam</h2>
                                 <button onClick={() => setOpenSchedule(false)} className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-white/40"><ArrowLeft size={16} className="rotate-45" /></button>
                             </div>
                             <form onSubmit={handleScheduleExam} className="space-y-4">
