@@ -477,7 +477,7 @@ const ExamManagement = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                     <StatCard title="Active Exams" value={stats.totalExams} icon={Activity} color="blue" />
                     <StatCard title="Pending Grading" value={stats.pendingGrading} icon={Clock} color="amber" />
-                    <StatCard title="Enrolled Pulse" value={stats.activeStudents} icon={TrendingUp} color="emerald" />
+                    <StatCard title="Enrolled Students" value={stats.activeStudents} icon={TrendingUp} color="emerald" />
                 </div>
 
                 {/* Navigation & Search Bar */}
