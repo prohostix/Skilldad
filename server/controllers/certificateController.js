@@ -221,12 +221,9 @@ const uploadCertificateFile = async (req, res) => {
         }
 
         // 2. Upload to storage (using FileUploadService logic)
-        // Since FileUploadService has specialized methods like uploadQuestionPaper, 
-        // I'll use a generic one or create a new one. 
-        // For now, I'll use uploadToLocal via a generic path if available or manually handled.
-        // Actually FileUploadService.uploadToLocal is async.
-        
-        const filename = `CERT-${id}-${Date.now()}.pdf`;
+        const path = require('path');
+        const ext = file.originalname ? path.extname(file.originalname).toLowerCase() : '.pdf';
+        const filename = `CERT-${id}-${Date.now()}${ext || '.pdf'}`;
         const relativePath = `certificates/${id}/${filename}`;
         
         // Use FileUploadService's internal validation / upload logic if possible
