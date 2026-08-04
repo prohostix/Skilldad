@@ -59,19 +59,13 @@ const notifyEnrolledStudents = async (session, title, message) => {
             const res = await query(q, params);
             studentIds = res.rows.map(r => r.student_id);
 
-            // Also check users directly linked to course
-            const userCourseRes = await query(
-                "SELECT id FROM users WHERE (course_id = $1 OR $1 = ANY(enrolled_courses)) AND role = 'student'",
-                [session.course_id]
-            );
-            const userCourseIds = userCourseRes.rows.map(r => r.id);
-            studentIds = Array.from(new Set([...studentIds, ...userCourseIds]));
+            // Note: phone/course_id are not direct columns on users; enrollments table is the source of truth
         }
 
         // 2. Fetch by Partner or University if specified
         if (session.partner_id) {
             const res = await query(
-                "SELECT id FROM users WHERE (registered_by = $1 OR created_by_id = $1) AND role = 'student'",
+                "SELECT id FROM users WHERE registered_by = $1 AND role = 'student'",
                 [session.partner_id]
             );
             const partnerStudentIds = res.rows.map(r => r.id);
@@ -107,7 +101,7 @@ const notifyEnrolledStudents = async (session, title, message) => {
             // Multi-channel notifications (WhatsApp + Email)
             const notificationService = require('../services/NotificationService');
             const studentsRes = await query(
-                'SELECT id, name, email, phone, profile FROM users WHERE id = ANY($1)',
+                "SELECT id, name, email, profile->>'phone' AS phone, profile->>'phoneNumber' AS phone_alt, profile FROM users WHERE id = ANY($1)",
                 [studentIds]
             );
 
@@ -121,13 +115,14 @@ const notifyEnrolledStudents = async (session, title, message) => {
             console.log(`[ExamNotify] Dispatching Email & WhatsApp notifications to ${studentsRes.rows.length} enrolled students for course: ${courseTitle}`);
 
             for (const student of studentsRes.rows) {
-                let phone = student.phone;
+                // Phone is stored inside the profile JSONB - already extracted by the query
+                let phone = student.phone || student.phone_alt;
                 if (!phone && student.profile) {
                     let p = student.profile;
                     if (typeof p === 'string') {
                         try { p = JSON.parse(p); } catch(e) { p = {}; }
                     }
-                    phone = p.phone || p.phoneNumber || p.contact;
+                    phone = p.phone || p.phoneNumber || p.contact || p.mobile;
                 }
                 notificationService.send(
                     { ...student, phone }, 
