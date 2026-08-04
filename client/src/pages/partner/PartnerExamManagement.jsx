@@ -210,9 +210,10 @@ const PartnerExamManagement = () => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-            const { data } = await axios.post(`/api/results/exams/${examId}/publish-results`, {}, config);
-            showToast(`Results Broadcasted: ${data.message || 'Results published successfully'}`, 'success');
-            fetchSubmissions(examId);
+            const { data } = await axios.put(`/api/exams/admin/${examId}/publish-results`, {}, config);
+            showToast(data.message || 'Results published! Students have been notified.', 'success');
+            // Update local exam state to reflect published status immediately
+            setExams(prev => prev.map(e => (e._id === examId || e.id === examId) ? { ...e, results_published: true } : e));
         } catch (err) {
             showToast(err.response?.data?.message || 'Publishing failed', 'error');
         }
@@ -675,6 +676,20 @@ const PartnerExamManagement = () => {
                                                 >
                                                     <Users size={12} className="mr-1.5" /> Results
                                                 </ModernButton>
+                                                {/* Publish Results button */}
+                                                {(exam.results_published || exam.resultsPublished) ? (
+                                                    <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest text-emerald-400">
+                                                        <CheckCircle size={12} /> Published
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handlePublishResults(exam._id)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-[9px] font-black uppercase tracking-widest text-amber-400 hover:bg-amber-500 hover:text-white transition-all"
+                                                        title="Publish Results to Students"
+                                                    >
+                                                        <Send size={12} /> Publish Results
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => handleDeleteExam(exam._id)}
                                                     className="p-1.5 bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-lg transition-all"
@@ -726,7 +741,7 @@ const PartnerExamManagement = () => {
                                                         const allGraded = submissions.length > 0 && submissions.every(s => s.status === 'graded');
                                                         return (
                                                             <>
-                                                                {allGraded && !currentExam?.resultsPublished && (
+                                                                {!currentExam?.resultsPublished && !currentExam?.results_published && (
                                                                     <ModernButton 
                                                                         size="sm" 
                                                                         onClick={() => handlePublishResults(selectedExamForGrading)}
@@ -735,7 +750,7 @@ const PartnerExamManagement = () => {
                                                                         <TrendingUp size={16} className="mr-2" /> Publish Results
                                                                     </ModernButton>
                                                                 )}
-                                                                {currentExam?.resultsPublished && (
+                                                                {(currentExam?.resultsPublished || currentExam?.results_published) && (
                                                                     <div className="px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                                                                         <FileCheck size={14} /> Records Live
                                                                     </div>

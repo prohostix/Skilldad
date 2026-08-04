@@ -122,6 +122,20 @@ const getExamResults = asyncHandler(async (req, res) => {
  */
 const getStudentResult = asyncHandler(async (req, res) => {
   const { examId, studentId } = req.params;
+  const userRole = req.user?.role?.toLowerCase();
+
+  // Check results_published gate — only bypass for admin/university/partner
+  if (userRole === 'student') {
+    const examCheck = await query('SELECT results_published FROM exams WHERE id = $1', [examId]);
+    const examRow = examCheck.rows[0];
+    if (examRow && examRow.results_published === false) {
+      return res.status(403).json({
+        success: false,
+        resultsPending: true,
+        message: 'Results have not been published yet. Your institution will notify you once results are available.'
+      });
+    }
+  }
 
   const resSet = await query(`
     SELECT r.id as _id, r.exam_id, r.student_id, r.submission_id,

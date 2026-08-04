@@ -253,6 +253,17 @@ const getMySubmission = asyncHandler(async (req, res) => {
   const { examId } = req.params;
   const studentId = req.user.id || req.user._id;
 
+  // Check if results have been published before showing score/answers
+  const examRes = await query('SELECT results_published, title FROM exams WHERE id = $1', [examId]);
+  const examRow = examRes.rows[0];
+  if (examRow && examRow.results_published === false) {
+    return res.status(403).json({
+      success: false,
+      resultsPending: true,
+      message: 'Results have not been published yet. Your institution will notify you once results are available.'
+    });
+  }
+
   const subRes = await query(`
     SELECT s.id as _id, s.exam_id, s.student_id, s.status, 
            s.started_at as "startedAt", s.submitted_at as "submittedAt", 

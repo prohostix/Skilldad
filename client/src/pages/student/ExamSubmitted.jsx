@@ -13,6 +13,7 @@ const ExamSubmitted = () => {
     const [submission, setSubmission] = useState(null);
     const [exam, setExam] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [resultsPending, setResultsPending] = useState(false);
 
     const getAuthConfig = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -32,6 +33,10 @@ const ExamSubmitted = () => {
             ]);
             setSubmission(submissionRes.data);
             setExam(examRes.data);
+            // Determine if results are pending based on exam publish flags
+            const examData = examRes.data;
+            const pending = !(examData?.resultsPublished || examData?.results_published);
+            setResultsPending(pending);
         } catch (error) {
             console.error('Error fetching submission details:', error);
         } finally {
@@ -58,6 +63,32 @@ const ExamSubmitted = () => {
                     </div>
                     <p className="text-white/30 text-xs font-black uppercase tracking-widest">Loading submission...</p>
                 </div>
+            </div>
+        );
+    }
+
+    // Results not yet published by institution
+    if (resultsPending) {
+        return (
+            <div className="min-h-screen bg-[#020202] flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                    className="text-center space-y-5"
+                >
+                    <CheckCircle size={64} className="mx-auto text-amber-400" />
+                    <h1 className="text-3xl font-black text-white">Results Pending</h1>
+                    <p className="text-white/60 max-w-md mx-auto">
+                        Your institution hasn't published the results yet. We'll notify you as soon as they're available.
+                    </p>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="mt-4 inline-flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary/80 transition"
+                    >
+                        <Home size={16} /> Dashboard
+                    </button>
+                </motion.div>
             </div>
         );
     }

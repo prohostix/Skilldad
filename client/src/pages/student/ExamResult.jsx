@@ -21,6 +21,7 @@ const ExamResult = () => {
     const [exam, setExam] = useState(null);
     const [showAnswers, setShowAnswers] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [resultsPending, setResultsPending] = useState(false);
 
     const getAuthConfig = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
@@ -35,6 +36,7 @@ const ExamResult = () => {
 
     const fetchResult = async () => {
         setLoading(true);
+        setResultsPending(false);
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
             const userId = userInfo.id || userInfo._id || userInfo.user_id;
@@ -44,6 +46,17 @@ const ExamResult = () => {
                 axios.get(`/api/exams/exam/${examId}/my-submission`, getAuthConfig()),
                 axios.get(`/api/exams/${examId}`, getAuthConfig())
             ]);
+
+            // Check if results are pending (403 with resultsPending flag)
+            const subRejected = submissionRes.status === 'rejected';
+            const resRejected = resultRes.status === 'rejected';
+            const subErr = subRejected ? submissionRes.reason?.response?.data : null;
+            const resErr = resRejected ? resultRes.reason?.response?.data : null;
+            if ((subErr?.resultsPending) || (resErr?.resultsPending)) {
+                setResultsPending(true);
+                setLoading(false);
+                return;
+            }
 
             const resDataVal = resultRes.status === 'fulfilled' ? resultRes.value?.data : null;
             const subDataVal = submissionRes.status === 'fulfilled' ? submissionRes.value?.data : null;
@@ -81,8 +94,13 @@ const ExamResult = () => {
             setSubmission(sub || {});
             setExam(ex || {});
         } catch (error) {
-            console.error('Error fetching result:', error);
-            showToast(error.response?.data?.message || 'Error loading result', 'error');
+            // Check if the top-level catch has a resultsPending response
+            if (error?.response?.data?.resultsPending) {
+                setResultsPending(true);
+            } else {
+                console.error('Error fetching result:', error);
+                showToast(error.response?.data?.message || 'Error loading result', 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -226,6 +244,49 @@ const ExamResult = () => {
                     </div>
                     <p className="text-white/30 text-xs font-black uppercase tracking-widest">Fetching Results...</p>
                 </div>
+            </div>
+        );
+    }
+
+    // Results not yet published by institution
+    if (resultsPending) {
+        return (
+            <div className="min-h-screen bg-[#020202] flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: 'circOut' }}
+                    className="p-12 text-center max-w-md w-full bg-white/[0.03] border border-white/8 rounded-3xl"
+                >
+                    <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                        className="w-20 h-20 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                    >
+                        <Clock size={36} className="text-amber-400" />
+                    </motion.div>
+                    <h3 className="text-2xl font-black text-white mb-3 tracking-tight">Results Pending</h3>
+                    <p className="text-white/50 text-sm mb-2 leading-relaxed">
+                        Your exam has been submitted and is under review.
+                    </p>
+                    <p className="text-white/30 text-xs mb-8 leading-relaxed">
+                        Your institution will publish the results soon. You'll receive a notification via <span className="text-amber-400 font-bold">Email</span> and <span className="text-amber-400 font-bold">WhatsApp</span> once they are available.
+                    </p>
+                    <div className="w-full bg-white/5 rounded-full h-1.5 mb-8 overflow-hidden">
+                        <motion.div
+                            className="h-full bg-amber-500/60 rounded-full"
+                            animate={{ x: ['-100%', '200%'] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                            style={{ width: '40%' }}
+                        />
+                    </div>
+                    <button
+                        onClick={() => navigate('/dashboard/exams')}
+                        className="w-full py-3 bg-white/5 border border-white/10 text-white/70 rounded-xl font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                    >
+                        <Home size={16} /> Back to Exams
+                    </button>
+                </motion.div>
             </div>
         );
     }

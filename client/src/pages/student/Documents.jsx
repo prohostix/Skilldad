@@ -246,6 +246,7 @@ const Documents = () => {
     });
 
     const pendingRequests = certificates.filter(c => c.status === 'PENDING');
+    const issuedCertificates = certificates.filter(c => c.status === 'ISSUED');
 
     const processedDocuments = (() => {
         // Standard required slots mapped to student's uploaded docs
@@ -367,10 +368,36 @@ const Documents = () => {
                                 Requisition Tracking
                              </h2>
                         </div>
-                        <div className="text-[8px] font-bold text-white/10 uppercase tracking-widest">{eligibleCourses.length + pendingRequests.length} Tasks</div>
+                        <div className="text-[8px] font-bold text-white/10 uppercase tracking-widest">{eligibleCourses.length + pendingRequests.length + issuedCertificates.length} Tasks</div>
                     </div>
                     
                     <div className="p-1 space-y-1">
+                        {/* Issued Certificates Popup/Card */}
+                        {issuedCertificates.map(cert => (
+                            <motion.div 
+                                key={cert.id}
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-primary/10 hover:bg-primary/20 p-3 rounded-lg border border-primary/30 flex items-center justify-between group transition-all"
+                            >
+                                <div className="flex items-center gap-3 min-w-0 pr-4">
+                                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                                        <Trophy size={14} className="text-primary" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="text-xs font-bold text-white truncate">{cert.course_title}</h3>
+                                        <p className="text-[9px] text-primary/80 font-bold mt-0.5 uppercase tracking-widest">Certificate Issued by {cert.university_name || 'University Provider'}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleDownload(`${cert.course_title} Certificate`, cert.certificate_url)}
+                                    className="px-4 py-1.5 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-md transition-all shadow-lg shadow-primary/20 flex items-center gap-1.5"
+                                >
+                                    <Download size={10} /> DOWNLOAD
+                                </button>
+                            </motion.div>
+                        ))}
+
                         {/* Eligible for Certificate */}
                         {eligibleCourses.map(course => (
                             <motion.div 
@@ -422,7 +449,7 @@ const Documents = () => {
                         ))}
 
                         {/* Empty Graduation State (Minimal) */}
-                        {eligibleCourses.length === 0 && pendingRequests.length === 0 && (
+                        {eligibleCourses.length === 0 && pendingRequests.length === 0 && issuedCertificates.length === 0 && (
                             <div className="py-2 flex flex-col items-center justify-center gap-1 opacity-40">
                                 <Trophy size={14} className="text-white/20" />
                                 <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.1em]">Complete a course (100%) to unlock certification</p>

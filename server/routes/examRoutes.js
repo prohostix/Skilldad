@@ -280,6 +280,41 @@ router.put('/admin/:id/link-paper', protect, authorize('admin', 'university', 'p
     }
 });
 
+// @desc    Publish results for an exam (makes results visible to students)
+router.put('/admin/:id/publish-results', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
+    try {
+        const examId = req.params.id;
+        const userId = req.user._id.toString();
+        const userRole = req.user.role?.toLowerCase();
+
+        // Fetch exam and verify ownership for partner/university
+        const examRes = await query('SELECT * FROM exams WHERE id = $1', [examId]);
+        if (examRes.rows.length === 0) return res.status(404).json({ message: 'Exam not found' });
+        const exam = examRes.rows[0];
+
+        if (userRole === 'partner' || userRole === 'university') {
+            if (exam.created_by_id !== userId && exam.university_id !== userId) {
+                return res.status(403).json({ message: 'Not authorized to publish results for this exam' });
+            }
+        }
+
+        // Set results_published = true
+        await query('UPDATE exams SET results_published = TRUE WHERE id = $1', [examId]);
+
+        // Notify enrolled students that results are published
+        notifyEnrolledStudents(
+            { course_id: exam.course_id, university_id: exam.university_id, partner_id: userRole === 'partner' ? userId : null, batch_ids: exam.batch_ids },
+            '📊 Exam Results Published',
+            `Results for "${exam.title}" have been published. Check your score now!`
+        );
+
+        res.json({ success: true, message: 'Results published successfully. Students have been notified.' });
+    } catch (error) {
+        console.error('[PG EXAM] Error publishing results:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Helper for exam scheduling
 const handleSchedulePost = async (req, res) => {
     try {

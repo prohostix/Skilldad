@@ -10,8 +10,10 @@ import {
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import { useToast } from '../../context/ToastContext';
 
 const CertificateManagement = () => {
+    const { showToast } = useToast();
     const [certificates, setCertificates] = useState([]);
     const [universities, setUniversities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -30,7 +32,7 @@ const CertificateManagement = () => {
             await axios.put(`/api/certificates/${id}/status`, { status, notes }, config);
             fetchData();
         } catch (error) {
-            alert(error.response?.data?.message || 'Failed to update certificate status');
+            showToast(error.response?.data?.message || 'Failed to update certificate status', 'error');
         }
     };
 
@@ -51,13 +53,13 @@ const CertificateManagement = () => {
                 } 
             };
             await axios.post(`/api/certificates/${selectedCert.id}/upload`, formData, config);
-            alert('Certificate uploaded and ISSUED to student successfully!');
+            showToast('Certificate uploaded and ISSUED to student successfully!', 'success');
             setShowUploadModal(false);
             setFile(null);
             setSelectedCert(null);
             fetchData();
         } catch (error) {
-            alert(error.response?.data?.message || 'Failed to upload certificate PDF');
+            showToast(error.response?.data?.message || 'Failed to upload certificate PDF', 'error');
         } finally {
             setUploading(false);
         }

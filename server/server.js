@@ -304,6 +304,13 @@ const startServer = async () => {
             console.log("[Migration] Added batch_ids (array) to exams".green);
         }
 
+        // Ensure results_published flag exists on exams (result publishing gate)
+        const rPubColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'exams' AND column_name = 'results_published'");
+        if (rPubColCheck.rows.length === 0) {
+            await query("ALTER TABLE exams ADD COLUMN results_published BOOLEAN DEFAULT FALSE");
+            console.log("[Migration] Added results_published to exams".green);
+        }
+
         // Ensure university_id exists in enrollments for cohort scoping
         const uniColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'enrollments' AND column_name = 'university_id'");
         if (uniColCheck.rows.length === 0) {

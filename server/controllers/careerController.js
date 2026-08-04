@@ -173,10 +173,10 @@ exports.adminDeleteVacancy = async (req, res) => {
 exports.adminGetApplications = async (req, res) => {
     try {
         const result = await query(
-            `SELECT a.*, v.title as vacancy_title, v.company as vacancy_company, s."studentName" as student_name, s.email as student_email
+            `SELECT a.*, v.title as vacancy_title, v.company as vacancy_company, s.name as student_name, s.email as student_email
              FROM skilldad_applications a
              JOIN skilldad_vacancies v ON a.vacancy_id = v.id
-             JOIN students s ON a.student_id = s.id
+             JOIN users s ON a.student_id = s.id
              ORDER BY a.applied_at DESC`
         );
         res.json({ success: true, applications: result.rows });

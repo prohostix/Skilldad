@@ -8,9 +8,11 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import { useToast } from '../../context/ToastContext';
 
 const PlacementsPortal = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('vacancies');
     const [searchQuery, setSearchQuery] = useState('');
     const [vacancies, setVacancies] = useState([]);
@@ -97,9 +99,9 @@ const PlacementsPortal = () => {
             setSelectedVacancy(null);
             setResume(null);
             fetchData();
-            alert('Application submitted successfully!');
+            showToast('Application submitted successfully!', 'success');
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to apply.');
+            showToast(err.response?.data?.message || 'Failed to apply.', 'error');
         } finally {
             setSubmitting(false);
         }

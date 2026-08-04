@@ -8,6 +8,7 @@ import {
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../context/ToastContext';
 import { useSocket } from '../../context/SocketContext';
 
@@ -24,6 +25,7 @@ const CareerManager = () => {
     // Modal states
     const [showVacancyModal, setShowVacancyModal] = useState(false);
     const [showPlacementModal, setShowPlacementModal] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState({ open: false, type: null, id: null });
     const [editingItem, setEditingItem] = useState(null);
     const [formData, setFormData] = useState({});
 
@@ -78,8 +80,11 @@ const CareerManager = () => {
         }
     };
 
-    const handleDeleteVacancy = async (id) => {
-        if (!window.confirm('Delete this listing?')) return;
+    const handleDeleteVacancy = (id) => {
+        setConfirmDelete({ open: true, type: 'vacancy', id });
+    };
+
+    const executeDeleteVacancy = async (id) => {
         try {
             await axios.delete(`/api/career/admin/vacancies/${id}`, config);
             showToast('Vacancy deleted', 'success');
@@ -120,8 +125,11 @@ const CareerManager = () => {
         }
     };
 
-    const handleDeletePlacement = async (id) => {
-        if (!window.confirm('Remove from Hall of Fame?')) return;
+    const handleDeletePlacement = (id) => {
+        setConfirmDelete({ open: true, type: 'placement', id });
+    };
+
+    const executeDeletePlacement = async (id) => {
         try {
             await axios.delete(`/api/career/admin/placements/${id}`, config);
             showToast('Placement deleted', 'success');
@@ -129,6 +137,15 @@ const CareerManager = () => {
         } catch (error) {
             showToast('Delete failed', 'error');
         }
+    };
+
+    const handleConfirmDelete = () => {
+        if (confirmDelete.type === 'vacancy') {
+            executeDeleteVacancy(confirmDelete.id);
+        } else if (confirmDelete.type === 'placement') {
+            executeDeletePlacement(confirmDelete.id);
+        }
+        setConfirmDelete({ open: false, type: null, id: null });
     };
 
     const getStatusColor = (status) => {
@@ -460,6 +477,16 @@ const CareerManager = () => {
                     </GlassCard>
                 </div>
             )}
+            
+            <ConfirmDialog 
+                open={confirmDelete.open}
+                title={confirmDelete.type === 'vacancy' ? "Delete this listing?" : "Remove from Hall of Fame?"}
+                message={confirmDelete.type === 'vacancy' ? "This will permanently remove the vacancy." : "This will permanently remove this entry."}
+                confirmLabel="Delete"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setConfirmDelete({ open: false, type: null, id: null })}
+                danger={true}
+            />
         </div>
     );
 };
