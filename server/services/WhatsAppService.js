@@ -44,7 +44,7 @@ class WhatsAppService {
             payload.append('destination', cleanPhone);
             payload.append('template', JSON.stringify({
                 id: templateId,
-                params: variables.map(v => v ? v.toString() : '')
+                params: variables.map(v => (v && v.toString().trim() !== '') ? v.toString() : ' ')
             }));
             payload.append('src.name', 'SkillDadChat');
 
