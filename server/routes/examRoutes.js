@@ -47,9 +47,12 @@ const notifyEnrolledStudents = async (session, title, message) => {
             let q = "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'";
             let params = [session.course_id];
             
-            if (session.batch_ids && session.batch_ids.length > 0) {
-                q += " AND batch_id = ANY($2)";
-                params.push(session.batch_ids);
+            if (session.batch_ids && Array.isArray(session.batch_ids) && session.batch_ids.length > 0) {
+                const validBatchIds = session.batch_ids.filter(Boolean);
+                if (validBatchIds.length > 0) {
+                    q += " AND batch_id = ANY($2)";
+                    params.push(validBatchIds);
+                }
             }
             
             const res = await query(q, params);
@@ -82,7 +85,7 @@ const notifyEnrolledStudents = async (session, title, message) => {
             // Multi-channel notifications (WhatsApp + Email)
             const notificationService = require('../services/NotificationService');
             const studentsRes = await query(
-                'SELECT id, name, email, profile FROM users WHERE id = ANY($1)',
+                'SELECT id, name, email, phone, profile FROM users WHERE id = ANY($1)',
                 [studentIds]
             );
 
@@ -92,6 +95,8 @@ const notifyEnrolledStudents = async (session, title, message) => {
                 const cRes = await query('SELECT title FROM courses WHERE id = $1', [session.course_id]);
                 if (cRes.rows.length > 0) courseTitle = cRes.rows[0].title;
             }
+
+            console.log(`[ExamNotify] Dispatching Email & WhatsApp notifications to ${studentsRes.rows.length} enrolled students for course: ${courseTitle}`);
 
             for (const student of studentsRes.rows) {
                 let phone = student.phone;
@@ -109,7 +114,8 @@ const notifyEnrolledStudents = async (session, title, message) => {
                         examTitle: title.replace('📝', '').trim(), 
                         courseTitle: courseTitle,
                         scheduledDate: session.scheduled_start
-                    }
+                    },
+                    { email: true, whatsapp: true }
                 ).catch(err => console.error(`[ExamNotify] Failed for student ${student.id}:`, err.message));
             }
         }
