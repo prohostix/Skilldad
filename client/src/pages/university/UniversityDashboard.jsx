@@ -182,7 +182,6 @@ const UniversityDashboard = () => {
 
                 // Align course fetching with ScheduleClass.jsx for robustness
                 const courseData = coursesRes.data;
-                console.log('[UniversityDashboard] Courses fetched:', courseData);
                 if (Array.isArray(courseData)) {
                     setCourses(courseData);
                 } else if (courseData && Array.isArray(courseData.courses)) {
