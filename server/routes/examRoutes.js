@@ -355,7 +355,7 @@ const handleSchedulePost = async (req, res) => {
         const partnerId = req.user.role?.toLowerCase() === 'partner' ? createdById : null;
         notifyEnrolledStudents(
             { course_id: courseId, university_id: universityId, partner_id: partnerId, scheduled_start: scheduledStartTime, batch_ids: batchIds },
-            'New Exam Scheduled 📝',
+            `${title} 📝`,
             `A new exam "${title}" has been scheduled for your course.`
         );
 
