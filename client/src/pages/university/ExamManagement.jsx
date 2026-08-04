@@ -190,17 +190,23 @@ const ExamManagement = () => {
         }
     };
 
-    const handlePublishResults = async (examId) => {
+    const [publishModal, setPublishModal] = useState({ open: false, examId: null });
+
+    const handlePublishResults = (examId) => {
+        setPublishModal({ open: true, examId });
+    };
+
+    const confirmPublishResults = async () => {
+        const examId = publishModal.examId;
+        setPublishModal({ open: false, examId: null });
+        if (!examId) return;
+
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-            if (!window.confirm('Broadcast results to all students? This action will enable score visibility.')) {
-                return;
-            }
-
             const { data } = await axios.post(`/api/results/exams/${examId}/publish-results`, {}, config);
-            showToast(`Results Broadcasted: ${data.publishedCount} notifications sent.`, 'success');
+            showToast(`Results Broadcasted: ${data.message || 'Results published successfully'}`, 'success');
             fetchSubmissions(examId);
         } catch (err) {
             showToast(err.response?.data?.message || 'Publishing failed', 'error');
@@ -1105,6 +1111,59 @@ const ExamManagement = () => {
                                     >
                                         <Trash2 size={15} />
                                         Delete Exam
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                {/* Broadcast / Publish Results Modal */}
+                {publishModal.open && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.92, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', damping: 22, stiffness: 280 }}
+                            className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                        >
+                            {/* Purple accent bar */}
+                            <div className="h-1 w-full bg-gradient-to-r from-primary via-primary-light to-accent" />
+
+                            <div className="p-6">
+                                <div className="flex items-start gap-4 mb-4">
+                                    <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
+                                        <Send size={22} className="text-primary-light" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-white font-poppins">Publish Exam Results</h3>
+                                        <p className="text-xs text-white/50 mt-0.5">Broadcast scores & enable student visibility</p>
+                                    </div>
+                                </div>
+
+                                <div className="pl-[60px]">
+                                    <p className="text-sm text-white/70 leading-relaxed">
+                                        Are you sure you want to broadcast results to all enrolled students? This action will grant score visibility and notify students.
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-3 mt-6">
+                                    <button
+                                        onClick={() => setPublishModal({ open: false, examId: null })}
+                                        className="px-4 py-2 text-sm font-medium text-white/60 hover:text-white bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmPublishResults}
+                                        className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-primary to-accent hover:from-primary-light hover:to-accent rounded-xl shadow-lg shadow-primary/30 transition-all active:scale-95 flex items-center gap-2"
+                                    >
+                                        <Send size={15} />
+                                        Publish Now
                                     </button>
                                 </div>
                             </div>
