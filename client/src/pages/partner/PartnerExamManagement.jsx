@@ -50,6 +50,9 @@ const PartnerExamManagement = () => {
     const [activeTab, setActiveTab] = useState('conduct');
     const [activeVaultFolder, setActiveVaultFolder] = useState('exam_paper');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCourseFilter, setSelectedCourseFilter] = useState('');
+    const [selectedBatchFilter, setSelectedBatchFilter] = useState('');
+    const [filterBatches, setFilterBatches] = useState([]);
     const [confirmModal, setConfirmModal] = useState({ open: false, examId: null });
     const [questionPapers, setQuestionPapers] = useState([]);
     const [answerKeys, setAnswerKeys] = useState([]);
@@ -395,24 +398,48 @@ const PartnerExamManagement = () => {
         }
     };
 
+    const handleCourseFilterChange = async (courseId) => {
+        setSelectedCourseFilter(courseId);
+        setSelectedBatchFilter('');
+        setFilterBatches([]);
+        if (courseId) {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                const { data } = await axios.get(`/api/batches/course/${courseId}`, config);
+                setFilterBatches(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error('Error fetching filter batches:', err);
+                setFilterBatches([]);
+            }
+        }
+    };
+
     const isExamCompleted = (exam) => {
         if (exam.status === 'completed') return true;
         if (exam.scheduledEndTime && new Date(exam.scheduledEndTime) < new Date()) return true;
         return false;
     };
 
+    const matchesFilters = (e) => {
+        const matchesSearch = !searchTerm || 
+            e.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            e.course?.title?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const examCourseId = e.course?._id || e.course?.id || e.course;
+        const matchesCourse = !selectedCourseFilter || String(examCourseId) === String(selectedCourseFilter);
+
+        const examBatchId = e.batchId?._id || e.batchId?.id || e.batchId || e.batch?._id || e.batch?.id || e.batch;
+        const matchesBatch = !selectedBatchFilter || String(examBatchId) === String(selectedBatchFilter);
+
+        return matchesSearch && matchesCourse && matchesBatch;
+    };
+
     const activeExams = exams.filter(e => !isExamCompleted(e));
     const completedExams = exams.filter(e => isExamCompleted(e));
 
-    const filteredExams = activeExams.filter(e => 
-        e.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        e.course?.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const filteredHistoryExams = completedExams.filter(e => 
-        e.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        e.course?.title?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredExams = activeExams.filter(matchesFilters);
+    const filteredHistoryExams = completedExams.filter(matchesFilters);
 
     const filteredPapers = questionPapers.filter(p => 
         p.title?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -494,22 +521,62 @@ const PartnerExamManagement = () => {
                     <StatCard title="Enrolled Pulse" value={stats.activeStudents} icon={TrendingUp} color="emerald" />
                 </div>
 
-                {/* Navigation & Search Bar */}
-                <div className="sticky top-1 z-40 flex flex-col xl:flex-row xl:items-center justify-between gap-2 p-1 bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl mt-0">
+                {/* Navigation & Search & Filter Bar */}
+                <div className="sticky top-1 z-40 flex flex-col xl:flex-row xl:items-center justify-between gap-2 p-1.5 bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl mt-0">
                     <div className="flex items-center gap-0.5 overflow-x-auto no-scrollbar px-1">
                         <TabButton id="conduct" label="Conduct" icon={Calendar} />
                         <TabButton id="grading" label="Grading" icon={Edit} />
                         <TabButton id="history" label="History" icon={Clock} />
                     </div>
-                    <div className="relative group w-full xl:w-72 px-1">
-                        <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-medium placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] transition-all"
-                        />
+
+                    <div className="flex flex-wrap items-center gap-2 px-1 w-full xl:w-auto">
+                        {/* Course Filter Dropdown */}
+                        <div className="relative flex-1 xl:flex-none min-w-[150px]">
+                            <select
+                                value={selectedCourseFilter}
+                                onChange={(e) => handleCourseFilterChange(e.target.value)}
+                                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-medium text-white/80 focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer pr-8"
+                            >
+                                <option value="" className="bg-[#0D1117] text-white">All Courses</option>
+                                {courses.map(c => (
+                                    <option key={c._id} value={c._id} className="bg-[#0D1117] text-white">
+                                        {c.title}
+                                    </option>
+                                ))}
+                            </select>
+                            <Filter size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+                        </div>
+
+                        {/* Batch Filter Dropdown */}
+                        {selectedCourseFilter && (
+                            <div className="relative flex-1 xl:flex-none min-w-[140px]">
+                                <select
+                                    value={selectedBatchFilter}
+                                    onChange={(e) => setSelectedBatchFilter(e.target.value)}
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-medium text-white/80 focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer pr-8"
+                                >
+                                    <option value="" className="bg-[#0D1117] text-white">All Batches</option>
+                                    {filterBatches.map(b => (
+                                        <option key={b.id || b._id} value={b.id || b._id} className="bg-[#0D1117] text-white">
+                                            {b.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <Users size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
+                            </div>
+                        )}
+
+                        {/* Search Input */}
+                        <div className="relative group flex-1 xl:w-56">
+                            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-medium placeholder:text-white/20 focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] transition-all"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -557,7 +624,14 @@ const PartnerExamManagement = () => {
                                                 </div>
                                                 <div className="space-y-0.5">
                                                     <h4 className="text-base font-bold text-white tracking-tight">{exam.title}</h4>
-                                                    <p className="text-[10px] text-white/40 font-medium">{exam.course?.title || 'General Assessment'}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-[10px] text-white/40 font-medium">{exam.course?.title || 'General Assessment'}</p>
+                                                        {exam.batchId?.name && (
+                                                            <span className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary-light text-[9px] font-bold">
+                                                                Batch: {exam.batchId.name}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     <div className="flex items-center gap-3 pt-0.5">
                                                         <span className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-white/30">
                                                             <Calendar size={10} /> {new Date(exam.scheduledStartTime || exam.scheduledDate).toLocaleDateString()}
