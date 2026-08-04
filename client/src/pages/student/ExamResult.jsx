@@ -23,9 +23,15 @@ const ExamResult = () => {
     const [loading, setLoading] = useState(true);
 
     const getAuthConfig = () => {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        return { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+        return { headers: { Authorization: `Bearer ${userInfo.token || ''}` } };
     };
+
+    useEffect(() => {
+        if (examId) {
+            fetchResult();
+        }
+    }, [examId]);
 
     const fetchResult = async () => {
         setLoading(true);
