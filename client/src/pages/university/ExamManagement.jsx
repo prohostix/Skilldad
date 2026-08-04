@@ -471,17 +471,6 @@ const ExamManagement = () => {
                     <div className="space-y-0">
                         <DashboardHeading title="Exam Management" className="!text-2xl !tracking-tighter" />
                     </div>
-                    <div className="flex items-center gap-4">
-                        <ModernButton
-                            variant="secondary"
-                            onClick={() => fetchData(true)}
-                            disabled={loading}
-                            className="!px-4 !py-2 !rounded-xl !bg-white/5 !border-white/10 hover:!bg-white/10 transition-all group !text-xs"
-                        >
-                            <RefreshCw size={14} className={`mr-2 transition-all ${loading ? 'animate-spin text-primary' : 'group-hover:rotate-180'}`} />
-                            {loading ? 'Syncing...' : 'Sync System'}
-                        </ModernButton>
-                    </div>
                 </div>
 
                 {/* Stats Grid */}
