@@ -57,18 +57,23 @@ const notifyEnrolledStudents = async (session, title, message) => {
             
             const res = await query(q, params);
             studentIds = res.rows.map(r => r.student_id);
-        } else if (session.university_id) {
-            const res = await query(
-                "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
-                [session.university_id]
-            );
-            studentIds = res.rows.map(r => r.id);
-        } else if (session.partner_id) {
-            const res = await query(
-                "SELECT id FROM users WHERE registered_by = $1 AND role = 'student'",
-                [session.partner_id]
-            );
-            studentIds = res.rows.map(r => r.id);
+        }
+
+        // Fallback: If no enrollments matched or course_id wasn't provided, fetch university or partner students
+        if (studentIds.length === 0) {
+            if (session.partner_id) {
+                const res = await query(
+                    "SELECT id FROM users WHERE registered_by = $1 AND role = 'student'",
+                    [session.partner_id]
+                );
+                studentIds = res.rows.map(r => r.id);
+            } else if (session.university_id) {
+                const res = await query(
+                    "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
+                    [session.university_id]
+                );
+                studentIds = res.rows.map(r => r.id);
+            }
         }
 
         if (studentIds.length > 0) {
@@ -289,8 +294,9 @@ router.post('/admin/schedule', protect, authorize('admin', 'university', 'partne
         ]);
 
         // Notify students about scheduled exam
+        const partnerId = req.user.role?.toLowerCase() === 'partner' ? createdById : null;
         notifyEnrolledStudents(
-            { course_id: courseId, university_id: universityId, scheduled_start: scheduledStartTime, batch_ids: batchIds },
+            { course_id: courseId, university_id: universityId, partner_id: partnerId, scheduled_start: scheduledStartTime, batch_ids: batchIds },
             'New Exam Scheduled 📝',
             `A new exam "${title}" has been scheduled for your course.`
         );
