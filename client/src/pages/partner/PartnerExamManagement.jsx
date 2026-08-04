@@ -483,14 +483,14 @@ const PartnerExamManagement = () => {
     );
 
     const StatCard = ({ title, value, icon: Icon, color }) => (
-        <GlassCard style={{ borderRadius: '10px' }} className="p-3 flex flex-col justify-between group hover:border-primary/30 transition-all duration-300 overflow-hidden relative">
+        <GlassCard style={{ borderRadius: '8px' }} className="px-3 py-1.5 flex flex-col justify-between group hover:border-primary/30 transition-all duration-300 overflow-hidden relative">
             <div className="flex items-center justify-between gap-2 relative z-10">
-                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-0">{title}</p>
-                <div className={`p-1.5 rounded-lg bg-${color}-500/10 text-${color}-400 group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon size={14} strokeWidth={2.5} />
+                <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-0">{title}</p>
+                <div className={`p-1 rounded-md bg-${color}-500/10 text-${color}-400 group-hover:scale-110 transition-transform duration-300`}>
+                    <Icon size={12} strokeWidth={2.5} />
                 </div>
             </div>
-            <h3 className="text-xl font-black text-white leading-none mt-2 relative z-10">{value}</h3>
+            <h3 className="text-base font-black text-white leading-none mt-0.5 relative z-10">{value}</h3>
         </GlassCard>
     );
 
