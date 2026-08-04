@@ -267,7 +267,7 @@ const templates = {
             <p style="${baseStyle.p}">A new exam has been scheduled for your course: <strong>${courseTitle}</strong>.</p>
             <div style="${baseStyle.highlight}">
                 <p style="margin: 0 0 4px 0;"><strong style="color: #7C3AED;">Exam:</strong> ${examTitle}</p>
-                <p style="margin: 0;"><strong style="color: #7C3AED;">Scheduled Time:</strong> ${new Date(scheduledDate).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}</p>
+                <p style="margin: 0;"><strong style="color: #7C3AED;">Scheduled Time:</strong> ${new Date(scheduledDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'long', timeStyle: 'short' })}</p>
             </div>
             <p style="${baseStyle.p}">Make sure to prepare and be online at the scheduled time.</p>
         `;
