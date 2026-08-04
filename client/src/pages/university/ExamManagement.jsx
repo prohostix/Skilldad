@@ -117,24 +117,27 @@ const ExamManagement = () => {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-            const [docsRes, coursesRes, examsRes] = await Promise.all([
+            const [docsRes, coursesRes, examsRes] = await Promise.allSettled([
                 axios.get('/api/documents', config),
                 axios.get('/api/courses/admin', config),
                 axios.get('/api/exams', config)
             ]);
 
-            setQuestionPapers(docsRes.data.filter(d => d.type === 'exam_paper'));
-            setAnswerKeys(docsRes.data.filter(d => d.type === 'answer_sheet'));
-            setAllDocuments(docsRes.data);
-            setExams(Array.isArray(examsRes.data) ? examsRes.data : []);
-            setCourses(coursesRes.data);
+            const docsData = docsRes.status === 'fulfilled' ? (docsRes.value?.data || []) : [];
+            const coursesData = coursesRes.status === 'fulfilled' ? (coursesRes.value?.data || []) : [];
+            const examsData = examsRes.status === 'fulfilled' ? (examsRes.value?.data || []) : [];
+
+            setQuestionPapers(Array.isArray(docsData) ? docsData.filter(d => d.type === 'exam_paper') : []);
+            setAnswerKeys(Array.isArray(docsData) ? docsData.filter(d => d.type === 'answer_sheet') : []);
+            setAllDocuments(Array.isArray(docsData) ? docsData : []);
+            setExams(Array.isArray(examsData) ? examsData : []);
+            setCourses(Array.isArray(coursesData) ? coursesData : []);
             setLoading(false);
             if (showSuccessToast) {
                 showToast('Exam system synchronized', 'success');
             }
         } catch (err) {
             console.error('Fetch error:', err);
-            showToast('Failed to sync system data', 'error');
             setExams([]);
             setLoading(false);
         }
