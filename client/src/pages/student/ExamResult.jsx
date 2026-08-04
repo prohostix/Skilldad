@@ -31,10 +31,10 @@ const ExamResult = () => {
         setLoading(true);
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
-            const userId = userInfo.id || userInfo._id;
+            const userId = userInfo.id || userInfo._id || userInfo.user_id;
 
             const [resultRes, submissionRes, examRes] = await Promise.allSettled([
-                axios.get(`/api/results/exam/${examId}/student/${userId}`, getAuthConfig()),
+                userId ? axios.get(`/api/results/exam/${examId}/student/${userId}`, getAuthConfig()) : Promise.resolve(null),
                 axios.get(`/api/exams/exam/${examId}/my-submission`, getAuthConfig()),
                 axios.get(`/api/exams/${examId}`, getAuthConfig())
             ]);
@@ -45,7 +45,7 @@ const ExamResult = () => {
 
             const sub = subDataVal?.submission || subDataVal;
             const ex = examDataVal?.exam || examDataVal;
-            let resData = resDataVal?.result !== undefined ? resDataVal.result : resDataVal;
+            let resData = (resDataVal && resDataVal.result !== undefined && resDataVal.result !== null) ? resDataVal.result : (resDataVal?.obtainedMarks !== undefined ? resDataVal : null);
 
             if (!resData && sub) {
                 const obtained = sub.obtained_marks !== undefined ? Number(sub.obtained_marks) : Number(sub.obtainedMarks || 0);
@@ -72,8 +72,8 @@ const ExamResult = () => {
             }
 
             setResult(resData);
-            setSubmission(sub);
-            setExam(ex);
+            setSubmission(sub || {});
+            setExam(ex || {});
         } catch (error) {
             console.error('Error fetching result:', error);
             showToast(error.response?.data?.message || 'Error loading result', 'error');
