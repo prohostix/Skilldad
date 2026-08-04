@@ -27,7 +27,8 @@ import {
     ArrowLeft,
     TrendingUp,
     FileCheck,
-    HelpCircle
+    HelpCircle,
+    Send
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
