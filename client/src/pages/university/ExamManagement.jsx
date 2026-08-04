@@ -1116,6 +1116,8 @@ const ExamManagement = () => {
                             </div>
                         </motion.div>
                     </motion.div>
+                )}
+
                 {/* Broadcast / Publish Results Modal */}
                 {publishModal.open && (
                     <motion.div
