@@ -67,7 +67,7 @@ const notifyResultRecipients = async (examId, examTitle) => {
   const recipientsRes = await query(`
     SELECT r.obtained_marks as "obtainedMarks", r.total_marks as "totalMarks",
            r.percentage, r.is_passed as "isPassed",
-           u.id, u.name, u.email, u.phone, u.profile
+           u.id, u.name, u.email, u.profile
     FROM results r
     JOIN users u ON r.student_id = u.id
     WHERE r.exam_id = $1

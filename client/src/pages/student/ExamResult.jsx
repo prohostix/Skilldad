@@ -45,7 +45,7 @@ const ExamResult = () => {
 
             const sub = subDataVal?.submission || subDataVal;
             const ex = examDataVal?.exam || examDataVal;
-            let resData = resDataVal?.result || resDataVal;
+            let resData = resDataVal?.result !== undefined ? resDataVal.result : resDataVal;
 
             if (!resData && sub) {
                 const obtained = sub.obtained_marks !== undefined ? Number(sub.obtained_marks) : Number(sub.obtainedMarks || 0);
