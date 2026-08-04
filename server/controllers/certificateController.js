@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const notifyCertificateIssued = async (certificate) => {
     try {
         const [studentRes, courseRes] = await Promise.all([
-            query('SELECT id, name, email, phone, profile FROM users WHERE id = $1', [certificate.student_id]),
+            query('SELECT id, name, email, profile FROM users WHERE id = $1', [certificate.student_id]),
             query('SELECT title FROM courses WHERE id = $1', [certificate.course_id])
         ]);
         const student = studentRes.rows[0];
