@@ -133,7 +133,7 @@ class WhatsAppService {
         // skilldad_certificate [Name, CourseTitle]
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_CERT || 'common_status',
+            process.env.GUPSHUP_TEMPLATE_CERT || 'skilldad_certificate',
             [studentName, courseTitle]
         );
     }
