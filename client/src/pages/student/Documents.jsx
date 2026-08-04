@@ -390,7 +390,7 @@ const Documents = () => {
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => handleDownload(`${cert.course_title} Certificate`, cert.certificate_url)}
+                                    onClick={() => handleDownload(`${cert.course_title} Certificate`, cert.file_url)}
                                     className="px-4 py-1.5 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-md transition-all shadow-lg shadow-primary/20 flex items-center gap-1.5"
                                 >
                                     <Download size={10} /> DOWNLOAD
