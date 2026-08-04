@@ -894,13 +894,15 @@ const ExamManagement = () => {
                                                 </div>
                                                 <div>
                                                     <h5 className="font-bold text-white tracking-tight">{exam.title}</h5>
-                                                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Finalized {new Date(exam.createdAt).toLocaleDateString()}</p>
+                                                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">
+                                                        Finalized {exam.createdAt || exam.created_at ? new Date(exam.createdAt || exam.created_at).toLocaleDateString() : 'Recent'}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-8">
                                                 <div className="text-right">
                                                     <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Pass Rate</p>
-                                                    <p className="text-lg font-black text-emerald-400">92%</p>
+                                                    <p className="text-lg font-black text-emerald-400">{exam.passRate !== undefined ? exam.passRate : (exam.pass_rate || 0)}%</p>
                                                 </div>
                                                 <ModernButton size="sm" variant="secondary" onClick={() => fetchSubmissions(exam._id)} className="!rounded-xl !bg-white/5 !border-white/10">View Audit</ModernButton>
                                             </div>

@@ -979,7 +979,7 @@ const PartnerExamManagement = () => {
                                                         )}
                                                     </div>
                                                     <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mt-1">
-                                                        Ended {new Date(exam.scheduledEndTime || exam.scheduledStartTime || exam.createdAt).toLocaleDateString()}
+                                                        Ended {(exam.scheduledEndTime || exam.scheduled_end || exam.scheduledStartTime || exam.scheduled_start || exam.createdAt || exam.created_at) ? new Date(exam.scheduledEndTime || exam.scheduled_end || exam.scheduledStartTime || exam.scheduled_start || exam.createdAt || exam.created_at).toLocaleDateString() : 'Recently'}
                                                     </p>
                                                 </div>
                                             </div>

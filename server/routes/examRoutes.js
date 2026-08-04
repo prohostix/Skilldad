@@ -161,7 +161,9 @@ router.get('/', protect, authorize('admin', 'university', 'partner'), async (req
                    c.id as course_id, c.title as course_title,
                    u.id as university_id, u.name as university_name, u.profile as university_profile,
                    cr.name as creator_name, cr.role as creator_role,
-                   (SELECT COUNT(*) FROM questions q WHERE q.exam_id = e.id) as question_count
+                   (SELECT COUNT(*) FROM questions q WHERE q.exam_id = e.id) as question_count,
+                   (SELECT COUNT(*) FROM results r WHERE r.exam_id = e.id) as total_results_count,
+                   (SELECT COUNT(*) FROM results r WHERE r.exam_id = e.id AND r.is_passed = true) as passed_results_count
             FROM exams e
             LEFT JOIN courses c ON e.course_id = c.id
             LEFT JOIN users u ON e.university_id = u.id
@@ -172,17 +174,26 @@ router.get('/', protect, authorize('admin', 'university', 'partner'), async (req
         if (userRole === 'admin') {
             examsRes = await query(queryStr + ' ORDER BY e.created_at DESC');
         } else {
-            // University filter: see exams assigned to them OR exams they created
+            // University/Partner filter: see exams assigned to them OR exams they created
             examsRes = await query(queryStr + ' WHERE e.university_id = $1 OR e.created_by_id = $1 ORDER BY e.created_at DESC', [req.user._id.toString()]);
         }
 
-        const exams = examsRes.rows.map(row => ({
-            ...row,
-            questionCount: parseInt(row.question_count || 0, 10),
-            university: { _id: row.university_id, name: row.university_name, profile: row.university_profile },
-            course: { _id: row.course_id, title: row.course_title },
-            createdBy: { name: row.creator_name, role: row.creator_role }
-        }));
+        const exams = examsRes.rows.map(row => {
+            const totalResCount = parseInt(row.total_results_count || 0, 10);
+            const passedResCount = parseInt(row.passed_results_count || 0, 10);
+            const passRate = totalResCount > 0 ? Math.round((passedResCount / totalResCount) * 100) : 0;
+
+            return {
+                ...row,
+                questionCount: parseInt(row.question_count || 0, 10),
+                totalResultsCount: totalResCount,
+                passedResultsCount: passedResCount,
+                passRate: passRate,
+                university: { _id: row.university_id, name: row.university_name, profile: row.university_profile },
+                course: { _id: row.course_id, title: row.course_title },
+                createdBy: { name: row.creator_name, role: row.creator_role }
+            };
+        });
 
         res.json(exams);
     } catch (error) {
