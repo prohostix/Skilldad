@@ -57,13 +57,22 @@ const notifyEnrolledStudents = async (session, title, message) => {
             
             const res = await query(q, params);
             studentIds = res.rows.map(r => r.student_id);
+
+            // Fallback: If no enrollments table rows match, check users table for course_id or partner/university
+            if (studentIds.length === 0) {
+                const userCourseRes = await query(
+                    "SELECT id FROM users WHERE (course_id = $1 OR $1 = ANY(enrolled_courses)) AND role = 'student'",
+                    [session.course_id]
+                );
+                studentIds = userCourseRes.rows.map(r => r.id);
+            }
         }
 
-        // Fallback: If no enrollments matched or course_id wasn't provided, fetch university or partner students
+        // Fallback 2: Fetch all students under partner or university
         if (studentIds.length === 0) {
             if (session.partner_id) {
                 const res = await query(
-                    "SELECT id FROM users WHERE registered_by = $1 AND role = 'student'",
+                    "SELECT id FROM users WHERE (registered_by = $1 OR created_by_id = $1) AND role = 'student'",
                     [session.partner_id]
                 );
                 studentIds = res.rows.map(r => r.id);
@@ -74,6 +83,12 @@ const notifyEnrolledStudents = async (session, title, message) => {
                 );
                 studentIds = res.rows.map(r => r.id);
             }
+        }
+
+        // Fallback 3: Global student broadcast fallback if single partner/university student base
+        if (studentIds.length === 0) {
+            const allStudentsRes = await query("SELECT id FROM users WHERE role = 'student' LIMIT 250");
+            studentIds = allStudentsRes.rows.map(r => r.id);
         }
 
         if (studentIds.length > 0) {
