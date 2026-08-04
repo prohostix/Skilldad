@@ -27,8 +27,6 @@ const ExamResult = () => {
         return { headers: { Authorization: `Bearer ${userInfo.token}` } };
     };
 
-    useEffect(() => { fetchResult(); }, [examId]);
-
     const fetchResult = async () => {
         setLoading(true);
         try {
@@ -38,9 +36,37 @@ const ExamResult = () => {
                 axios.get(`/api/exams/exam/${examId}/my-submission`, getAuthConfig()),
                 axios.get(`/api/exams/${examId}`, getAuthConfig())
             ]);
-            setResult(resultRes.data.result || resultRes.data);
-            setSubmission(submissionRes.data.submission || submissionRes.data);
-            setExam(examRes.data.exam || examRes.data);
+            const sub = submissionRes.data.submission || submissionRes.data;
+            const ex = examRes.data.exam || examRes.data;
+            let resData = resultRes.data.result;
+
+            if (!resData && sub) {
+                const obtained = sub.obtained_marks !== undefined ? Number(sub.obtained_marks) : Number(sub.obtainedMarks || 0);
+                const total = sub.total_marks !== undefined ? Number(sub.total_marks) : Number(sub.totalMarks || 0);
+                const pct = total > 0 ? (obtained / total) * 100 : (sub.percentage !== undefined ? Number(sub.percentage) : 0);
+                const passScore = Number(ex?.passingScore || ex?.passing_score || 40);
+                const isPassed = pct >= passScore;
+
+                let grade = 'F';
+                if (pct >= 90) grade = 'A+';
+                else if (pct >= 80) grade = 'A';
+                else if (pct >= 70) grade = 'B+';
+                else if (pct >= 60) grade = 'B';
+                else if (pct >= 50) grade = 'C';
+                else if (pct >= 40) grade = 'D';
+
+                resData = {
+                    obtainedMarks: obtained,
+                    totalMarks: total,
+                    percentage: pct,
+                    grade,
+                    isPassed
+                };
+            }
+
+            setResult(resData);
+            setSubmission(sub);
+            setExam(ex);
         } catch (error) {
             if (error.response?.status === 403) {
                 showToast('Results have not been published yet', 'error');

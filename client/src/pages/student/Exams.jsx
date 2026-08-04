@@ -584,11 +584,7 @@ const Exams = () => {
                             </span>
                         </div>
                         <ModernButton
-                            onClick={() => {
-                                if (window.confirm('Are you sure you want to submit your exam now?')) {
-                                    handleSubmitExam();
-                                }
-                            }}
+                            onClick={() => setShowSubmitModal(true)}
                             className="!bg-emerald-600 !text-white !px-6 !h-10 !text-xs !rounded-full shadow-lg shadow-emerald-600/20"
                         >
                             Submit Exam
@@ -650,7 +646,7 @@ const Exams = () => {
                                         </button>
                                     </div>
 
-                                    <h2 className="text-lg md:text-xl font-semibold text-slate-800 leading-relaxed">
+                                    <h2 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed">
                                         {question.question || question.questionText}
                                     </h2>
                                 </div>
@@ -819,6 +815,74 @@ const Exams = () => {
                         </div>
                     </aside>
                 </div>
+
+                {/* Styled Submit Modal */}
+                <AnimatePresence>
+                    {showSubmitModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 sm:p-7 max-w-md w-full text-slate-900 space-y-6"
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600">
+                                        <Send size={24} />
+                                    </div>
+                                    <button
+                                        onClick={() => setShowSubmitModal(false)}
+                                        className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-bold font-space text-slate-900">
+                                        Confirm Final Submission
+                                    </h3>
+                                    <p className="text-xs text-slate-500 leading-relaxed font-inter">
+                                        Are you sure you want to finish and submit your exam? Once submitted, you cannot change your responses.
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-center">
+                                    <div>
+                                        <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total</span>
+                                        <span className="text-lg font-black text-slate-800">{activeExam.questions.length}</span>
+                                    </div>
+                                    <div>
+                                        <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Answered</span>
+                                        <span className="text-lg font-black text-emerald-600">{answeredCount}</span>
+                                    </div>
+                                    <div>
+                                        <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Flagged</span>
+                                        <span className="text-lg font-black text-amber-600">{flaggedQuestions.size}</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3 pt-2">
+                                    <button
+                                        onClick={() => setShowSubmitModal(false)}
+                                        className="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                                    >
+                                        Back to Exam
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowSubmitModal(false);
+                                            handleSubmitExam();
+                                        }}
+                                        className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white shadow-lg shadow-emerald-600/25 transition-all"
+                                    >
+                                        Yes, Submit Now
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
         );
     }

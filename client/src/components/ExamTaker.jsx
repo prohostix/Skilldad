@@ -602,15 +602,15 @@ const SubmitConfirmModal = ({ onConfirm, onCancel, isSubmitting, answeredCount, 
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={styles.modalOverlay}>
-            <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.92, opacity: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+            <motion.div initial={{ scale: 0.94, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.94, opacity: 0, y: 10 }} transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                 style={styles.modalBox}>
 
                 <div style={styles.modalIcon}>
                     <Send size={26} color="#7C6FF7" />
                 </div>
-                <h3 style={styles.modalTitle}>Ready to Submit?</h3>
-                <p style={styles.modalSub}>Once submitted, you cannot make changes.</p>
+                <h3 style={styles.modalTitle}>Confirm Final Submission</h3>
+                <p style={styles.modalSub}>Are you sure you want to submit your exam now? Once submitted, you cannot modify your answers.</p>
 
                 <div style={styles.modalStats}>
                     <div style={styles.modalStat}>
@@ -618,11 +618,11 @@ const SubmitConfirmModal = ({ onConfirm, onCancel, isSubmitting, answeredCount, 
                         <span style={styles.modalStatLabel}>Answered</span>
                     </div>
                     <div style={styles.modalStat}>
-                        <span style={{ ...styles.modalStatNum, color: unanswered > 0 ? '#f59e0b' : '#22c55e' }}>{unanswered}</span>
+                        <span style={{ ...styles.modalStatNum, color: unanswered > 0 ? '#ef4444' : '#22c55e' }}>{unanswered}</span>
                         <span style={styles.modalStatLabel}>Unanswered</span>
                     </div>
                     <div style={styles.modalStat}>
-                        <span style={{ ...styles.modalStatNum, color: flaggedCount > 0 ? '#f59e0b' : 'rgba(255,255,255,0.5)' }}>{flaggedCount}</span>
+                        <span style={{ ...styles.modalStatNum, color: flaggedCount > 0 ? '#f59e0b' : 'rgba(255,255,255,0.4)' }}>{flaggedCount}</span>
                         <span style={styles.modalStatLabel}>Flagged</span>
                     </div>
                 </div>
@@ -636,7 +636,7 @@ const SubmitConfirmModal = ({ onConfirm, onCancel, isSubmitting, answeredCount, 
                 <div style={styles.modalActions}>
                     <button onClick={onCancel} disabled={isSubmitting} style={styles.cancelBtn}>Go Back</button>
                     <button onClick={onConfirm} disabled={isSubmitting} style={styles.confirmBtn}>
-                        {isSubmitting ? 'Submitting…' : 'Submit Now'}
+                        {isSubmitting ? 'Submitting…' : 'Yes, Submit Now'}
                     </button>
                 </div>
             </motion.div>
