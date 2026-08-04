@@ -30,15 +30,22 @@ const ExamResult = () => {
     const fetchResult = async () => {
         setLoading(true);
         try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const [resultRes, submissionRes, examRes] = await Promise.all([
-                axios.get(`/api/results/exam/${examId}/student/${userInfo.id || userInfo._id}`, getAuthConfig()),
+            const userInfo = JSON.parse(localStorage.getItem('userInfo')) || {};
+            const userId = userInfo.id || userInfo._id;
+
+            const [resultRes, submissionRes, examRes] = await Promise.allSettled([
+                axios.get(`/api/results/exam/${examId}/student/${userId}`, getAuthConfig()),
                 axios.get(`/api/exams/exam/${examId}/my-submission`, getAuthConfig()),
                 axios.get(`/api/exams/${examId}`, getAuthConfig())
             ]);
-            const sub = submissionRes.data.submission || submissionRes.data;
-            const ex = examRes.data.exam || examRes.data;
-            let resData = resultRes.data.result;
+
+            const resDataVal = resultRes.status === 'fulfilled' ? resultRes.value?.data : null;
+            const subDataVal = submissionRes.status === 'fulfilled' ? submissionRes.value?.data : null;
+            const examDataVal = examRes.status === 'fulfilled' ? examRes.value?.data : null;
+
+            const sub = subDataVal?.submission || subDataVal;
+            const ex = examDataVal?.exam || examDataVal;
+            let resData = resDataVal?.result || resDataVal;
 
             if (!resData && sub) {
                 const obtained = sub.obtained_marks !== undefined ? Number(sub.obtained_marks) : Number(sub.obtainedMarks || 0);
@@ -68,11 +75,8 @@ const ExamResult = () => {
             setSubmission(sub);
             setExam(ex);
         } catch (error) {
-            if (error.response?.status === 403) {
-                showToast('Results have not been published yet', 'error');
-            } else {
-                showToast(error.response?.data?.message || 'Error loading result', 'error');
-            }
+            console.error('Error fetching result:', error);
+            showToast(error.response?.data?.message || 'Error loading result', 'error');
         } finally {
             setLoading(false);
         }
