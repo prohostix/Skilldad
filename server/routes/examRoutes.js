@@ -43,6 +43,7 @@ const notifyEnrolledStudents = async (session, title, message) => {
     try {
         let studentIds = [];
         
+        // 1. Fetch by Course and optional Batch
         if (session.course_id) {
             let q = "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'";
             let params = [session.course_id];
@@ -58,34 +59,35 @@ const notifyEnrolledStudents = async (session, title, message) => {
             const res = await query(q, params);
             studentIds = res.rows.map(r => r.student_id);
 
-            // Fallback: If no enrollments table rows match, check users table for course_id or partner/university
-            if (studentIds.length === 0) {
-                const userCourseRes = await query(
-                    "SELECT id FROM users WHERE (course_id = $1 OR $1 = ANY(enrolled_courses)) AND role = 'student'",
-                    [session.course_id]
-                );
-                studentIds = userCourseRes.rows.map(r => r.id);
-            }
+            // Also check users directly linked to course
+            const userCourseRes = await query(
+                "SELECT id FROM users WHERE (course_id = $1 OR $1 = ANY(enrolled_courses)) AND role = 'student'",
+                [session.course_id]
+            );
+            const userCourseIds = userCourseRes.rows.map(r => r.id);
+            studentIds = Array.from(new Set([...studentIds, ...userCourseIds]));
         }
 
-        // Fallback 2: Fetch all students under partner or university
-        if (studentIds.length === 0) {
-            if (session.partner_id) {
-                const res = await query(
-                    "SELECT id FROM users WHERE (registered_by = $1 OR created_by_id = $1) AND role = 'student'",
-                    [session.partner_id]
-                );
-                studentIds = res.rows.map(r => r.id);
-            } else if (session.university_id) {
-                const res = await query(
-                    "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
-                    [session.university_id]
-                );
-                studentIds = res.rows.map(r => r.id);
-            }
+        // 2. Fetch by Partner or University if specified
+        if (session.partner_id) {
+            const res = await query(
+                "SELECT id FROM users WHERE (registered_by = $1 OR created_by_id = $1) AND role = 'student'",
+                [session.partner_id]
+            );
+            const partnerStudentIds = res.rows.map(r => r.id);
+            studentIds = Array.from(new Set([...studentIds, ...partnerStudentIds]));
+        }
+        
+        if (session.university_id) {
+            const res = await query(
+                "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
+                [session.university_id]
+            );
+            const uniStudentIds = res.rows.map(r => r.id);
+            studentIds = Array.from(new Set([...studentIds, ...uniStudentIds]));
         }
 
-        // Fallback 3: Global student broadcast fallback if single partner/university student base
+        // 3. Fallback: If no specific partner/university/course students matched, fetch all active students
         if (studentIds.length === 0) {
             const allStudentsRes = await query("SELECT id FROM users WHERE role = 'student' LIMIT 250");
             studentIds = allStudentsRes.rows.map(r => r.id);
