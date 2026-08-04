@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Bell, Shield, Save, Upload } from 'lucide-react';
+import { User, Bell, Shield, Save, Upload, ArrowLeft } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 import { useToast } from '../context/ToastContext';
@@ -21,6 +22,7 @@ const SettingsTab = ({ active, label, icon: Icon, onClick }) => (
 );
 
 const Settings = () => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('profile');
     const [profileImage, setProfileImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -217,8 +219,14 @@ const Settings = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="mb-8"
+                    className="mb-8 flex items-center space-x-4"
                 >
+                    <button 
+                        onClick={() => navigate(-1)}
+                        className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+                    >
+                        <ArrowLeft size={16} />
+                    </button>
                     <h1 className="text-base font-bold text-white font-inter tracking-tight">Account Settings</h1>
                 </motion.div>
 

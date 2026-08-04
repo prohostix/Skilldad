@@ -235,7 +235,7 @@ const Navbar = ({ onToggleSidebar }) => {
                                 </div>
                                 <div className="py-1">
                                     <button 
-                                        onClick={() => { setIsProfileOpen(false); navigate('/settings'); }}
+                                        onClick={() => { setIsProfileOpen(false); navigate(userRole === 'student' ? '/dashboard/settings' : `/${userRole}/settings`); }}
                                         className="w-full text-left px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-3"
                                     >
                                         <Settings size={16} className="text-slate-400" />
