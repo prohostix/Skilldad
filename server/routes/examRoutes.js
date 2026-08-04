@@ -257,8 +257,8 @@ router.put('/admin/:id/link-paper', protect, authorize('admin', 'university', 'p
     }
 });
 
-// @desc    Schedule a new exam
-router.post('/admin/schedule', protect, authorize('admin', 'university', 'partner'), async (req, res) => {
+// Helper for exam scheduling
+const handleSchedulePost = async (req, res) => {
     try {
         const {
             title, description, course, university,
@@ -316,16 +316,13 @@ router.post('/admin/schedule', protect, authorize('admin', 'university', 'partne
         console.error('[PG EXAM] Error scheduling exam:', error);
         res.status(500).json({ message: error.message });
     }
-});
+};
 
-// Alias for university deployment
-router.post('/', protect, authorize('admin', 'university', 'partner'), async (req, res, next) => {
-    // We just re-use the same logic by calling the existing handler or redirecting
-    // For simplicity, we just duplicate the handler or call it. 
-    // I'll just copy the logic here or wrap it in a function if I had more time, 
-    // but for now, making it hit the same logic is easiest.
-    return res.status(308).redirect(307, '/api/exams/admin/schedule');
-});
+// @desc    Schedule a new exam
+router.post('/admin/schedule', protect, authorize('admin', 'university', 'partner'), handleSchedulePost);
+
+// Alias for university & partner deployment
+router.post('/', protect, authorize('admin', 'university', 'partner'), handleSchedulePost);
 
 // Use refactored controller methods for student flow
 router.get('/student/my-exams', protect, examController.getStudentExams);
