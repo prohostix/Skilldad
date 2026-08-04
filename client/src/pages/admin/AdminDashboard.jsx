@@ -17,7 +17,8 @@ import {
     FileText,
     ChevronDown,
     Briefcase,
-    Banknote
+    Banknote,
+    Award
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ChartCard from '../../components/ui/ChartCard';
@@ -30,7 +31,7 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState({
         totalUsers: 0, totalCourses: 0, totalStudents: 0,
         totalPartners: 0, totalRevenue: 0, totalTickets: 0,
-        pendingEnquiries: 0, pendingPayouts: 0,
+        pendingEnquiries: 0, pendingPayouts: 0, pendingCertificates: 0,
         dbSize: 'Calculating...',
         chartData: [
             { name: 'Mon', value: 0 },
@@ -184,6 +185,7 @@ const AdminDashboard = () => {
         { title: 'Course Enquiries', value: stats.pendingEnquiries ?? '0', icon: Mail, color: '#5B5CFF', trend: 'Pending' },
         { title: 'Open Tickets', value: stats.totalTickets || '0', icon: FileText, color: '#FF5C5C', trend: 'Active' },
         { title: 'Pending Payouts', value: stats.pendingPayouts ?? '0', icon: Banknote, color: '#22c55e', trend: 'Payout' },
+        { title: 'Pending Certs', value: stats.pendingCertificates ?? '0', icon: Award, color: '#E83E8C', trend: 'Requests' },
     ];
 
     return (

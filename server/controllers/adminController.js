@@ -150,6 +150,9 @@ const getGlobalStats = async (req, res) => {
         console.log('[getGlobalStats] Querying pendingPayoutsCount...');
         const pendingPayoutsCount = await query("SELECT COUNT(*) FROM payouts WHERE status = 'pending'").catch(e => { console.error('pendingPayoutsCount Error:', e.message); return { rows: [{ count: 0 }] }; });
 
+        console.log('[getGlobalStats] Querying pendingCertificatesCount...');
+        const pendingCertificatesCount = await query("SELECT COUNT(*) FROM certificates WHERE status = 'PENDING'").catch(e => { console.error('pendingCertificatesCount Error:', e.message); return { rows: [{ count: 0 }] }; });
+
         console.log('[getGlobalStats] Querying dbSizeRes...');
         const dbSizeRes = await query("SELECT pg_database_size(current_database()) as size").catch(e => { console.error('dbSizeRes Error (falling back to 0):', e.message); return { rows: [{ size: 0 }] }; });
         
@@ -222,6 +225,7 @@ const getGlobalStats = async (req, res) => {
             totalApplications: parseInt(careerAppCount.rows[0].count),
             pendingEnquiries: parseInt(pendingEnquiryCount.rows[0].count),
             pendingPayouts: parseInt(pendingPayoutsCount.rows[0].count),
+            pendingCertificates: parseInt(pendingCertificatesCount.rows[0].count),
             totalRevenue: totalRevenue,
             dbSize: `${dbSizeMB} MB`,
             chartData: chartRes.rows,
