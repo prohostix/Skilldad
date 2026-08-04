@@ -931,7 +931,7 @@ const ExamManagement = () => {
                     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md">
                         <GlassCard className="p-6 border-white/20 shadow-[0_0_60px_rgba(var(--primary-rgb),0.1)]">
                             <div className="flex items-center justify-between mb-5">
-                                <h2 className="text-lg font-black text-white tracking-tighter uppercase">Schedule Exam</h2>
+                                <h2 className="text-xl font-bold text-white tracking-normal capitalize">Schedule Exam</h2>
                                 <button onClick={() => setOpenSchedule(false)} className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-white/40"><ArrowLeft size={16} className="rotate-45" /></button>
                             </div>
                             <form onSubmit={handleScheduleExam} className="space-y-4">
@@ -940,14 +940,14 @@ const ExamManagement = () => {
                                         <button 
                                             type="button"
                                             onClick={() => setExamData({...examData, deploymentMode: 'new'})} 
-                                            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${examData.deploymentMode === 'new' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
+                                            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${examData.deploymentMode === 'new' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
                                         >
                                             New Slot
                                         </button>
                                         <button 
                                             type="button"
                                             onClick={() => setExamData({...examData, deploymentMode: 'existing'})} 
-                                            className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${examData.deploymentMode === 'existing' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
+                                            className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ${examData.deploymentMode === 'existing' ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
                                         >
                                             Existing Slot
                                         </button>
@@ -957,11 +957,11 @@ const ExamManagement = () => {
                                 {(!examData.linkedPaper || examData.deploymentMode === 'new') ? (
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="space-y-1 col-span-2">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Protocol Label</label>
-                                            <input required type="text" value={examData.title} onChange={e => setExamData({...examData, title: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white text-sm" placeholder="Exam Title" />
+                                            <label className="text-xs font-medium text-white/60 ml-1">Exam Title</label>
+                                            <input required type="text" value={examData.title} onChange={e => setExamData({...examData, title: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white text-sm" placeholder="e.g., Midterm Assessment 2026" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Subject Vector</label>
+                                            <label className="text-xs font-medium text-white/60 ml-1">Course / Domain</label>
                                             <select
                                                 required
                                                 value={examData.course}
@@ -982,21 +982,21 @@ const ExamManagement = () => {
                                                         setAvailableBatches([]);
                                                     }
                                                 }}
-                                                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/60 text-sm"
+                                                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/80 text-sm"
                                             >
-                                                <option value="">Select Domain</option>
+                                                <option value="">Select Course</option>
                                                 {courses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
                                             </select>
                                         </div>
                                         {examData.course && availableBatches.length > 0 && (
                                             <div className="space-y-1 col-span-2">
-                                                <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Target Batches (Optional)</label>
-                                                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-3 bg-white/5 border border-white/10 rounded-xl custom-scrollbar">
-                                                    {availableBatches.map((batch) => (
-                                                        <label key={batch.id} className="flex items-center space-x-2 cursor-pointer group p-1 hover:bg-white/5 rounded transition-colors">
+                                                <label className="text-xs font-medium text-white/60 ml-1">Target Batches</label>
+                                                <div className="grid grid-cols-2 gap-2 bg-white/5 border border-white/10 rounded-xl p-2.5 max-h-36 overflow-y-auto">
+                                                    {availableBatches.map(batch => (
+                                                        <label key={batch.id} className="flex items-center gap-2 cursor-pointer group">
                                                             <input
                                                                 type="checkbox"
-                                                                className="w-4 h-4 rounded border-white/20 bg-white/5 text-primary focus:ring-primary/50"
+                                                                className="rounded border-white/20 bg-white/5 text-primary focus:ring-primary h-3.5 w-3.5"
                                                                 checked={(examData.batchIds || []).includes(batch.id)}
                                                                 onChange={(e) => {
                                                                     const currentBatchIds = examData.batchIds || [];
@@ -1015,38 +1015,38 @@ const ExamManagement = () => {
                                             </div>
                                         )}
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Duration (MIN)</label>
+                                            <label className="text-xs font-medium text-white/60 ml-1">Duration (mins)</label>
                                             <input type="number" value={examData.duration} onChange={e => setExamData({...examData, duration: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Launch Sequence</label>
-                                            <input required type="datetime-local" value={examData.scheduledStartTime} onChange={e => setExamData({...examData, scheduledStartTime: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm" />
+                                            <label className="text-xs font-medium text-white/60 ml-1">Start Time</label>
+                                            <input required type="datetime-local" value={examData.scheduledStartTime} onChange={e => setExamData({...examData, scheduledStartTime: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/80 text-sm" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Termination Sequence</label>
-                                            <input required type="datetime-local" value={examData.scheduledEndTime} onChange={e => setExamData({...examData, scheduledEndTime: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm" />
+                                            <label className="text-xs font-medium text-white/60 ml-1">End Time</label>
+                                            <input required type="datetime-local" value={examData.scheduledEndTime} onChange={e => setExamData({...examData, scheduledEndTime: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white/80 text-sm" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Total Marks</label>
+                                            <label className="text-xs font-medium text-white/60 ml-1">Total Marks</label>
                                             <input required type="number" value={examData.totalMarks} onChange={e => setExamData({...examData, totalMarks: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm" />
                                         </div>
                                         <div className="space-y-1">
-                                            <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Passing Score</label>
+                                            <label className="text-xs font-medium text-white/60 ml-1">Passing Score</label>
                                             <input required type="number" value={examData.passingScore} onChange={e => setExamData({...examData, passingScore: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm" />
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="space-y-1">
-                                        <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Select Target Slot</label>
-                                        <select required value={examData.existingExamId} onChange={e => setExamData({...examData, existingExamId: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/60 text-sm">
+                                        <label className="text-xs font-medium text-white/60 ml-1">Select Target Slot</label>
+                                        <select required value={examData.existingExamId} onChange={e => setExamData({...examData, existingExamId: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white/80 text-sm">
                                             <option value="">Choose an existing examination...</option>
                                             {exams.map(e => <option key={e._id} value={e._id}>{e.title}</option>)}
                                         </select>
                                     </div>
                                 )}
                                 <div className="flex gap-3 pt-2">
-                                    <button type="button" onClick={() => setOpenSchedule(false)} className="flex-1 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold uppercase tracking-widest text-white/40 hover:bg-white/10 transition-all">Abort</button>
-                                    <button type="submit" className="flex-1 py-2 bg-primary rounded-xl text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-primary/30 hover:bg-primary/80 transition-all">Deploy System</button>
+                                    <button type="button" onClick={() => setOpenSchedule(false)} className="flex-1 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-semibold text-white/60 hover:bg-white/10 transition-all">Cancel</button>
+                                    <button type="submit" className="flex-1 py-2.5 bg-primary rounded-xl text-xs font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/80 transition-all">Schedule Exam</button>
                                 </div>
                             </form>
                         </GlassCard>
