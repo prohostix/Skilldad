@@ -646,8 +646,8 @@ const Exams = () => {
                                         </button>
                                     </div>
 
-                                    <h2 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed">
-                                        {question.question || question.questionText}
+                                    <h2 className="text-lg md:text-xl font-black text-slate-900 leading-relaxed dark:text-slate-900">
+                                        {question.questionText || question.question_text || question.question || question.title || 'Question text not available'}
                                     </h2>
                                 </div>
 
