@@ -2,6 +2,7 @@ const sendEmail = require('../utils/sendEmail');
 const whatsAppService = require('./WhatsAppService');
 const emailTemplates = require('../utils/emailTemplates');
 const { query } = require('../config/postgres');
+const crypto = require('crypto');
 
 /**
  * Notification Service (Production Grade)
@@ -29,7 +30,7 @@ class NotificationService {
             phone = p.phone;
         }
 
-        const newLogId = `nl_${Date.now()}`;
+        const newLogId = `nl_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
         const deliveryStatus = {
             email: { state: options.email && email ? 'pending' : 'skipped' },
             whatsapp: { state: options.whatsapp && phone ? 'pending' : 'skipped' }
