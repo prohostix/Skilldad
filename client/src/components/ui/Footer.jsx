@@ -49,7 +49,7 @@ const Footer = ({ forceVisible = false }) => {
                                 alt="SkillDad Logo"
                                 className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_20px_rgba(192,38,255,0.5)]"
                             />
-                            <span className="text-2xl font-black text-white tracking-tight font-space">
+                            <span className="brand-text text-2xl font-bold font-space text-white uppercase tracking-[0.1em]">
                                 SkillDad
                             </span>
                         </Link>

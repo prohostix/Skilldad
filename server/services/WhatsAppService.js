@@ -48,6 +48,14 @@ class WhatsAppService {
             }));
             payload.append('src.name', 'SkillDadChat');
 
+            console.log(`[WhatsApp Gupshup DEBUG] Payload to send:`, {
+                destination: cleanPhone,
+                template: JSON.stringify({
+                    id: templateId,
+                    params: variables.map(v => (v && v.toString().trim() !== '') ? v.toString() : ' ')
+                })
+            });
+
             const response = await axios.post(
                 this.baseUrl,
                 payload,

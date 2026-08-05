@@ -520,15 +520,15 @@ select option {
 html.light-mode {
   --color-background: #ffffff;
   --color-background-mid: #f9fafb;
-  --color-background-light: #f3f4f6;
+  --color-background-light: #f5f0e6;
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;
   --color-text-muted: #6b7280;
-  background-color: #f3f4f6 !important;
+  background-color: #f5f0e6 !important;
 }
 
 html.light-mode body {
-  background-color: #f3f4f6 !important;
+  background-color: #f5f0e6 !important;
   color: #1f2937 !important;
 }
 
@@ -542,8 +542,8 @@ html.light-mode .bg-alyra-gradient,
 html.light-mode .bg-background,
 html.light-mode .bg-background-mid,
 html.light-mode .bg-background-light {
-  background: #f3f4f6 !important;
-  background-color: #f3f4f6 !important;
+  background: #f5f0e6 !important;
+  background-color: #f5f0e6 !important;
 }
 
 /* Ensure absolute/fixed overlays also become light */
@@ -553,7 +553,7 @@ html.light-mode [class*="bg-background/"] {
 }
 
 html.light-mode nav {
-  background-color: rgba(243, 244, 246, 0.95) !important;
+  background-color: rgba(245, 240, 230, 0.95) !important;
 }
 
 html.light-mode .text-white,
@@ -608,18 +608,18 @@ html.light-mode .bg-zinc-900 {
 }
 html.light-mode .bg-gray-800,
 html.light-mode .bg-zinc-800 {
-  background-color: #f3f4f6 !important;
+  background-color: #f5f0e6 !important;
 }
 
 html.light-mode input,
 html.light-mode select,
 html.light-mode textarea {
-  background-color: #ffffff !important;
+  background-color: #f5f0e6 !important;
   color: #111827 !important;
   border: 1px solid #d1d5db !important;
 }
 html.light-mode select option {
-  background-color: #ffffff !important;
+  background-color: #f5f0e6 !important;
   color: #111827 !important;
 }
 
@@ -636,4 +636,146 @@ html.light-mode .text-\[\#E9D5FF\] {
 }
 html.light-mode .text-\[\#E9D5FF\]:hover {
   color: #111827 !important;
+}
+
+/* --- LIGHT MODE GLOBAL OVERRIDES --- */
+html.light-mode body {
+  background-color: #f5f0e6 !important;
+  background-image: none !important;
+}
+
+html.light-mode .text-white, 
+html.light-mode [class*="text-[#F"], 
+html.light-mode [class*="text-[#E"], 
+html.light-mode [class*="text-[#D"], 
+html.light-mode [class*="text-gray-1"], 
+html.light-mode [class*="text-gray-2"], 
+html.light-mode [class*="text-gray-3"], 
+html.light-mode [class*="text-gray-4"], 
+html.light-mode [class*="text-slate-1"], 
+html.light-mode [class*="text-slate-2"], 
+html.light-mode [class*="text-slate-3"], 
+html.light-mode [class*="text-slate-4"] {
+  color: #1e293b !important;
+}
+
+html.light-mode .bg-black, 
+html.light-mode [class*="bg-[#0"], 
+html.light-mode [class*="bg-[#1"], 
+html.light-mode [class*="bg-gray-9"], 
+html.light-mode [class*="bg-gray-8"], 
+html.light-mode [class*="bg-slate-9"], 
+html.light-mode [class*="bg-slate-8"] {
+  background-color: #f5f0e6 !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light-mode nav[style] {
+    background-color: rgba(245, 240, 230, 0.85) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(16px) !important;
+}
+  
+  html.light-mode nav[style*="background-color: transparent"] {
+  background-color: transparent !important;
+  border-bottom-color: transparent !important;
+  backdrop-filter: none !important;
+}
+  
+  /* Force nav text and brand logo to be white on the new purple background */
+  
+  
+  
+
+html.light-mode button .text-white, 
+html.light-mode a .text-white {
+  color: #ffffff !important;
+}
+
+/* --- HERO SECTION LIGHT MODE FIXES --- */
+
+
+html.light-mode .from-black {
+  --tw-gradient-from: #f5f0e6 !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.light-mode .via-black\/40 {
+  --tw-gradient-via: rgba(245, 240, 230, 0.6) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+}
+
+html.light-mode .to-black {
+  --tw-gradient-to: #f5f0e6 !important;
+}
+
+html.light-mode .from-black.to-transparent {
+  background-image: linear-gradient(to top, #f5f0e6, transparent) !important;
+}
+html.light-mode .bg-gradient-to-r.from-black.via-black\/40.to-transparent {
+  background-image: linear-gradient(to right, #f5f0e6, rgba(245, 240, 230, 0.8), transparent) !important;
+}
+html.light-mode .bg-gradient-to-l.from-black.via-black\/40.to-transparent {
+  background-image: linear-gradient(to left, #f5f0e6, rgba(245, 240, 230, 0.8), transparent) !important;
+}
+html.light-mode .bg-gradient-to-t.from-black.to-transparent {
+  background-image: linear-gradient(to top, #f5f0e6, transparent) !important;
+}
+
+html.light-mode .text-white\/50,
+html.light-mode .text-white\/60,
+html.light-mode .text-white\/80 {
+  color: #475569 !important;
+}
+
+/* Make sure the hero container doesn't force black */
+html.light-mode .bg-black {
+  background-color: #f5f0e6 !important;
+}
+
+/* Force text visibility in hero */
+html.light-mode .text-white {
+  color: #1e293b !important;
+}
+
+/* Fix the black line crack in HeroSection NetworkDiagram */
+html.light-mode .network-diagram-fade {
+  opacity: 0 !important;
+}
+
+
+
+/* Fix the black line crack in HeroSection NetworkDiagram */
+html.light-mode .absolute.inset-y-0.right-0.w-20.pointer-events-none {
+  background: linear-gradient(to right, transparent, #f5f0e6) !important;
+}
+
+/* Restore canvas rule */
+html.light-mode canvas {
+  filter: invert(1) hue-rotate(180deg) brightness(1.05);
+  mix-blend-mode: multiply;
+  opacity: 0.95;
+}
+
+/* Fix stacking context for multiply blend mode in light mode */
+
+
+/* Force canvas wrapper to multiply with cream background */
+html.light-mode .absolute.inset-0.z-0.gpu-accelerated {
+  mix-blend-mode: multiply !important;
+}
+
+/* Brand text color specifically for logos in light mode */
+html.light-mode .brand-text,
+html.light-mode a .brand-text,
+html.light-mode a .text-white.brand-text {
+  color: #4C1D95 !important;
+}
+
+/* Force nav box links to be white on the purple gradient background */
+html.light-mode .nav-box-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+html.light-mode .nav-box-link:hover {
+  color: #ffffff !important;
 }

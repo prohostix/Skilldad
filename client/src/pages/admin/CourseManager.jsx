@@ -65,7 +65,7 @@ const CourseManager = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.get('/api/users/universities', config);
+            const { data } = await axios.get('/api/admin/universities', config);
             setUniversities(data);
         } catch (error) {
             console.error(error);
@@ -76,7 +76,7 @@ const CourseManager = () => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.get('/api/skilldad-universities', config);
+            const { data } = await axios.get('/api/admin/skilldad-universities', config);
             setSkillDadUniversities(data);
         } catch (error) {
             console.error(error);

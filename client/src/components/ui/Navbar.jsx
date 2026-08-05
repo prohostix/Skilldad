@@ -11,24 +11,20 @@ const Navbar = ({ compact = false }) => {
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(() => {
-        const savedMode = localStorage.getItem('theme-mode');
-        // Default is dark mode, so if nothing is saved or it's 'dark', return true.
-        return savedMode ? savedMode === 'dark' : true;
-    });
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
 
-    // Theme effect
     useEffect(() => {
-        if (isDarkMode) {
-            document.documentElement.classList.remove('light-mode');
-            localStorage.setItem('theme-mode', 'dark');
-        } else {
+        if (theme === 'light') {
             document.documentElement.classList.add('light-mode');
-            localStorage.setItem('theme-mode', 'light');
+        } else {
+            document.documentElement.classList.remove('light-mode');
         }
-    }, [isDarkMode]);
+        localStorage.setItem('theme', theme);
+    }, [theme]);
 
-    const toggleTheme = () => setIsDarkMode(!isDarkMode);
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    };
 
     // Check if we're on auth pages (login/register)
     const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
@@ -95,22 +91,27 @@ const Navbar = ({ compact = false }) => {
                             />
                         </div>
                         {/* Text - 'SkillDad' */}
-                        <span className={`font-bold font-space text-white uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
+                        <span className={`brand-text font-bold font-space text-white uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
                             SkillDad
                         </span>
                     </div>
 
                     {/* Desktop Menu - Hide on auth pages */}
                     {!isAuthPage && (
-                        <div className="hidden lg:flex items-center space-x-8">
+                        <div className={`hidden lg:flex items-center justify-center ${theme === 'light' ? 'space-x-5 bg-gradient-to-r from-[#8A2BE2] to-[#FF2FD1] px-7 h-9 rounded-full shadow-[0_4px_15px_rgba(138,43,226,0.3)] border border-white/20' : 'space-x-8'}`}>
                             {navItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     to={item.href}
-                                    className={`relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`}
+                                    className={theme === 'light' 
+                                        ? `nav-box-link font-semibold text-white/90 hover:text-white transition-colors duration-200 group flex items-center h-full ${compact ? 'text-xs' : 'text-[13px]'}`
+                                        : `relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`
+                                    }
                                 >
                                     {item.name}
-                                    <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-primary-dark to-primary group-hover:w-full transition-all duration-300 shadow-glow-purple"></span>
+                                    {theme !== 'light' && (
+                                        <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r from-primary-dark to-primary group-hover:w-full transition-all duration-300 shadow-glow-purple"></span>
+                                    )}
                                 </Link>
                             ))}
                         </div>
@@ -119,15 +120,13 @@ const Navbar = ({ compact = false }) => {
                     {/* Right Side Actions - Hide on auth pages */}
                     {!isAuthPage && (
                         <div className="hidden lg:flex items-center space-x-6">
-                            {/* Theme Toggle */}
                             <button
                                 onClick={toggleTheme}
-                                className="p-2 rounded-full border border-white/20 text-white hover:bg-white/10 hover:text-primary transition-all duration-300"
+                                className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center ${theme === 'light' ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/5 hover:border-primary/30'}`}
                                 aria-label="Toggle theme"
                             >
-                                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
                             </button>
-                            
                             {user ? (
                                 <button
                                     onClick={() => navigate(getDashboardLink())}
@@ -157,7 +156,13 @@ const Navbar = ({ compact = false }) => {
 
                     {/* Mobile Menu Button - Hide on auth pages */}
                     {!isAuthPage && (
-                        <div className="lg:hidden">
+                        <div className="lg:hidden flex items-center space-x-4">
+                            <button
+                                onClick={toggleTheme}
+                                className={`p-1.5 rounded-full transition-colors flex items-center justify-center ${theme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-[#1a1a2e] text-[#E9D5FF] border border-white/5'}`}
+                            >
+                                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                            </button>
                             <button onClick={() => setMobileMenuOpen(true)} className="text-white">
                                 <Menu size={compact ? 20 : 24} />
                             </button>
@@ -177,23 +182,13 @@ const Navbar = ({ compact = false }) => {
                     }}
                 >
                     <div className="flex justify-between items-center mb-10">
-                        <span className="text-xl font-bold font-inter text-white">SkillDad</span>
+                        <span className="brand-text text-xl font-bold font-inter text-white">SkillDad</span>
                         <button onClick={() => setMobileMenuOpen(false)} className="text-white">
                             <X size={24} />
                         </button>
                     </div>
 
-                            {/* Theme Toggle Mobile */}
-                            <button
-                                onClick={toggleTheme}
-                                className="flex items-center justify-between w-full py-4 px-4 text-white border border-white/10 rounded-xl mb-4"
-                            >
-                                <span className="font-medium text-lg">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                                {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-400" />}
-                            </button>
-
-                            {/* Mobile Auth Buttons */}
-                            <div className="flex flex-col space-y-4">
+                    <div className="flex flex-col space-y-6">
                         {navItems.map((item) => (
                             <Link
                                 key={item.name}
