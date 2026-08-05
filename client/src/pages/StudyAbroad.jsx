@@ -141,20 +141,20 @@ const StudyAbroad = () => {
                                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
                                         Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Boundless</span> Opportunities
                                     </h1>
-                                    <p className="text-white/40 text-lg max-w-2xl mx-auto">
+                                    <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                                         Discover world-class education across the globe. Choose your destination and start your journey today.
                                     </p>
                                     
                                     <div className="max-w-xl mx-auto relative group mt-8">
                                         <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700"></div>
                                         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl p-2 focus-within:border-primary/50 transition-all">
-                                            <Search className="ml-4 text-white/20" size={20} />
+                                            <Search className="ml-4 text-gray-400" size={20} />
                                             <input 
                                                 type="text" 
                                                 placeholder="Search by country (e.g. Canada, UK...)"
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="bg-transparent border-none outline-none w-full px-4 py-3 text-white placeholder:text-white/20"
+                                                className="bg-transparent border-none outline-none w-full px-4 py-3 text-white placeholder:text-gray-400"
                                             />
                                         </div>
                                     </div>
@@ -182,15 +182,15 @@ const StudyAbroad = () => {
                                                     className="w-full h-96 object-cover rounded-3xl group-hover:scale-105 transition-transform duration-700"
                                                 />
                                                 <div className="absolute bottom-0 left-0 right-0 p-8 z-20 space-y-2">
-                                                    <h3 className="text-3xl font-bold">{country.name}</h3>
-                                                    <p className="text-white/60 line-clamp-2 text-sm">{country.description}</p>
-                                                    <div className="pt-4 flex items-center text-primary font-bold gap-2 group-hover:gap-4 transition-all uppercase tracking-widest text-xs">
+                                                    <h3 className="text-3xl font-bold force-white">{country.name}</h3>
+                                                    <p className="force-white-60 line-clamp-2 text-sm">{country.description}</p>
+                                                    <div className="pt-4 flex items-center force-primary font-bold gap-2 group-hover:gap-4 transition-all uppercase tracking-widest text-xs">
                                                         Explore Universities <ArrowRight size={14} />
                                                     </div>
                                                 </div>
                                                 <div className="absolute top-6 right-6 z-20">
                                                     <div className="p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                                                        <ArrowUpRight size={20} />
+                                                        <ArrowUpRight size={20} className="force-white" />
                                                     </div>
                                                 </div>
                                             </motion.div>

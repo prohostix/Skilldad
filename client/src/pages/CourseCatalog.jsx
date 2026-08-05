@@ -108,7 +108,7 @@ const CourseCatalog = () => {
     }, [courses, isFixedUniversity]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] relative overflow-hidden">
+        <div className="min-h-screen course-catalog-page bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] relative overflow-hidden">
             <Navbar />
 
             {/* Background Glows */}
@@ -121,11 +121,11 @@ const CourseCatalog = () => {
                 <AnimatePresence>
                     {!(isSearchFocused || filter) && (
                         <motion.div 
-                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                            animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                            transition={{ duration: 0.4, ease: "easeInOut" }}
-                            className="max-w-[1300px] mx-auto text-center space-y-4 px-4 overflow-hidden"
+                             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                             animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                             transition={{ duration: 0.4, ease: "easeInOut" }}
+                             className="max-w-[1300px] mx-auto text-center space-y-4 px-4 overflow-hidden"
                         >
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
@@ -135,7 +135,7 @@ const CourseCatalog = () => {
                                 {universityName ? (
                                     <><span className="opacity-40">Courses by</span> <span className="premium-gradient-text">{universityName}</span></>
                                 ) : (
-                                    <><span className="opacity-40">Expand Your</span> <span className="premium-gradient-text">Horizon</span></>
+                                    <span className="premium-gradient-text">Expand Your Horizon</span>
                                 )}
                             </motion.h1>
                             {universityName && (

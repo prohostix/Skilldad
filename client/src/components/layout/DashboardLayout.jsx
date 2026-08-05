@@ -38,7 +38,7 @@ const DashboardLayout = () => {
                 <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 max-w-full">
                     <DashboardNavbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-                    <main className={`${location.pathname.includes('/session/') ? 'p-0' : 'p-3 sm:p-6 lg:p-8 max-w-[1600px] mx-auto'} w-full flex-1`}>
+                    <main className={`${location.pathname.includes('/session/') || location.pathname.includes('/course/') ? 'p-0' : 'p-3 sm:p-6 lg:p-8 max-w-[1600px] mx-auto'} w-full flex-1`}>
                         <Outlet />
                     </main>
                 </div>

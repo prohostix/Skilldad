@@ -546,6 +546,22 @@ html.light-mode .bg-background-light {
   background-color: #f5f0e6 !important;
 }
 
+html.light-mode .course-catalog-page,
+html.light-mode .platform-page,
+html.light-mode .about-us-page {
+  background: #f5f0e6 !important;
+  background-color: #f5f0e6 !important;
+  background-image: none !important;
+}
+
+html.light-mode .premium-gradient-text {
+  background: linear-gradient(to right, #8A2BE2 0%, #FF2FD1 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
 /* Ensure absolute/fixed overlays also become light */
 html.light-mode [class*="bg-black/"],
 html.light-mode [class*="bg-background/"] {
@@ -563,6 +579,18 @@ html.light-mode .text-gray-200 {
   color: #111827 !important;
 }
 
+html.light-mode .text-white\/20,
+html.light-mode .text-white\/40,
+html.light-mode .text-white\/60,
+html.light-mode .text-white\/80 {
+  color: #4b5563 !important;
+}
+
+html.light-mode .placeholder\:text-white\/20::placeholder,
+html.light-mode .placeholder\:text-white\/40::placeholder {
+  color: #9ca3af !important;
+}
+
 html.light-mode h1, 
 html.light-mode h2, 
 html.light-mode h3, 
@@ -572,6 +600,35 @@ html.light-mode h6,
 html.light-mode .font-bold,
 html.light-mode .font-semibold {
   color: #111827 !important;
+}
+
+/* Utilities to force white text on dark image overlays in light mode */
+.force-white,
+html.light-mode .force-white,
+html.light-mode h3.force-white,
+html.light-mode .font-bold.force-white {
+  color: #ffffff !important;
+}
+
+.force-white-60,
+html.light-mode .force-white-60 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.force-white-40,
+html.light-mode .force-white-40 {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.force-white-20,
+html.light-mode .force-white-20 {
+  color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.force-primary,
+html.light-mode .force-primary,
+html.light-mode .font-bold.force-primary {
+  color: #6d28ff !important; /* primary color */
 }
 
 html.light-mode .text-gray-300,
@@ -586,6 +643,23 @@ html.light-mode .glass-card {
   border-color: rgba(0, 0, 0, 0.1) !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
 }
+
+.about-card-bg {
+  background-color: rgba(10, 7, 24, 0.9);
+}
+html.light-mode .about-card-bg {
+  background-color: rgba(245, 240, 230, 0.9) !important; /* Cream background */
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.about-inner-card-bg {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+html.light-mode .about-inner-card-bg {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
 html.light-mode .glass-card:hover {
   background: rgba(255, 255, 255, 0.95) !important;
   border-color: rgba(109, 40, 255, 0.3) !important;

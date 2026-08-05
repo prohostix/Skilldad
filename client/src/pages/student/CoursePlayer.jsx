@@ -367,7 +367,7 @@ const CoursePlayer = () => {
     );
 
     return (
-        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] bg-[#050505] lg:rounded-2xl border border-white/5 font-inter shadow-2xl relative">
+        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-64px)] bg-[#050505] font-inter shadow-2xl relative">
             {/* Sidebar - Course Content */}
             <div className={`${isSidebarOpen ? 'w-full lg:w-96' : 'w-0 overflow-hidden'} transition-all duration-500 bg-[#0a0a0a] border-r border-white/10 flex flex-col z-20 lg:sticky lg:top-0 lg:h-[calc(100vh-64px)]`}>
                 <div className="p-6 border-b border-white/10">
@@ -406,63 +406,8 @@ const CoursePlayer = () => {
                     </div>
                 </div>
 
-                {/* Live Sessions Section */}
-                {liveSessions.length > 0 && (
-                    <div className="px-6 py-4 bg-primary/5 border-b border-primary/20">
-                        <div className="flex items-center space-x-2 mb-3">
-                            <Video size={16} className="text-primary" />
-                            <h3 className="text-sm font-bold text-primary uppercase tracking-wide">Upcoming Live Sessions</h3>
-                        </div>
-                        <div className="space-y-2">
-                            {liveSessions.slice(0, 3).map((session) => {
-                                const sessionDate = new Date(session.startTime);
-                                const isLive = session.status === 'live';
-                                const isUpcoming = session.status === 'scheduled' && sessionDate > new Date();
-
-                                return (
-                                    <div
-                                        key={session._id}
-                                        className="p-3 bg-black/40 rounded-lg border border-white/10 hover:border-primary/30 transition-all cursor-pointer"
-                                        onClick={() => navigate(`/dashboard/live-classes`)}
-                                    >
-                                        <div className="flex items-start justify-between mb-2">
-                                            <p className="text-sm font-bold text-white line-clamp-1">{session.topic}</p>
-                                            {isLive && (
-                                                <span className="px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
-                                                    LIVE
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center space-x-3 text-[10px] text-slate-400">
-                                            <div className="flex items-center">
-                                                <Calendar size={10} className="mr-1" />
-                                                {sessionDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                            </div>
-                                            <div className="flex items-center">
-                                                <Clock size={10} className="mr-1" />
-                                                {sessionDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
-                                        </div>
-                                        {session.instructor && (
-                                            <p className="text-[10px] text-primary mt-1 font-bold">
-                                                by {session.instructor.name}
-                                            </p>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        {liveSessions.length > 3 && (
-                            <button
-                                onClick={() => navigate(`/dashboard/live-classes`)}
-                                className="w-full mt-2 text-xs text-primary hover:text-primary/80 font-bold transition-colors"
-                            >
-                                View all {liveSessions.length} sessions →
-                            </button>
-                        )}
-                    </div>
-                )}
                 <div className="flex-1 overflow-y-auto">
+                    {/* Course Modules & Classes */}
                     <ul className="divide-y divide-white/5">
                         {course.modules.map((module, mIndex) => (
                             <li key={mIndex}>
@@ -544,6 +489,7 @@ const CoursePlayer = () => {
                             </li>
                         ))}
                     </ul>
+
                 </div>
             </div>
 
@@ -831,68 +777,29 @@ const CoursePlayer = () => {
                             {!isSidebarOpen && discussionHubBlock}
                         </div>
 
-                        {/* Sidebar Info Widgets */}
-                        <div className="w-full lg:w-80 space-y-6">
-                            <GlassCard className="bg-primary/5 border-primary/10">
-                                <h4 className="text-sm font-bold text-primary uppercase tracking-widest mb-4 flex items-center">
-                                    <User size={14} className="mr-2" /> Instructor
-                                </h4>
-                                <div className="flex items-center space-x-3 mb-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-xl">
+                        {/* Instructor Card - full width below video, matching player width */}
+                        <div className="w-full mx-auto max-w-6xl">
+                            <GlassCard className="bg-primary/5 border-primary/10 !py-2 !px-3.5">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-base flex-shrink-0">
                                         {(course.instructorName || course.instructor?.name || 'I')[0]}
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-white font-poppins">
-                                            {course.instructorName || course.instructor?.name || 'Academic facilitator'}
-                                        </p>
-                                        {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && (
-                                            <p className="text-[10px] font-bold text-primary uppercase tracking-wider">
-                                                {course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-baseline space-x-2">
+                                            <p className="font-bold text-white font-poppins text-xs">
+                                                {course.instructorName || course.instructor?.name || 'Academic facilitator'}
                                             </p>
-                                        )}
+                                            {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && 
+                                             (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name) !== (course.instructorName || course.instructor?.name) && (
+                                                <span className="text-[9px] font-bold text-primary uppercase tracking-wider truncate">
+                                                    • {course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-[10px] text-[#B8C0FF]/80 font-inter leading-snug mt-0.5 line-clamp-1">
+                                            {course.instructor?.profile?.bio || 'Experienced academic facilitator dedicated to your success in this course track.'}
+                                        </p>
                                     </div>
-                                </div>
-                                <p className="text-xs text-[#B8C0FF] font-inter leading-relaxed">
-                                    {course.instructor?.profile?.bio || 'Experienced academic facilitator dedicated to your success in this course track.'}
-                                </p>
-                            </GlassCard>
-
-                            <GlassCard className="border-white/10 overflow-hidden !p-0">
-                                <div className="p-4 bg-white/5 border-b border-white/10">
-                                    <p className="text-xs font-bold text-white/50 uppercase tracking-widest">Resources</p>
-                                </div>
-                                <div className="p-2 space-y-1">
-                                    {/* Lessons that are documents */}
-                                    {course.modules.flatMap(m => m.videos).filter(v => v.videoType === 'document').map(doc => (
-                                        <button 
-                                            key={doc._id}
-                                            onClick={() => window.open(doc.url, '_blank')}
-                                            className="w-full flex items-center p-3 text-[11px] font-bold text-[#B8C0FF] hover:bg-white/5 transition-all rounded-lg group"
-                                        >
-                                            <div className="w-7 h-7 rounded-lg bg-red-500/10 text-red-500 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                                                <FileText size={14} />
-                                            </div>
-                                            <span className="truncate">{doc.title}</span>
-                                        </button>
-                                    ))}
-
-                                    {/* Specific attachments for current video */}
-                                    {currentVideo.attachments?.map((file) => (
-                                        <button 
-                                            key={file._id}
-                                            onClick={() => window.open(file.url, '_blank')}
-                                            className="w-full flex items-center p-3 text-[11px] font-bold text-white/70 hover:bg-white/5 transition-all rounded-lg group"
-                                        >
-                                            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                                                <Download size={14} />
-                                            </div>
-                                            <span className="truncate">{file.name}</span>
-                                        </button>
-                                    ))}
-
-                                    {(!currentVideo.attachments?.length && !course.modules.some(m => m.videos.some(v => v.videoType === 'document'))) && (
-                                        <p className="text-center text-[10px] text-white/30 py-4 italic">No generic resources yet.</p>
-                                    )}
                                 </div>
                             </GlassCard>
                         </div>

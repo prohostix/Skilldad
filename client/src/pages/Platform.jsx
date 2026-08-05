@@ -83,7 +83,7 @@ const Platform = () => {
     const allUniversities = [...universities, ...skillDadUniversities];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A]">
+        <div className="min-h-screen platform-page bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A]">
             <Navbar />
 
             {/* Main Content Section */}
@@ -96,9 +96,8 @@ const Platform = () => {
                         className="text-center mb-10 md:mb-16"
                     >
                         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6 font-space">
-                            <span className="opacity-40">University</span>{' '}
                             <span className="premium-gradient-text">
-                                Platform
+                                University Partners
                             </span>
                         </h1>
                         <p className="text-base md:text-lg text-gray-300 max-w-4xl mx-auto font-inter px-4">

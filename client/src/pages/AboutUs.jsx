@@ -101,7 +101,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
             whileHover={{ y: -6, scale: 1.008 }}
             className="w-full"
         >
-            <GlassCard className="relative group overflow-hidden p-6 sm:p-7 md:p-8 !bg-[#0A0A12]/95 backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-[0_0_50px_rgba(192,38,255,0.22)]">
+            <GlassCard className="relative group overflow-hidden p-6 sm:p-7 md:p-8 about-card-bg backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-[0_0_50px_rgba(192,38,255,0.22)]">
                 {/* Animated Ambient Glow */}
                 <motion.div 
                     animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
@@ -341,7 +341,7 @@ const AboutUs = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] overflow-hidden text-white">
+        <div className="min-h-screen about-us-page bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] overflow-hidden text-white">
             <Navbar />
 
             {/* Floating Background Elements */}
@@ -356,11 +356,6 @@ const AboutUs = () => {
                         animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                         transition={{ duration: 0.9, ease: "easeOut" }}
                     >
-                        {/* Top Badge */}
-                        <div className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/15 rounded-full border border-primary/30 text-primary text-xs font-black uppercase tracking-widest mb-6 shadow-lg shadow-primary/10">
-                            <Sparkles size={14} className="animate-pulse" />
-                            <span>Official Skill-to-Career Launchpad</span>
-                        </div>
 
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white font-space tracking-tight leading-[1.1] mb-6">
                             Empowering Students to <br className="hidden sm:inline" />
@@ -402,7 +397,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 !bg-[#0A0718]/90 border-primary/30 hover:border-primary/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-primary/30 hover:border-primary/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -454,7 +449,7 @@ const AboutUs = () => {
                                             color: '#C026FF'
                                         }
                                     ].map((pillar, idx) => (
-                                        <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-primary/40 hover:bg-white/[0.04] transition-all duration-300 group">
+                                        <div key={idx} className="p-5 rounded-2xl about-inner-card-bg border border-white/10 hover:border-primary/40 hover:bg-white/[0.04] transition-all duration-300 group">
                                             <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: pillar.color }}>
                                                 <pillar.icon size={20} />
                                             </div>
@@ -474,7 +469,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 !bg-[#0E061A]/90 border-[#C026FF]/30 hover:border-[#C026FF]/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 hover:border-[#C026FF]/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -546,7 +541,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 !bg-[#060D1A]/90 border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="space-y-10">

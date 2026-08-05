@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
@@ -224,8 +224,18 @@ const NetworkDiagram = () => (
 
 /* ─── HeroSection ────────────────────────────────────────────── */
 const HeroSection = () => {
-    const { user } = useUser();
     const navigate = useNavigate();
+    const { user, getDashboardLink } = useUser();
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setTheme(document.documentElement.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+
     const [partners, setPartners] = React.useState([
         "Oxford Digital", "MIT Horizon", "Stanford Online", "ETH Zurich",
         "Berkeley Tech", "Cambridge AI", "Harvard Tech", "Yale AI"
@@ -249,18 +259,7 @@ const HeroSection = () => {
         fetchPartners();
     }, []);
 
-    // Helper to get dashboard link based on role
-    const getDashboardLink = () => {
-        if (!user) return '/login';
-        switch (user.role) {
-            case 'admin': return '/admin/dashboard';
-            case 'university': return '/university/dashboard';
-            case 'partner': return '/partner/dashboard';
-            case 'finance': return '/finance/dashboard';
-            case 'sales': return '/sales/dashboard';
-            default: return '/dashboard';
-        }
-    };
+
 
     return (
         <section className="relative min-h-[90vh] md:min-h-[100vh] flex items-center overflow-hidden bg-transparent">
@@ -333,7 +332,10 @@ const HeroSection = () => {
                             {!user && (
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-lg border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
+                                    className={theme === 'dark'
+                                        ? "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-white/20 bg-transparent text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:border-white/40 hover:bg-white/5 active:scale-95"
+                                        : "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
+                                    }
                                 >
                                     Login Now
                                 </button>

@@ -53,15 +53,7 @@ const Services = () => {
             {/* Hero Section */}
             <section className="pt-28 md:pt-36 pb-12 px-4 sm:px-6 relative">
                 <div className="max-w-4xl mx-auto text-center space-y-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-semibold text-gray-300 backdrop-blur-md shadow-inner"
-                    >
-                        <LucideIcons.Sparkles size={14} className="text-primary animate-pulse" />
-                        <span className="tracking-wide">Enterprise Educational Solutions</span>
-                    </motion.div>
+
 
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
@@ -100,7 +92,7 @@ const Services = () => {
                                     transition={{ duration: 0.6 }}
                                 >
                                     <div className="relative group rounded-3xl p-[1px] bg-gradient-to-r from-primary/50 via-primary/20 to-white/10 shadow-2xl transition-all duration-500 hover:shadow-[0_0_50px_rgba(110,40,255,0.2)]">
-                                        <GlassCard className="!bg-[#090616]/95 backdrop-blur-3xl rounded-[23px] p-6 sm:p-8 md:p-10 space-y-8">
+                                        <GlassCard className="about-card-bg backdrop-blur-3xl rounded-[23px] p-6 sm:p-8 md:p-10 space-y-8">
                                             <div className="grid lg:grid-cols-12 gap-8 items-start">
                                                 {/* Left — Main Details */}
                                                 <div className="lg:col-span-7 space-y-5 text-left">
@@ -123,7 +115,7 @@ const Services = () => {
                                                     </p>
 
                                                     {featured.details && (
-                                                        <div className="p-4 rounded-xl bg-white/[0.02] border-l-4 border-primary border-y border-r border-white/5 text-xs sm:text-sm text-gray-300 font-inter leading-relaxed">
+                                                        <div className="p-4 rounded-xl about-inner-card-bg border-l-4 border-primary border-y border-r border-white/5 text-xs sm:text-sm text-gray-300 font-inter leading-relaxed">
                                                             "{featured.details}"
                                                         </div>
                                                     )}
@@ -139,7 +131,7 @@ const Services = () => {
                                                 </div>
 
                                                 {/* Right — Key Highlights Box */}
-                                                <div className="lg:col-span-5 p-5 sm:p-6 rounded-2xl bg-white/[0.03] border border-white/10 space-y-4 text-left h-full flex flex-col justify-between">
+                                                <div className="lg:col-span-5 p-5 sm:p-6 rounded-2xl about-inner-card-bg border border-white/10 space-y-4 text-left h-full flex flex-col justify-between">
                                                     <div>
                                                         <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
                                                             <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 font-space">
@@ -153,7 +145,7 @@ const Services = () => {
 
                                                         <div className="space-y-2.5">
                                                             {(featured.features || []).map((feature, idx) => (
-                                                                <div key={idx} className="flex items-center space-x-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/30 transition-all duration-300">
+                                                                <div key={idx} className="flex items-center space-x-3 p-3 rounded-xl about-inner-card-bg border border-white/5 hover:border-primary/30 transition-all duration-300">
                                                                     <LucideIcons.CheckCircle2 className="text-emerald-400 shrink-0" size={16} />
                                                                     <span className="text-xs sm:text-sm text-gray-200 font-medium font-inter">{feature}</span>
                                                                 </div>
@@ -187,7 +179,7 @@ const Services = () => {
                                                         </h4>
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                                             {featured.sub_services.map((sub, idx) => (
-                                                                <div key={idx} className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-primary/40 transition-all space-y-2 group/sub">
+                                                                <div key={idx} className="p-4 rounded-xl about-inner-card-bg border border-white/10 hover:border-primary/40 transition-all space-y-2 group/sub">
                                                                     <div className="flex items-center space-x-2">
                                                                         <span className="w-2 h-2 rounded-full bg-primary shrink-0 group-hover/sub:scale-125 transition-transform" />
                                                                         <h5 className="font-bold text-white text-xs sm:text-sm font-inter">{sub.title}</h5>
@@ -224,7 +216,7 @@ const Services = () => {
                                             transition={{ delay: index * 0.1 }}
                                             className="group h-full"
                                         >
-                                            <GlassCard className={`h-full transition-all duration-300 overflow-hidden rounded-2xl border ${expandedId === service.id ? 'border-primary/50 bg-[#0A0714] shadow-[0_0_30px_rgba(110,40,255,0.15)]' : 'border-white/10 hover:border-primary/30'} p-6 flex flex-col justify-between text-left`}>
+                                            <GlassCard className={`h-full transition-all duration-300 overflow-hidden rounded-2xl border ${expandedId === service.id ? 'border-primary/50 about-card-bg shadow-[0_0_30px_rgba(110,40,255,0.15)]' : 'border-white/10 hover:border-primary/30'} p-6 flex flex-col justify-between text-left`}>
                                                 <div className="space-y-4">
                                                     <div className="flex items-center justify-between">
                                                         <div className={`w-12 h-12 rounded-xl ${service.bg_class || 'bg-primary/10'} flex items-center justify-center border border-white/10 group-hover:scale-105 transition-transform shrink-0`}>
@@ -283,7 +275,7 @@ const Services = () => {
                                                                 <div className="space-y-2 pt-2">
                                                                     <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Included Modules</span>
                                                                     {service.sub_services.map((sub, idx) => (
-                                                                        <div key={idx} className="p-2.5 rounded-lg bg-white/[0.03] border border-white/5 text-xs">
+                                                                        <div key={idx} className="p-2.5 rounded-lg about-inner-card-bg border border-white/5 text-xs">
                                                                             <span className="font-bold text-white block mb-0.5">{sub.title}</span>
                                                                             <span className="text-gray-400 text-[11px] leading-relaxed block">{sub.desc}</span>
                                                                         </div>
