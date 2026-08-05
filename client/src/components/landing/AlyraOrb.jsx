@@ -22,6 +22,7 @@ const AlyraOrb = () => {
         const startTime = Date.now();
 
         let cachedBgGrad = null;
+        let cachedIsLightMode = null;
         let isMobile = window.innerWidth < 768;
 
         const resize = () => {
@@ -35,10 +36,8 @@ const AlyraOrb = () => {
             canvas.style.width = `${window.innerWidth}px`;
             canvas.style.height = `${window.innerHeight}px`;
 
-            // Deep satin black background foundation
-            cachedBgGrad = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
-            cachedBgGrad.addColorStop(0, 'rgba(4, 2, 10, 1)');
-            cachedBgGrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+            // Reset cache so it regenerates on next frame
+            cachedBgGrad = null;
         };
 
         const handleMouseMove = (e) => {
@@ -102,7 +101,20 @@ const AlyraOrb = () => {
             mouseRef.current.currentX += (mouseRef.current.targetX - mouseRef.current.currentX) * 0.04;
             mouseRef.current.currentY += (mouseRef.current.targetY - mouseRef.current.currentY) * 0.04;
 
-            ctx.fillStyle = cachedBgGrad || '#000';
+            const currentIsLightMode = document.documentElement.classList.contains('light-mode');
+            if (!cachedBgGrad || cachedIsLightMode !== currentIsLightMode) {
+                cachedIsLightMode = currentIsLightMode;
+                cachedBgGrad = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
+                if (currentIsLightMode) {
+                    cachedBgGrad.addColorStop(0, 'rgba(243, 244, 246, 1)'); // Light gray
+                    cachedBgGrad.addColorStop(1, 'rgba(249, 250, 251, 1)'); // Lighter gray
+                } else {
+                    cachedBgGrad.addColorStop(0, 'rgba(4, 2, 10, 1)');
+                    cachedBgGrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
+                }
+            }
+
+            ctx.fillStyle = cachedBgGrad;
             ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
             ctx.save();

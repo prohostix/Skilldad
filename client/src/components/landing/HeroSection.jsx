@@ -217,7 +217,7 @@ const NetworkDiagram = () => (
         {/* Fade right edge to blend into hero */}
         <div
             className="absolute inset-y-0 right-0 w-20 pointer-events-none"
-            style={{ background: 'linear-gradient(to right, transparent, #000)' }}
+            style={{ background: 'linear-gradient(to right, transparent, var(--color-background, #000))' }}
         />
     </div>
 );
