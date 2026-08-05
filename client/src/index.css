@@ -565,7 +565,7 @@ html.light-mode .premium-gradient-text {
 /* Ensure absolute/fixed overlays also become light */
 html.light-mode [class*="bg-black/"],
 html.light-mode [class*="bg-background/"] {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  background-color: rgba(245, 240, 230, 0.95) !important;
 }
 
 html.light-mode nav {
@@ -579,16 +579,55 @@ html.light-mode .text-gray-200 {
   color: #111827 !important;
 }
 
+html.light-mode .text-amber-200,
+html.light-mode .text-amber-300,
+html.light-mode .text-amber-400 {
+  color: #d97706 !important;
+}
+
+html.light-mode .text-white\/5,
+html.light-mode .text-white\/10,
+html.light-mode .text-white\/15,
 html.light-mode .text-white\/20,
+html.light-mode .text-white\/25,
+html.light-mode .text-white\/30,
+html.light-mode .text-white\/35,
 html.light-mode .text-white\/40,
+html.light-mode .text-white\/45,
+html.light-mode .text-white\/50,
+html.light-mode .text-white\/55,
 html.light-mode .text-white\/60,
-html.light-mode .text-white\/80 {
+html.light-mode .text-white\/65,
+html.light-mode .text-white\/70,
+html.light-mode .text-white\/75,
+html.light-mode .text-white\/80,
+html.light-mode .text-white\/85,
+html.light-mode .text-white\/90,
+html.light-mode .text-white\/95 {
   color: #4b5563 !important;
 }
 
+html.light-mode .placeholder\:text-white\/10::placeholder,
 html.light-mode .placeholder\:text-white\/20::placeholder,
-html.light-mode .placeholder\:text-white\/40::placeholder {
+html.light-mode .placeholder\:text-white\/30::placeholder,
+html.light-mode .placeholder\:text-white\/40::placeholder,
+html.light-mode .placeholder\:text-white\/50::placeholder,
+html.light-mode [class*="placeholder:text-white/"]::placeholder,
+html.light-mode [class*="placeholder-white/"]::placeholder {
   color: #9ca3af !important;
+}
+
+html.light-mode [class*="text-[#B8C0FF]"] {
+  color: #4b5563 !important;
+}
+
+html.light-mode .recharts-text,
+html.light-mode .recharts-cartesian-axis-tick-value tspan {
+  fill: #4b5563 !important;
+}
+
+html.light-mode .recharts-legend-item-text {
+  color: #4b5563 !important;
 }
 
 html.light-mode h1, 
@@ -686,11 +725,15 @@ html.light-mode .bg-zinc-800 {
 }
 
 html.light-mode input,
-html.light-mode select,
+html.light-mode select:not(.text-transparent),
 html.light-mode textarea {
   background-color: #f5f0e6 !important;
   color: #111827 !important;
   border: 1px solid #d1d5db !important;
+}
+
+html.light-mode .text-transparent {
+  color: transparent !important;
 }
 html.light-mode select option {
   background-color: #f5f0e6 !important;

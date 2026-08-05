@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info, Wallet, Video } from 'lucide-react';
+import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info, Wallet, Video, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
 import { useSocket } from '../../context/SocketContext';
@@ -11,6 +11,20 @@ const Navbar = ({ onToggleSidebar }) => {
     const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+    
+    useEffect(() => {
+        if (theme === 'light') {
+            document.documentElement.classList.add('light-mode');
+        } else {
+            document.documentElement.classList.remove('light-mode');
+        }
+        localStorage.setItem('theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    };
     
     // Get user info and logout method from context
     const { user, logout, rewardPoints } = useUser();
@@ -128,6 +142,15 @@ const Navbar = ({ onToggleSidebar }) => {
                     </motion.div>
                 )}
                 
+                {/* Theme Toggle */}
+                <button
+                    onClick={toggleTheme}
+                    className="p-2 text-slate-400 hover:bg-white/5 hover:text-primary rounded-xl transition-all"
+                    aria-label="Toggle theme"
+                >
+                    {theme === 'light' ? <Moon size={18} className="sm:w-5 sm:h-5" /> : <Sun size={18} className="sm:w-5 sm:h-5" />}
+                </button>
+
                 {/* Notification Bell Dropdown */}
                 <div className="relative" ref={notifRef}>
                     <button 

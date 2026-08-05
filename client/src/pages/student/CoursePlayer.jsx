@@ -731,7 +731,7 @@ const CoursePlayer = () => {
                     </div>
                 )}
 
-                    <div className="flex flex-col lg:flex-row gap-8">
+                    <div className="flex flex-col gap-8 w-full mx-auto max-w-6xl">
                         <div className="flex-1 space-y-8">
                             {showExercise && currentExercise && (
                                 <GlassCard className="animate-in slide-in-from-bottom-6 duration-700 bg-black/40 shadow-xl border-emerald-500/20">

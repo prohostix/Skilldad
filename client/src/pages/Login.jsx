@@ -141,7 +141,7 @@ const Login = () => {
                                 Email Address
                             </label>
                             <div className={`relative transition-all duration-300 ${isFocused === 'email' ? 'scale-[1.01]' : ''}`}>
-                                <div className={`absolute inset-y-0 left-3.5 flex items-center pointer-events-none transition-colors ${isFocused === 'email' ? 'text-primary' : 'text-white/40'}`}>
+                                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-primary z-10">
                                     <Mail size={16} />
                                 </div>
                                 <input
@@ -164,7 +164,7 @@ const Login = () => {
                                 Password
                             </label>
                             <div className={`relative transition-all duration-300 ${isFocused === 'password' ? 'scale-[1.01]' : ''}`}>
-                                <div className={`absolute inset-y-0 left-3.5 flex items-center pointer-events-none transition-colors ${isFocused === 'password' ? 'text-primary' : 'text-white/40'}`}>
+                                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-primary z-10">
                                     <Lock size={16} />
                                 </div>
                                 <input
@@ -182,7 +182,7 @@ const Login = () => {
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     onMouseDown={(e) => e.preventDefault()}
-                                    className="absolute inset-y-0 right-3 flex items-center text-white/40 hover:text-primary transition-colors focus:outline-none z-10"
+                                    className="absolute inset-y-0 right-3 flex items-center text-primary transition-colors focus:outline-none z-10"
                                 >
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
