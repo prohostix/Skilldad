@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Menu, X, LayoutDashboard } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Sun, Moon } from 'lucide-react';
 import SkillDadLogo from './SkillDadLogo';
 import { useUser } from '../../context/UserContext';
 
@@ -11,6 +11,24 @@ const Navbar = ({ compact = false }) => {
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        const savedMode = localStorage.getItem('theme-mode');
+        // Default is dark mode, so if nothing is saved or it's 'dark', return true.
+        return savedMode ? savedMode === 'dark' : true;
+    });
+
+    // Theme effect
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.remove('light-mode');
+            localStorage.setItem('theme-mode', 'dark');
+        } else {
+            document.documentElement.classList.add('light-mode');
+            localStorage.setItem('theme-mode', 'light');
+        }
+    }, [isDarkMode]);
+
+    const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
     // Check if we're on auth pages (login/register)
     const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
@@ -101,6 +119,15 @@ const Navbar = ({ compact = false }) => {
                     {/* Right Side Actions - Hide on auth pages */}
                     {!isAuthPage && (
                         <div className="hidden lg:flex items-center space-x-6">
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="p-2 rounded-full border border-white/20 text-white hover:bg-white/10 hover:text-primary transition-all duration-300"
+                                aria-label="Toggle theme"
+                            >
+                                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                            </button>
+                            
                             {user ? (
                                 <button
                                     onClick={() => navigate(getDashboardLink())}
@@ -156,7 +183,17 @@ const Navbar = ({ compact = false }) => {
                         </button>
                     </div>
 
-                    <div className="flex flex-col space-y-6">
+                            {/* Theme Toggle Mobile */}
+                            <button
+                                onClick={toggleTheme}
+                                className="flex items-center justify-between w-full py-4 px-4 text-white border border-white/10 rounded-xl mb-4"
+                            >
+                                <span className="font-medium text-lg">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                                {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-blue-400" />}
+                            </button>
+
+                            {/* Mobile Auth Buttons */}
+                            <div className="flex flex-col space-y-4">
                         {navItems.map((item) => (
                             <Link
                                 key={item.name}
