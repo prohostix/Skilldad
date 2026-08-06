@@ -174,6 +174,21 @@ const CoursePlayer = () => {
         );
     }
 
+    if (!course.isEnrolled) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-white">
+                <div className="p-4 bg-rose-500/10 rounded-full mb-4">
+                    <Unlock size={48} className="text-rose-500" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Content Locked</h2>
+                <p className="text-gray-400 mb-6 text-center max-w-md">You do not have active access to this course. Your enrollment may be inactive or deactivated by your institution.</p>
+                <ModernButton onClick={() => navigate('/dashboard/my-courses')}>
+                    Back to Dashboard
+                </ModernButton>
+            </div>
+        );
+    }
+
     const currentVideo = hasVideos ? currentModule.videos[currentVideoIndex] : {};
     const currentExercise = currentVideo?.exercises?.[0];
 
