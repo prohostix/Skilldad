@@ -84,6 +84,11 @@ const submitExam = asyncHandler(async (req, res) => {
   const { isAutoSubmit = false, answers } = req.body;
   const studentId = req.user._id;
 
+  if (req.user && req.user.is_active === false) {
+    res.status(403);
+    throw new Error('Your account has been deactivated. You cannot submit exams.');
+  }
+
   // 1. Find submission and validate ownership
   const subRes = await query(`
     SELECT s.*, e.title as exam_title, e.total_marks, e.exam_type, e.passing_score

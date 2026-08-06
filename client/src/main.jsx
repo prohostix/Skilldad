@@ -10,18 +10,6 @@ import { ToastProvider } from './context/ToastContext'
 // Uses VITE_API_URL env var, or defaults to same-origin (handled by Nginx proxy)
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || ''
 
-// Global interceptor for deactivated accounts
-axios.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 403 && error.response?.data?.message === 'Your account has been deactivated.') {
-            localStorage.removeItem('userInfo');
-            localStorage.removeItem('token');
-            window.location.href = '/login?session=expired';
-        }
-        return Promise.reject(error);
-    }
-);
 
 createRoot(document.getElementById('root')).render(
   <ToastProvider>

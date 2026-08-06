@@ -173,7 +173,7 @@ const getCourse = asyncHandler(async (req, res) => {
     }
 
     // Strip sensitive content (video URLs, attachments, quizzes) for guests or non-enrolled students
-    const hasFullAccess = req.user && ['admin', 'university', 'partner'].includes(req.user.role) || isEnrolled;
+    const hasFullAccess = (req.user && ['admin', 'university', 'partner'].includes(req.user.role)) || (isEnrolled && req.user?.is_active !== false);
     if (!hasFullAccess && Array.isArray(course.modules)) {
         course.modules = course.modules.map(m => {
             const sanitizedModule = { ...m };

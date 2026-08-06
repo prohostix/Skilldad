@@ -14,6 +14,11 @@ const getStudentExams = asyncHandler(async (req, res) => {
 
   console.log(`[Exams] Fetching exams for student: ${studentId}`);
 
+  if (req.user && req.user.is_active === false) {
+    console.warn(`[Exams] Deactivated student ${studentId} attempting to fetch exams.`);
+    return res.json({ success: true, count: 0, data: [] });
+  }
+
   // 1. Get enrolled courses from PG
   const enrollRes = await query(`
       SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active'
@@ -102,7 +107,12 @@ const getStudentExams = asyncHandler(async (req, res) => {
  */
 const startExam = asyncHandler(async (req, res) => {
   const { examId } = req.params;
-  const studentId = req.user.id || req.user._id;
+  const studentId = req.user.id;
+
+  if (req.user && req.user.is_active === false) {
+    res.status(403);
+    throw new Error('Your account has been deactivated. You cannot start exams.');
+  }
 
   // 1. Check access in PG
   const accessResult = await examAccessService.checkExamAccess(examId, studentId);

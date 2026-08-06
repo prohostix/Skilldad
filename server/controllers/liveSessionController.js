@@ -136,6 +136,10 @@ const createSession = asyncHandler(async (req, res) => {
 
 // @desc    Get all sessions for a user
 const getSessions = asyncHandler(async (req, res) => {
+    if (req.user && req.user.role === 'student' && req.user.is_active === false) {
+        return res.json([]);
+    }
+
     let sql = `
         SELECT s.*, u.name as instructor_name, c.title as course_title, b.name as batch_name,
         COALESCE(

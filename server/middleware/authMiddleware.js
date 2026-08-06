@@ -20,9 +20,7 @@ const protect = async (req, res, next) => {
             if (!req.user) {
                 return res.status(401).json({ message: 'User not found' });
             }
-            if (req.user.is_active === false) {
-                return res.status(403).json({ message: 'Your account has been deactivated.' });
-            }
+
 
             console.log(`[AUTH PROTECT] Decoded ID: ${decoded.id}, User Found: ${req.user.email}, Role: ${req.user.role}`);
             return next();
@@ -54,9 +52,7 @@ const optionalProtect = async (req, res, next) => {
             `, [decoded.id]);
             req.user = userRes.rows[0];
             
-            if (req.user && req.user.is_active === false) {
-                req.user = null; // Treat inactive as guest
-            }
+
             return next();
         } catch (error) {
             console.error('Optional auth error (continuing as guest):', error.message);
