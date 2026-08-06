@@ -144,6 +144,7 @@ const getCourse = asyncHandler(async (req, res) => {
     // Check enrollment if user is logged in
     let isEnrolled = false;
     let studentBatchId = null;
+    let studentBatchIsActive = true;
     if (req.user) {
         const enrollRes = await query(`
             SELECT e.id, e.batch_id, b.is_active as batch_is_active 
@@ -156,7 +157,7 @@ const getCourse = asyncHandler(async (req, res) => {
             const enrollment = enrollRes.rows[0];
             // If they belong to a batch and the batch is explicitly inactive, track it
             if (enrollment.batch_id && enrollment.batch_is_active === false) {
-                // Batch is inactive; content will be stripped below
+                studentBatchIsActive = false;
             }
             isEnrolled = true;
             studentBatchId = enrollment.batch_id ? String(enrollment.batch_id) : null;
@@ -172,8 +173,7 @@ const getCourse = asyncHandler(async (req, res) => {
     }
 
     // Strip sensitive content (video URLs, attachments, quizzes) for guests or non-enrolled students
-    const enrollmentBatchIsActive = enrollRes && enrollRes.rows.length > 0 ? enrollRes.rows[0].batch_is_active : null;
-    const hasFullAccess = (req.user && ['admin', 'university', 'partner'].includes(req.user.role)) || (isEnrolled && req.user?.is_active !== false && enrollmentBatchIsActive !== false);
+    const hasFullAccess = (req.user && ['admin', 'university', 'partner'].includes(req.user.role)) || (isEnrolled && req.user?.is_active !== false && studentBatchIsActive !== false);
     if (!hasFullAccess && Array.isArray(course.modules)) {
         course.modules = course.modules.map(m => {
             const sanitizedModule = { ...m };
