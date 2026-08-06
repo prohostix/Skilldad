@@ -804,8 +804,8 @@ html.light-mode nav[style] {
   
   
 
-html.light-mode button .text-white, 
-html.light-mode a .text-white {
+html.light-mode button.text-white, 
+html.light-mode a.text-white {
   color: #ffffff !important;
 }
 
@@ -896,3 +896,20 @@ html.light-mode .nav-box-link {
 html.light-mode .nav-box-link:hover {
   color: #ffffff !important;
 }
+
+/* --- PARTNER DASHBOARD OVERRIDES --- */
+html.light-mode .partner-dashboard-wrapper [class*="text-white"]:not(button):not(a) {
+  color: #111827 !important;
+}
+
+html.light-mode .partner-dashboard-wrapper .bg-\[\#0B0F1A\] {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Fix batch tags and info badges light mode visibility */
+html.light-mode [class*="text-blue-3"],
+html.light-mode [class*="text-blue-4"] {
+  color: #1e3a8a !important;
+}
+

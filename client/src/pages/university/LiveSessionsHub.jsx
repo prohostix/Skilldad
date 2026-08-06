@@ -288,7 +288,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
             onClick={onClose}
         >
             <div className="w-full max-w-lg my-4" onClick={e => e.stopPropagation()}>
-                <GlassCard className="border-primary/20 shadow-2xl shadow-primary/10 !p-5">
+                <GlassCard className="border-primary/20 shadow-2xl shadow-primary/10 !p-5 bg-black/95">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2.5">
@@ -537,7 +537,7 @@ const RecordingUploadModal = ({ session, onClose, onUpload, onToast }) => {
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
             <div className="w-full max-w-md" onClick={e => e.stopPropagation()}>
-                <GlassCard className="border-primary/20 p-6">
+                <GlassCard className="border-primary/20 p-6 bg-black/95">
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h3 className="text-lg font-bold text-white flex items-center gap-2"><Film size={18} className="text-primary" /> Session Recording</h3>

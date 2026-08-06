@@ -386,59 +386,83 @@ const UniversityDashboard = () => {
         setSelectedStudentForView(student);
     };
 
+    const isMainDashboard = location.pathname.endsWith('/dashboard') || location.pathname === '/university' || location.pathname === '/university/';
+
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <DashboardHeading title="University Dashboard" />
-                    <p className="text-white/50 mt-1 text-sm">Manage your institution, students, and sessions.</p>
+            {isMainDashboard && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <DashboardHeading title="University Dashboard" />
+                        <p className="text-white/50 mt-1 text-sm">Manage your institution, students, and sessions.</p>
+                    </div>
+                    <div className="flex gap-3">
+                        <ModernButton variant="secondary" onClick={() => { }}>
+                            <Bell size={18} />
+                        </ModernButton>
+                    </div>
                 </div>
-                <div className="flex gap-3">
-                    <ModernButton variant="secondary" onClick={() => { }}>
-                        <Bell size={18} />
-                    </ModernButton>
+            )}
+
+            {!isMainDashboard && location.pathname.includes('certificates') && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                    <div>
+                        <DashboardHeading title="Certificates Management" />
+                        <p className="text-white/50 mt-1 text-sm">Review, approve, and issue student certificates.</p>
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {!isMainDashboard && location.pathname.includes('courses') && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+                    <div>
+                        <DashboardHeading title="Course Management" />
+                        <p className="text-white/50 mt-1 text-sm">Manage your university's course catalog and syllabus.</p>
+                    </div>
+                </div>
+            )}
 
             {/* Dashboard Stats Overview */}
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                {[
-                    { label: 'Total Students', value: stats.studentCount || 0, icon: Users, color: 'from-blue-500/20 to-blue-600/20', border: 'border-blue-500/30', text: 'text-blue-400' },
-                    { label: 'Active Sessions', value: stats.liveSessions || 0, icon: Video, color: 'from-primary/20 to-primary-dark/20', border: 'border-primary/30', text: 'text-primary' },
-                    { label: 'Learning Groups', value: stats.groupCount || 0, icon: BookOpen, color: 'from-amber-500/20 to-amber-600/20', border: 'border-amber-500/30', text: 'text-amber-400' },
-                    { label: 'Avg. Performance', value: `${stats.avgScore || 0}%`, icon: TrendingUp, color: 'from-emerald-500/20 to-emerald-600/20', border: 'border-emerald-500/30', text: 'text-emerald-400' },
-                ].map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                    >
-                        <GlassCard className={`p-3 sm:p-4 border-b-2 ${stat.border} group hover:scale-[1.02] transition-all duration-300`}>
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">{stat.label}</p>
-                                    <div className="text-2xl font-black text-white">
-                                        <CountingNumber value={parseInt(stat.value) || 0} suffix={stat.value.toString().includes('%') ? '%' : ''} />
+            {isMainDashboard && (
+                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                    {[
+                        { label: 'Total Students', value: stats.studentCount || 0, icon: Users, color: 'from-blue-500/20 to-blue-600/20', border: 'border-blue-500/30', text: 'text-blue-400' },
+                        { label: 'Active Sessions', value: stats.liveSessions || 0, icon: Video, color: 'from-primary/20 to-primary-dark/20', border: 'border-primary/30', text: 'text-primary' },
+                        { label: 'Learning Groups', value: stats.groupCount || 0, icon: BookOpen, color: 'from-amber-500/20 to-amber-600/20', border: 'border-amber-500/30', text: 'text-amber-400' },
+                        { label: 'Avg. Performance', value: `${stats.avgScore || 0}%`, icon: TrendingUp, color: 'from-emerald-500/20 to-emerald-600/20', border: 'border-emerald-500/30', text: 'text-emerald-400' },
+                    ].map((stat, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                        >
+                            <GlassCard className={`p-3 sm:p-4 border-b-2 ${stat.border} group hover:scale-[1.02] transition-all duration-300`}>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">{stat.label}</p>
+                                        <div className="text-2xl font-black text-white">
+                                            <CountingNumber value={parseInt(stat.value) || 0} suffix={stat.value.toString().includes('%') ? '%' : ''} />
+                                        </div>
+                                    </div>
+                                    <div className={`p-2 rounded-xl bg-gradient-to-br ${stat.color} ${stat.text} shadow-inner`}>
+                                        <stat.icon size={20} />
                                     </div>
                                 </div>
-                                <div className={`p-2 rounded-xl bg-gradient-to-br ${stat.color} ${stat.text} shadow-inner`}>
-                                    <stat.icon size={20} />
+                                <div className="mt-2.5 flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-emerald-400">+12%</span>
+                                    <span className="text-[10px] text-white/20 uppercase tracking-tighter">vs last month</span>
                                 </div>
-                            </div>
-                            <div className="mt-2.5 flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-emerald-400">+12%</span>
-                                <span className="text-[10px] text-white/20 uppercase tracking-tighter">vs last month</span>
-                            </div>
-                        </GlassCard>
-                    </motion.div>
-                ))}
-            </div>
+                            </GlassCard>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
 
             {/* Tab Navigation */}
-            {!location.pathname.includes('analytics') && (
-                <div className="flex justify-center mb-8">
+            {isMainDashboard && (
+                <div className="flex justify-center mb-8 mt-6">
                     <div className="flex space-x-1 bg-white/5 p-1 rounded-full w-fit mx-auto backdrop-blur-md border border-white/10 flex-wrap justify-center">
                         {[
                             { id: 'students', label: 'Student Management', icon: Users },

@@ -6,8 +6,8 @@ const ModernButton = ({ children, onClick, variant = 'primary', className = '', 
 
     const variants = {
         primary: 'bg-gradient-to-r from-primary-dark via-primary to-primary-light text-white hover:shadow-glow-gradient hover:scale-[1.02] shadow-glow-purple',
-        secondary: 'bg-white/5 backdrop-blur-md text-white border border-primary/40 hover:bg-white/10 hover:border-primary hover:shadow-glow-purple transition-all duration-300',
-        outline: 'border-2 border-primary/50 text-white hover:border-primary hover:bg-primary/10 hover:shadow-glow-pink',
+        secondary: 'bg-white/5 backdrop-blur-md text-slate-100 border border-primary/40 hover:bg-white/10 hover:border-primary hover:shadow-glow-purple transition-all duration-300',
+        outline: 'border-2 border-primary/50 text-slate-100 hover:border-primary hover:bg-primary/10 hover:shadow-glow-pink',
         ghost: 'text-text-secondary hover:bg-white/5 hover:text-primary',
     };
 

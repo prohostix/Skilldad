@@ -67,14 +67,14 @@ const Navbar = ({ compact = false }) => {
     };
 
     // Determine if navbar should be transparent
-    const shouldBeTransparent = isHomePage && !scrolled;
+    const shouldBeTransparent = !scrolled;
 
     return (
         <>
             <nav
-                className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? 'border-b border-white/5 shadow-2xl' : 'border-b border-transparent'}`}
+                className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? 'border-b border-black/5 shadow-md' : 'border-b border-transparent'}`}
                 style={{
-                    backgroundColor: shouldBeTransparent ? 'transparent' : '#000000',
+                    backgroundColor: shouldBeTransparent ? 'transparent' : (theme === 'light' ? '#FDF8EE' : '#000000'),
                     backdropFilter: shouldBeTransparent ? 'none' : 'blur(20px)',
                 }}
             >
@@ -130,7 +130,7 @@ const Navbar = ({ compact = false }) => {
                             {user ? (
                                 <button
                                     onClick={() => navigate(getDashboardLink())}
-                                    className={`flex items-center gap-2 rounded-lg font-bold text-white relative overflow-hidden group transition-all duration-300 border border-primary/50 bg-gradient-to-r from-primary/30 via-blue-500/30 to-primary/30 backdrop-blur-sm hover:from-primary/60 hover:via-blue-500/60 hover:to-primary/60 hover:border-primary/80 shadow-[0_0_20px_rgba(110,40,255,0.4)] hover:shadow-[0_0_30px_rgba(110,40,255,0.6)] ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
+                                    className={`flex items-center gap-2 rounded-lg font-bold text-slate-100 relative overflow-hidden group transition-all duration-300 border border-primary/50 bg-gradient-to-r from-primary/30 via-blue-500/30 to-primary/30 backdrop-blur-sm hover:from-primary/60 hover:via-blue-500/60 hover:to-primary/60 hover:border-primary/80 shadow-[0_0_20px_rgba(110,40,255,0.4)] hover:shadow-[0_0_30px_rgba(110,40,255,0.6)] ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
                                 >
                                     <LayoutDashboard size={compact ? 14 : 16} className="relative z-10" />
                                     <span className="relative z-10">Dashboard</span>
@@ -139,13 +139,13 @@ const Navbar = ({ compact = false }) => {
                                 <>
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className={`font-medium text-white hover:text-primary transition-colors ${compact ? 'text-xs' : 'text-sm'}`}
+                                        className={`font-medium text-slate-100 hover:text-primary transition-colors ${compact ? 'text-xs' : 'text-sm'}`}
                                     >
                                         Login
                                     </button>
                                     <button
                                         onClick={() => navigate('/register')}
-                                        className={`rounded-lg font-bold text-white relative overflow-hidden group transition-all duration-300 border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-sm hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
+                                        className={`rounded-lg font-bold text-slate-100 relative overflow-hidden group transition-all duration-300 border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-sm hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] ${compact ? 'px-4 py-1.5 text-xs' : 'px-6 py-2.5 text-sm'}`}
                                     >
                                         <span className="relative z-10">Sign Up</span>
                                     </button>
@@ -163,7 +163,7 @@ const Navbar = ({ compact = false }) => {
                             >
                                 {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
                             </button>
-                            <button onClick={() => setMobileMenuOpen(true)} className="text-white">
+                            <button onClick={() => setMobileMenuOpen(true)} className="text-slate-100">
                                 <Menu size={compact ? 20 : 24} />
                             </button>
                         </div>
@@ -183,7 +183,7 @@ const Navbar = ({ compact = false }) => {
                 >
                     <div className="flex justify-between items-center mb-10">
                         <span className="brand-text text-xl font-bold font-inter text-white">SkillDad</span>
-                        <button onClick={() => setMobileMenuOpen(false)} className="text-white">
+                        <button onClick={() => setMobileMenuOpen(false)} className="text-slate-100">
                             <X size={24} />
                         </button>
                     </div>
@@ -194,7 +194,7 @@ const Navbar = ({ compact = false }) => {
                                 key={item.name}
                                 to={item.href}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-lg font-medium text-white hover:text-primary transition-colors"
+                                className="text-lg font-medium text-slate-100 hover:text-primary transition-colors"
                             >
                                 {item.name}
                             </Link>
@@ -203,7 +203,7 @@ const Navbar = ({ compact = false }) => {
                         {user ? (
                             <button
                                 onClick={() => { navigate(getDashboardLink()); setMobileMenuOpen(false); }}
-                                className="py-4 rounded-xl text-lg font-bold text-white text-center border border-primary/50 bg-gradient-to-r from-primary/30 via-blue-500/30 to-primary/30 backdrop-blur-sm hover:from-primary/60 hover:via-blue-500/60 hover:to-primary/60 hover:border-primary/80 shadow-[0_0_20px_rgba(110,40,255,0.5)] transition-all duration-300 flex items-center justify-center gap-3"
+                                className="py-4 rounded-xl text-lg font-bold text-slate-100 text-center border border-primary/50 bg-gradient-to-r from-primary/30 via-blue-500/30 to-primary/30 backdrop-blur-sm hover:from-primary/60 hover:via-blue-500/60 hover:to-primary/60 hover:border-primary/80 shadow-[0_0_20px_rgba(110,40,255,0.5)] transition-all duration-300 flex items-center justify-center gap-3"
                             >
                                 <LayoutDashboard size={20} />
                                 Dashboard
@@ -218,7 +218,7 @@ const Navbar = ({ compact = false }) => {
                                 </button>
                                 <button
                                     onClick={() => { navigate('/register'); setMobileMenuOpen(false); }}
-                                    className="py-4 rounded-xl text-lg font-bold text-white text-center border border-primary/30 bg-gradient-to-r from-primary-dark/20 via-primary/20 to-primary-light/20 backdrop-blur-sm hover:from-primary/40 hover:via-primary-light/40 hover:to-primary/40 hover:border-primary/50 shadow-glow-purple transition-all duration-300"
+                                    className="py-4 rounded-xl text-lg font-bold text-slate-100 text-center border border-primary/30 bg-gradient-to-r from-primary-dark/20 via-primary/20 to-primary-light/20 backdrop-blur-sm hover:from-primary/40 hover:via-primary-light/40 hover:to-primary/40 hover:border-primary/50 shadow-glow-purple transition-all duration-300"
                                 >
                                     Sign Up
                                 </button>

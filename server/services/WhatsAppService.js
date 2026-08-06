@@ -112,9 +112,14 @@ class WhatsAppService {
         });
 
         // skilldad_exam_scheduled [Name, CourseTitle, ExamTitle, DateTime]
+        // Using the exact UUID from Gupshup dashboard to prevent "template did not match" errors
+        const templateId = (process.env.GUPSHUP_TEMPLATE_EXAM && !process.env.GUPSHUP_TEMPLATE_EXAM.startsWith('skilldad_')) 
+            ? process.env.GUPSHUP_TEMPLATE_EXAM 
+            : '698a0181-1504-4eea-bfc6-3180e7a21ebb';
+
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_EXAM || 'skilldad_exam_scheduled',
+            templateId,
             [studentName, courseTitle || 'Your Course', examTitle, formattedDate]
         );
     }
