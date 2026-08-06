@@ -165,7 +165,7 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        if (user.is_active === false) {
+        if (user.is_active === false && user.role?.toLowerCase() !== 'student') {
             console.warn(`[Login] Inactive user attempted login: ${lowerEmail}`);
             return res.status(403).json({ message: 'Your account has been deactivated. Please contact support.' });
         }
