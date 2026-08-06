@@ -56,7 +56,7 @@ const getMyCourses = asyncHandler(async (req, res) => {
         JOIN courses c ON e.course_id = c.id
         LEFT JOIN users u ON c.instructor_id = u.id
         LEFT JOIN batches b ON e.batch_id = b.id
-        WHERE e.student_id = $1
+        WHERE e.student_id = $1 AND (b.is_active IS NULL OR b.is_active = true)
     `, [userId]);
 
     const transformed = enrollRes.rows.map(row => ({
