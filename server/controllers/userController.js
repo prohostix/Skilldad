@@ -590,7 +590,7 @@ module.exports = {
                     return res.status(404).json({ message: 'User not found' });
                 }
 
-                const isOwnStudent = target.role === 'student' && (
+                const isOwnStudent = target.role?.toLowerCase() === 'student' && (
                     (requesterRole === 'partner' && target.registered_by === requesterId) ||
                     (requesterRole === 'university' && (target.university_id === requesterId || target.registered_by === requesterId))
                 );

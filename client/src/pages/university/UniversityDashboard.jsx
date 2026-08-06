@@ -201,6 +201,25 @@ const UniversityDashboard = () => {
         fetchData();
     }, []);
 
+    const handleToggleStudentStatus = async (studentId, currentStatus) => {
+        try {
+            const newStatus = currentStatus === false ? true : false;
+            await axios.put(`/api/users/${studentId}/status`, { is_active: newStatus }, config);
+            alert(`Student ${newStatus ? 'activated' : 'deactivated'} successfully`);
+            
+            // Update local state to reflect change
+            setStudents(students.map(s => {
+                if ((s._id || s.id) === studentId) {
+                    return { ...s, is_active: newStatus };
+                }
+                return s;
+            }));
+        } catch (error) {
+            console.error('Error toggling student status:', error);
+            alert(error.response?.data?.message || 'Failed to update student status');
+        }
+    };
+
     const filteredStudents = students.filter(student => {
         const name = student.name || '';
         const email = student.email || '';
@@ -580,6 +599,13 @@ const UniversityDashboard = () => {
                                                 </div>
                                             </div>
                                             <div className="flex space-x-2">
+                                                <button
+                                                    onClick={() => handleToggleStudentStatus(student._id || student.id, student.is_active)}
+                                                    className={`inline-flex items-center justify-center min-w-[70px] text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider transition-colors border ${student.is_active !== false ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'}`}
+                                                    title={student.is_active !== false ? "Click to deactivate" : "Click to activate"}
+                                                >
+                                                    {student.is_active !== false ? 'Active' : 'Inactive'}
+                                                </button>
                                                 <button
                                                     onClick={() => handleViewStudent(student)}
                                                     className="p-2 text-white/40 hover:text-white transition-colors"
