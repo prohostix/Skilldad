@@ -21,7 +21,11 @@ const getStudentExams = asyncHandler(async (req, res) => {
 
   // 1. Get enrolled courses from PG
   const enrollRes = await query(`
-      SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active'
+      SELECT e.course_id 
+      FROM enrollments e
+      LEFT JOIN batches b ON e.batch_id = b.id
+      WHERE e.student_id = $1 AND e.status = 'active'
+      AND (b.id IS NULL OR b.is_active IS NOT FALSE)
   `, [studentId]);
   const courseIds = enrollRes.rows.map(r => r.course_id);
 

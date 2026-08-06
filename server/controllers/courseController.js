@@ -154,10 +154,9 @@ const getCourse = asyncHandler(async (req, res) => {
         
         if (enrollRes.rows.length > 0) {
             const enrollment = enrollRes.rows[0];
-            // If they belong to a batch and the batch is explicitly inactive, block access
+            // If they belong to a batch and the batch is explicitly inactive, track it
             if (enrollment.batch_id && enrollment.batch_is_active === false) {
-                // Do not throw a 403 error here; authMiddleware already handles treating them as inactive,
-                // which allows them to view the syllabus but strips video contents.
+                // Batch is inactive; content will be stripped below
             }
             isEnrolled = true;
             studentBatchId = enrollment.batch_id ? String(enrollment.batch_id) : null;
@@ -173,7 +172,8 @@ const getCourse = asyncHandler(async (req, res) => {
     }
 
     // Strip sensitive content (video URLs, attachments, quizzes) for guests or non-enrolled students
-    const hasFullAccess = (req.user && ['admin', 'university', 'partner'].includes(req.user.role)) || (isEnrolled && req.user?.is_active !== false);
+    const enrollmentBatchIsActive = enrollRes && enrollRes.rows.length > 0 ? enrollRes.rows[0].batch_is_active : null;
+    const hasFullAccess = (req.user && ['admin', 'university', 'partner'].includes(req.user.role)) || (isEnrolled && req.user?.is_active !== false && enrollmentBatchIsActive !== false);
     if (!hasFullAccess && Array.isArray(course.modules)) {
         course.modules = course.modules.map(m => {
             const sanitizedModule = { ...m };

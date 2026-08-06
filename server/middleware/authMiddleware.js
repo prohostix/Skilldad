@@ -11,10 +11,9 @@ const protect = async (req, res, next) => {
 
             // PostgreSQL query instead of User.findById
             const userRes = await query(`
-                SELECT u.id, u.id as _id, u.name, u.email, u.role, u.profile, u.university_id, u.registered_by, u.is_active, b.is_active as batch_is_active
-                FROM users u
-                LEFT JOIN batches b ON u.batch_id = b.id
-                WHERE u.id = $1
+                SELECT id, id as _id, name, email, role, profile, university_id, registered_by, is_active
+                FROM users 
+                WHERE id = $1
             `, [decoded.id]);
             req.user = userRes.rows[0];
 
@@ -22,9 +21,7 @@ const protect = async (req, res, next) => {
                 return res.status(401).json({ message: 'User not found' });
             }
 
-            if (req.user.batch_is_active === false) {
-                req.user.is_active = false;
-            }            console.log(`[AUTH PROTECT] Decoded ID: ${decoded.id}, User Found: ${req.user.email}, Role: ${req.user.role}`);
+            console.log(`[AUTH PROTECT] Decoded ID: ${decoded.id}, User Found: ${req.user.email}, Role: ${req.user.role}`);
             return next();
         } catch (error) {
             console.error('Auth protection error:', error.message);
@@ -48,17 +45,12 @@ const optionalProtect = async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
             const userRes = await query(`
-                SELECT u.id, u.id as _id, u.name, u.email, u.role, u.profile, u.university_id, u.registered_by, u.is_active, b.is_active as batch_is_active
-                FROM users u
-                LEFT JOIN batches b ON u.batch_id = b.id
-                WHERE u.id = $1
+                SELECT id, id as _id, name, email, role, profile, university_id, registered_by, is_active
+                FROM users 
+                WHERE id = $1
             `, [decoded.id]);
             req.user = userRes.rows[0];
             
-            if (req.user && req.user.batch_is_active === false) {
-                req.user.is_active = false;
-            }
-
             return next();
         } catch (error) {
             console.error('Optional auth error (continuing as guest):', error.message);

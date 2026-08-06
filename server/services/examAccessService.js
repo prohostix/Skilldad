@@ -24,13 +24,18 @@ async function checkExamAccess(examId, studentId) {
 
     // 2. Verify student enrollment and batch access from PG
     const enrollRes = await query(`
-        SELECT * FROM enrollments 
-        WHERE student_id = $1 AND course_id = $2 AND status = 'active'
+        SELECT e.*, b.is_active as batch_is_active FROM enrollments e
+        LEFT JOIN batches b ON e.batch_id = b.id
+        WHERE e.student_id = $1 AND e.course_id = $2 AND e.status = 'active'
     `, [studentId.toString(), exam.course_id]);
 
     const enrollment = enrollRes.rows[0];
     if (!enrollment) {
       return { canAccess: false, reason: 'Not enrolled in course' };
+    }
+
+    if (enrollment.batch_is_active === false) {
+      return { canAccess: false, reason: 'Your batch is currently inactive. You cannot start exams.' };
     }
 
     // 2b. Batch access check

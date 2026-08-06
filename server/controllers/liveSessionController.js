@@ -178,8 +178,15 @@ const getSessions = asyncHandler(async (req, res) => {
     if (req.user.role === 'student') {
         // Students only see sessions for courses they're actively enrolled in — no
         // institution-wide sessions regardless of enrollment (course_id IS NULL branch removed).
+        // Also excludes sessions from courses where the student's batch is inactive.
         sql += ` AND (
-            s.course_id IN (SELECT course_id FROM enrollments WHERE student_id = $1 AND status = 'active')
+            s.course_id IN (
+                SELECT e.course_id 
+                FROM enrollments e 
+                LEFT JOIN batches b ON e.batch_id = b.id 
+                WHERE e.student_id = $1 AND e.status = 'active' 
+                AND (b.id IS NULL OR b.is_active IS NOT FALSE)
+            )
             AND (s.batch_id IS NULL OR s.batch_id = (SELECT batch_id FROM enrollments WHERE student_id = $1 AND course_id = s.course_id LIMIT 1))
         )`;
         params.push(req.user.id);
