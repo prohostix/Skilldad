@@ -156,8 +156,8 @@ const getCourse = asyncHandler(async (req, res) => {
             const enrollment = enrollRes.rows[0];
             // If they belong to a batch and the batch is explicitly inactive, block access
             if (enrollment.batch_id && enrollment.batch_is_active === false) {
-                res.status(403);
-                throw new Error('Your batch is currently inactive. Please contact support to access this course.');
+                // Do not throw a 403 error here; authMiddleware already handles treating them as inactive,
+                // which allows them to view the syllabus but strips video contents.
             }
             isEnrolled = true;
             studentBatchId = enrollment.batch_id ? String(enrollment.batch_id) : null;
