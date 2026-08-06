@@ -590,10 +590,32 @@ module.exports = {
                     return res.status(404).json({ message: 'User not found' });
                 }
 
-                const isOwnStudent = target.role?.toLowerCase() === 'student' && (
-                    (requesterRole === 'partner' && target.registered_by === requesterId) ||
-                    (requesterRole === 'university' && (target.university_id === requesterId || target.registered_by === requesterId))
-                );
+                let isOwnStudent = false;
+
+                if (target.role?.toLowerCase() === 'student') {
+                    if (requesterRole === 'university') {
+                        isOwnStudent = target.university_id === requesterId || target.registered_by === requesterId;
+                    } else if (requesterRole === 'partner') {
+                        if (target.registered_by === requesterId) {
+                            isOwnStudent = true;
+                        } else {
+                            // Check if they used the partner's discount code or enrolled in a course taught by the partner
+                            const partnerCheckRes = await query(`
+                                SELECT 1 FROM users u
+                                LEFT JOIN enrollments e ON u.id = e.student_id
+                                LEFT JOIN courses c ON e.course_id = c.id
+                                WHERE u.id = $1 AND (
+                                    u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $2)
+                                    OR c.instructor_id = $2
+                                ) LIMIT 1
+                            `, [userId, requesterId]);
+                            
+                            if (partnerCheckRes.rows.length > 0) {
+                                isOwnStudent = true;
+                            }
+                        }
+                    }
+                }
 
                 if (!isOwnStudent) {
                     return res.status(403).json({ message: 'Not authorized to change status for this user' });
