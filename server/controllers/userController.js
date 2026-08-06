@@ -259,7 +259,7 @@ const getUsers = async (req, res) => {
         
         let usersRes;
         
-        let queryStr = 'SELECT id as _id, name, email, role, profile, created_at FROM users';
+        let queryStr = 'SELECT id as _id, name, email, role, profile, is_active, created_at FROM users';
         let queryParams = [];
         let whereClauses = [];
 

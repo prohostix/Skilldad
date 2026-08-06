@@ -160,7 +160,7 @@ const getPartnerStudents = async (req, res) => {
         const studentsRes = await query(`
             SELECT 
                 u.id as _id, u.name, u.email, u.profile, u.partner_code, u.created_at,
-                u.is_verified,
+                u.is_verified, u.is_active,
                 CASE 
                     WHEN u.registered_by = $1 THEN 'Directly Registered'
                     WHEN u.partner_code IN (SELECT code FROM discounts WHERE partner_id = $1) THEN 'Discount Code'
