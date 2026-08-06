@@ -18,10 +18,19 @@ const DashboardLayout = () => {
     const userInfo = (() => { try { return JSON.parse(localStorage.getItem('userInfo')); } catch { return null; } })();
     const isStudent = userInfo?.role?.toLowerCase() === 'student';
 
-    // Close sidebar on path change if we're on mobile
+    // Auto-manage sidebar state based on route and screen size
     useEffect(() => {
-        if (window.innerWidth < 1024) {
+        const isCourseOrSession = location.pathname.includes('/course/') || location.pathname.includes('/session/');
+        
+        if (isCourseOrSession) {
+            // Always auto-hide sidebar when entering course player or live sessions for maximum screen space
             setIsSidebarOpen(false);
+        } else if (window.innerWidth < 1024) {
+            // Auto-hide on mobile for all path changes
+            setIsSidebarOpen(false);
+        } else {
+            // On desktop, ensure sidebar is open for normal dashboard pages
+            setIsSidebarOpen(true);
         }
     }, [location.pathname]);
 
