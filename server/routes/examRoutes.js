@@ -45,13 +45,20 @@ const notifyEnrolledStudents = async (session, title, message) => {
         
         // 1. Fetch by Course and optional Batch
         if (session.course_id) {
-            let q = "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'";
+            // Join with batches to ensure we don't notify students in an explicitly inactive batch
+            let q = `
+                SELECT e.student_id 
+                FROM enrollments e
+                LEFT JOIN batches b ON e.batch_id = b.id
+                WHERE e.course_id = $1 AND e.status = 'active'
+                AND (e.batch_id IS NULL OR b.is_active = true)
+            `;
             let params = [session.course_id];
             
             if (session.batch_ids && Array.isArray(session.batch_ids) && session.batch_ids.length > 0) {
                 const validBatchIds = session.batch_ids.filter(Boolean);
                 if (validBatchIds.length > 0) {
-                    q += " AND batch_id = ANY($2)";
+                    q += " AND e.batch_id = ANY($2)";
                     params.push(validBatchIds);
                 }
             }
@@ -101,7 +108,7 @@ const notifyEnrolledStudents = async (session, title, message) => {
             // Multi-channel notifications (WhatsApp + Email)
             const notificationService = require('../services/NotificationService');
             const studentsRes = await query(
-                "SELECT id, name, email, profile->>'phone' AS phone, profile->>'phoneNumber' AS phone_alt, profile FROM users WHERE id = ANY($1)",
+                "SELECT id, name, email, profile->>'phone' AS phone, profile->>'phoneNumber' AS phone_alt, profile FROM users WHERE id = ANY($1) AND is_active = true",
                 [studentIds]
             );
 

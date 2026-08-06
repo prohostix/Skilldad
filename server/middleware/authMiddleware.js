@@ -11,7 +11,7 @@ const protect = async (req, res, next) => {
 
             // PostgreSQL query instead of User.findById
             const userRes = await query(`
-                SELECT id, id as _id, name, email, role, profile, university_id, registered_by 
+                SELECT id, id as _id, name, email, role, profile, university_id, registered_by, is_active
                 FROM users 
                 WHERE id = $1
             `, [decoded.id]);
@@ -19,6 +19,9 @@ const protect = async (req, res, next) => {
 
             if (!req.user) {
                 return res.status(401).json({ message: 'User not found' });
+            }
+            if (req.user.is_active === false) {
+                return res.status(403).json({ message: 'Your account has been deactivated.' });
             }
 
             console.log(`[AUTH PROTECT] Decoded ID: ${decoded.id}, User Found: ${req.user.email}, Role: ${req.user.role}`);
@@ -45,11 +48,15 @@ const optionalProtect = async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
             const userRes = await query(`
-                SELECT id, id as _id, name, email, role, profile, university_id, registered_by 
+                SELECT id, id as _id, name, email, role, profile, university_id, registered_by, is_active
                 FROM users 
                 WHERE id = $1
             `, [decoded.id]);
             req.user = userRes.rows[0];
+            
+            if (req.user && req.user.is_active === false) {
+                req.user = null; // Treat inactive as guest
+            }
             return next();
         } catch (error) {
             console.error('Optional auth error (continuing as guest):', error.message);

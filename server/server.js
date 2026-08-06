@@ -287,6 +287,20 @@ const startServer = async () => {
                 created_at TIMESTAMP DEFAULT NOW()
             )
         `);
+
+        // Ensure is_active flag exists on batches
+        const batchActiveColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'batches' AND column_name = 'is_active'");
+        if (batchActiveColCheck.rows.length === 0) {
+            await query("ALTER TABLE batches ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
+            console.log("[Migration] Added is_active to batches".green);
+        }
+
+        // Ensure is_active flag exists on users
+        const userActiveColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'is_active'");
+        if (userActiveColCheck.rows.length === 0) {
+            await query("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
+            console.log("[Migration] Added is_active to users".green);
+        }
         
         const tablesToUpdate = ['enrollments', 'live_sessions'];
         for (const table of tablesToUpdate) {

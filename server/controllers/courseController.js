@@ -146,11 +146,22 @@ const getCourse = asyncHandler(async (req, res) => {
     let studentBatchId = null;
     if (req.user) {
         const enrollRes = await query(`
-            SELECT id, batch_id FROM enrollments
-            WHERE student_id = $1 AND course_id = $2 AND status = 'active'
+            SELECT e.id, e.batch_id, b.is_active as batch_is_active 
+            FROM enrollments e
+            LEFT JOIN batches b ON e.batch_id = b.id
+            WHERE e.student_id = $1 AND e.course_id = $2 AND e.status = 'active'
         `, [req.user.id, id]);
-        isEnrolled = enrollRes.rows.length > 0;
-        studentBatchId = enrollRes.rows[0]?.batch_id ? String(enrollRes.rows[0].batch_id) : null;
+        
+        if (enrollRes.rows.length > 0) {
+            const enrollment = enrollRes.rows[0];
+            // If they belong to a batch and the batch is explicitly inactive, block access
+            if (enrollment.batch_id && enrollment.batch_is_active === false) {
+                res.status(403);
+                throw new Error('Your batch is currently inactive. Please contact support to access this course.');
+            }
+            isEnrolled = true;
+            studentBatchId = enrollment.batch_id ? String(enrollment.batch_id) : null;
+        }
     }
 
     // Students only see modules that are either open to everyone (no publishedBatches

@@ -10,7 +10,8 @@ const {
     uploadProfileImage,
     uploadCoverImage,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    updateUserStatus
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -25,5 +26,6 @@ router.post('/upload-profile-image', protect, upload.single('profileImage'), upl
 router.post('/upload-cover-image', protect, upload.single('coverImage'), uploadCoverImage);
 router.post('/forgotpassword', forgotPassword);
 router.put('/resetpassword/:resettoken', resetPassword);
+router.put('/:id/status', protect, updateUserStatus);
 
 module.exports = router;

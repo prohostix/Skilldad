@@ -6,13 +6,15 @@ export default function lazyRetry(importFn) {
     return new Promise((resolve, reject) => {
         importFn()
             .then((module) => {
-                sessionStorage.removeItem('lazy-retry-refreshed');
                 resolve(module);
             })
             .catch((error) => {
-                const hasRefreshed = sessionStorage.getItem('lazy-retry-refreshed') === 'true';
-                if (!hasRefreshed) {
-                    sessionStorage.setItem('lazy-retry-refreshed', 'true');
+                console.error(`[lazyRetry] Error importing chunk: ${error.message}`);
+                const lastRefresh = parseInt(sessionStorage.getItem('lazy-retry-time') || '0', 10);
+                const now = Date.now();
+                // Only allow one reload per 5 seconds to prevent infinite loops
+                if (now - lastRefresh > 5000) {
+                    sessionStorage.setItem('lazy-retry-time', now.toString());
                     window.location.reload();
                 } else {
                     reject(error);

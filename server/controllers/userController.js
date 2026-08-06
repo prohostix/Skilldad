@@ -165,6 +165,11 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        if (user.is_active === false) {
+            console.warn(`[Login] Inactive user attempted login: ${lowerEmail}`);
+            return res.status(403).json({ message: 'Your account has been deactivated. Please contact support.' });
+        }
+
         console.log(`[Login] Success for user: ${user.email} (Role: ${user.role})`);
 
         // A user who has never logged in before (last_login_at still null) is
@@ -561,6 +566,45 @@ module.exports = {
             res.json({ success: true, message: 'Cover image uploaded', imageUrl });
         } catch (error) {
             console.error('Cover Upload Error:', error);
+            res.status(500).json({ message: error.message });
+        }
+    },
+
+    updateUserStatus: async (req, res) => {
+        try {
+            const userId = req.params.id;
+            const { is_active } = req.body;
+            const requesterRole = req.user.role;
+            const requesterId = req.user._id || req.user.id;
+
+            // Only admin, partner or university can change status
+            if (requesterRole !== 'admin' && requesterRole !== 'partner' && requesterRole !== 'university') {
+                return res.status(403).json({ message: 'Not authorized to perform this action' });
+            }
+
+            // Partners/universities may only toggle students that belong to them
+            if (requesterRole !== 'admin') {
+                const targetRes = await query('SELECT role, university_id, registered_by FROM users WHERE id = $1', [userId]);
+                const target = targetRes.rows[0];
+                if (!target) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+
+                const isOwnStudent = target.role === 'student' && (
+                    (requesterRole === 'partner' && target.registered_by === requesterId) ||
+                    (requesterRole === 'university' && (target.university_id === requesterId || target.registered_by === requesterId))
+                );
+
+                if (!isOwnStudent) {
+                    return res.status(403).json({ message: 'Not authorized to change status for this user' });
+                }
+            }
+
+            await query('UPDATE users SET is_active = $1, updated_at = NOW() WHERE id = $2', [Boolean(is_active), userId]);
+
+            res.json({ success: true, message: `User status updated to ${is_active ? 'active' : 'inactive'}` });
+        } catch (error) {
+            console.error('Update User Status Error:', error);
             res.status(500).json({ message: error.message });
         }
     }

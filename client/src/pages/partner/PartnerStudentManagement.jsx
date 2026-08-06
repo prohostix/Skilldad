@@ -249,8 +249,20 @@ const PartnerStudentManagement = () => {
             // Refresh list
             fetchStudents();
         } catch (error) {
-            console.error('Error registering student:', error);
+            console.error('Registration Error:', error.response?.data || error);
             showToast(error.response?.data?.message || 'Failed to register student', 'error');
+        }
+    };
+
+    const handleToggleStudentStatus = async (studentId, currentStatus) => {
+        try {
+            const newStatus = currentStatus === false ? true : false;
+            await axios.put(`/api/users/${studentId}/status`, { is_active: newStatus }, config);
+            showToast(`Student ${newStatus ? 'activated' : 'deactivated'} successfully`, 'success');
+            fetchStudents();
+        } catch (error) {
+            console.error('Error toggling student status:', error);
+            showToast(error.response?.data?.message || 'Failed to update student status', 'error');
         }
     };
 
@@ -554,11 +566,20 @@ const PartnerStudentManagement = () => {
                                                 <Trophy size={16} />
                                             </button>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-bold text-white">Status</p>
-                                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${student.isVerified ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                                                {student.isVerified ? 'Verified' : 'Pending'}
-                                            </span>
+                                        <div className="text-right flex flex-col items-end">
+                                            <p className="text-sm font-bold text-white mb-1">Status</p>
+                                            <div className="flex gap-1.5">
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${student.isVerified ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                                    {student.isVerified ? 'Verified' : 'Pending'}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleToggleStudentStatus(student._id || student.id, student.is_active)}
+                                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider transition-colors border ${student.is_active !== false ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'}`}
+                                                    title={student.is_active !== false ? "Click to deactivate" : "Click to activate"}
+                                                >
+                                                    {student.is_active !== false ? 'Active' : 'Inactive'}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

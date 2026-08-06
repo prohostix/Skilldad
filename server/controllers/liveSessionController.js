@@ -17,11 +17,17 @@ const notifyEnrolledStudents = async (session, title, message, notificationType 
         }
 
         if (session.course_id) {
-            let enrollSql = "SELECT student_id FROM enrollments WHERE course_id = $1 AND status = 'active'";
+            let enrollSql = `
+                SELECT e.student_id 
+                FROM enrollments e
+                LEFT JOIN batches b ON e.batch_id = b.id
+                WHERE e.course_id = $1 AND e.status = 'active'
+                AND (e.batch_id IS NULL OR b.is_active = true)
+            `;
             let enrollParams = [session.course_id];
             
             if (session.batch_id) {
-                enrollSql += " AND batch_id = $2";
+                enrollSql += " AND e.batch_id = $2";
                 enrollParams.push(session.batch_id);
             }
             
@@ -29,13 +35,13 @@ const notifyEnrolledStudents = async (session, title, message, notificationType 
             studentIds = res.rows.map(r => r.student_id);
         } else if (session.university_id) {
             const res = await query(
-                "SELECT id FROM users WHERE university_id = $1 AND role = 'student'",
+                "SELECT id FROM users WHERE university_id = $1 AND role = 'student' AND is_active = true",
                 [session.university_id]
             );
             studentIds = res.rows.map(r => r.id);
         } else if (session.partner_id) {
             const res = await query(
-                "SELECT id FROM users WHERE registered_by = $1 AND role = 'student'",
+                "SELECT id FROM users WHERE registered_by = $1 AND role = 'student' AND is_active = true",
                 [session.partner_id]
             );
             studentIds = res.rows.map(r => r.id);
@@ -56,7 +62,7 @@ const notifyEnrolledStudents = async (session, title, message, notificationType 
             // 2. Send External Notifications (WhatsApp & Email)
             // Fetch student details to get phone numbers and emails
             const studentsRes = await query(
-                "SELECT id, name, email, profile FROM users WHERE id = ANY($1)",
+                "SELECT id, name, email, profile FROM users WHERE id = ANY($1) AND is_active = true",
                 [studentIds]
             );
 

@@ -28,7 +28,18 @@ const ProtectedRoute = ({ allowedRoles }) => {
             sales: '/sales/dashboard',
             student: '/dashboard',
         };
-        return <Navigate to={roleHome[userRole] || '/dashboard'} replace />;
+        
+        const targetUrl = roleHome[userRole] || '/dashboard';
+        
+        if (window.location.pathname === targetUrl || (targetUrl === '/dashboard' && window.location.pathname === '/dashboard')) {
+            // Force logout if we're looping because their role is completely unrecognized
+            // and they aren't even allowed on the fallback dashboard.
+            localStorage.removeItem('userInfo');
+            localStorage.removeItem('token');
+            return <Navigate to="/login?session=expired" replace />;
+        }
+
+        return <Navigate to={targetUrl} replace />;
     }
 
     return <Outlet />;
