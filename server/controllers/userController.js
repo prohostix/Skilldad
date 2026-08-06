@@ -165,9 +165,21 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        if (user.is_active === false && user.role?.toLowerCase() !== 'student') {
-            console.warn(`[Login] Inactive user attempted login: ${lowerEmail}`);
-            return res.status(403).json({ message: 'Your account has been deactivated. Please contact support.' });
+        if (user.is_active === false) {
+            if (user.role?.toLowerCase() !== 'student') {
+                console.warn(`[Login] Inactive user attempted login: ${lowerEmail}`);
+                return res.status(403).json({ message: 'Your account has been deactivated. Please contact support.' });
+            } else {
+                // If it's a student, check if they were deactivated by admin
+                let profile = {};
+                try {
+                    profile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
+                } catch(e) {}
+                if (profile.deactivated_by_role === 'admin') {
+                    console.warn(`[Login] Admin-deactivated student attempted login: ${lowerEmail}`);
+                    return res.status(403).json({ message: 'Your account has been deactivated by an Administrator. Please contact support.' });
+                }
+            }
         }
 
         console.log(`[Login] Success for user: ${user.email} (Role: ${user.role})`);
@@ -622,7 +634,22 @@ module.exports = {
                 }
             }
 
-            await query('UPDATE users SET is_active = $1, updated_at = NOW() WHERE id = $2', [Boolean(is_active), userId]);
+            // Track who deactivated the user
+            const profileRes = await query('SELECT profile FROM users WHERE id = $1', [userId]);
+            let profile = profileRes.rows[0]?.profile || {};
+            if (typeof profile === 'string') {
+                try { profile = JSON.parse(profile); } catch(e) { profile = {}; }
+            }
+
+            // Convert string "true"/"false" to boolean
+            const newStatus = is_active === 'true' || is_active === true;
+            if (newStatus) {
+                delete profile.deactivated_by_role;
+            } else {
+                profile.deactivated_by_role = requesterRole;
+            }
+
+            await query('UPDATE users SET is_active = $1, profile = $2, updated_at = NOW() WHERE id = $3', [newStatus, JSON.stringify(profile), userId]);
 
             res.json({ success: true, message: `User status updated to ${is_active ? 'active' : 'inactive'}` });
         } catch (error) {
