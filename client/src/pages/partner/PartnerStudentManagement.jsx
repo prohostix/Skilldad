@@ -568,13 +568,13 @@ const PartnerStudentManagement = () => {
                                         </div>
                                         <div className="text-right flex flex-col items-end">
                                             <p className="text-sm font-bold text-white mb-1">Status</p>
-                                            <div className="flex gap-1.5">
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${student.isVerified ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                            <div className="flex gap-2">
+                                                <span className={`inline-flex items-center justify-center min-w-[70px] text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border ${student.isVerified ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'}`}>
                                                     {student.isVerified ? 'Verified' : 'Pending'}
                                                 </span>
                                                 <button
                                                     onClick={() => handleToggleStudentStatus(student._id || student.id, student.is_active)}
-                                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider transition-colors border ${student.is_active !== false ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'}`}
+                                                    className={`inline-flex items-center justify-center min-w-[70px] text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider transition-colors border ${student.is_active !== false ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'}`}
                                                     title={student.is_active !== false ? "Click to deactivate" : "Click to activate"}
                                                 >
                                                     {student.is_active !== false ? 'Active' : 'Inactive'}
