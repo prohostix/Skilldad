@@ -164,14 +164,28 @@ const getCourse = asyncHandler(async (req, res) => {
         }
     }
 
-    // Students only see modules that are either open to everyone (no publishedBatches
-    // set — the default for all existing content) or explicitly published to the batch
-    // they're enrolled in. Instructors/admins always see every module so they can manage
-    // and publish them.
+    // Filter modules based on batch publish settings for students
     if (req.user?.role === 'student' && Array.isArray(course.modules)) {
         course.modules = course.modules.filter(m => {
             if (!Array.isArray(m.publishedBatches)) return true;
             return studentBatchId ? m.publishedBatches.includes(studentBatchId) : false;
+        });
+    }
+
+    // Strip sensitive content (video URLs, attachments, quizzes) for guests or non-enrolled students
+    const hasFullAccess = req.user && ['admin', 'university', 'partner'].includes(req.user.role) || isEnrolled;
+    if (!hasFullAccess && Array.isArray(course.modules)) {
+        course.modules = course.modules.map(m => {
+            const sanitizedModule = { ...m };
+            delete sanitizedModule.quiz; // Hide quizzes from public
+            
+            if (Array.isArray(sanitizedModule.videos)) {
+                sanitizedModule.videos = sanitizedModule.videos.map(v => {
+                    const { url, attachments, exercises, zoom_recording_url, ...safeVideo } = v;
+                    return safeVideo;
+                });
+            }
+            return sanitizedModule;
         });
     }
 
