@@ -195,7 +195,7 @@ const PartnerCourseManager = () => {
                     </div>
                 ) : filteredCourses.map((course) => (
                     <GlassCard key={course._id} className="group overflow-hidden flex flex-col border-white/10 hover:border-primary/30 transition-all duration-300">
-                        <div className="relative h-40 bg-zinc-900 overflow-hidden">
+                        <div className="relative h-32 bg-zinc-900 overflow-hidden">
                             {course.thumbnail ? (
                                 <img src={getMediaUrl(course.thumbnail)} alt={course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                             ) : (
@@ -214,16 +214,16 @@ const PartnerCourseManager = () => {
                             </div>
                         </div>
                         
-                        <div className="p-5 flex-1 flex flex-col">
+                        <div className="p-4 flex-1 flex flex-col">
                             <div className="flex justify-end items-start mb-2">
                                 <span className="text-sm font-bold text-white">₹{course.price}</span>
                             </div>
                             <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{course.title}</h3>
-                            <p className="text-xs text-white/50 line-clamp-2 mb-4 flex-1">
+                            <p className="text-xs text-white/50 line-clamp-2 mb-3 flex-1">
                                 {course.description}
                             </p>
                             
-                            <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+                            <div className="flex items-center justify-between pt-3 border-t border-white/10 mt-auto">
                                 <div className="flex items-center gap-3">
                                     <button 
                                         onClick={() => navigate(`/partner/courses/${course._id}`)}
