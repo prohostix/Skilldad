@@ -21,7 +21,11 @@ class ExamNotificationService {
                     SELECT u.id as _id, u.name, u.email, u.profile 
                     FROM enrollments e
                     JOIN users u ON e.student_id = u.id
-                    WHERE e.course_id = $1 AND e.status = 'active'
+                    LEFT JOIN batches b ON u.batch_id = b.id
+                    WHERE e.course_id = $1 
+                    AND e.status = 'active'
+                    AND u.is_active IS NOT FALSE
+                    AND (b.is_active IS NULL OR b.is_active IS NOT FALSE)
                 `, [courseId]);
                 
                 students = enrollmentsRes.rows;
@@ -88,7 +92,11 @@ class ExamNotificationService {
                     SELECT u.id as _id, u.name, u.email, u.profile 
                     FROM enrollments e
                     JOIN users u ON e.student_id = u.id
-                    WHERE e.course_id = $1 AND e.status = 'active'
+                    LEFT JOIN batches b ON u.batch_id = b.id
+                    WHERE e.course_id = $1 
+                    AND e.status = 'active'
+                    AND u.is_active IS NOT FALSE
+                    AND (b.is_active IS NULL OR b.is_active IS NOT FALSE)
                 `, [courseId]);
                 
                 students = enrollmentsRes.rows;
@@ -200,7 +208,11 @@ class ExamNotificationService {
                     SELECT u.id as _id, u.name, u.email, u.profile 
                     FROM enrollments e
                     JOIN users u ON e.student_id = u.id
-                    WHERE e.course_id = $1 AND e.status = 'active'
+                    LEFT JOIN batches b ON u.batch_id = b.id
+                    WHERE e.course_id = $1 
+                    AND e.status = 'active'
+                    AND u.is_active IS NOT FALSE
+                    AND (b.is_active IS NULL OR b.is_active IS NOT FALSE)
                 `, [courseId]);
                 
                 students = enrollmentsRes.rows;
