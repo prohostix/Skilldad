@@ -127,7 +127,7 @@ const CapabilitiesSection = () => {
                         <ModernButton onClick={() => { navigate('/courses'); window.scrollTo(0, 0); }} className="!px-8 !py-3 font-black uppercase tracking-widest text-[10px]">
                             Explore
                         </ModernButton>
-                        <button className="flex items-center space-x-2 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[8px] hover:bg-white/10 transition-all group">
+                        <button className="flex items-center space-x-2 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white [.light-mode_&]:!text-black font-black uppercase tracking-widest text-[8px] hover:bg-white/10 hover:border-white/20 transition-all group">
                             <span>Demo</span>
                             <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                         </button>
