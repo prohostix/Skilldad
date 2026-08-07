@@ -334,7 +334,7 @@ const HeroSection = () => {
                                     onClick={() => navigate('/login')}
                                     className={theme === 'dark'
                                         ? "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-white/20 bg-transparent text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:border-white/40 hover:bg-white/5 active:scale-95"
-                                        : "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
+                                        : "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-black font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
                                     }
                                 >
                                     Login Now
