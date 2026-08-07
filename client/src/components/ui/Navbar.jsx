@@ -72,9 +72,9 @@ const Navbar = ({ compact = false }) => {
     return (
         <>
             <nav
-                className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? 'border-b border-black/5 shadow-md text-gray-900' : 'border-b border-transparent'}`}
+                className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-black/5 shadow-md text-gray-900' : 'border-b border-white/5 shadow-md text-white') : 'border-b border-transparent'}`}
                 style={{
-                    backgroundColor: shouldBeTransparent ? 'transparent' : '#FDF8EE',
+                    backgroundColor: shouldBeTransparent ? 'transparent' : (theme === 'light' ? '#FDF8EE' : 'rgba(0, 0, 0, 0.9)'),
                     backdropFilter: shouldBeTransparent ? 'none' : 'blur(20px)',
                 }}
             >
@@ -91,7 +91,7 @@ const Navbar = ({ compact = false }) => {
                             />
                         </div>
                         {/* Text - 'SkillDad' */}
-                        <span className={`brand-text font-bold font-space ${!shouldBeTransparent ? 'text-gray-900' : 'text-white'} uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
+                        <span className={`brand-text font-bold font-space ${!shouldBeTransparent && theme === 'light' ? 'text-gray-900' : 'text-white'} uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
                             SkillDad
                         </span>
                     </div>
@@ -105,7 +105,7 @@ const Navbar = ({ compact = false }) => {
                                     to={item.href}
                                     className={theme === 'light' 
                                         ? `nav-box-link font-semibold text-white/90 hover:text-white transition-colors duration-200 group flex items-center h-full ${compact ? 'text-xs' : 'text-[13px]'}`
-                                        : `relative font-medium ${!shouldBeTransparent ? 'text-gray-800 hover:text-primary' : 'text-[#E9D5FF] hover:text-white'} transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`
+                                        : `relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`
                                     }
                                 >
                                     {item.name}
@@ -139,7 +139,7 @@ const Navbar = ({ compact = false }) => {
                                 <>
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className={`font-medium ${!shouldBeTransparent ? 'text-gray-800 hover:text-primary' : 'text-slate-100 hover:text-primary'} transition-colors ${compact ? 'text-xs' : 'text-sm'}`}
+                                        className={`font-medium ${!shouldBeTransparent && theme === 'light' ? 'text-gray-800 hover:text-primary' : 'text-slate-100 hover:text-primary'} transition-colors ${compact ? 'text-xs' : 'text-sm'}`}
                                     >
                                         Login
                                     </button>

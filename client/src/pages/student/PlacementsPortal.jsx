@@ -131,10 +131,9 @@ const PlacementsPortal = () => {
     const TABS = [
         { id: 'vacancies', label: 'Jobs' },
         { id: 'internships', label: 'Internships' },
-        { id: 'hall_of_fame', label: 'Hall of Fame' },
     ];
 
-    const activeList = activeTab === 'hall_of_fame' ? filteredPlacements : filteredVacancies;
+    const activeList = filteredVacancies;
 
     return (
         <div className="space-y-4 pb-12 animate-in fade-in duration-500">
@@ -184,38 +183,8 @@ const PlacementsPortal = () => {
             {/* Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
 
-                {/* --- Hall of Fame Cards --- */}
-                {activeTab === 'hall_of_fame' && filteredPlacements.map((p, i) => (
-                    <motion.div key={p.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                        <div className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all overflow-hidden flex flex-col h-full group">
-                            <div className="relative h-44 overflow-hidden shrink-0">
-                                <img
-                                    src={p.student_photo || `https://i.pravatar.cc/400?u=${p.id}`}
-                                    alt={p.student_name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent" />
-                                <span className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-primary/25 backdrop-blur-sm rounded-full border border-primary/30 text-[9px] font-bold text-white uppercase tracking-wide">
-                                    <Trophy size={8} className="text-primary" /> Placed
-                                </span>
-                            </div>
-                            <div className="p-3 flex flex-col gap-1.5 flex-1">
-                                <p className="text-sm font-semibold text-white group-hover:text-primary transition-colors line-clamp-1">{p.student_name}</p>
-                                <p className="text-xs text-white/40">{p.designation}</p>
-                                <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-white/5">
-                                    <Building2 size={11} className="text-primary/60 shrink-0" />
-                                    <span className="text-xs text-white/60 font-medium truncate">{p.company_name}</span>
-                                    <span className="ml-auto text-[10px] text-white/25 shrink-0">
-                                        {new Date(p.placed_date).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-
                 {/* --- Vacancy / Internship Cards --- */}
-                {activeTab !== 'hall_of_fame' && filteredVacancies.map((v, i) => (
+                {filteredVacancies.map((v, i) => (
                     <motion.div key={v.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
                         <div
                             className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all overflow-hidden flex flex-col h-full group cursor-pointer"

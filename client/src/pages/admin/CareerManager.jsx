@@ -164,18 +164,13 @@ const CareerManager = () => {
                 <div>
                     <DashboardHeading title="Career Center Management" />
                     <p className="text-white/40 text-sm font-medium mt-1">
-                        Manage corporate vacancies, review student applications, and update the Hall of Fame.
+                        Manage corporate vacancies and review student applications.
                     </p>
                 </div>
                 <div className="flex gap-3">
                     {activeTab === 'vacancies' && (
                         <ModernButton onClick={() => { setFormData({ job_type: 'Job', status: 'open' }); setEditingItem(null); setShowVacancyModal(true); }}>
                             <Plus size={16} className="mr-2" /> Add Vacancy
-                        </ModernButton>
-                    )}
-                    {activeTab === 'placements' && (
-                        <ModernButton onClick={() => { setFormData({ placed_date: new Date().toISOString().split('T')[0] }); setEditingItem(null); setShowPlacementModal(true); }}>
-                            <Plus size={16} className="mr-2" /> Add Placement
                         </ModernButton>
                     )}
                 </div>
@@ -185,8 +180,7 @@ const CareerManager = () => {
             <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/10 w-fit backdrop-blur-xl">
                 {[
                     { id: 'vacancies', label: 'Vacancies', icon: Briefcase },
-                    { id: 'applications', label: 'Applications', icon: FileText },
-                    { id: 'placements', label: 'Hall of Fame', icon: Trophy }
+                    { id: 'applications', label: 'Applications', icon: FileText }
                 ].map((tab) => (
                     <button
                         key={tab.id}
@@ -328,33 +322,11 @@ const CareerManager = () => {
                                         </td>
                                     </tr>
                                 ))}
-
-                                {activeTab === 'placements' && placements.map(p => (
-                                    <tr key={p.id} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-6 py-5">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 border border-white/10 shrink-0">
-                                                    <img src={p.student_photo || `https://i.pravatar.cc/100?u=${p.id}`} alt="" />
-                                                </div>
-                                                <div className="font-bold text-white">{p.student_name}</div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5 text-white/80 font-bold">{p.company_name}</td>
-                                        <td className="px-6 py-5 text-white/40 font-medium">{p.designation}</td>
-                                        <td className="px-6 py-5 text-white/40 font-medium">{new Date(p.placed_date).toLocaleDateString()}</td>
-                                        <td className="px-6 py-5 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => { setFormData(p); setEditingItem(p); setShowPlacementModal(true); }} className="p-2 text-white/40 hover:text-primary transition-colors"><Edit3 size={18} /></button>
-                                                <button onClick={() => handleDeletePlacement(p.id)} className="p-2 text-white/40 hover:text-rose-500 transition-colors"><Trash2 size={18} /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
                             </tbody>
                         </table>
                     )}
 
-                    {!loading && (activeTab === 'vacancies' ? vacancies : activeTab === 'applications' ? applications : placements).length === 0 && (
+                    {!loading && (activeTab === 'vacancies' ? vacancies : applications).length === 0 && (
                         <div className="p-20 text-center flex flex-col items-center gap-4">
                             <AlertCircle size={48} className="text-white/5" />
                             <p className="text-white/20 font-black uppercase tracking-[0.3em]">No entries found in this category</p>

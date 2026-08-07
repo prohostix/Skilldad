@@ -32,6 +32,8 @@ const CourseCatalog = () => {
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+        setTimeout(() => window.scrollTo(0, 0), 100);
         // Server health check (same-origin)
         axios.get('/health').catch(() => { });
 

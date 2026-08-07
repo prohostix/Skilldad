@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import {
     Target,
@@ -46,6 +47,7 @@ const AnimatedText = ({ text }) => {
 
 const CapabilitiesSection = () => {
     const sectionRef = useRef(null);
+    const navigate = useNavigate();
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
@@ -122,7 +124,7 @@ const CapabilitiesSection = () => {
                         transition={{ delay: 0.2 }}
                         className="flex flex-wrap gap-4 pt-4"
                     >
-                        <ModernButton className="!px-8 !py-3 font-black uppercase tracking-widest text-[10px]">
+                        <ModernButton onClick={() => { navigate('/courses'); window.scrollTo(0, 0); }} className="!px-8 !py-3 font-black uppercase tracking-widest text-[10px]">
                             Explore
                         </ModernButton>
                         <button className="flex items-center space-x-2 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[8px] hover:bg-white/10 transition-all group">
