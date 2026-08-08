@@ -33,15 +33,24 @@ const SkillDadUniversityDetail = () => {
         website: '',
         phone: '',
         email: '',
-        description: ''
+        description: '',
+        badge: '',
+        foundation_year: '',
+        total_scholars: '',
+        specialized_courses: '',
+        quality_rating: '',
+        career_success: '',
+        global_network: ''
     });
 
     const [uploading, setUploading] = useState(false);
     const [uploadingCover, setUploadingCover] = useState(false);
     const [uploadingGallery, setUploadingGallery] = useState(false);
+    const [uploadingCertificates, setUploadingCertificates] = useState(false);
     const fileInputRef = useRef(null);
     const coverInputRef = useRef(null);
     const galleryInputRef = useRef(null);
+    const certificatesInputRef = useRef(null);
 
     const getAuthConfig = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -58,7 +67,14 @@ const SkillDadUniversityDetail = () => {
                 website: data.website || '',
                 phone: data.phone || '',
                 email: data.email || '',
-                description: data.description || ''
+                description: data.description || '',
+                badge: data.badge || '',
+                foundation_year: data.foundation_year || '',
+                total_scholars: data.total_scholars || '',
+                specialized_courses: data.specialized_courses || '',
+                quality_rating: data.quality_rating || '',
+                career_success: data.career_success || '',
+                global_network: data.global_network || ''
             });
         } catch (error) {
             console.error('Error fetching SkillDad university details:', error);
@@ -147,6 +163,27 @@ const SkillDadUniversityDetail = () => {
         }
     };
 
+    const handleCertificatesUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const formData = new FormData();
+        files.forEach(file => formData.append('certificateImages', file));
+
+        setUploadingCertificates(true);
+        try {
+            const config = { ...getAuthConfig(), headers: { ...getAuthConfig().headers, 'Content-Type': 'multipart/form-data' } };
+            await axios.post(`/api/admin/skilldad-universities/${id}/upload-certificates`, formData, config);
+            showToast(`${files.length} certificates added`, 'success');
+            fetchDetails();
+        } catch (error) {
+            console.error('Error uploading certificates:', error);
+            showToast(error.response?.data?.message || 'Failed to upload certificates', 'error');
+        } finally {
+            setUploadingCertificates(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
@@ -167,6 +204,7 @@ const SkillDadUniversityDetail = () => {
     }
 
     const gallery = university.gallery || [];
+    const certificates = university.certificates || [];
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
@@ -366,6 +404,50 @@ const SkillDadUniversityDetail = () => {
                         </div>
                     </div>
                 </GlassCard>
+
+                {/* Certificates Card */}
+                <GlassCard className="lg:col-span-1 space-y-4">
+                    <h3 className="text-sm font-semibold text-white font-inter flex items-center">
+                        <Camera size={16} className="mr-2 text-primary" /> Certificates
+                    </h3>
+                    <div className="space-y-4">
+                        <label
+                            className="w-full py-3 bg-primary/10 border-2 border-dashed border-primary/30 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-primary/20 transition-all group"
+                            onClick={() => certificatesInputRef.current.click()}
+                        >
+                            {uploadingCertificates ? (
+                                <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                            ) : (
+                                <>
+                                    <Camera size={20} className="text-primary mb-1 group-hover:scale-110 transition-transform" />
+                                    <span className="text-[10px] font-black uppercase text-primary">Upload Certificates</span>
+                                </>
+                            )}
+                        </label>
+                        <input
+                            type="file"
+                            ref={certificatesInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            multiple
+                            onChange={handleCertificatesUpload}
+                        />
+
+                        <div className="py-2 border-b border-white/5 mb-2">
+                            <p className="text-[10px] text-white/30 uppercase font-black tracking-widest">
+                                {certificates.length} Certificates Saved
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                            {certificates.map((img, idx) => (
+                                <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
+                                    <img src={getMediaUrl(img)} className="w-full h-full object-cover" alt="Certificate" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </GlassCard>
             </div>
 
             {/* Institutional Profile Details */}
@@ -431,6 +513,73 @@ const SkillDadUniversityDetail = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* New Highlights Fields */}
+                    <div className="md:col-span-2 grid md:grid-cols-2 gap-6 pt-4 border-t border-white/10 mt-6">
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Badge (e.g. Global Academic Partner)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                value={editData.badge}
+                                onChange={(e) => setEditData({ ...editData, badge: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Foundation Year</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                value={editData.foundation_year}
+                                onChange={(e) => setEditData({ ...editData, foundation_year: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Total Scholars (e.g. 25K+ Users)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                value={editData.total_scholars}
+                                onChange={(e) => setEditData({ ...editData, total_scholars: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Specialized Courses (e.g. 4)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                value={editData.specialized_courses}
+                                onChange={(e) => setEditData({ ...editData, specialized_courses: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Quality Rating (e.g. A++ Triple Crown)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                value={editData.quality_rating}
+                                onChange={(e) => setEditData({ ...editData, quality_rating: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Career Success (e.g. 98% Placement)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                value={editData.career_success}
+                                onChange={(e) => setEditData({ ...editData, career_success: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Global Network (e.g. 120+ Alliances)</label>
+                            <input
+                                type="text"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                value={editData.global_network}
+                                onChange={(e) => setEditData({ ...editData, global_network: e.target.value })}
+                            />
+                        </div>
+                    </div>
                 </GlassCard>
             )}
 
@@ -455,6 +604,51 @@ const SkillDadUniversityDetail = () => {
                                 </a>
                             ) : '—'}
                         </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/10">
+                        {university.badge && (
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
+                                <span className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Badge</span>
+                                <span className="text-white text-sm font-semibold">{university.badge}</span>
+                            </div>
+                        )}
+                        {university.foundation_year && (
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
+                                <span className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Foundation</span>
+                                <span className="text-white text-sm font-semibold">{university.foundation_year}</span>
+                            </div>
+                        )}
+                        {university.total_scholars && (
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
+                                <span className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Scholars</span>
+                                <span className="text-white text-sm font-semibold">{university.total_scholars}</span>
+                            </div>
+                        )}
+                        {university.specialized_courses && (
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
+                                <span className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Courses</span>
+                                <span className="text-white text-sm font-semibold">{university.specialized_courses}</span>
+                            </div>
+                        )}
+                        {university.quality_rating && (
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
+                                <span className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Rating</span>
+                                <span className="text-white text-sm font-semibold">{university.quality_rating}</span>
+                            </div>
+                        )}
+                        {university.career_success && (
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
+                                <span className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Career</span>
+                                <span className="text-white text-sm font-semibold">{university.career_success}</span>
+                            </div>
+                        )}
+                        {university.global_network && (
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-center">
+                                <span className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-1">Network</span>
+                                <span className="text-white text-sm font-semibold">{university.global_network}</span>
+                            </div>
+                        )}
                     </div>
                 </GlassCard>
             )}

@@ -35,15 +35,27 @@ const getSkillDadUniversityById = async (req, res) => {
 // @access  Private (Admin)
 const createSkillDadUniversity = async (req, res) => {
     try {
-        const { name, location, website, phone, email, description } = req.body;
+        const { 
+            name, location, website, phone, email, description,
+            badge, foundation_year, total_scholars, specialized_courses,
+            quality_rating, career_success, global_network
+        } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'University name is required' });
         }
 
         const result = await query(
-            'INSERT INTO skill_dad_universities (name, location, website, phone, email, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [name, location, website, phone, email, description]
+            `INSERT INTO skill_dad_universities (
+                name, location, website, phone, email, description,
+                badge, foundation_year, total_scholars, specialized_courses,
+                quality_rating, career_success, global_network
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+            [
+                name, location, website, phone, email, description,
+                badge, foundation_year, total_scholars, specialized_courses,
+                quality_rating, career_success, global_network
+            ]
         );
 
         res.status(201).json(withId(result.rows[0]));
@@ -58,14 +70,28 @@ const createSkillDadUniversity = async (req, res) => {
 // @access  Private (Admin)
 const updateSkillDadUniversity = async (req, res) => {
     try {
-        const { name, location, website, phone, email, description, isActive } = req.body;
+        const { 
+            name, location, website, phone, email, description, isActive,
+            badge, foundation_year, total_scholars, specialized_courses,
+            quality_rating, career_success, global_network
+        } = req.body;
         const result = await query(`
             UPDATE skill_dad_universities 
             SET name = COALESCE($1, name), location = COALESCE($2, location), website = COALESCE($3, website), 
                 phone = COALESCE($4, phone), email = COALESCE($5, email), description = COALESCE($6, description), 
-                is_active = COALESCE($7, is_active), updated_at = NOW()
-            WHERE id = $8 RETURNING *
-        `, [name, location, website, phone, email, description, isActive, req.params.id]);
+                is_active = COALESCE($7, is_active), 
+                badge = COALESCE($8, badge), foundation_year = COALESCE($9, foundation_year),
+                total_scholars = COALESCE($10, total_scholars), specialized_courses = COALESCE($11, specialized_courses),
+                quality_rating = COALESCE($12, quality_rating), career_success = COALESCE($13, career_success),
+                global_network = COALESCE($14, global_network),
+                updated_at = NOW()
+            WHERE id = $15 RETURNING *
+        `, [
+            name, location, website, phone, email, description, isActive,
+            badge, foundation_year, total_scholars, specialized_courses,
+            quality_rating, career_success, global_network,
+            req.params.id
+        ]);
 
         if (result.rowCount === 0) return res.status(404).json({ message: 'University not found' });
         res.json(withId(result.rows[0]));
@@ -174,6 +200,37 @@ const deleteSkillDadUniversity = async (req, res) => {
     }
 };
 
+// @desc    Upload SkillDad university certificates
+// @route   POST /api/admin/skilldad-universities/:id/upload-certificates
+// @access  Private (Admin)
+const uploadSkillDadUniversityCertificates = async (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: 'Please upload certificate images' });
+        }
+
+        const existingRes = await query('SELECT certificates FROM skill_dad_universities WHERE id = $1', [req.params.id]);
+        if (existingRes.rowCount === 0) return res.status(404).json({ message: 'University not found' });
+
+        const currentCertificates = existingRes.rows[0].certificates || [];
+        const newImages = req.files.map(file => `/uploads/${file.filename}`);
+        const updatedCertificates = [...currentCertificates, ...newImages];
+
+        await query(
+            'UPDATE skill_dad_universities SET certificates = $1, updated_at = NOW() WHERE id = $2',
+            [JSON.stringify(updatedCertificates), req.params.id]
+        );
+
+        res.json({
+            message: `${req.files.length} certificates added`,
+            certificates: updatedCertificates
+        });
+    } catch (error) {
+        console.error('[uploadSkillDadUniversityCertificates] Error:', error);
+        res.status(500).json({ message: error.message || 'Server error uploading certificates' });
+    }
+};
+
 module.exports = {
     getSkillDadUniversities,
     getSkillDadUniversityById,
@@ -183,4 +240,5 @@ module.exports = {
     uploadSkillDadUniversityProfileImage,
     uploadSkillDadUniversityCoverImage,
     uploadSkillDadUniversityGalleryImages,
+    uploadSkillDadUniversityCertificates,
 };

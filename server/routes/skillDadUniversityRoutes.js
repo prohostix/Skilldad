@@ -11,6 +11,7 @@ const {
     uploadSkillDadUniversityProfileImage,
     uploadSkillDadUniversityCoverImage,
     uploadSkillDadUniversityGalleryImages,
+    uploadSkillDadUniversityCertificates,
 } = require('../controllers/skillDadUniversityController');
 
 // All routes require admin authentication
@@ -29,5 +30,6 @@ router.route('/:id')
 router.post('/:id/upload-image', upload.single('profileImage'), uploadSkillDadUniversityProfileImage);
 router.post('/:id/upload-cover', upload.single('coverImage'), uploadSkillDadUniversityCoverImage);
 router.post('/:id/upload-gallery', upload.array('galleryImages', 10), uploadSkillDadUniversityGalleryImages);
+router.post('/:id/upload-certificates', upload.array('certificateImages', 10), uploadSkillDadUniversityCertificates);
 
 module.exports = router;

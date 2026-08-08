@@ -774,6 +774,24 @@ const PartnerExamManagement = () => {
                                                                 <div className="space-y-1">
                                                                     <h4 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{exam.title}</h4>
                                                                     <p className="text-xs text-white/30 font-bold uppercase tracking-widest">{exam.course?.title}</p>
+                                                                    <div className="flex items-center gap-3 pt-1">
+                                                                        {exam.batchId?.name && (
+                                                                            <span className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded text-white/40 font-semibold tracking-wider uppercase">
+                                                                                {exam.batchId.name}
+                                                                            </span>
+                                                                        )}
+                                                                        {(exam.scheduledStartTime || exam.scheduledDate || exam.createdAt || exam.created_at) && (
+                                                                            <span className="text-[10px] text-white/40 font-medium">
+                                                                                {new Date(exam.scheduledStartTime || exam.scheduledDate || exam.createdAt || exam.created_at).toLocaleString(undefined, {
+                                                                                    year: 'numeric',
+                                                                                    month: 'short',
+                                                                                    day: 'numeric',
+                                                                                    hour: '2-digit',
+                                                                                    minute: '2-digit'
+                                                                                })}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             <ChevronRight size={20} className="text-white/20 group-hover:text-white/50 transition-all group-hover:translate-x-1" />
