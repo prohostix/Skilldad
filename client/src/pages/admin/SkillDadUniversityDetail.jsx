@@ -99,7 +99,7 @@ const SkillDadUniversityDetail = () => {
 
     const fetchAllCourses = async () => {
         try {
-            const { data } = await axios.get('/api/admin/courses', getAuthConfig());
+            const { data } = await axios.get('/api/courses/admin', getAuthConfig());
             setAllCourses(data.courses || data);
         } catch (error) {
             console.error('Error fetching courses:', error);
