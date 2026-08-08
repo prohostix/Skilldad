@@ -462,6 +462,7 @@ const SkillDadUniversityDetail = () => {
                             </p>
                         </div>
 
+                        <div className="grid grid-cols-3 gap-2">
                             {certificates.map((img, idx) => {
                                 // For backward compatibility with images vs structured certs
                                 if(typeof img === 'string') {
