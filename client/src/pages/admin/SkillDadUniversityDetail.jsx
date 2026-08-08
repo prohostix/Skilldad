@@ -730,7 +730,9 @@ const SkillDadUniversityDetail = () => {
                         <div className="space-y-3">
                             <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider">Assigned Courses</label>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                                {(allCourses || []).map(course => {
+                                {(allCourses || [])
+                                    .filter(c => c.universityName === university.name || String(c.skillDadUniversityId) === String(university.id))
+                                    .map(course => {
                                     const isSelected = editData.assignedCourses.includes(course._id || course.id);
                                     return (
                                         <div 
