@@ -138,13 +138,13 @@ router.get('/universities/:name/courses', async (req, res) => {
         const queryParams = [];
         
         if (instructorId && assignedCourseIds.length > 0) {
-            coursesQuery += ` AND (c.instructor_id = $1 OR c.id = ANY($2::text[]))`;
+            coursesQuery += ` AND (c.instructor_id = $1 OR c.id::text = ANY($2::text[]))`;
             queryParams.push(instructorId, assignedCourseIds);
         } else if (instructorId) {
             coursesQuery += ` AND c.instructor_id = $1`;
             queryParams.push(instructorId);
         } else if (assignedCourseIds.length > 0) {
-            coursesQuery += ` AND c.id = ANY($1::text[])`;
+            coursesQuery += ` AND c.id::text = ANY($1::text[])`;
             queryParams.push(assignedCourseIds);
         } else {
             // No instructor ID and no assigned courses => return empty array
