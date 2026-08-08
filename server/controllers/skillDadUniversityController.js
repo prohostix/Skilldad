@@ -38,7 +38,8 @@ const createSkillDadUniversity = async (req, res) => {
         const { 
             name, location, website, phone, email, description,
             badge, foundation_year, total_scholars, specialized_courses,
-            quality_rating, career_success, global_network
+            quality_rating, career_success, global_network,
+            youtubeUrl, achievements, assignedCourses, certificates
         } = req.body;
 
         if (!name) {
@@ -49,12 +50,17 @@ const createSkillDadUniversity = async (req, res) => {
             `INSERT INTO skill_dad_universities (
                 name, location, website, phone, email, description,
                 badge, foundation_year, total_scholars, specialized_courses,
-                quality_rating, career_success, global_network
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+                quality_rating, career_success, global_network,
+                youtube_url, achievements, assigned_courses, certificates
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
             [
                 name, location, website, phone, email, description,
                 badge, foundation_year, total_scholars, specialized_courses,
-                quality_rating, career_success, global_network
+                quality_rating, career_success, global_network,
+                youtubeUrl,
+                achievements ? JSON.stringify(achievements) : '[]',
+                assignedCourses ? JSON.stringify(assignedCourses) : '[]',
+                certificates ? JSON.stringify(certificates) : '[]'
             ]
         );
 
@@ -73,7 +79,8 @@ const updateSkillDadUniversity = async (req, res) => {
         const { 
             name, location, website, phone, email, description, isActive,
             badge, foundation_year, total_scholars, specialized_courses,
-            quality_rating, career_success, global_network
+            quality_rating, career_success, global_network,
+            youtubeUrl, achievements, assignedCourses, certificates
         } = req.body;
         const result = await query(`
             UPDATE skill_dad_universities 
@@ -84,12 +91,20 @@ const updateSkillDadUniversity = async (req, res) => {
                 total_scholars = COALESCE($10, total_scholars), specialized_courses = COALESCE($11, specialized_courses),
                 quality_rating = COALESCE($12, quality_rating), career_success = COALESCE($13, career_success),
                 global_network = COALESCE($14, global_network),
+                youtube_url = COALESCE($15, youtube_url),
+                achievements = COALESCE($16, achievements),
+                assigned_courses = COALESCE($17, assigned_courses),
+                certificates = COALESCE($18, certificates),
                 updated_at = NOW()
-            WHERE id = $15 RETURNING *
+            WHERE id = $19 RETURNING *
         `, [
             name, location, website, phone, email, description, isActive,
             badge, foundation_year, total_scholars, specialized_courses,
             quality_rating, career_success, global_network,
+            youtubeUrl,
+            achievements ? JSON.stringify(achievements) : null,
+            assignedCourses ? JSON.stringify(assignedCourses) : null,
+            certificates ? JSON.stringify(certificates) : null,
             req.params.id
         ]);
 

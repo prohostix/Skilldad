@@ -86,7 +86,8 @@ router.get('/universities', async (req, res) => {
 router.get('/skilldad-universities', async (req, res) => {
     try {
         const result = await query(`
-            SELECT id, name, location, website, phone, email, description, profile_image, cover_image, gallery
+            SELECT id, name, location, website, phone, email, description, profile_image, cover_image, gallery,
+                   youtube_url, achievements, assigned_courses, certificates
             FROM skill_dad_universities
             WHERE is_active = true
             ORDER BY created_at ASC
@@ -108,29 +109,47 @@ router.get('/universities/:name/courses', async (req, res) => {
         // 1. Find the university by name
         const uniRes = await query('SELECT id, profile FROM users WHERE role = $1 AND name = $2 AND is_verified = $3', ['university', uniName, true]);
         
+        let assignedCourseIds = [];
+        let instructorId = null;
+
         if (uniRes.rows.length === 0) {
-            return res.status(404).json({ message: 'University not found' });
+            // Check skill_dad_universities if not found in users
+            const sdUniRes = await query('SELECT id, assigned_courses FROM skill_dad_universities WHERE name = $1 AND is_active = $2', [uniName, true]);
+            if (sdUniRes.rows.length === 0) {
+                return res.status(404).json({ message: 'University not found' });
+            }
+            // Parse assigned_courses for skilldad university
+            const sdAssigned = sdUniRes.rows[0].assigned_courses;
+            assignedCourseIds = typeof sdAssigned === 'string' ? JSON.parse(sdAssigned) : (sdAssigned || []);
+        } else {
+            const uni = uniRes.rows[0];
+            instructorId = uni.id;
+            const profile = typeof uni.profile === 'string' ? JSON.parse(uni.profile) : (uni.profile || {});
+            assignedCourseIds = profile.assigned_courses || [];
         }
-        
-        const uni = uniRes.rows[0];
-        const profile = typeof uni.profile === 'string' ? JSON.parse(uni.profile) : (uni.profile || {});
-        const assignedCourseIds = profile.assigned_courses || [];
         
         // 2. Fetch courses where instructor is the university OR course ID is in assigned_courses
         let coursesQuery = `
             SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
             FROM courses c
             LEFT JOIN users u ON c.instructor_id = u.id
-            WHERE c.is_published = true AND (c.instructor_id = $1
+            WHERE c.is_published = true
         `;
-        const queryParams = [uni.id];
+        const queryParams = [];
         
-        if (assignedCourseIds.length > 0) {
-            coursesQuery += ` OR c.id = ANY($2::text[])`;
+        if (instructorId && assignedCourseIds.length > 0) {
+            coursesQuery += ` AND (c.instructor_id = $1 OR c.id = ANY($2::text[]))`;
+            queryParams.push(instructorId, assignedCourseIds);
+        } else if (instructorId) {
+            coursesQuery += ` AND c.instructor_id = $1`;
+            queryParams.push(instructorId);
+        } else if (assignedCourseIds.length > 0) {
+            coursesQuery += ` AND c.id = ANY($1::text[])`;
             queryParams.push(assignedCourseIds);
+        } else {
+            // No instructor ID and no assigned courses => return empty array
+            return res.json([]);
         }
-        
-        coursesQuery += `)`;
         
         const coursesRes = await query(coursesQuery, queryParams);
         
@@ -138,8 +157,8 @@ router.get('/universities/:name/courses', async (req, res) => {
             ...course,
             _id: course.id,
             instructor: {
-                name: course.instructor_name,
-                profile: typeof course.instructor_profile === 'string' ? JSON.parse(course.instructor_profile) : course.instructor_profile,
+                name: course.instructor_name || uniName,
+                profile: course.instructor_profile ? (typeof course.instructor_profile === 'string' ? JSON.parse(course.instructor_profile) : course.instructor_profile) : {},
                 role: 'university'
             }
         }));

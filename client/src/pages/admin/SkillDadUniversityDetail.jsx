@@ -11,7 +11,11 @@ import {
     Globe,
     Phone,
     MapPin,
-    Mail
+    Mail,
+    Youtube,
+    CheckCircle,
+    Award,
+    BookOpen
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -24,6 +28,7 @@ const SkillDadUniversityDetail = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const [university, setUniversity] = useState(null);
+    const [allCourses, setAllCourses] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [isEditing, setIsEditing] = useState(false);
@@ -40,7 +45,11 @@ const SkillDadUniversityDetail = () => {
         specialized_courses: '',
         quality_rating: '',
         career_success: '',
-        global_network: ''
+        global_network: '',
+        youtubeUrl: '',
+        achievements: [],
+        assignedCourses: [],
+        certificates: []
     });
 
     const [uploading, setUploading] = useState(false);
@@ -74,7 +83,11 @@ const SkillDadUniversityDetail = () => {
                 specialized_courses: data.specialized_courses || '',
                 quality_rating: data.quality_rating || '',
                 career_success: data.career_success || '',
-                global_network: data.global_network || ''
+                global_network: data.global_network || '',
+                youtubeUrl: data.youtube_url || '',
+                achievements: typeof data.achievements === 'string' ? JSON.parse(data.achievements) : (data.achievements || []),
+                assignedCourses: typeof data.assigned_courses === 'string' ? JSON.parse(data.assigned_courses) : (data.assigned_courses || []),
+                certificates: typeof data.certificates === 'string' ? JSON.parse(data.certificates) : (data.certificates || [])
             });
         } catch (error) {
             console.error('Error fetching SkillDad university details:', error);
@@ -84,8 +97,18 @@ const SkillDadUniversityDetail = () => {
         }
     };
 
+    const fetchAllCourses = async () => {
+        try {
+            const { data } = await axios.get('/api/admin/courses', getAuthConfig());
+            setAllCourses(data.courses || data);
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+        }
+    };
+
     useEffect(() => {
         fetchDetails();
+        fetchAllCourses();
     }, [id]);
 
     const handleSaveProfile = async () => {
@@ -439,12 +462,23 @@ const SkillDadUniversityDetail = () => {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2">
-                            {certificates.map((img, idx) => (
-                                <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
-                                    <img src={getMediaUrl(img)} className="w-full h-full object-cover" alt="Certificate" />
-                                </div>
-                            ))}
+                            {certificates.map((img, idx) => {
+                                // For backward compatibility with images vs structured certs
+                                if(typeof img === 'string') {
+                                    return (
+                                        <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
+                                            <img src={getMediaUrl(img)} className="w-full h-full object-cover" alt="Certificate" />
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10 text-center">
+                                        <Award size={20} className="mx-auto mb-2 text-amber-500" />
+                                        <p className="text-white text-xs font-bold truncate">{img.title}</p>
+                                        <p className="text-white/40 text-[9px] uppercase font-black truncate">{img.issuer}</p>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </GlassCard>
@@ -579,6 +613,149 @@ const SkillDadUniversityDetail = () => {
                                 onChange={(e) => setEditData({ ...editData, global_network: e.target.value })}
                             />
                         </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-white/10 mt-6 space-y-6">
+                        {/* YouTube URL */}
+                        <div>
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider mb-2">Success Story YouTube URL</label>
+                            <div className="relative">
+                                <Youtube className="absolute left-4 top-3 text-white/30" size={16} />
+                                <input
+                                    type="url"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                    placeholder="https://youtube.com/watch?v=..."
+                                    value={editData.youtubeUrl}
+                                    onChange={(e) => setEditData({ ...editData, youtubeUrl: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Achievements */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider">Achievements (Milestones)</label>
+                                <button
+                                    onClick={() => setEditData({...editData, achievements: [...editData.achievements, { title: '', desc: '' }]})}
+                                    className="px-3 py-1 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg text-xs font-bold uppercase"
+                                >
+                                    + Add
+                                </button>
+                            </div>
+                            {editData.achievements.map((ach, idx) => (
+                                <div key={idx} className="flex gap-2 items-center bg-white/5 p-3 rounded-xl border border-white/10">
+                                    <div className="flex-1 space-y-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Title"
+                                            value={ach.title || ach}
+                                            onChange={(e) => {
+                                                const newAch = [...editData.achievements];
+                                                if (typeof newAch[idx] === 'object') newAch[idx].title = e.target.value;
+                                                else newAch[idx] = e.target.value;
+                                                setEditData({...editData, achievements: newAch});
+                                            }}
+                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Description (Optional)"
+                                            value={ach.desc || ''}
+                                            onChange={(e) => {
+                                                const newAch = [...editData.achievements];
+                                                if (typeof newAch[idx] === 'string') newAch[idx] = { title: newAch[idx], desc: e.target.value };
+                                                else newAch[idx].desc = e.target.value;
+                                                setEditData({...editData, achievements: newAch});
+                                            }}
+                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                        />
+                                    </div>
+                                    <button onClick={() => {
+                                        const newAch = editData.achievements.filter((_, i) => i !== idx);
+                                        setEditData({...editData, achievements: newAch});
+                                    }} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg"><X size={16}/></button>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Certificates / Accreditations */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider">Accreditations (Structured)</label>
+                                <button
+                                    onClick={() => setEditData({...editData, certificates: [...editData.certificates, { title: '', issuer: '' }]})}
+                                    className="px-3 py-1 bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 rounded-lg text-xs font-bold uppercase"
+                                >
+                                    + Add
+                                </button>
+                            </div>
+                            {editData.certificates.map((cert, idx) => {
+                                if (typeof cert === 'string') return null; // Only show structured ones here
+                                return (
+                                <div key={idx} className="flex gap-2 items-center bg-white/5 p-3 rounded-xl border border-white/10">
+                                    <div className="flex-1 space-y-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Certificate Title (e.g. ISO 9001)"
+                                            value={cert.title || ''}
+                                            onChange={(e) => {
+                                                const newCert = [...editData.certificates];
+                                                newCert[idx].title = e.target.value;
+                                                setEditData({...editData, certificates: newCert});
+                                            }}
+                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Issuer (e.g. Quality Board)"
+                                            value={cert.issuer || ''}
+                                            onChange={(e) => {
+                                                const newCert = [...editData.certificates];
+                                                newCert[idx].issuer = e.target.value;
+                                                setEditData({...editData, certificates: newCert});
+                                            }}
+                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                        />
+                                    </div>
+                                    <button onClick={() => {
+                                        const newCert = editData.certificates.filter((_, i) => i !== idx);
+                                        setEditData({...editData, certificates: newCert});
+                                    }} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg"><X size={16}/></button>
+                                </div>
+                            )})}
+                        </div>
+
+                        {/* Assigned Courses */}
+                        <div className="space-y-3">
+                            <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider">Assigned Courses</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                                {(allCourses || []).map(course => {
+                                    const isSelected = editData.assignedCourses.includes(course._id || course.id);
+                                    return (
+                                        <div 
+                                            key={course._id || course.id} 
+                                            onClick={() => {
+                                                const id = course._id || course.id;
+                                                let newAssigned;
+                                                if (isSelected) {
+                                                    newAssigned = editData.assignedCourses.filter(c => c !== id);
+                                                } else {
+                                                    newAssigned = [...editData.assignedCourses, id];
+                                                }
+                                                setEditData({...editData, assignedCourses: newAssigned});
+                                            }}
+                                            className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${isSelected ? 'bg-primary/10 border-primary text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
+                                        >
+                                            <div className={`w-4 h-4 rounded flex items-center justify-center border ${isSelected ? 'bg-primary border-primary' : 'border-white/30'}`}>
+                                                {isSelected && <CheckCircle size={12} className="text-[#05030B]" />}
+                                            </div>
+                                            <span className="text-sm font-semibold truncate flex-1">{course.title}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
                     </div>
                 </GlassCard>
             )}

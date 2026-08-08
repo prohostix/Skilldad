@@ -183,7 +183,16 @@ const UniversityPublicDetail = () => {
                             description: match.description || '',
                             image: match.cover_image ? getMediaUrl(match.cover_image) : (match.profile_image ? getMediaUrl(match.profile_image) : undefined),
                             profileImage: match.profile_image ? getMediaUrl(match.profile_image) : undefined,
-                            profile: { website: match.website, phone: match.phone, coverImage: match.cover_image || undefined }
+                            profile: { 
+                                website: match.website, 
+                                phone: match.phone, 
+                                coverImage: match.cover_image || undefined,
+                                gallery: match.gallery || [],
+                                youtubeUrl: match.youtube_url || undefined,
+                                videos: match.youtube_url ? [match.youtube_url] : [],
+                                achievements: typeof match.achievements === 'string' ? JSON.parse(match.achievements) : (match.achievements || []),
+                                certificates: typeof match.certificates === 'string' ? JSON.parse(match.certificates) : (match.certificates || [])
+                            }
                         });
                         return;
                     }
