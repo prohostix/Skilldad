@@ -32,21 +32,18 @@ const WBLPage = () => {
         <div className="min-h-screen bg-[#050514] text-white selection:bg-primary/30">
             <Navbar />
             
-            <div className="pt-32 pb-20 px-6">
-                <div className="max-w-7xl mx-auto space-y-12">
+            <div className="pt-24 pb-20 px-6">
+                <div className="max-w-7xl mx-auto space-y-8">
                     
                     {/* Header */}
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center space-y-4"
+                        className="text-center"
                     >
                         <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
                             Work-Based <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Learning</span>
                         </h1>
-                        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                            Bridge the gap between academic knowledge and practical skills with our industry-aligned programs.
-                        </p>
                     </motion.div>
 
                     {/* Tabs */}
