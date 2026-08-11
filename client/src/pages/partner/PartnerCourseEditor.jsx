@@ -488,7 +488,7 @@ const PartnerCourseEditor = () => {
                 <div className="flex items-center gap-4">
                     <button 
                         onClick={() => navigate('/partner/courses')}
-                        className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-white transition-all shadow-xl"
+                        className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-white [.light-mode_&]:!text-black transition-all shadow-xl"
                     >
                         <ArrowLeft size={20} />
                     </button>

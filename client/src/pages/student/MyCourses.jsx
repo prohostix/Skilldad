@@ -241,7 +241,7 @@ const MyCourses = () => {
                 <div className="flex shrink-0">
                     <button
                         onClick={() => setShowPlannerModal(true)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 rounded-lg text-xs font-semibold text-white transition-all shadow-sm group"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 rounded-lg text-xs font-semibold text-white [.light-mode_&]:!text-black transition-all shadow-sm group"
                     >
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         <Calendar size={14} className="text-primary group-hover:scale-110 transition-transform" />

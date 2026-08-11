@@ -84,7 +84,7 @@ const SupportManagement = () => {
             ticket.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
             ticket.subject.toLowerCase().includes(searchQuery.toLowerCase());
 
-        const matchesStatus = statusFilter === 'All' || ticket.status === statusFilter;
+        const matchesStatus = statusFilter === 'All' || (ticket.status && ticket.status.toLowerCase() === statusFilter.toLowerCase());
 
         return matchesSearch && matchesStatus;
     });

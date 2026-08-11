@@ -237,7 +237,7 @@ const StudentDashboard = () => {
                 <div className="flex items-center space-x-2">
                     <button
                         onClick={() => navigate('/dashboard/my-courses')}
-                        className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white hover:bg-white/10 transition-colors flex items-center uppercase tracking-wider"
+                        className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white [.light-mode_&]:!text-black hover:bg-white/10 transition-colors flex items-center uppercase tracking-wider"
                     >
                         <BookOpen size={12} className="mr-1.5 text-primary" /> My Learning
                     </button>
