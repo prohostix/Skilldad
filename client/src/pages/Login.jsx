@@ -100,7 +100,7 @@ const Login = () => {
             {/* Home Button - Left Side */}
             <button
                 onClick={() => navigate('/')}
-                className="fixed top-20 md:top-24 left-6 z-50 p-3 rounded-xl bg-white/5 border border-white/10 text-purple-500 hover:bg-white/10 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm"
+                className="fixed top-20 md:top-24 left-6 z-50 p-3 rounded-xl bg-white/5 border border-white/10 text-white [.light-mode_&]:!text-purple-500 hover:bg-white/10 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm"
                 title="Go to Home"
             >
                 <Home size={20} />
