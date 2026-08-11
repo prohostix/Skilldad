@@ -28,6 +28,7 @@ const Support = lazy(() => lazyRetry(() => import('./pages/Support')));
 const AboutUs = lazy(() => lazyRetry(() => import('./pages/AboutUs')));
 const Partners = lazy(() => lazyRetry(() => import('./pages/Partners')));
 const StudyAbroad = lazy(() => lazyRetry(() => import('./pages/StudyAbroad')));
+const WBLPage = lazy(() => lazyRetry(() => import('./pages/public/WBLPage')));
 const Settings = lazy(() => lazyRetry(() => import('./pages/Settings')));
 const CourseDetail = lazy(() => lazyRetry(() => import('./pages/CourseDetail')));
 const HostRoom = lazy(() => lazyRetry(() => import('./pages/HostRoom')));
@@ -113,6 +114,7 @@ const CouponManager = lazy(() => lazyRetry(() => import('./pages/admin/CouponMan
 const UniversityDetail = lazy(() => lazyRetry(() => import('./pages/admin/UniversityDetail')));
 const ServicesManagement = lazy(() => lazyRetry(() => import('./pages/admin/ServicesManagement')));
 const StudyAbroadManagement = lazy(() => lazyRetry(() => import('./pages/admin/StudyAbroadManagement')));
+const WBLManagement = lazy(() => lazyRetry(() => import('./pages/admin/WBLManagement')));
 const CareerManager = lazy(() => lazyRetry(() => import('./pages/admin/CareerManager')));
 const CertificateManagement = lazy(() => lazyRetry(() => import('./pages/admin/CertificateManagement')));
 const DocumentReview = lazy(() => lazyRetry(() => import('./pages/admin/DocumentReview')));
@@ -153,6 +155,7 @@ function App() {
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/study-abroad" element={<StudyAbroad />} />
+                <Route path="/wbl" element={<WBLPage />} />
                 <Route path="/course/:courseId" element={<CourseDetail />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -275,6 +278,7 @@ function App() {
                     <Route path="faqs" element={<FAQManagement />} />
                     <Route path="services" element={<ServicesManagement />} />
                     <Route path="study-abroad" element={<StudyAbroadManagement />} />
+                    <Route path="wbl" element={<WBLManagement />} />
                     <Route path="certificates" element={<CertificateManagement />} />
                     <Route path="document-review" element={<DocumentReview />} />
                     <Route path="settings" element={<Settings />} />

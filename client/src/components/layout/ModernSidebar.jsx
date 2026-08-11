@@ -127,6 +127,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             { name: 'Communications', icon: Bell, path: '/admin/communications' },
             { name: 'Services Management', icon: LayoutDashboard, path: '/admin/services' },
             { name: 'Study Abroad', icon: Globe, path: '/admin/study-abroad' },
+            { name: 'WBL Management', icon: Briefcase, path: '/admin/wbl' },
             { name: 'Page Content & Assets', icon: Image, path: '/admin/partner-logos' },
             { name: 'Support Tickets', icon: LifeBuoy, path: '/admin/support' },
             { name: 'FAQ Manager', icon: MessageCircle, path: '/admin/faqs' },

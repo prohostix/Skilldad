@@ -162,6 +162,7 @@ app.use('/api/services', require('./routes/serviceRoutes'));
 app.use('/api/referrals', require('./routes/referralRoutes'));
 app.use('/api/study-abroad', require('./routes/studyAbroadRoutes'));
 app.use('/api/admin/study-abroad', require('./routes/adminStudyAbroadRoutes'));
+app.use('/api/wbl', require('./routes/wblRoutes'));
 app.use('/api/discussions', require('./routes/discussionRoutes'));
 app.use('/api/career', require('./routes/careerRoutes'));
 app.use('/api/certificates', require('./routes/certificateRoutes'));
@@ -480,6 +481,24 @@ const startServer = async () => {
             await query('ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP WITH TIME ZONE');
             console.log('[Migration] Added last_login_at to users'.green);
         }
+
+        // Auto-migrate: ensure wbl_courses table exists
+        await query(`
+            CREATE TABLE IF NOT EXISTS wbl_courses (
+                id UUID PRIMARY KEY,
+                category VARCHAR(50) NOT NULL CHECK (category IN ('domestic', 'abroad')),
+                title VARCHAR(255) NOT NULL,
+                university_name VARCHAR(255) NOT NULL,
+                location VARCHAR(255),
+                duration VARCHAR(100),
+                fees VARCHAR(100),
+                description TEXT,
+                is_active BOOLEAN DEFAULT true,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('[Migration] wbl_courses table verified/created'.green);
     } catch (migErr) {
         console.warn('[Migration] Database migration warning:', migErr.message);
     }
