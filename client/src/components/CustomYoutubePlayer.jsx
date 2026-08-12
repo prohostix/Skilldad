@@ -323,7 +323,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
             max={100}
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="w-0 group-hover/volume:w-16 h-1 rounded bg-white/20 appearance-none cursor-pointer accent-primary transition-all duration-300 overflow-hidden"
+            className="w-0 opacity-0 group-hover/volume:w-16 group-hover/volume:opacity-100 h-1 rounded bg-white/20 appearance-none cursor-pointer accent-primary transition-all duration-300"
           />
         </div>
 
