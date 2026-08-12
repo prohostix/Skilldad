@@ -91,7 +91,7 @@ const Navbar = ({ compact = false }) => {
                             />
                         </div>
                         {/* Text - 'SkillDad' */}
-                        <span className={`brand-text font-bold font-space ${!shouldBeTransparent && theme === 'light' ? 'text-gray-900' : 'text-white'} uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
+                        <span className={`brand-text font-bold font-space ${theme === 'light' ? 'text-primary' : 'text-white'} uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 ${compact ? 'text-base' : 'text-xl'}`}>
                             SkillDad
                         </span>
                     </div>

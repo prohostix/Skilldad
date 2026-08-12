@@ -555,11 +555,11 @@ html.light-mode .about-us-page {
 }
 
 html.light-mode .premium-gradient-text {
-  background: linear-gradient(to right, #8A2BE2 0%, #FF2FD1 100%) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  color: transparent !important;
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: initial !important;
+  color: #6D28FF !important;
 }
 
 /* Ensure absolute/fixed overlays also become light */
@@ -852,6 +852,39 @@ html.light-mode .bg-black {
   background-color: #FAF9F6 !important;
 }
 
+/* Force text visibility in hero */
+html.light-mode .text-white {
+  color: #1e293b !important;
+}
+
+/* Fix the black line crack in HeroSection NetworkDiagram */
+html.light-mode .network-diagram-fade {
+  opacity: 0 !important;
+}
+
+
+
+/* Fix the black line crack in HeroSection NetworkDiagram */
+html.light-mode .absolute.inset-y-0.right-0.w-20.pointer-events-none {
+  background: linear-gradient(to right, transparent, #FAF9F6) !important;
+}
+
+/* Restore canvas rule */
+html.light-mode canvas {
+  filter: invert(1) hue-rotate(180deg) brightness(1.05);
+  mix-blend-mode: multiply;
+  opacity: 0.95;
+}
+
+/* Fix stacking context for multiply blend mode in light mode */
+
+
+/* Force canvas wrapper to multiply with cream background */
+html.light-mode .absolute.inset-0.z-0.gpu-accelerated {
+  mix-blend-mode: multiply !important;
+}
+
+/* Brand text color specifically for logos in light mode */
 html.light-mode .brand-text,
 html.light-mode a .brand-text,
 html.light-mode a .text-white.brand-text {
@@ -884,8 +917,8 @@ html.light-mode [class*="text-blue-4"] {
 
  
 
-html.light-mode .logo-color-text { color: #4C1D95 !important; }
-html.light-mode .logo-color-text:hover { color: #8A2BE2 !important; }
+html.light-mode .logo-color-text { color: #6D28FF !important; }
+html.light-mode .logo-color-text:hover { color: #8B5CF6 !important; }
 
 html.light-mode .wbl-btn-text { color: #000000 !important; }
 
@@ -893,36 +926,3 @@ html.light-mode .wbl-btn-text { color: #000000 !important; }
 html.light-mode .wbl-btn-text { color: #000000 !important; }
 
 .wbl-btn-text { color: white; }
-
-/* --- RESTORED LIGHT MODE FIXES --- */
-html.light-mode .text-white {
-  color: #1e293b !important;
-}
-
-html.light-mode .network-diagram-fade {
-  opacity: 0 !important;
-}
-
-html.light-mode .absolute.inset-y-0.right-0.w-20.pointer-events-none {
-  background: linear-gradient(to right, transparent, #FAF9F6) !important;
-}
-
-html.light-mode canvas {
-  filter: invert(1) hue-rotate(180deg) brightness(1.05);
-  mix-blend-mode: multiply;
-  opacity: 0.95;
-}
-
-html.light-mode .absolute.inset-0.z-0.gpu-accelerated {
-  mix-blend-mode: multiply !important;
-}
-
-/* Remove shaded gradient text and use solid primary purple in light mode */
-html.light-mode .text-transparent.bg-clip-text,
-html.light-mode .premium-gradient-text {
-  background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  -webkit-text-fill-color: initial !important;
-  color: #6D28FF !important;
-}
