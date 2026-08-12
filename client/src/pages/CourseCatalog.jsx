@@ -173,7 +173,7 @@ const CourseCatalog = () => {
                                             : 'text-white/50 hover:text-white'
                                             }`}
                                     >
-                                        WBL
+                                        Work-Based Learning
                                     </button>
                                 </div>
                             </div>
