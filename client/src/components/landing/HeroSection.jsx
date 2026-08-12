@@ -323,7 +323,7 @@ const HeroSection = () => {
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-gradient-to-r from-[#8A2BE2] to-[#FF2FD1] text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-2 group hover:shadow-[0_0_50px_rgba(255,47,209,0.5)] hover:scale-[1.04] active:scale-95 shadow-xl"
+                                className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-primary text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-2 group hover:shadow-glow-purple hover:scale-[1.04] active:scale-95 shadow-xl"
                             >
                                 {user ? 'Go to Dashboard' : 'Start Learning Today'}
                                 <ChevronRight className="group-hover:translate-x-1.5 transition-transform" size={18} />
