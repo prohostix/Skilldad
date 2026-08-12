@@ -397,7 +397,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-primary/30 hover:border-primary/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-primary/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -469,7 +469,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 hover:border-[#C026FF]/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -521,8 +521,8 @@ const AboutUs = () => {
                                             color: '#5B5CFF'
                                         }
                                     ].map((pillar, idx) => (
-                                        <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-[#C026FF]/40 hover:bg-white/[0.04] transition-all duration-300 group">
-                                            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: pillar.color }}>
+                                        <div key={idx} className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 transition-all duration-300">
+                                            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 transition-transform" style={{ color: pillar.color }}>
                                                 <pillar.icon size={20} />
                                             </div>
                                             <h4 className="text-sm font-bold text-white mb-1 font-space">{pillar.title}</h4>
@@ -541,7 +541,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-emerald-500/30 hover:border-emerald-500/50 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-emerald-500/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="space-y-10">
@@ -589,10 +589,10 @@ const AboutUs = () => {
                                             tag: 'Future Ready'
                                         }
                                     ].map((val, idx) => (
-                                        <div key={idx} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-emerald-500/40 hover:bg-white/[0.04] transition-all duration-300 flex flex-col justify-between group">
+                                        <div key={idx} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 transition-all duration-300 flex flex-col justify-between">
                                             <div>
                                                 <div className="flex items-center justify-between mb-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 transition-transform">
                                                         <val.icon size={20} />
                                                     </div>
                                                     <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
