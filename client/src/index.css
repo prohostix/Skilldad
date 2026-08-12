@@ -699,8 +699,8 @@ html.light-mode .about-card-bg {
   background-color: rgba(255, 255, 255, 0.02);
 }
 html.light-mode .about-inner-card-bg {
-  background-color: rgba(255, 255, 255, 0.6) !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
+  background-color: rgba(10, 7, 24, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 html.light-mode .glass-card:hover {
