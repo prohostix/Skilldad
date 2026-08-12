@@ -128,7 +128,7 @@ const CourseCatalog = () => {
                              animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
                              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                              transition={{ duration: 0.4, ease: "easeInOut" }}
-                             className="max-w-[1300px] mx-auto text-center space-y-4 px-4 overflow-hidden"
+                             className="max-w-[1300px] mx-auto text-center px-4 overflow-hidden"
                         >
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
@@ -146,7 +146,7 @@ const CourseCatalog = () => {
                             )}
 
                             {/* Program Type Toggle */}
-                            <div className="flex justify-center pt-2">
+                            <div className="flex justify-center mt-4">
                                 <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-2xl flex-wrap justify-center">
                                     <button
                                         onClick={() => setProgramType('course')}
@@ -185,9 +185,9 @@ const CourseCatalog = () => {
                                         initial={{ opacity: 0, height: 0, y: -10 }}
                                         animate={{ opacity: 1, height: 'auto', y: 0 }}
                                         exit={{ opacity: 0, height: 0, y: -10 }}
-                                        className="flex justify-center pt-4 overflow-hidden"
+                                        className="flex justify-center mt-3 overflow-hidden"
                                     >
-                                        <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap justify-center mt-2">
+                                        <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap justify-center">
                                             <button 
                                                 onClick={() => setProgramType('wbl_abroad')}
                                                 className={`px-3 md:px-5 py-1.5 md:py-2 rounded-lg font-bold font-inter text-[9px] md:text-[11px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_abroad'
