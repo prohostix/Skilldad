@@ -397,7 +397,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-primary/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-primary/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -469,7 +469,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -541,7 +541,7 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard className="p-8 md:p-12 lg:p-14 about-card-bg border-emerald-500/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                        <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-emerald-500/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
                             
                             <div className="space-y-10">
