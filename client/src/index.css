@@ -518,10 +518,6 @@ select option {
 
 /* LIGHT MODE GLOBAL OVERRIDES */
 html.light-mode {
-  --color-primary: #4C1D95;
-  --color-primary-light: #8A2BE2;
-  --color-primary-dark: #3B0066;
-  --color-primary-accent: #6D28FF;
   --color-background: #FAF9F6;
   --color-background-mid: #FAF9F6;
   --color-background-light: #FAF9F6;
@@ -559,12 +555,30 @@ html.light-mode .about-us-page {
 }
 
 html.light-mode .premium-gradient-text,
-html.light-mode .bg-clip-text {
+html.light-mode .bg-clip-text.text-transparent {
   background: none !important;
-  -webkit-background-clip: initial !important;
-  background-clip: initial !important;
-  -webkit-text-fill-color: initial !important;
-  color: var(--color-primary) !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: unset !important;
+  color: #4C1D95 !important;
+}
+
+html.light-mode .bg-primary,
+html.light-mode .bg-primary-dark,
+html.light-mode .bg-primary-light {
+  background-color: #4C1D95 !important;
+}
+
+html.light-mode .text-primary,
+html.light-mode .text-primary-dark,
+html.light-mode .text-primary-light {
+  color: #4C1D95 !important;
+}
+
+html.light-mode .border-primary,
+html.light-mode .border-primary-dark,
+html.light-mode .border-primary-light {
+  border-color: #4C1D95 !important;
 }
 
 /* Ensure absolute/fixed overlays also become light */
