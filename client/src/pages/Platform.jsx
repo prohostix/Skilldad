@@ -131,10 +131,7 @@ const Platform = () => {
                                             }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                                        <div className="absolute top-3 md:top-4 right-3 md:right-4 flex items-center space-x-1 bg-black/50 backdrop-blur-sm rounded-full px-2 md:px-3 py-1">
-                                            <Star className="text-yellow-400" size={12} />
-                                            <span className="text-white text-xs md:text-sm font-bold">{university.rating}</span>
-                                        </div>
+
                                     </div>
 
                                     {/* University Details */}
