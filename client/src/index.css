@@ -518,6 +518,10 @@ select option {
 
 /* LIGHT MODE GLOBAL OVERRIDES */
 html.light-mode {
+  --color-primary: #4C1D95;
+  --color-primary-light: #8A2BE2;
+  --color-primary-dark: #3B0066;
+  --color-primary-accent: #6D28FF;
   --color-background: #FAF9F6;
   --color-background-mid: #FAF9F6;
   --color-background-light: #FAF9F6;
@@ -554,12 +558,13 @@ html.light-mode .about-us-page {
   background-image: none !important;
 }
 
-html.light-mode .premium-gradient-text {
+html.light-mode .premium-gradient-text,
+html.light-mode .bg-clip-text {
   background: none !important;
-  -webkit-background-clip: border-box !important;
-  background-clip: border-box !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
   -webkit-text-fill-color: initial !important;
-  color: #6D28FF !important;
+  color: var(--color-primary) !important;
 }
 
 /* Ensure absolute/fixed overlays also become light */
@@ -917,8 +922,8 @@ html.light-mode [class*="text-blue-4"] {
 
  
 
-html.light-mode .logo-color-text { color: #6D28FF !important; }
-html.light-mode .logo-color-text:hover { color: #8B5CF6 !important; }
+html.light-mode .logo-color-text { color: #4C1D95 !important; }
+html.light-mode .logo-color-text:hover { color: #8A2BE2 !important; }
 
 html.light-mode .wbl-btn-text { color: #000000 !important; }
 
