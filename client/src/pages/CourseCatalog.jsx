@@ -190,18 +190,18 @@ const CourseCatalog = () => {
                                         <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap justify-center">
                                             <button 
                                                 onClick={() => setProgramType('wbl_abroad')}
-                                                className={`px-3 md:px-5 py-1.5 md:py-2 rounded-lg font-bold font-inter text-[9px] md:text-[11px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_abroad'
+                                                className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_abroad'
                                                     ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
-                                                    : 'text-white/60 hover:text-white'
+                                                    : 'text-white/50 hover:text-white'
                                                     }`}
                                             >
                                                 International Programmes
                                             </button>
                                             <button 
                                                 onClick={() => setProgramType('wbl_domestic')}
-                                                className={`px-3 md:px-5 py-1.5 md:py-2 rounded-lg font-bold font-inter text-[9px] md:text-[11px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
+                                                className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
                                                     ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
-                                                    : 'text-white/60 hover:text-white'
+                                                    : 'text-white/50 hover:text-white'
                                                     }`}
                                             >
                                                 Domestic Programmes
