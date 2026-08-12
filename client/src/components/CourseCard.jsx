@@ -25,9 +25,10 @@ const CourseCard = ({ course }) => {
     return (
         <>
         <GlassCard
+            noHover={true}
             lowBlur={true}
-            className={`group overflow-hidden !p-0 h-full flex flex-col hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 gpu-accelerated ${
-                isFeatured ? '!border-amber-500/40 hover:!border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : ''
+            className={`overflow-hidden !p-0 h-full flex flex-col transition-all duration-500 gpu-accelerated ${
+                isFeatured ? '!border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : ''
             }`}
         >
             {/* Thumbnail Section */}
@@ -38,7 +39,7 @@ const CourseCard = ({ course }) => {
                 <img
                     src={thumbnailUrl}
                     alt={course.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 relative z-20"
+                    className="w-full h-full object-cover relative z-20"
                     onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800";
@@ -56,12 +57,7 @@ const CourseCard = ({ course }) => {
                     </div>
                 )}
 
-                {/* Play Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-90 group-hover:scale-100 transform transition-transform z-30">
-                    <div className="w-10 h-10 bg-primary/90 rounded-full flex items-center justify-center text-white shadow-xl shadow-primary/40 backdrop-blur-sm">
-                        <PlayCircle size={24} />
-                    </div>
-                </div>
+                {/* Removed hover Play Overlay */}
 
                 <div className="absolute bottom-2 left-2 right-2 flex items-center text-white z-30">
                     <div className="flex items-center space-x-1">
