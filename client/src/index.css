@@ -729,13 +729,13 @@ html.light-mode .bg-zinc-900 {
 }
 html.light-mode .bg-gray-800,
 html.light-mode .bg-zinc-800 {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
 }
 
 html.light-mode input,
 html.light-mode select:not(.text-transparent),
 html.light-mode textarea {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
   color: #111827 !important;
   border: 1px solid #d1d5db !important;
 }
@@ -744,7 +744,7 @@ html.light-mode .text-transparent {
   color: transparent !important;
 }
 html.light-mode select option {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
   color: #111827 !important;
 }
 
@@ -765,7 +765,7 @@ html.light-mode .text-\[\#E9D5FF\]:hover {
 
 /* --- LIGHT MODE GLOBAL OVERRIDES --- */
 html.light-mode body {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
   background-image: none !important;
 }
 
@@ -791,12 +791,12 @@ html.light-mode [class*="bg-gray-9"],
 html.light-mode [class*="bg-gray-8"], 
 html.light-mode [class*="bg-slate-9"], 
 html.light-mode [class*="bg-slate-8"] {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
   border-color: #e2e8f0 !important;
 }
 
 html.light-mode nav[style] {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
   border-bottom: none !important;
   backdrop-filter: none !important;
 }
@@ -849,7 +849,7 @@ html.light-mode .text-white\/80 {
 
 /* Make sure the hero container doesn't force black */
 html.light-mode .bg-black {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
 }
 
 /* Force text visibility in hero */
@@ -866,7 +866,7 @@ html.light-mode .network-diagram-fade {
 
 /* Fix the black line crack in HeroSection NetworkDiagram */
 html.light-mode .absolute.inset-y-0.right-0.w-20.pointer-events-none {
-  background: linear-gradient(to right, transparent, #e0cce3) !important;
+  background: linear-gradient(to right, transparent, #FAF9F6) !important;
 }
 
 /* Restore canvas rule */

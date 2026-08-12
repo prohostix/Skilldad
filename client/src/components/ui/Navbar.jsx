@@ -74,7 +74,7 @@ const Navbar = ({ compact = false }) => {
             <nav
                 className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-black/5 shadow-md text-gray-900' : 'border-b border-white/5 shadow-md text-white') : 'border-b border-transparent'}`}
                 style={{
-                    backgroundColor: shouldBeTransparent ? 'transparent' : (theme === 'light' ? '#e0cce3' : 'rgba(0, 0, 0, 0.9)'),
+                    backgroundColor: shouldBeTransparent ? 'transparent' : (theme === 'light' ? '#FAF9F6' : 'rgba(0, 0, 0, 0.9)'),
                     backdropFilter: shouldBeTransparent ? 'none' : 'blur(20px)',
                 }}
             >
