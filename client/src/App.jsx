@@ -114,7 +114,7 @@ const CouponManager = lazy(() => lazyRetry(() => import('./pages/admin/CouponMan
 const UniversityDetail = lazy(() => lazyRetry(() => import('./pages/admin/UniversityDetail')));
 const ServicesManagement = lazy(() => lazyRetry(() => import('./pages/admin/ServicesManagement')));
 const StudyAbroadManagement = lazy(() => lazyRetry(() => import('./pages/admin/StudyAbroadManagement')));
-const WBLManagement = lazy(() => lazyRetry(() => import('./pages/admin/WBLManagement')));
+
 const CareerManager = lazy(() => lazyRetry(() => import('./pages/admin/CareerManager')));
 const CertificateManagement = lazy(() => lazyRetry(() => import('./pages/admin/CertificateManagement')));
 const DocumentReview = lazy(() => lazyRetry(() => import('./pages/admin/DocumentReview')));
@@ -259,6 +259,7 @@ function App() {
                     <Route path="users" element={<UserList />} />
                     <Route path="students" element={<StudentManagement />} />
                     <Route path="career-manager" element={<CareerManager />} />
+                    <Route path="wbl" element={<CourseManager wblOnly={true} />} />
                     <Route path="university" element={<UniversityManagement />} />
                     <Route path="university/:id" element={<UniversityDetail />} />
                     <Route path="skilldad-universities" element={<SkillDadUniversities />} />
@@ -278,7 +279,7 @@ function App() {
                     <Route path="faqs" element={<FAQManagement />} />
                     <Route path="services" element={<ServicesManagement />} />
                     <Route path="study-abroad" element={<StudyAbroadManagement />} />
-                    <Route path="wbl" element={<WBLManagement />} />
+
                     <Route path="certificates" element={<CertificateManagement />} />
                     <Route path="document-review" element={<DocumentReview />} />
                     <Route path="settings" element={<Settings />} />

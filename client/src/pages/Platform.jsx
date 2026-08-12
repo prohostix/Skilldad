@@ -135,11 +135,6 @@ const Platform = () => {
                                             <Star className="text-yellow-400" size={12} />
                                             <span className="text-white text-xs md:text-sm font-bold">{university.rating}</span>
                                         </div>
-                                        <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 text-white">
-                                            <span className="text-xs font-bold uppercase tracking-wider px-2 py-1 bg-primary/80 rounded-md">
-                                                Est. {university.established}
-                                            </span>
-                                        </div>
                                     </div>
 
                                     {/* University Details */}

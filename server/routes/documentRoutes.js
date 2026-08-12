@@ -514,17 +514,18 @@ router.put('/:id', protect, async (req, res) => {
     try {
         const docId = req.params.id;
         const userId = req.user.id || req.user._id;
-        const { title, description, status } = req.body;
+        const { title, description, status, type } = req.body;
 
         const result = await query(`
             UPDATE documents 
             SET title = COALESCE($1, title), 
                 description = COALESCE($2, description), 
                 status = COALESCE($3, status),
+                type = COALESCE($7, type),
                 updated_at = NOW()
             WHERE id = $4 AND (uploaded_by_id = $5 OR $6 = 'admin')
             RETURNING *, id as _id
-        `, [title, description, status, docId, userId, req.user.role]);
+        `, [title, description, status, docId, userId, req.user.role, type]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Document not found or unauthorized' });

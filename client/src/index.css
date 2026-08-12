@@ -518,17 +518,17 @@ select option {
 
 /* LIGHT MODE GLOBAL OVERRIDES */
 html.light-mode {
-  --color-background: #ffffff;
-  --color-background-mid: #f9fafb;
-  --color-background-light: #f5f0e6;
+  --color-background: #e0cce3;
+  --color-background-mid: #e0cce3;
+  --color-background-light: #e0cce3;
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;
   --color-text-muted: #6b7280;
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
 }
 
 html.light-mode body {
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
   color: #1f2937 !important;
 }
 
@@ -542,15 +542,15 @@ html.light-mode .bg-alyra-gradient,
 html.light-mode .bg-background,
 html.light-mode .bg-background-mid,
 html.light-mode .bg-background-light {
-  background: #f5f0e6 !important;
-  background-color: #f5f0e6 !important;
+  background: #e0cce3 !important;
+  background-color: #e0cce3 !important;
 }
 
 html.light-mode .course-catalog-page,
 html.light-mode .platform-page,
 html.light-mode .about-us-page {
-  background: #f5f0e6 !important;
-  background-color: #f5f0e6 !important;
+  background: #e0cce3 !important;
+  background-color: #e0cce3 !important;
   background-image: none !important;
 }
 
@@ -565,11 +565,11 @@ html.light-mode .premium-gradient-text {
 /* Ensure absolute/fixed overlays also become light */
 html.light-mode [class*="bg-black/"],
 html.light-mode [class*="bg-background/"] {
-  background-color: rgba(245, 240, 230, 0.95) !important;
+  background-color: #e0cce3 !important;
 }
 
 html.light-mode nav {
-  background-color: rgba(245, 240, 230, 0.95) !important;
+  background-color: #e0cce3 !important;
 }
 
 html.light-mode .text-white,
@@ -691,7 +691,7 @@ html.light-mode .glass-card {
   background-color: rgba(10, 7, 24, 0.9);
 }
 html.light-mode .about-card-bg {
-  background-color: rgba(245, 240, 230, 0.9) !important; /* Cream background */
+  background-color: rgba(248, 212, 230, 0.9) !important; /* Cream background */
   border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
@@ -725,13 +725,13 @@ html.light-mode .bg-zinc-900 {
 }
 html.light-mode .bg-gray-800,
 html.light-mode .bg-zinc-800 {
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
 }
 
 html.light-mode input,
 html.light-mode select:not(.text-transparent),
 html.light-mode textarea {
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
   color: #111827 !important;
   border: 1px solid #d1d5db !important;
 }
@@ -740,7 +740,7 @@ html.light-mode .text-transparent {
   color: transparent !important;
 }
 html.light-mode select option {
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
   color: #111827 !important;
 }
 
@@ -761,7 +761,7 @@ html.light-mode .text-\[\#E9D5FF\]:hover {
 
 /* --- LIGHT MODE GLOBAL OVERRIDES --- */
 html.light-mode body {
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
   background-image: none !important;
 }
 
@@ -787,14 +787,14 @@ html.light-mode [class*="bg-gray-9"],
 html.light-mode [class*="bg-gray-8"], 
 html.light-mode [class*="bg-slate-9"], 
 html.light-mode [class*="bg-slate-8"] {
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
   border-color: #e2e8f0 !important;
 }
 
 html.light-mode nav[style] {
-    background-color: rgba(245, 240, 230, 0.85) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-  backdrop-filter: blur(16px) !important;
+  background-color: #e0cce3 !important;
+  border-bottom: none !important;
+  backdrop-filter: none !important;
 }
   
   html.light-mode nav[style*="background-color: transparent"] {
@@ -817,30 +817,24 @@ html.light-mode a.text-white {
 
 
 html.light-mode .from-black {
-  --tw-gradient-from: #f5f0e6 !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+  background-image: none !important;
+  background-color: transparent !important;
 }
 
 html.light-mode .via-black\/40 {
-  --tw-gradient-via: rgba(245, 240, 230, 0.6) !important;
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to) !important;
+  background-image: none !important;
 }
 
 html.light-mode .to-black {
-  --tw-gradient-to: #f5f0e6 !important;
+  background-image: none !important;
 }
 
-html.light-mode .from-black.to-transparent {
-  background-image: linear-gradient(to top, #f5f0e6, transparent) !important;
-}
-html.light-mode .bg-gradient-to-r.from-black.via-black\/40.to-transparent {
-  background-image: linear-gradient(to right, #f5f0e6, rgba(245, 240, 230, 0.8), transparent) !important;
-}
-html.light-mode .bg-gradient-to-l.from-black.via-black\/40.to-transparent {
-  background-image: linear-gradient(to left, #f5f0e6, rgba(245, 240, 230, 0.8), transparent) !important;
-}
+html.light-mode .from-black.to-transparent,
+html.light-mode .bg-gradient-to-r.from-black.via-black\/40.to-transparent,
+html.light-mode .bg-gradient-to-l.from-black.via-black\/40.to-transparent,
 html.light-mode .bg-gradient-to-t.from-black.to-transparent {
-  background-image: linear-gradient(to top, #f5f0e6, transparent) !important;
+  background-image: none !important;
+  background-color: transparent !important;
 }
 
 html.light-mode .text-white\/50,
@@ -851,7 +845,7 @@ html.light-mode .text-white\/80 {
 
 /* Make sure the hero container doesn't force black */
 html.light-mode .bg-black {
-  background-color: #f5f0e6 !important;
+  background-color: #e0cce3 !important;
 }
 
 /* Force text visibility in hero */
@@ -868,7 +862,7 @@ html.light-mode .network-diagram-fade {
 
 /* Fix the black line crack in HeroSection NetworkDiagram */
 html.light-mode .absolute.inset-y-0.right-0.w-20.pointer-events-none {
-  background: linear-gradient(to right, transparent, #f5f0e6) !important;
+  background: linear-gradient(to right, transparent, #e0cce3) !important;
 }
 
 /* Restore canvas rule */
@@ -917,3 +911,14 @@ html.light-mode [class*="text-blue-4"] {
   color: #1e3a8a !important;
 }
 
+ 
+
+html.light-mode .logo-color-text { color: #4C1D95 !important; }
+html.light-mode .logo-color-text:hover { color: #8A2BE2 !important; }
+
+html.light-mode .wbl-btn-text { color: #000000 !important; }
+
+
+html.light-mode .wbl-btn-text { color: #000000 !important; }
+
+.wbl-btn-text { color: white; }

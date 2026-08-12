@@ -128,9 +128,9 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
                 <h3 className="text-base sm:text-lg font-bold text-text-primary font-poppins">{title}</h3>
                 {subtitle && <p className="text-[10px] sm:text-xs text-text-muted mt-0.5 sm:mt-1 font-inter">{subtitle}</p>}
             </div>
-            <div className="h-[220px] sm:h-[300px] w-full relative min-h-[220px]" style={{ minWidth: 0 }}>
+            <div className="h-[220px] sm:h-[300px] w-full relative min-h-[220px]">
                 {isMounted ? (
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={200} debounce={200}>
+                    <ResponsiveContainer width="99%" height="100%">
                         {renderChart()}
                     </ResponsiveContainer>
                 ) : (

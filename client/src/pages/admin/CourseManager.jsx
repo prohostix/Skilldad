@@ -26,7 +26,7 @@ import DashboardHeading from '../../components/ui/DashboardHeading';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../context/ToastContext';
 
-const CourseManager = () => {
+const CourseManager = ({ wblOnly = false }) => {
     const [courses, setCourses] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -101,7 +101,7 @@ const CourseManager = () => {
         fetchSkillDadUniversities();
     }, []);
 
-    const handleCreate = () => {
+    const handleCreate = (defaultProgramType) => {
         setFormData({
             title: '',
             description: '',
@@ -117,7 +117,7 @@ const CourseManager = () => {
             university_tools: [],
             features: [],
             learning_outcomes: [],
-            programType: 'course',
+            programType: defaultProgramType || (wblOnly ? 'degree_programme' : 'course'),
             skillDadUniversityId: ''
         });
         setEditingCourse(null);
@@ -140,7 +140,7 @@ const CourseManager = () => {
             university_tools: course.university_tools || [],
             features: course.features || [],
             learning_outcomes: course.learning_outcomes || [],
-            programType: course.programType || course.program_type || 'course',
+            programType: course.programType || course.program_type || (wblOnly ? 'degree_programme' : 'course'),
             skillDadUniversityId: course.skillDadUniversityId || course.skill_dad_university_id || ''
         });
         setEditingCourse(course);
@@ -311,18 +311,32 @@ const CourseManager = () => {
         const matchesProvider =
             providerFilter === 'all' || getProviderName(course) === providerFilter;
 
-        return matchesSearch && matchesStatus && matchesProvider;
+        const isWblCourse = (course.programType || course.program_type) === 'degree_programme' || (course.programType || course.program_type) === 'wbl_abroad';
+        const matchesWblOnly = wblOnly ? isWblCourse : !isWblCourse;
+
+        return matchesSearch && matchesStatus && matchesProvider && matchesWblOnly;
     });
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="text-left">
-                    <DashboardHeading title="Course Library" />
+                    <DashboardHeading title={wblOnly ? "WBL Management" : "Course Library"} />
                 </div>
-                <ModernButton onClick={handleCreate} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm">
-                    <Plus size={16} className="mr-1.5" /> Create New Course
-                </ModernButton>
+                {wblOnly ? (
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <ModernButton onClick={() => handleCreate('degree_programme')} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm">
+                            <Plus size={16} className="mr-1.5" /> Add Domestic Course
+                        </ModernButton>
+                        <ModernButton variant="secondary" onClick={() => handleCreate('wbl_abroad')} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm !bg-sky-500/10 !text-sky-400 hover:!bg-sky-500 hover:!text-white !border-sky-500/20">
+                            <Plus size={16} className="mr-1.5" /> Add Study Abroad
+                        </ModernButton>
+                    </div>
+                ) : (
+                    <ModernButton onClick={() => handleCreate('course')} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm">
+                        <Plus size={16} className="mr-1.5" /> Create New Course
+                    </ModernButton>
+                )}
             </div>
 
             <GlassCard className="!p-0 overflow-hidden">
@@ -444,6 +458,11 @@ const CourseManager = () => {
                                                 {(course.programType || course.program_type) === 'degree_programme' && (
                                                     <span className="inline-block mt-1 px-2.5 py-0.5 bg-primary/20 text-primary rounded-full text-[9px] font-bold uppercase tracking-tight">
                                                         Degree Programme
+                                                    </span>
+                                                )}
+                                                {(course.programType || course.program_type) === 'wbl_abroad' && (
+                                                    <span className="inline-block mt-1 px-2.5 py-0.5 bg-sky-500/20 text-sky-400 rounded-full text-[9px] font-bold uppercase tracking-tight">
+                                                        Study Abroad
                                                     </span>
                                                 )}
                                             </div>
@@ -668,9 +687,10 @@ const CourseManager = () => {
                                             universityName: ''
                                         })}
                                     >
-                                        <option value="course" className="bg-[#0B071A]">Skill Course</option>
+                                        {!wblOnly && <option value="course" className="bg-[#0B071A]">Skill Course</option>}
                                         <option value="degree_programme" className="bg-[#0B071A]">Skill Integrated Degree Programme</option>
-                                        <option value="featured" className="bg-[#0B071A]">Featured Course</option>
+                                        <option value="wbl_abroad" className="bg-[#0B071A]">Study Abroad Programme</option>
+                                        {!wblOnly && <option value="featured" className="bg-[#0B071A]">Featured Course</option>}
                                     </select>
                                 </div>
                             </div>
@@ -680,7 +700,7 @@ const CourseManager = () => {
                                     <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
                                         Provider University
                                     </label>
-                                    {formData.programType === 'degree_programme' ? (
+                                    {(formData.programType === 'degree_programme' || formData.programType === 'wbl_abroad') ? (
                                         <select
                                             required
                                             className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter appearance-none"

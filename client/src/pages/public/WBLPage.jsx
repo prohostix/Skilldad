@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, MapPin, Clock, DollarSign, ArrowUpRight, School } from 'lucide-react';
+import { SearchX } from 'lucide-react';
 import Navbar from '../../components/ui/Navbar';
 import Footer from '../../components/ui/Footer';
+import CourseCard from '../../components/CourseCard';
 import ModernButton from '../../components/ui/ModernButton';
 
 const WBLPage = () => {
@@ -13,11 +14,15 @@ const WBLPage = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+        
         const fetchCourses = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`/api/wbl/courses?category=${activeTab}`);
-                setCourses(response.data);
+                const { data } = await axios.get('/api/courses');
+                if (data && Array.isArray(data)) {
+                    setCourses(data);
+                }
             } catch (err) {
                 setError('Failed to load courses');
                 console.error(err);
@@ -26,14 +31,30 @@ const WBLPage = () => {
             }
         };
         fetchCourses();
-    }, [activeTab]);
+    }, []);
+
+    const filteredCourses = useMemo(() => {
+        return courses.filter(course => {
+            const programType = course.programType || course.program_type || 'course';
+            if (activeTab === 'domestic') {
+                return programType === 'degree_programme';
+            } else if (activeTab === 'abroad') {
+                return programType === 'wbl_abroad';
+            }
+            return false;
+        });
+    }, [courses, activeTab]);
 
     return (
-        <div className="min-h-screen bg-[#050514] text-white selection:bg-primary/30">
+        <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] text-white selection:bg-primary/30 relative overflow-hidden">
             <Navbar />
             
-            <div className="pt-24 pb-20 px-6">
-                <div className="max-w-7xl mx-auto space-y-8">
+            {/* Background Glows */}
+            <div className="absolute top-0 left-1/4 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-primary/3 blur-[120px] rounded-full pointer-events-none gpu-accelerated" />
+            <div className="absolute top-1/2 right-1/4 w-[400px] md:w-[600px] h-[400px] md:h-[600px] bg-primary-dark/2 blur-[150px] rounded-full pointer-events-none gpu-accelerated" />
+
+            <div className="pt-20 pb-20 px-6 relative z-10">
+                <div className="max-w-[1300px] mx-auto space-y-8">
                     
                     {/* Header */}
                     <motion.div 
@@ -41,36 +62,36 @@ const WBLPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-center"
                     >
-                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                            Work-Based <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Learning</span>
+                        <h1 className="text-4xl md:text-6xl font-black tracking-tight font-space leading-tight">
+                            Work-Based <span className="premium-gradient-text">Learning</span>
                         </h1>
                     </motion.div>
 
                     {/* Tabs */}
                     <div className="flex justify-center">
-                        <div className="bg-white/5 p-1 rounded-full flex gap-2 border border-white/10">
+                        <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-2xl flex-wrap justify-center shadow-2xl">
                             <button
                                 onClick={() => setActiveTab('domestic')}
-                                className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 ${activeTab === 'domestic'
-                                    ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-[0_0_20px_rgba(138,43,226,0.4)]'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                className={`px-6 py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${activeTab === 'domestic'
+                                    ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                    : 'text-white/50 hover:text-white'
                                     }`}
                             >
-                                Domestic
+                                Domestic Programmes
                             </button>
                             <button
                                 onClick={() => setActiveTab('abroad')}
-                                className={`px-8 py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 ${activeTab === 'abroad'
-                                    ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-[0_0_20px_rgba(138,43,226,0.4)]'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                className={`px-6 py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${activeTab === 'abroad'
+                                    ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                    : 'text-white/50 hover:text-white'
                                     }`}
                             >
-                                Abroad
+                                Study Abroad
                             </button>
                         </div>
                     </div>
 
-                    {/* Course List */}
+                    {/* Course Grid */}
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
@@ -80,74 +101,36 @@ const WBLPage = () => {
                             transition={{ duration: 0.3 }}
                         >
                             {loading ? (
-                                <div className="grid grid-cols-1 gap-6">
-                                    {[1, 2, 3].map(i => (
-                                        <div key={i} className="h-40 rounded-[2rem] bg-white/5 animate-pulse border border-white/10" />
-                                    ))}
+                                <div className="flex flex-col items-center justify-center py-20 space-y-8">
+                                    <div className="relative">
+                                        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                                        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse"></div>
+                                    </div>
+                                    <p className="text-white/40 font-black uppercase tracking-[0.5em] text-[10px]">Syncing Knowledge Base</p>
                                 </div>
                             ) : error ? (
                                 <div className="text-center text-red-400 py-10 bg-red-500/10 rounded-2xl border border-red-500/20">{error}</div>
-                            ) : courses.length === 0 ? (
-                                <div className="text-center text-gray-500 py-20 bg-white/5 rounded-[2rem] border border-white/10">
-                                    No {activeTab} courses available at the moment.
-                                </div>
+                            ) : filteredCourses.length === 0 ? (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="py-32 text-center space-y-8 bg-white/[0.02] rounded-[40px] border border-white/5"
+                                >
+                                    <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/20 border border-white/10">
+                                        <SearchX size={48} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-3xl font-black text-white font-space">No programmes found</h3>
+                                        <p className="text-text-muted font-inter max-w-sm mx-auto text-lg leading-relaxed">There are currently no {activeTab} programmes available.</p>
+                                    </div>
+                                    <ModernButton variant="secondary" onClick={() => setActiveTab(activeTab === 'domestic' ? 'abroad' : 'domestic')} className="!px-10 !py-5 uppercase tracking-widest font-black text-xs">
+                                        View {activeTab === 'domestic' ? 'Abroad' : 'Domestic'} Programmes
+                                    </ModernButton>
+                                </motion.div>
                             ) : (
-                                <div className="grid grid-cols-1 gap-6">
-                                    {courses.map((course, index) => (
-                                        <motion.div
-                                            key={course.id}
-                                            initial={{ opacity: 0, y: 30 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.05 }}
-                                            className="group p-1 bg-gradient-to-r from-transparent hover:from-primary/20 to-transparent rounded-[2rem] transition-all duration-500"
-                                        >
-                                            <div className="bg-[#0B0F1A] p-8 rounded-[1.9rem] flex flex-col md:flex-row md:items-center justify-between gap-8 border border-white/5 group-hover:border-primary/30 transition-all cursor-pointer">
-                                                <div className="space-y-4 flex-1">
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="px-3 py-1 bg-white/10 text-white/60 text-[10px] font-black rounded-lg uppercase tracking-tighter">
-                                                            {course.category}
-                                                        </span>
-                                                        <h3 className="text-2xl font-bold group-hover:text-primary transition-colors">{course.title}</h3>
-                                                    </div>
-                                                    
-                                                    <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
-                                                        <School size={14}/> {course.university_name}
-                                                    </div>
-
-                                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                                                        {course.location && (
-                                                            <div className="space-y-1">
-                                                                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Location</p>
-                                                                <p className="flex items-center gap-2 text-white/60"><MapPin size={14} className="text-gray-400"/> {course.location}</p>
-                                                            </div>
-                                                        )}
-                                                        {course.duration && (
-                                                            <div className="space-y-1">
-                                                                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Duration</p>
-                                                                <p className="flex items-center gap-2 text-white/60"><Clock size={14} className="text-primary"/> {course.duration}</p>
-                                                            </div>
-                                                        )}
-                                                        {course.fees && (
-                                                            <div className="space-y-1">
-                                                                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Fees</p>
-                                                                <p className="flex items-center gap-2 text-white/60"><DollarSign size={14} className="text-emerald-500"/> {course.fees}</p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    {course.description && (
-                                                        <p className="text-white/40 text-sm line-clamp-2 pt-2 border-t border-white/5 mt-4">
-                                                            {course.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div className="shrink-0">
-                                                    <ModernButton className="group-hover:scale-105 transition-transform" variant="secondary">
-                                                        View Details <ArrowUpRight size={18} className="ml-2"/>
-                                                    </ModernButton>
-                                                </div>
-                                            </div>
-                                        </motion.div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 gpu-accelerated">
+                                    {filteredCourses.map((course) => (
+                                        <CourseCard key={course._id} course={course} />
                                     ))}
                                 </div>
                             )}

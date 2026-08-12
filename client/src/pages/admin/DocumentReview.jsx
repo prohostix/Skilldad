@@ -13,7 +13,8 @@ import {
     User,
     Building2,
     Calendar,
-    AlertCircle
+    AlertCircle,
+    Edit3
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassCard from '../../components/ui/GlassCard';
@@ -29,6 +30,8 @@ const DocumentReview = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [selectedDoc, setSelectedDoc] = useState(null);
+    const [docToEdit, setDocToEdit] = useState(null);
+    const [editForm, setEditForm] = useState({ title: '', type: '' });
     const [rejectionReason, setRejectionReason] = useState('');
     const [isReviewing, setIsReviewing] = useState(false);
 
@@ -77,6 +80,28 @@ const DocumentReview = () => {
         } catch (error) {
             console.error('Error reviewing document:', error);
             showToast(error.response?.data?.message || 'Review failed', 'error');
+        } finally {
+            setIsReviewing(false);
+        }
+    };
+
+    const handleUpdateDocument = async () => {
+        try {
+            setIsReviewing(true);
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+            
+            await axios.put(`/api/documents/${docToEdit._id}`, {
+                title: editForm.title,
+                type: editForm.type
+            }, config);
+
+            showToast(`Document updated successfully`, 'success');
+            setDocToEdit(null);
+            fetchDocuments();
+        } catch (error) {
+            console.error('Error updating document:', error);
+            showToast(error.response?.data?.message || 'Update failed', 'error');
         } finally {
             setIsReviewing(false);
         }
@@ -230,6 +255,16 @@ const DocumentReview = () => {
                                         <ModernButton 
                                             variant="secondary" 
                                             className="!py-2 !px-3 text-[11px] font-bold"
+                                            onClick={() => {
+                                                setDocToEdit(doc);
+                                                setEditForm({ title: doc.title || '', type: doc.type || '' });
+                                            }}
+                                        >
+                                            <Edit3 size={14} className="mr-1.5" /> Edit
+                                        </ModernButton>
+                                        <ModernButton 
+                                            variant="secondary" 
+                                            className="!py-2 !px-3 text-[11px] font-bold"
                                             onClick={() => setSelectedDoc(doc)}
                                         >
                                             <Eye size={14} className="mr-1.5" /> Review
@@ -369,6 +404,62 @@ const DocumentReview = () => {
                                         </ModernButton>
                                     </div>
                                 </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Edit Document Modal */}
+            <AnimatePresence>
+                {docToEdit && (
+                    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setDocToEdit(null)}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-2xl"
+                        >
+                            <div className="flex justify-between items-start mb-6">
+                                <h2 className="text-xl font-bold text-white">Edit Document</h2>
+                                <button 
+                                    onClick={() => setDocToEdit(null)}
+                                    className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-all"
+                                >
+                                    <XCircle size={24} />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-white/50 uppercase tracking-widest mb-2 block">Title</label>
+                                    <input 
+                                        type="text"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                        value={editForm.title}
+                                        onChange={(e) => setEditForm(prev => ({...prev, title: e.target.value}))}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-white/50 uppercase tracking-widest mb-2 block">Document Type</label>
+                                    <input 
+                                        type="text"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary transition-all"
+                                        value={editForm.type}
+                                        onChange={(e) => setEditForm(prev => ({...prev, type: e.target.value}))}
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-8 flex gap-3">
+                                <ModernButton variant="secondary" onClick={() => setDocToEdit(null)} className="flex-1">Cancel</ModernButton>
+                                <ModernButton onClick={handleUpdateDocument} disabled={isReviewing} className="flex-1">Save Changes</ModernButton>
                             </div>
                         </motion.div>
                     </div>

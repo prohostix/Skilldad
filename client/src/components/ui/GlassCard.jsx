@@ -1,25 +1,27 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const GlassCard = ({ children, className = '', title, icon: Icon, onClick, style, lowBlur = false, ...rest }) => {
+const GlassCard = ({ children, className = '', title, icon: Icon, onClick, style, lowBlur = false, noHover = false, ...rest }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{
+            whileHover={!noHover ? {
                 y: -8,
                 transition: { duration: 0.4, ease: "easeOut" },
                 borderColor: "rgba(109, 64, 255, 0.4)",
                 backgroundColor: "rgba(255, 255, 255, 0.08)"
-            }}
+            } : undefined}
             className={`relative group bg-white/[0.03] ${lowBlur ? 'backdrop-blur-md' : 'backdrop-blur-xl'} rounded-[16px] sm:rounded-[24px] p-4 sm:p-6 border-2 border-primary/20 transition-all duration-500 shadow-2xl ${className}`}
             onClick={onClick}
             style={style}
             {...rest}
         >
             {/* Hover Glow Effect */}
-            <div className="absolute inset-0 rounded-[16px] sm:rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none shadow-[0_0_40px_rgba(109,40,255,0.15)]" />
+            {!noHover && (
+                <div className="absolute inset-0 rounded-[16px] sm:rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none shadow-[0_0_40px_rgba(109,40,255,0.15)]" />
+            )}
 
             {(title || Icon) && (
                 <div className="flex items-center mb-4 space-x-3">

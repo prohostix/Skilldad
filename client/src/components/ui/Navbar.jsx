@@ -49,7 +49,6 @@ const Navbar = ({ compact = false }) => {
         { name: 'Courses', href: '/courses' },
         { name: 'Universities', href: '/platform' },
         { name: 'Study Abroad', href: '/study-abroad' },
-        { name: 'WBL', href: '/wbl' },
         { name: 'Services', href: '/services' },
         { name: 'About Us', href: '/about' },
     ];
@@ -75,7 +74,7 @@ const Navbar = ({ compact = false }) => {
             <nav
                 className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-black/5 shadow-md text-gray-900' : 'border-b border-white/5 shadow-md text-white') : 'border-b border-transparent'}`}
                 style={{
-                    backgroundColor: shouldBeTransparent ? 'transparent' : (theme === 'light' ? '#FDF8EE' : 'rgba(0, 0, 0, 0.9)'),
+                    backgroundColor: shouldBeTransparent ? 'transparent' : (theme === 'light' ? '#e0cce3' : 'rgba(0, 0, 0, 0.9)'),
                     backdropFilter: shouldBeTransparent ? 'none' : 'blur(20px)',
                 }}
             >
@@ -99,13 +98,13 @@ const Navbar = ({ compact = false }) => {
 
                     {/* Desktop Menu - Hide on auth pages */}
                     {!isAuthPage && (
-                        <div className={`hidden lg:flex items-center justify-center ${theme === 'light' ? 'space-x-5 bg-gradient-to-r from-[#8A2BE2] to-[#FF2FD1] px-7 h-9 rounded-full shadow-[0_4px_15px_rgba(138,43,226,0.3)] border border-white/20' : 'space-x-8'}`}>
+                        <div className="hidden lg:flex items-center justify-center space-x-8">
                             {navItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     to={item.href}
                                     className={theme === 'light' 
-                                        ? `nav-box-link font-semibold text-white/90 hover:text-white transition-colors duration-200 group flex items-center h-full ${compact ? 'text-xs' : 'text-[13px]'}`
+                                        ? `logo-color-text relative font-bold transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`
                                         : `relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`
                                     }
                                 >

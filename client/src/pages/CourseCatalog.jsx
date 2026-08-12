@@ -83,7 +83,8 @@ const CourseCatalog = () => {
             const courseUniversity = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad';
             const matchesUniversity = selectedUniversity === 'All' || courseUniversity === selectedUniversity;
 
-            const matchesProgramType = (course.programType || course.program_type || 'course') === programType;
+            const effectiveProgramType = programType === 'wbl_domestic' ? 'degree_programme' : programType;
+            const matchesProgramType = (course.programType || course.program_type || 'course') === effectiveProgramType;
 
             return matchesSearch && matchesUniversity && matchesProgramType;
         });
@@ -165,8 +166,50 @@ const CourseCatalog = () => {
                                     >
                                         Skill Integrated Degree Programmes
                                     </button>
+                                    <button
+                                        onClick={() => setProgramType('wbl')}
+                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType.startsWith('wbl')
+                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white'
+                                            }`}
+                                    >
+                                        WBL
+                                    </button>
                                 </div>
                             </div>
+
+                            {/* WBL Sub-options */}
+                            <AnimatePresence>
+                                {programType.startsWith('wbl') && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, height: 0, y: -10 }}
+                                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                        exit={{ opacity: 0, height: 0, y: -10 }}
+                                        className="flex justify-center pt-4 overflow-hidden"
+                                    >
+                                        <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap justify-center mt-2">
+                                            <button 
+                                                onClick={() => setProgramType('wbl_abroad')}
+                                                className={`px-3 md:px-5 py-1.5 md:py-2 rounded-lg font-bold font-inter text-[9px] md:text-[11px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_abroad'
+                                                    ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
+                                                    : 'text-white/60 hover:text-white'
+                                                    }`}
+                                            >
+                                                International Programmes
+                                            </button>
+                                            <button 
+                                                onClick={() => setProgramType('wbl_domestic')}
+                                                className={`px-3 md:px-5 py-1.5 md:py-2 rounded-lg font-bold font-inter text-[9px] md:text-[11px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
+                                                    ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
+                                                    : 'text-white/60 hover:text-white'
+                                                    }`}
+                                            >
+                                                Domestic Programmes
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -235,7 +278,11 @@ const CourseCatalog = () => {
 
                 {/* Grid Section */}
                 <div className="max-w-[1180px] mx-auto px-4">
-                    {loading ? (
+                    {programType === 'wbl' ? (
+                        <div className="py-20 text-center">
+                            <p className="text-white/60 text-lg">Please select International or Domestic programmes above.</p>
+                        </div>
+                    ) : loading ? (
                         <div className="flex flex-col items-center justify-center py-20 md:py-40 space-y-8">
                             <div className="relative">
                                 <div className="w-12 h-12 md:w-16 md:h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>

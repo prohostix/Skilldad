@@ -91,8 +91,8 @@ const Services = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.6 }}
                                 >
-                                    <div className="relative group rounded-3xl p-[1px] bg-gradient-to-r from-primary/50 via-primary/20 to-white/10 shadow-2xl transition-all duration-500 hover:shadow-[0_0_50px_rgba(110,40,255,0.2)]">
-                                        <GlassCard className="about-card-bg backdrop-blur-3xl rounded-[23px] p-6 sm:p-8 md:p-10 space-y-8">
+                                    <div className="relative group rounded-3xl p-[1px] bg-gradient-to-r from-primary/50 via-primary/20 to-white/10 shadow-2xl transition-all duration-500">
+                                        <GlassCard noHover={true} className="about-card-bg backdrop-blur-3xl rounded-[23px] p-6 sm:p-8 md:p-10 space-y-8">
                                             <div className="grid lg:grid-cols-12 gap-8 items-start">
                                                 {/* Left — Main Details */}
                                                 <div className="lg:col-span-7 space-y-5 text-left">

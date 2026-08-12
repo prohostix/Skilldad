@@ -4,7 +4,7 @@ import {
     LayoutDashboard, Briefcase, BookOpen, Users, Building2,
     BarChart3, LifeBuoy, Settings, X, LogOut, FileText,
     Trophy, DollarSign, GraduationCap, Image, Bell, Ticket,
-    Wallet, MessageCircle, ChevronDown, ChevronRight, Globe, Home, Video, Inbox
+    Wallet, MessageCircle, ChevronDown, ChevronRight, Globe, Home, Video, Inbox, MapPin
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
@@ -111,6 +111,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             { name: 'Users', icon: Users, path: '/admin/users' },
             { name: 'Students', icon: GraduationCap, path: '/admin/students' },
             { name: 'Career Manager', icon: Briefcase, path: '/admin/career-manager' },
+            { name: 'WBL Management', icon: Building2, path: '/admin/wbl' },
             { name: 'Certificates', icon: Trophy, path: '/admin/certificates' },
             { name: 'Document Review', icon: FileText, path: '/admin/document-review' },
             {
@@ -126,8 +127,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             { name: 'Payouts', icon: DollarSign, path: '/admin/payouts' },
             { name: 'Communications', icon: Bell, path: '/admin/communications' },
             { name: 'Services Management', icon: LayoutDashboard, path: '/admin/services' },
-            { name: 'Study Abroad', icon: Globe, path: '/admin/study-abroad' },
-            { name: 'WBL Management', icon: Briefcase, path: '/admin/wbl' },
+            { name: 'University Setup', icon: MapPin, path: '/admin/universities' },
             { name: 'Page Content & Assets', icon: Image, path: '/admin/partner-logos' },
             { name: 'Support Tickets', icon: LifeBuoy, path: '/admin/support' },
             { name: 'FAQ Manager', icon: MessageCircle, path: '/admin/faqs' },
