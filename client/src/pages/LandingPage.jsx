@@ -555,71 +555,76 @@ const LandingPage = () => {
 
                     {/* University Carousel (1 Row) */}
                     <div className="relative mt-8">
-                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 overflow-hidden min-h-[300px]">
-                            <AnimatePresence mode="popLayout">
-                                {visibleUnis.map((uni, i) => (
-                                    <motion.div
-                                        key={uniStartIndex + '-' + i + '-' + uni.name}
-                                        initial={{ opacity: 0, x: 50 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -50, scale: 0.95 }}
-                                        transition={{ duration: 0.4, ease: "easeOut" }}
-                                        className={`h-full ${i === 1 ? 'hidden xs:block' : ''} ${i >= 2 ? 'hidden lg:block' : ''}`}
-                                    >
-                                        <GlassCard
-                                            className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"
-                                            onClick={() => {
-                                                navigate(`/university-profile/${encodeURIComponent(uni.name)}`, { state: { university: uni } });
-                                            }}
+                        <div className="overflow-hidden min-h-[300px]">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={uniStartIndex}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+                                >
+                                    {visibleUnis.map((uni, i) => (
+                                        <div
+                                            key={uni.name + '-' + i}
+                                            className={`h-full ${i === 1 ? 'hidden xs:block' : ''} ${i >= 2 ? 'hidden lg:block' : ''}`}
                                         >
-                                            {/* University Icon + Tag row */}
-                                            <div className="flex items-center gap-3 mb-3 w-full">
-                                                <div className="w-9 h-9 rounded-[14px] bg-primary/20 text-primary flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 border border-primary/30 group-hover:border-primary/50 overflow-hidden p-1.5">
-                                                    {uni.logo ? (
-                                                        <img 
-                                                            src={uni.logo} 
-                                                            alt={uni.name} 
-                                                            className="w-full h-full object-contain" 
-                                                        />
-                                                    ) : (
-                                                        <Library size={18} strokeWidth={2.5} />
-                                                    )}
-                                                </div>
-                                                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Ivy-Alliance</span>
-                                            </div>
-
-                                            {/* University Name */}
-                                            <h3 className="text-base font-bold text-white mb-1 group-hover:text-primary transition-colors font-poppins">{uni.name}</h3>
-                                            <p className="text-[11px] text-text-muted mb-3 flex items-center gap-1 font-inter">
-                                                <Globe size={11} />
-                                                {uni.location}
-                                            </p>
-
-                                            {/* Stats */}
-                                            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5 w-full mb-3 mt-auto">
-                                                <div>
-                                                    <p className="text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black">Scholars</p>
-                                                    <p className="text-xs font-bold text-white">{uni.students}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black">Modules</p>
-                                                    <p className="text-xs font-bold text-white">{uni.programs}</p>
-                                                </div>
-                                            </div>
-
-                                            <div 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    navigate('/platform');
+                                            <GlassCard
+                                                className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"
+                                                onClick={() => {
+                                                    navigate(`/university-profile/${encodeURIComponent(uni.name)}`, { state: { university: uni } });
                                                 }}
-                                                className="mt-3 pt-3 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer hover:bg-white/[0.02] transition-colors -mx-6 px-6"
                                             >
-                                                <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Expand Logic</span>
-                                                <ArrowRight size={14} className="text-text-muted group-hover/link:text-primary transition-all group-hover/link:translate-x-1" />
-                                            </div>
-                                        </GlassCard>
-                                    </motion.div>
-                                ))}
+                                                {/* University Icon + Tag row */}
+                                                <div className="flex items-center gap-3 mb-3 w-full">
+                                                    <div className="w-9 h-9 rounded-[14px] bg-primary/20 text-primary flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 border border-primary/30 group-hover:border-primary/50 overflow-hidden p-1.5">
+                                                        {uni.logo ? (
+                                                            <img 
+                                                                src={uni.logo} 
+                                                                alt={uni.name} 
+                                                                className="w-full h-full object-contain" 
+                                                            />
+                                                        ) : (
+                                                            <Library size={18} strokeWidth={2.5} />
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Ivy-Alliance</span>
+                                                </div>
+
+                                                {/* University Name */}
+                                                <h3 className="text-base font-bold text-white mb-1 group-hover:text-primary transition-colors font-poppins">{uni.name}</h3>
+                                                <p className="text-[11px] text-text-muted mb-3 flex items-center gap-1 font-inter">
+                                                    <Globe size={11} />
+                                                    {uni.location}
+                                                </p>
+
+                                                {/* Stats */}
+                                                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5 w-full mb-3 mt-auto">
+                                                    <div>
+                                                        <p className="text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black">Scholars</p>
+                                                        <p className="text-xs font-bold text-white">{uni.students}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[9px] text-text-muted uppercase tracking-wider mb-0.5 font-black">Modules</p>
+                                                        <p className="text-xs font-bold text-white">{uni.programs}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate('/platform');
+                                                    }}
+                                                    className="mt-3 pt-3 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer hover:bg-white/[0.02] transition-colors -mx-6 px-6"
+                                                >
+                                                    <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Expand Logic</span>
+                                                    <ArrowRight size={14} className="text-text-muted group-hover/link:text-primary transition-all group-hover/link:translate-x-1" />
+                                                </div>
+                                            </GlassCard>
+                                        </div>
+                                    ))}
+                                </motion.div>
                             </AnimatePresence>
                         </div>
                         {/* Manual Controls */}
