@@ -687,8 +687,11 @@ html.light-mode .glass-card {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
 }
 
-.about-card-bg {
-  background-color: rgba(10, 7, 24, 0.9);
+.about-card-bg,
+.about-card-bg:hover {
+  background-color: rgba(10, 7, 24, 0.9) !important;
+  border-color: rgba(192, 38, 255, 0.2) !important;
+  box-shadow: 0 8px 32px 0 rgba(109, 40, 255, 0.08) !important;
 }
 html.light-mode .about-card-bg,
 html.light-mode .about-card-bg:hover {
