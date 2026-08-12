@@ -449,8 +449,8 @@ const AboutUs = () => {
                                             color: '#C026FF'
                                         }
                                     ].map((pillar, idx) => (
-                                        <div key={idx} className="p-5 rounded-2xl about-inner-card-bg border border-white/10 hover:border-primary/40 hover:bg-white/[0.04] transition-all duration-300 group">
-                                            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ color: pillar.color }}>
+                                        <div key={idx} className="p-5 rounded-2xl about-inner-card-bg border border-white/10 transition-all duration-300">
+                                            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 transition-transform" style={{ color: pillar.color }}>
                                                 <pillar.icon size={20} />
                                             </div>
                                             <h4 className="text-sm font-bold text-white mb-1 font-space">{pillar.title}</h4>
