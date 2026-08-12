@@ -563,12 +563,12 @@ const LandingPage = () => {
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -20 }}
                                     transition={{ duration: 0.3 }}
-                                    className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6"
+                                    className="flex flex-nowrap gap-4 sm:gap-6 w-full"
                                 >
                                     {visibleUnis.map((uni, i) => (
                                         <div
-                                            key={uni.name + '-' + i}
-                                            className={`h-full ${i > 0 ? 'hidden xs:block' : ''} ${i > 1 ? 'hidden md:block' : ''}`}
+                                            key={`${uni.name}-${uniStartIndex}-${i}`}
+                                            className="w-full sm:w-[calc(50%-0.75rem)] md:w-[calc(25%-1.125rem)] shrink-0 h-full"
                                         >
                                             <GlassCard
                                                 className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 h-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"
