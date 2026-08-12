@@ -518,17 +518,17 @@ select option {
 
 /* LIGHT MODE GLOBAL OVERRIDES */
 html.light-mode {
-  --color-background: #e0cce3;
-  --color-background-mid: #e0cce3;
-  --color-background-light: #e0cce3;
+  --color-background: #FAF9F6;
+  --color-background-mid: #FAF9F6;
+  --color-background-light: #FAF9F6;
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;
   --color-text-muted: #6b7280;
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
 }
 
 html.light-mode body {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
   color: #1f2937 !important;
 }
 
@@ -542,15 +542,15 @@ html.light-mode .bg-alyra-gradient,
 html.light-mode .bg-background,
 html.light-mode .bg-background-mid,
 html.light-mode .bg-background-light {
-  background: #e0cce3 !important;
-  background-color: #e0cce3 !important;
+  background: #FAF9F6 !important;
+  background-color: #FAF9F6 !important;
 }
 
 html.light-mode .course-catalog-page,
 html.light-mode .platform-page,
 html.light-mode .about-us-page {
-  background: #e0cce3 !important;
-  background-color: #e0cce3 !important;
+  background: #FAF9F6 !important;
+  background-color: #FAF9F6 !important;
   background-image: none !important;
 }
 
@@ -565,11 +565,11 @@ html.light-mode .premium-gradient-text {
 /* Ensure absolute/fixed overlays also become light */
 html.light-mode [class*="bg-black/"],
 html.light-mode [class*="bg-background/"] {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
 }
 
 html.light-mode nav {
-  background-color: #e0cce3 !important;
+  background-color: #FAF9F6 !important;
 }
 
 html.light-mode .text-white,
