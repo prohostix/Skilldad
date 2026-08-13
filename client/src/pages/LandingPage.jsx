@@ -321,7 +321,7 @@ const LandingPage = () => {
                                     transition={{ duration: 0.7, delay: 0.1 }}
                                     className="text-2xl sm:text-3xl font-black text-white font-jakarta tracking-tight"
                                 >
-                                    <span className="opacity-40">Featured</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Courses</span>
+                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Featured</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Courses</span>
                                 </motion.h2>
                                 <motion.p
                                     initial={{ opacity: 0, y: 20 }}
