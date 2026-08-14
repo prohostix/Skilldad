@@ -173,13 +173,13 @@ const StudyAbroad = () => {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: index * 0.1 }}
                                                 onClick={() => handleCountryClick(country)}
-                                                className="group relative cursor-pointer"
+                                                className="group relative cursor-pointer overflow-hidden rounded-3xl shadow-lg hover:shadow-xl transition-all duration-700"
                                             >
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 rounded-3xl"></div>
                                                 <img 
                                                     src={country.image_url || `https://images.unsplash.com/photo-1526772662000-3f88f10405ff?q=80&w=1974&auto=format&fit=crop`} 
                                                     alt={country.name}
-                                                    className="w-full h-96 object-cover rounded-3xl group-hover:scale-105 transition-transform duration-700"
+                                                    className="w-full h-96 object-cover rounded-3xl group-hover:scale-105 transition-transform duration-700 ease-out"
                                                 />
                                                 <div className="absolute bottom-0 left-0 right-0 p-8 z-20 space-y-2">
                                                     <h3 className="text-3xl font-bold force-white">{country.name}</h3>
