@@ -30,7 +30,7 @@ const getPasswordError = (password) => {
 };
 
 // A real phone number is never a simple run of identical or consecutive
-// digits (e.g. 1234567890, 0000000000, 9876543210) — catches placeholder
+// digits (e.g. 1234567890, 0000000000, 9876543210) - catches placeholder
 // values that would otherwise pass a plain length check.
 const isSequentialOrRepeated = (digits) => {
     if (/^(\d)\1+$/.test(digits)) return true;
@@ -55,10 +55,10 @@ const registerUser = async (req, res) => {
         // This route also doubles as the endpoint admin/university/partner panels use
         // to create student accounts directly, where the phone field is optional. Only
         // enforce a required, validated phone for genuine public self-registration
-        // (no auth token) — for admin-initiated creation, just sanity-check it if given.
+        // (no auth token) - for admin-initiated creation, just sanity-check it if given.
         const isAdminInitiated = !!req.headers.authorization;
         const phoneDigits = (phone || '').replace(/^\+/, '').replace(/\D/g, '');
-        // The sequential/repeated check must run on the national number alone —
+        // The sequential/repeated check must run on the national number alone -
         // a country code prefix (e.g. "91") breaks the digit pattern of an
         // otherwise-obvious placeholder like 9876543210.
         const isIndianWithCode = phoneDigits.startsWith('91') && phoneDigits.length === 12;
@@ -72,14 +72,14 @@ const registerUser = async (req, res) => {
                 return res.status(400).json({ message: 'Enter a valid Indian mobile number (must start with 6, 7, 8, or 9).' });
             }
             if (isSequentialOrRepeated(nationalNumber)) {
-                return res.status(400).json({ message: 'Enter a real phone number — that looks like a placeholder.' });
+                return res.status(400).json({ message: 'Enter a real phone number - that looks like a placeholder.' });
             }
         } else if (phoneDigits && (phoneDigits.length < 7 || phoneDigits.length > 15 || isSequentialOrRepeated(nationalNumber))) {
             return res.status(400).json({ message: 'Enter a valid phone number, or leave it blank.' });
         }
 
         // Full password strength policy for public self-registration; admin/university/
-        // partner panels creating a student account just need a non-empty password —
+        // partner panels creating a student account just need a non-empty password -
         // they don't currently offer the same strength UI, so don't break that flow.
         if (!isAdminInitiated) {
             const passwordError = getPasswordError(password);
@@ -102,7 +102,7 @@ const registerUser = async (req, res) => {
 
         // 3. Insert into PG
         // last_login_at is set here too, since registration immediately hands back a
-        // usable token — without this, a user who never visits /login separately would
+        // usable token - without this, a user who never visits /login separately would
         // have last_login_at stay null forever and re-trigger the first-login welcome.
         const newUser = await query(`
             INSERT INTO users (id, name, email, password, role, discount_rate, profile, university_id, is_verified, last_login_at, created_at, updated_at)
@@ -174,7 +174,7 @@ const loginUser = async (req, res) => {
                 let profile = {};
                 try {
                     profile = typeof user.profile === 'string' ? JSON.parse(user.profile) : (user.profile || {});
-                } catch(e) {}
+                } catch (e) { }
                 if (profile.deactivated_by_role === 'admin') {
                     console.warn(`[Login] Admin-deactivated student attempted login: ${lowerEmail}`);
                     return res.status(403).json({ message: 'Your account has been deactivated by an Administrator. Please contact support.' });
@@ -268,9 +268,9 @@ const getUsers = async (req, res) => {
         const { role, universityId, partnerId } = req.query;
         const requesterRole = req.user.role?.toLowerCase();
         const requesterId = req.user._id || req.user.id;
-        
+
         let usersRes;
-        
+
         let queryStr = 'SELECT id as _id, name, email, role, profile, is_active, created_at FROM users';
         let queryParams = [];
         let whereClauses = [];
@@ -321,7 +321,7 @@ const getUsers = async (req, res) => {
                 JOIN courses c ON e.course_id = c.id
                 LEFT JOIN batches b ON e.batch_id = b.id
             `);
-            
+
             const studentEnrollments = {};
             enrollmentsRes.rows.forEach(r => {
                 if (!studentEnrollments[r.student_id]) {
@@ -392,10 +392,10 @@ module.exports = {
 
             // 4. Send Email
             const baseUrl = (process.env.CLIENT_URL && !process.env.CLIENT_URL.includes('localhost') && !process.env.CLIENT_URL.includes('127.0.0.1'))
-                ? process.env.CLIENT_URL 
+                ? process.env.CLIENT_URL
                 : 'https://skilldad.com';
             const resetUrl = `${baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl}/reset-password/${resetToken}`;
-            
+
             try {
                 const html = emailTemplates.passwordReset(user.name, resetUrl);
                 await sendEmail({
@@ -621,7 +621,7 @@ module.exports = {
                                     OR c.instructor_id = $2
                                 ) LIMIT 1
                             `, [userId, requesterId]);
-                            
+
                             if (partnerCheckRes.rows.length > 0) {
                                 isOwnStudent = true;
                             }
@@ -638,7 +638,7 @@ module.exports = {
             const profileRes = await query('SELECT profile FROM users WHERE id = $1', [userId]);
             let profile = profileRes.rows[0]?.profile || {};
             if (typeof profile === 'string') {
-                try { profile = JSON.parse(profile); } catch(e) { profile = {}; }
+                try { profile = JSON.parse(profile); } catch (e) { profile = {}; }
             }
 
             // Convert string "true"/"false" to boolean

@@ -1,9 +1,9 @@
 import React from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { 
-    Rocket, Globe, Award, Users, Book, Target, Linkedin, Loader2, 
-    Activity, CheckCircle2, Briefcase, GraduationCap, Zap, ShieldCheck, 
+import {
+    Rocket, Globe, Award, Users, Book, Target, Linkedin, Loader2,
+    Activity, CheckCircle2, Briefcase, GraduationCap, Zap, ShieldCheck,
     TrendingUp, Sparkles, ArrowRight, Laptop, Layers, Building2
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
@@ -103,16 +103,16 @@ const ExecutiveLeadershipCard = ({ member }) => {
         >
             <GlassCard className="relative group overflow-hidden p-6 sm:p-7 md:p-8 about-card-bg backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-[0_0_50px_rgba(192,38,255,0.22)]">
                 {/* Animated Ambient Glow */}
-                <motion.div 
+                <motion.div
                     animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none"
                 />
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 sm:gap-8">
-                    
+
                     {/* LEFT SIDE: Animated Image Container */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: -25 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
@@ -133,7 +133,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         ) : null}
 
                         {/* Diagonal Hover Shine Sweep */}
-                        <motion.div 
+                        <motion.div
                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none"
                             initial={{ x: '-100%' }}
                             whileHover={{ x: '200%' }}
@@ -141,10 +141,10 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         />
 
                         {/* Initial Fallback Avatar */}
-                        <div 
+                        <div
                             className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 via-[#C026FF]/20 to-[#0A0A12] border border-primary/20 ${memberImg ? 'hidden' : 'flex'}`}
                         >
-                            <motion.div 
+                            <motion.div
                                 whileHover={{ scale: 1.1, rotate: 3 }}
                                 className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-4xl sm:text-5xl font-space shadow-xl shadow-primary/20 mb-2"
                             >
@@ -157,9 +157,9 @@ const ExecutiveLeadershipCard = ({ member }) => {
 
                         {/* Gradient Bottom Overlay */}
                         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/40 to-transparent pointer-events-none" />
-                        
+
                         {/* Organization Tag */}
-                        <motion.div 
+                        <motion.div
                             whileHover={{ scale: 1.05 }}
                             className="absolute top-3.5 left-3.5 px-3.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-full text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 shadow-md"
                         >
@@ -172,59 +172,59 @@ const ExecutiveLeadershipCard = ({ member }) => {
                     <div className="flex-1 space-y-4 flex flex-col justify-between py-1">
                         <div>
                             {/* Role & Department Badges */}
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.15 }}
                                 className="flex flex-wrap items-center gap-2 mb-2.5"
                             >
-                                <div className="inline-flex items-center space-x-1.5 px-3.5 py-1 bg-primary/15 rounded-full border border-primary/30 text-primary text-[11px] font-black uppercase tracking-wider shadow-sm">
-                                    <ShieldCheck size={13} className="text-primary" />
+                                <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 bg-primary/15 rounded-full border border-primary/30 text-primary text-[10px] font-black uppercase tracking-wider shadow-sm">
+                                    <ShieldCheck size={12} className="text-primary" />
                                     <span>{memberRole}</span>
                                 </div>
-                                <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400 bg-white/[0.03] px-2.5 py-0.5 rounded border border-white/10">
+                                <span className="text-[9px] font-extrabold uppercase tracking-widest text-gray-400 bg-white/[0.03] px-2 py-0.5 rounded border border-white/10">
                                     {memberName.toLowerCase().includes('basil') ? 'Global Strategy' : 'Platform & Hiring'}
                                 </span>
                             </motion.div>
 
                             {/* Executive Name */}
-                            <motion.h3 
+                            <motion.h3
                                 initial={{ opacity: 0, y: 15 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
-                                className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-space leading-snug group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:via-primary-light group-hover:to-primary transition-all duration-500"
+                                className="text-xl sm:text-2xl md:text-3xl font-black text-white font-space leading-snug group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:via-primary-light group-hover:to-primary transition-all duration-500"
                             >
                                 {memberName}
                             </motion.h3>
 
                             {/* Bio */}
-                            <motion.p 
+                            <motion.p
                                 initial={{ opacity: 0, y: 15 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5, delay: 0.25 }}
-                                className="text-xs sm:text-sm text-gray-300 font-inter leading-relaxed mt-2.5 font-normal"
+                                className="text-[11px] sm:text-xs text-gray-300 font-inter leading-relaxed mt-2.5 font-normal"
                             >
                                 {getExecutiveBio()}
                             </motion.p>
                         </div>
 
                         {/* Executive Quote Box */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 15 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.28 }}
-                            className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 italic text-xs text-gray-300 font-inter leading-relaxed flex items-start gap-2.5"
+                            className="p-2.5 rounded-xl bg-white/[0.02] border border-white/10 italic text-[11px] text-gray-300 font-inter leading-relaxed flex items-start gap-2"
                         >
                             <span className="text-primary font-serif text-xl leading-none">“</span>
                             <span>{getExecutiveQuote()}</span>
                         </motion.div>
 
                         {/* Strategic Focus Badges with Hover Pop */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 15 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -233,11 +233,11 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         >
                             <div className="flex flex-wrap gap-2">
                                 {pillars.map((pillar, idx) => (
-                                    <motion.span 
+                                    <motion.span
                                         key={idx}
                                         whileHover={{ scale: 1.06, y: -2 }}
                                         transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                                        className="px-3 py-1 bg-white/[0.04] border border-white/10 hover:border-primary/40 rounded-xl text-[11px] font-medium text-gray-200 flex items-center gap-1.5 cursor-default transition-colors"
+                                        className="px-2.5 py-0.5 bg-white/[0.04] border border-white/10 hover:border-primary/40 rounded-xl text-[10px] font-medium text-gray-200 flex items-center gap-1.5 cursor-default transition-colors"
                                     >
                                         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                                         {pillar}
@@ -248,7 +248,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
 
                         {/* LinkedIn / Action Button */}
                         {linkedinUrl ? (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
@@ -268,7 +268,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                                 </motion.a>
                             </motion.div>
                         ) : (
-                            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400 font-bold uppercase tracking-wider">
+                            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                                 <span>SKILLDAD EXECUTIVE BOARD</span>
                                 <div className="flex items-center gap-1.5">
                                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -330,7 +330,7 @@ const AboutUs = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#05030B] flex items-center justify-center">
-                <motion.div 
+                <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
                 >
@@ -399,7 +399,7 @@ const AboutUs = () => {
                     >
                         <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-primary/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-                            
+
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                                 <div className="lg:col-span-5 space-y-5">
                                     <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-lg shadow-primary/20">
@@ -471,7 +471,7 @@ const AboutUs = () => {
                     >
                         <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
-                            
+
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                                 <div className="lg:col-span-5 space-y-5 lg:order-2">
                                     <div className="w-14 h-14 rounded-2xl bg-[#C026FF]/20 border border-[#C026FF]/40 flex items-center justify-center text-[#C026FF] shadow-lg shadow-[#C026FF]/20">
@@ -484,7 +484,7 @@ const AboutUs = () => {
                                         </h2>
                                     </div>
                                     <p className="text-sm md:text-base text-gray-300 font-inter leading-relaxed">
-                                        {cms.vision?.description || 'We envision a global education ecosystem where degree qualifications are unified with actual practical mastery—allowing learners to seamlessly transition into high-growth global careers.'}
+                                        {cms.vision?.description || 'We envision a global education ecosystem where degree qualifications are unified with actual practical mastery-allowing learners to seamlessly transition into high-growth global careers.'}
                                     </p>
                                     <div className="pt-2">
                                         <div className="p-4 rounded-2xl bg-[#C026FF]/10 border border-[#C026FF]/20 flex items-center gap-3">
@@ -541,17 +541,17 @@ const AboutUs = () => {
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
                     >
-                        <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-emerald-500/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
-                            <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-                            
+                        <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
+                            <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
+
                             <div className="space-y-10">
                                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/20">
+                                            <div className="w-12 h-12 rounded-2xl bg-[#C026FF]/20 border border-[#C026FF]/40 flex items-center justify-center text-[#C026FF] shadow-lg shadow-[#C026FF]/20">
                                                 <Award size={24} strokeWidth={2.5} />
                                             </div>
-                                            <span className="text-xs font-black uppercase tracking-[0.3em] text-emerald-400">Core Pillar 03</span>
+                                            <span className="text-xs font-black uppercase tracking-[0.3em] text-[#C026FF]">Core Pillar 03</span>
                                         </div>
                                         <h2 className="text-3xl md:text-4xl font-black text-white font-space">
                                             {cms.values?.title || 'Our Core Values'}
@@ -592,10 +592,10 @@ const AboutUs = () => {
                                         <div key={idx} className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 transition-all duration-300 flex flex-col justify-between">
                                             <div>
                                                 <div className="flex items-center justify-between mb-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 transition-transform">
+                                                    <div className="w-10 h-10 rounded-xl bg-[#C026FF]/10 border border-[#C026FF]/20 flex items-center justify-center text-[#C026FF] transition-transform">
                                                         <val.icon size={20} />
                                                     </div>
-                                                    <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400/80 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest text-[#C026FF]/80 bg-[#C026FF]/10 px-2 py-0.5 rounded border border-[#C026FF]/20">
                                                         {val.tag}
                                                     </span>
                                                 </div>
@@ -652,22 +652,22 @@ const AboutUs = () => {
                                 icon: Briefcase
                             }
                         ].map((item, idx) => (
-                            <GlassCard key={idx} className="p-6 relative group hover:border-primary/50 transition-all duration-300 rounded-2xl flex flex-col justify-between">
+                            <GlassCard key={idx} className="p-5 relative group hover:border-primary/50 transition-all duration-300 rounded-2xl flex flex-col justify-between">
                                 <div>
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black font-mono">
-                                            <item.icon size={22} />
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black font-mono">
+                                            <item.icon size={18} />
                                         </div>
-                                        <span className="text-2xl font-black text-white/20 font-mono group-hover:text-primary transition-colors">
+                                        <span className="text-xl font-black text-white/20 font-mono group-hover:text-primary transition-colors">
                                             {item.step}
                                         </span>
                                     </div>
-                                    <h3 className="text-lg font-bold text-white mb-2 font-space">{item.title}</h3>
-                                    <p className="text-xs text-gray-400 font-inter leading-relaxed">{item.desc}</p>
+                                    <h3 className="text-base font-bold text-white mb-1.5 font-space">{item.title}</h3>
+                                    <p className="text-[11px] text-gray-400 font-inter leading-relaxed">{item.desc}</p>
                                 </div>
-                                <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-primary text-xs font-bold">
+                                <div className="mt-4 pt-3 border-t border-white/5 flex items-center gap-2 text-primary text-[10px] font-bold">
                                     <span>Career Stage {idx + 1}</span>
-                                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                                 </div>
                             </GlassCard>
                         ))}
@@ -700,7 +700,7 @@ const AboutUs = () => {
                             <div className="h-1.5 w-20 bg-gradient-to-r from-primary via-[#C026FF] to-transparent mx-auto rounded-full mt-4"></div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             variants={staggerContainer}
                             initial="hidden"
                             whileInView="visible"
@@ -744,7 +744,7 @@ const AboutUs = () => {
                             <div className="h-1.5 w-16 bg-gradient-to-r from-[#C026FF] to-transparent mx-auto rounded-full mt-4"></div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             variants={staggerContainer}
                             initial="hidden"
                             whileInView="visible"
@@ -782,7 +782,7 @@ const AboutUs = () => {
                             <ModernButton onClick={() => window.location.href = '/courses'} className="px-10 py-4 w-full sm:w-auto !text-xs uppercase tracking-widest shadow-[0_0_30px_rgba(91,92,255,0.3)] hover:shadow-[0_0_50px_rgba(91,92,255,0.5)]">
                                 Explore Skill Programs
                             </ModernButton>
-                            <button onClick={() => window.location.href = '/register'} className="text-white font-bold uppercase tracking-widest text-xs py-4 px-8 rounded-xl border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all w-full sm:w-auto">
+                            <button onClick={() => window.location.href = '/register'} className="text-white font-bold uppercase tracking-widest text-xs py-4 px-8 rounded-xl border border-white/20 hover:bg-white/10 hover:border-white/40 transition-all duration-300 w-full sm:w-auto [.light-mode_&]:!text-slate-900 [.light-mode_&]:bg-gradient-to-r [.light-mode_&]:from-primary/30 [.light-mode_&]:via-blue-500/30 [.light-mode_&]:to-primary/30 [.light-mode_&]:border-primary/50 [.light-mode_&]:shadow-[0_0_20px_rgba(110,40,255,0.3)] [.light-mode_&]:hover:shadow-[0_0_30px_rgba(110,40,255,0.5)]">
                                 Register Now
                             </button>
                         </div>

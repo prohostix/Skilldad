@@ -93,7 +93,7 @@ const HostLinkModal = ({ data, onClose }) => {
                 <p className="text-xs text-white/40 mb-4">
                     Share this link with the instructor. It expires at{' '}
                     <strong className="text-white">{new Date(data.expiresAt).toLocaleTimeString()}</strong>{' '}
-                    ({Math.round(data.expiresIn / 3600)}h TTL). JWT-signed — do not post publicly.
+                    ({Math.round(data.expiresIn / 3600)}h TTL). JWT-signed - do not post publicly.
                 </p>
 
                 {/* Topic */}
@@ -256,7 +256,7 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
             };
             const isoStartTime = getISO();
 
-            // ─── Save to backend (blocking — we wait for real confirmation) ───
+            // ─── Save to backend (blocking - we wait for real confirmation) ───
             const { data: savedSession } = await axios.post(
                 API(''),
                 {
@@ -363,7 +363,7 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
                         </div>
                     </div>
 
-                    {/* Start Date & Time — split inputs for cross-browser reliability */}
+                    {/* Start Date & Time - split inputs for cross-browser reliability */}
                     <div>
                         <label className={labelCls}>Start Date & Time *</label>
                         <div className="grid grid-cols-2 gap-3">
@@ -840,7 +840,7 @@ const LiveSessionsTab = ({ students }) => {
         } finally {
             if (!retrying) setLoading(false);
         }
-         
+
     }, []);
 
     useEffect(() => {
@@ -954,7 +954,7 @@ const LiveSessionsTab = ({ students }) => {
     const sessionCourseTitles = sessions.map(s => getCourseTitle(s.course) || getCourseTitle(s.category)).filter(Boolean);
     const universityCourseTitles = allUniversityCourses.map(c => getCourseTitle(c)).filter(Boolean);
     const uniqueCourses = Array.from(new Set([...universityCourseTitles, ...sessionCourseTitles])).filter(Boolean).sort();
-    
+
     // Apply both status and course filters & sort newly created/newest first
     let filtered = [...sessions].sort((a, b) => {
         const timeA = new Date(a.created_at || a.createdAt || a.startTime).getTime();
@@ -1021,7 +1021,7 @@ const LiveSessionsTab = ({ students }) => {
                     ].map(({ icon: Icon, label, desc }) => (
                         <span key={label} className="flex items-center gap-1.5">
                             <Icon size={12} className="text-purple-400" />
-                            <strong className="text-white/70">{label}</strong> — {desc}
+                            <strong className="text-white/70">{label}</strong> - {desc}
                         </span>
                     ))}
                 </div>

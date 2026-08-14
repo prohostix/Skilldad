@@ -81,7 +81,7 @@ const checkAdmin = (req, res, next) => {
 router.get('/stats', protect, checkAdmin, getGlobalStats);
 router.get('/analytics', protect, checkAdmin, getPlatformAnalytics);
 router.post('/test-notification', protect, checkAdmin, testNotification);
-// All users without pagination — used by B2B management
+// All users without pagination - used by B2B management
 router.get('/users/all', protect, checkAdmin, async (req, res) => {
     try {
         const { query } = require('../config/postgres');

@@ -328,7 +328,7 @@ const SkillDadUniversityDetail = () => {
                         ) : (
                             <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
                                 <span className="text-white/40 text-xs font-bold uppercase tracking-wider">Email</span>
-                                <span className="text-white text-sm font-semibold truncate ml-2">{university.email || '—'}</span>
+                                <span className="text-white text-sm font-semibold truncate ml-2">{university.email || '-'}</span>
                             </div>
                         )}
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
@@ -465,7 +465,7 @@ const SkillDadUniversityDetail = () => {
                         <div className="grid grid-cols-3 gap-2">
                             {certificates.map((img, idx) => {
                                 // For backward compatibility with images vs structured certs
-                                if(typeof img === 'string') {
+                                if (typeof img === 'string') {
                                     return (
                                         <div key={idx} className="relative group aspect-square rounded-lg overflow-hidden border border-white/10">
                                             <img src={getMediaUrl(img)} className="w-full h-full object-cover" alt="Certificate" />
@@ -637,7 +637,7 @@ const SkillDadUniversityDetail = () => {
                             <div className="flex items-center justify-between">
                                 <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider">Achievements (Milestones)</label>
                                 <button
-                                    onClick={() => setEditData({...editData, achievements: [...editData.achievements, { title: '', desc: '' }]})}
+                                    onClick={() => setEditData({ ...editData, achievements: [...editData.achievements, { title: '', desc: '' }] })}
                                     className="px-3 py-1 bg-primary/20 text-primary hover:bg-primary/30 rounded-lg text-xs font-bold uppercase"
                                 >
                                     + Add
@@ -654,7 +654,7 @@ const SkillDadUniversityDetail = () => {
                                                 const newAch = [...editData.achievements];
                                                 if (typeof newAch[idx] === 'object') newAch[idx].title = e.target.value;
                                                 else newAch[idx] = e.target.value;
-                                                setEditData({...editData, achievements: newAch});
+                                                setEditData({ ...editData, achievements: newAch });
                                             }}
                                             className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
                                         />
@@ -666,15 +666,15 @@ const SkillDadUniversityDetail = () => {
                                                 const newAch = [...editData.achievements];
                                                 if (typeof newAch[idx] === 'string') newAch[idx] = { title: newAch[idx], desc: e.target.value };
                                                 else newAch[idx].desc = e.target.value;
-                                                setEditData({...editData, achievements: newAch});
+                                                setEditData({ ...editData, achievements: newAch });
                                             }}
                                             className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
                                         />
                                     </div>
                                     <button onClick={() => {
                                         const newAch = editData.achievements.filter((_, i) => i !== idx);
-                                        setEditData({...editData, achievements: newAch});
-                                    }} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg"><X size={16}/></button>
+                                        setEditData({ ...editData, achievements: newAch });
+                                    }} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg"><X size={16} /></button>
                                 </div>
                             ))}
                         </div>
@@ -684,7 +684,7 @@ const SkillDadUniversityDetail = () => {
                             <div className="flex items-center justify-between">
                                 <label className="block text-white/40 text-[10px] font-bold uppercase tracking-wider">Accreditations (Structured)</label>
                                 <button
-                                    onClick={() => setEditData({...editData, certificates: [...editData.certificates, { title: '', issuer: '' }]})}
+                                    onClick={() => setEditData({ ...editData, certificates: [...editData.certificates, { title: '', issuer: '' }] })}
                                     className="px-3 py-1 bg-amber-500/20 text-amber-500 hover:bg-amber-500/30 rounded-lg text-xs font-bold uppercase"
                                 >
                                     + Add
@@ -693,37 +693,38 @@ const SkillDadUniversityDetail = () => {
                             {editData.certificates.map((cert, idx) => {
                                 if (typeof cert === 'string') return null; // Only show structured ones here
                                 return (
-                                <div key={idx} className="flex gap-2 items-center bg-white/5 p-3 rounded-xl border border-white/10">
-                                    <div className="flex-1 space-y-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Certificate Title (e.g. ISO 9001)"
-                                            value={cert.title || ''}
-                                            onChange={(e) => {
-                                                const newCert = [...editData.certificates];
-                                                newCert[idx].title = e.target.value;
-                                                setEditData({...editData, certificates: newCert});
-                                            }}
-                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Issuer (e.g. Quality Board)"
-                                            value={cert.issuer || ''}
-                                            onChange={(e) => {
-                                                const newCert = [...editData.certificates];
-                                                newCert[idx].issuer = e.target.value;
-                                                setEditData({...editData, certificates: newCert});
-                                            }}
-                                            className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
-                                        />
+                                    <div key={idx} className="flex gap-2 items-center bg-white/5 p-3 rounded-xl border border-white/10">
+                                        <div className="flex-1 space-y-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Certificate Title (e.g. ISO 9001)"
+                                                value={cert.title || ''}
+                                                onChange={(e) => {
+                                                    const newCert = [...editData.certificates];
+                                                    newCert[idx].title = e.target.value;
+                                                    setEditData({ ...editData, certificates: newCert });
+                                                }}
+                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Issuer (e.g. Quality Board)"
+                                                value={cert.issuer || ''}
+                                                onChange={(e) => {
+                                                    const newCert = [...editData.certificates];
+                                                    newCert[idx].issuer = e.target.value;
+                                                    setEditData({ ...editData, certificates: newCert });
+                                                }}
+                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+                                            />
+                                        </div>
+                                        <button onClick={() => {
+                                            const newCert = editData.certificates.filter((_, i) => i !== idx);
+                                            setEditData({ ...editData, certificates: newCert });
+                                        }} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg"><X size={16} /></button>
                                     </div>
-                                    <button onClick={() => {
-                                        const newCert = editData.certificates.filter((_, i) => i !== idx);
-                                        setEditData({...editData, certificates: newCert});
-                                    }} className="text-rose-500 hover:bg-rose-500/10 p-2 rounded-lg"><X size={16}/></button>
-                                </div>
-                            )})}
+                                )
+                            })}
                         </div>
 
                         {/* Assigned Courses */}
@@ -733,29 +734,29 @@ const SkillDadUniversityDetail = () => {
                                 {(allCourses || [])
                                     .filter(c => c.universityName === university.name || String(c.skillDadUniversityId) === String(university.id))
                                     .map(course => {
-                                    const isSelected = editData.assignedCourses.includes(course._id || course.id);
-                                    return (
-                                        <div 
-                                            key={course._id || course.id} 
-                                            onClick={() => {
-                                                const id = course._id || course.id;
-                                                let newAssigned;
-                                                if (isSelected) {
-                                                    newAssigned = editData.assignedCourses.filter(c => c !== id);
-                                                } else {
-                                                    newAssigned = [...editData.assignedCourses, id];
-                                                }
-                                                setEditData({...editData, assignedCourses: newAssigned});
-                                            }}
-                                            className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${isSelected ? 'bg-primary/10 border-primary text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
-                                        >
-                                            <div className={`w-4 h-4 rounded flex items-center justify-center border ${isSelected ? 'bg-primary border-primary' : 'border-white/30'}`}>
-                                                {isSelected && <CheckCircle size={12} className="text-[#05030B]" />}
+                                        const isSelected = editData.assignedCourses.includes(course._id || course.id);
+                                        return (
+                                            <div
+                                                key={course._id || course.id}
+                                                onClick={() => {
+                                                    const id = course._id || course.id;
+                                                    let newAssigned;
+                                                    if (isSelected) {
+                                                        newAssigned = editData.assignedCourses.filter(c => c !== id);
+                                                    } else {
+                                                        newAssigned = [...editData.assignedCourses, id];
+                                                    }
+                                                    setEditData({ ...editData, assignedCourses: newAssigned });
+                                                }}
+                                                className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${isSelected ? 'bg-primary/10 border-primary text-white' : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'}`}
+                                            >
+                                                <div className={`w-4 h-4 rounded flex items-center justify-center border ${isSelected ? 'bg-primary border-primary' : 'border-white/30'}`}>
+                                                    {isSelected && <CheckCircle size={12} className="text-[#05030B]" />}
+                                                </div>
+                                                <span className="text-sm font-semibold truncate flex-1">{course.title}</span>
                                             </div>
-                                            <span className="text-sm font-semibold truncate flex-1">{course.title}</span>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
                             </div>
                         </div>
 
@@ -770,11 +771,11 @@ const SkillDadUniversityDetail = () => {
                     <div className="grid sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
                         <div className="flex items-center text-white/60 text-sm">
                             <MapPin size={14} className="mr-2 flex-shrink-0 text-primary" />
-                            {university.location || '—'}
+                            {university.location || '-'}
                         </div>
                         <div className="flex items-center text-white/60 text-sm">
                             <Phone size={14} className="mr-2 flex-shrink-0 text-primary" />
-                            {university.phone || '—'}
+                            {university.phone || '-'}
                         </div>
                         <div className="flex items-center text-white/60 text-sm truncate">
                             <Globe size={14} className="mr-2 flex-shrink-0 text-primary" />
@@ -782,7 +783,7 @@ const SkillDadUniversityDetail = () => {
                                 <a href={university.website} target="_blank" rel="noopener noreferrer" className="truncate hover:text-primary transition-colors">
                                     {university.website}
                                 </a>
-                            ) : '—'}
+                            ) : '-'}
                         </div>
                     </div>
 

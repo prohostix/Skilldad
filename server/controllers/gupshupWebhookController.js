@@ -12,7 +12,7 @@ const { query } = require('../config/postgres');
  * { type: "message-event", payload: { id, type, destination, payload: { reason, code } } }
  */
 const handleGupshupWebhook = async (req, res) => {
-    // Ack immediately — Gupshup retries on non-2xx/timeout, and we never want
+    // Ack immediately - Gupshup retries on non-2xx/timeout, and we never want
     // a slow DB or a malformed payload to cause duplicate/growing retries.
     res.status(200).json({ success: true });
 
@@ -22,7 +22,7 @@ const handleGupshupWebhook = async (req, res) => {
         // The first ("enqueued") event's `id` is the Gupshup message id we stored.
         // Every later-lifecycle event (sent/delivered/read/failed) reuses `id` for
         // WhatsApp's own internal message id instead, and carries our original
-        // Gupshup id back in `gsId` — so gsId must win whenever it's present.
+        // Gupshup id back in `gsId` - so gsId must win whenever it's present.
         const gsMessageId = eventPayload.gsId || eventPayload.id;
         const eventType = eventPayload.type; // enqueued | sent | delivered | read | failed
         const failReason = eventPayload.payload?.reason || eventPayload.reason || null;
@@ -49,7 +49,7 @@ const handleGupshupWebhook = async (req, res) => {
         `, [eventType, failReason, gsMessageId]);
 
         if (result.rowCount === 0) {
-            // Dump the full payload (not just the id) — Gupshup appears to reference
+            // Dump the full payload (not just the id) - Gupshup appears to reference
             // messages by a different id scheme partway through the lifecycle, and we
             // need the raw shape to figure out what field actually links back to ours.
             console.log(`[Gupshup Webhook] No matching notification_log for message id ${gsMessageId}. Full payload:`, JSON.stringify(body));

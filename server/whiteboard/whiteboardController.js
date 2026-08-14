@@ -1,12 +1,12 @@
 'use strict';
 
 const path = require('path');
-const fs   = require('fs');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { query } = require('../config/postgres');
 
 const WHITEBOARD_DIR = path.join(__dirname, '..', 'uploads', 'whiteboards');
-const MAX_PNG_BYTES  = 5 * 1024 * 1024; // 5 MB
+const MAX_PNG_BYTES = 5 * 1024 * 1024; // 5 MB
 
 // Ensure upload directory exists
 if (!fs.existsSync(WHITEBOARD_DIR)) {
@@ -48,8 +48,8 @@ const saveWhiteboardSnapshot = async (req, res) => {
       return res.status(404).json({ message: 'Session not found.' });
     }
 
-    // Generate UUID filename — no user input in path
-    const ext      = format === 'png' ? 'png' : 'json';
+    // Generate UUID filename - no user input in path
+    const ext = format === 'png' ? 'png' : 'json';
     const filename = `${uuidv4()}.${ext}`;
     const filePath = path.join(WHITEBOARD_DIR, filename);
 
@@ -76,7 +76,7 @@ const saveWhiteboardSnapshot = async (req, res) => {
 
     return res.status(201).json({
       snapshotId,
-      url:       relPath,
+      url: relPath,
       createdAt,
     });
 

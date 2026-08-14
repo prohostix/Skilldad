@@ -2,48 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-    BookOpen,
-    Trophy,
-    Clock,
-    Target,
-    PlayCircle,
-    Calendar,
-    ChevronRight,
-    FileText,
-    Video,
-    Users,
-    CheckCircle,
-    Upload,
-    Download,
-    Star,
-    BarChart3,
-    Play,
-    ExternalLink,
-    Gift,
-    Copy,
-    Check,
-    Share2,
-    AlertCircle,
-    XCircle
+    Search, Heart, Archive, Bell, X, ChevronLeft, ChevronRight, MoreHorizontal, Calendar as CalendarIcon, Play, BarChart2
 } from 'lucide-react';
 import axios from 'axios';
-import GlassCard from '../../components/ui/GlassCard';
-import ModernButton from '../../components/ui/ModernButton';
-import CountingNumber from '../../components/ui/CountingNumber';
-import DashboardHeading from '../../components/ui/DashboardHeading';
-import ReferralWidget from '../../components/student/ReferralWidget';
-import ReferralModal from '../../components/student/ReferralModal';
-import WelcomeModal from '../../components/student/WelcomeModal';
 import { getMediaUrl } from '../../utils/media';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 
 const StudentDashboard = () => {
-    const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [upcomingSessions, setUpcomingSessions] = useState([]);
     const [recentProjects, setRecentProjects] = useState([]);
     const [upcomingExams, setUpcomingExams] = useState([]);
     const [documents, setDocuments] = useState([]);
-    const [enrolledUniversities, setEnrolledUniversities] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [rewardPoints, setRewardPoints] = useState(0);
     const [stats, setStats] = useState({
         completionRate: 0,
@@ -51,49 +20,16 @@ const StudentDashboard = () => {
         averageScore: 0,
         certificatesEarned: 0
     });
+    const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [userInfo, setUserInfo] = useState(null);
-    const [referralData, setReferralData] = useState({ code: '', link: '' });
-    const [isReferModalOpen, setIsReferModalOpen] = useState(false);
-    const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState(false);
-    const [copied, setCopied] = useState(false);
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showStats, setShowStats] = useState(true);
+    const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+    const [pendingProjectsCount, setPendingProjectsCount] = useState(0);
+    const [pendingCertsCount, setPendingCertsCount] = useState(0);
     const navigate = useNavigate();
 
-    const STANDARD_REQUIRED_SLOTS = [
-        { id: 'std_id_proof', title: 'Identity Proof', type: 'id_proof', matchKeywords: ['identity', 'id proof', 'aadhaar', 'passport', 'id_proof', 'govt id', 'voter'] },
-        { id: 'std_sslc', title: '10th / SSLC Certificate', type: 'sslc_certificate', matchKeywords: ['sslc', '10th', 'secondary school', 'sslc_certificate', 'tenth'] }
-    ];
-
-    const pendingRequiredDocs = STANDARD_REQUIRED_SLOTS.filter(slot => {
-        // Only show pending banner if there's NO doc at all (not even a rejected one that was re-uploaded)
-        const matchingDocs = documents.filter(d => {
-            const titleLower = (d.title || '').toLowerCase();
-            const typeLower = (d.type || '').toLowerCase();
-            return slot.matchKeywords.some(kw => titleLower.includes(kw) || typeLower.includes(kw));
-        });
-        // Hide the pending banner if there are any matching docs (even rejected ones)
-        return matchingDocs.length === 0;
-    });
-
-    // Only show rejection notification for docs that have NOT been re-uploaded.
-    // If a newer doc of the same type/title exists with status 'submitted' or 'approved', hide the rejection.
-    const rejectedDocs = documents.filter(d => {
-        if (d.status !== 'rejected') return false;
-        const rejectedAt = new Date(d.created_at || d.updated_at || 0).getTime();
-        const hasNewerResubmission = documents.some(other => {
-            if (String(other._id || other.id) === String(d._id || d.id)) return false; // skip self
-            if (other.status === 'rejected') return false; // skip other rejected docs
-            // Match by type or title similarity
-            const sameType = other.type && d.type && other.type === d.type;
-            const sameTitle = other.title && d.title &&
-                other.title.toLowerCase().trim() === d.title.toLowerCase().trim();
-            if (!sameType && !sameTitle) return false;
-            const otherAt = new Date(other.created_at || other.updated_at || 0).getTime();
-            return otherAt > rejectedAt; // newer doc exists
-        });
-        return !hasNewerResubmission;
-    });
-
-    // Mock data for demonstration
     useEffect(() => {
         const fetchData = async () => {
             const storedUser = JSON.parse(localStorage.getItem('userInfo'));
@@ -102,13 +38,6 @@ const StudentDashboard = () => {
                 return;
             }
             setUserInfo(storedUser);
-
-            // Shown exactly once per real first login/registration — strip the flag
-            // from localStorage immediately so a page refresh doesn't re-trigger it.
-            if (storedUser.isFirstLogin) {
-                setIsWelcomeModalOpen(true);
-                localStorage.setItem('userInfo', JSON.stringify({ ...storedUser, isFirstLogin: false }));
-            }
 
             const config = { headers: { Authorization: `Bearer ${storedUser.token}` } };
             setLoading(true);
@@ -120,87 +49,57 @@ const StudentDashboard = () => {
                     projectsRes,
                     examsRes,
                     docsRes,
-                    pointsRes
+                    pointsRes,
+                    leaderboardRes,
+                    certsRes
                 ] = await Promise.allSettled([
                     axios.get('/api/enrollment/my-courses', config),
                     axios.get('/api/sessions', config),
                     axios.get('/api/projects/my-projects', config),
                     axios.get('/api/exams/student/my-exams', config),
                     axios.get('/api/documents/my-documents', config),
-                    axios.get('/api/referrals/my-points', config)
+                    axios.get('/api/referrals/my-points', config),
+                    axios.get('/api/referrals/leaderboard', config),
+                    axios.get('/api/certificates/my', config)
                 ]);
                 if (pointsRes.status === 'fulfilled') {
                     setRewardPoints(pointsRes.value.data?.total || 0);
                 }
+                if (leaderboardRes.status === 'fulfilled') {
+                    setLeaderboard(leaderboardRes.value.data || []);
+                }
 
-                const codeRes = await axios.get('/api/referrals/my-code', config);
-                setReferralData(codeRes.data);
-
-                // Safe data extraction
                 const courses = coursesRes.status === 'fulfilled' ? coursesRes.value.data : [];
                 const sessions = sessionsRes.status === 'fulfilled' ? sessionsRes.value.data : [];
                 const projects = projectsRes.status === 'fulfilled' ? projectsRes.value.data : [];
-                // New API returns { success: true, data: [...] }
                 const exams = examsRes.status === 'fulfilled' ? (examsRes.value.data.data || examsRes.value.data || []) : [];
                 const docs = docsRes.status === 'fulfilled' ? docsRes.value.data : [];
+                const certs = certsRes.status === 'fulfilled' ? (certsRes.value.data.data || certsRes.value.data || []) : [];
 
-                setEnrolledCourses(courses.slice(0, 3)); // Show top 3 active
+                setEnrolledCourses(courses.slice(0, 3)); 
                 setUpcomingSessions(sessions.filter(s => s.status === 'scheduled' || s.status === 'live').slice(0, 3));
                 setRecentProjects(projects.slice(0, 3));
-                // Filter upcoming exams (scheduled status, not yet started)
+                // Calculate pending stats
+                // Note: These are NOT demo data. They are calculated from the live API response.
+                const activeProjects = projects.filter(p => !p.completed && p.status !== 'approved');
+                setPendingProjectsCount(activeProjects.length);
+                
+                // Documents pending (status pending, rejected, or unverified)
+                const pendingDocs = docs.filter(d => d.status === 'pending' || d.status === 'rejected' || !d.verified);
+                
+                // Certificates pending (status pending or requested)
+                const activeCerts = Array.isArray(certs) ? certs.filter(c => c.status === 'pending' || c.status === 'requested') : [];
+                
+                // Combine both for the card
+                setPendingCertsCount(activeCerts.length + pendingDocs.length);
+
                 const now = new Date();
-                setUpcomingExams(exams.filter(e => {
-                    const startTime = new Date(e.scheduledStartTime);
-                    return e.status === 'scheduled' && startTime > now;
-                }).slice(0, 3));
-                setDocuments(docs); // Keep all docs for accurate notification logic
+                setUpcomingExams(exams.filter(e => e.status === 'scheduled' && new Date(e.scheduledStartTime) > now).slice(0, 3));
+                setDocuments(docs);
 
-                // Extract unique universities from enrolled courses
-                const universities = new Map();
-                courses.forEach(enrollment => {
-                    const course = enrollment.course;
-                    if (course) {
-                        const uniName = course.universityName ||
-                            course.instructor?.profile?.universityName ||
-                            (course.instructor?.role === 'university' && course.instructor?.name);
-
-                        const uniId = course.instructor?._id || course.instructor;
-
-                        if (uniName && uniId) {
-                            if (!universities.has(uniId.toString())) {
-                                universities.set(uniId.toString(), {
-                                    id: uniId,
-                                    name: uniName,
-                                    courseCount: 1,
-                                    logo: course.instructor?.profileImage || null
-                                });
-                            } else {
-                                const existing = universities.get(uniId.toString());
-                                existing.courseCount += 1;
-                            }
-                        }
-                    }
-                });
-                setEnrolledUniversities(Array.from(universities.values()));
-
-                // Calculate stats from real data
                 const totalProgress = courses.reduce((sum, c) => sum + (Number(c.progress) || 0), 0);
                 const avgProgress = courses.length > 0 ? Math.round(totalProgress / courses.length) : 0;
-
-                const gradedExams = exams.filter(e => e.submission && (e.submission.percentage !== undefined && e.submission.percentage !== null));
-                const totalExamPercentage = gradedExams.reduce((sum, e) => sum + (Number(e.submission.percentage) || 0), 0);
-                const avgExamScore = gradedExams.length > 0
-                    ? Math.round(totalExamPercentage / gradedExams.length)
-                    : null;
-
-                const certificates = courses.filter(c => c.isCompleted).length;
-
-                setStats({
-                    completionRate: avgProgress,
-                    totalCourses: courses.length,
-                    averageScore: avgExamScore !== null ? avgExamScore : (avgProgress > 0 ? avgProgress - 5 : 0),
-                    certificatesEarned: certificates
-                });
+                setStats(prev => ({ ...prev, completionRate: avgProgress }));
 
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
@@ -212,412 +111,274 @@ const StudentDashboard = () => {
         fetchData();
     }, [navigate]);
 
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    useEffect(() => {
+        const handleToggleStats = () => setShowStats(prev => !prev);
+        window.addEventListener('toggle-stats', handleToggleStats);
+        return () => window.removeEventListener('toggle-stats', handleToggleStats);
+    }, []);
 
     if (loading || !userInfo) return (
         <div className="flex items-center justify-center min-h-[400px]">
-            <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-[#4C1D95]/20 border-t-[#4C1D95] rounded-full animate-spin"></div>
         </div>
     );
 
+    const userName = userInfo.name?.split(' ')[0] || 'Student';
+    const userHandle = `@${userName.toLowerCase()}`;
+
+    // Calculate current week
+    const today = new Date();
+    const currentMonth = today.toLocaleString('default', { month: 'long', year: 'numeric' });
+    const dayOfWeek = today.getDay();
+    const diffToMonday = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(diffToMonday);
+    
+    const weekDays = ['M','T','W','T','F','S','S'];
+    const currentWeekDates = Array.from({length: 7}).map((_, i) => {
+        const d = new Date(startOfWeek);
+        d.setDate(startOfWeek.getDate() + i);
+        return {
+            day: weekDays[i],
+            dateNum: d.getDate(),
+            fullDate: d,
+            isToday: d.toDateString() === new Date().toDateString()
+        };
+    });
+
     return (
-        <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500 pb-12 px-1 sm:px-0">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-white/5">
-                <div>
-                    <DashboardHeading title={`Student Dashboard`} className="mb-0.5" uniform />
-                    <p className="text-white/40 text-xs font-medium">
-                        {userInfo.isFirstLogin ? 'Welcome' : 'Welcome back'}, <span className="text-white font-bold">{userInfo.name?.split(' ')[0] || 'Scholar'}</span>.
-                    </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <button
-                        onClick={() => navigate('/dashboard/my-courses')}
-                        className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white [.light-mode_&]:!text-black hover:bg-white/10 transition-colors flex items-center uppercase tracking-wider"
-                    >
-                        <BookOpen size={12} className="mr-1.5 text-primary" /> My Learning
-                    </button>
-                    <button
-                        onClick={() => navigate('/courses')}
-                        className="px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-bold text-primary hover:bg-primary hover:text-white transition-all flex items-center uppercase tracking-wider"
-                    >
-                        <PlayCircle size={12} className="mr-1.5" /> New Courses
-                    </button>
-                </div>
-            </div>
-
-            {/* Document Rejection Notification Banner */}
-            {rejectedDocs.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-rose-500/5">
-                        <div className="flex items-start gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0 mt-0.5 sm:mt-0">
-                                <XCircle size={18} />
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <h4 className="text-xs font-bold text-rose-300 uppercase tracking-wider">Document Verification Rejected</h4>
-                                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                                        {rejectedDocs.length} {rejectedDocs.length === 1 ? 'Action Required' : 'Actions Required'}
-                                    </span>
-                                </div>
-                                <p className="text-xs text-white/70 mt-1 leading-relaxed">
-                                    The following document(s) were rejected: <span className="text-rose-200 font-semibold">{rejectedDocs.map(d => `${d.title || d.type}${d.rejection_reason ? ` (Reason: "${d.rejection_reason}")` : ''}`).join(', ')}</span>. Please re-upload clear copies.
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => navigate('/dashboard/documents')}
-                            className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-rose-500/20 shrink-0 flex items-center justify-center gap-2"
-                        >
-                            <Upload size={14} /> Re-upload Documents
-                        </button>
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Pending Document Verification Banner */}
-            {pendingRequiredDocs.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/5">
-                        <div className="flex items-start gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 mt-0.5 sm:mt-0">
-                                <AlertCircle size={18} />
-                            </div>
-                            <div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <h4 className="text-xs font-bold text-amber-300 uppercase tracking-wider">Document Verification Pending</h4>
-                                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                                        {pendingRequiredDocs.length} Mandatory {pendingRequiredDocs.length === 1 ? 'Doc' : 'Docs'} Missing
-                                    </span>
-                                </div>
-                                <p className="text-xs text-white/70 mt-1 leading-relaxed">
-                                    Please upload mandatory documents (<span className="text-amber-200 font-semibold">{pendingRequiredDocs.map(d => d.title).join(', ')}</span>) to complete student verification & course access.
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => navigate('/dashboard/documents')}
-                            className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold rounded-xl text-xs transition-all shadow-md shadow-amber-500/20 shrink-0 flex items-center justify-center gap-2"
-                        >
-                            <Upload size={14} /> Upload Documents Now
-                        </button>
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Enrolled Universities */}
-            {enrolledUniversities.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 font-mono">
-                                <Users size={12} className="text-primary" /> Enrolled Universities
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {enrolledUniversities.map((university) => (
-                                <div key={university.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-white/5 bg-white/[0.015] hover:border-primary/20 hover:bg-white/[0.03] transition-all group cursor-pointer">
-                                    <div className="w-8 h-8 rounded-full border border-white/10 overflow-hidden shrink-0">
-                                        {university.logo ? (
-                                            <img src={university.logo} alt={university.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                                                {university.name.charAt(0)}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="text-[11px] font-bold text-white group-hover:text-primary transition-colors truncate">{university.name}</h4>
-                                        <p className="text-[9px] text-white/40 font-semibold uppercase tracking-wider mt-0.5">
-                                            {university.courseCount} {university.courseCount === 1 ? 'Course' : 'Courses'}
-                                        </p>
-                                    </div>
-                                    <ChevronRight size={12} className="text-white/20 group-hover:text-primary transition-colors mr-1" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </motion.div>
-            )}
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                {[
-                    { 
-                        label: 'Current Status', 
-                        val: stats.completionRate, 
-                        suffix: '%',
-                        icon: CheckCircle, 
-                        border: 'border-primary/20', 
-                        bg: 'bg-primary/10', 
-                        text: 'text-primary'
-                    },
-                    { label: 'Active Courses', val: stats.totalCourses, icon: BookOpen, border: 'border-emerald-500/20', bg: 'bg-emerald-500/10', text: 'text-emerald-400' },
-                    { label: 'Average Score', val: stats.averageScore, suffix: '%', icon: BarChart3, border: 'border-amber-500/20', bg: 'bg-amber-500/10', text: 'text-amber-400' },
-                    { label: 'Reward Points', val: rewardPoints, suffix: ' pts', icon: Star, border: 'border-yellow-500/20', bg: 'bg-yellow-500/10', text: 'text-yellow-400' },
-                ].map((stat, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                        <div className={`rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] p-4 flex items-center gap-3 transition-colors h-full`}>
-                            <div className={`p-2.5 rounded-lg border ${stat.bg} ${stat.text} ${stat.border}`}>
-                                <stat.icon size={16} />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-[9px] text-white/40 uppercase font-bold tracking-widest truncate">{stat.label}</p>
-                                <p className="text-lg font-bold text-white leading-none mt-1">
-                                    <CountingNumber value={stat.val} suffix={stat.suffix || ''} />
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-
-            {/* Main Content Grid */}
-            <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
-                
-                {/* Left Column - Core Acitivties */}
-                <div className="lg:col-span-2 space-y-6">
+        <div className="student-dashboard-container bg-transparent min-h-screen px-4 sm:px-6 lg:px-8 py-4 lg:py-6 font-inter text-gray-900 text-dark-white overflow-x-hidden w-full max-w-full">
+            <div className="flex flex-col xl:flex-row gap-8">
+                {/* Main Content Area */}
+                <div className="flex-1 space-y-8 min-w-0">
                     
-                    {/* Active Learning */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 font-mono">
-                                <BookOpen size={8} /> Active Learning
+                    {/* Top Header */}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <DashboardHeading title="Overviews" />
+                    </div>
+                    
+                    {/* Hero and Daily Question Grid */}
+                    <div className="grid lg:grid-cols-3 gap-6">
+                        
+                        {/* Hero Card */}
+                        <div className="lg:col-span-3 bg-[#F6EDDB] rounded-[32px] p-8 flex flex-col justify-between relative overflow-hidden border border-[#e8dfcd] min-h-[250px] glass-panel-hero">
+                            <div className="relative z-10 w-[70%]">
+                                <h2 className="text-3xl sm:text-5xl font-extrabold text-[#4C1D95] dark:text-[#E879F9] mb-2 leading-tight">
+                                    Welcome back,<br/>{userName}!
+                                </h2>
+                                <button 
+                                    onClick={() => navigate(enrolledCourses.length > 0 ? `/dashboard/course/${enrolledCourses[0].course._id}` : '/dashboard/courses')} 
+                                    className="mt-6 sm:mt-8 px-6 py-3 bg-[#4C1D95] text-white font-bold rounded-full shadow-sm hover:shadow-lg transition-all hover:bg-[#3b1775]"
+                                >
+                                    {enrolledCourses.length > 0 ? 'Resume Learning' : 'Browse Courses'}
+                                </button>
                             </div>
-                            <button onClick={() => navigate('/dashboard/my-courses')} className="text-[9px] font-bold text-white/20 hover:text-white uppercase tracking-widest transition-colors flex items-center">
-                                View All <ChevronRight size={10} className="ml-0.5" />
-                            </button>
+                            
+                            {/* Abstract Student Illustration */}
+                            <div className="absolute right-0 bottom-0 w-[60%] sm:w-1/2 h-full flex items-end justify-end pointer-events-none">
+                                <div className="w-full h-[120%] bg-gradient-to-t from-[#4C1D95]/10 to-transparent rounded-full translate-x-1/4 translate-y-1/4 blur-3xl absolute"></div>
+                                <img src="/student_hero_illustration.png" alt="Student" className="w-[140%] sm:w-[120%] lg:w-[90%] xl:w-[80%] object-contain object-right-bottom origin-bottom-right z-10 opacity-100 drop-shadow-2xl" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Continue Watching */}
+                    <div>
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-dark-white dark:text-white">Continue Watching</h2>
+                            <div className="flex gap-2">
+                                <button className="w-8 h-8 rounded-full border border-gray-200 dark:border-[#C026FF]/20 flex items-center justify-center hover:bg-gray-50 dark:bg-white/5 transition-colors">
+                                    <ChevronLeft size={16} className="text-gray-600 text-dark-gray dark:text-gray-300" />
+                                </button>
+                                <button className="w-8 h-8 rounded-full border border-gray-200 dark:border-[#C026FF]/20 flex items-center justify-center hover:bg-gray-50 dark:bg-white/5 transition-colors">
+                                    <ChevronRight size={16} className="text-gray-600 text-dark-gray dark:text-gray-300" />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="grid sm:grid-cols-2 gap-3.5">
-                            {enrolledCourses.map((enrollment) => (
-                                <div
-                                    key={enrollment._id}
-                                    className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all overflow-hidden flex flex-col h-full group cursor-pointer"
-                                    onClick={() => navigate(`/dashboard/course/${enrollment.course._id}`)}
-                                >
-                                    <div className="relative aspect-video sm:aspect-[16/6] overflow-hidden">
-                                        <img src={enrollment.course.thumbnail ? getMediaUrl(enrollment.course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'} alt={enrollment.course.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }} />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80" />
-                                        <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[9px] font-bold text-white border border-white/10 uppercase tracking-widest">
-                                            {enrollment.progress}% complete
-                                        </div>
-                                    </div>
-
-                                    <div className="p-4 flex flex-col gap-2 flex-1">
-                                        <h3 className="text-sm font-semibold text-white group-hover:text-primary transition-colors line-clamp-1">{enrollment.course.title}</h3>
-                                        <div className="text-[9px] font-bold uppercase tracking-widest text-white/40 leading-tight">
-                                            {enrollment.course.instructor?.profile?.universityName || enrollment.course.instructorName || 'Lead Instructor'}
-                                        </div>
-                                        <div className="mt-auto pt-2">
-                                            <div className="flex justify-between items-center text-[9px] font-bold text-white/40 mb-1.5 uppercase tracking-widest">
-                                                <span>{enrollment.completedModules || 0}/{enrollment.totalModules || 10} Modules</span>
-                                            </div>
-                                            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                                                <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${enrollment.progress}%` }} />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="px-4 py-2 border-t border-white/5 bg-white/[0.015] flex items-center justify-between gap-3 min-h-[40px]">
-                                        <div className="flex -space-x-1.5">
-                                            {[1, 2, 3].map((i) => (
-                                                <div key={i} className="w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center overflow-hidden">
-                                                    <img src={`https://i.pravatar.cc/100?u=${enrollment.course._id}${i}`} className="w-full h-full object-cover opacity-50" />
-                                                </div>
-                                            ))}
-                                            <div className="w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-[8px] font-bold text-white/40">
-                                                +
-                                            </div>
-                                        </div>
-                                        <button className="text-[9px] font-bold bg-primary/10 text-primary hover:bg-primary hover:text-white px-2.5 py-1 rounded border border-primary/20 hover:border-primary transition-all flex items-center gap-1 uppercase tracking-widest">
-                                            Resume <Play size={8} />
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {enrolledCourses.length > 0 ? enrolledCourses.map((enrollment, index) => (
+                                <div key={enrollment._id || index} className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-5 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col glass-panel" onClick={() => navigate(`/dashboard/course/${enrollment.course._id}`)}>
+                                    <div className="flex justify-between items-center mb-4">
+                                        <span className="px-3 py-1 bg-gray-50 dark:bg-white/5 text-gray-600 text-dark-gray dark:text-gray-300 text-xs font-bold rounded-full border border-gray-100 dark:border-[#C026FF]/20">
+                                            {enrollment.completedModules || 0}/{enrollment.totalModules || 12}
+                                        </span>
+                                        <button className="text-gray-400 dark:text-gray-500 text-dark-gray hover:text-gray-600 text-dark-gray dark:text-gray-300">
+                                            <MoreHorizontal size={18} />
                                         </button>
                                     </div>
+                                    <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 text-dark-gray uppercase tracking-wider mb-2 line-clamp-1">
+                                        {enrollment.course.instructor?.profile?.universityName || 'Course'}
+                                    </p>
+                                    <h4 className="font-bold text-gray-900 text-dark-white dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
+                                        {enrollment.course.title}
+                                    </h4>
                                 </div>
-                            ))}
+                            )) : (
+                                <div className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-8 text-gray-400 dark:text-gray-500 text-dark-gray border-2 border-dashed border-gray-200 dark:border-[#C026FF]/20 rounded-[24px]">
+                                    No active courses found.
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Project Pipeline */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 font-mono">
-                                <FileText size={8} /> Project Pipeline
+                    {/* Quick Stats Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                        <div 
+                            onClick={() => navigate('/dashboard/my-courses')}
+                            className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-6 flex items-center space-x-4 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm cursor-pointer hover:shadow-md transition-shadow group glass-panel"
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-100 transition-colors">
+                                <Archive size={24} />
                             </div>
-                            <button onClick={() => navigate('/dashboard/my-courses')} className="text-[9px] font-bold text-white/20 hover:text-white uppercase tracking-widest transition-colors flex items-center">
-                                View Courses <ChevronRight size={10} className="ml-0.5" />
-                            </button>
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-900 text-dark-white dark:text-white font-inter">{pendingProjectsCount}</h3>
+                                <p className="text-sm text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray font-medium font-inter">Pending Projects</p>
+                            </div>
+                            <div className="ml-auto text-gray-300 group-hover:text-orange-500 transition-colors">
+                                <ChevronRight size={20} />
+                            </div>
                         </div>
 
-                        <div className="grid sm:grid-cols-2 gap-3.5">
-                            {recentProjects.map((project) => (
-                                <div
-                                    key={project._id}
-                                    className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-emerald-500/30 hover:bg-white/[0.04] transition-all overflow-hidden flex flex-col h-full group cursor-pointer relative"
-                                    onClick={() => project.courseId || project.course?._id ? navigate(`/dashboard/course/${project.courseId || project.course?._id}/projects`) : navigate('/dashboard/my-courses')}
-                                >
-                                    <div className="p-4 flex flex-col gap-2 flex-1">
-                                        <div className="flex justify-between items-start mb-1">
-                                            <div className="flex-1 min-w-0 pr-2">
-                                                <h3 className="text-[11px] font-bold text-white group-hover:text-emerald-400 transition-colors uppercase tracking-wider truncate">{project.title}</h3>
-                                                <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest truncate">{project.course?.title}</p>
-                                            </div>
-                                            <div className={`p-1.5 rounded-lg border ${project.status === 'submitted' || project.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
-                                                {project.status === 'submitted' || project.status === 'graded' ? <CheckCircle size={12} /> : <Clock size={12} />}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="px-4 py-2 border-t border-white/5 bg-white/[0.015] flex items-center justify-between min-h-[40px]">
-                                        <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-white/30">
-                                            <Calendar size={10} /> {project.status === 'graded' ? 'Grade: A+' : new Date(project.deadline).toLocaleDateString()}
-                                        </div>
-                                        <span className="text-[9px] font-bold text-white/30 group-hover:text-emerald-400 uppercase tracking-widest transition-colors flex items-center gap-1">
-                                            Details <ExternalLink size={8} />
-                                        </span>
-                                    </div>
-                                    <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-full -mr-8 -mt-8 blur-xl group-hover:bg-emerald-500/10 transition-colors pointer-events-none" />
-                                </div>
-                            ))}
+                        <div 
+                            onClick={() => navigate('/dashboard/documents')}
+                            className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-6 flex items-center space-x-4 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm cursor-pointer hover:shadow-md transition-shadow group glass-panel"
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:bg-emerald-100 transition-colors">
+                                <Heart size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-900 text-dark-white dark:text-white font-inter">{pendingCertsCount}</h3>
+                                <p className="text-sm text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray font-medium font-inter">Pending Docs & Certs</p>
+                            </div>
+                            <div className="ml-auto text-gray-300 group-hover:text-emerald-500 transition-colors">
+                                <ChevronRight size={20} />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Column - Sidebar */}
-                <div className="space-y-6">
-                    {/* Referrals & Reward Widget */}
-                    <ReferralWidget userInfo={userInfo} />
-
-                    {/* Scheduled Sessions */}
-                    <div className="space-y-3">
-                        <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 font-mono mb-1">
-                            <Video size={8} /> Scheduled Sessions
-                        </div>
-                        
-                        <div className="flex flex-col gap-2">
-                            {upcomingSessions.map((session) => (
-                                <div key={session._id} className="p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-purple-500/30 hover:bg-white/[0.04] transition-all flex flex-col gap-3 group">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0">
-                                            <Video size={14} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-xs font-bold text-white truncate group-hover:text-purple-400 transition-colors">{session.topic}</h3>
-                                            <p className="text-[9px] font-bold uppercase tracking-widest text-white/40 truncate">{session.instructor?.profile?.universityName || 'Academic Session'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-white/40">
-                                        <span className="flex items-center gap-1"><Calendar size={9} /> {new Date(session.startTime).toLocaleDateString()}</span>
-                                        <span className="flex items-center gap-1"><Clock size={9} /> {session.duration}m</span>
-                                    </div>
-                                    <button 
-                                        onClick={() => { session.status === 'live' ? navigate(`/dashboard/watch/${session._id}`) : window.open(session.meetingLink, '_blank') }}
-                                        className="w-full py-1.5 bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-500/30 text-white hover:text-purple-400 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5"
-                                    >
-                                        <Play size={10} /> {session.status === 'live' ? 'Watch Stream' : 'Join Link'}
-                                    </button>
-                                </div>
-                            ))}
-                            {upcomingSessions.length === 0 && (
-                                <div className="p-4 text-center border border-dashed border-white/10 rounded-xl text-[9px] text-white/30 font-bold uppercase tracking-widest">
-                                    No Active Sessions
-                                </div>
-                            )}
+                {/* Right Sidebar */}
+                {showStats && (
+                <div className="w-full xl:w-80 space-y-6 shrink-0 animate-in slide-in-from-right-8 duration-300">
+                    
+                    {/* Statistic Header */}
+                    <div className="flex items-center gap-4 bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-full p-2 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm statistic-header">
+                        <button onClick={() => setShowStats(false)} className="w-10 h-10 rounded-full hover:bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray hover:text-red-500 transition-colors shrink-0">
+                            <X size={18} />
+                        </button>
+                        <div className="flex-1 mt-1">
+                            <DashboardHeading title="Statistic" />
                         </div>
                     </div>
 
-                    {/* Exam Assessments */}
-                    <div className="space-y-3">
-                        <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 font-mono mb-1">
-                            <Trophy size={8} /> Assessments
+                    {/* Profile Summary Widget */}
+                    <div className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-5 flex items-center gap-4 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm glass-panel">
+                        <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 shrink-0 border-2 border-white shadow-sm flex items-center justify-center">
+                            <img src={userInfo.profileImage || `https://ui-avatars.com/api/?name=${userName}&background=4C1D95&color=fff`} alt={userName} className="w-full h-full object-cover" />
                         </div>
-                        
-                        <div className="flex flex-col gap-2">
-                            {upcomingExams.map((exam) => (
-                                <div key={exam._id} onClick={() => navigate('/dashboard/exams')} className="p-3 rounded-xl border border-white/10 bg-white/[0.02] hover:border-amber-500/30 hover:bg-white/[0.04] transition-all flex flex-col gap-3 group cursor-pointer">
-                                    <div className="flex items-start gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
-                                            <Trophy size={14} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-[11px] font-bold text-white group-hover:text-amber-400 transition-colors uppercase tracking-wider truncate">{exam.title}</h3>
-                                            <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest truncate">{exam.course?.title}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                                        <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-white/40">
-                                            <Calendar size={9} /> {new Date(exam.scheduledStartTime).toLocaleDateString()}
-                                        </div>
-                                        <span className="text-[9px] font-bold text-amber-500 uppercase tracking-widest">Attempt</span>
-                                    </div>
-                                </div>
-                            ))}
-                            {upcomingExams.length === 0 && (
-                                <div className="p-4 text-center border border-dashed border-white/10 rounded-xl text-[9px] text-white/30 font-bold uppercase tracking-widest">
-                                    No Pending Assessments
-                                </div>
-                            )}
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-900 text-dark-white dark:text-white truncate">{userInfo.name || 'Scholar'}</h3>
+                            <p className="text-sm text-[#F48F56] font-bold truncate">{rewardPoints} Reward Points</p>
                         </div>
                     </div>
 
-                    {/* Quick Resources */}
-                    <div className="space-y-3">
-                        <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 font-mono mb-1">
-                            <FileText size={8} /> Quick Docs
+                    {/* Calendar Widget */}
+                    <div className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-6 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm transition-all duration-300 glass-panel">
+                        <div className="flex items-center justify-between mb-5 cursor-pointer group" onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}>
+                            <h3 className="font-bold text-gray-900 text-dark-white dark:text-white text-sm">{currentMonth}</h3>
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-gray-50 dark:bg-white/5 transition-colors">
+                                <ChevronRight size={16} className={`text-gray-400 dark:text-gray-500 text-dark-gray transition-transform duration-300 ${isCalendarExpanded ? '-rotate-90' : 'rotate-90'}`} />
+                            </div>
                         </div>
                         
-                        <div className="flex flex-col gap-2">
-                            {/* Render missing required documents first with PENDING UPLOAD badges */}
-                            {pendingRequiredDocs.map((docSlot) => (
-                                <div key={docSlot.id} onClick={() => navigate('/dashboard/documents')} className="p-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:border-amber-500/50 hover:bg-amber-500/15 transition-all flex items-center gap-3 group cursor-pointer">
-                                    <div className="w-7 h-7 rounded bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                                        <AlertCircle size={12} />
+                        <div className="flex justify-between items-center text-center">
+                            {currentWeekDates.map((d, i) => (
+                                <div key={i} className="flex flex-col gap-2">
+                                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-dark-gray">{d.day}</span>
+                                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${d.isToday ? 'bg-[#F48F56] text-white shadow-md shadow-[#F48F56]/30' : 'text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray hover:bg-gray-50 dark:bg-white/5 cursor-pointer'}`}>
+                                        {d.dateNum}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-[10px] font-bold text-amber-200 truncate group-hover:text-amber-300 transition-colors">{docSlot.title}</h3>
-                                        <p className="text-[8px] text-amber-400/70 font-bold uppercase tracking-widest">Mandatory Verification Doc</p>
-                                    </div>
-                                    <span className="text-[8px] font-extrabold text-amber-400 bg-amber-500/20 border border-amber-500/30 px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
-                                        PENDING UPLOAD
-                                    </span>
                                 </div>
                             ))}
+                        </div>
 
-                            {/* Render uploaded documents */}
-                            {documents.map((doc) => (
-                                <div key={doc._id} onClick={() => navigate('/dashboard/documents')} className="p-2.5 rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all flex items-center gap-3 group cursor-pointer">
-                                    <div className="w-7 h-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 group-hover:scale-110 transition-transform">
-                                        <FileText size={12} />
+                        {/* Expanded Schedule */}
+                        {isCalendarExpanded && (
+                            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-[#C026FF]/20 space-y-4 animate-in slide-in-from-top-2 fade-in duration-300">
+                                <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-dark-gray uppercase tracking-wider mb-2">Upcoming Schedule</h4>
+                                {upcomingSessions.length === 0 && upcomingExams.length === 0 ? (
+                                    <p className="text-xs text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray text-center py-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-[#C026FF]/20">No upcoming schedule</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {upcomingSessions.map(session => (
+                                            <div key={session._id} className="flex items-start gap-3 p-2 rounded-xl hover:bg-gray-50 dark:bg-white/5 border border-transparent hover:border-gray-100 dark:border-[#C026FF]/20 transition-colors cursor-pointer" onClick={() => navigate('/dashboard/live-classes')}>
+                                                <div className="w-8 h-8 rounded-full bg-[#4C1D95]/10 flex items-center justify-center text-[#4C1D95] dark:text-[#E879F9] shrink-0 mt-0.5">
+                                                    <Play size={12} className="ml-0.5" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="text-xs font-bold text-gray-900 text-dark-white dark:text-white truncate leading-tight mb-0.5">{session.topic || 'Live Session'}</h4>
+                                                    <p className="text-[9px] font-semibold text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">{new Date(session.startTime).toLocaleDateString()} • {new Date(session.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {upcomingExams.map(exam => (
+                                            <div key={exam._id} className="flex items-start gap-3 p-2 rounded-xl hover:bg-gray-50 dark:bg-white/5 border border-transparent hover:border-gray-100 dark:border-[#C026FF]/20 transition-colors cursor-pointer" onClick={() => navigate('/dashboard/exams')}>
+                                                <div className="w-8 h-8 rounded-full bg-[#F48F56]/10 flex items-center justify-center text-[#F48F56] shrink-0 mt-0.5">
+                                                    <CalendarIcon size={12} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="text-xs font-bold text-gray-900 text-dark-white dark:text-white truncate leading-tight mb-0.5">{exam.title || 'Exam'}</h4>
+                                                    <p className="text-[9px] font-semibold text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">{new Date(exam.scheduledStartTime).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="text-[10px] font-bold text-white truncate group-hover:text-primary transition-colors">{doc.title}</h3>
-                                        <p className="text-[8px] text-white/40 font-bold uppercase tracking-widest">{doc.format || 'PDF'} • {(doc.fileSize / (1024 * 1024)).toFixed(1) || '2MB'}</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Tasks of the month */}
+                    <div className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-6 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm glass-panel">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-gray-900 text-dark-white dark:text-white text-sm">Tasks of the month</h3>
+                            <span className="text-[10px] font-bold text-[#F48F56] bg-[#F48F56]/10 px-2 py-1 rounded-md">{currentMonth.split(' ')[0]}</span>
+                        </div>
+                        
+                        <div className="w-full bg-gray-100 dark:bg-white/10 rounded-full h-2 mb-2 relative overflow-hidden">
+                            <div className="bg-[#F48F56] h-full rounded-full transition-all duration-1000" style={{ width: `${stats.completionRate || 0}%` }}></div>
+                        </div>
+                        <div className="text-right text-xs font-bold text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">{stats.completionRate || 0}%</div>
+                    </div>
+
+                    {/* Leaderboard */}
+                    <div className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-6 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm glass-panel">
+                        <h3 className="font-bold text-gray-900 text-dark-white dark:text-white mb-5 text-sm">Leaderboard</h3>
+                        
+                        <div className="space-y-4">
+                            {leaderboard.length > 0 ? leaderboard.map((user, i) => {
+                                const level = Math.floor((user.xp || 0) / 1000) + 1;
+                                const userImg = `https://ui-avatars.com/api/?name=${user.name || 'User'}&background=4C1D95&color=fff`;
+                                return (
+                                    <div key={user.id || i} className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:bg-white/5 rounded-xl transition-colors cursor-pointer">
+                                        <img src={userImg} alt={user.name} className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/10 border-2 border-white shadow-sm" />
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-sm font-bold text-gray-900 text-dark-white dark:text-white truncate">{user.name || 'User'}</h4>
+                                            <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 text-dark-gray">Level {level} • {user.xp || 0} XP</p>
+                                        </div>
+                                        <div className="text-xs font-bold text-gray-900 text-dark-white dark:text-white bg-gray-100 dark:bg-white/10 w-6 h-6 rounded-full flex items-center justify-center">#{i + 1}</div>
                                     </div>
-                                    <Download size={10} className="text-white/20 group-hover:text-primary transition-colors mr-1" />
-                                </div>
-                            ))}
-                            
-                            <button onClick={() => navigate('/dashboard/documents')} className="w-full py-3 bg-white/[0.02] border border-dashed border-white/20 hover:border-primary/40 rounded-xl flex items-center justify-center gap-1.5 group transition-all mt-1">
-                                <Upload size={12} className="text-white/30 group-hover:text-primary transition-colors" />
-                                <span className="text-[9px] font-bold text-white/40 group-hover:text-primary uppercase tracking-widest transition-colors">Upload Document</span>
-                            </button>
+                                );
+                            }) : (
+                                <p className="text-xs text-gray-400 dark:text-gray-500 text-dark-gray text-center py-4">No top students yet</p>
+                            )}
                         </div>
                     </div>
 
                 </div>
+                )}
             </div>
-
-            <WelcomeModal
-                isOpen={isWelcomeModalOpen}
-                onClose={() => setIsWelcomeModalOpen(false)}
-                name={userInfo.name?.split(' ')[0] || 'Scholar'}
-            />
         </div>
     );
 };

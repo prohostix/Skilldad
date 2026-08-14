@@ -47,8 +47,8 @@ const Platform = () => {
         // Build best-available image: profile.coverImage > Unsplash fallback (DO NOT fallback to logo)
         const coverImg = u.profile?.coverImage;
         const resolvedImage = coverImg
-                ? getMediaUrl(coverImg)
-                : fallbackImg;
+            ? getMediaUrl(coverImg)
+            : fallbackImg;
 
         return {
             id: u._id,
@@ -65,7 +65,7 @@ const Platform = () => {
         };
     });
 
-    // SkillDad-owned universities are display-only (no login/dashboard) — always shown after partner universities
+    // SkillDad-owned universities are display-only (no login/dashboard) - always shown after partner universities
     const skillDadUniversities = dynamicSkillDadUnis.map(u => ({
         id: `sd-${u.id}`,
         name: u.name,
@@ -135,54 +135,28 @@ const Platform = () => {
                                     </div>
 
                                     {/* University Details */}
-                                    <div className="p-5">
-                                        <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-space">
+                                    <div className="p-4 md:p-5">
+                                        <h3 className="text-base md:text-lg font-bold text-white mb-1.5 font-space">
                                             {university.name}
                                         </h3>
 
-                                        <div className="flex items-center text-gray-400 mb-3">
-                                            <MapPin size={14} className="mr-2 flex-shrink-0" />
-                                            <span className="text-sm">{university.location}</span>
+                                        <div className="flex items-center text-gray-400 mb-2.5">
+                                            <MapPin size={12} className="mr-1.5 flex-shrink-0" />
+                                            <span className="text-xs">{university.location}</span>
                                         </div>
 
-                                        <p className="text-gray-300 text-sm mb-4 line-clamp-2">
+                                        <p className="text-gray-300 text-xs mb-3.5 line-clamp-2 leading-relaxed">
                                             {university.description}
                                         </p>
 
                                         {/* Stats */}
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            <div className="text-center">
-                                                <div className="flex items-center justify-center mb-1">
-                                                    <Users size={16} className="text-primary mr-1" />
-                                                </div>
-                                                <p className="text-white font-bold text-sm">{university.students}</p>
-                                                <p className="text-gray-400 text-xs">Students</p>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="flex items-center justify-center mb-1">
-                                                    <BookOpen size={16} className="text-emerald-400 mr-1" />
-                                                </div>
-                                                <p className="text-white font-bold text-sm">{university.programs}</p>
-                                                <p className="text-gray-400 text-xs">Programs</p>
-                                            </div>
+                                        <div className="flex items-center text-gray-400 mb-2">
+                                            <BookOpen size={12} className="text-emerald-400 mr-1.5 flex-shrink-0" />
+                                            <span className="text-xs">
+                                                <strong className="text-white">{university.programs}</strong> Programs Available
+                                            </span>
                                         </div>
 
-                                        {/* Specialties */}
-                                        <div className="flex flex-wrap gap-2">
-                                            {university.specialties.slice(0, 3).map((specialty, idx) => (
-                                                <span
-                                                    key={idx}
-                                                    className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full border border-primary/20"
-                                                >
-                                                    {specialty}
-                                                </span>
-                                            ))}
-                                            {university.specialties.length > 3 && (
-                                                <span className="text-xs px-2 py-1 bg-gray-800 text-gray-400 rounded-full">
-                                                    +{university.specialties.length - 3}
-                                                </span>
-                                            )}
-                                        </div>
                                     </div>
                                 </GlassCard>
                             </motion.div>

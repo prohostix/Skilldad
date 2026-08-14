@@ -20,12 +20,12 @@ class NotificationService {
         const _id = user._id || user.id;
         const name = user.name;
         const email = user.email;
-        
+
         let phone = user.phone;
         if (!phone && user.profile) {
             let p = user.profile;
             if (typeof p === 'string') {
-                try { p = JSON.parse(p); } catch(e) { p = {}; }
+                try { p = JSON.parse(p); } catch (e) { p = {}; }
             }
             phone = p.phone;
         }
@@ -40,12 +40,12 @@ class NotificationService {
             INSERT INTO notification_logs (id, user_id, recipient_name, recipient_email, recipient_phone, type, channel, delivery_status, metadata, message, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()) RETURNING *
         `, [
-            newLogId, 
-            _id || null, 
-            name, email, phone, 
-            type, 
-            (options.email && options.whatsapp) ? 'both' : (options.email ? 'email' : 'whatsapp'), 
-            deliveryStatus, 
+            newLogId,
+            _id || null,
+            name, email, phone,
+            type,
+            (options.email && options.whatsapp) ? 'both' : (options.email ? 'email' : 'whatsapp'),
+            deliveryStatus,
             data,
             'Sending notification'
         ]);
@@ -126,7 +126,7 @@ class NotificationService {
                 timestamp: new Date()
             };
         }
-        // Merge only our own 'email' key — a blind full-column overwrite here would
+        // Merge only our own 'email' key - a blind full-column overwrite here would
         // race with the parallel WhatsApp write (and any webhook-driven update to
         // the whatsapp key) and clobber whichever finished last.
         await query(
@@ -159,7 +159,7 @@ class NotificationService {
             let result;
             switch (type) {
                 case 'welcome':
-                    // skilldad_welcome [Name] — template body already says "Welcome {{1}}"
+                    // skilldad_welcome [Name] - template body already says "Welcome {{1}}"
                     result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_WELCOME || 'common_status', [user.name]);
                     break;
                 case 'enrollment':
@@ -209,7 +209,7 @@ class NotificationService {
                 timestamp: new Date()
             };
         }
-        // Merge only our own 'whatsapp' key — see note in _executeEmail.
+        // Merge only our own 'whatsapp' key - see note in _executeEmail.
         await query(
             "UPDATE notification_logs SET delivery_status = COALESCE(delivery_status, '{}'::jsonb) || jsonb_build_object('whatsapp', $1::jsonb), updated_at = NOW() WHERE id = $2",
             [JSON.stringify(log.status.whatsapp), log.id]

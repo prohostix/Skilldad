@@ -2,8 +2,8 @@
  * Rate Limiting Middleware
  *
  * Dual-layer strategy:
- *  1. express-rate-limit (in-memory, per process) — fast, no deps
- *  2. Redis sliding-window (optional, cross-process) — for horizontal scaling
+ *  1. express-rate-limit (in-memory, per process) - fast, no deps
+ *  2. Redis sliding-window (optional, cross-process) - for horizontal scaling
  *
  * Horizontal scaling note:
  *  When multiple Node processes run behind a load balancer, each process has
@@ -16,7 +16,7 @@ const rateLimit = require('express-rate-limit');
 
 /* ── In-memory limiters (express-rate-limit) ────────────────── */
 
-/** General API — 100 req/min */
+/** General API - 100 req/min */
 const apiLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 100,
@@ -26,7 +26,7 @@ const apiLimiter = rateLimit({
     message: { message: 'Too many requests, please try again in a minute.' },
 });
 
-/** Session creation — 10 req/15 min per university */
+/** Session creation - 10 req/15 min per university */
 const createSessionLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 10,
@@ -35,7 +35,7 @@ const createSessionLimiter = rateLimit({
     message: { message: 'Session creation rate limit reached. Try again later.' },
 });
 
-/** Signed URL requests — 30 req/min per user */
+/** Signed URL requests - 30 req/min per user */
 const signedUrlLimiter = rateLimit({
     windowMs: 60 * 1000,
     max: 30,
@@ -44,7 +44,7 @@ const signedUrlLimiter = rateLimit({
     message: { message: 'Signed URL rate limit exceeded.' },
 });
 
-/** Notification dispatch — 5 per session per day */
+/** Notification dispatch - 5 per session per day */
 const notifLimiter = rateLimit({
     windowMs: 24 * 60 * 60 * 1000,
     max: 5,
@@ -65,7 +65,7 @@ const notifLimiter = rateLimit({
 const redisRateLimiter = (prefix, windowMs, maxReqs) => async (req, res, next) => {
     const { getRedis, KEYS } = require('../utils/redisCache');
     const r = getRedis();
-    if (!r) return next(); // degrade gracefully — in-memory limiter still active
+    if (!r) return next(); // degrade gracefully - in-memory limiter still active
 
     const key = KEYS.rateLimitKey(req.user?._id || req.ip, prefix);
     const now = Date.now();

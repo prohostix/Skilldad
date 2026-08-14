@@ -10,7 +10,8 @@ import {
     Layers,
     Sparkles,
     SearchX,
-    ShieldCheck
+    ShieldCheck,
+    ChevronDown
 } from 'lucide-react';
 
 import Navbar from '../components/ui/Navbar';
@@ -19,6 +20,121 @@ import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
 import { toast } from 'react-hot-toast';
+
+const CustomSelect = ({ value, onChange, options, className, align = "right" }) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const dropdownRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative group/univ" ref={dropdownRef}>
+            <div 
+                onClick={() => setIsOpen(!isOpen)}
+                className={`${className} cursor-pointer flex items-center justify-between`}
+            >
+                <span className="truncate pr-4 select-none">{value === 'All' ? 'All Providers' : value}</span>
+                <div className={`pointer-events-none transition-colors ${isOpen ? 'text-primary' : 'text-white/30 group-hover/univ:text-primary'}`}>
+                    <Filter size={14} />
+                </div>
+            </div>
+            
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} top-full mt-2 w-[260px] bg-[#0A0714]/95 backdrop-blur-2xl border border-white/10 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] overflow-hidden z-50`}
+                    >
+                        <div className="max-h-[300px] overflow-y-auto custom-scrollbar py-1">
+                            <div 
+                                onClick={() => { onChange('All'); setIsOpen(false); }}
+                                className={`px-4 py-3 text-sm cursor-pointer transition-colors flex items-center gap-3 ${value === 'All' ? 'bg-primary/20 text-white border-l-2 border-primary' : 'text-white/70 hover:bg-white/5 hover:text-white border-l-2 border-transparent'}`}
+                            >
+                                <div className={`w-1.5 h-1.5 rounded-full ${value === 'All' ? 'bg-primary' : 'bg-transparent'}`} />
+                                <span className="font-medium select-none">All Providers</span>
+                            </div>
+                            {options.filter(u => u !== 'All').map(uni => (
+                                <div 
+                                    key={uni}
+                                    onClick={() => { onChange(uni); setIsOpen(false); }}
+                                    className={`px-4 py-3 text-sm cursor-pointer transition-colors flex items-center gap-3 ${value === uni ? 'bg-primary/20 text-white border-l-2 border-primary' : 'text-white/70 hover:bg-white/5 hover:text-white border-l-2 border-transparent'}`}
+                                >
+                                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${value === uni ? 'bg-primary' : 'bg-transparent'}`} />
+                                    <span className="truncate font-medium select-none">{uni}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+const FormSelect = ({ value, onChange, options, className }) => {
+    const [isOpen, setIsOpen] = React.useState(false);
+    const dropdownRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative group/select" ref={dropdownRef}>
+            <div 
+                onClick={() => setIsOpen(!isOpen)}
+                className={`${className} cursor-pointer flex items-center justify-between transition-all`}
+            >
+                <span className="truncate select-none text-white/80">{value}</span>
+                <div className={`pointer-events-none transition-colors ${isOpen ? 'text-primary' : 'text-white/20 group-hover/select:text-primary'}`}>
+                    <Layers size={16} />
+                </div>
+            </div>
+            
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute left-0 right-0 top-full mt-2 bg-[#0A0714]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.8)] overflow-hidden z-50"
+                    >
+                        <div className="max-h-[200px] overflow-y-auto custom-scrollbar py-2">
+                            {options.map(opt => (
+                                <div 
+                                    key={opt}
+                                    onClick={() => { onChange(opt); setIsOpen(false); }}
+                                    className={`px-6 py-3.5 text-sm cursor-pointer transition-colors flex items-center gap-3 ${value === opt ? 'bg-primary/20 text-white border-l-2 border-primary' : 'text-white/70 hover:bg-white/5 hover:text-white border-l-2 border-transparent'}`}
+                                >
+                                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${value === opt ? 'bg-primary' : 'bg-transparent'}`} />
+                                    <span className="truncate font-medium select-none">{opt}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 const CourseCatalog = () => {
     const navigate = useNavigate();
@@ -30,6 +146,7 @@ const CourseCatalog = () => {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [universityName, setUniversityName] = useState('');
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+    const [enquiryType, setEnquiryType] = useState('General Course Enquiry');
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -39,7 +156,7 @@ const CourseCatalog = () => {
 
         const fetchCourses = async () => {
             try {
-                // Check if logged-in user is a university — if so, show only their courses
+                // Check if logged-in user is a university - if so, show only their courses
                 const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
                 let url = '/api/courses';
 
@@ -123,12 +240,12 @@ const CourseCatalog = () => {
                 {/* Hero Header - Conditionally hidden when searching */}
                 <AnimatePresence>
                     {!(isSearchFocused || filter) && (
-                        <motion.div 
-                             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                             animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                             transition={{ duration: 0.4, ease: "easeInOut" }}
-                             className="max-w-[1300px] mx-auto text-center px-4 overflow-hidden"
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="max-w-[1300px] mx-auto text-center px-4 overflow-hidden"
                         >
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
@@ -181,14 +298,14 @@ const CourseCatalog = () => {
                             {/* WBL Sub-options */}
                             <AnimatePresence>
                                 {programType.startsWith('wbl') && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, height: 0, y: -10 }}
                                         animate={{ opacity: 1, height: 'auto', y: 0 }}
                                         exit={{ opacity: 0, height: 0, y: -10 }}
                                         className="flex justify-center mt-3 overflow-hidden"
                                     >
                                         <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap justify-center">
-                                            <button 
+                                            <button
                                                 onClick={() => setProgramType('wbl_abroad')}
                                                 className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_abroad'
                                                     ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
@@ -197,7 +314,7 @@ const CourseCatalog = () => {
                                             >
                                                 International Programmes
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => setProgramType('wbl_domestic')}
                                                 className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
                                                     ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
@@ -221,7 +338,7 @@ const CourseCatalog = () => {
                     <div className="flex flex-col gap-4 items-stretch">
                         {/* Search & Mobile Filter Toggle */}
                         <div className="flex items-center gap-3 w-full">
-                            <div 
+                            <div
                                 className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1 cursor-text`}
                                 onClick={() => document.getElementById('catalog-search')?.focus()}
                             >
@@ -246,20 +363,14 @@ const CourseCatalog = () => {
                             </div>
                             {/* University Filter - same row as search on desktop */}
                             {!isFixedUniversity && universities.length > 2 && (
-                                <div className="relative group/univ hidden md:block shrink-0">
-                                    <select
+                                <div className="hidden md:block shrink-0">
+                                    <CustomSelect
                                         value={selectedUniversity}
-                                        onChange={(e) => setSelectedUniversity(e.target.value)}
-                                        className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-10 py-2.5 md:py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-xs md:text-sm shadow-xl min-w-[140px] max-w-[200px] truncate"
-                                    >
-                                        <option value="All" className="bg-[#050514]">All Providers</option>
-                                        {universities.filter(u => u !== 'All').map(uni => (
-                                            <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
-                                        ))}
-                                    </select>
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
-                                        <Filter size={14} />
-                                    </div>
+                                        onChange={setSelectedUniversity}
+                                        options={universities}
+                                        align="right"
+                                        className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-3 py-2.5 md:py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all font-inter text-xs md:text-sm shadow-xl min-w-[160px] max-w-[220px]"
+                                    />
                                 </div>
                             )}
 
@@ -368,30 +479,30 @@ const CourseCatalog = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Selection Matrix</label>
-                                    <div className="relative group/select">
-                                        <select className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-sm">
-                                            <option className="bg-[#050514]">General Course Enquiry</option>
-                                            <option className="bg-[#050514]">Technical Support</option>
-                                            <option className="bg-[#050514]">Corporate Training</option>
-                                            <option className="bg-[#050514]">University Integration</option>
-                                        </select>
-                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-white/20 group-hover/select:text-primary transition-colors">
-                                            <Layers size={16} />
-                                        </div>
-                                    </div>
+                                    <FormSelect 
+                                        value={enquiryType}
+                                        onChange={setEnquiryType}
+                                        options={[
+                                            'General Course Enquiry',
+                                            'Technical Support',
+                                            'Corporate Training',
+                                            'University Integration'
+                                        ]}
+                                        className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-3.5 hover:border-primary/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 font-inter text-sm"
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Message Detail</label>
                                     <textarea rows="3" className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-sm" placeholder="Structure your requirements here..."></textarea>
                                 </div>
-                                <ModernButton 
+                                <ModernButton
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        toast.success('Protocol Transmitted Successfully. Our advisors will sync with you shortly.');
+                                        toast.success('Ticket Raised Successfully. Our advisors will contact you shortly.');
                                     }}
                                     className="w-full !py-4 shadow-glow-gradient font-black uppercase tracking-[0.3em] text-[10px]"
                                 >
-                                    Transmit Protocol
+                                    Raise a Ticket
                                 </ModernButton>
                             </form>
                         </div>
@@ -418,31 +529,23 @@ const CourseCatalog = () => {
                             >
                                 <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
                                 <h3 className="text-xl font-bold text-white font-jakarta mb-6">Filters</h3>
-                                
+
                                 <div className="space-y-6">
                                     {/* Mobile University Select */}
                                     {!isFixedUniversity && universities.length > 2 && (
                                         <div className="space-y-3">
                                             <label className="text-xs font-black text-white/40 uppercase tracking-widest">Provider</label>
-                                            <div className="relative group/univ">
-                                                <select
-                                                    value={selectedUniversity}
-                                                    onChange={(e) => setSelectedUniversity(e.target.value)}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-10 py-3.5 text-white focus:border-primary/50 focus:outline-none transition-all appearance-none cursor-pointer font-inter text-sm shadow-xl"
-                                                >
-                                                    <option value="All" className="bg-[#050514]">All Providers</option>
-                                                    {universities.filter(u => u !== 'All').map(uni => (
-                                                        <option key={uni} value={uni} className="bg-[#050514]">{uni}</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-white/30 group-hover/univ:text-primary transition-colors">
-                                                    <Filter size={16} />
-                                                </div>
-                                            </div>
+                                            <CustomSelect
+                                                value={selectedUniversity}
+                                                onChange={setSelectedUniversity}
+                                                options={universities}
+                                                align="left"
+                                                className="w-full bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-3 py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all font-inter text-sm shadow-xl"
+                                            />
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 <ModernButton
                                     className="w-full mt-8 !py-4 justify-center shadow-glow-purple"
                                     onClick={() => setIsMobileFilterOpen(false)}

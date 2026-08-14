@@ -180,7 +180,7 @@ const UniversityManagement = () => {
                     : p
             ));
 
-            showToast(`✓ ${payload.name} updated — discount: ${payload.discountRate}%`, 'success');
+            showToast(`✓ ${payload.name} updated - discount: ${payload.discountRate}%`, 'success');
             setOpenEdit(false);
             setOpenDiscount(false);
             // Sync from server in bg
@@ -223,7 +223,7 @@ const UniversityManagement = () => {
             };
 
             const { data } = await axios.post(`/api/admin/universities/${selectedPartner._id}/upload-image`, formData, config);
-            
+
             setSelectedPartner(prev => ({
                 ...prev,
                 profileImage: data.profileImage || `/uploads/${file.name}`
@@ -334,12 +334,12 @@ const UniversityManagement = () => {
 
     const handleDeleteUniversity = async () => {
         if (!selectedPartner?._id) return;
-        
+
         setLoadingDelete(true);
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            
+
             await axios.delete(`/api/admin/universities/${selectedPartner._id}`, config);
             showToast(`${selectedPartner.name} deleted successfully`, 'success');
             setOpenDelete(false);
@@ -607,7 +607,7 @@ const UniversityManagement = () => {
                                         {partner.role}
                                     </span>
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between text-xs border-t border-white/5 pt-3">
                                     <div className="flex items-center space-x-1.5 font-bold uppercase tracking-wide">
                                         <span className={`w-2 h-2 rounded-full ${partner.isVerified ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></span>
@@ -839,10 +839,10 @@ const UniversityManagement = () => {
                             />
                             <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Update Institution Logo</p>
                         </div>
-                        
+
                         <div className="w-full px-2 mb-6">
                             <label className="block text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mb-2 text-center">OR PASTE LOGO URL</label>
-                            <input 
+                            <input
                                 type="text"
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-primary transition-all"
                                 placeholder="https://example.com/logo.png"
@@ -1240,7 +1240,7 @@ const UniversityManagement = () => {
                             <p className="text-sm text-white/60 mb-8 font-inter">
                                 Are you sure you want to remove <span className="text-white font-bold">{selectedPartner?.name}</span>? This action cannot be undone if there are no dependencies.
                             </p>
-                            
+
                             <div className="flex w-full gap-3">
                                 <button
                                     onClick={() => setOpenDelete(false)}

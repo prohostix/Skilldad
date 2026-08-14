@@ -148,13 +148,13 @@ const StudyAbroad = () => {
                                     <div className="max-w-xl mx-auto relative group mt-8">
                                         <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700"></div>
                                         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl p-2 focus-within:border-primary/50 transition-all">
-                                            <Search className="ml-4 text-gray-400" size={20} />
+                                            <Search className="ml-4 text-gray-400 shrink-0" size={20} />
                                             <input 
                                                 type="text" 
                                                 placeholder="Search by country (e.g. Canada, UK...)"
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="bg-transparent border-none outline-none w-full px-4 py-3 text-white placeholder:text-gray-400"
+                                                className="!bg-transparent border-none outline-none ring-0 focus:ring-0 w-full ml-3 px-4 py-3 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500"
                                             />
                                         </div>
                                     </div>

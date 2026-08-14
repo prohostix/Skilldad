@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 /*
-  UniversityOrb3D — Performance-optimised version
+  UniversityOrb3D - Performance-optimised version
   • All infinite loops use CSS @keyframes (GPU-composited transform+opacity only)
   • No boxShadow animation (triggers repaint every frame)
   • No backdrop-blur on orbiting elements
-  • Math.random() values memoised — never called on re-render
+  • Math.random() values memoised - never called on re-render
   • will-change: transform on every animated layer
 */
 
@@ -85,7 +85,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
             className="relative w-full h-full flex items-center justify-center select-none"
             style={{ perspective: 800 }}
         >
-            {/* Ambient glow — static, no animation needed */}
+            {/* Ambient glow - static, no animation needed */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-60 h-60 rounded-full"
                     style={{ background: 'radial-gradient(circle, #7C3AED1A 0%, transparent 70%)' }} />
@@ -94,7 +94,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
             {/* Scene */}
             <div style={{ position: 'relative', width: 280, height: 280 }}>
 
-                {/* Rings — pure CSS spin, GPU only */}
+                {/* Rings - pure CSS spin, GPU only */}
                 {RINGS.map((r, i) => (
                     <div
                         key={i}
@@ -115,7 +115,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
                     />
                 ))}
 
-                {/* Travel dots — ring wrapper spins, dot just sits at top */}
+                {/* Travel dots - ring wrapper spins, dot just sits at top */}
                 {DOTS.map((d, i) => (
                     <div
                         key={i}
@@ -148,7 +148,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
                     </div>
                 ))}
 
-                {/* Core sphere — scale pulse only, no boxShadow animation */}
+                {/* Core sphere - scale pulse only, no boxShadow animation */}
                 <div
                     style={{
                         position: 'absolute',
@@ -163,7 +163,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
                         willChange: 'transform',
                     }}
                 >
-                    {/* Shine highlight — static */}
+                    {/* Shine highlight - static */}
                     <div style={{
                         position: 'absolute', top: 10, left: 12,
                         width: 22, height: 14, borderRadius: '50%',
@@ -173,7 +173,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
                     }} />
                 </div>
 
-                {/* Orbiting badges — CSS float animation, no backdrop-blur */}
+                {/* Orbiting badges - CSS float animation, no backdrop-blur */}
                 {displayBadges.map((b) => {
                     const rad = (b.angle * Math.PI) / 180;
                     const bx = Math.cos(rad) * RADIUS;
@@ -207,7 +207,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
                     );
                 })}
 
-                {/* Particles — memoised positions, CSS fade+float */}
+                {/* Particles - memoised positions, CSS fade+float */}
                 {PARTICLE_DATA.map((p, i) => (
                     <div
                         key={i}
@@ -229,7 +229,7 @@ const UniversityOrb3D = ({ universities = [] }) => {
                 ))}
             </div>
 
-            {/* Ground reflection — static */}
+            {/* Ground reflection - static */}
             <div
                 style={{
                     position: 'absolute',

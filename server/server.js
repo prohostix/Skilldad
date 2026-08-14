@@ -8,12 +8,12 @@ const colors = require('colors');
 
 // Handle EIO (Input/output error) which can happen when terminal is detached
 process.stdout.on('error', (err) => {
-    if (err.code === 'EIO') return;
-    console.error('stdout error:', err);
+  if (err.code === 'EIO') return;
+  console.error('stdout error:', err);
 });
 process.stderr.on('error', (err) => {
-    if (err.code === 'EIO') return;
-    console.error('stderr error:', err);
+  if (err.code === 'EIO') return;
+  console.error('stderr error:', err);
 });
 
 
@@ -96,7 +96,7 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-// CORS — allow Vercel frontend + localhost dev
+// CORS - allow Vercel frontend + localhost dev
 const allowedOrigins = [
   'https://skill-dad-client.vercel.app',
   'https://skilldad.vercel.app',
@@ -251,36 +251,36 @@ const startServer = async () => {
 
     // Auto-migrate: ensure faqs table has all required columns
     try {
-        const { query } = require('./config/postgres');
-        const colRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['faqs']);
-        const cols = colRes.rows.map(r => r.column_name);
-        if (!cols.includes('help_link')) await query('ALTER TABLE faqs ADD COLUMN help_link TEXT');
-        if (!cols.includes('demo_video_link')) await query('ALTER TABLE faqs ADD COLUMN demo_video_link TEXT');
-        if (!cols.includes('views')) await query('ALTER TABLE faqs ADD COLUMN views INTEGER DEFAULT 0');
-        if (!cols.includes('upvotes')) await query('ALTER TABLE faqs ADD COLUMN upvotes INTEGER DEFAULT 0');
-        if (!cols.includes('downvotes')) await query('ALTER TABLE faqs ADD COLUMN downvotes INTEGER DEFAULT 0');
-        if (!cols.includes('updated_at')) await query('ALTER TABLE faqs ADD COLUMN updated_at TIMESTAMP DEFAULT NOW()');
-        await query(`CREATE TABLE IF NOT EXISTS faq_search_analytics (id SERIAL PRIMARY KEY, query TEXT UNIQUE NOT NULL, count INTEGER DEFAULT 1, updated_at TIMESTAMP DEFAULT NOW())`);
+      const { query } = require('./config/postgres');
+      const colRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['faqs']);
+      const cols = colRes.rows.map(r => r.column_name);
+      if (!cols.includes('help_link')) await query('ALTER TABLE faqs ADD COLUMN help_link TEXT');
+      if (!cols.includes('demo_video_link')) await query('ALTER TABLE faqs ADD COLUMN demo_video_link TEXT');
+      if (!cols.includes('views')) await query('ALTER TABLE faqs ADD COLUMN views INTEGER DEFAULT 0');
+      if (!cols.includes('upvotes')) await query('ALTER TABLE faqs ADD COLUMN upvotes INTEGER DEFAULT 0');
+      if (!cols.includes('downvotes')) await query('ALTER TABLE faqs ADD COLUMN downvotes INTEGER DEFAULT 0');
+      if (!cols.includes('updated_at')) await query('ALTER TABLE faqs ADD COLUMN updated_at TIMESTAMP DEFAULT NOW()');
+      await query(`CREATE TABLE IF NOT EXISTS faq_search_analytics (id SERIAL PRIMARY KEY, query TEXT UNIQUE NOT NULL, count INTEGER DEFAULT 1, updated_at TIMESTAMP DEFAULT NOW())`);
 
-        // Seed default FAQs if table is empty
-        const countRes = await query('SELECT COUNT(*) FROM faqs');
-        if (parseInt(countRes.rows[0].count) === 0) {
-            const crypto = require('crypto');
-            const defaults = [
-                { question: 'How to apply for job and internship', answer: 'Navigate to the Career & Placements portal. Browse the available vacancies in the "Jobs" or "Internships" tabs. Click on any listing to view details, then click "Apply" to submit your profile and resume. We suggest having a complete profile for a better chance of selection.', category: 'Career & Placements', help_link: '/dashboard/placements' },
-                { question: 'How does the Refer & Earn program work?', answer: 'Share your unique referral code with friends. When they join SkillDad using your link, you earn 100 reward points instantly. These points are tracked in your Reward Wallet and can be redeemed for course discounts or exclusive certificates.', category: 'Rewards & Referrals', help_link: '/dashboard/reward-wallet' },
-            ];
-            for (const faq of defaults) {
-                await query('INSERT INTO faqs (id, question, answer, category, help_link) VALUES ($1, $2, $3, $4, $5)', [crypto.randomUUID(), faq.question, faq.answer, faq.category, faq.help_link]);
-            }
-            console.log('[Migration] Seeded default FAQs'.green);
+      // Seed default FAQs if table is empty
+      const countRes = await query('SELECT COUNT(*) FROM faqs');
+      if (parseInt(countRes.rows[0].count) === 0) {
+        const crypto = require('crypto');
+        const defaults = [
+          { question: 'How to apply for job and internship', answer: 'Navigate to the Career & Placements portal. Browse the available vacancies in the "Jobs" or "Internships" tabs. Click on any listing to view details, then click "Apply" to submit your profile and resume. We suggest having a complete profile for a better chance of selection.', category: 'Career & Placements', help_link: '/dashboard/placements' },
+          { question: 'How does the Refer & Earn program work?', answer: 'Share your unique referral code with friends. When they join SkillDad using your link, you earn 100 reward points instantly. These points are tracked in your Reward Wallet and can be redeemed for course discounts or exclusive certificates.', category: 'Rewards & Referrals', help_link: '/dashboard/reward-wallet' },
+        ];
+        for (const faq of defaults) {
+          await query('INSERT INTO faqs (id, question, answer, category, help_link) VALUES ($1, $2, $3, $4, $5)', [crypto.randomUUID(), faq.question, faq.answer, faq.category, faq.help_link]);
         }
+        console.log('[Migration] Seeded default FAQs'.green);
+      }
 
-        console.log('[Migration] FAQs table columns verified/updated'.green);
-        
-        // Auto-migrate: Batch Management
-        console.log('[Migration] Verifying Batch Management schema...'.yellow);
-        await query(`
+      console.log('[Migration] FAQs table columns verified/updated'.green);
+
+      // Auto-migrate: Batch Management
+      console.log('[Migration] Verifying Batch Management schema...'.yellow);
+      await query(`
             CREATE TABLE IF NOT EXISTS batches (
                 id SERIAL PRIMARY KEY,
                 course_id VARCHAR(255) REFERENCES courses(id) ON DELETE CASCADE,
@@ -289,62 +289,62 @@ const startServer = async () => {
             )
         `);
 
-        // Ensure is_active flag exists on batches
-        const batchActiveColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'batches' AND column_name = 'is_active'");
-        if (batchActiveColCheck.rows.length === 0) {
-            await query("ALTER TABLE batches ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
-            console.log("[Migration] Added is_active to batches".green);
-        }
+      // Ensure is_active flag exists on batches
+      const batchActiveColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'batches' AND column_name = 'is_active'");
+      if (batchActiveColCheck.rows.length === 0) {
+        await query("ALTER TABLE batches ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
+        console.log("[Migration] Added is_active to batches".green);
+      }
 
-        // Ensure is_active flag exists on users
-        const userActiveColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'is_active'");
-        if (userActiveColCheck.rows.length === 0) {
-            await query("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
-            console.log("[Migration] Added is_active to users".green);
-        }
-        
-        const tablesToUpdate = ['enrollments', 'live_sessions'];
-        for (const table of tablesToUpdate) {
-            const colCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1 AND column_name = 'batch_id'", [table]);
-            if (colCheck.rows.length === 0) {
-                await query(`ALTER TABLE ${table} ADD COLUMN batch_id INTEGER REFERENCES batches(id)`);
-                console.log(`[Migration] Added batch_id to ${table}`.green);
-            }
-        }
+      // Ensure is_active flag exists on users
+      const userActiveColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'is_active'");
+      if (userActiveColCheck.rows.length === 0) {
+        await query("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE");
+        console.log("[Migration] Added is_active to users".green);
+      }
 
-        // Special handling for exams: batch_ids (array)
-        const examColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'exams' AND column_name = 'batch_ids'");
-        if (examColCheck.rows.length === 0) {
-            await query("ALTER TABLE exams ADD COLUMN batch_ids INTEGER[] DEFAULT NULL");
-            console.log("[Migration] Added batch_ids (array) to exams".green);
+      const tablesToUpdate = ['enrollments', 'live_sessions'];
+      for (const table of tablesToUpdate) {
+        const colCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1 AND column_name = 'batch_id'", [table]);
+        if (colCheck.rows.length === 0) {
+          await query(`ALTER TABLE ${table} ADD COLUMN batch_id INTEGER REFERENCES batches(id)`);
+          console.log(`[Migration] Added batch_id to ${table}`.green);
         }
+      }
 
-        // Ensure results_published flag exists on exams (result publishing gate)
-        const rPubColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'exams' AND column_name = 'results_published'");
-        if (rPubColCheck.rows.length === 0) {
-            await query("ALTER TABLE exams ADD COLUMN results_published BOOLEAN DEFAULT FALSE");
-            console.log("[Migration] Added results_published to exams".green);
-        }
+      // Special handling for exams: batch_ids (array)
+      const examColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'exams' AND column_name = 'batch_ids'");
+      if (examColCheck.rows.length === 0) {
+        await query("ALTER TABLE exams ADD COLUMN batch_ids INTEGER[] DEFAULT NULL");
+        console.log("[Migration] Added batch_ids (array) to exams".green);
+      }
 
-        // Ensure university_id exists in enrollments for cohort scoping
-        const uniColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'enrollments' AND column_name = 'university_id'");
-        if (uniColCheck.rows.length === 0) {
-            await query('ALTER TABLE enrollments ADD COLUMN university_id VARCHAR(255) REFERENCES users(id)');
-            console.log('[Migration] Added university_id to enrollments'.green);
-        }
-        
-        console.log('[Migration] Batch Management schema verified'.green);
+      // Ensure results_published flag exists on exams (result publishing gate)
+      const rPubColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'exams' AND column_name = 'results_published'");
+      if (rPubColCheck.rows.length === 0) {
+        await query("ALTER TABLE exams ADD COLUMN results_published BOOLEAN DEFAULT FALSE");
+        console.log("[Migration] Added results_published to exams".green);
+      }
 
-        // Auto-migrate: ensure live_sessions table has partner_id
-        const sessColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['live_sessions']);
-        const sessCols = sessColRes.rows.map(r => r.column_name);
-        if (!sessCols.includes('partner_id')) {
-            await query('ALTER TABLE live_sessions ADD COLUMN partner_id VARCHAR(255) REFERENCES users(id)');
-            console.log('[Migration] Added partner_id to live_sessions'.green);
-        }
+      // Ensure university_id exists in enrollments for cohort scoping
+      const uniColCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name = 'enrollments' AND column_name = 'university_id'");
+      if (uniColCheck.rows.length === 0) {
+        await query('ALTER TABLE enrollments ADD COLUMN university_id VARCHAR(255) REFERENCES users(id)');
+        console.log('[Migration] Added university_id to enrollments'.green);
+      }
 
-        // Auto-migrate: Create sales_applications table
-        await query(`
+      console.log('[Migration] Batch Management schema verified'.green);
+
+      // Auto-migrate: ensure live_sessions table has partner_id
+      const sessColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['live_sessions']);
+      const sessCols = sessColRes.rows.map(r => r.column_name);
+      if (!sessCols.includes('partner_id')) {
+        await query('ALTER TABLE live_sessions ADD COLUMN partner_id VARCHAR(255) REFERENCES users(id)');
+        console.log('[Migration] Added partner_id to live_sessions'.green);
+      }
+
+      // Auto-migrate: Create sales_applications table
+      await query(`
             CREATE TABLE IF NOT EXISTS sales_applications (
                 id VARCHAR(255) PRIMARY KEY,
                 sales_id VARCHAR(255) REFERENCES users(id) ON DELETE SET NULL,
@@ -364,84 +364,84 @@ const startServer = async () => {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             )
         `);
-        console.log('[Migration] sales_applications table verified/created'.green);
+      console.log('[Migration] sales_applications table verified/created'.green);
 
-        // Auto-migrate: ensure sales_applications has student_dob
-        const salesColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['sales_applications']);
-        const salesCols = salesColRes.rows.map(r => r.column_name);
-        if (!salesCols.includes('student_dob')) {
-            await query('ALTER TABLE sales_applications ADD COLUMN student_dob VARCHAR(50)');
-            console.log('[Migration] Added student_dob to sales_applications'.green);
-        }
+      // Auto-migrate: ensure sales_applications has student_dob
+      const salesColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['sales_applications']);
+      const salesCols = salesColRes.rows.map(r => r.column_name);
+      if (!salesCols.includes('student_dob')) {
+        await query('ALTER TABLE sales_applications ADD COLUMN student_dob VARCHAR(50)');
+        console.log('[Migration] Added student_dob to sales_applications'.green);
+      }
 
-        // Auto-migrate: ensure skill_dad_universities has profile media columns
-        const sdUniColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['skill_dad_universities']);
-        const sdUniCols = sdUniColRes.rows.map(r => r.column_name);
-        if (!sdUniCols.includes('profile_image')) {
-            await query('ALTER TABLE skill_dad_universities ADD COLUMN profile_image VARCHAR(255)');
-            console.log('[Migration] Added profile_image to skill_dad_universities'.green);
-        }
-        if (!sdUniCols.includes('cover_image')) {
-            await query('ALTER TABLE skill_dad_universities ADD COLUMN cover_image VARCHAR(255)');
-            console.log('[Migration] Added cover_image to skill_dad_universities'.green);
-        }
-        if (!sdUniCols.includes('gallery')) {
-            await query("ALTER TABLE skill_dad_universities ADD COLUMN gallery JSONB DEFAULT '[]'::jsonb");
-            console.log('[Migration] Added gallery to skill_dad_universities'.green);
-        }
+      // Auto-migrate: ensure skill_dad_universities has profile media columns
+      const sdUniColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['skill_dad_universities']);
+      const sdUniCols = sdUniColRes.rows.map(r => r.column_name);
+      if (!sdUniCols.includes('profile_image')) {
+        await query('ALTER TABLE skill_dad_universities ADD COLUMN profile_image VARCHAR(255)');
+        console.log('[Migration] Added profile_image to skill_dad_universities'.green);
+      }
+      if (!sdUniCols.includes('cover_image')) {
+        await query('ALTER TABLE skill_dad_universities ADD COLUMN cover_image VARCHAR(255)');
+        console.log('[Migration] Added cover_image to skill_dad_universities'.green);
+      }
+      if (!sdUniCols.includes('gallery')) {
+        await query("ALTER TABLE skill_dad_universities ADD COLUMN gallery JSONB DEFAULT '[]'::jsonb");
+        console.log('[Migration] Added gallery to skill_dad_universities'.green);
+      }
 
-        // Auto-migrate: ensure courses has program_type (Skill Courses vs Skill Integrated Degree Programmes)
-        const courseColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['courses']);
-        const courseCols = courseColRes.rows.map(r => r.column_name);
-        if (!courseCols.includes('program_type')) {
-            await query("ALTER TABLE courses ADD COLUMN program_type VARCHAR(30) NOT NULL DEFAULT 'course'");
-            console.log('[Migration] Added program_type to courses'.green);
-        }
-        if (!courseCols.includes('skill_dad_university_id')) {
-            await query('ALTER TABLE courses ADD COLUMN skill_dad_university_id INTEGER REFERENCES skill_dad_universities(id) ON DELETE SET NULL');
-            console.log('[Migration] Added skill_dad_university_id to courses'.green);
-        }
+      // Auto-migrate: ensure courses has program_type (Skill Courses vs Skill Integrated Degree Programmes)
+      const courseColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['courses']);
+      const courseCols = courseColRes.rows.map(r => r.column_name);
+      if (!courseCols.includes('program_type')) {
+        await query("ALTER TABLE courses ADD COLUMN program_type VARCHAR(30) NOT NULL DEFAULT 'course'");
+        console.log('[Migration] Added program_type to courses'.green);
+      }
+      if (!courseCols.includes('skill_dad_university_id')) {
+        await query('ALTER TABLE courses ADD COLUMN skill_dad_university_id INTEGER REFERENCES skill_dad_universities(id) ON DELETE SET NULL');
+        console.log('[Migration] Added skill_dad_university_id to courses'.green);
+      }
 
-        // Auto-migrate: ensure enquiries supports course-linked enrollment enquiries and status tracking
-        const enquiryColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['enquiries']);
-        const enquiryCols = enquiryColRes.rows.map(r => r.column_name);
-        if (!enquiryCols.includes('course_id')) {
-            await query('ALTER TABLE enquiries ADD COLUMN course_id VARCHAR(255) REFERENCES courses(id) ON DELETE SET NULL');
-            console.log('[Migration] Added course_id to enquiries'.green);
-        }
-        if (!enquiryCols.includes('course_name')) {
-            await query('ALTER TABLE enquiries ADD COLUMN course_name VARCHAR(255)');
-            console.log('[Migration] Added course_name to enquiries'.green);
-        }
-        if (!enquiryCols.includes('status')) {
-            await query("ALTER TABLE enquiries ADD COLUMN status VARCHAR(30) NOT NULL DEFAULT 'new'");
-            console.log('[Migration] Added status to enquiries'.green);
-        }
-        if (!enquiryCols.includes('university_name')) {
-            await query('ALTER TABLE enquiries ADD COLUMN university_name VARCHAR(255)');
-            console.log('[Migration] Added university_name to enquiries'.green);
-        }
+      // Auto-migrate: ensure enquiries supports course-linked enrollment enquiries and status tracking
+      const enquiryColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['enquiries']);
+      const enquiryCols = enquiryColRes.rows.map(r => r.column_name);
+      if (!enquiryCols.includes('course_id')) {
+        await query('ALTER TABLE enquiries ADD COLUMN course_id VARCHAR(255) REFERENCES courses(id) ON DELETE SET NULL');
+        console.log('[Migration] Added course_id to enquiries'.green);
+      }
+      if (!enquiryCols.includes('course_name')) {
+        await query('ALTER TABLE enquiries ADD COLUMN course_name VARCHAR(255)');
+        console.log('[Migration] Added course_name to enquiries'.green);
+      }
+      if (!enquiryCols.includes('status')) {
+        await query("ALTER TABLE enquiries ADD COLUMN status VARCHAR(30) NOT NULL DEFAULT 'new'");
+        console.log('[Migration] Added status to enquiries'.green);
+      }
+      if (!enquiryCols.includes('university_name')) {
+        await query('ALTER TABLE enquiries ADD COLUMN university_name VARCHAR(255)');
+        console.log('[Migration] Added university_name to enquiries'.green);
+      }
 
-        // Auto-migrate: ensure batches supports activate/deactivate
-        const batchColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['batches']);
-        const batchCols = batchColRes.rows.map(r => r.column_name);
-        if (!batchCols.includes('is_active')) {
-            await query('ALTER TABLE batches ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT true');
-            console.log('[Migration] Added is_active to batches'.green);
-        }
+      // Auto-migrate: ensure batches supports activate/deactivate
+      const batchColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['batches']);
+      const batchCols = batchColRes.rows.map(r => r.column_name);
+      if (!batchCols.includes('is_active')) {
+        await query('ALTER TABLE batches ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT true');
+        console.log('[Migration] Added is_active to batches'.green);
+      }
 
-        // Auto-migrate: ensure courses support highlights and learning outcomes
-        if (!courseCols.includes('features')) {
-            await query("ALTER TABLE courses ADD COLUMN features JSONB NOT NULL DEFAULT '[]'::jsonb");
-            console.log('[Migration] Added features to courses'.green);
-        }
-        if (!courseCols.includes('learning_outcomes')) {
-            await query("ALTER TABLE courses ADD COLUMN learning_outcomes JSONB NOT NULL DEFAULT '[]'::jsonb");
-            console.log('[Migration] Added learning_outcomes to courses'.green);
-        }
+      // Auto-migrate: ensure courses support highlights and learning outcomes
+      if (!courseCols.includes('features')) {
+        await query("ALTER TABLE courses ADD COLUMN features JSONB NOT NULL DEFAULT '[]'::jsonb");
+        console.log('[Migration] Added features to courses'.green);
+      }
+      if (!courseCols.includes('learning_outcomes')) {
+        await query("ALTER TABLE courses ADD COLUMN learning_outcomes JSONB NOT NULL DEFAULT '[]'::jsonb");
+        console.log('[Migration] Added learning_outcomes to courses'.green);
+      }
 
-        // Auto-migrate: ensure interactive_contents table exists with all required columns
-        await query(`
+      // Auto-migrate: ensure interactive_contents table exists with all required columns
+      await query(`
             CREATE TABLE IF NOT EXISTS interactive_contents (
                 id TEXT PRIMARY KEY,
                 type TEXT,
@@ -459,31 +459,31 @@ const startServer = async () => {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             )
         `);
-        const icColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['interactive_contents']);
-        const icCols = icColRes.rows.map(r => r.column_name);
-        if (!icCols.includes('module_id')) await query('ALTER TABLE interactive_contents ADD COLUMN module_id TEXT');
-        if (!icCols.includes('course_id')) await query('ALTER TABLE interactive_contents ADD COLUMN course_id TEXT');
-        if (!icCols.includes('description')) await query('ALTER TABLE interactive_contents ADD COLUMN description TEXT');
-        if (!icCols.includes('instructions')) await query('ALTER TABLE interactive_contents ADD COLUMN instructions TEXT');
-        if (!icCols.includes('time_limit')) await query('ALTER TABLE interactive_contents ADD COLUMN time_limit INTEGER DEFAULT 0');
-        if (!icCols.includes('attempts_allowed')) await query('ALTER TABLE interactive_contents ADD COLUMN attempts_allowed INTEGER DEFAULT -1');
-        if (!icCols.includes('passing_score')) await query('ALTER TABLE interactive_contents ADD COLUMN passing_score INTEGER DEFAULT 70');
-        if (!icCols.includes('show_solution_after')) await query("ALTER TABLE interactive_contents ADD COLUMN show_solution_after TEXT DEFAULT 'submission'");
-        if (!icCols.includes('questions')) await query("ALTER TABLE interactive_contents ADD COLUMN questions JSONB DEFAULT '[]'");
-        console.log('[Migration] interactive_contents table columns verified/updated'.green);
+      const icColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['interactive_contents']);
+      const icCols = icColRes.rows.map(r => r.column_name);
+      if (!icCols.includes('module_id')) await query('ALTER TABLE interactive_contents ADD COLUMN module_id TEXT');
+      if (!icCols.includes('course_id')) await query('ALTER TABLE interactive_contents ADD COLUMN course_id TEXT');
+      if (!icCols.includes('description')) await query('ALTER TABLE interactive_contents ADD COLUMN description TEXT');
+      if (!icCols.includes('instructions')) await query('ALTER TABLE interactive_contents ADD COLUMN instructions TEXT');
+      if (!icCols.includes('time_limit')) await query('ALTER TABLE interactive_contents ADD COLUMN time_limit INTEGER DEFAULT 0');
+      if (!icCols.includes('attempts_allowed')) await query('ALTER TABLE interactive_contents ADD COLUMN attempts_allowed INTEGER DEFAULT -1');
+      if (!icCols.includes('passing_score')) await query('ALTER TABLE interactive_contents ADD COLUMN passing_score INTEGER DEFAULT 70');
+      if (!icCols.includes('show_solution_after')) await query("ALTER TABLE interactive_contents ADD COLUMN show_solution_after TEXT DEFAULT 'submission'");
+      if (!icCols.includes('questions')) await query("ALTER TABLE interactive_contents ADD COLUMN questions JSONB DEFAULT '[]'");
+      console.log('[Migration] interactive_contents table columns verified/updated'.green);
 
-        // Auto-migrate: track last_login_at so we can detect a genuine first-ever login
-        // (column stays null until the first successful login/registration) to drive the
-        // first-time welcome experience.
-        const userColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['users']);
-        const userCols = userColRes.rows.map(r => r.column_name);
-        if (!userCols.includes('last_login_at')) {
-            await query('ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP WITH TIME ZONE');
-            console.log('[Migration] Added last_login_at to users'.green);
-        }
+      // Auto-migrate: track last_login_at so we can detect a genuine first-ever login
+      // (column stays null until the first successful login/registration) to drive the
+      // first-time welcome experience.
+      const userColRes = await query("SELECT column_name FROM information_schema.columns WHERE table_name = $1", ['users']);
+      const userCols = userColRes.rows.map(r => r.column_name);
+      if (!userCols.includes('last_login_at')) {
+        await query('ALTER TABLE users ADD COLUMN last_login_at TIMESTAMP WITH TIME ZONE');
+        console.log('[Migration] Added last_login_at to users'.green);
+      }
 
-        // Auto-migrate: ensure wbl_courses table exists
-        await query(`
+      // Auto-migrate: ensure wbl_courses table exists
+      await query(`
             CREATE TABLE IF NOT EXISTS wbl_courses (
                 id UUID PRIMARY KEY,
                 category VARCHAR(50) NOT NULL CHECK (category IN ('domestic', 'abroad')),
@@ -498,14 +498,14 @@ const startServer = async () => {
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        console.log('[Migration] wbl_courses table verified/created'.green);
+      console.log('[Migration] wbl_courses table verified/created'.green);
     } catch (migErr) {
-        console.warn('[Migration] Database migration warning:', migErr.message);
+      console.warn('[Migration] Database migration warning:', migErr.message);
     }
-    
+
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`.green.bold);
-      
+
       const heapLimit = require('v8').getHeapStatistics().heap_size_limit;
       console.log(`[Server] Memory Heap Limit: ${(heapLimit / 1024 / 1024).toFixed(2)} MB`.cyan);
 
@@ -522,7 +522,7 @@ const startServer = async () => {
         }).on('error', (err) => {
           console.warn('[KeepAlive] Ping failed:', err.message);
         });
-      }, 14 * 60 * 1000); 
+      }, 14 * 60 * 1000);
     });
   } catch (error) {
     console.error('[Server] Critical failure during startup:'.red.bold, error);

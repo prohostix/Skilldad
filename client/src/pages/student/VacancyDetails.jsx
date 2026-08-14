@@ -173,96 +173,96 @@ const VacancyDetails = () => {
                     </GlassCard>
                 </motion.div>
             ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Left: Main content - 2/3 */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* About the Role */}
-                    {vacancy.description && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                            <GlassCard className="border-white/10">
-                                <div className="flex items-center gap-3 mb-5">
-                                    <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
-                                        <Info size={16} className="text-primary" />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left: Main content - 2/3 */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* About the Role */}
+                        {vacancy.description && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                                <GlassCard className="border-white/10">
+                                    <div className="flex items-center gap-3 mb-5">
+                                        <div className="p-2 bg-primary/10 rounded-lg border border-primary/20">
+                                            <Info size={16} className="text-primary" />
+                                        </div>
+                                        <h2 className="text-base font-black text-white uppercase tracking-widest">About the Role</h2>
                                     </div>
-                                    <h2 className="text-base font-black text-white uppercase tracking-widest">About the Role</h2>
-                                </div>
-                                <p className="text-white/60 text-sm leading-relaxed whitespace-pre-line">
-                                    {vacancy.description}
+                                    <p className="text-white/60 text-sm leading-relaxed whitespace-pre-line">
+                                        {vacancy.description}
+                                    </p>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+
+                        {/* Requirements */}
+                        {requirements.length > 0 && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                                <GlassCard className="border-white/10">
+                                    <div className="flex items-center gap-3 mb-5">
+                                        <div className="p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                                            <ListChecks size={16} className="text-purple-400" />
+                                        </div>
+                                        <h2 className="text-base font-black text-white uppercase tracking-widest">Requirements</h2>
+                                    </div>
+                                    <ul className="space-y-3">
+                                        {requirements.map((req, i) => (
+                                            <li key={i} className="flex items-start gap-3 text-sm text-white/60">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                                                {req.replace(/^[-•*]\s*/, '')}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+                    </div>
+
+                    {/* Right: About Company + Apply CTA - 1/3 */}
+                    <div className="space-y-6">
+                        {/* About Company */}
+                        {vacancy.about_company && (
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+                                <GlassCard className="border-white/10">
+                                    <div className="flex items-center gap-3 mb-5">
+                                        <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                                            <Building2 size={16} className="text-emerald-400" />
+                                        </div>
+                                        <h2 className="text-sm font-black text-white uppercase tracking-widest">About the Company</h2>
+                                    </div>
+                                    <p className="text-white/50 text-sm leading-relaxed whitespace-pre-line">
+                                        {vacancy.about_company}
+                                    </p>
+                                </GlassCard>
+                            </motion.div>
+                        )}
+
+                        {/* Sticky Apply Card */}
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+                            <GlassCard className="border-primary/20 bg-primary/5">
+                                <h3 className="text-sm font-black text-white uppercase tracking-widest mb-2">Ready to Apply?</h3>
+                                <p className="text-xs text-white/40 mb-5 leading-relaxed">
+                                    Submit your resume and let the hiring team know you're interested.
                                 </p>
-                            </GlassCard>
-                        </motion.div>
-                    )}
-
-                    {/* Requirements */}
-                    {requirements.length > 0 && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                            <GlassCard className="border-white/10">
-                                <div className="flex items-center gap-3 mb-5">
-                                    <div className="p-2 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                                        <ListChecks size={16} className="text-purple-400" />
+                                {isApplied ? (
+                                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold px-4 py-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 justify-center">
+                                        <CheckCircle size={14} /> Application Submitted
                                     </div>
-                                    <h2 className="text-base font-black text-white uppercase tracking-widest">Requirements</h2>
+                                ) : (
+                                    <ModernButton
+                                        className="w-full !py-3 text-sm font-black"
+                                        onClick={() => setShowApplyModal(true)}
+                                        disabled={vacancy.status !== 'open'}
+                                    >
+                                        Apply Now
+                                    </ModernButton>
+                                )}
+                                <div className="mt-3 flex items-center gap-2 text-[10px] text-white/30">
+                                    <Clock size={11} />
+                                    Deadline: {new Date(vacancy.deadline).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
                                 </div>
-                                <ul className="space-y-3">
-                                    {requirements.map((req, i) => (
-                                        <li key={i} className="flex items-start gap-3 text-sm text-white/60">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                                            {req.replace(/^[-•*]\s*/, '')}
-                                        </li>
-                                    ))}
-                                </ul>
                             </GlassCard>
                         </motion.div>
-                    )}
+                    </div>
                 </div>
-
-                {/* Right: About Company + Apply CTA - 1/3 */}
-                <div className="space-y-6">
-                    {/* About Company */}
-                    {vacancy.about_company && (
-                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                            <GlassCard className="border-white/10">
-                                <div className="flex items-center gap-3 mb-5">
-                                    <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-                                        <Building2 size={16} className="text-emerald-400" />
-                                    </div>
-                                    <h2 className="text-sm font-black text-white uppercase tracking-widest">About the Company</h2>
-                                </div>
-                                <p className="text-white/50 text-sm leading-relaxed whitespace-pre-line">
-                                    {vacancy.about_company}
-                                </p>
-                            </GlassCard>
-                        </motion.div>
-                    )}
-
-                    {/* Sticky Apply Card */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                        <GlassCard className="border-primary/20 bg-primary/5">
-                            <h3 className="text-sm font-black text-white uppercase tracking-widest mb-2">Ready to Apply?</h3>
-                            <p className="text-xs text-white/40 mb-5 leading-relaxed">
-                                Submit your resume and let the hiring team know you're interested.
-                            </p>
-                            {isApplied ? (
-                                <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold px-4 py-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 justify-center">
-                                    <CheckCircle size={14} /> Application Submitted
-                                </div>
-                            ) : (
-                                <ModernButton
-                                    className="w-full !py-3 text-sm font-black"
-                                    onClick={() => setShowApplyModal(true)}
-                                    disabled={vacancy.status !== 'open'}
-                                >
-                                    Apply Now
-                                </ModernButton>
-                            )}
-                            <div className="mt-3 flex items-center gap-2 text-[10px] text-white/30">
-                                <Clock size={11} />
-                                Deadline: {new Date(vacancy.deadline).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
-                            </div>
-                        </GlassCard>
-                    </motion.div>
-                </div>
-            </div>
             )}
 
             {/* Apply Modal */}
@@ -295,12 +295,12 @@ const VacancyDetails = () => {
                                 {resume ? (
                                     <>
                                         <p className="text-sm font-bold text-primary">{resume.name}</p>
-                                        <p className="text-xs text-white/40 mt-1">{(resume.size / 1024).toFixed(1)} KB — Click to replace</p>
+                                        <p className="text-xs text-white/40 mt-1">{(resume.size / 1024).toFixed(1)} KB - Click to replace</p>
                                     </>
                                 ) : (
                                     <>
                                         <p className="text-sm font-bold text-white/60">Upload Resume</p>
-                                        <p className="text-xs text-white/30 mt-1">PDF, DOC, DOCX — Max 5MB</p>
+                                        <p className="text-xs text-white/30 mt-1">PDF, DOC, DOCX - Max 5MB</p>
                                     </>
                                 )}
                             </div>

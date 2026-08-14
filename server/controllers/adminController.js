@@ -71,10 +71,10 @@ const updateEntity = async (req, res) => {
 
         if (saved.role === 'partner' && discountRate !== undefined && discountRate !== null) {
             const rawCode = (saved.name.replace(/\s+/g, '').substring(0, 6) + saved.discount_rate).toUpperCase();
-            
+
             // Look for existing discount code for this partner
             let discountRes = await query('SELECT id FROM discounts WHERE partner_id = $1 ORDER BY id ASC', [saved.id]);
-            
+
             let finalCode = rawCode;
             const codeCheck = await query('SELECT id FROM discounts WHERE code = $1 AND (partner_id IS NULL OR partner_id != $2)', [finalCode, saved.id]);
             if (codeCheck.rows.length > 0) {
@@ -122,25 +122,25 @@ const updateEntity = async (req, res) => {
 const getGlobalStats = async (req, res) => {
     try {
         console.log('[getGlobalStats] Starting queries (v2 with intensive logs)...');
-        
+
         console.log('[getGlobalStats] Querying userCount...');
         const userCount = await query('SELECT COUNT(*) FROM users').catch(e => { console.error('userCount Error:', e.message); return { rows: [{ count: 0 }] }; });
-        
+
         console.log('[getGlobalStats] Querying courseCount...');
         const courseCount = await query('SELECT COUNT(*) FROM courses').catch(e => { console.error('courseCount Error:', e.message); return { rows: [{ count: 0 }] }; });
-        
+
         console.log('[getGlobalStats] Querying studentCount...');
         const studentCount = await query("SELECT COUNT(*) FROM users WHERE role = 'student'").catch(e => { console.error('studentCount Error:', e.message); return { rows: [{ count: 0 }] }; });
-        
+
         console.log('[getGlobalStats] Querying partnerCount...');
         const partnerCount = await query("SELECT COUNT(*) FROM users WHERE role = 'partner'").catch(e => { console.error('partnerCount Error:', e.message); return { rows: [{ count: 0 }] }; });
-        
+
         console.log('[getGlobalStats] Querying ticketCount...');
         const ticketCount = await query("SELECT COUNT(*) FROM support_tickets WHERE status = 'open'").catch(e => { console.error('ticketCount Error:', e.message); return { rows: [{ count: 0 }] }; });
-        
+
         console.log('[getGlobalStats] Querying revenueRes...');
         const revenueRes = await query("SELECT SUM(final_amount) as total FROM transactions WHERE status = 'success'").catch(e => { console.error('revenueRes Error:', e.message); return { rows: [{ total: 0 }] }; });
-        
+
         console.log('[getGlobalStats] Querying careerAppCount...');
         const careerAppCount = await query('SELECT COUNT(*) FROM skilldad_applications').catch(e => { console.error('careerAppCount Error:', e.message); return { rows: [{ count: 0 }] }; });
 
@@ -155,7 +155,7 @@ const getGlobalStats = async (req, res) => {
 
         console.log('[getGlobalStats] Querying dbSizeRes...');
         const dbSizeRes = await query("SELECT pg_database_size(current_database()) as size").catch(e => { console.error('dbSizeRes Error (falling back to 0):', e.message); return { rows: [{ size: 0 }] }; });
-        
+
         console.log('[getGlobalStats] Querying chartRes...');
         const chartRes = await query(`
             WITH days AS (
@@ -173,7 +173,7 @@ const getGlobalStats = async (req, res) => {
             GROUP BY d.day
             ORDER BY d.day
         `).catch(e => { console.error('chartRes Error:', e.message); return { rows: [] }; });
-        
+
         console.log('[getGlobalStats] Querying activityRes...');
         const activityRes = await query(`
             (SELECT 
@@ -201,7 +201,7 @@ const getGlobalStats = async (req, res) => {
             ORDER BY time DESC
             LIMIT 10
         `).catch(e => { console.error('activityRes Error:', e.message); return { rows: [] }; });
-        
+
         console.log('[getGlobalStats] All queries completed with fallbacks (v2).');
 
         const totalRevenue = revenueRes.rows[0].total ? parseFloat(revenueRes.rows[0].total) : 0;
@@ -328,8 +328,8 @@ const verifyUser = async (req, res) => {
         }
 
         const currentVerified = userRes.rows[0].is_verified;
-        const newStatus = typeof req.body?.isVerified === 'boolean' 
-            ? req.body.isVerified 
+        const newStatus = typeof req.body?.isVerified === 'boolean'
+            ? req.body.isVerified
             : !currentVerified;
 
         const result = await query('UPDATE users SET is_verified = $1, updated_at = NOW() WHERE id = $2 RETURNING id, is_verified as "isVerified"', [newStatus, req.params.id]);
@@ -362,7 +362,7 @@ const getPlatformAnalytics = async (req, res) => {
         if (startDate && endDate && startDate.trim() !== '' && endDate.trim() !== '') {
             const start = new Date(startDate);
             const end = new Date(endDate);
-            
+
             // Ensure dates are valid before adding to query
             if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
                 userStatsQuery += ' WHERE created_at >= $1 AND created_at <= $2';
@@ -374,9 +374,9 @@ const getPlatformAnalytics = async (req, res) => {
 
         userStatsQuery += ' GROUP BY role';
         console.log('[getPlatformAnalytics] Querying userStats...');
-        const userStatsRes = await query(userStatsQuery, params).catch(e => { 
-            console.error('userStats Error:', e.message); 
-            return { rows: [] }; 
+        const userStatsRes = await query(userStatsQuery, params).catch(e => {
+            console.error('userStats Error:', e.message);
+            return { rows: [] };
         });
 
         // Real enrollment sources
@@ -392,9 +392,9 @@ const getPlatformAnalytics = async (req, res) => {
             FROM users
             WHERE role = 'student'
             GROUP BY 1
-        `).catch(e => { 
-            console.error('enrollmentSources Error:', e.message); 
-            return { rows: [] }; 
+        `).catch(e => {
+            console.error('enrollmentSources Error:', e.message);
+            return { rows: [] };
         });
 
         // Real revenue impact
@@ -411,9 +411,9 @@ const getPlatformAnalytics = async (req, res) => {
             JOIN users u ON t.user_id = u.id
             WHERE t.status = 'success'
             GROUP BY 1
-        `).catch(e => { 
-            console.error('revenueImpact Error:', e.message); 
-            return { rows: [] }; 
+        `).catch(e => {
+            console.error('revenueImpact Error:', e.message);
+            return { rows: [] };
         });
 
         // Convert revenue impact array to object
@@ -446,7 +446,7 @@ const getPlatformAnalytics = async (req, res) => {
 const testNotification = async (req, res) => {
     try {
         console.log('[testNotification] Triggering test broadcast to admins...');
-        
+
         socketService.broadcastToAdmins('admin_notification', {
             title: 'System Test',
             message: 'Real-time notification working perfectly! 🔥',
@@ -707,13 +707,13 @@ const getAllStudents = async (req, res) => {
 const getStudentDocuments = async (req, res) => {
     try {
         const docsRes = await query('SELECT * FROM documents WHERE student_id = $1', [req.params.id]);
-        
+
         const docs = docsRes.rows;
         const processedDocs = docs.filter(doc => {
             if (doc.status === 'pending') {
-                const isFulfilled = docs.some(d => 
+                const isFulfilled = docs.some(d =>
                     d.student_id === doc.student_id &&
-                    d.title === doc.title && 
+                    d.title === doc.title &&
                     (d.status === 'submitted' || d.status === 'approved' || d.status === 'rejected')
                 );
                 return !isFulfilled;
@@ -806,7 +806,7 @@ const updateStudent = async (req, res) => {
         const updatedEmail = req.body.email || student.email;
         const updatedBio = req.body.bio || student.bio;
         const updatedIsVerified = req.body.isVerified !== undefined ? req.body.isVerified : student.is_verified;
-        
+
         let updatedProfile = parseProfile(student.profile);
         if (req.body.phone !== undefined) {
             updatedProfile.phone = req.body.phone;
@@ -873,7 +873,7 @@ const deleteStudent = async (req, res) => {
             await client.query('DELETE FROM projects WHERE student_id = $1', [id]);
             await client.query('DELETE FROM transactions WHERE student_id = $1', [id]);
             await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
-            
+
             // Handle documents (could be uploaded by student)
             await client.query('DELETE FROM documents WHERE uploaded_by_id = $1 OR student_id = $1', [id]);
 
@@ -896,7 +896,7 @@ const deleteStudent = async (req, res) => {
             await client.query('DELETE FROM users WHERE id = $1', [id]);
 
             await client.query('COMMIT');
-            
+
             // Notify via WebSocket
             if (socketService.notifyUserListUpdate) {
                 socketService.notifyUserListUpdate('deleted', { _id: id, role: 'student' });
@@ -953,7 +953,7 @@ const deleteUser = async (req, res) => {
                 await client.query('DELETE FROM transactions WHERE student_id = $1', [id]);
                 await client.query('DELETE FROM reward_points WHERE user_id = $1', [id]);
             }
-            
+
             // Cleanup documents uploaded by this user
             await client.query('DELETE FROM documents WHERE uploaded_by_id = $1 OR student_id = $1', [id]);
 
@@ -976,7 +976,7 @@ const deleteUser = async (req, res) => {
             await client.query('DELETE FROM users WHERE id = $1', [id]);
 
             await client.query('COMMIT');
-            
+
             // Notify via WebSocket
             if (socketService.notifyUserListUpdate) {
                 socketService.notifyUserListUpdate('deleted', { ...user, _id: user.id });
@@ -1227,7 +1227,7 @@ async function inviteUser(req, res) {
 
         console.log('[inviteUser] DB Insert successful. Sending notifications in background...');
 
-        // Fire-and-forget: email + optional WhatsApp — never block the response
+        // Fire-and-forget: email + optional WhatsApp - never block the response
         setImmediate(async () => {
             try {
                 await sendEmail({
@@ -1287,14 +1287,14 @@ const deletePhysicalFiles = async (filePaths) => {
     const fs = require('fs').promises;
     const path = require('path');
     const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
-    
+
     for (const filePath of paths) {
         if (!filePath || typeof filePath !== 'string') continue;
-        
+
         // Remove /uploads/ prefix for path joining (if it's a relative URL)
         const relativePath = filePath.startsWith('/uploads/') ? filePath.replace('/uploads/', '') : filePath;
         const fullPath = path.join(global.BASE_UPLOAD_PATH || path.join(__dirname, '../uploads'), relativePath);
-        
+
         try {
             const fsSync = require('fs');
             if (fsSync.existsSync(fullPath)) {
@@ -1355,7 +1355,7 @@ async function deleteUniversity(req, res) {
 
         // 3. Build comprehensive list of files to delete
         const filesToDelete = [];
-        
+
         // University files
         if (uni.profile_image) filesToDelete.push(uni.profile_image);
         const profile = typeof uni.profile === 'string' ? JSON.parse(uni.profile) : (uni.profile || {});
@@ -1451,7 +1451,7 @@ async function deleteUniversity(req, res) {
             await client.query('DELETE FROM discounts WHERE partner_id = $1', [id]);
             await client.query('DELETE FROM live_sessions WHERE university_id = $1 OR instructor_id = $2', [id, id]);
             await client.query('DELETE FROM documents WHERE uploaded_by_id = $1 OR university_id = $1', [id]);
-            
+
             // Delete courses
             if (courseIds.length > 0) {
                 await client.query('DELETE FROM courses WHERE id = ANY($1)', [courseIds]);
@@ -1461,20 +1461,20 @@ async function deleteUniversity(req, res) {
             await client.query('DELETE FROM users WHERE id = $1', [id]);
 
             await client.query('COMMIT');
-            
+
             // 6. Delete Physical Files after successful DB cleanup
             if (filesToDelete.length > 0) {
                 await deletePhysicalFiles(filesToDelete);
             }
-            
+
             // Notify via WebSocket
             if (socketService.notifyUserListUpdate) {
                 socketService.notifyUserListUpdate('deleted', { ...uni, _id: uni.id });
             }
 
-            res.json({ 
-                success: true, 
-                message: 'University and all associated data (courses, exams, files) deleted successfully' 
+            res.json({
+                success: true,
+                message: 'University and all associated data (courses, exams, files) deleted successfully'
             });
         } catch (dbError) {
             await client.query('ROLLBACK');
@@ -1536,7 +1536,7 @@ async function getUniversityDetail(req, res) {
         const university = universityRes.rows[0];
 
         if (university && typeof university.profile === 'string') {
-            try { university.profile = JSON.parse(university.profile); } catch(e) { university.profile = {}; }
+            try { university.profile = JSON.parse(university.profile); } catch (e) { university.profile = {}; }
         }
 
         if (!university || (university.role !== 'university' && university.role !== 'partner')) {
@@ -1598,9 +1598,9 @@ async function getUniversityDetail(req, res) {
         });
     } catch (error) {
         console.error('[getUniversityDetail] Internal Error:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             message: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 }
@@ -1737,7 +1737,7 @@ const adminEnrollStudent = async (req, res) => {
                         try {
                             const p = JSON.parse(student.profile);
                             studentData.phone = student.phone || p.phone;
-                        } catch(e) {}
+                        } catch (e) { }
                     }
                     await notificationService.send(studentData, 'enrollment', { courseTitle: course.title, enrolledBy });
                 } catch (err) {
@@ -1807,7 +1807,7 @@ const adminEnrollStudent = async (req, res) => {
         });
     } catch (error) {
         console.error('[AdminEnroll] CRITICAL ERROR:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
             message: error.message || 'Failed to enroll student',
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
@@ -1972,7 +1972,7 @@ const uploadUniversityGalleryImages = async (req, res) => {
         const newImages = req.files.map(file => `/uploads/${file.filename}`);
         const profile = parseProfile(user.profile);
         const currentGallery = profile.gallery || [];
-        
+
         const updatedGallery = [...currentGallery, ...newImages];
         profile.gallery = updatedGallery;
 
@@ -2007,7 +2007,7 @@ const uploadFacultyPhoto = async (req, res) => {
 
         const imagePath = `/uploads/${req.file.filename}`;
         const profile = parseProfile(user.profile);
-        
+
         if (!Array.isArray(profile.faculty)) {
             profile.faculty = [];
         }

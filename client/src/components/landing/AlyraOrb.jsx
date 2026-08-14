@@ -91,7 +91,7 @@ const AlyraOrb = () => {
                 return;
             }
 
-            // Frame throttle — skip frame if budget not elapsed
+            // Frame throttle - skip frame if budget not elapsed
             if (timestamp - lastFrameTime < FRAME_BUDGET) {
                 animationFrameId = requestAnimationFrame(render);
                 return;

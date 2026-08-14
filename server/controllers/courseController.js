@@ -23,9 +23,9 @@ const getCourses = asyncHandler(async (req, res) => {
         }
 
         if (search) {
-            const stopWords = ['is','the','a','an','of','for','to','and','or','in','on','which','one','any','all','some','what','how','details','detail'];
+            const stopWords = ['is', 'the', 'a', 'an', 'of', 'for', 'to', 'and', 'or', 'in', 'on', 'which', 'one', 'any', 'all', 'some', 'what', 'how', 'details', 'detail'];
             const words = search.split(/[ \-–&,]+/).filter(w => w.trim().length > 1 && !stopWords.includes(w.toLowerCase()));
-            
+
             if (words.length > 0) {
                 let orConditions = [];
                 let relevanceCases = [];
@@ -35,7 +35,7 @@ const getCourses = asyncHandler(async (req, res) => {
                     orConditions.push(`c.title ILIKE $${paramIdx} OR c.university_name ILIKE $${paramIdx}`);
                     relevanceCases.push(`(CASE WHEN c.title ILIKE $${paramIdx} THEN 2 WHEN c.university_name ILIKE $${paramIdx} THEN 1 ELSE 0 END)`);
                 });
-                
+
                 queryStr = queryStr.replace('SELECT c.*,', `SELECT c.*, (${relevanceCases.join(' + ')}) as relevance,`);
                 queryStr += ` AND (${orConditions.join(' OR ')})`;
                 queryStr += ` ORDER BY relevance DESC, c.is_featured DESC, c.created_at DESC LIMIT 10`;
@@ -126,7 +126,7 @@ const getAdminCourses = asyncHandler(async (req, res) => {
 const getCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
-    // PG Query — LEFT JOIN because Degree Programme courses (linked to a SkillDad University)
+    // PG Query - LEFT JOIN because Degree Programme courses (linked to a SkillDad University)
     // have a null instructor_id and no real instructor user account
     const courseRes = await query(`
         SELECT c.*, u.name as instructor_name, u.profile as instructor_profile
@@ -152,7 +152,7 @@ const getCourse = asyncHandler(async (req, res) => {
             LEFT JOIN batches b ON e.batch_id = b.id
             WHERE e.student_id = $1 AND e.course_id = $2 AND e.status = 'active'
         `, [req.user.id, id]);
-        
+
         if (enrollRes.rows.length > 0) {
             const enrollment = enrollRes.rows[0];
             // If they belong to a batch and the batch is explicitly inactive, track it
@@ -178,7 +178,7 @@ const getCourse = asyncHandler(async (req, res) => {
         course.modules = course.modules.map(m => {
             const sanitizedModule = { ...m };
             delete sanitizedModule.quiz; // Hide quizzes from public
-            
+
             if (Array.isArray(sanitizedModule.videos)) {
                 sanitizedModule.videos = sanitizedModule.videos.map(v => {
                     const { url, attachments, exercises, zoom_recording_url, ...safeVideo } = v;
@@ -213,7 +213,7 @@ const createCourse = asyncHandler(async (req, res) => {
     const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes } = req.body;
     const isDegreeProgramme = (programType || 'course') === 'degree_programme';
 
-    // For Admin, a provider is mandatory — a real university for Skill Courses, a SkillDad University for Degree Programmes
+    // For Admin, a provider is mandatory - a real university for Skill Courses, a SkillDad University for Degree Programmes
     if (req.user.role === 'admin') {
         if (isDegreeProgramme && !skillDadUniversityId) {
             res.status(400);
@@ -300,7 +300,7 @@ const updateCourse = asyncHandler(async (req, res) => {
         WHERE id = $15
     `, [title, description, category, price, isPublished, isFeatured, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, programType, features ? JSON.stringify(features) : null, learning_outcomes ? JSON.stringify(learning_outcomes) : null, id]);
 
-    // instructor_id and skill_dad_university_id are mutually exclusive — a Degree Programme is
+    // instructor_id and skill_dad_university_id are mutually exclusive - a Degree Programme is
     // linked to a SkillDad University (no login account), a Skill Course to a real instructor user.
     if (programType === 'degree_programme') {
         await query(
@@ -359,42 +359,42 @@ const updateCourse = asyncHandler(async (req, res) => {
 const addModule = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { title } = req.body;
-    
+
     const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-    
+
     if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
         return res.status(403).json({ message: 'Not authorized' });
     }
-    
+
     const modules = courseRes.rows[0].modules || [];
     const newModule = {
         _id: `module_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         title,
         videos: []
     };
-    
+
     modules.push(newModule);
     await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-    
+
     res.status(201).json(newModule);
 });
 
 const updateModule = asyncHandler(async (req, res) => {
     const { id, moduleId } = req.params;
     const { title } = req.body;
-    
+
     const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-    
+
     if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
         return res.status(403).json({ message: 'Not authorized' });
     }
-    
+
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
     if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
-    
+
     modules[moduleIndex].title = title;
     await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
 
@@ -406,7 +406,7 @@ const updateModule = asyncHandler(async (req, res) => {
 // @access  Private (Instructor/Admin)
 //
 // batchIds omitted/undefined on the module (legacy data, or never touched) means the
-// module is open to every enrolled student — matches today's behaviour, so existing
+// module is open to every enrolled student - matches today's behaviour, so existing
 // courses see zero change until an instructor explicitly publishes a module.
 // batchIds: [] means explicitly published to nobody yet (a real "draft" state).
 // batchIds: [...ids] restricts visibility to students enrolled in one of those batches;
@@ -438,95 +438,95 @@ const updateModulePublishTargets = asyncHandler(async (req, res) => {
 
 const deleteModule = asyncHandler(async (req, res) => {
     const { id, moduleId } = req.params;
-    
+
     const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-    
+
     if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
         return res.status(403).json({ message: 'Not authorized' });
     }
-    
+
     let modules = courseRes.rows[0].modules || [];
     modules = modules.filter(m => m._id !== moduleId);
-    
+
     await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-    
+
     res.json({ message: 'Module deleted' });
 });
 
 const addVideo = asyncHandler(async (req, res) => {
     const { id, moduleId } = req.params;
     const { title, url } = req.body;
-    
+
     const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-    
+
     if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
         return res.status(403).json({ message: 'Not authorized' });
     }
-    
+
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
     if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
-    
+
     const newVideo = {
         _id: `video_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         title,
         url
     };
-    
+
     modules[moduleIndex].videos = modules[moduleIndex].videos || [];
     modules[moduleIndex].videos.push(newVideo);
-    
+
     await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-    
+
     res.status(201).json(newVideo);
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
     const { id, moduleId, videoId } = req.params;
     const { title, url } = req.body;
-    
+
     const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-    
+
     if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
         return res.status(403).json({ message: 'Not authorized' });
     }
-    
+
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
     if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
-    
+
     const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
     if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
-    
+
     modules[moduleIndex].videos[videoIndex].title = title || modules[moduleIndex].videos[videoIndex].title;
     modules[moduleIndex].videos[videoIndex].url = url || modules[moduleIndex].videos[videoIndex].url;
-    
+
     await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-    
+
     res.json(modules[moduleIndex].videos[videoIndex]);
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
     const { id, moduleId, videoId } = req.params;
-    
+
     const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
     if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-    
+
     if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
         return res.status(403).json({ message: 'Not authorized' });
     }
-    
+
     let modules = courseRes.rows[0].modules || [];
     const moduleIndex = modules.findIndex(m => m._id === moduleId);
     if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
-    
+
     modules[moduleIndex].videos = modules[moduleIndex].videos.filter(v => v._id !== videoId);
-    
+
     await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-    
+
     res.json({ message: 'Video deleted' });
 });
 
@@ -539,10 +539,10 @@ const uploadThumbnail = asyncHandler(async (req, res) => {
     }
 
     if (!req.file) return res.status(400).json({ message: 'Please upload an image' });
-    
+
     const imagePath = `/uploads/${req.file.filename}`;
     await query('UPDATE courses SET thumbnail = $1, updated_at = NOW() WHERE id = $2', [imagePath, id]);
-    
+
     res.json({ message: 'Thumbnail uploaded', thumbnail: imagePath });
 });
 
@@ -555,10 +555,10 @@ const uploadBrochure = asyncHandler(async (req, res) => {
     }
 
     if (!req.file) return res.status(400).json({ message: 'Please upload a file' });
-    
+
     const filePath = `/uploads/${req.file.filename}`;
     await query('UPDATE courses SET brochure_url = $1, updated_at = NOW() WHERE id = $2', [filePath, id]);
-    
+
     res.json({ message: 'Brochure uploaded', brochure_url: filePath });
 });
 
@@ -604,28 +604,28 @@ module.exports = {
     saveModuleQuiz,
     uploadLessonVideo: asyncHandler(async (req, res) => {
         const { id, moduleId, videoId } = req.params;
-        
+
         const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
         if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-        
+
         if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
             return res.status(403).json({ message: 'Not authorized' });
         }
-        
+
         if (!req.file) return res.status(400).json({ message: 'Please upload a video file' });
-        
+
         let modules = courseRes.rows[0].modules || [];
         const moduleIndex = modules.findIndex(m => m._id === moduleId);
         if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
-        
+
         const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
         if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
-        
+
         const videoPath = `/uploads/${req.file.filename}`;
         modules[moduleIndex].videos[videoIndex].url = videoPath;
-        
+
         await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-        
+
         res.json({ message: 'Video uploaded successfully', url: videoPath });
     }),
     uploadLessonDocument: asyncHandler(async (req, res) => {
@@ -672,15 +672,15 @@ module.exports = {
         if (courseRes.rows.length === 0) {
             return res.status(404).json({ message: 'Course not found' });
         }
-        
+
         if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
             return res.status(403).json({ message: 'Not authorized' });
         }
-        
+
         const client = await getPool().connect();
         try {
             await client.query('BEGIN');
-            
+
             // Delete related simple dependencies safely using savepoints
             const dependentTables = [
                 'progress', 'submissions', 'projects', 'interactive_contents',
@@ -713,7 +713,7 @@ module.exports = {
                 await client.query('ROLLBACK TO SAVEPOINT before_exams');
             }
 
-            // Documents must be deleted after exams — exam question papers/answer keys are
+            // Documents must be deleted after exams - exam question papers/answer keys are
             // referenced by exams.linked_paper_id/answer_key_id, so deleting documents first
             // would violate that foreign key and silently roll back, leaving orphaned documents
             // that then block the course delete itself.
@@ -727,7 +727,7 @@ module.exports = {
 
             // Finally, delete the course
             await client.query('DELETE FROM courses WHERE id = $1', [id]);
-            
+
             await client.query('COMMIT');
             res.json({ message: 'Course and all related data removed successfully' });
         } catch (error) {
@@ -750,33 +750,33 @@ module.exports = {
     addExercise: asyncHandler(async (req, res) => {
         const { id, moduleId, videoId } = req.params;
         const { title, type, content } = req.body;
-        
+
         const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
         if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Course not found' });
-        
+
         if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
             return res.status(403).json({ message: 'Not authorized' });
         }
-        
+
         let modules = courseRes.rows[0].modules || [];
         const moduleIndex = modules.findIndex(m => m._id === moduleId);
         if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
-        
+
         const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
         if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
-        
+
         const newExercise = {
             _id: `ex_${Date.now()}`,
             title: title || 'New Exercise',
             type: type || 'video-interaction',
             content: content || {}
         };
-        
+
         if (!modules[moduleIndex].videos[videoIndex].exercises) {
             modules[moduleIndex].videos[videoIndex].exercises = [];
         }
         modules[moduleIndex].videos[videoIndex].exercises.push(newExercise);
-        
+
         await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
         res.status(201).json({ message: 'Exercise added', exercise: newExercise });
     }),
@@ -806,29 +806,29 @@ module.exports = {
     uploadLessonFile: asyncHandler(async (req, res) => {
         const { id, moduleId, videoId } = req.params;
         console.log(`[Server] Lesson File Upload Attempt: course=${id}, module=${moduleId}, video=${videoId}`);
-        
+
         const courseRes = await query('SELECT modules, instructor_id FROM courses WHERE id = $1', [id]);
         if (courseRes.rows.length === 0) {
             console.log(`[Server] Course not found: ${id}`);
             return res.status(404).json({ message: 'Course not found' });
         }
-        
+
         console.log(`[Server] Found course. Instructor: ${courseRes.rows[0].instructor_id}, Current User: ${req.user.id}, Role: ${req.user.role}`);
-        
+
         if (req.user.role !== 'admin' && courseRes.rows[0].instructor_id !== req.user.id) {
             console.log(`[Server] NOT AUTHORIZED. Course belongs to: ${courseRes.rows[0].instructor_id}`);
             return res.status(403).json({ message: 'Not authorized' });
         }
-        
+
         if (!req.file) return res.status(400).json({ message: 'Please upload a file' });
-        
+
         let modules = courseRes.rows[0].modules || [];
         const moduleIndex = modules.findIndex(m => m._id === moduleId);
         if (moduleIndex === -1) return res.status(404).json({ message: 'Module not found' });
-        
+
         const videoIndex = modules[moduleIndex].videos.findIndex(v => v._id === videoId);
         if (videoIndex === -1) return res.status(404).json({ message: 'Video not found' });
-        
+
         const filePath = `/uploads/${req.file.filename}`;
         const newFile = {
             _id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
@@ -836,12 +836,12 @@ module.exports = {
             url: filePath,
             type: req.file.mimetype
         };
-        
+
         modules[moduleIndex].videos[videoIndex].attachments = modules[moduleIndex].videos[videoIndex].attachments || [];
         modules[moduleIndex].videos[videoIndex].attachments.push(newFile);
-        
+
         await query('UPDATE courses SET modules = $1::jsonb, updated_at = NOW() WHERE id = $2', [JSON.stringify(modules), id]);
-        
+
         res.status(201).json({ message: 'File uploaded successfully', file: newFile });
     })
 };

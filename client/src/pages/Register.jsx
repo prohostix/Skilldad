@@ -102,7 +102,7 @@ const countryPhoneLengths = {
 };
 
 // Catches obviously-fake placeholder numbers that pass a plain length check
-// (e.g. 1234567890, 0000000000, 9876543210) — a real number is never a
+// (e.g. 1234567890, 0000000000, 9876543210) - a real number is never a
 // simple run of identical or consecutive digits.
 const isSequentialOrRepeated = (digits) => {
     if (/^(\d)\1+$/.test(digits)) return true; // all the same digit
@@ -179,7 +179,7 @@ const Register = () => {
             };
             const { data } = await axios.post('/api/users', submissionData);
             updateUser(data); // updates context + localStorage so Navbar re-renders
-            
+
             // If referral code exists, apply it
             if (referralCode) {
                 try {
@@ -190,7 +190,7 @@ const Register = () => {
                 }
             }
 
-            // Navigate to home page — Dashboard button is in Navbar
+            // Navigate to home page - Dashboard button is in Navbar
             navigate('/');
         } catch (err) {
             const msg = err.response?.data?.message || 'Registration failed. Please try again.';
@@ -231,7 +231,7 @@ const Register = () => {
         }
 
         if (isSequentialOrRepeated(digitsOnly)) {
-            setError('Enter a real phone number — that looks like a placeholder.');
+            setError('Enter a real phone number - that looks like a placeholder.');
             return;
         }
 

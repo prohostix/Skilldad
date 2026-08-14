@@ -14,7 +14,7 @@ let redis = null;
 
 /**
  * Lazy-init Redis client.
- * Falls back gracefully to null if Redis is unavailable —
+ * Falls back gracefully to null if Redis is unavailable -
  * DB is always the source of truth.
  */
 const getRedis = () => {
@@ -37,7 +37,7 @@ const getRedis = () => {
         });
 
         redis.on('error', (err) => {
-            console.warn('[Redis] connection error — falling back to DB:', err.message);
+            console.warn('[Redis] connection error - falling back to DB:', err.message);
             redis = null; // reset so next call retries
         });
 

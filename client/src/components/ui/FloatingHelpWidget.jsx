@@ -202,7 +202,7 @@ const FloatingHelpWidget = () => {
                 return;
             }
 
-            // 2. Search FAQs from DB — primary knowledge source
+            // 2. Search FAQs from DB - primary knowledge source
             try {
                 const faqRes = await axios.get(`/api/faqs?search=${encodeURIComponent(query)}`);
                 const faqs = faqRes.data || [];
@@ -230,7 +230,7 @@ const FloatingHelpWidget = () => {
                 console.error('FAQ search failed:', err);
             }
 
-            // 3. Course search — only if query seems course-related
+            // 3. Course search - only if query seems course-related
             if (query.includes('course') || query.includes('learn') || query.includes('program')) {
                 try {
                     const conversationalFillers = /\b(show|tell|me|about|particular|the|view|i|want|to|learn|find|search|looking|for|can|you|please|is|what|how|courses|course|programs|program)\b/gi;
@@ -264,7 +264,7 @@ const FloatingHelpWidget = () => {
 
             // 4. Final fallback
             const isCourseRelated = query.includes('course') || query.includes('learn') || query.includes('program') || query.includes('detail');
-            
+
             if (isCourseRelated) {
                 setMessages(prev => [...prev, {
                     id: (Date.now() + 1).toString(),
@@ -362,8 +362,8 @@ const FloatingHelpWidget = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 relative z-10">
-                                <button 
-                                    onClick={resetChat} 
+                                <button
+                                    onClick={resetChat}
                                     title="Clear Chat"
                                     className="text-white/70 hover:text-white transition-all bg-white/5 hover:bg-white/10 p-2 rounded-lg"
                                 >
@@ -453,14 +453,14 @@ const FloatingHelpWidget = () => {
                                                 <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
                                                     <span className="text-[10px] text-white/40 italic">Was this helpful?</span>
                                                     <div className="flex gap-2">
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleFeedback(msg.id, msg.faqId, true)}
                                                             className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'up' ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80'}`}
                                                             disabled={feedbackSent[msg.id]}
                                                         >
                                                             <ThumbsUp size={12} />
                                                         </button>
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleFeedback(msg.id, msg.faqId, false)}
                                                             className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'down' ? 'bg-red-500/20 text-red-400' : 'bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80'}`}
                                                             disabled={feedbackSent[msg.id]}
@@ -550,7 +550,7 @@ const FloatingHelpWidget = () => {
                 >
                     {/* Pulsing ring */}
                     <div className="absolute inset-0 rounded-full bg-[#7C3AED] animate-ping opacity-20 pointer-events-none"></div>
-                    
+
                     {/* Tooltip */}
                     <div className="absolute right-full mr-5 bg-[#0B071A]/90 backdrop-blur-md border border-[#7C3AED]/30 text-white text-xs px-4 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform translate-x-4 group-hover:translate-x-0 shadow-xl">
                         <div className="flex items-center gap-2">

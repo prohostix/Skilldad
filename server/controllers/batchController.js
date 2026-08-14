@@ -157,7 +157,7 @@ const toggleBatchStatus = asyncHandler(async (req, res) => {
     }
 
     // 2. Update status. Deactivating only stops the batch from being offered
-    // for new enrollments/exam/session targeting going forward — it does not
+    // for new enrollments/exam/session targeting going forward - it does not
     // touch students already assigned to it, their enrollments, or content
     // already published to them.
     const result = await query(

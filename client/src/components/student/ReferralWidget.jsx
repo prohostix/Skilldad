@@ -84,7 +84,7 @@ export const ReferralDrawer = ({ open, onClose }) => {
                     url: referralData.link,
                 });
                 return;
-            } catch {}
+            } catch { }
         }
         copy(referralData.link, 'link');
     };
@@ -307,7 +307,7 @@ const ReferralWidget = ({ userInfo }) => {
                             <div>
                                 <p className="text-[10px] font-black text-amber-400/70 uppercase tracking-widest">Reward Points</p>
                                 <p className="text-2xl font-black text-white leading-tight">
-                                    {loading ? '—' : rewardData.total.toLocaleString()}
+                                    {loading ? '-' : rewardData.total.toLocaleString()}
                                     <span className="text-[11px] text-amber-400 font-bold ml-1.5">pts</span>
                                 </p>
                             </div>

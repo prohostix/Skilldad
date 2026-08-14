@@ -7,7 +7,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     try {
         userInfo = rawUserInfo ? JSON.parse(rawUserInfo) : null;
     } catch {
-        // corrupt data — force re-login
+        // corrupt data - force re-login
     }
 
     if (!userInfo || !userInfo.token) {
@@ -28,9 +28,9 @@ const ProtectedRoute = ({ allowedRoles }) => {
             sales: '/sales/dashboard',
             student: '/dashboard',
         };
-        
+
         const targetUrl = roleHome[userRole] || '/dashboard';
-        
+
         if (window.location.pathname === targetUrl || (targetUrl === '/dashboard' && window.location.pathname === '/dashboard')) {
             // Force logout if we're looping because their role is completely unrecognized
             // and they aren't even allowed on the fallback dashboard.

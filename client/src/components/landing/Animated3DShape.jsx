@@ -1,7 +1,7 @@
 import React from 'react';
 
 /*
-  Animated3DShape — Performance-optimised
+  Animated3DShape - Performance-optimised
   • All animations use CSS keyframes (GPU-composited transform+opacity only)
   • No Framer Motion infinite loops (reduced from multiple instances to 0)
   • Eliminated backdrop-blur on rotating cube faces (very expensive)
@@ -83,7 +83,7 @@ const Animated3DShape = () => {
                             boxShadow: '0 0 30px rgba(192, 38, 255, 0.3), inset 0 0 30px rgba(192, 38, 255, 0.2)'
                         }}
                     >
-                        {/* Grid Pattern — static */}
+                        {/* Grid Pattern - static */}
                         <div className="absolute inset-0 opacity-20">
                             {[...Array(6)].map((_, i) => (
                                 <div

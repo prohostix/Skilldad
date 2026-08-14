@@ -61,7 +61,7 @@ const partners = [
         logo: 'CAP',
         category: 'Technology & Consulting',
         location: 'Paris, France',
-        description: 'A global leader in consulting, technology services, and digital transformation — a key collaborator in SkillDad\'s international placement network.',
+        description: 'A global leader in consulting, technology services, and digital transformation - a key collaborator in SkillDad\'s international placement network.',
         students: '1,900+',
         openRoles: 78,
         rating: 4.6,
@@ -121,7 +121,7 @@ const partners = [
         logo: 'HCL',
         category: 'IT Services',
         location: 'Noida, India',
-        description: 'A next-generation global technology company helping enterprises reimagine their businesses — powered by SkillDad talent pipelines.',
+        description: 'A next-generation global technology company helping enterprises reimagine their businesses - powered by SkillDad talent pipelines.',
         students: '1,500+',
         openRoles: 58,
         rating: 4.4,
@@ -136,7 +136,7 @@ const partners = [
         logo: 'DEL',
         category: 'Professional Services',
         location: 'London, UK',
-        description: 'Big Four firm offering audit, consulting, tax services — a premium partner channeling SkillDad graduates into elite professional roles globally.',
+        description: 'Big Four firm offering audit, consulting, tax services - a premium partner channeling SkillDad graduates into elite professional roles globally.',
         students: '980+',
         openRoles: 42,
         rating: 4.9,
@@ -223,7 +223,7 @@ const Partners = () => {
                         transition={{ duration: 0.7, delay: 0.2 }}
                         className="text-text-secondary text-base md:text-lg font-inter max-w-2xl mx-auto mb-10 leading-relaxed"
                     >
-                        Our global network of 150+ partner companies actively recruit from SkillDad's talent pool — placing graduates in roles across engineering, consulting, finance, and beyond.
+                        Our global network of 150+ partner companies actively recruit from SkillDad's talent pool - placing graduates in roles across engineering, consulting, finance, and beyond.
                     </motion.p>
 
                     {/* Stats Row */}

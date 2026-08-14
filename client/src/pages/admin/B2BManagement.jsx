@@ -212,7 +212,7 @@ const B2BManagement = () => {
                     : p
             ));
 
-            showToast(`✓ ${payload.name} updated — discount: ${payload.discountRate}%`, 'success');
+            showToast(`✓ ${payload.name} updated - discount: ${payload.discountRate}%`, 'success');
             setOpenEdit(false);
             setOpenDiscount(false);
             // Sync from server in bg

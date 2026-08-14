@@ -20,11 +20,11 @@ const publishResults = asyncHandler(async (req, res) => {
 
   const userRole = req.user.role?.toLowerCase();
   const userId = req.user._id?.toString() || req.user.id?.toString();
-  
-  const isAuthorized = 
-    userRole === 'admin' || 
-    userRole === 'partner' || 
-    exam.university_id === userId || 
+
+  const isAuthorized =
+    userRole === 'admin' ||
+    userRole === 'partner' ||
+    exam.university_id === userId ||
     exam.created_by_id === userId;
 
   if (!isAuthorized) {
@@ -50,7 +50,7 @@ const publishResults = asyncHandler(async (req, res) => {
     WHERE id = $1
   `, [examId]);
 
-  // 5. Notify every student who has a result for this exam — scoped by construction
+  // 5. Notify every student who has a result for this exam - scoped by construction
   // to only students who actually took it (which is itself batch-gated at submission time).
   notifyResultRecipients(examId, exam.title).catch(err =>
     console.error('[Result Notify] Failed to notify students:', err.message)
@@ -124,7 +124,7 @@ const getStudentResult = asyncHandler(async (req, res) => {
   const { examId, studentId } = req.params;
   const userRole = req.user?.role?.toLowerCase();
 
-  // Check results_published gate — only bypass for admin/university/partner
+  // Check results_published gate - only bypass for admin/university/partner
   if (userRole === 'student') {
     const examCheck = await query('SELECT results_published FROM exams WHERE id = $1', [examId]);
     const examRow = examCheck.rows[0];

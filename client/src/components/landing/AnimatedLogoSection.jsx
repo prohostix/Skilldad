@@ -51,7 +51,7 @@ const ORBITALS = Array.from({ length: 8 }, (_, i) => {
 const AnimatedLogoSection = () => {
     return (
         <section className="relative py-12 md:py-16 overflow-hidden bg-transparent" style={{ perspective: "1200px" }}>
-            {/* Background Glows — Static */}
+            {/* Background Glows - Static */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">

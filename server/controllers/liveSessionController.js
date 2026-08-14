@@ -25,12 +25,12 @@ const notifyEnrolledStudents = async (session, title, message, notificationType 
                 AND (e.batch_id IS NULL OR b.is_active = true)
             `;
             let enrollParams = [session.course_id];
-            
+
             if (session.batch_id) {
                 enrollSql += " AND e.batch_id = $2";
                 enrollParams.push(session.batch_id);
             }
-            
+
             const res = await query(enrollSql, enrollParams);
             studentIds = res.rows.map(r => r.student_id);
         } else if (session.university_id) {
@@ -68,8 +68,8 @@ const notifyEnrolledStudents = async (session, title, message, notificationType 
 
             for (const student of studentsRes.rows) {
                 // Ensure ID is passed correctly
-                student._id = student.id; 
-                
+                student._id = student.id;
+
                 try {
                     await notificationService.send(
                         student,
@@ -112,9 +112,9 @@ const createSession = asyncHandler(async (req, res) => {
         console.log(`[Session] Jitsi meeting created for session ${id}: Room ${jitsiData.roomName}`);
     } catch (jitsiError) {
         console.error(`[Session] Failed to create Jitsi meeting for session ${id}:`, jitsiError.message);
-        return res.status(500).json({ 
-            success: false, 
-            message: `Failed to create Jitsi meeting: ${jitsiError.message}` 
+        return res.status(500).json({
+            success: false,
+            message: `Failed to create Jitsi meeting: ${jitsiError.message}`
         });
     }
 
@@ -176,7 +176,7 @@ const getSessions = asyncHandler(async (req, res) => {
     const params = [];
 
     if (req.user.role === 'student') {
-        // Students only see sessions for courses they're actively enrolled in — no
+        // Students only see sessions for courses they're actively enrolled in - no
         // institution-wide sessions regardless of enrollment (course_id IS NULL branch removed).
         // Also excludes sessions from courses where the student's batch is inactive.
         sql += ` AND (
@@ -201,16 +201,16 @@ const getSessions = asyncHandler(async (req, res) => {
     sql += ' ORDER BY s.created_at DESC, s.start_time DESC';
 
     const resSet = await query(sql, params);
-    
+
     const sessions = resSet.rows.map(r => {
         let zoom = r.zoom;
         let recording = r.recording;
-        
+
         if (zoom && typeof zoom === 'string') {
-            try { zoom = JSON.parse(zoom); } catch (e) {}
+            try { zoom = JSON.parse(zoom); } catch (e) { }
         }
         if (recording && typeof recording === 'string') {
-            try { recording = JSON.parse(recording); } catch (e) {}
+            try { recording = JSON.parse(recording); } catch (e) { }
         }
 
         const enrolledCount = r.dynamic_enrolled_count !== undefined && r.dynamic_enrolled_count !== null
@@ -255,12 +255,12 @@ const getSession = asyncHandler(async (req, res) => {
 
     // Ensure JSON fields are parsed
     if (session.zoom && typeof session.zoom === 'string') {
-        try { 
+        try {
             session.meetingData = JSON.parse(session.zoom);
-        } catch (e) {}
+        } catch (e) { }
     }
     if (session.recording && typeof session.recording === 'string') {
-        try { session.recording = JSON.parse(session.recording); } catch (e) {}
+        try { session.recording = JSON.parse(session.recording); } catch (e) { }
     }
 
     // Calculate dynamic enrolled count for this session
@@ -310,14 +310,14 @@ const getSession = asyncHandler(async (req, res) => {
 // @desc    Start session
 const startSession = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    
+
     // Get session details first to notify students
     const resSet = await query("SELECT * FROM live_sessions WHERE id = $1", [id]);
     const session = resSet.rows[0];
-    
+
     if (session) {
         await query("UPDATE live_sessions SET status = 'live', start_time = NOW() WHERE id = $1", [id]);
-        
+
         // Notify students that session is now live
         notifyEnrolledStudents(
             session,
@@ -325,7 +325,7 @@ const startSession = asyncHandler(async (req, res) => {
             `The session "${session.topic}" is now live. Join now to participate!`
         );
     }
-    
+
     res.json({ success: true, message: 'Session is live' });
 });
 
@@ -342,7 +342,7 @@ const endSession = asyncHandler(async (req, res) => {
     // placeholder for future Jitsi recording sync integration
 
     if (session) {
-        // Email only — no approved WhatsApp template exists for session completion
+        // Email only - no approved WhatsApp template exists for session completion
         notifyEnrolledStudents(
             session,
             'Live Class Completed',
@@ -421,7 +421,7 @@ module.exports = {
         const session = resSet.rows[0];
 
         // Ensure user owns this or is admin
-        if ((req.user.role === 'university' && session.university_id !== req.user.id) || 
+        if ((req.user.role === 'university' && session.university_id !== req.user.id) ||
             (req.user.role === 'partner' && session.partner_id !== req.user.id)) {
             return res.status(403).json({ success: false, message: 'Not authorized to modify this session.' });
         }
@@ -436,7 +436,7 @@ module.exports = {
         };
 
         await query("UPDATE live_sessions SET recording = $1, updated_at = NOW() WHERE id = $2", [JSON.stringify(newRecording), id]);
-        
+
         res.json({ success: true, message: 'Recording added successfully!', recording: newRecording });
     }),
     deleteSession: asyncHandler(async (req, res) => {
@@ -489,7 +489,7 @@ module.exports = {
         if (resSet.rows.length === 0) {
             return res.status(404).json({ error: 'Not found' });
         }
-        
+
         const recording = typeof resSet.rows[0].recording === 'string' ? JSON.parse(resSet.rows[0].recording || '{}') : (resSet.rows[0].recording || {});
 
         let playUrl = recording.playUrl || recording.play_url;
