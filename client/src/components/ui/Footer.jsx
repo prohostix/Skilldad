@@ -301,7 +301,7 @@ const Footer = ({ forceVisible = false }) => {
 
                 {/* Bottom Bar */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-gray-400 font-inter">
+                    <div className="mt-1.5 flex flex-col md:flex-row items-center gap-4 text-sm text-gray-400 font-inter">
                         <p>© 2026 SkillDad. All rights reserved.</p>
                         <span className="hidden md:block text-gray-600">•</span>
                         <p className="flex items-center gap-2">

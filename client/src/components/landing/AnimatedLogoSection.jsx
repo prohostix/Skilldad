@@ -127,21 +127,21 @@ const AnimatedLogoSection = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.4, duration: 1 }}
-                        className="space-y-6 max-w-2xl"
+                        className="space-y-5 max-w-2xl mx-auto"
                     >
-                        <h2 className="text-3xl md:text-5xl font-black text-white tracking-[-0.02em] leading-tight font-space">
+                        <h2 className="text-2xl md:text-4xl font-black text-white tracking-[-0.02em] leading-tight font-space">
                             Powered by <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#8A2BE2] via-[#C026FF] to-[#007BFF]">SkillDad</span>
                         </h2>
                         <div className="flex items-center justify-center space-x-4">
-                            <div className="h-[1px] w-16 bg-gradient-to-r from-transparent to-primary/50" />
-                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                            <div className="h-[1px] w-16 bg-gradient-to-l from-transparent to-primary/50" />
+                            <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-primary/50" />
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                            <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-primary/50" />
                         </div>
-                        <div className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 border border-primary/25 rounded-full text-xs font-black uppercase tracking-widest text-primary shadow-sm mb-1">
-                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                        <div className="inline-flex items-center space-x-2 px-3 py-1 bg-primary/10 border border-primary/25 rounded-full text-[10px] font-black uppercase tracking-widest text-primary shadow-sm mb-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                             <span>First in India • EU ECTS Credit Accredited</span>
                         </div>
-                        <p className="text-gray-300 text-base md:text-xl leading-relaxed font-inter font-normal opacity-90 max-w-3xl mx-auto">
+                        <p className="text-gray-300 text-sm md:text-base leading-relaxed font-inter font-normal opacity-90 max-w-2xl mx-auto">
                             Acquire industry-aligned tech and business competencies certified by premier European universities with transferable ECTS credits. SkillDad bridges academic learning with real-world corporate placements, empowering learners with globally recognized qualifications and career growth.
                         </p>
                     </motion.div>
