@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info, Wallet, Video, Sun, Moon } from 'lucide-react';
+import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info, Wallet, Video, Sun, Moon, BarChart2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
 import { useSocket } from '../../context/SocketContext';
@@ -16,8 +16,10 @@ const Navbar = ({ onToggleSidebar }) => {
     useEffect(() => {
         if (theme === 'light') {
             document.documentElement.classList.add('light-mode');
+            document.documentElement.classList.remove('dark');
         } else {
             document.documentElement.classList.remove('light-mode');
+            document.documentElement.classList.add('dark');
         }
         localStorage.setItem('theme', theme);
     }, [theme]);
@@ -63,7 +65,7 @@ const Navbar = ({ onToggleSidebar }) => {
     // Generic Mock Notifications - Removed in favor of real socket notifications
 
     return (
-        <header className="sticky top-0 z-50 w-full h-14 sm:h-16 bg-black/60 backdrop-blur-xl border-b border-white/5 px-3 sm:px-6 flex items-center justify-between will-change-transform font-inter">
+        <header className="sticky top-0 z-50 w-full h-14 sm:h-16 bg-white dark:bg-black/60 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 px-3 sm:px-6 flex items-center justify-between will-change-transform font-inter dashboard-navbar">
             <div className="flex items-center space-x-4 flex-1">
                 <button
                     onClick={onToggleSidebar}
@@ -73,11 +75,11 @@ const Navbar = ({ onToggleSidebar }) => {
                 </button>
 
                 <div className="relative max-w-md w-full hidden sm:block">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" size={18} />
                     <input
                         type="text"
                         placeholder="Search resources, topics..."
-                        className="w-full pl-12 pr-4 py-2 bg-white/[0.03] border border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all text-white placeholder:text-white/20 text-sm"
+                        className="w-full pl-12 pr-4 py-2 bg-gray-100 dark:bg-black border border-transparent dark:border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/20 text-sm"
                     />
                 </div>
 
@@ -142,6 +144,17 @@ const Navbar = ({ onToggleSidebar }) => {
                     </motion.div>
                 )}
                 
+                {/* Statistics Panel Toggle */}
+                {userRole === 'student' && (
+                    <button
+                        onClick={() => window.dispatchEvent(new Event('toggle-stats'))}
+                        className="hidden sm:flex p-2 text-slate-400 hover:bg-white/5 hover:text-primary rounded-xl transition-all"
+                        title="Toggle Statistics Panel"
+                    >
+                        <BarChart2 size={18} className="sm:w-5 sm:h-5" />
+                    </button>
+                )}
+
                 {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}

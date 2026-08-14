@@ -23,6 +23,7 @@ import {
 import GlassCard from '../../components/ui/GlassCard';
 import ChartCard from '../../components/ui/ChartCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 import { toast } from 'react-hot-toast';
 import { useSocket } from '../../context/SocketContext';
 
@@ -71,8 +72,8 @@ const AdminDashboard = () => {
     }, [showExportMenu]);
 
     // Chart data now comes from stats.chartData state
-    const displayChartData = stats.chartData && stats.chartData.length > 0 
-        ? stats.chartData 
+    const displayChartData = stats.chartData && stats.chartData.length > 0
+        ? stats.chartData
         : [
             { name: 'Mon', value: 400 },
             { name: 'Tue', value: 300 },
@@ -193,13 +194,7 @@ const AdminDashboard = () => {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                    <motion.h1
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="text-sm font-semibold text-white font-jakarta text-left uppercase tracking-[0.2em]"
-                    >
-                        <span className="text-white/50">System</span> Intelligence
-                    </motion.h1>
+                    <DashboardHeading title="System Intelligence" />
                 </div>
                 <div className="flex items-center space-x-3">
                     <div className="relative">
@@ -295,7 +290,7 @@ const AdminDashboard = () => {
                 ))}
             </div>
 
-            {/* Enrollment Momentum — full width, no longer sharing a grid row with Live Pulse */}
+            {/* Enrollment Momentum - full width, no longer sharing a grid row with Live Pulse */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -313,7 +308,7 @@ const AdminDashboard = () => {
                 </div>
             </motion.div>
 
-            {/* Live Pulse — its own full-width row instead of being squeezed under/beside the graph */}
+            {/* Live Pulse - its own full-width row instead of being squeezed under/beside the graph */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -359,7 +354,7 @@ const AdminDashboard = () => {
                 </GlassCard>
             </motion.div>
 
-            {/* Infrastructure Status — its own full-width row so it isn't squeezed
+            {/* Infrastructure Status - its own full-width row so it isn't squeezed
                 to the bottom of the taller Live Pulse column and cut off by the footer */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}

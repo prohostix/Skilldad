@@ -945,3 +945,93 @@ html.light-mode .wbl-btn-text { color: #000000 !important; }
 html.light-mode .wbl-btn-text { color: #000000 !important; }
 
 .wbl-btn-text { color: white; }
+
+/* Force exact primary purple for login buttons in light mode */
+html.light-mode .light-mode-purple-btn {
+  background: #4C1D95 !important;
+  background-image: none !important;
+  border-color: transparent !important;
+}
+html.light-mode .light-mode-purple-btn:hover {
+  background: #3B1673 !important;
+}
+
+/* --- DASHBOARD DARK MODE FIXES --- */
+html.dark .dashboard-layout,
+html:not(.light-mode) .dashboard-layout {
+  background: linear-gradient(135deg, #020005 0%, #040010 50%, #0B001A 100%) !important;
+}
+html.dark .modern-sidebar,
+html:not(.light-mode) .modern-sidebar {
+  background-color: rgba(2, 0, 5, 0.95) !important;
+  border-color: rgba(192, 38, 255, 0.2) !important;
+}
+html.dark .student-dashboard-container,
+html:not(.light-mode) .student-dashboard-container {
+  background-color: transparent !important;
+  border-color: rgba(192, 38, 255, 0.2) !important;
+}
+html.dark .glass-panel,
+html:not(.light-mode) .glass-panel {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: rgba(192, 38, 255, 0.2) !important;
+}
+html.dark .glass-panel-hero,
+html:not(.light-mode) .glass-panel-hero {
+  background-color: rgba(109, 40, 255, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: rgba(192, 38, 255, 0.3) !important;
+}
+html.dark .text-dark-white,
+html:not(.light-mode) .text-dark-white {
+  color: #ffffff !important;
+}
+html.dark .text-dark-gray,
+html:not(.light-mode) .text-dark-gray {
+  color: #a1a1aa !important;
+}
+
+/* --- DASHBOARD DARK MODE NAVBAR & STATS HEADER FIXES --- */
+  html.dark .dashboard-navbar,
+  html:not(.light-mode) .dashboard-navbar {
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    border-color: rgba(192, 38, 255, 0.2) !important;
+  }
+  
+  html.dark .dashboard-navbar input,
+  html:not(.light-mode) .dashboard-navbar input {
+    background-color: #020005 !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  html.dark .statistic-header,
+html:not(.light-mode) .statistic-header {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: rgba(192, 38, 255, 0.2) !important;
+}
+
+/* --- BULLETPROOF BACKGROUND MATCHING --- */
+html:not(.dark) body,
+html:not(.dark) .dashboard-layout,
+html:not(.dark) .modern-sidebar,
+html:not(.dark) .dashboard-navbar,
+html:not(.dark) .student-dashboard-container {
+  background-color: #FFFFFF !important;
+}
+
+html.dark .modern-sidebar {
+  background-color: #020005 !important;
+  border-right-color: rgba(192, 38, 255, 0.2) !important;
+}
+html.dark .modern-sidebar * {
+  color-scheme: dark;
+}
+
+/* Fix for sidebar nav cream background in light mode */
+html.light-mode .modern-sidebar nav,
+html:not(.dark) .modern-sidebar nav {
+  background-color: transparent !important;
+}

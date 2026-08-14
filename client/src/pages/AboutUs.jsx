@@ -1,9 +1,9 @@
 import React from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { 
-    Rocket, Globe, Award, Users, Book, Target, Linkedin, Loader2, 
-    Activity, CheckCircle2, Briefcase, GraduationCap, Zap, ShieldCheck, 
+import {
+    Rocket, Globe, Award, Users, Book, Target, Linkedin, Loader2,
+    Activity, CheckCircle2, Briefcase, GraduationCap, Zap, ShieldCheck,
     TrendingUp, Sparkles, ArrowRight, Laptop, Layers, Building2
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
@@ -103,16 +103,16 @@ const ExecutiveLeadershipCard = ({ member }) => {
         >
             <GlassCard className="relative group overflow-hidden p-6 sm:p-7 md:p-8 about-card-bg backdrop-blur-2xl border-[#C026FF]/20 hover:border-[#C026FF]/60 transition-all duration-500 rounded-3xl shadow-xl hover:shadow-[0_0_50px_rgba(192,38,255,0.22)]">
                 {/* Animated Ambient Glow */}
-                <motion.div 
+                <motion.div
                     animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none"
                 />
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-6 sm:gap-8">
-                    
+
                     {/* LEFT SIDE: Animated Image Container */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: -25 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
@@ -133,7 +133,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         ) : null}
 
                         {/* Diagonal Hover Shine Sweep */}
-                        <motion.div 
+                        <motion.div
                             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 pointer-events-none"
                             initial={{ x: '-100%' }}
                             whileHover={{ x: '200%' }}
@@ -141,10 +141,10 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         />
 
                         {/* Initial Fallback Avatar */}
-                        <div 
+                        <div
                             className={`w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/30 via-[#C026FF]/20 to-[#0A0A12] border border-primary/20 ${memberImg ? 'hidden' : 'flex'}`}
                         >
-                            <motion.div 
+                            <motion.div
                                 whileHover={{ scale: 1.1, rotate: 3 }}
                                 className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary font-black text-4xl sm:text-5xl font-space shadow-xl shadow-primary/20 mb-2"
                             >
@@ -157,9 +157,9 @@ const ExecutiveLeadershipCard = ({ member }) => {
 
                         {/* Gradient Bottom Overlay */}
                         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0A0A12] via-[#0A0A12]/40 to-transparent pointer-events-none" />
-                        
+
                         {/* Organization Tag */}
-                        <motion.div 
+                        <motion.div
                             whileHover={{ scale: 1.05 }}
                             className="absolute top-3.5 left-3.5 px-3.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-full text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 shadow-md"
                         >
@@ -172,7 +172,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                     <div className="flex-1 space-y-4 flex flex-col justify-between py-1">
                         <div>
                             {/* Role & Department Badges */}
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, x: 20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
@@ -189,7 +189,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                             </motion.div>
 
                             {/* Executive Name */}
-                            <motion.h3 
+                            <motion.h3
                                 initial={{ opacity: 0, y: 15 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
@@ -200,7 +200,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                             </motion.h3>
 
                             {/* Bio */}
-                            <motion.p 
+                            <motion.p
                                 initial={{ opacity: 0, y: 15 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
@@ -212,7 +212,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         </div>
 
                         {/* Executive Quote Box */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 15 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -224,7 +224,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         </motion.div>
 
                         {/* Strategic Focus Badges with Hover Pop */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 15 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -233,7 +233,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                         >
                             <div className="flex flex-wrap gap-2">
                                 {pillars.map((pillar, idx) => (
-                                    <motion.span 
+                                    <motion.span
                                         key={idx}
                                         whileHover={{ scale: 1.06, y: -2 }}
                                         transition={{ type: "spring", stiffness: 300, damping: 15 }}
@@ -248,7 +248,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
 
                         {/* LinkedIn / Action Button */}
                         {linkedinUrl ? (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
@@ -330,7 +330,7 @@ const AboutUs = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#05030B] flex items-center justify-center">
-                <motion.div 
+                <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
                 >
@@ -399,7 +399,7 @@ const AboutUs = () => {
                     >
                         <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-primary/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-                            
+
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                                 <div className="lg:col-span-5 space-y-5">
                                     <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-lg shadow-primary/20">
@@ -471,7 +471,7 @@ const AboutUs = () => {
                     >
                         <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-[#C026FF]/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -top-24 -left-24 w-80 h-80 bg-[#C026FF]/10 rounded-full blur-3xl pointer-events-none" />
-                            
+
                             <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                                 <div className="lg:col-span-5 space-y-5 lg:order-2">
                                     <div className="w-14 h-14 rounded-2xl bg-[#C026FF]/20 border border-[#C026FF]/40 flex items-center justify-center text-[#C026FF] shadow-lg shadow-[#C026FF]/20">
@@ -484,7 +484,7 @@ const AboutUs = () => {
                                         </h2>
                                     </div>
                                     <p className="text-sm md:text-base text-gray-300 font-inter leading-relaxed">
-                                        {cms.vision?.description || 'We envision a global education ecosystem where degree qualifications are unified with actual practical mastery—allowing learners to seamlessly transition into high-growth global careers.'}
+                                        {cms.vision?.description || 'We envision a global education ecosystem where degree qualifications are unified with actual practical mastery-allowing learners to seamlessly transition into high-growth global careers.'}
                                     </p>
                                     <div className="pt-2">
                                         <div className="p-4 rounded-2xl bg-[#C026FF]/10 border border-[#C026FF]/20 flex items-center gap-3">
@@ -543,7 +543,7 @@ const AboutUs = () => {
                     >
                         <GlassCard noHover={true} className="p-8 md:p-12 lg:p-14 about-card-bg border-emerald-500/30 transition-all duration-500 rounded-3xl relative overflow-hidden shadow-2xl">
                             <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-                            
+
                             <div className="space-y-10">
                                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
                                     <div className="space-y-3">
@@ -700,7 +700,7 @@ const AboutUs = () => {
                             <div className="h-1.5 w-20 bg-gradient-to-r from-primary via-[#C026FF] to-transparent mx-auto rounded-full mt-4"></div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             variants={staggerContainer}
                             initial="hidden"
                             whileInView="visible"
@@ -744,7 +744,7 @@ const AboutUs = () => {
                             <div className="h-1.5 w-16 bg-gradient-to-r from-[#C026FF] to-transparent mx-auto rounded-full mt-4"></div>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             variants={staggerContainer}
                             initial="hidden"
                             whileInView="visible"

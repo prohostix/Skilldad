@@ -288,10 +288,10 @@ const Exams = () => {
 
             const finalSubmissionId = submissionId;
 
-            setActiveExam({ 
-                ...exam, 
-                questions: liveQuestions, 
-                currentSubmissionId: finalSubmissionId 
+            setActiveExam({
+                ...exam,
+                questions: liveQuestions,
+                currentSubmissionId: finalSubmissionId
             });
             setCurrentQuestion(0);
             setAnswers({});
@@ -327,13 +327,13 @@ const Exams = () => {
         try {
             const rawInfo = localStorage.getItem('userInfo');
             const userInfo = JSON.parse(rawInfo);
-            const config = { 
+            const config = {
                 headers: { Authorization: `Bearer ${userInfo.token}` },
                 responseType: 'blob'
             };
 
             const response = await axios.get(`/api/exams/${exam._id}/question-paper`, config);
-            
+
             // Create a blob URL and trigger download
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
@@ -349,7 +349,7 @@ const Exams = () => {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-            
+
             showToast('Question paper downloaded!', 'success');
         } catch (err) {
             const msg = 'Could not access question paper';
@@ -365,20 +365,20 @@ const Exams = () => {
         try {
             const rawInfo = localStorage.getItem('userInfo');
             const userInfo = JSON.parse(rawInfo);
-            
+
             const formData = new FormData();
             formData.append('document', file);
             formData.append('examId', exam._id);
 
-            const config = { 
-                headers: { 
+            const config = {
+                headers: {
                     Authorization: `Bearer ${userInfo.token}`,
                     'Content-Type': 'multipart/form-data'
-                } 
+                }
             };
 
             await axios.post(`/api/exams/${exam._id}/upload-answer`, formData, config);
-            
+
             showToast('Answer sheet uploaded successfully!', 'success');
             fetchExams();
         } catch (err) {
@@ -507,22 +507,22 @@ const Exams = () => {
                             {activeExam.examType === 'pdf-based' ? 'PDF ASSESSMENT READY' : 'ASSESSMENT UNAVAILABLE'}
                         </h2>
                         <p className="text-white/50 mb-8 font-medium text-sm">
-                            {activeExam.examType === 'pdf-based' 
-                                ? 'This assessment is paper-based. Please download the question paper and submit your answers.' 
+                            {activeExam.examType === 'pdf-based'
+                                ? 'This assessment is paper-based. Please download the question paper and submit your answers.'
                                 : 'This assessment currently contains no questions. Please notify your instructor or system administrator to verify the configuration.'}
                         </p>
                         <div className="flex flex-col gap-3">
                             {activeExam.examType === 'pdf-based' && (
                                 <div className="space-y-4">
-                                    <ModernButton 
-                                        onClick={() => downloadQuestionPaper(activeExam)} 
+                                    <ModernButton
+                                        onClick={() => downloadQuestionPaper(activeExam)}
                                         className="w-full"
                                         disabled={downloadingPaper === activeExam._id}
                                     >
                                         <Download size={18} className="mr-2" />
                                         {downloadingPaper === activeExam._id ? 'Downloading...' : 'Download Question Paper'}
                                     </ModernButton>
-                                    
+
                                     <div className="relative">
                                         <input
                                             type="file"
@@ -607,7 +607,7 @@ const Exams = () => {
                                     </span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                                    <motion.div 
+                                    <motion.div
                                         className="h-full bg-primary"
                                         initial={{ width: 0 }}
                                         animate={{ width: `${progress}%` }}
@@ -635,11 +635,10 @@ const Exams = () => {
                                         </div>
                                         <button
                                             onClick={() => toggleFlag(question._id || question.id)}
-                                            className={`p-2 rounded-lg transition-all ${
-                                                flaggedQuestions.has(question._id || question.id)
+                                            className={`p-2 rounded-lg transition-all ${flaggedQuestions.has(question._id || question.id)
                                                     ? 'bg-amber-100 text-amber-600'
                                                     : 'text-slate-300 hover:text-slate-400 hover:bg-slate-50'
-                                            }`}
+                                                }`}
                                             title="Flag for later"
                                         >
                                             <Flag size={20} fill={flaggedQuestions.has(question._id || question.id) ? "currentColor" : "none"} />
@@ -697,9 +696,8 @@ const Exams = () => {
                                                     <span className={`text-[13px] font-medium flex-1 text-left ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>
                                                         {typeof option === 'object' ? option.text : option}
                                                     </span>
-                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                        isSelected ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white'
-                                                    }`}>
+                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white'
+                                                        }`}>
                                                         {isSelected && <CheckCircle size={14} fill="currentColor" className="text-white" />}
                                                     </div>
                                                 </button>
@@ -718,7 +716,7 @@ const Exams = () => {
                                 >
                                     <ChevronLeft size={20} /> Previous Question
                                 </button>
-                                
+
                                 {currentQuestion < activeExam.questions.length - 1 ? (
                                     <ModernButton
                                         onClick={() => setCurrentQuestion(prev => prev + 1)}
@@ -903,17 +901,15 @@ const Exams = () => {
                         <button
                             key={option.value}
                             onClick={() => setFilter(option.value)}
-                            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${
-                                filter === option.value
+                            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all ${filter === option.value
                                     ? 'bg-primary text-white shadow-sm'
                                     : 'text-white/50 hover:text-white'
-                            }`}
+                                }`}
                         >
                             {option.label}
                             {option.count > 0 && (
-                                <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                                    filter === option.value ? 'bg-white/20' : 'bg-white/10'
-                                }`}>
+                                <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold ${filter === option.value ? 'bg-white/20' : 'bg-white/10'
+                                    }`}>
                                     {option.count}
                                 </span>
                             )}
@@ -948,7 +944,7 @@ const Exams = () => {
                             transition={{ delay: idx * 0.04 }}
                         >
                             <div className="rounded-xl border border-white/10 bg-white/[0.02] hover:border-primary/30 hover:bg-white/[0.04] transition-all overflow-hidden flex flex-col sm:flex-row items-stretch sm:items-center gap-4 p-4 group">
-                                
+
                                 {/* 1. Title + Course + Type (Left Column) */}
                                 <div className="flex flex-col gap-2 flex-1 min-w-0">
                                     <div className="flex items-start gap-2">
@@ -967,11 +963,10 @@ const Exams = () => {
                                                 {exam.type && (
                                                     <>
                                                         <span className="text-white/20">·</span>
-                                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${
-                                                            exam.type.toLowerCase() === 'final' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                            exam.type.toLowerCase() === 'midterm' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                                            'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                                                        }`}>
+                                                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${exam.type.toLowerCase() === 'final' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                                                exam.type.toLowerCase() === 'midterm' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                                                    'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                                                            }`}>
                                                             {exam.type}
                                                         </span>
                                                     </>
@@ -994,7 +989,7 @@ const Exams = () => {
                                     <div className="w-px h-6 bg-white/5" />
                                     <div className="flex flex-col gap-0.5">
                                         <span className="text-white/30 uppercase tracking-wider text-[8px] font-bold">Questions</span>
-                                        <span className="flex items-center gap-1 text-white/70"><FileText size={9} />{exam.totalQuestions || exam.questions?.length || '—'}</span>
+                                        <span className="flex items-center gap-1 text-white/70"><FileText size={9} />{exam.totalQuestions || exam.questions?.length || '-'}</span>
                                     </div>
                                     <div className="w-px h-6 bg-white/5" />
                                     <div className="flex flex-col gap-0.5">
@@ -1006,7 +1001,7 @@ const Exams = () => {
                                 {/* Mobile Stats (Only visible on small screens) */}
                                 <div className="flex lg:hidden items-center gap-3 text-[10px] font-medium pt-3 border-t border-white/5">
                                     <span className="flex items-center gap-1 text-white/60"><Clock size={9} />{exam.duration || 60}m</span>
-                                    <span className="flex items-center gap-1 text-white/60"><FileText size={9} />{exam.totalQuestions || exam.questions?.length || '—'} Qs</span>
+                                    <span className="flex items-center gap-1 text-white/60"><FileText size={9} />{exam.totalQuestions || exam.questions?.length || '-'} Qs</span>
                                     <span className="flex items-center gap-1 text-white/60"><RotateCcw size={9} />{exam.attemptsUsed || 0}/{exam.maxAttempts || 1}</span>
                                 </div>
 
@@ -1044,7 +1039,7 @@ const Exams = () => {
                                             <RotateCcw size={11} /> Retry Try
                                         </button>
                                     ) : status === 'failed' ? (
-                                        <span className="text-[9px] text-white/30 font-bold uppercase tracking-wide px-2 text-center">No attempts<br/>left</span>
+                                        <span className="text-[9px] text-white/30 font-bold uppercase tracking-wide px-2 text-center">No attempts<br />left</span>
                                     ) : status === 'available' ? (
                                         <button
                                             onClick={() => exam.examType === 'pdf-based' ? downloadQuestionPaper(exam) : startExam(exam)}

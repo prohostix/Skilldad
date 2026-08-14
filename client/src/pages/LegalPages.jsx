@@ -62,7 +62,7 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                             className="flex items-center justify-center gap-3 py-2 px-4 rounded-full bg-white/5 border border-white/10 w-fit mx-auto"
                         >
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Version 2.4 — Updated {lastUpdated}</span>
+                            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Version 2.4 - Updated {lastUpdated}</span>
                         </motion.div>
                     </div>
 

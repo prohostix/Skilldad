@@ -47,8 +47,8 @@ const Platform = () => {
         // Build best-available image: profile.coverImage > Unsplash fallback (DO NOT fallback to logo)
         const coverImg = u.profile?.coverImage;
         const resolvedImage = coverImg
-                ? getMediaUrl(coverImg)
-                : fallbackImg;
+            ? getMediaUrl(coverImg)
+            : fallbackImg;
 
         return {
             id: u._id,
@@ -65,7 +65,7 @@ const Platform = () => {
         };
     });
 
-    // SkillDad-owned universities are display-only (no login/dashboard) — always shown after partner universities
+    // SkillDad-owned universities are display-only (no login/dashboard) - always shown after partner universities
     const skillDadUniversities = dynamicSkillDadUnis.map(u => ({
         id: `sd-${u.id}`,
         name: u.name,

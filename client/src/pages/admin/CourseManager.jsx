@@ -328,7 +328,7 @@ const CourseManager = ({ wblOnly = false }) => {
                         <ModernButton onClick={() => handleCreate('degree_programme')} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm">
                             <Plus size={16} className="mr-1.5" /> Add Domestic Course
                         </ModernButton>
-                        <ModernButton variant="secondary" onClick={() => handleCreate('wbl_abroad')} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm !bg-sky-500/10 !text-sky-400 hover:!bg-sky-500 hover:!text-white !border-sky-500/20">
+                        <ModernButton onClick={() => handleCreate('wbl_abroad')} className="w-full sm:w-auto !px-4 !py-3 sm:!py-2 text-sm">
                             <Plus size={16} className="mr-1.5" /> Add Study Abroad
                         </ModernButton>
                     </div>
@@ -976,7 +976,7 @@ const CourseManager = ({ wblOnly = false }) => {
                                 <button
                                     type="button"
                                     onClick={() => setShowCreateModal(false)}
-                                    className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all font-medium font-inter"
+                                    className="px-6 py-2.5 bg-primary hover:bg-primary-dark text-white dark:bg-white/5 dark:hover:bg-white/10 rounded-xl transition-all font-medium font-inter"
                                 >
                                     Cancel
                                 </button>

@@ -121,7 +121,7 @@ const SessionDetail = () => {
       // 3. Audio mixing setup using Web Audio API
       let mixedAudioTrack = null;
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      
+
       if (AudioContextClass) {
         try {
           const audioCtx = new AudioContextClass();
@@ -198,14 +198,14 @@ const SessionDetail = () => {
 
         const blob = new Blob(recordedChunksRef.current, { type: options.mimeType });
         const url = URL.createObjectURL(blob);
-        
+
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
         a.download = `SkillDad-Session-${sessionId}-${Date.now()}.webm`;
         document.body.appendChild(a);
         a.click();
-        
+
         setTimeout(() => {
           document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
@@ -360,17 +360,16 @@ const SessionDetail = () => {
                 {session.instructor?.name ? ` \u2022 ${session.instructor.name}` : ''}
               </p>
             </div>
-            
+
             {/* If host, show custom recording controls */}
             {isHost && (
               <div className="flex items-center gap-3">
                 <button
                   onClick={toggleRecording}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
-                    isRecording 
-                      ? 'bg-red-500/20 border-red-500/35 text-red-400 animate-pulse' 
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${isRecording
+                      ? 'bg-red-500/20 border-red-500/35 text-red-400 animate-pulse'
                       : 'bg-white/5 border-white/10 text-white hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   <span className={`w-2.5 h-2.5 rounded-full ${isRecording ? 'bg-red-500' : 'bg-white/40'}`} />
                   {isRecording ? 'Recording (Click to Stop)' : 'Record Session'}
@@ -380,7 +379,7 @@ const SessionDetail = () => {
           </div>
         </div>
 
-        {/* Jitsi container — fills all remaining height after header */}
+        {/* Jitsi container - fills all remaining height after header */}
         <div
           style={{
             flex: '1 1 0',
@@ -437,16 +436,15 @@ const SessionDetail = () => {
           <div className="lg:col-span-2 space-y-8">
             <GlassCard className="p-10 overflow-hidden relative">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
-              
+
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border shadow-lg ${
-                    session.status === 'live' 
-                      ? 'bg-red-600/10 text-red-500 border-red-600/20' 
+                  <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] border shadow-lg ${session.status === 'live'
+                      ? 'bg-red-600/10 text-red-500 border-red-600/20'
                       : session.status === 'scheduled'
                         ? 'bg-amber-600/10 text-amber-500 border-amber-600/20'
                         : 'bg-white/5 text-white/40 border-white/10'
-                  }`}>
+                    }`}>
                     {session.status === 'live' ? '• Live Broadcast' : session.status === 'scheduled' ? 'Upcoming Session' : 'Archive available'}
                   </div>
                   {session.course?.title && (
@@ -484,22 +482,21 @@ const SessionDetail = () => {
 
             {/* Join Section */}
             {(session.status === 'live' || session.status === 'scheduled') && (
-              <GlassCard className={`p-10 border-2 transition-all duration-500 ${
-                session.status === 'live' ? 'border-primary/40 bg-primary/5' : 'border-white/5 bg-transparent'
-              }`}>
+              <GlassCard className={`p-10 border-2 transition-all duration-500 ${session.status === 'live' ? 'border-primary/40 bg-primary/5' : 'border-white/5 bg-transparent'
+                }`}>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                   <div className="text-center md:text-left">
                     <h2 className="text-2xl font-bold text-white mb-2">
-                       {session.status === 'live' ? (isHost ? 'Studio is Live' : 'The Broadcast is Live!') : (isHost ? 'Ready to Broadcast?' : 'Scheduled for Broadcast')}
+                      {session.status === 'live' ? (isHost ? 'Studio is Live' : 'The Broadcast is Live!') : (isHost ? 'Ready to Broadcast?' : 'Scheduled for Broadcast')}
                     </h2>
                     <p className="text-white/40 text-sm max-w-md">
-                      {session.status === 'live' 
+                      {session.status === 'live'
                         ? (isHost ? 'Your audience is watching. Enter the studio to resume your session.' : 'Join now to participate in this interactive learning experience.')
                         : (isHost ? 'Enter the studio to prepare your camera. Your students will be notified the second you join!' : `This session will go live at ${formatTime(session.startTime)}. Please return 5 minutes before the start time.`)
                       }
                     </p>
                   </div>
-                  
+
                   {(session.status === 'live' || (session.status === 'scheduled' && isHost)) ? (
                     <button
                       onClick={handleStartMeeting}
@@ -564,7 +561,7 @@ const SessionDetail = () => {
                   <h3 className="text-white text-sm font-bold uppercase tracking-wide">Archived Content</h3>
                 </div>
                 <p className="text-white/40 text-xs leading-relaxed mb-6">This broadcast has concluded. You can access the recording below.</p>
-                
+
                 {session.recording?.status === 'completed' && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between text-[10px]">
@@ -582,9 +579,9 @@ const SessionDetail = () => {
         {session.status === 'ended' && (
           <div className="mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <h2 className="text-xs font-black text-white/20 uppercase tracking-[0.3em] mb-6 mb-12 flex items-center gap-4">
-               <div className="h-px flex-1 bg-white/5"></div>
-               Review Broadcast Recording
-               <div className="h-px flex-1 bg-white/5"></div>
+              <div className="h-px flex-1 bg-white/5"></div>
+              Review Broadcast Recording
+              <div className="h-px flex-1 bg-white/5"></div>
             </h2>
             <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/5">
               <MeetingRecordingPlayer

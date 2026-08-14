@@ -28,7 +28,7 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, errorInfo) {
     // Log error details for debugging
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     this.setState(prevState => ({
       error,
       errorInfo,
@@ -59,7 +59,7 @@ class ErrorBoundary extends React.Component {
 
   // A stale-chunk failure means the tab was open across a deploy and the old
   // hashed chunk filename no longer exists on the server. lazyRetry already
-  // reloads once automatically to recover from this — if the error still
+  // reloads once automatically to recover from this - if the error still
   // reached here, that one retry wasn't enough (e.g. another deploy landed
   // in between), so "Try Again" (a React state reset) won't help; only a
   // real page reload fetches the current build.

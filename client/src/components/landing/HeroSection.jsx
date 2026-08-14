@@ -269,7 +269,7 @@ const HeroSection = () => {
                 <AlyraOrb />
             </div>
 
-            {/* Purple Network Diagram — left */}
+            {/* Purple Network Diagram - left */}
             <div className="gpu-accelerated">
                 <NetworkDiagram />
             </div>

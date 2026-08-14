@@ -88,24 +88,26 @@ const CapabilitiesSection = () => {
 
                 {/* Left Side: Content */}
                 <div className="space-y-6 lg:sticky lg:top-32 py-4">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        className="text-primary text-[10px] md:text-xs font-black uppercase tracking-[0.4em]"
-                    >
-                        Capabilities
-                    </motion.div>
+                    <div>
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="inline-flex font-normal items-center space-x-2 text-primary text-xs uppercase tracking-widest"
+                        >
+                            Capabilities
+                        </motion.div>
 
-                    <motion.h2
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] font-jakarta"
-                    >
-                        Intelligent Tools <br />
-                        For <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-accent">Dynamic</span> Teams
-                    </motion.h2>
+                        <motion.h2
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] font-jakarta"
+                        >
+                            Intelligent Tools <br />
+                            For <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-accent">Dynamic</span> Teams
+                        </motion.h2>
+                    </div>
 
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
@@ -114,7 +116,7 @@ const CapabilitiesSection = () => {
                         transition={{ delay: 0.1 }}
                         className="text-text-secondary text-sm md:text-base leading-relaxed max-w-md font-inter"
                     >
-                        A growing toolkit built to keep students, universities, and enterprise partners moving in sync — from adaptive scaling to real-time insight, without the operational overhead.
+                        A growing toolkit built to keep students, universities, and enterprise partners moving in sync - from adaptive scaling to real-time insight, without the operational overhead.
                     </motion.p>
 
                     <motion.div

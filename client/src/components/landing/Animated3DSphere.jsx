@@ -1,12 +1,12 @@
 import React from 'react';
 
 /*
-  Animated3DSphere — Performance-optimised
+  Animated3DSphere - Performance-optimised
   • Every animation uses CSS keyframes → GPU-composited transform/opacity only
   • No Framer Motion used (was 43+ simultaneous motion instances)
   • No width/height/margin animation (caused layout reflows every frame)
   • Energy waves now scale from center, not width/height expand
-  • Particle positions fixed at module level — no render-time Math.random()
+  • Particle positions fixed at module level - no render-time Math.random()
   • will-change: transform on all animated layers
 */
 
@@ -39,7 +39,7 @@ const RINGS = [
     { size: 280, dur: '20s', color: '#7C3AED', opacity: 0.4, rx: 45, rz: 90 },
 ];
 
-// 8 particles per ring — positions computed once at module load
+// 8 particles per ring - positions computed once at module load
 const RING_PARTICLES = RINGS.map(ring =>
     Array.from({ length: 8 }, (_, i) => {
         const a = (i * Math.PI * 2) / 8;
@@ -93,7 +93,7 @@ const Animated3DSphere = () => (
                 willChange: 'transform',
             }}
         >
-            {/* Central sphere — scale pulse only */}
+            {/* Central sphere - scale pulse only */}
             <div
                 className="absolute top-1/2 left-1/2 w-32 h-32 rounded-full"
                 style={{
@@ -124,7 +124,7 @@ const Animated3DSphere = () => (
                         willChange: 'transform',
                     }}
                 >
-                    {/* Ring particles — opacity+scale only */}
+                    {/* Ring particles - opacity+scale only */}
                     {RING_PARTICLES[ri].map((p, pi) => (
                         <div
                             key={pi}
@@ -162,7 +162,7 @@ const Animated3DSphere = () => (
             ))}
         </div>
 
-        {/* Energy waves — scale from center, NOT width/height expand */}
+        {/* Energy waves - scale from center, NOT width/height expand */}
         {[0, 1, 2].map(i => (
             <div
                 key={i}
@@ -176,7 +176,7 @@ const Animated3DSphere = () => (
             />
         ))}
 
-        {/* Ambient glow — static */}
+        {/* Ambient glow - static */}
         <div
             className="absolute inset-0 rounded-full blur-3xl opacity-30 pointer-events-none"
             style={{ background: 'radial-gradient(circle, #C026FF 0%, #7C3AED 40%, transparent 70%)' }}

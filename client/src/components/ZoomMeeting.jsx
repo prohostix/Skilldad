@@ -15,17 +15,17 @@ import './ZoomMeeting.css';
  */
 const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onError }) => {
   const initializationInProgress = useRef(false);
-  const isInitializedRef         = useRef(false);
-  const zoomClient               = useRef(null);
-  const meetingSDKElement        = useRef(null);
-  const mountedRef               = useRef(true);
+  const isInitializedRef = useRef(false);
+  const zoomClient = useRef(null);
+  const meetingSDKElement = useRef(null);
+  const mountedRef = useRef(true);
 
-  const [useMockMode,     setUseMockMode]     = useState(false);
-  const [loading,         setLoading]         = useState(true);
-  const [loadingStep,     setLoadingStep]      = useState('Connecting…');
-  const [error,           setError]           = useState(null);
-  const [showEndConfirm,  setShowEndConfirm]  = useState(false);
-  const [isEnding,        setIsEnding]        = useState(false);
+  const [useMockMode, setUseMockMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingStep, setLoadingStep] = useState('Connecting…');
+  const [error, setError] = useState(null);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
 
   const observerRef = useRef(null);
 
@@ -41,7 +41,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         }
       }
       if (zoomClient.current) {
-        try { zoomClient.current.leaveMeeting(); } catch (_) {}
+        try { zoomClient.current.leaveMeeting(); } catch (_) { }
         zoomClient.current = null;
       }
     };
@@ -61,7 +61,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         if (!mountedRef.current) return;
 
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-        const token    = propToken || localStorage.getItem('token') || userInfo.token;
+        const token = propToken || localStorage.getItem('token') || userInfo.token;
         if (!token) throw new Error('Authentication required. Please log in.');
 
         const config = {
@@ -94,7 +94,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
 
         // Destroy stale client
         if (zoomClient.current) {
-          try { zoomClient.current.leaveMeeting(); } catch (_) {}
+          try { zoomClient.current.leaveMeeting(); } catch (_) { }
           zoomClient.current = null;
         }
 
@@ -124,11 +124,11 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         setLoadingStep('Joining meeting…');
         console.log('[Zoom] Joining meeting…');
         await client.join({
-          signature:     sdkConfig.signature,
+          signature: sdkConfig.signature,
           meetingNumber: sdkConfig.meetingNumber,
-          password:      sdkConfig.passWord,
-          userName:      sdkConfig.userName,
-          userEmail:     sdkConfig.userEmail,
+          password: sdkConfig.passWord,
+          userName: sdkConfig.userName,
+          userEmail: sdkConfig.userEmail,
         });
 
         console.log('[Zoom] Successfully joined meeting');
@@ -192,7 +192,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
               childList: true,
             });
 
-            // setInterval as fallback — runs every 500ms to catch
+            // setInterval as fallback - runs every 500ms to catch
             // cases where SDK re-hides toolbar after observer fires
             const intervalId = setInterval(() => {
               if (!mountedRef.current) {
@@ -236,7 +236,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
         const msg = err.response?.data?.message || err.message || 'Failed to join meeting';
         setError(msg);
         setLoading(false);
-        isInitializedRef.current         = false;
+        isInitializedRef.current = false;
         initializationInProgress.current = false;
         onError?.(msg);
       } finally {
@@ -259,7 +259,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
     setIsEnding(true);
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-      const token    = propToken || localStorage.getItem('token') || userInfo.token;
+      const token = propToken || localStorage.getItem('token') || userInfo.token;
       await axios.put(`/api/sessions/${sessionId}/end`, {}, { headers: { Authorization: `Bearer ${token}` } });
       console.log(`[Zoom] Session ${sessionId} ended.`);
       exitMeeting();
@@ -283,7 +283,7 @@ const ZoomMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, onE
     setError(null);
     setLoading(true);
     setLoadingStep('Connecting…');
-    isInitializedRef.current         = false;
+    isInitializedRef.current = false;
     initializationInProgress.current = false;
   };
 

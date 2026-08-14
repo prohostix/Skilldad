@@ -248,7 +248,7 @@ const LandingPage = () => {
             specialties: ['Digital Transformation', 'Enterprise Learning']
         })) : staticUnis;
 
-    // SkillDad-owned universities are display-only (no login/dashboard) — always shown after partner universities
+    // SkillDad-owned universities are display-only (no login/dashboard) - always shown after partner universities
     const skillDadUniversityCards = dynamicSkillDadUniversities.map(u => {
         const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`;
         return {
@@ -287,8 +287,8 @@ const LandingPage = () => {
     }
 
     // No need to enrich logos - they're already complete in the static arrays
-    
-    const visibleUnis = allUniversities.length > 0 
+
+    const visibleUnis = allUniversities.length > 0
         ? [0, 1, 2, 3].map(offset => allUniversities[(uniStartIndex + offset) % allUniversities.length])
         : [];
 
@@ -298,20 +298,20 @@ const LandingPage = () => {
 
             <HeroSection />
 
-            {/* Trending / Featured Courses Section — admin-curated via the Featured toggle */}
+            {/* Trending / Featured Courses Section - admin-curated via the Featured toggle */}
             {featuredCourses.length > 0 && (
                 <section id="courses" className="relative pt-16 md:pt-20 pb-16 md:pb-20 px-6 z-10 section-optimize">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 md:mb-12">
-                            <div className="text-center sm:text-left space-y-3">
+                            <div className="text-center sm:text-left">
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.5 }}
-                                    className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
+                                    className="inline-flex font-normal items-center space-x-2 text-primary text-xs font-black uppercase tracking-widest"
                                 >
-                                    <TrendingUp size={14} />
+                                    <TrendingUp size={15} />
                                     <span>Trending Now</span>
                                 </motion.div>
                                 <motion.h2
@@ -330,7 +330,7 @@ const LandingPage = () => {
                                     transition={{ duration: 0.7, delay: 0.2 }}
                                     className="text-text-secondary font-inter text-sm sm:text-base max-w-xl"
                                 >
-                                    Hand-picked by our team — the courses learners are enrolling in right now.
+                                    Hand-picked by our team - the courses learners are enrolling in right now.
                                 </motion.p>
                             </div>
                             <ModernButton
@@ -376,7 +376,7 @@ const LandingPage = () => {
                     <div className="w-12 h-0.5 bg-primary/20 mx-auto mt-3 rounded-full" />
                 </div>
 
-                {/* Row 1 — Scrolls Left */}
+                {/* Row 1 - Scrolls Left */}
                 <div className="relative overflow-hidden whitespace-nowrap mb-6 pointer-events-none sm:pointer-events-auto">
                     <div className="flex animate-scroll will-change-transform" style={{ animationDuration: '120s' }}>
                         {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
@@ -401,7 +401,7 @@ const LandingPage = () => {
                     <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
                 </div>
 
-                {/* Row 2 — Scrolls Right */}
+                {/* Row 2 - Scrolls Right */}
                 <div className="relative overflow-hidden whitespace-nowrap pointer-events-none sm:pointer-events-auto">
                     <div className="flex animate-scroll-reverse will-change-transform" style={{ animationDuration: '130s' }}>
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
@@ -441,7 +441,7 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6 }}
-                                className="inline-flex items-center space-x-2 px-3 py-1 bg-primary/20 rounded-full mb-6 font-black text-[10px] text-primary uppercase tracking-[0.3em] border border-primary/30"
+                                className="inline-flex font-normal items-center space-x-2 text-primary text-xs uppercase tracking-widest"
                             >
                                 <Cpu size={14} /> <span>Neural Core Architecture</span>
                             </motion.div>
@@ -504,17 +504,17 @@ const LandingPage = () => {
             {/* University Partners Section */}
             <section className="relative pt-16 md:pt-24 pb-8 md:pb-12 px-6 z-10 bg-transparent section-optimize">
                 <div className="max-w-7xl mx-auto">
-                    {/* Heading row — text left, 3D orb right */}
+                    {/* Heading row - text left, 3D orb right */}
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-12 md:mb-16">
 
-                        {/* Left — text */}
-                        <div className="text-center lg:text-left space-y-4 flex-1">
+                        {/* Left - text */}
+                        <div className="text-center lg:text-left flex-1">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5 }}
-                                className="inline-flex items-center space-x-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20 text-primary text-xs font-black uppercase tracking-widest"
+                                className="inline-flex font-normal items-center space-x-2 text-primary text-xs uppercase tracking-widest"
                             >
                                 <Users size={14} />
                                 <span>Trusted Partners</span>
@@ -540,7 +540,7 @@ const LandingPage = () => {
                             </motion.p>
                         </div>
 
-                        {/* Right — 3D University Orb */}
+                        {/* Right - 3D University Orb */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, x: 40 }}
                             whileInView={{ opacity: 1, scale: 1, x: 0 }}
@@ -580,10 +580,10 @@ const LandingPage = () => {
                                                 <div className="flex items-center gap-3 mb-3 w-full">
                                                     <div className="w-9 h-9 rounded-[14px] bg-primary/20 text-primary flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 border border-primary/30 group-hover:border-primary/50 overflow-hidden p-1.5">
                                                         {uni.logo ? (
-                                                            <img 
-                                                                src={uni.logo} 
-                                                                alt={uni.name} 
-                                                                className="w-full h-full object-contain" 
+                                                            <img
+                                                                src={uni.logo}
+                                                                alt={uni.name}
+                                                                className="w-full h-full object-contain"
                                                             />
                                                         ) : (
                                                             <Library size={18} strokeWidth={2.5} />
@@ -611,7 +611,7 @@ const LandingPage = () => {
                                                     </div>
                                                 </div>
 
-                                                <div 
+                                                <div
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         navigate('/platform');
@@ -629,7 +629,7 @@ const LandingPage = () => {
                         </div>
                         {/* Manual Controls */}
                         <div className="flex justify-end mt-4 px-2">
-                            <button 
+                            <button
                                 onClick={() => setUniStartIndex(prev => prev + 1)}
                                 className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-[0_0_15px_rgba(110,40,255,0.2)] hover:shadow-glow-purple group active:scale-95"
                                 aria-label="Next Universities"
@@ -644,16 +644,16 @@ const LandingPage = () => {
             {/* ── Managed by IITans Section ── */}
             <section className="relative pt-8 md:pt-12 pb-8 md:pb-12 px-6 z-10 bg-black overflow-hidden section-optimize">
                 <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-                
+
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-12 mb-16">
-                        <div className="text-center lg:text-left space-y-4 flex-1">
+                        <div className="text-center lg:text-left flex-1">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5 }}
-                                className="inline-flex items-center space-x-2 px-4 py-1.5 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest"
+                                className="inline-flex font-normal items-center space-x-2 text-primary text-xs uppercase tracking-widest"
                             >
                                 <Zap size={14} />
                                 <span>Innovation Leadership</span>
@@ -696,10 +696,10 @@ const LandingPage = () => {
                             >
                                 <GlassCard className="!bg-white/[0.02] border-white/5 group-hover:border-primary/40 transition-all duration-500 h-full p-0 overflow-hidden text-left hover:shadow-2xl hover:shadow-primary/10">
                                     <div className="aspect-[4/5] overflow-hidden relative">
-                                        <img 
-                                            src={getMediaUrl(lead.image || lead.imageUrl || lead.img)} 
-                                            alt={lead.name} 
-                                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" 
+                                        <img
+                                            src={getMediaUrl(lead.image || lead.imageUrl || lead.img)}
+                                            alt={lead.name}
+                                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                                             onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.name)}&background=5B5CFF&color=fff&bold=true`; }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
@@ -708,7 +708,7 @@ const LandingPage = () => {
                                                 <span className={`w-1.5 h-1.5 rounded-full bg-${lead.accent_color || lead.color || 'primary'}`} />
                                                 <span>{lead.university || lead.alumni} alumni</span>
                                             </div>
-                                            <h3 className="text-xl font-bold text-white mb-1 font-jakarta">{lead.name}</h3>
+                                            <h3 className="text-xl font-bold text-white [.light-mode_&]:!text-white mb-1 font-jakarta">{lead.name}</h3>
                                             <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">{lead.title || lead.role}</p>
                                         </div>
                                     </div>
@@ -732,7 +732,7 @@ const LandingPage = () => {
             {cmsSettings.campus_impact?.show_section === true && (
                 <section className="relative py-16 md:py-24 px-6 z-10 bg-transparent section-optimize">
                     <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
-                    
+
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-16 space-y-4">
                             <motion.div
@@ -784,10 +784,10 @@ const LandingPage = () => {
                                             { name: 'Vikram Patel', campus: 'Cloud Academy', package: '20 LPA', role: 'Cloud Engineer', imageUrl: '/assets/success/student2.png', story: 'Architected scalable microservices for enterprise clients.' },
                                             { name: 'Anita Desai', campus: 'Cyber Hub', package: '16 LPA', role: 'Cyber Security', imageUrl: '/assets/success/student3.png', story: 'Secured critical infrastructure using modern cryptographic standards.' }
                                         ];
-                                        
+
                                         const num = allStories.length;
                                         if (num === 0) return null;
-                                        
+
                                         const visibleStories = [
                                             allStories[successIndex % num],
                                             allStories[(successIndex + 1) % num],
@@ -797,69 +797,69 @@ const LandingPage = () => {
                                         return visibleStories.map((student, i) => {
                                             const videoSrc = student.videoUrl || student.video_url;
                                             return (
-                                            <motion.div
-                                                key={student.name + i}
-                                                initial={{ opacity: 0, y: 30 }}
-                                                whileInView={{ opacity: 1, y: 0 }}
-                                                viewport={{ once: true, margin: "-50px" }}
-                                                transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 100 }}
-                                                whileHover={{ y: -12, scale: 1.02 }}
-                                                className="group cursor-pointer"
-                                                onMouseEnter={(e) => {
-                                                    const vid = e.currentTarget.querySelector('video');
-                                                    if (vid) { vid.currentTime = 0; vid.play().catch(() => {}); }
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    const vid = e.currentTarget.querySelector('video');
-                                                    if (vid) { vid.pause(); vid.currentTime = 0; }
-                                                }}
-                                                onClick={() => videoSrc && setActiveVideo({ url: videoSrc, name: student.name })}
-                                            >
-                                                <GlassCard className="p-4 !bg-white/[0.03] border-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden hover:shadow-glow-purple">
-                                                    <div className="aspect-video rounded-xl overflow-hidden mb-5 relative group-hover:shadow-2xl transition-all">
-                                                        <img
-                                                            src={getMediaUrl(student.imageUrl || student.image || student.img)}
-                                                            alt={student.name}
-                                                            className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
-                                                            onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=5B5CFF&color=fff&bold=true`; }}
-                                                        />
-                                                        {videoSrc && (
-                                                            <video
-                                                                src={videoSrc.startsWith('http') ? videoSrc : getMediaUrl(videoSrc)}
-                                                                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                                                                muted
-                                                                playsInline
-                                                                loop
-                                                                preload="metadata"
+                                                <motion.div
+                                                    key={student.name + i}
+                                                    initial={{ opacity: 0, y: 30 }}
+                                                    whileInView={{ opacity: 1, y: 0 }}
+                                                    viewport={{ once: true, margin: "-50px" }}
+                                                    transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 100 }}
+                                                    whileHover={{ y: -12, scale: 1.02 }}
+                                                    className="group cursor-pointer"
+                                                    onMouseEnter={(e) => {
+                                                        const vid = e.currentTarget.querySelector('video');
+                                                        if (vid) { vid.currentTime = 0; vid.play().catch(() => { }); }
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        const vid = e.currentTarget.querySelector('video');
+                                                        if (vid) { vid.pause(); vid.currentTime = 0; }
+                                                    }}
+                                                    onClick={() => videoSrc && setActiveVideo({ url: videoSrc, name: student.name })}
+                                                >
+                                                    <GlassCard className="p-4 !bg-white/[0.03] border-white/5 hover:border-primary/40 transition-all duration-500 overflow-hidden hover:shadow-glow-purple">
+                                                        <div className="aspect-video rounded-xl overflow-hidden mb-5 relative group-hover:shadow-2xl transition-all">
+                                                            <img
+                                                                src={getMediaUrl(student.imageUrl || student.image || student.img)}
+                                                                alt={student.name}
+                                                                className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : 'group-hover:scale-110'}`}
+                                                                onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=5B5CFF&color=fff&bold=true`; }}
                                                             />
-                                                        )}
-                                                        <div className={`absolute inset-0 bg-black/40 transition-all duration-500 flex items-center justify-center ${videoSrc ? 'group-hover:bg-transparent' : 'group-hover:bg-black/20'}`}>
-                                                            <div className={`w-12 h-12 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-glow-primary transform scale-90 group-hover:scale-100 transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : ''}`}>
-                                                                <Play size={20} fill="currentColor" />
+                                                            {videoSrc && (
+                                                                <video
+                                                                    src={videoSrc.startsWith('http') ? videoSrc : getMediaUrl(videoSrc)}
+                                                                    className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                                    muted
+                                                                    playsInline
+                                                                    loop
+                                                                    preload="metadata"
+                                                                />
+                                                            )}
+                                                            <div className={`absolute inset-0 bg-black/40 transition-all duration-500 flex items-center justify-center ${videoSrc ? 'group-hover:bg-transparent' : 'group-hover:bg-black/20'}`}>
+                                                                <div className={`w-12 h-12 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-glow-primary transform scale-90 group-hover:scale-100 transition-all duration-500 ${videoSrc ? 'group-hover:opacity-0' : ''}`}>
+                                                                    <Play size={20} fill="currentColor" />
+                                                                </div>
+                                                            </div>
+                                                            <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white uppercase tracking-widest">
+                                                                Success Story
                                                             </div>
                                                         </div>
-                                                        <div className="absolute top-3 left-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded border border-white/10 text-[9px] font-black text-white uppercase tracking-widest">
-                                                            Success Story
+                                                        <div className="px-2">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <h3 className="text-lg font-bold text-white font-jakarta">{student.name}</h3>
+                                                                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded border border-emerald-500/30">
+                                                                    {student.package}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mb-4">{student.campus} · {student.role}</p>
+                                                            <p className="text-xs text-text-muted leading-relaxed font-inter mb-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                                                                {student.story} Leveraging SkillDad’s neural learning path to master advanced industry modules.
+                                                            </p>
+                                                            <div className="pt-4 border-t border-white/5 flex items-center gap-2">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                                                                <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Hired by Global HQ</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="px-2">
-                                                        <div className="flex items-center justify-between mb-3">
-                                                            <h3 className="text-lg font-bold text-white font-jakarta">{student.name}</h3>
-                                                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-black rounded border border-emerald-500/30">
-                                                                {student.package}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em] mb-4">{student.campus} · {student.role}</p>
-                                                        <p className="text-xs text-text-muted leading-relaxed font-inter mb-4 opacity-80 group-hover:opacity-100 transition-opacity">
-                                                            {student.story} Leveraging SkillDad’s neural learning path to master advanced industry modules.
-                                                        </p>
-                                                        <div className="pt-4 border-t border-white/5 flex items-center gap-2">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em]">Hired by Global HQ</span>
-                                                        </div>
-                                                    </div>
-                                                </GlassCard>
-                                            </motion.div>
+                                                    </GlassCard>
+                                                </motion.div>
                                             );
                                         });
                                     })()}
@@ -883,7 +883,7 @@ const LandingPage = () => {
                         </button>
                         <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black aspect-video">
                             {activeVideo.url.startsWith('http') ? (
-                                // External URL — embed in iframe (YouTube/Vimeo) or video tag
+                                // External URL - embed in iframe (YouTube/Vimeo) or video tag
                                 activeVideo.url.includes('youtube.com') || activeVideo.url.includes('youtu.be') ? (
                                     <iframe
                                         src={`https://www.youtube.com/embed/${activeVideo.url.split('v=')[1]?.split('&')[0] || activeVideo.url.split('/').pop()}?modestbranding=1&rel=0&iv_load_policy=3`}

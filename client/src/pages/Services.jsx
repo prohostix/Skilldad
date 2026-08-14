@@ -70,7 +70,7 @@ const Services = () => {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto font-inter leading-relaxed"
                     >
-                        Comprehensive, outcome-focused educational services designed to empower students, academic institutions, and enterprise partners — featuring{' '}
+                        Comprehensive, outcome-focused educational services designed to empower students, academic institutions, and enterprise partners - featuring{' '}
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary font-bold">
                             100% Placement Assurance
                         </span>.
@@ -94,7 +94,7 @@ const Services = () => {
                                     <div className="relative group rounded-3xl p-[1px] bg-gradient-to-r from-primary/50 via-primary/20 to-white/10 shadow-2xl transition-all duration-500">
                                         <GlassCard noHover={true} className="about-card-bg backdrop-blur-3xl rounded-[23px] p-6 sm:p-8 md:p-10 space-y-8">
                                             <div className="grid lg:grid-cols-12 gap-8 items-start">
-                                                {/* Left — Main Details */}
+                                                {/* Left - Main Details */}
                                                 <div className="lg:col-span-7 space-y-5 text-left">
                                                     <div className="flex items-start space-x-4">
                                                         <div className={`w-14 h-14 rounded-2xl ${featured.bg_class || 'bg-primary/15'} flex items-center justify-center border border-primary/30 shadow-lg shadow-primary/20 shrink-0`}>
@@ -130,7 +130,7 @@ const Services = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Right — Key Highlights Box */}
+                                                {/* Right - Key Highlights Box */}
                                                 <div className="lg:col-span-5 p-5 sm:p-6 rounded-2xl about-inner-card-bg border border-white/10 space-y-4 text-left h-full flex flex-col justify-between">
                                                     <div>
                                                         <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">

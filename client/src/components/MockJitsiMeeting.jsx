@@ -11,17 +11,17 @@ const HIDE_DELAY = 4000;
 
 /**
  * MockJitsiMeeting
- * Uses real getUserMedia for camera/mic — shows live local video feed.
+ * Uses real getUserMedia for camera/mic - shows live local video feed.
  * Remote participants remain simulated (no real P2P WebRTC in mock mode).
  */
 const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
   // ── Media State ──────────────────────────────────────────────────────────
-  const [localStream, setLocalStream]   = useState(null);
+  const [localStream, setLocalStream] = useState(null);
   const [audioEnabled, setAudioEnabled] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(true);
-  const [mediaError, setMediaError]     = useState(null);
+  const [mediaError, setMediaError] = useState(null);
   const localVideoRef = useRef(null);
-  const streamRef     = useRef(null);
+  const streamRef = useRef(null);
 
   const [screenStream, setScreenStream] = useState(null);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -33,8 +33,8 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
   const recordingStreamRef = useRef(null);
 
   // ── Meeting State ─────────────────────────────────────────────────────────
-  const [loading, setLoading]   = useState(true);
-  const [joined, setJoined]     = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [joined, setJoined] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
@@ -42,7 +42,7 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
   const [isEnding, setIsEnding] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [viewMode, setViewMode] = useState('stage');
-  const [elapsed, setElapsed]   = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [chatMessages, setChatMessages] = useState([
     { id: 1, sender: 'System', text: 'Connected to session.', time: '', isSystem: true },
   ]);
@@ -54,8 +54,8 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
   const [showMockWhiteboard, setShowMockWhiteboard] = useState(false);
 
   const hideTimerRef = useRef(null);
-  const timerRef     = useRef(null);
-  const chatEndRef   = useRef(null);
+  const timerRef = useRef(null);
+  const chatEndRef = useRef(null);
 
   // ── Acquire camera + mic on mount ────────────────────────────────────────
   useEffect(() => {
@@ -164,12 +164,12 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
 
       if (isHost) {
         try {
-          const ui  = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const ui = JSON.parse(localStorage.getItem('userInfo') || '{}');
           const tok = localStorage.getItem('token') || ui.token;
           if (tok) axios.put(`/api/sessions/${sessionId}/start`, {}, {
             headers: { Authorization: `Bearer ${tok}` }
-          }).catch(() => {});
-        } catch (_) {}
+          }).catch(() => { });
+        } catch (_) { }
       }
 
       // Simulated remote participants appear after 2 s
@@ -177,11 +177,11 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
         setParticipants(prev => [
           ...prev,
           ...(isHost ? [
-            { id: 2, name: 'Student A',  isHost: false, video: true,  audio: true  },
-            { id: 3, name: 'Student B',  isHost: false, video: false, audio: true  },
+            { id: 2, name: 'Student A', isHost: false, video: true, audio: true },
+            { id: 3, name: 'Student B', isHost: false, video: false, audio: true },
           ] : [
-            { id: 2, name: 'Instructor', isHost: true,  video: true,  audio: true  },
-            { id: 3, name: 'Peer',       isHost: false, video: true,  audio: false },
+            { id: 2, name: 'Instructor', isHost: true, video: true, audio: true },
+            { id: 3, name: 'Peer', isHost: false, video: true, audio: false },
           ]),
         ]);
       }, 2000);
@@ -212,7 +212,7 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
 
   // ── Actions ───────────────────────────────────────────────────────────────
   const fmt = s => {
-    const m  = String(Math.floor(s / 60)).padStart(2, '0');
+    const m = String(Math.floor(s / 60)).padStart(2, '0');
     const sc = String(s % 60).padStart(2, '0');
     return `${m}:${sc}`;
   };
@@ -226,7 +226,7 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
   const confirmEnd = async () => {
     setIsEnding(true);
     try {
-      const ui  = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const ui = JSON.parse(localStorage.getItem('userInfo') || '{}');
       const tok = localStorage.getItem('token') || ui.token;
       await axios.put(`/api/sessions/${sessionId}/end`, {}, {
         headers: { Authorization: `Bearer ${tok}` }
@@ -265,7 +265,7 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
           if (audioTracks.length > 1 && AudioContextClass) {
             const ctx = new AudioContextClass();
             const dest = ctx.createMediaStreamDestination();
-            
+
             audioTracks.forEach(t => {
               const sourceStream = new MediaStream([t]);
               const src = ctx.createMediaStreamSource(sourceStream);
@@ -318,7 +318,7 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
         // Process recorded video Blob
         const blob = new Blob(recordedChunksRef.current, { type: options.mimeType });
         const url = URL.createObjectURL(blob);
-        
+
         // Trigger auto-download
         const a = document.createElement('a');
         a.style.display = 'none';
@@ -326,7 +326,7 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
         a.download = `SkillDad-Session-${sessionId}-${Date.now()}.webm`;
         document.body.appendChild(a);
         a.click();
-        
+
         setTimeout(() => {
           document.body.removeChild(a);
           window.URL.revokeObjectURL(url);
@@ -637,16 +637,16 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
           </button>
 
           {/* Screen Share */}
-          <button 
+          <button
             onClick={toggleScreenShare}
             className={`p-3.5 rounded-xl transition-all ${isScreenSharing ? 'bg-blue-600 text-white' : 'text-white/50 hover:bg-white/10 hover:text-white'}`}
             title="Share screen"
           >
             <Monitor size={21} />
           </button>
-          
+
           {/* Mock Native Whiteboard Placeholder */}
-          <button 
+          <button
             onClick={() => setShowMockWhiteboard(v => !v)}
             className={`p-3.5 rounded-xl transition-all ${showMockWhiteboard ? 'bg-blue-600 text-white' : 'text-white/50 hover:bg-white/10 hover:text-white'}`}
             title="Open Jitsi Builtin Whiteboard"
@@ -700,7 +700,8 @@ const MockJitsiMeeting = ({ sessionId, isHost = false, onLeave }) => {
         <InteractiveWhiteboard onClose={() => setShowMockWhiteboard(false)} />
       )}
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .jitsi-mock { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

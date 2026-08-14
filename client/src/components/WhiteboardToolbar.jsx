@@ -21,13 +21,13 @@ import {
  * @param {function} onClose         - () => void
  */
 const TOOLS = [
-  { id: 'pen',       icon: Pen,           label: 'Pen' },
-  { id: 'eraser',    icon: Eraser,        label: 'Eraser' },
-  { id: 'rectangle', icon: Square,        label: 'Rectangle' },
-  { id: 'circle',    icon: Circle,        label: 'Circle' },
-  { id: 'line',      icon: Minus,         label: 'Line' },
-  { id: 'text',      icon: Type,          label: 'Text' },
-  { id: 'select',    icon: MousePointer2, label: 'Select' },
+  { id: 'pen', icon: Pen, label: 'Pen' },
+  { id: 'eraser', icon: Eraser, label: 'Eraser' },
+  { id: 'rectangle', icon: Square, label: 'Rectangle' },
+  { id: 'circle', icon: Circle, label: 'Circle' },
+  { id: 'line', icon: Minus, label: 'Line' },
+  { id: 'text', icon: Type, label: 'Text' },
+  { id: 'select', icon: MousePointer2, label: 'Select' },
 ];
 
 const WhiteboardToolbar = ({
@@ -126,7 +126,7 @@ const WhiteboardToolbar = ({
         <Undo2 size={18} />
       </button>
 
-      {/* Clear — host only */}
+      {/* Clear - host only */}
       {isHost && (
         <button
           title="Clear board"

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-    Plus, 
-    Search, 
-    Edit3, 
-    Trash2, 
-    FileText, 
-    Users, 
-    CheckCircle, 
-    Clock, 
-    ExternalLink, 
+import {
+    Plus,
+    Search,
+    Edit3,
+    Trash2,
+    FileText,
+    Users,
+    CheckCircle,
+    Clock,
+    ExternalLink,
     Download,
     Eye,
     MessageSquare,
@@ -32,7 +32,7 @@ const ProjectManager = () => {
     const [showGradeModal, setShowGradeModal] = useState(false);
     const [selectedSubmission, setSelectedSubmission] = useState(null);
     const [gradeData, setGradeData] = useState({ grade: '', feedback: '' });
-    
+
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -207,14 +207,14 @@ const ProjectManager = () => {
 
             {/* Tabs */}
             <div className="flex gap-2 border-b border-white/10 pb-px">
-                <button 
+                <button
                     onClick={() => setActiveTab('projects')}
                     className={`px-6 py-3 text-sm font-bold uppercase tracking-widest transition-all relative ${activeTab === 'projects' ? 'text-primary' : 'text-white/40 hover:text-white/70'}`}
                 >
                     Project Definitions
                     {activeTab === 'projects' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_-4px_12px_rgba(var(--color-primary-rgb),0.5)]" />}
                 </button>
-                <button 
+                <button
                     onClick={() => setActiveTab('submissions')}
                     className={`px-6 py-3 text-sm font-bold uppercase tracking-widest transition-all relative ${activeTab === 'submissions' ? 'text-primary' : 'text-white/40 hover:text-white/70'}`}
                 >
@@ -332,7 +332,7 @@ const ProjectManager = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <select 
+                            <select
                                 className="bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-primary transition-all"
                                 value={selectedProjectForSubmissions || ''}
                                 onChange={(e) => fetchSubmissions(e.target.value)}
@@ -374,11 +374,10 @@ const ProjectManager = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-6">
-                                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
-                                                        sub.status === 'graded' 
-                                                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                                                        : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                                                    }`}>
+                                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${sub.status === 'graded'
+                                                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                            : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                        }`}>
                                                         {sub.status}
                                                     </span>
                                                 </td>
@@ -392,9 +391,9 @@ const ProjectManager = () => {
                                                 <td className="px-8 py-6 text-right">
                                                     <div className="flex items-center justify-end gap-3">
                                                         {sub.file_url && (
-                                                            <a 
-                                                                href={`${axios.defaults.baseURL || ''}${sub.file_url}`} 
-                                                                target="_blank" 
+                                                            <a
+                                                                href={`${axios.defaults.baseURL || ''}${sub.file_url}`}
+                                                                target="_blank"
                                                                 rel="noopener noreferrer"
                                                                 className="p-2 bg-white/5 text-white/40 border border-white/10 rounded-lg hover:bg-white/10 hover:text-white transition-all"
                                                                 title="View File"
@@ -454,7 +453,7 @@ const ProjectManager = () => {
                                     <Trash2 size={20} />
                                 </button>
                             </div>
-                            
+
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
@@ -508,11 +507,10 @@ const ProjectManager = () => {
                                                                         : [...formData.batchIds, batchId]
                                                                 });
                                                             }}
-                                                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
-                                                                isSelected
+                                                            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${isSelected
                                                                     ? 'bg-primary text-white border-primary'
                                                                     : 'bg-white/5 text-white/50 border-white/10 hover:border-primary/40 hover:text-white'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {batch.name}
                                                         </button>
@@ -520,7 +518,7 @@ const ProjectManager = () => {
                                                 })}
                                             </div>
                                         ) : (
-                                            <p className="text-xs text-white/25 italic px-1">No batches created yet for this course — the project will be open to all enrolled students.</p>
+                                            <p className="text-xs text-white/25 italic px-1">No batches created yet for this course - the project will be open to all enrolled students.</p>
                                         )}
                                     </div>
                                 )}

@@ -117,7 +117,7 @@ const formatSession = (s, currentUserId) => {
     const startObj = parseSafeDate(s.startTime);
     // Use en-IN for Indian users, but keep it robust
     const locale = 'en-IN';
-    
+
     // Ownership check
     const isOwner = currentUserId && (
         (s.instructor?._id || s.instructor?.id || s.instructor_id) === currentUserId ||
@@ -170,7 +170,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                 category: course ? course.category : prev.category,
                 batchId: ''
             }));
-            
+
             // Fetch batches for the selected course
             try {
                 const rawInfo = localStorage.getItem('userInfo');
@@ -506,7 +506,7 @@ const RecordingUploadModal = ({ session, onClose, onUpload, onToast }) => {
         e.preventDefault();
         if (uploadType === 'link' && !recordingUrl.trim()) return onToast('Please provide a URL', 'error');
         if (uploadType === 'file' && !file) return onToast('Please select a video file', 'error');
-        
+
         setSubmitting(true);
         try {
             const formData = new FormData();
@@ -519,9 +519,9 @@ const RecordingUploadModal = ({ session, onClose, onUpload, onToast }) => {
             const rawInfo = localStorage.getItem('userInfo');
             const { token } = JSON.parse(rawInfo);
             const { data } = await axios.post(`/api/sessions/${session.id}/recording`, formData, {
-                headers: { 
-                    Authorization: `Bearer ${token}`, 
-                    'Content-Type': uploadType === 'file' ? 'multipart/form-data' : 'application/json' 
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': uploadType === 'file' ? 'multipart/form-data' : 'application/json'
                 }
             });
             onUpload(session.id, data.recording);
@@ -545,7 +545,7 @@ const RecordingUploadModal = ({ session, onClose, onUpload, onToast }) => {
                         </div>
                         <button onClick={onClose} className="p-2 text-white/30 hover:text-white rounded-lg transition-all"><X size={18} /></button>
                     </div>
-                    
+
                     <div className="flex bg-white/5 rounded-xl p-1 mb-6">
                         <button onClick={() => setUploadType('link')} className={`flex-1 py-2 text-[11px] font-bold rounded-lg uppercase tracking-wider transition-all ${uploadType === 'link' ? 'bg-primary text-white shadow-md' : 'text-white/40 hover:text-white'}`}>External Link</button>
                         <button onClick={() => setUploadType('file')} className={`flex-1 py-2 text-[11px] font-bold rounded-lg uppercase tracking-wider transition-all ${uploadType === 'file' ? 'bg-primary text-white shadow-md' : 'text-white/40 hover:text-white'}`}>Upload Video</button>
@@ -578,7 +578,7 @@ const RecordingUploadModal = ({ session, onClose, onUpload, onToast }) => {
 ═══════════════════════════════════════════════════════════════*/
 const LiveSessionsHub = () => {
     const navigate = useNavigate();
-    // ✅ Seed with demo data immediately — NEVER show a blank/loading screen
+    // ✅ Seed with demo data immediately - NEVER show a blank/loading screen
     const [liveSessions, setLiveSessions] = useState([]); // Start empty
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true); // Indicate loading initially
@@ -609,7 +609,7 @@ const LiveSessionsHub = () => {
         try {
             const config = getAuthConfig(15000);
             if (!config) return;
-            
+
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
             const uId = userInfo._id || userInfo.id;
 
@@ -619,10 +619,10 @@ const LiveSessionsHub = () => {
             }
         } catch (err) {
             console.warn('[LiveSessionsHub] background fetch sessions failed:', err.message);
-            
+
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
             const uId = userInfo._id || userInfo.id;
-            
+
             // Fallback to demo data ONLY if fetch fails completely and we have nothing
             setLiveSessions(DEMO_SESSIONS.map(s => formatSession(s, uId)));
         } finally {
@@ -652,7 +652,7 @@ const LiveSessionsHub = () => {
     const handleScheduled = (newSession, replaceId = null) => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
         const uId = userInfo._id || userInfo.id;
-        
+
         const formatted = formatSession(newSession, uId);
         if (replaceId) {
             // Replace the optimistic local entry with the real DB entry
@@ -829,14 +829,14 @@ const LiveSessionsHub = () => {
                                     .map((session, idx) => (
                                         <GlassCard key={session.id || `sess-${idx}`} className={`p-5 md:p-6 group relative overflow-hidden transition-all duration-300 border-white/10 hover:border-primary/20 ${session.status === 'live' ? 'bg-red-500/5 border-red-500/20' : ''}`}>
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-primary/10 transition-all pointer-events-none" />
-                                            
+
                                             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
                                                 {/* Left Side: Icon & Session Details */}
                                                 <div className="flex items-start gap-4 min-w-0">
                                                     <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 border shadow-md transition-all duration-300 group-hover:scale-105 ${session.status === 'live' ? 'bg-red-500/20 border-red-500/20 text-red-500' : 'bg-primary/10 border-primary/15 text-primary'}`}>
                                                         {session.status === 'live' ? <Radio size={20} className="animate-pulse" /> : <Video size={20} />}
                                                     </div>
-                                                    
+
                                                     <div className="min-w-0 flex-1">
                                                         <div className="flex items-center flex-wrap gap-2 mb-1.5">
                                                             <h4 className="font-semibold text-white text-base md:text-lg group-hover:text-primary transition-colors truncate tracking-tight">{session.title}</h4>
@@ -844,7 +844,7 @@ const LiveSessionsHub = () => {
                                                                 <span className="px-2 py-0.5 rounded-full bg-red-500 text-[9px] font-bold text-white uppercase tracking-wider animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.4)]">Live</span>
                                                             )}
                                                         </div>
-                                                        
+
                                                         {/* Course, Batch, Instructor info */}
                                                         <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-white/40 text-[11px] font-medium mb-3">
                                                             <span className="text-primary/90 font-semibold">{session.course}</span>
@@ -870,7 +870,7 @@ const LiveSessionsHub = () => {
                                                 {/* Right Side: Action Group */}
                                                 <div className="flex flex-wrap items-center gap-2 shrink-0 self-end md:self-center">
                                                     {notifyBtn(session.id)}
-                                                    
+
                                                     <ModernButton
                                                         variant={(session.status === 'live' || (session.isOwner && !session.meetingLink)) ? 'primary' : 'secondary'}
                                                         className={`text-[10px] md:text-xs px-4 md:px-5 py-2 h-10 font-bold shadow-md tracking-wider uppercase transition-all ${session.status === 'live' ? '!bg-red-500 !border-red-500 !text-white' : ''}`}
@@ -878,9 +878,9 @@ const LiveSessionsHub = () => {
                                                     >
                                                         {session.status === 'live' ? 'Studio' : (session.isOwner && !session.meetingLink ? 'Start Session' : (session.meetingLink ? 'Join' : 'Prepare'))}
                                                     </ModernButton>
-                                                    
+
                                                     {session.status === 'live' && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleEndSession(session.id)}
                                                             className="h-10 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all"
                                                         >
@@ -889,11 +889,11 @@ const LiveSessionsHub = () => {
                                                     )}
 
                                                     {(session.status === 'completed' || session.status === 'ended') && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => setRecordModalData(session)}
                                                             className={`h-10 px-4 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border ${session.recording && session.recording.status === 'available' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white' : 'bg-white/5 border-white/10 text-white/50 hover:text-white hover:bg-white/10'}`}
                                                         >
-                                                            <UploadCloud size={14} className="mr-1.5 inline-block" /> 
+                                                            <UploadCloud size={14} className="mr-1.5 inline-block" />
                                                             Rec
                                                         </button>
                                                     )}

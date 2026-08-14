@@ -100,7 +100,7 @@ const Login = () => {
             {/* Home Button - Left Side */}
             <button
                 onClick={() => navigate('/')}
-                className="fixed top-20 md:top-24 left-6 z-50 p-3 rounded-xl bg-white/5 border border-white/10 text-white [.light-mode_&]:!text-purple-500 hover:bg-white/10 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm"
+                className="fixed top-20 md:top-24 left-6 z-50 p-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm shadow-lg light-mode-purple-btn"
                 title="Go to Home"
             >
                 <Home size={20} />
@@ -199,7 +199,7 @@ const Login = () => {
                         <ModernButton
                             type="submit"
                             disabled={loading}
-                            className="w-full !py-2.5 text-xs font-bold shadow-glow-gradient group mt-4 overflow-hidden rounded-xl"
+                            className="w-full !py-2.5 text-xs font-bold shadow-glow-purple group mt-4 overflow-hidden rounded-xl light-mode-purple-btn"
                         >
                             {loading ? (
                                 <div className="flex items-center justify-center">

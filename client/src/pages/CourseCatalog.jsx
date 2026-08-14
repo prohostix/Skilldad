@@ -39,7 +39,7 @@ const CourseCatalog = () => {
 
         const fetchCourses = async () => {
             try {
-                // Check if logged-in user is a university — if so, show only their courses
+                // Check if logged-in user is a university - if so, show only their courses
                 const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
                 let url = '/api/courses';
 
@@ -123,12 +123,12 @@ const CourseCatalog = () => {
                 {/* Hero Header - Conditionally hidden when searching */}
                 <AnimatePresence>
                     {!(isSearchFocused || filter) && (
-                        <motion.div 
-                             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                             animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
-                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                             transition={{ duration: 0.4, ease: "easeInOut" }}
-                             className="max-w-[1300px] mx-auto text-center px-4 overflow-hidden"
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 32 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="max-w-[1300px] mx-auto text-center px-4 overflow-hidden"
                         >
                             <motion.h1
                                 initial={{ opacity: 0, y: 20 }}
@@ -181,14 +181,14 @@ const CourseCatalog = () => {
                             {/* WBL Sub-options */}
                             <AnimatePresence>
                                 {programType.startsWith('wbl') && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, height: 0, y: -10 }}
                                         animate={{ opacity: 1, height: 'auto', y: 0 }}
                                         exit={{ opacity: 0, height: 0, y: -10 }}
                                         className="flex justify-center mt-3 overflow-hidden"
                                     >
                                         <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap justify-center">
-                                            <button 
+                                            <button
                                                 onClick={() => setProgramType('wbl_abroad')}
                                                 className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_abroad'
                                                     ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
@@ -197,7 +197,7 @@ const CourseCatalog = () => {
                                             >
                                                 International Programmes
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => setProgramType('wbl_domestic')}
                                                 className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
                                                     ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
@@ -221,7 +221,7 @@ const CourseCatalog = () => {
                     <div className="flex flex-col gap-4 items-stretch">
                         {/* Search & Mobile Filter Toggle */}
                         <div className="flex items-center gap-3 w-full">
-                            <div 
+                            <div
                                 className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1 cursor-text`}
                                 onClick={() => document.getElementById('catalog-search')?.focus()}
                             >
@@ -384,7 +384,7 @@ const CourseCatalog = () => {
                                     <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Message Detail</label>
                                     <textarea rows="3" className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-sm" placeholder="Structure your requirements here..."></textarea>
                                 </div>
-                                <ModernButton 
+                                <ModernButton
                                     onClick={(e) => {
                                         e.preventDefault();
                                         toast.success('Protocol Transmitted Successfully. Our advisors will sync with you shortly.');
@@ -418,7 +418,7 @@ const CourseCatalog = () => {
                             >
                                 <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-6" />
                                 <h3 className="text-xl font-bold text-white font-jakarta mb-6">Filters</h3>
-                                
+
                                 <div className="space-y-6">
                                     {/* Mobile University Select */}
                                     {!isFixedUniversity && universities.length > 2 && (
@@ -442,7 +442,7 @@ const CourseCatalog = () => {
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 <ModernButton
                                     className="w-full mt-8 !py-4 justify-center shadow-glow-purple"
                                     onClick={() => setIsMobileFilterOpen(false)}

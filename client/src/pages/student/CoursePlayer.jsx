@@ -109,7 +109,7 @@ const CoursePlayer = () => {
         const fetchCurrentVideoDiscussions = async () => {
             const currentModule = course?.modules?.[currentModuleIndex];
             const currentVideo = currentModule?.videos?.[currentVideoIndex];
-            
+
             if (currentVideo?._id) {
                 const userInfo = JSON.parse(localStorage.getItem('userInfo'));
                 const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -278,7 +278,7 @@ const CoursePlayer = () => {
                         courseId,
                         videoId: vidId,
                     }, config);
-                    
+
                     setUserProgress(prev => ({
                         ...prev,
                         completedVideos: [...(prev.completedVideos || []), vidId],
@@ -393,8 +393,8 @@ const CoursePlayer = () => {
                         >
                             <ArrowLeft size={14} className="mr-2" /> Back
                         </button>
-                        
-                        <button 
+
+                        <button
                             onClick={() => setIsSidebarOpen(false)}
                             className="p-1.5 bg-white/5 hover:bg-red-500/10 text-slate-500 hover:text-red-500 rounded-lg transition-all"
                             title="Hide Curriculum"
@@ -519,7 +519,7 @@ const CoursePlayer = () => {
                         <p className="text-slate-400 font-inter max-w-lg mx-auto mb-6">
                             Congratulations on reaching the end of {course.title}.
                         </p>
-                        
+
                         {Number(userProgress.progress || 0) < 100 && (
                             <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 max-w-lg mx-auto text-sm font-bold">
                                 ⚠️ Your overall progress is only {Number(userProgress.progress || 0)}%. You must complete all videos and quizzes to unlock your certificate.
@@ -533,14 +533,13 @@ const CoursePlayer = () => {
                                     <span>Certificate Applied!</span>
                                 </div>
                             ) : (
-                                <ModernButton 
-                                    onClick={handleApplyCertificate} 
+                                <ModernButton
+                                    onClick={handleApplyCertificate}
                                     disabled={isApplyingCertificate || Number(userProgress.progress || 0) < 100}
-                                    className={`!px-8 !py-4 !text-lg shadow-xl ${
-                                        Number(userProgress.progress || 0) < 100
+                                    className={`!px-8 !py-4 !text-lg shadow-xl ${Number(userProgress.progress || 0) < 100
                                             ? '!bg-slate-600 !text-slate-400 !shadow-none opacity-50 cursor-not-allowed'
                                             : '!bg-emerald-500 shadow-emerald-500/20'
-                                    }`}
+                                        }`}
                                 >
                                     {isApplyingCertificate
                                         ? 'Submitting...'
@@ -550,7 +549,7 @@ const CoursePlayer = () => {
                                     }
                                 </ModernButton>
                             )}
-                            <button 
+                            <button
                                 onClick={() => navigate('/dashboard/my-courses')}
                                 className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all"
                             >
@@ -563,7 +562,7 @@ const CoursePlayer = () => {
                         <div className="flex items-center justify-between bg-white/[0.02] p-4 lg:px-8 border-b border-white/5">
                             <div className="flex items-center space-x-4">
                                 {!isSidebarOpen && (
-                                    <button 
+                                    <button
                                         onClick={() => setIsSidebarOpen(true)}
                                         className="p-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl hover:bg-primary hover:text-white transition-all group flex items-center shadow-xl shadow-primary/10"
                                         title="Show Curriculum"
@@ -580,10 +579,10 @@ const CoursePlayer = () => {
                                     <h1 className="text-lg font-black text-white font-poppins">{showQuiz ? `${currentModule.title} - Final Quiz` : currentVideo.title}</h1>
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center space-x-2">
                                 {isSidebarOpen && (
-                                    <button 
+                                    <button
                                         onClick={() => setIsSidebarOpen(false)}
                                         className="hidden lg:flex items-center px-2.5 py-1.5 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-primary transition-all rounded-lg border border-white/10 font-bold text-[9px] uppercase tracking-widest"
                                     >
@@ -596,238 +595,238 @@ const CoursePlayer = () => {
                             </div>
                         </div>
                         <div className="p-4 lg:p-8 space-y-8">
-                    {showQuiz ? (
-                        <div className="relative group mx-auto max-w-5xl">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-primary rounded-3xl blur opacity-10"></div>
-                            <GlassCard className="relative bg-[#0a0a0a] border-white/10 p-8 shadow-2xl">
-                                {quizResult ? (
-                                    <div className="text-center py-12 space-y-6 animate-in zoom-in-95 duration-500">
-                                        <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
-                                            <CheckCircle size={48} />
-                                        </div>
-                                        <h2 className="text-3xl font-black text-white font-poppins">Quiz Completed!</h2>
-                                        <p className="text-slate-400 font-inter max-w-md mx-auto">
-                                            Great job completing the assessment for "{currentModule.title}".
-                                        </p>
-                                        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 inline-block">
-                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Your Score</p>
-                                            <p className="text-5xl font-black text-emerald-400 font-poppins">{Math.round((quizResult.score / quizResult.total) * 100)}%</p>
-                                            <p className="text-sm font-bold text-slate-400 mt-2">{quizResult.score} / {quizResult.total} Correct</p>
-                                        </div>
-                                        <div className="pt-8">
-                                            <ModernButton 
-                                                onClick={handleNext}
-                                                className="!px-12 !py-4"
-                                            >
-                                                {currentModuleIndex < course.modules.length - 1 ? 'Continue to Next Section' : 'Finish Course'}
-                                            </ModernButton>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-                                        <div className="flex items-center justify-between mb-8">
-                                            <div className="px-4 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20">
-                                                Question {quizIndex + 1} of {currentModule.quiz.questions.length}
+                            {showQuiz ? (
+                                <div className="relative group mx-auto max-w-5xl">
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-primary rounded-3xl blur opacity-10"></div>
+                                    <GlassCard className="relative bg-[#0a0a0a] border-white/10 p-8 shadow-2xl">
+                                        {quizResult ? (
+                                            <div className="text-center py-12 space-y-6 animate-in zoom-in-95 duration-500">
+                                                <div className="w-24 h-24 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
+                                                    <CheckCircle size={48} />
+                                                </div>
+                                                <h2 className="text-3xl font-black text-white font-poppins">Quiz Completed!</h2>
+                                                <p className="text-slate-400 font-inter max-w-md mx-auto">
+                                                    Great job completing the assessment for "{currentModule.title}".
+                                                </p>
+                                                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 inline-block">
+                                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Your Score</p>
+                                                    <p className="text-5xl font-black text-emerald-400 font-poppins">{Math.round((quizResult.score / quizResult.total) * 100)}%</p>
+                                                    <p className="text-sm font-bold text-slate-400 mt-2">{quizResult.score} / {quizResult.total} Correct</p>
+                                                </div>
+                                                <div className="pt-8">
+                                                    <ModernButton
+                                                        onClick={handleNext}
+                                                        className="!px-12 !py-4"
+                                                    >
+                                                        {currentModuleIndex < course.modules.length - 1 ? 'Continue to Next Section' : 'Finish Course'}
+                                                    </ModernButton>
+                                                </div>
                                             </div>
-                                            <div className="flex gap-1">
-                                                {currentModule.quiz.questions.map((_, i) => (
-                                                    <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i === quizIndex ? 'w-8 bg-emerald-500' : 'w-4 bg-white/10'}`}></div>
+                                        ) : (
+                                            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+                                                <div className="flex items-center justify-between mb-8">
+                                                    <div className="px-4 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20">
+                                                        Question {quizIndex + 1} of {currentModule.quiz.questions.length}
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        {currentModule.quiz.questions.map((_, i) => (
+                                                            <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i === quizIndex ? 'w-8 bg-emerald-500' : 'w-4 bg-white/10'}`}></div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                <h3 className="text-2xl font-bold text-white mb-8 font-poppins leading-tight">
+                                                    {currentModule.quiz.questions[quizIndex].question}
+                                                </h3>
+
+                                                <div className="space-y-4 mb-12">
+                                                    {currentModule.quiz.questions[quizIndex].options.map((opt, i) => (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() => setQuizAnswers(prev => ({ ...prev, [quizIndex]: opt }))}
+                                                            className={`w-full group relative flex items-center p-6 rounded-2xl border-2 transition-all duration-300 font-bold ${quizAnswers[quizIndex] === opt
+                                                                ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400'
+                                                                : 'border-white/10 hover:border-white/20 text-white/60 hover:text-white'}`}
+                                                        >
+                                                            <div className={`w-6 h-6 rounded-lg border-2 mr-4 flex items-center justify-center transition-all ${quizAnswers[quizIndex] === opt ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-white/20'}`}>
+                                                                <span className="text-[10px]">{String.fromCharCode(65 + i)}</span>
+                                                            </div>
+                                                            {opt}
+                                                        </button>
+                                                    ))}
+                                                </div>
+
+                                                <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                                                    <button
+                                                        disabled={quizIndex === 0}
+                                                        onClick={() => setQuizIndex(prev => prev - 1)}
+                                                        className="px-6 py-2 text-sm font-bold text-white/40 hover:text-white disabled:opacity-0 transition-all"
+                                                    >
+                                                        Previous
+                                                    </button>
+
+                                                    {quizIndex === currentModule.quiz.questions.length - 1 ? (
+                                                        <ModernButton
+                                                            disabled={!quizAnswers[quizIndex]}
+                                                            onClick={() => {
+                                                                const score = currentModule.quiz.questions.reduce((acc, q, i) => {
+                                                                    return acc + (quizAnswers[i] === q.options[q.correctIndex] ? 1 : 0);
+                                                                }, 0);
+                                                                setQuizResult({ score, total: currentModule.quiz.questions.length });
+                                                            }}
+                                                            className="!px-10 shadow-xl shadow-emerald-500/20 !bg-emerald-500"
+                                                        >
+                                                            Finish Assessment
+                                                        </ModernButton>
+                                                    ) : (
+                                                        <ModernButton
+                                                            disabled={!quizAnswers[quizIndex]}
+                                                            onClick={() => setQuizIndex(prev => prev + 1)}
+                                                            className="!px-10"
+                                                        >
+                                                            Next Question
+                                                        </ModernButton>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </GlassCard>
+                                </div>
+                            ) : (
+                                <div className="relative group w-full mx-auto max-w-6xl">
+                                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-secondary-purple/20 rounded-3xl blur opacity-20 transition duration-1000"></div>
+                                    <div className="relative aspect-video rounded-2xl bg-black shadow-2xl overflow-hidden border border-white/10">
+                                        {/* Render based on video type */}
+                                        {currentVideo.videoType === 'document' ? (
+                                            <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8 text-center">
+                                                <FileText size={64} className="text-secondary-purple mb-4 animate-bounce" />
+                                                <h3 className="text-xl font-bold text-slate-800 mb-2">{currentVideo.title}</h3>
+                                                <p className="text-slate-500 mb-6 max-w-md">This lesson is a document resource. Click below to view or download it.</p>
+                                                <div className="flex space-x-4">
+                                                    <ModernButton
+                                                        onClick={() => window.open(currentVideo.url, '_blank')}
+                                                        className="!bg-secondary-purple"
+                                                    >
+                                                        View Document
+                                                    </ModernButton>
+                                                    <a href={currentVideo.url} download className="flex items-center px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition-all">
+                                                        <Download size={18} className="mr-2" /> Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        ) : (currentVideo.videoType === 'zoom-recording' || currentVideo.videoType === 'live-recording') && (currentVideo.zoomRecording?.playUrl || currentVideo.recordingUrl) ? (
+                                            <MeetingRecordingPlayer
+                                                recordingUrl={currentVideo.recordingUrl || currentVideo.zoomRecording?.playUrl}
+                                                sessionId={currentVideo.zoomSession || currentVideo.sessionId}
+                                                title={currentVideo.title}
+                                                onEnded={handleVideoEnd}
+                                                onError={(error) => console.error('Recording playback error:', error)}
+                                            />
+                                        ) : (currentVideo.url && (currentVideo.url.endsWith('.mp4') || currentVideo.url.endsWith('.webm') || currentVideo.url.endsWith('.ogg') || currentVideo.url.endsWith('.mov') || currentVideo.url.includes('/mp4') || currentVideo.url.includes('.mp4?') || currentVideo.url.includes('/uploads/'))) ? (
+                                            <video
+                                                src={getMediaUrl(currentVideo.url)}
+                                                controls
+                                                className="w-full h-full"
+                                                onEnded={handleVideoEnd}
+                                                onError={(e) => {
+                                                    console.error('Video playback error:', e);
+                                                    toast.error('Unable to load video file. The file may be missing from the server.');
+                                                }}
+                                                controlsList="nodownload"
+                                            />
+                                        ) : (
+                                            <CustomYoutubePlayer
+                                                url={currentVideo.url}
+                                                title={currentVideo.title}
+                                                onEnded={handleVideoEnd}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex flex-col gap-8 w-full mx-auto max-w-6xl">
+                                <div className="flex-1 space-y-8">
+                                    {showExercise && currentExercise && (
+                                        <GlassCard className="animate-in slide-in-from-bottom-6 duration-700 bg-black/40 shadow-xl border-emerald-500/20">
+                                            <div className="flex items-center space-x-3 mb-6">
+                                                <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
+                                                    <Unlock size={20} />
+                                                </div>
+                                                <h3 className="text-xl font-extrabold text-white font-poppins tracking-tight">Knowledge Check</h3>
+                                            </div>
+                                            <p className="text-[#B8C0FF] font-bold font-inter mb-6">{currentExercise.question}</p>
+
+                                            <div className="space-y-3 mb-8">
+                                                {currentExercise.options.map((opt, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setSelectedAnswer(opt)}
+                                                        className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all font-bold ${selectedAnswer === opt
+                                                            ? 'border-primary bg-primary/5 text-primary'
+                                                            : 'border-white/10 hover:border-white/20 text-white/70'
+                                                            }`}
+                                                    >
+                                                        {opt}
+                                                    </button>
                                                 ))}
                                             </div>
-                                        </div>
-                                        
-                                        <h3 className="text-2xl font-bold text-white mb-8 font-poppins leading-tight">
-                                            {currentModule.quiz.questions[quizIndex].question}
-                                        </h3>
-                                        
-                                        <div className="space-y-4 mb-12">
-                                            {currentModule.quiz.questions[quizIndex].options.map((opt, i) => (
-                                                <button
-                                                    key={i}
-                                                    onClick={() => setQuizAnswers(prev => ({ ...prev, [quizIndex]: opt }))}
-                                                    className={`w-full group relative flex items-center p-6 rounded-2xl border-2 transition-all duration-300 font-bold ${quizAnswers[quizIndex] === opt 
-                                                        ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400' 
-                                                        : 'border-white/10 hover:border-white/20 text-white/60 hover:text-white'}`}
-                                                >
-                                                    <div className={`w-6 h-6 rounded-lg border-2 mr-4 flex items-center justify-center transition-all ${quizAnswers[quizIndex] === opt ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-white/20'}`}>
-                                                        <span className="text-[10px]">{String.fromCharCode(65 + i)}</span>
-                                                    </div>
-                                                    {opt}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        
-                                        <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
-                                            <button 
-                                                disabled={quizIndex === 0}
-                                                onClick={() => setQuizIndex(prev => prev - 1)}
-                                                className="px-6 py-2 text-sm font-bold text-white/40 hover:text-white disabled:opacity-0 transition-all"
-                                            >
-                                                Previous
-                                            </button>
-                                            
-                                            {quizIndex === currentModule.quiz.questions.length - 1 ? (
-                                                <ModernButton 
-                                                    disabled={!quizAnswers[quizIndex]}
-                                                    onClick={() => {
-                                                        const score = currentModule.quiz.questions.reduce((acc, q, i) => {
-                                                            return acc + (quizAnswers[i] === q.options[q.correctIndex] ? 1 : 0);
-                                                        }, 0);
-                                                        setQuizResult({ score, total: currentModule.quiz.questions.length });
-                                                    }}
-                                                    className="!px-10 shadow-xl shadow-emerald-500/20 !bg-emerald-500"
-                                                >
-                                                    Finish Assessment
-                                                </ModernButton>
-                                            ) : (
-                                                <ModernButton 
-                                                    disabled={!quizAnswers[quizIndex]}
-                                                    onClick={() => setQuizIndex(prev => prev + 1)}
-                                                    className="!px-10"
-                                                >
-                                                    Next Question
-                                                </ModernButton>
+
+                                            {exerciseFeedback && (
+                                                <div className={`p-4 rounded-xl mb-6 font-bold text-sm animate-in fade-in duration-300 ${exerciseFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                                                    }`}>
+                                                    {exerciseFeedback.message}
+                                                </div>
                                             )}
-                                        </div>
-                                    </div>
-                                )}
-                            </GlassCard>
-                        </div>
-                    ) : (
-                        <div className="relative group w-full mx-auto max-w-6xl">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-secondary-purple/20 rounded-3xl blur opacity-20 transition duration-1000"></div>
-                            <div className="relative aspect-video rounded-2xl bg-black shadow-2xl overflow-hidden border border-white/10">
-                                {/* Render based on video type */}
-                                {currentVideo.videoType === 'document' ? (
-                                <div className="w-full h-full bg-white flex flex-col items-center justify-center p-8 text-center">
-                                    <FileText size={64} className="text-secondary-purple mb-4 animate-bounce" />
-                                    <h3 className="text-xl font-bold text-slate-800 mb-2">{currentVideo.title}</h3>
-                                    <p className="text-slate-500 mb-6 max-w-md">This lesson is a document resource. Click below to view or download it.</p>
-                                    <div className="flex space-x-4">
-                                        <ModernButton 
-                                            onClick={() => window.open(currentVideo.url, '_blank')}
-                                            className="!bg-secondary-purple"
-                                        >
-                                            View Document
-                                        </ModernButton>
-                                        <a href={currentVideo.url} download className="flex items-center px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition-all">
-                                            <Download size={18} className="mr-2" /> Download
-                                        </a>
-                                    </div>
-                                </div>
-                            ) : (currentVideo.videoType === 'zoom-recording' || currentVideo.videoType === 'live-recording') && (currentVideo.zoomRecording?.playUrl || currentVideo.recordingUrl) ? (
-                                <MeetingRecordingPlayer
-                                    recordingUrl={currentVideo.recordingUrl || currentVideo.zoomRecording?.playUrl}
-                                    sessionId={currentVideo.zoomSession || currentVideo.sessionId}
-                                    title={currentVideo.title}
-                                    onEnded={handleVideoEnd}
-                                    onError={(error) => console.error('Recording playback error:', error)}
-                                />
-                            ) : (currentVideo.url && (currentVideo.url.endsWith('.mp4') || currentVideo.url.endsWith('.webm') || currentVideo.url.endsWith('.ogg') || currentVideo.url.endsWith('.mov') || currentVideo.url.includes('/mp4') || currentVideo.url.includes('.mp4?') || currentVideo.url.includes('/uploads/'))) ? (
-                                <video
-                                    src={getMediaUrl(currentVideo.url)}
-                                    controls
-                                    className="w-full h-full"
-                                    onEnded={handleVideoEnd}
-                                    onError={(e) => {
-                                        console.error('Video playback error:', e);
-                                        toast.error('Unable to load video file. The file may be missing from the server.');
-                                    }}
-                                    controlsList="nodownload"
-                                />
-                            ) : (
-                                <CustomYoutubePlayer
-                                    url={currentVideo.url}
-                                    title={currentVideo.title}
-                                    onEnded={handleVideoEnd}
-                                />
-                            )}
-                        </div>
-                    </div>
-                )}
 
-                    <div className="flex flex-col gap-8 w-full mx-auto max-w-6xl">
-                        <div className="flex-1 space-y-8">
-                            {showExercise && currentExercise && (
-                                <GlassCard className="animate-in slide-in-from-bottom-6 duration-700 bg-black/40 shadow-xl border-emerald-500/20">
-                                    <div className="flex items-center space-x-3 mb-6">
-                                        <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
-                                            <Unlock size={20} />
-                                        </div>
-                                        <h3 className="text-xl font-extrabold text-white font-poppins tracking-tight">Knowledge Check</h3>
-                                    </div>
-                                    <p className="text-[#B8C0FF] font-bold font-inter mb-6">{currentExercise.question}</p>
-
-                                    <div className="space-y-3 mb-8">
-                                        {currentExercise.options.map((opt, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={() => setSelectedAnswer(opt)}
-                                                className={`w-full text-left px-5 py-4 rounded-xl border-2 transition-all font-bold ${selectedAnswer === opt
-                                                    ? 'border-primary bg-primary/5 text-primary'
-                                                    : 'border-white/10 hover:border-white/20 text-white/70'
-                                                    }`}
-                                            >
-                                                {opt}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {exerciseFeedback && (
-                                        <div className={`p-4 rounded-xl mb-6 font-bold text-sm animate-in fade-in duration-300 ${exerciseFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-                                            }`}>
-                                            {exerciseFeedback.message}
-                                        </div>
+                                            <ModernButton onClick={submitAnswer} className="w-full !py-4 font-bold tracking-wide">
+                                                Validate Answer
+                                            </ModernButton>
+                                        </GlassCard>
                                     )}
 
-                                    <ModernButton onClick={submitAnswer} className="w-full !py-4 font-bold tracking-wide">
-                                        Validate Answer
-                                    </ModernButton>
-                                </GlassCard>
-                            )}
-
-                            {/* Discussion Hub renders here only when the curriculum index sidebar is
+                                    {/* Discussion Hub renders here only when the curriculum index sidebar is
                                 hidden; when it's open, the row is too narrow so it moves below (see
                                 after this flex row) and spans full width instead. */}
-                            {!isSidebarOpen && discussionHubBlock}
-                        </div>
-
-                        {/* Instructor Card - full width below video, matching player width */}
-                        <div className="w-full mx-auto max-w-6xl">
-                            <GlassCard className="bg-primary/5 border-primary/10 !py-2 !px-3.5">
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-base flex-shrink-0">
-                                        {(course.instructorName || course.instructor?.name || 'I')[0]}
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="flex items-baseline space-x-2">
-                                            <p className="font-bold text-white font-poppins text-xs">
-                                                {course.instructorName || course.instructor?.name || 'Academic facilitator'}
-                                            </p>
-                                            {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && 
-                                             (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name) !== (course.instructorName || course.instructor?.name) && (
-                                                <span className="text-[9px] font-bold text-primary uppercase tracking-wider truncate">
-                                                    • {course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p className="text-[10px] text-[#B8C0FF]/80 font-inter leading-snug mt-0.5 line-clamp-1">
-                                            {course.instructor?.profile?.bio || 'Experienced academic facilitator dedicated to your success in this course track.'}
-                                        </p>
-                                    </div>
+                                    {!isSidebarOpen && discussionHubBlock}
                                 </div>
-                            </GlassCard>
-                        </div>
-                    </div>
 
-                    {/* Curriculum index is open — row above is too narrow for the discussion
+                                {/* Instructor Card - full width below video, matching player width */}
+                                <div className="w-full mx-auto max-w-6xl">
+                                    <GlassCard className="bg-primary/5 border-primary/10 !py-2 !px-3.5">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-base flex-shrink-0">
+                                                {(course.instructorName || course.instructor?.name || 'I')[0]}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-baseline space-x-2">
+                                                    <p className="font-bold text-white font-poppins text-xs">
+                                                        {course.instructorName || course.instructor?.name || 'Academic facilitator'}
+                                                    </p>
+                                                    {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) &&
+                                                        (course.universityName || course.instructor?.profile?.universityName || course.instructor?.name) !== (course.instructorName || course.instructor?.name) && (
+                                                            <span className="text-[9px] font-bold text-primary uppercase tracking-wider truncate">
+                                                                • {course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}
+                                                            </span>
+                                                        )}
+                                                </div>
+                                                <p className="text-[10px] text-[#B8C0FF]/80 font-inter leading-snug mt-0.5 line-clamp-1">
+                                                    {course.instructor?.profile?.bio || 'Experienced academic facilitator dedicated to your success in this course track.'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </GlassCard>
+                                </div>
+                            </div>
+
+                            {/* Curriculum index is open - row above is too narrow for the discussion
                         box, so it takes the full width below instead. */}
-                    {isSidebarOpen && (
-                        <div className="w-full">
-                            {discussionHubBlock}
+                            {isSidebarOpen && (
+                                <div className="w-full">
+                                    {discussionHubBlock}
+                                </div>
+                            )}
                         </div>
-                    )}
-                    </div>
                     </div>
                 )}
             </div>

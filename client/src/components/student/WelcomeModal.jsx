@@ -10,7 +10,7 @@ const WelcomeModal = ({ isOpen, onClose, name }) => {
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 sm:pt-24 px-4 sm:px-6">
-                    {/* Invisible click-outside-to-close layer — no dark/blur tint, so the
+                    {/* Invisible click-outside-to-close layer - no dark/blur tint, so the
                         dashboard behind stays fully visible instead of being hidden. */}
                     <div onClick={onClose} className="absolute inset-0" />
 
@@ -40,7 +40,7 @@ const WelcomeModal = ({ isOpen, onClose, name }) => {
                                 Welcome to SkillDad, {name}!
                             </h2>
                             <p className="text-slate-400 text-sm max-w-sm mb-8">
-                                Your account is all set up. This is your dashboard — track enrolled courses, live classes, exams, and rewards from right here.
+                                Your account is all set up. This is your dashboard - track enrolled courses, live classes, exams, and rewards from right here.
                             </p>
 
                             <div className="w-full flex flex-col sm:flex-row gap-3">

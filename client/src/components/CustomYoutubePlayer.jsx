@@ -33,7 +33,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
   const [showControls, setShowControls] = useState(true);
   const [isReady, setIsReady] = useState(false);
   // The YouTube iframe isn't created until the student presses play. Before that,
-  // we show our own poster image + play button — a plain <img>, not an iframe —
+  // we show our own poster image + play button - a plain <img>, not an iframe -
   // so there's no YouTube "cued" thumbnail/branding to hide in the first place.
   const [started, setStarted] = useState(false);
 
@@ -62,7 +62,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
       if (destroyed || !mountRef.current) return;
       playerRef.current = new YT.Player(mountRef.current, {
         videoId,
-        // autoplay is always 1 here — the player is only ever created after the
+        // autoplay is always 1 here - the player is only ever created after the
         // student clicks the poster. Using the playerVars flag (rather than an
         // imperative .playVideo() call after the API script finishes loading)
         // avoids the async gap that can make browsers silently block playback,
@@ -223,8 +223,8 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
       onMouseMove={handleMouseMove}
       className="relative w-full aspect-video bg-black overflow-hidden group rounded-2xl border border-white/10 shadow-2xl"
     >
-      {/* Before the student presses play, there is no iframe in the DOM at all —
-          just our own poster image + play button — so there is no YouTube "cued"
+      {/* Before the student presses play, there is no iframe in the DOM at all -
+          just our own poster image + play button - so there is no YouTube "cued"
           thumbnail/branding to hide in the first place. */}
       {!started && (
         <div
@@ -239,7 +239,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         </div>
       )}
 
-      {/* YouTube Player — only created once started=true. controls=0/modestbranding/
+      {/* YouTube Player - only created once started=true. controls=0/modestbranding/
           rel=0 suppress YouTube's own UI, and pointer-events-none means the iframe
           never receives real hover/click events. Rendered at natural size with no
           crop/stretch, since a vertical crop here previously clipped subtitles
@@ -250,7 +250,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         </div>
       )}
 
-      {/* Pause Cover — YouTube shows its own title bar + suggested-video overlay
+      {/* Pause Cover - YouTube shows its own title bar + suggested-video overlay
           whenever the video is paused via the API, with no parameter to disable
           it. Since a paused frame isn't changing anyway, fully covering it while
           not playing hides that native UI completely instead of trying to mask
@@ -269,15 +269,14 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
         className="absolute inset-0 cursor-pointer z-10"
       />
 
-      {/* Control Skin Layer — single row, hugging the very bottom edge, so it
+      {/* Control Skin Layer - single row, hugging the very bottom edge, so it
           physically occupies the same strip where YouTube's native share/
           watch-later/more-videos icons render in fullscreen (rather than
           trying to suppress them directly, which fullscreen doesn't allow
           reliably). */}
       <div
-        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 pt-3 pb-2 flex items-center gap-4 text-white transition-all duration-300 z-20 ${
-          showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
-        }`}
+        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 pt-3 pb-2 flex items-center gap-4 text-white transition-all duration-300 z-20 ${showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+          }`}
       >
         {/* Play/Pause Button */}
         <button
@@ -292,7 +291,7 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
           {formatTime(currentTime)} <span className="text-white/30">/</span> {formatTime(duration)}
         </span>
 
-        {/* Progress Timeline bar — fills the space between the buttons */}
+        {/* Progress Timeline bar - fills the space between the buttons */}
         <input
           type="range"
           min={0}
@@ -301,11 +300,9 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
           onChange={handleSeek}
           className="flex-1 h-1 bg-white/20 hover:h-1.5 rounded-lg appearance-none cursor-pointer accent-primary transition-all"
           style={{
-            background: `linear-gradient(to right, #5B5CFF 0%, #5B5CFF ${
-              duration ? (currentTime / duration) * 100 : 0
-            }%, rgba(255,255,255,0.2) ${
-              duration ? (currentTime / duration) * 100 : 0
-            }%, rgba(255,255,255,0.2) 100%)`
+            background: `linear-gradient(to right, #5B5CFF 0%, #5B5CFF ${duration ? (currentTime / duration) * 100 : 0
+              }%, rgba(255,255,255,0.2) ${duration ? (currentTime / duration) * 100 : 0
+              }%, rgba(255,255,255,0.2) 100%)`
           }}
         />
 
@@ -325,11 +322,9 @@ const CustomYoutubePlayer = ({ url, title, onEnded }) => {
             onChange={handleVolumeChange}
             className="w-0 opacity-0 group-hover/volume:w-16 group-hover/volume:opacity-100 h-1 rounded bg-white/20 appearance-none cursor-pointer accent-primary transition-all duration-300"
             style={{
-              background: `linear-gradient(to right, #5B5CFF 0%, #5B5CFF ${
-                isMuted ? 0 : volume
-              }%, rgba(255,255,255,0.2) ${
-                isMuted ? 0 : volume
-              }%, rgba(255,255,255,0.2) 100%)`
+              background: `linear-gradient(to right, #5B5CFF 0%, #5B5CFF ${isMuted ? 0 : volume
+                }%, rgba(255,255,255,0.2) ${isMuted ? 0 : volume
+                }%, rgba(255,255,255,0.2) 100%)`
             }}
           />
         </div>

@@ -9,8 +9,18 @@ import { ReferFAB } from '../student/ReferralWidget';
 import ReferralModal from '../student/ReferralModal';
 
 const DashboardLayout = () => {
-    // Only open the sidebar by default on large screens
-    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
+    // Sidebar collapsed by default (false) on all screens, but remember user's choice
+    const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+        const saved = localStorage.getItem('sidebarOpen');
+        // If nothing is saved, default to false (collapsed)
+        return saved === 'true';
+    });
+
+    // Save to local storage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('sidebarOpen', isSidebarOpen);
+    }, [isSidebarOpen]);
+
     const [referModalOpen, setReferModalOpen] = useState(false);
     const location = useLocation();
 
@@ -18,27 +28,22 @@ const DashboardLayout = () => {
     const userInfo = (() => { try { return JSON.parse(localStorage.getItem('userInfo')); } catch { return null; } })();
     const isStudent = userInfo?.role?.toLowerCase() === 'student';
 
-    // Auto-manage sidebar state based on route and screen size
+    // Auto-manage sidebar state for specific routes
     useEffect(() => {
         const isCourseOrSession = location.pathname.includes('/course/') || location.pathname.includes('/session/');
         
-        if (isCourseOrSession) {
-            // Always auto-hide sidebar when entering course player or live sessions for maximum screen space
+        if (isCourseOrSession || window.innerWidth < 1024) {
+            // Auto-hide on mobile or immersive views
             setIsSidebarOpen(false);
-        } else if (window.innerWidth < 1024) {
-            // Auto-hide on mobile for all path changes
-            setIsSidebarOpen(false);
-        } else {
-            // On desktop, ensure sidebar is open for normal dashboard pages
-            setIsSidebarOpen(true);
         }
+        // Removed the "else" that forced it open on desktop, so it stays collapsed by default
     }, [location.pathname]);
 
-    // Use a dark background for the dashboard
-    const backgroundClass = 'bg-[#04020a]';
+    // Support both light and dark backgrounds
+    const backgroundClass = 'bg-white dark:bg-alyra-dark';
 
     return (
-        <div className={`min-h-screen ${backgroundClass} flex flex-col relative`}>
+        <div className={`min-h-screen ${backgroundClass} flex flex-col relative dashboard-layout`}>
             {/* Upper Section: Sidebar + Content */}
             <div className="flex flex-1 relative min-h-0">
                 <ModernSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
@@ -47,7 +52,7 @@ const DashboardLayout = () => {
                 <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 max-w-full">
                     <DashboardNavbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-                    <main className={`${location.pathname.includes('/session/') || location.pathname.includes('/course/') ? 'p-0' : 'p-3 sm:p-6 lg:p-8 max-w-[1600px] mx-auto'} w-full flex-1`}>
+                    <main className={`${location.pathname.includes('/session/') || location.pathname.includes('/course/') ? 'p-0' : 'px-3 sm:px-6 lg:px-8 py-3 lg:py-4 max-w-[1600px] mx-auto'} w-full flex-1`}>
                         <Outlet />
                     </main>
                 </div>

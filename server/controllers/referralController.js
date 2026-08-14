@@ -131,4 +131,26 @@ const applyReferralCode = async (req, res) => {
     }
 };
 
-module.exports = { getMyReferralCode, getMyReferrals, getMyRewardPoints, applyReferralCode };
+/**
+ * GET /api/referrals/leaderboard
+ */
+const getLeaderboard = async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT u.id, u.name, u.email, COALESCE(SUM(rp.points), 0) AS xp
+            FROM users u
+            JOIN reward_points rp ON u.id = rp.user_id::text
+            GROUP BY u.id, u.name, u.email
+            ORDER BY xp DESC
+            LIMIT 5
+        `);
+        // If users table id is uuid, we might need u.id::text. Let's just group by u.id.
+        // Also users might have role='student' but let's just get top points earners.
+        res.json(result.rows);
+    } catch (error) {
+        console.error('[Referral] getLeaderboard error:', error.message);
+        res.status(500).json({ message: 'Failed to fetch leaderboard' });
+    }
+};
+
+module.exports = { getMyReferralCode, getMyReferrals, getMyRewardPoints, applyReferralCode, getLeaderboard };

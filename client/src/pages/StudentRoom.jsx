@@ -105,7 +105,7 @@ const StudentRoom = () => {
                 </div>
             </div>
 
-            {/* Jitsi — fills remaining height */}
+            {/* Jitsi - fills remaining height */}
             <div className="flex-1 relative min-h-0">
                 <JitsiMeeting
                     sessionId={id}

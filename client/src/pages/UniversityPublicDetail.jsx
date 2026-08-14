@@ -122,17 +122,17 @@ const UniversityPublicDetail = () => {
     useEffect(() => {
         const videos = (university?.profile?.videos?.length > 0 ? university.profile.videos : [university?.profile?.youtubeUrl]).filter(url => !!url);
         if (!videos || videos.length <= 1 || isHoveringVideo) return;
-        
+
         const interval = setInterval(() => {
             setCurrentVideoIndex(prev => (prev + 1) % videos.length);
         }, 4000);
         return () => clearInterval(interval);
     }, [university, isHoveringVideo]);
-    
+
     // Check if current user owns this profile
     // university._id may be undefined on first render when data comes from location.state (which uses `id`)
     const universityOwnerId = university?._id || university?.id;
-    // SkillDad Universities have no login account (id is always prefixed "sd-") — they're managed
+    // SkillDad Universities have no login account (id is always prefixed "sd-") - they're managed
     // from the dedicated admin edit page, not via self-upload on this public page.
     const isSkillDadUni = String(universityOwnerId).startsWith('sd-');
     const isOwner = !isSkillDadUni && currentUser && (currentUser._id === universityOwnerId || currentUser.role === 'admin');
@@ -164,7 +164,7 @@ const UniversityPublicDetail = () => {
                 const { data } = await axios.get(`/api/public/universities/profile/${encodeURIComponent(universityName)}`);
                 setUniversity(data);
             } catch (error) {
-                // Not a real university account — check if this is a SkillDad University instead
+                // Not a real university account - check if this is a SkillDad University instead
                 // (no login account, so it isn't in /api/public/universities/profile). Covers being
                 // reached directly (bookmark/typed URL) rather than via a card click that already
                 // passed state, since those don't hit this fallback at all.
@@ -173,7 +173,7 @@ const UniversityPublicDetail = () => {
                     const match = skillDadUnis.find(u => u.name === universityName);
                     if (match) {
                         // Always use the freshly-fetched record, even if location.state already had a
-                        // university object — that state is a snapshot from whenever the Platform/Landing
+                        // university object - that state is a snapshot from whenever the Platform/Landing
                         // page last loaded its university list, and goes stale the moment someone edits
                         // the logo/cover here (edits would otherwise appear to "revert" on next visit).
                         setUniversity({
@@ -183,9 +183,9 @@ const UniversityPublicDetail = () => {
                             description: match.description || '',
                             image: match.cover_image ? getMediaUrl(match.cover_image) : (match.profile_image ? getMediaUrl(match.profile_image) : undefined),
                             profileImage: match.profile_image ? getMediaUrl(match.profile_image) : undefined,
-                            profile: { 
-                                website: match.website, 
-                                phone: match.phone, 
+                            profile: {
+                                website: match.website,
+                                phone: match.phone,
                                 coverImage: match.cover_image || undefined,
                                 gallery: match.gallery || [],
                                 youtubeUrl: match.youtube_url || undefined,
@@ -280,8 +280,8 @@ const UniversityPublicDetail = () => {
 
                 // If currently logged in user is this university, update their context too
                 if (currentUser._id === university._id) {
-                    updateUser({ 
-                        ...currentUser, 
+                    updateUser({
+                        ...currentUser,
                         profileImage: data.imageUrl,
                         profile: {
                             ...(currentUser.profile || {}),
@@ -381,7 +381,7 @@ const UniversityPublicDetail = () => {
                             <ModernButton onClick={() => navigate('/platform')} className="w-full justify-center">
                                 Browse Institutions
                             </ModernButton>
-                            <button 
+                            <button
                                 onClick={() => navigate(-1)}
                                 className="text-white/40 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors py-2"
                             >
@@ -482,7 +482,7 @@ const UniversityPublicDetail = () => {
                                             e.target.src = 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=800';
                                         }}
                                     />
-                                    
+
                                     {canEditImages && (
                                         <div
                                             className="absolute inset-0 bg-[#05030B]/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm cursor-pointer"
@@ -521,7 +521,7 @@ const UniversityPublicDetail = () => {
                                     <Award size={18} className="text-primary-accent" />
                                     <span>Global Academic Partner</span>
                                 </div>
-                                
+
                                 <h1 className="text-4xl xs:text-5xl md:text-7xl lg:text-[100px] font-black text-white font-jakarta tracking-tighter leading-[1.1] md:leading-[0.85] py-2">
                                     {university.name}
                                 </h1>
@@ -530,7 +530,7 @@ const UniversityPublicDetail = () => {
                                     <div className="group min-w-[120px] sm:min-w-[140px]">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-primary transition-colors">Global Campus</p>
                                         <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
-                                            <MapPin size={18} className="text-primary shrink-0" /> 
+                                            <MapPin size={18} className="text-primary shrink-0" />
                                             <span className="truncate max-w-[150px] sm:max-w-none">{university.profile?.location || university.location || 'Excellence Hub'}</span>
                                         </div>
                                     </div>
@@ -579,7 +579,7 @@ const UniversityPublicDetail = () => {
             </section>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-32 space-y-20 md:space-y-32">
-                
+
                 {/* Institutional Identity */}
                 <div className="grid lg:grid-cols-12 gap-20 items-start">
                     <div className="lg:col-span-8 space-y-12">
@@ -660,8 +660,8 @@ const UniversityPublicDetail = () => {
                                 </div>
                             </div>
 
-                            <ModernButton 
-                                variant="primary" 
+                            <ModernButton
+                                variant="primary"
                                 className="w-full justify-center !py-6 shadow-glow-purple/20 group/btn"
                                 onClick={() => {
                                     const section = document.getElementById('programs-section');
@@ -686,7 +686,7 @@ const UniversityPublicDetail = () => {
                                     <div className="w-2 h-8 bg-red-600 rounded-full"></div>
                                     Success Story
                                 </h3>
-                                <div 
+                                <div
                                     className="relative aspect-video rounded-[32px] sm:rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl"
                                     onMouseEnter={() => setIsHoveringVideo(true)}
                                     onMouseLeave={() => setIsHoveringVideo(false)}
@@ -710,13 +710,13 @@ const UniversityPublicDetail = () => {
                                             ></iframe>
                                         </motion.div>
                                     </AnimatePresence>
-                                    
+
                                     {/* Carousel Indicators */}
                                     {videos.length > 1 && (
                                         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 pointer-events-none">
                                             {videos.map((_, idx) => (
-                                                <div 
-                                                    key={idx} 
+                                                <div
+                                                    key={idx}
                                                     className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentVideoIndex ? 'w-6 bg-primary' : 'w-2 bg-white/30'}`}
                                                 />
                                             ))}
@@ -760,7 +760,7 @@ const UniversityPublicDetail = () => {
                                 <p className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">Campus Atmosphere</p>
                                 <h2 className="text-4xl font-black text-white font-jakarta">Explore Academic <span className="text-primary italic">Life</span></h2>
                             </div>
-                            <ModernButton 
+                            <ModernButton
                                 onClick={() => {
                                     if (university.profile?.virtualTourUrl) {
                                         window.open(university.profile.virtualTourUrl, '_blank');
@@ -768,7 +768,7 @@ const UniversityPublicDetail = () => {
                                         toast.success('Initialising high-fidelity virtual campus tour... coming soon.');
                                     }
                                 }}
-                                variant="secondary" 
+                                variant="secondary"
                                 className="!px-10"
                             >
                                 View Virtual Tour
@@ -779,9 +779,8 @@ const UniversityPublicDetail = () => {
                                 <motion.div
                                     key={i}
                                     whileHover={{ y: -10 }}
-                                    className={`relative rounded-[32px] sm:rounded-[40px] overflow-hidden border border-white/5 shadow-2xl group cursor-pointer ${
-                                        i === 0 ? 'sm:col-span-2 sm:row-span-2 aspect-square' : 'aspect-square'
-                                    }`}
+                                    className={`relative rounded-[32px] sm:rounded-[40px] overflow-hidden border border-white/5 shadow-2xl group cursor-pointer ${i === 0 ? 'sm:col-span-2 sm:row-span-2 aspect-square' : 'aspect-square'
+                                        }`}
                                 >
                                     <img src={img} alt={`Campus Spot ${i}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6 sm:p-8">
@@ -825,7 +824,7 @@ const UniversityPublicDetail = () => {
                 {/* Faculty & Academic Leadership */}
                 {(university.profile?.faculty?.length > 0 || university.profile?.personnel?.length > 0) && (
                     <section className="space-y-12">
-                         <div className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] mb-4">
+                        <div className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] mb-4">
                             <Users size={16} /> Faculty & Academic Leadership
                         </div>
                         <h2 className="text-4xl font-black text-white font-jakarta mb-16">Distinguished <span className="text-primary italic">Directory</span></h2>
