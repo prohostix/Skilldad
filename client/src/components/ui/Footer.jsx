@@ -84,7 +84,7 @@ const Footer = ({ forceVisible = false }) => {
                         <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
                             Company
                         </h3>
-                        <ul className="space-y-4">
+                        <ul className="space-y-2">
                             <li>
                                 <Link
                                     to="/about"
@@ -143,7 +143,7 @@ const Footer = ({ forceVisible = false }) => {
                         <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
                             Resources
                         </h3>
-                        <ul className="space-y-4">
+                        <ul className="space-y-2">
                             <li>
                                 <Link
                                     to="/courses"
@@ -217,7 +217,7 @@ const Footer = ({ forceVisible = false }) => {
                         <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
                             Legal
                         </h3>
-                        <ul className="space-y-4">
+                        <ul className="space-y-2">
                             <li>
                                 <Link
                                     to="/privacy"
@@ -266,7 +266,7 @@ const Footer = ({ forceVisible = false }) => {
                         <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
                             Contact
                         </h3>
-                        <ul className="space-y-4">
+                        <ul className="space-y-2">
                             <li className="flex items-start gap-3 text-gray-400 text-sm group">
                                 <Mail size={16} className="mt-0.5 flex-shrink-0 group-hover:text-primary transition-colors" />
                                 <a href="mailto:support@skilldad.com" className="hover:text-white transition-colors font-inter">

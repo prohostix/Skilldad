@@ -37,25 +37,6 @@ body {
   will-change: transform;
 }
 
-/* Optimize transitions - use specific properties and faster durations */
-.transition-all {
-  transition-property: transform, opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
-}
-
-.transition-colors {
-  transition-property: color, background-color, border-color;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-.transition-transform {
-  transition-property: transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
 /* Optimize hover effects - reduce scale and rotation */
 button:hover,
 a:hover {
@@ -76,6 +57,7 @@ a:hover {
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -105,7 +87,7 @@ a:hover {
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
   }
-  
+
   table {
     font-size: 0.875rem;
   }
@@ -113,20 +95,21 @@ a:hover {
 
 /* Mobile responsive utilities */
 @media (max-width: 640px) {
+
   /* Reduce padding on mobile */
   .space-y-8 {
     gap: 1.5rem;
   }
-  
+
   /* Smaller text on mobile */
   h1 {
     font-size: 1.25rem;
   }
-  
+
   h2 {
     font-size: 1.125rem;
   }
-  
+
   /* Compact buttons on mobile */
   button {
     padding: 0.5rem 0.75rem;

@@ -104,14 +104,11 @@ const Navbar = ({ compact = false }) => {
                                     key={item.name}
                                     to={item.href}
                                     className={theme === 'light'
-                                        ? `logo-color-text relative font-bold transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`
-                                        : `relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 group py-2 ${compact ? 'text-xs' : 'text-sm'}`
+                                        ? `logo-color-text nav-underline relative font-bold transition-colors duration-300 py-2 ${compact ? 'text-xs' : 'text-sm'}`
+                                        : `nav-underline relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 py-2 ${compact ? 'text-xs' : 'text-sm'}`
                                     }
                                 >
                                     {item.name}
-                                    {theme !== 'light' && (
-                                        <span className={`absolute bottom-0 left-0 w-0 h-[2px] bg-gradient-to-r ${!shouldBeTransparent ? 'from-primary to-primary-dark' : 'from-primary-dark to-primary'} group-hover:w-full transition-all duration-300 shadow-glow-purple`}></span>
-                                    )}
                                 </Link>
                             ))}
                         </div>
@@ -122,7 +119,7 @@ const Navbar = ({ compact = false }) => {
                         <div className="hidden lg:flex items-center space-x-6">
                             <button
                                 onClick={toggleTheme}
-                                className={`shrink-0 aspect-square h-9 min-h-[36px] rounded-full transition-all duration-300 flex items-center justify-center ${theme === 'light' ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/5 hover:border-primary/30'}`}
+                                className={`shrink-0 aspect-square h-10 min-h-[36px] rounded-full transition-all duration-300 flex items-center justify-center ${theme === 'light' ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/5 hover:border-primary/30'}`}
                                 aria-label="Toggle theme"
                             >
                                 {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}

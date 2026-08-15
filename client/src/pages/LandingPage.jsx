@@ -337,7 +337,7 @@ const LandingPage = () => {
                                 onClick={() => navigate('/courses')}
                                 className="hidden sm:inline-flex !px-6 !py-3 !text-[10px] uppercase tracking-widest font-black shrink-0"
                             >
-                                Explore Full Catalog <ChevronRight size={14} className="ml-1" />
+                                Explore Full Catalog <ChevronRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform duration-500 ease-in-out" />
                             </ModernButton>
                         </div>
 
@@ -352,7 +352,7 @@ const LandingPage = () => {
                                 onClick={() => navigate('/courses')}
                                 className="w-full !py-4 !text-[10px] uppercase tracking-widest font-black"
                             >
-                                Explore Full Catalog
+                                Explore Full Catalog <ChevronRight size={14} className="ml-1 group-hover:translate-x-1" style={{ transition: 'transform 800ms ease-in-out' }} />
                             </ModernButton>
                         </div>
                     </div>
@@ -531,7 +531,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1, delay: 0.3 }}
-                            className="hidden lg:block h-[320px] gpu-accelerated"
+                            className="hidden lg:block h-130 gpu-accelerated"
                         >
                             <Animated3DShape />
                         </motion.div>
@@ -701,7 +701,7 @@ const LandingPage = () => {
                                 transition={{ duration: 0.7, delay: 0.1 }}
                                 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white font-jakarta tracking-tight leading-tight"
                             >
-                                Managed by <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-primary to-primary-dark">IITans in INDIA</span>
+                                Managed by <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary-dark">IITans in INDIA</span>
                             </motion.h2>
                             <motion.p
                                 initial={{ opacity: 0, y: 20 }}
@@ -727,20 +727,20 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: "-50px" }}
                                 transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 100 }}
-                                whileHover={{ y: -12, scale: 1.02 }}
+                                whileHover={{}}
                                 className="h-full group"
                             >
-                                <GlassCard className="!bg-white/[0.02] border-white/5 group-hover:border-primary/40 transition-all duration-500 h-full p-0 overflow-hidden text-left hover:shadow-2xl hover:shadow-primary/10">
+                                <GlassCard noHover className="!bg-white/[0.02] !border-2 !border-primary/40 hover:!border-primary/70 transition-all duration-500 h-full p-0 overflow-hidden text-left hover:shadow-2xl hover:shadow-primary/20">
                                     <div className="aspect-[4/5] overflow-hidden relative">
                                         <img
                                             src={getMediaUrl(lead.image || lead.imageUrl || lead.img)}
                                             alt={lead.name}
-                                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
                                             onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.name)}&background=5B5CFF&color=fff&bold=true`; }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                                         <div className="absolute bottom-6 left-6 right-6">
-                                            <div className="inline-flex items-center space-x-2 px-2.5 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-[9px] font-black uppercase tracking-widest text-white mb-2">
+                                            <div className="inline-flex items-center space-x-2 px-2.5 py-1 bg-white/10 dark:group-hover:bg-white/25 backdrop-blur-md rounded-full border border-white/20 dark:group-hover:border-white/60 text-[9px] font-black uppercase tracking-widest !text-white mb-2 transition-all duration-300">
                                                 <span className={`w-1.5 h-1.5 rounded-full bg-${lead.accent_color || lead.color || 'primary'}`} />
                                                 <span>{lead.university || lead.alumni} alumni</span>
                                             </div>
@@ -748,12 +748,12 @@ const LandingPage = () => {
                                             <p className="text-[10px] text-primary font-black uppercase tracking-[0.2em]">{lead.title || lead.role}</p>
                                         </div>
                                     </div>
-                                    <div className="p-6">
-                                        <p className="text-xs text-text-muted leading-relaxed font-inter opacity-80 group-hover:opacity-100 transition-opacity">
+                                    <div className="pb-5 pt-3 px-0">
+                                        <p className="text-xs text-white [.light-mode_&]:!text-gray-950 leading-relaxed font-inter opacity-80 group-hover:opacity-100 transition-opacity">
                                             {lead.bio || "Driving the core functional strategy and system reliability for SkillDad’s pan-India academic operations."}
                                         </p>
-                                        <div className="mt-6 pt-6 border-t border-white/5 flex items-center justify-between">
-                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Functional Leadership</span>
+                                        <div className="mt-4 pt-2 border-t border-white/5 flex items-center justify-between">
+                                            <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Functional Leadership</span>
                                             <Activity size={14} className="text-primary/40 group-hover:text-primary transition-colors" />
                                         </div>
                                     </div>

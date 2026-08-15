@@ -323,18 +323,23 @@ const HeroSection = () => {
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-primary text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-2 group hover:shadow-glow-purple hover:scale-[1.04] active:scale-95 shadow-xl"
+                                className="relative w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-primary text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-2 group hover:shadow-glow-purple active:scale-95 shadow-xl before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white/.5)_50%,transparent_75%,transparent_100%)] dark:before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white)_50%,transparent_75%,transparent_100%)] before:bg-[length:250%_250%,100%_100%] before:bg-[position:200%_0,0_0] before:bg-no-repeat before:[transition:background-position_0s_ease] hover:before:bg-[position:-100%_0,0_0] hover:before:duration-[1500ms]"
                             >
-                                {user ? 'Go to Dashboard' : 'Start Learning Today'}
-                                <ChevronRight className="group-hover:translate-x-1.5 transition-transform" size={18} />
+                                <span className="relative z-10 flex items-center gap-2">
+                                    {user ? 'Go to Dashboard' : 'Start Learning Today'}
+                                    <ChevronRight
+                                        className="group-hover:translate-x-2 transition-transform duration-[800ms] ease-in-out"
+                                        size={18}
+                                    />
+                                </span>
                             </button>
 
                             {!user && (
                                 <button
                                     onClick={() => navigate('/login')}
                                     className={theme === 'dark'
-                                        ? "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-white/20 bg-transparent text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:border-white/40 hover:bg-white/5 active:scale-95"
-                                        : "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-black font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
+                                        ? "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-white/20 bg-transparent text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-colors hover:border-white/40 hover:bg-white/5 active:scale-95"
+                                        : "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-primary/30 bg-linear-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-black font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-colors hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
                                     }
                                 >
                                     Login Now
