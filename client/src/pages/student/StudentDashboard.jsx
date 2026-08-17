@@ -177,7 +177,7 @@ const StudentDashboard = () => {
                             {/* Abstract Student Illustration */}
                             <div className="absolute right-0 bottom-0 w-1/2 h-full flex items-end justify-end pointer-events-none pr-8 pb-4">
                                 <div className="w-full h-[120%] bg-gradient-to-t from-[#4C1D95]/10 to-transparent rounded-full translate-x-1/4 translate-y-1/4 blur-3xl absolute"></div>
-                                <img src="/student_hero_illustration.png" alt="Student" className="h-[95%] w-auto object-contain object-right-bottom z-10 opacity-100 mix-blend-multiply drop-shadow-2xl" />
+                                <img src="/student_hero_illustration.png" alt="Student" className="h-[95%] w-auto object-contain object-right-bottom z-10 opacity-100 mix-blend-darken" />
                             </div>
                         </div>
                     </div>
