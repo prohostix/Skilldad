@@ -466,7 +466,7 @@ const CourseDetail = () => {
                                     </label>
                                 )}
 
-                                <div className="absolute inset-0 bg-[#000000]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                <div className="absolute inset-0 overlay-dark flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                     <div className="w-16 h-16 bg-[#ffffff]/20 backdrop-blur-md rounded-full flex items-center justify-center">
                                         <PlayCircle size={32} className="text-white force-white ml-1" />
                                     </div>

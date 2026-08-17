@@ -681,6 +681,10 @@ html.light-mode .font-bold.force-white {
   color: #ffffff !important;
 }
 
+html.light-mode .overlay-dark {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
 .force-white-60,
 html.light-mode .force-white-60 {
   color: rgba(255, 255, 255, 0.6) !important;
