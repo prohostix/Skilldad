@@ -253,14 +253,14 @@ const CourseDetail = () => {
                         {(course.programType === 'degree_programme' || course.program_type === 'degree_programme') ? (
                             <div className="mt-8 space-y-12">
                                 {/* Top Banner */}
-                                <div className="rounded-3xl p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 shadow-xl relative overflow-hidden" style={{ background: 'linear-gradient(90deg, #2A1468 0%, #3B1F87 100%)', border: '1px solid #4F3699' }}>
-                                    <div className="flex-1 flex gap-5 items-start relative z-10">
-                                        <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                                            <Laptop size={26} style={{ color: '#FFFFFF' }} />
+                                <div className="rounded-[1.5rem] p-5 md:p-6 flex flex-col md:flex-row gap-6 md:gap-8 shadow-xl relative overflow-hidden" style={{ background: 'linear-gradient(90deg, #2A1468 0%, #3B1F87 100%)', border: '1px solid #4F3699' }}>
+                                    <div className="flex-1 flex gap-4 items-start relative z-10">
+                                        <div className="w-12 h-12 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                                            <Laptop size={22} className="!text-white" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-lg mb-2 tracking-wide" style={{ color: '#FFFFFF' }}>WORK WHILE YOU STUDY</h3>
-                                            <p className="text-sm leading-relaxed" style={{ color: '#E2D5F8' }}>
+                                            <h3 className="font-bold text-[16px] mb-1 tracking-wide !text-white">WORK WHILE YOU STUDY</h3>
+                                            <p className="text-[13px] leading-relaxed !text-[#E2D5F8]">
                                                 Get opportunities for internships, part-time roles and live projects in hospitals, clinics and healthcare organizations.
                                             </p>
                                         </div>
@@ -268,13 +268,13 @@ const CourseDetail = () => {
                                     
                                     <div className="hidden md:block w-px self-stretch relative z-10" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}></div>
                                     
-                                    <div className="flex-1 flex gap-5 items-start relative z-10">
-                                        <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                                            <Star size={26} style={{ color: '#FFFFFF' }} />
+                                    <div className="flex-1 flex gap-4 items-start relative z-10">
+                                        <div className="w-12 h-12 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                                            <Star size={22} className="!text-white" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-lg mb-2 tracking-wide" style={{ color: '#FFFFFF' }}>WHY IT MATTERS</h3>
-                                            <p className="text-sm leading-relaxed" style={{ color: '#E2D5F8' }}>
+                                            <h3 className="font-bold text-[16px] mb-1 tracking-wide !text-white">WHY IT MATTERS</h3>
+                                            <p className="text-[13px] leading-relaxed !text-[#E2D5F8]">
                                                 You earn, gain experience and build confidence — so you're job-ready even before you graduate.
                                             </p>
                                         </div>
