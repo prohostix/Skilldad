@@ -31,6 +31,48 @@ import ModernButton from '../components/ui/ModernButton';
 import EnrollEnquiryModal from '../components/ui/EnrollEnquiryModal';
 import { getMediaUrl } from '../utils/media';
 
+// Custom filled icons to match exact reference design
+const CustomIconLearn = ({ size = 24, ...props }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} {...props}>
+    <path d="M12 21L11.7584 21.0543C9.72145 21.5126 7.57969 21.3653 5.63204 20.6353C4.21852 20.1054 3 18.9187 3 17.5V5.5C3 4.11939 4.11929 3 5.5 3C7.6257 3 9.68065 3.51333 11.4939 4.48419L12 4.75512L12.5061 4.48419C14.3194 3.51333 16.3743 3 18.5 3C19.8807 3 21 4.11939 21 5.5V17.5C21 18.9187 19.7815 20.1054 18.368 20.6353C16.4203 21.3653 14.2786 21.5126 12.2416 21.0543L12 21Z" />
+  </svg>
+);
+
+const CustomIconGraduate = ({ size = 24, ...props }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} {...props}>
+    <path d="M12 3L1 9L12 15L21 10.0909V17H23V9L12 3ZM4.31818 13.9182L12 18.0909L19.6818 13.9182V16.8273L12 21L4.31818 16.8273V13.9182Z" />
+  </svg>
+);
+
+const CustomIconBriefcase = ({ size = 24, ...props }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} {...props}>
+    <path d="M16 6V4C16 2.89543 15.1046 2 14 2H10C8.89543 2 8 2.89543 8 4V6H3C2.44772 6 2 6.44772 2 7V20C2 21.1046 2.89543 22 4 22H20C21.1046 22 22 21.1046 22 20V7C22 6.44772 21.5523 6 21 6H16ZM10 4H14V6H10V4Z" />
+  </svg>
+);
+
+const CustomIconExperience = ({ size = 24, ...props }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} {...props}>
+    <path d="M12 9C14.2091 9 16 7.20914 16 5C16 2.79086 14.2091 1 12 1C9.79086 1 8 2.79086 8 5C8 7.20914 9.79086 9 12 9Z" />
+    <path d="M18.6667 17.3333C18.6667 13.6514 15.6819 10.6667 12 10.6667C8.3181 10.6667 5.33333 13.6514 5.33333 17.3333C5.33333 17.7015 5.63181 18 6 18H18C18.3682 18 18.6667 17.7015 18.6667 17.3333Z" />
+    <path d="M12 18.5L12.5 20L14 20L12.8 21L13.2 22.5L12 21.6L10.8 22.5L11.2 21L10 20L11.5 20L12 18.5Z" />
+    <path d="M7.5 17.5L7.9 18.7L9 18.7L8.1 19.4L8.4 20.6L7.5 19.9L6.6 20.6L6.9 19.4L6 18.7L7.1 18.7L7.5 17.5Z" />
+    <path d="M16.5 17.5L16.9 18.7L18 18.7L17.1 19.4L17.4 20.6L16.5 19.9L15.6 20.6L15.9 19.4L15 18.7L16.1 18.7L16.5 17.5Z" />
+  </svg>
+);
+
+const CustomIconResume = ({ size = 24, ...props }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} {...props}>
+    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2ZM13 3.5L18.5 9H14C13.4477 9 13 8.55228 13 8V3.5ZM8 12H16V14H8V12ZM8 16H16V18H8V16Z" />
+  </svg>
+);
+
+const CustomIconPlaced = ({ size = 24, ...props }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size} {...props}>
+    <path d="M15 6V4C15 2.89543 14.1046 2 13 2H9C7.89543 2 7 2.89543 7 4V6H3C2.44772 6 2 6.44772 2 7V19C2 20.1046 2.89543 21 4 21H12.5C12.176 20.4042 12 19.7231 12 19C12 15.134 15.134 12 19 12C19.7231 12 20.4042 12.176 21 12.5V7C21 6.44772 20.5523 6 20 6H15ZM9 4H13V6H9V4Z" />
+    <path fillRule="evenodd" clipRule="evenodd" d="M19 14C16.2386 14 14 16.2386 14 19C14 21.7614 16.2386 24 19 24C21.7614 24 24 21.7614 24 19C24 16.2386 21.7614 14 19 14ZM20.7071 17.7071L18.7071 19.7071C18.3166 20.0976 17.6834 20.0976 17.2929 19.7071L16.2929 18.7071C15.9024 18.3166 15.9024 17.6834 16.2929 17.2929C16.6834 16.9024 17.3166 16.9024 17.7071 17.2929L18 17.5858L19.2929 16.2929C19.6834 15.9024 20.3166 15.9024 20.7071 16.2929C21.0976 16.6834 21.0976 17.3166 20.7071 17.7071Z" />
+  </svg>
+);
+
 const CourseDetail = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
@@ -290,12 +332,12 @@ const CourseDetail = () => {
                                     <div className="rounded-[2rem] p-6 md:p-8 pt-10 md:pt-12 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
                                         <div className="flex flex-col md:flex-row items-start md:items-start justify-between w-full relative z-10">
                                             {[
-                                                { icon: BookOpen, title: 'Learn', desc: 'Gain knowledge & industry skills' },
-                                                { icon: GraduationCap, title: 'Graduate', desc: 'Complete your Degree' },
-                                                { icon: Briefcase, title: 'Work & Learn', desc: 'Work on real projects & gain practical experience' },
-                                                { icon: UserCheck, title: 'Gain Experience', desc: 'Strengthen your skills & grow professionally' },
-                                                { icon: FileText, title: 'Stronger Resume', desc: 'Experience + Skills = Better career opportunities' },
-                                                { icon: CheckCircle2, title: 'Get Placed', desc: 'We connect you to top organizations until you get placed.' },
+                                                { icon: CustomIconLearn, title: 'Learn', desc: 'Gain knowledge & industry skills' },
+                                                { icon: CustomIconGraduate, title: 'Graduate', desc: 'Complete your Degree' },
+                                                { icon: CustomIconBriefcase, title: 'Work & Learn', desc: 'Work on real projects & gain practical experience' },
+                                                { icon: CustomIconExperience, title: 'Gain Experience', desc: 'Strengthen your skills & grow professionally' },
+                                                { icon: CustomIconResume, title: 'Stronger Resume', desc: 'Experience + Skills = Better career opportunities' },
+                                                { icon: CustomIconPlaced, title: 'Get Placed', desc: 'We connect you to top organizations until you get placed.' },
                                             ].map((step, idx, arr) => (
                                                 <div key={idx} className="flex flex-row md:flex-col items-center md:text-center flex-1 relative px-1 py-3 md:py-0 w-full md:w-auto gap-4 md:gap-0">
                                                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center md:mb-3 shrink-0 relative z-10" style={{ backgroundColor: '#F3E8FF' }}>
