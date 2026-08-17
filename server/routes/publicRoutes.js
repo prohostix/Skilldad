@@ -184,7 +184,32 @@ router.get('/universities/profile/:name', async (req, res) => {
         `, [uniName]);
         
         if (uniRes.rows.length === 0) {
-            return res.status(404).json({ message: 'University not found' });
+            // Check skill_dad_universities if not found in users
+            const sdUniRes = await query(`
+                SELECT id, name, email, phone, location as bio, description as "profile", profile_image as "profileImage", cover_image as "coverImage", website
+                FROM skill_dad_universities
+                WHERE name = $1 AND is_active = true
+            `, [uniName]);
+
+            if (sdUniRes.rows.length === 0) {
+                return res.status(404).json({ message: 'University not found' });
+            }
+
+            const uni = sdUniRes.rows[0];
+            const profile = { 
+                description: uni.profile, 
+                location: uni.bio, 
+                email: uni.email, 
+                phone: uni.phone,
+                coverImage: uni.coverImage,
+                website: uni.website
+            };
+            
+            return res.json({
+                ...uni,
+                profile,
+                _id: `sd-${uni.id}`
+            });
         }
         
         const uni = uniRes.rows[0];

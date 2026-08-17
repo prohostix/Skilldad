@@ -194,10 +194,10 @@ const LandingPage = () => {
 
     // Prepare partner rows - using final verified SVG URLs
     const row1Static = [
-        { name: 'TCS', logo: 'https://cdn.worldvectorlogo.com/logos/tata-consultancy-services-1.svg' },
+        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg' },
         { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
         { name: 'Wipro', logo: null },
-        { name: 'Accenture', logo: 'https://cdn.worldvectorlogo.com/logos/accenture-7.svg' },
+        { name: 'Accenture', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Accenture.svg' },
         { name: 'IBM', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg' },
         { name: 'HCL Technologies', logo: null },
         { name: 'Capgemini', logo: null },
@@ -212,8 +212,8 @@ const LandingPage = () => {
         { name: 'Meta', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
         { name: 'Oracle', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg' },
         { name: 'SAP', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg' },
-        { name: 'Adobe', logo: 'https://cdn.worldvectorlogo.com/logos/adobe-2.svg' },
-        { name: 'Intel', logo: 'https://cdn.worldvectorlogo.com/logos/intel.svg' },
+        { name: 'Adobe', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Adobe_Systems_logo_and_wordmark.svg' },
+        { name: 'Intel', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Intel_logo_%282020%2C_light_blue%29.svg' },
         { name: 'Goldman Sachs', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg' },
         { name: 'Salesforce', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg' }
     ];
