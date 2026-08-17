@@ -156,7 +156,7 @@ const Navbar = ({ compact = false }) => {
                         <div className="lg:hidden flex items-center space-x-4">
                             <button
                                 onClick={toggleTheme}
-                                className={`shrink-0 w-8 h-8 min-h-[32px] rounded-full transition-colors flex items-center justify-center ${theme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-[#1a1a2e] text-[#E9D5FF] border border-white/5'}`}
+                                className={`shrink-0 aspect-square h-10 min-h-[36px] rounded-full transition-all duration-300 flex items-center justify-center ${theme === 'light' ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/5 hover:border-primary/30'}`}
                             >
                                 {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
                             </button>

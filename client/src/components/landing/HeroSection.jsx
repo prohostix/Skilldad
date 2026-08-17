@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Landmark } from 'lucide-react';
 import AlyraOrb from './AlyraOrb';
 import { useUser } from '../../context/UserContext';
 
@@ -262,7 +262,7 @@ const HeroSection = () => {
 
 
     return (
-        <section className="relative min-h-[90vh] md:min-h-[100vh] flex items-center overflow-hidden bg-transparent">
+        <section className="relative h-[100vh] md:min-h-[100vh] flex items-start md:items-center overflow-hidden bg-transparent">
             <style dangerouslySetInnerHTML={{ __html: HERO_CSS }} />
 
             <div className="absolute inset-0 z-0 gpu-accelerated">
@@ -275,13 +275,13 @@ const HeroSection = () => {
             </div>
 
             {/* Hero Content */}
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 w-full relative z-[20]">
-                <div className="max-w-[900px] py-16 md:py-28 text-center mx-auto flex flex-col items-center">
+            <div className="max-w-[1400px] mx-auto px-0 sm:px-6 lg:px-12 w-full relative z-[20]">
+                <div className="max-w-[900px] pt-[300px] pb-[80px] md:pb-[100px] md:pt-[120px] md:pb-[120px] md:py-28 text-left md:text-center mx-auto flex flex-col items-start md:items-center">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.9, ease: 'easeOut' }}
-                        className="w-full flex flex-col items-center"
+                        className="w-full flex flex-col items-start md:items-center"
                     >
 
 
@@ -289,11 +289,11 @@ const HeroSection = () => {
                         <div
                             role="heading"
                             aria-level="1"
-                            className="text-[30px] xs:text-[38px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-[-0.03em] mb-6 md:mb-8 font-space px-2 sm:px-0 text-center"
+                            className="text-[36px] xs:text-[42px] sm:text-[50px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-tight mb-4 font-jakarta px-4 sm:px-0 text-left md:text-center"
                         >
-                            <span className="text-white">
+                            <span className="text-text-primary">
                                 <span
-                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary"
                                     style={{
                                         backgroundSize: '200% auto',
                                         animation: 'hero-text-gradient 5s linear infinite'
@@ -301,9 +301,9 @@ const HeroSection = () => {
                                 >
                                     Confusion
                                 </span>{' '}
-                                To{' '}
+                                To <br className="block sm:hidden" />
                                 <span
-                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary"
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary"
                                     style={{
                                         backgroundSize: '200% auto',
                                         animation: 'hero-text-gradient 5s linear infinite'
@@ -315,15 +315,14 @@ const HeroSection = () => {
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-white/60 text-xs sm:text-sm md:text-base font-medium max-w-2xl mx-auto mb-8 md:mb-10 font-inter leading-relaxed tracking-normal text-center">
-                            Turn uncertainty into clarity with industry-ready <span className="text-primary font-semibold">skills</span>.<br className="hidden sm:inline" /> Start building a career that actually moves you forward with <span className="text-primary font-semibold">Skilldad</span>.
+                        <p className="text-[14.5px] sm:text-xl text-text-secondary mb-8 max-w-[280px] xs:max-w-[320px] sm:max-w-2xl font-inter leading-[1.6] px-4 sm:px-0 text-left md:text-center mx-0 md:mx-auto">
+                            Turn uncertainty into clarity with industry-ready <span className="text-primary font-semibold">skills</span>. Start building a career that actually moves you forward with <span className="text-primary font-semibold">Skilldad</span>.
                         </p>
 
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md sm:max-w-none">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start md:justify-center gap-3 w-full sm:max-w-none mb-12 md:mb-0 px-4 sm:px-0">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="relative w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full bg-primary text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-2 group hover:shadow-glow-purple active:scale-95 shadow-xl before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white/.5)_50%,transparent_75%,transparent_100%)] dark:before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white)_50%,transparent_75%,transparent_100%)] before:bg-[length:250%_250%,100%_100%] before:bg-[position:200%_0,0_0] before:bg-no-repeat before:[transition:background-position_0s_ease] hover:before:bg-[position:-100%_0,0_0] hover:before:duration-[1500ms]"
+                                className="relative w-[80%] max-w-[260px] sm:max-w-none sm:w-auto px-6 md:px-10 py-3 md:py-4 rounded-full bg-primary text-white font-inter font-normal text-[14px] transition-all flex items-center justify-center gap-2 group hover:shadow-glow-purple active:scale-95 shadow-xl before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white/.5)_50%,transparent_75%,transparent_100%)] dark:before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white)_50%,transparent_75%,transparent_100%)] before:bg-[length:250%_250%,100%_100%] before:bg-[position:200%_0,0_0] before:bg-no-repeat before:[transition:background-position_0s_ease] hover:before:bg-[position:-100%_0,0_0] hover:before:duration-[1500ms]"
                             >
                                 <span className="relative z-10 flex items-center gap-2">
                                     {user ? 'Go to Dashboard' : 'Start Learning Today'}
@@ -338,8 +337,8 @@ const HeroSection = () => {
                                 <button
                                     onClick={() => navigate('/login')}
                                     className={theme === 'dark'
-                                        ? "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-white/20 bg-transparent text-white font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-colors hover:border-white/40 hover:bg-white/5 active:scale-95"
-                                        : "w-full sm:w-auto px-10 md:px-14 py-4 md:py-5 rounded-full border border-primary/30 bg-linear-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-black font-black text-[11px] md:text-[13px] uppercase tracking-[0.18em] transition-colors hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
+                                        ? "w-[80%] max-w-[260px] sm:max-w-none sm:w-auto px-6 md:px-10 py-3 md:py-4 rounded-full border border-white/20 bg-transparent text-white font-inter font-normal text-[14px] transition-colors hover:border-white/40 hover:bg-white/5 active:scale-95"
+                                        : "w-[80%] max-w-[260px] sm:max-w-none sm:w-auto px-6 md:px-10 py-3 md:py-4 rounded-full border border-primary/30 bg-linear-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-black font-inter font-normal text-[14px] transition-colors hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
                                     }
                                 >
                                     Login Now
@@ -351,11 +350,16 @@ const HeroSection = () => {
             </div>
 
             {/* University Ticker */}
-            <div className="absolute bottom-4 left-0 right-0 py-5 overflow-hidden whitespace-nowrap z-20 pointer-events-none sm:pointer-events-auto">
+            <div className="absolute bottom-24 md:bottom-8 left-0 right-0 py-2 sm:py-5 overflow-hidden whitespace-nowrap z-[20] pointer-events-none sm:pointer-events-auto">
+                <div className="md:hidden px-4 sm:px-6 mb-5 flex flex-col items-start">
+                    <div className="w-10 h-[2px] bg-primary mb-2 opacity-70"></div>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] font-inter">Trusted by learners from</span>
+                </div>
                 <div className="flex animate-scroll hover:pause-on-desktop will-change-transform" style={{ animationDuration: '150s' }}>
                     {[...partners, ...partners, ...partners].map((partner, i) => (
-                        <div key={i} className="mx-6 sm:mx-16 md:mx-28 flex items-center transition-all hover:scale-110 cursor-default">
-                            <span className="text-xs xs:text-sm md:text-[22px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 hover:text-white font-inter">{partner}</span>
+                        <div key={i} className="mx-6 sm:mx-10 md:mx-16 flex items-center gap-3 transition-all hover:scale-110 cursor-default">
+                            <Landmark className="text-primary" size={18} />
+                            <span className="text-[11px] xs:text-xs md:text-sm font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-gray-500 hover:text-gray-300 font-inter">{partner}</span>
                         </div>
                     ))}
                 </div>
