@@ -206,6 +206,26 @@ const CourseCatalog = () => {
             return matchesSearch && matchesUniversity && matchesProgramType;
         });
 
+        // Re-sort based on whether it's a WBL tab or not
+        filtered.sort((a, b) => {
+            if (!programType.startsWith('wbl')) {
+                // Ignore display_order, sort by created_at DESC
+                const dateA = new Date(a.createdAt || a.created_at || 0).getTime();
+                const dateB = new Date(b.createdAt || b.created_at || 0).getTime();
+                return dateB - dateA;
+            } else {
+                // Use display_order ASC
+                const orderA = a.displayOrder !== undefined ? a.displayOrder : (a.display_order !== undefined ? a.display_order : 999);
+                const orderB = b.displayOrder !== undefined ? b.displayOrder : (b.display_order !== undefined ? b.display_order : 999);
+                if (orderA !== orderB) return orderA - orderB;
+                
+                // Fallback to created_at DESC
+                const dateA = new Date(a.createdAt || a.created_at || 0).getTime();
+                const dateB = new Date(b.createdAt || b.created_at || 0).getTime();
+                return dateB - dateA;
+            }
+        });
+
         // Sort admin-featured courses first, then SkillDad provided courses to the top!
         return filtered.sort((a, b) => {
             const aFeatured = Boolean(a.isFeatured || a.is_featured) ? 1 : 0;
