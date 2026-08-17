@@ -81,14 +81,14 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Company Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
                             Company
                         </h3>
-                        <ul className="space-y-2">
+                        <ul className="-space-y-2">
                             <li>
                                 <Link
                                     to="/about"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         About Us
@@ -98,7 +98,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/courses"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Courses
@@ -108,7 +108,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/platform"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Universities
@@ -118,7 +118,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/services"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Services
@@ -128,7 +128,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/support"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Support
@@ -140,14 +140,14 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Resources Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
                             Resources
                         </h3>
-                        <ul className="space-y-2">
+                        <ul className="-space-y-2">
                             <li>
                                 <Link
                                     to="/courses"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Course Catalog
@@ -157,7 +157,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/support"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Help Center
@@ -180,7 +180,7 @@ const Footer = ({ forceVisible = false }) => {
                                     <li>
                                         <Link
                                             to="/login"
-                                            className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                            className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                         >
                                             <span className="group-hover:translate-x-1 transition-transform duration-200">
                                                 Student Login
@@ -190,7 +190,7 @@ const Footer = ({ forceVisible = false }) => {
                                     <li>
                                         <Link
                                             to="/register"
-                                            className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                            className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                         >
                                             <span className="group-hover:translate-x-1 transition-transform duration-200">
                                                 Get Started
@@ -214,14 +214,14 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Legal Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
                             Legal
                         </h3>
-                        <ul className="space-y-2">
+                        <ul className="-space-y-2">
                             <li>
                                 <Link
                                     to="/privacy"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Privacy Policy
@@ -231,7 +231,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/terms"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Terms of Service
@@ -241,7 +241,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/cookies"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Cookie Policy
@@ -251,7 +251,7 @@ const Footer = ({ forceVisible = false }) => {
                             <li>
                                 <Link
                                     to="/refund-policy"
-                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight"
                                 >
                                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                                         Refund Policy
@@ -263,27 +263,33 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Contact Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-6 font-inter">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
                             Contact
                         </h3>
-                        <ul className="space-y-2">
-                            <li className="flex items-start gap-3 text-gray-400 text-sm group">
-                                <Mail size={16} className="mt-0.5 flex-shrink-0 group-hover:text-primary transition-colors" />
-                                <a href="mailto:support@skilldad.com" className="hover:text-white transition-colors font-inter">
-                                    support@skilldad.com
+                        <ul className="-space-y-2">
+                            <li>
+                                <a href="mailto:support@skilldad.com" className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight">
+                                    <Mail size={16} className="mr-3 flex-shrink-0 group-hover:text-primary transition-colors" />
+                                    <span className="group-hover:translate-x-1 transition-transform duration-200">
+                                        support@skilldad.com
+                                    </span>
                                 </a>
                             </li>
-                            <li className="flex items-start gap-3 text-gray-400 text-sm group">
-                                <Phone size={16} className="mt-0.5 flex-shrink-0 group-hover:text-primary transition-colors" />
-                                <a href="tel:+916238067220" className="hover:text-white transition-colors font-inter">
-                                    +91 6238067220
+                            <li>
+                                <a href="tel:+916238067220" className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight">
+                                    <Phone size={16} className="mr-3 flex-shrink-0 group-hover:text-primary transition-colors" />
+                                    <span className="group-hover:translate-x-1 transition-transform duration-200">
+                                        +91 6238067220
+                                    </span>
                                 </a>
                             </li>
-                            <li className="flex items-start gap-3 text-gray-400 text-sm">
-                                <MapPin size={16} className="mt-0.5 flex-shrink-0" />
-                                <span className="font-inter">
-                                    A-18, S1, Second Floor,<br />Sector 59, Noida UP 201301.
-                                </span>
+                            <li>
+                                <div className="text-gray-400 text-sm inline-flex items-start group font-inter leading-tight">
+                                    <MapPin size={16} className="mr-3 mt-1 flex-shrink-0" />
+                                    <span>
+                                        A-18, S1, Second Floor,<br />Sector 59, Noida UP 201301.
+                                    </span>
+                                </div>
                             </li>
                         </ul>
                     </div>

@@ -262,32 +262,31 @@ const CourseCatalog = () => {
                                 <p className="text-white/40 text-sm mt-2">Showing all courses provided by your university</p>
                             )}
 
-                            {/* Program Type Toggle */}
-                            <div className="flex justify-center mt-4">
-                                <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-2xl flex-wrap justify-center">
+                            <div className="flex justify-center mt-6 w-full px-4 md:px-0">
+                                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-1 md:bg-white/5 md:border md:border-white/10 md:p-1 md:rounded-2xl w-full md:w-auto pb-2 md:pb-0">
                                     <button
                                         onClick={() => setProgramType('course')}
-                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'course'
-                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
-                                            : 'text-white/50 hover:text-white'
+                                        className={`whitespace-nowrap shrink-0 snap-start px-3 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black font-inter text-[8px] md:text-xs uppercase tracking-wider md:tracking-widest transition-all duration-300 ${programType === 'course'
+                                            ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
                                     >
                                         Skill Courses
                                     </button>
                                     <button
                                         onClick={() => setProgramType('degree_programme')}
-                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType === 'degree_programme'
-                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
-                                            : 'text-white/50 hover:text-white'
+                                        className={`whitespace-nowrap shrink-0 snap-start px-3 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black font-inter text-[8px] md:text-xs uppercase tracking-wider md:tracking-widest transition-all duration-300 ${programType === 'degree_programme'
+                                            ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
                                     >
                                         Skill Integrated Degree Programmes
                                     </button>
                                     <button
                                         onClick={() => setProgramType('wbl')}
-                                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-black font-inter text-[10px] md:text-xs uppercase tracking-widest transition-all duration-300 ${programType.startsWith('wbl')
-                                            ? 'bg-primary text-white shadow-[0_0_20px_rgba(110,40,255,0.3)]'
-                                            : 'text-white/50 hover:text-white'
+                                        className={`whitespace-nowrap shrink-0 snap-start px-3 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black font-inter text-[8px] md:text-xs uppercase tracking-wider md:tracking-widest transition-all duration-300 ${programType.startsWith('wbl')
+                                            ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
                                     >
                                         Work-Based Learning

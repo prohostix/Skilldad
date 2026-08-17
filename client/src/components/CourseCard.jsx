@@ -98,9 +98,9 @@ const CourseCard = ({ course }) => {
                     <div className="flex items-center justify-end pt-2.5 border-t border-white/5 mt-auto">
                         <ModernButton
                             onClick={handleEnroll}
-                            className="!px-3.5 !py-1.5 font-black uppercase tracking-widest text-[8px] group/btn shadow-glow-purple"
+                            className="!px-2.5 !py-0 !min-h-[24px] !h-[24px] !text-[8px] font-black uppercase tracking-widest group/btn shadow-glow-purple"
                         >
-                            <span className="mr-1">Enroll</span> <ArrowRight size={11} className="group-hover/btn:translate-x-1 transition-transform" />
+                            <span className="mr-1">Enroll</span> <ArrowRight size={9} className="group-hover/btn:translate-x-1 transition-transform" />
                         </ModernButton>
                     </div>
 

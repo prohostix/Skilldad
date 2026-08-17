@@ -174,7 +174,7 @@ const Navbar = ({ compact = false }) => {
                 <div
                     className="fixed inset-0 z-[60] flex flex-col p-6 lg:hidden"
                     style={{
-                        background: 'rgba(5, 5, 20, 0.95)',
+                        background: theme === 'light' ? 'rgba(250, 249, 246, 0.95)' : 'rgba(5, 5, 20, 0.95)',
                         backdropFilter: 'blur(20px)'
                     }}
                 >
@@ -196,7 +196,7 @@ const Navbar = ({ compact = false }) => {
                                 {item.name}
                             </Link>
                         ))}
-                        <div className="h-[1px] bg-white/10 w-full my-4"></div>
+                        <div className={`h-[1px] w-full my-4 ${theme === 'light' ? 'bg-black/10' : 'bg-white/10'}`}></div>
                         {user ? (
                             <button
                                 onClick={() => { navigate(getDashboardLink()); setMobileMenuOpen(false); }}

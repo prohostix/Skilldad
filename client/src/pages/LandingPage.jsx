@@ -543,7 +543,7 @@ const LandingPage = () => {
             <section className="relative pt-16 md:pt-24 pb-8 md:pb-0 z-10 bg-transparent section-optimize">
                 <div className="max-w-7xl mx-auto">
                     {/* Heading row - text left, 3D orb right */}
-                    <div className="flex px-6 flex-col lg:flex-row items-center justify-between gap-8 mb-12 md:mb-0">
+                    <div className="flex px-6 flex-col lg:flex-row items-center justify-between gap-8 mb-12 md:mb-16">
 
                         {/* Left - text */}
                         <div className="text-center lg:text-left flex-1">
@@ -619,7 +619,7 @@ const LandingPage = () => {
                                                             <img
                                                                 src={uni.logo}
                                                                 alt={uni.name}
-                                                                className="w-full h-full object-cover"
+                                                                className="w-full h-full object-contain"
                                                             />
                                                         ) : (
                                                             <Library size={18} strokeWidth={2.5} />
@@ -662,8 +662,8 @@ const LandingPage = () => {
                                     ))}
                                 </AnimatePresence>
                             </div>
-                            {/* Manual Control */}
-                            <div className='w-full flex justify-end mt-6'>
+                            {/* Manual Controls */}
+                            <div className="flex justify-end mt-4 px-2">
                                 <button
                                     onClick={() => setUniStartIndex(prev => prev + 1)}
                                     className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-[0_0_15px_rgba(110,40,255,0.2)] hover:shadow-glow-purple group active:scale-95"

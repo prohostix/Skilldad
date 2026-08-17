@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Globe, 
-    School, 
-    BookOpen, 
-    ArrowRight, 
-    Search, 
-    MapPin, 
-    DollarSign, 
-    Clock, 
-    FileText, 
+import {
+    Globe,
+    School,
+    BookOpen,
+    ArrowRight,
+    Search,
+    MapPin,
+    DollarSign,
+    Clock,
+    FileText,
     ChevronLeft,
     Calendar,
     ArrowUpRight
@@ -23,7 +23,7 @@ import { toast } from 'react-hot-toast';
 const StudyAbroad = () => {
     const [view, setView] = useState('countries'); // countries, universities, course-details
     const [loading, setLoading] = useState(false);
-    
+
     // Data State
     const [countries, setCountries] = useState([]);
     const [universities, setUniversities] = useState([]);
@@ -31,7 +31,7 @@ const StudyAbroad = () => {
     const [selectedCountry, setSelectedCountry] = useState(null);
     const [selectedUniversity, setSelectedUniversity] = useState(null);
     const [selectedCourse, setSelectedCourse] = useState(null);
-    
+
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
@@ -102,20 +102,20 @@ const StudyAbroad = () => {
         else if (view === 'universities') setView('countries');
     };
 
-    const filteredCountries = countries.filter(c => 
+    const filteredCountries = countries.filter(c =>
         c.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     return (
         <div className="min-h-screen bg-[#050514] text-white selection:bg-primary/30">
             <Navbar />
-            
+
             <div className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto">
-                    
+
                     {/* Breadcrumbs / Back Navigation */}
                     {view !== 'countries' && (
-                        <motion.button 
+                        <motion.button
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             onClick={goBack}
@@ -130,7 +130,7 @@ const StudyAbroad = () => {
 
                     <AnimatePresence mode="wait">
                         {view === 'countries' && (
-                            <motion.div 
+                            <motion.div
                                 key="countries"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -144,13 +144,13 @@ const StudyAbroad = () => {
                                     <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                                         Discover world-class education across the globe. Choose your destination and start your journey today.
                                     </p>
-                                    
+
                                     <div className="max-w-xl mx-auto relative group mt-8">
                                         <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700"></div>
                                         <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl p-2 focus-within:border-primary/50 transition-all">
                                             <Search className="ml-4 text-gray-400 shrink-0" size={20} />
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 placeholder="Search by country (e.g. Canada, UK...)"
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -162,7 +162,7 @@ const StudyAbroad = () => {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {loading && countries.length === 0 ? (
-                                        [1,2,3].map(i => (
+                                        [1, 2, 3].map(i => (
                                             <div key={i} className="h-80 rounded-3xl bg-white/5 animate-pulse border border-white/10" />
                                         ))
                                     ) : (
@@ -176,11 +176,13 @@ const StudyAbroad = () => {
                                                 className="group relative cursor-pointer overflow-hidden rounded-3xl shadow-lg hover:shadow-xl transition-all duration-700"
                                             >
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 rounded-3xl"></div>
-                                                <img 
-                                                    src={country.image_url || `https://images.unsplash.com/photo-1526772662000-3f88f10405ff?q=80&w=1974&auto=format&fit=crop`} 
+                                                <img
+                                                    src={country.image_url || `https://images.unsplash.com/photo-1526772662000-3f88f10405ff?q=80&w=1974&auto=format&fit=crop`}
                                                     alt={country.name}
-                                                    className="w-full h-96 object-cover rounded-3xl group-hover:scale-105 transition-transform duration-700 ease-out"
-                                                />
+                                                    className="w-full h-96 object-cover rounded-3xl 
+                                                    transform-gpu 
+                                                    transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] 
+                                                    group-hover:scale-105" />
                                                 <div className="absolute bottom-0 left-0 right-0 p-8 z-20 space-y-2">
                                                     <h3 className="text-3xl font-bold force-white">{country.name}</h3>
                                                     <p className="force-white-60 line-clamp-2 text-sm">{country.description}</p>
@@ -201,7 +203,7 @@ const StudyAbroad = () => {
                         )}
 
                         {view === 'universities' && (
-                            <motion.div 
+                            <motion.div
                                 key="universities"
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -259,7 +261,7 @@ const StudyAbroad = () => {
                         )}
 
                         {view === 'courses' && (
-                            <motion.div 
+                            <motion.div
                                 key="courses"
                                 initial={{ opacity: 0, x: 50 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -268,12 +270,12 @@ const StudyAbroad = () => {
                                 <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-primary font-bold uppercase tracking-widest text-xs">
-                                            <School size={14}/> {selectedUniversity?.name}
+                                            <School size={14} /> {selectedUniversity?.name}
                                         </div>
                                         <h2 className="text-4xl font-bold">Programs & Courses</h2>
                                     </div>
                                     <div className="px-6 py-3 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-3">
-                                        <MapPin className="text-white/20" size={18}/>
+                                        <MapPin className="text-white/20" size={18} />
                                         <span className="text-white/60">{selectedUniversity?.location}</span>
                                     </div>
                                 </div>
@@ -297,21 +299,21 @@ const StudyAbroad = () => {
                                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                                                         <div className="space-y-1">
                                                             <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Duration</p>
-                                                            <p className="flex items-center gap-2 text-white/60"><Clock size={14} className="text-primary"/> {course.duration}</p>
+                                                            <p className="flex items-center gap-2 text-white/60"><Clock size={14} className="text-primary" /> {course.duration}</p>
                                                         </div>
                                                         <div className="space-y-1">
                                                             <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Yearly Fees</p>
-                                                            <p className="flex items-center gap-2 text-white/60"><DollarSign size={14} className="text-emerald-500"/> {course.fees}</p>
+                                                            <p className="flex items-center gap-2 text-white/60"><DollarSign size={14} className="text-emerald-500" /> {course.fees}</p>
                                                         </div>
                                                         <div className="space-y-1">
                                                             <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Intakes</p>
-                                                            <p className="flex items-center gap-2 text-white/60"><Calendar size={14} className="text-blue-500"/> {course.intakes}</p>
+                                                            <p className="flex items-center gap-2 text-white/60"><Calendar size={14} className="text-blue-500" /> {course.intakes}</p>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div className="shrink-0">
                                                     <ModernButton className="group-hover:scale-105 transition-transform" variant="secondary">
-                                                        View Details <ArrowUpRight size={18} className="ml-2"/>
+                                                        View Details <ArrowUpRight size={18} className="ml-2" />
                                                     </ModernButton>
                                                 </div>
                                             </div>
@@ -322,7 +324,7 @@ const StudyAbroad = () => {
                         )}
 
                         {view === 'course-detail' && selectedCourse && (
-                            <motion.div 
+                            <motion.div
                                 key="course-detail"
                                 initial={{ opacity: 0, y: 50 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -332,14 +334,14 @@ const StudyAbroad = () => {
                                 <div className="lg:col-span-8 space-y-12">
                                     <div className="space-y-6">
                                         <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary text-xs font-bold uppercase tracking-widest">
-                                            <BookOpen size={14}/> {selectedCourse.level} Program
+                                            <BookOpen size={14} /> {selectedCourse.level} Program
                                         </div>
                                         <h1 className="text-5xl md:text-6xl font-bold">{selectedCourse.name}</h1>
-                                        
+
                                         <div className="flex flex-wrap items-center gap-12 pt-4">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
-                                                    {selectedCourse.universityLogo ? <img src={selectedCourse.universityLogo} className="w-full h-full object-cover"/> : <School className="text-white/20" size={24}/>}
+                                                    {selectedCourse.universityLogo ? <img src={selectedCourse.universityLogo} className="w-full h-full object-cover" /> : <School className="text-white/20" size={24} />}
                                                 </div>
                                                 <div>
                                                     <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Awarding University</p>
@@ -348,7 +350,7 @@ const StudyAbroad = () => {
                                             </div>
                                             <div className="flex items-center gap-4">
                                                 <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                                                    <Globe className="text-primary" size={24}/>
+                                                    <Globe className="text-primary" size={24} />
                                                 </div>
                                                 <div>
                                                     <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Location</p>
@@ -360,14 +362,14 @@ const StudyAbroad = () => {
 
                                     <div className="space-y-8">
                                         <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem]">
-                                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3"><FileText className="text-primary"/> Course Overview</h3>
+                                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3"><FileText className="text-primary" /> Course Overview</h3>
                                             <p className="text-white/60 leading-relaxed text-lg italic whitespace-pre-wrap">
                                                 "{selectedCourse.description || 'Discover a comprehensive curriculum designed to prepare you for global success in this field.'}"
                                             </p>
                                         </div>
 
                                         <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem]">
-                                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3"><BookOpen className="text-emerald-500"/> Admission Requirements</h3>
+                                            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3"><BookOpen className="text-emerald-500" /> Admission Requirements</h3>
                                             <div className="bg-white/[0.03] p-6 rounded-2xl border border-white/5">
                                                 <p className="text-white/60 leading-relaxed whitespace-pre-wrap">{selectedCourse.requirements || 'Contact our counselors for detailed entry requirements.'}</p>
                                             </div>
@@ -379,7 +381,7 @@ const StudyAbroad = () => {
                                 <div className="lg:col-span-4 space-y-6">
                                     <div className="p-8 bg-gradient-to-br from-primary/10 via-[#0B0F1A] to-[#0B0F1A] border border-white/10 rounded-[2.5rem] sticky top-32">
                                         <h3 className="text-xl font-bold mb-8">Summary & Enrollment</h3>
-                                        
+
                                         <div className="space-y-6 mb-8">
                                             <div className="flex items-center justify-between pb-4 border-b border-white/5">
                                                 <span className="text-white/40">Duration</span>
@@ -402,7 +404,7 @@ const StudyAbroad = () => {
                                         <ModernButton className="w-full py-4 text-base" onClick={() => toast.success("Counselor will contact you soon!")}>
                                             Inquire & Apply Now
                                         </ModernButton>
-                                        
+
                                         <p className="mt-6 text-center text-xs text-white/20">
                                             Apply through SkillDad to get guaranteed scholarship assistance and free visa counseling.
                                         </p>
