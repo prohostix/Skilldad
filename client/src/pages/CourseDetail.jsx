@@ -287,8 +287,8 @@ const CourseDetail = () => {
                                         <h3 className="font-bold tracking-widest uppercase text-xs" style={{ color: '#2A1468' }}>YOUR JOURNEY</h3>
                                     </div>
                                     
-                                    <div className="rounded-[2rem] p-8 md:p-12 pt-14 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
-                                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 md:gap-4 relative z-10">
+                                    <div className="rounded-[2rem] p-6 md:p-8 pt-12 md:pt-12 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+                                        <div className="flex flex-col md:flex-row items-start md:items-start justify-between w-full relative z-10">
                                             {[
                                                 { icon: BookOpen, title: 'Learn', desc: 'Gain knowledge & industry skills' },
                                                 { icon: GraduationCap, title: 'Graduate', desc: 'Complete your Degree' },
@@ -297,22 +297,22 @@ const CourseDetail = () => {
                                                 { icon: FileText, title: 'Stronger Resume', desc: 'Experience + Skills = Better career opportunities' },
                                                 { icon: CheckCircle2, title: 'Get Placed', desc: 'We connect you to top organizations until you get placed.' },
                                             ].map((step, idx, arr) => (
-                                                <React.Fragment key={idx}>
-                                                    <div className="flex flex-row md:flex-col items-center md:text-center md:max-w-[140px] flex-1 gap-4 md:gap-0">
-                                                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center md:mb-5 shrink-0" style={{ backgroundColor: '#F3E8FF' }}>
-                                                            <step.icon size={26} style={{ color: '#4B22A2' }} />
-                                                        </div>
-                                                        <div className="flex flex-col md:items-center">
-                                                            <h4 className="font-bold text-[15px] mb-1.5" style={{ color: '#1A0B3B' }}>{step.title}</h4>
-                                                            <p className="text-[11px] leading-snug md:text-center" style={{ color: '#4A3B69' }}>{step.desc}</p>
-                                                        </div>
+                                                <div key={idx} className="flex flex-row md:flex-col items-center md:text-center flex-1 relative px-1 py-3 md:py-0 w-full md:w-auto gap-4 md:gap-0">
+                                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center md:mb-3 shrink-0 relative z-10" style={{ backgroundColor: '#F3E8FF' }}>
+                                                        <step.icon size={22} style={{ color: '#4B22A2' }} />
                                                     </div>
+                                                    <div className="flex flex-col md:items-center text-left md:text-center">
+                                                        <h4 className="font-bold text-[13px] md:text-[14px] mb-1" style={{ color: '#1A0B3B' }}>{step.title}</h4>
+                                                        <p className="text-[11px] md:text-[10px] leading-tight" style={{ color: '#4A3B69' }}>{step.desc}</p>
+                                                    </div>
+                                                    
+                                                    {/* Chevron positioned exactly between items */}
                                                     {idx < arr.length - 1 && (
-                                                        <div className="hidden md:flex items-center -mt-8" style={{ color: '#C4B5FD' }}>
-                                                            <ChevronRight size={24} />
+                                                        <div className="hidden md:block absolute top-[28px] -right-3 -translate-y-1/2 z-0" style={{ color: '#C4B5FD' }}>
+                                                            <ChevronRight size={20} />
                                                         </div>
                                                     )}
-                                                </React.Fragment>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
