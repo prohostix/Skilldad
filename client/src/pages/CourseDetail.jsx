@@ -283,11 +283,11 @@ const CourseDetail = () => {
 
                                 {/* YOUR JOURNEY Section */}
                                 <div className="relative pt-6">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-6 z-10 rounded-full py-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0' }}>
-                                        <h3 className="font-bold tracking-widest uppercase text-xs" style={{ color: '#2A1468' }}>YOUR JOURNEY</h3>
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-6 z-10" style={{ backgroundColor: '#FFFFFF' }}>
+                                        <h3 className="font-extrabold tracking-widest uppercase text-[13px] md:text-[15px]" style={{ color: '#210A52' }}>YOUR JOURNEY</h3>
                                     </div>
                                     
-                                    <div className="rounded-[2rem] p-6 md:p-8 pt-12 md:pt-12 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+                                    <div className="rounded-[2rem] p-6 md:p-8 pt-12 md:pt-14 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
                                         <div className="flex flex-col md:flex-row items-start md:items-start justify-between w-full relative z-10">
                                             {[
                                                 { icon: BookOpen, title: 'Learn', desc: 'Gain knowledge & industry skills' },
@@ -298,18 +298,18 @@ const CourseDetail = () => {
                                                 { icon: CheckCircle2, title: 'Get Placed', desc: 'We connect you to top organizations until you get placed.' },
                                             ].map((step, idx, arr) => (
                                                 <div key={idx} className="flex flex-row md:flex-col items-center md:text-center flex-1 relative px-1 py-3 md:py-0 w-full md:w-auto gap-4 md:gap-0">
-                                                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center md:mb-3 shrink-0 relative z-10" style={{ backgroundColor: '#F3E8FF' }}>
-                                                        <step.icon size={22} style={{ color: '#4B22A2' }} />
+                                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center md:mb-3 shrink-0 relative z-10" style={{ backgroundColor: '#F3E8FF' }}>
+                                                        <step.icon size={28} strokeWidth={2} style={{ color: '#210A52' }} />
                                                     </div>
                                                     <div className="flex flex-col md:items-center text-left md:text-center">
-                                                        <h4 className="font-bold text-[13px] md:text-[14px] mb-1" style={{ color: '#1A0B3B' }}>{step.title}</h4>
-                                                        <p className="text-[11px] md:text-[10px] leading-tight" style={{ color: '#4A3B69' }}>{step.desc}</p>
+                                                        <h4 className="font-bold text-[14px] md:text-[15px] mb-1.5" style={{ color: '#111111' }}>{step.title}</h4>
+                                                        <p className="text-[11px] md:text-[11px] leading-tight" style={{ color: '#444444' }}>{step.desc}</p>
                                                     </div>
                                                     
                                                     {/* Chevron positioned exactly between items */}
                                                     {idx < arr.length - 1 && (
-                                                        <div className="hidden md:block absolute top-[28px] -right-3 -translate-y-1/2 z-0" style={{ color: '#C4B5FD' }}>
-                                                            <ChevronRight size={20} />
+                                                        <div className="hidden md:block absolute top-[32px] -right-3 -translate-y-1/2 z-0" style={{ color: '#210A52' }}>
+                                                            <ChevronRight size={22} strokeWidth={2.5} />
                                                         </div>
                                                     )}
                                                 </div>
