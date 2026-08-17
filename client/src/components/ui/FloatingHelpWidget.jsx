@@ -332,7 +332,7 @@ const FloatingHelpWidget = () => {
 
 
     return (
-        <div className="fixed bottom-6 right-6 z-[100]">
+        <div className="fixed bottom-8 right-4 md:bottom-6 md:right-6 z-[100]">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -546,7 +546,7 @@ const FloatingHelpWidget = () => {
             {!isOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="group relative w-16 h-16 rounded-full flex items-center justify-center shadow-[0_8px_32px_rgba(124,58,237,0.4)] transition-all duration-500 bg-gradient-to-tr from-[#7C3AED] via-[#9333EA] to-[#E879F9] hover:scale-110 active:scale-95 text-white border border-white/20 z-50 overflow-visible"
+                    className="group relative h-14 w-14 md:w-16 md:h-16 rounded-full flex items-center justify-center shadow-[0_8px_32px_rgba(124,58,237,0.4)] transition-all duration-500 bg-gradient-to-tr from-[#7C3AED] via-[#9333EA] to-[#E879F9] hover:scale-110 active:scale-95 text-white border border-white/20 z-50 overflow-visible"
                 >
                     {/* Pulsing ring */}
                     <div className="absolute inset-0 rounded-full bg-[#7C3AED] animate-ping opacity-20 pointer-events-none"></div>
