@@ -354,7 +354,7 @@ const CourseDetail = () => {
                                                         <step.icon size={28} strokeWidth={2} style={{ color: '#4C1D95' }} />
                                                     </div>
                                                     <div className="flex flex-col md:items-center text-left md:text-center">
-                                                        <h4 className="font-bold text-[14px] md:text-[15px] mb-1.5" style={{ color: '#111111' }}>{step.title}</h4>
+                                                        <h4 className="font-bold text-[13px] md:text-[14px] mb-1.5" style={{ color: '#111111' }}>{step.title}</h4>
                                                         <p className="text-[11px] md:text-[11px] leading-tight" style={{ color: '#444444' }}>{step.desc}</p>
                                                     </div>
                                                     
