@@ -466,9 +466,9 @@ const CourseDetail = () => {
                                     </label>
                                 )}
 
-                                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
-                                        <PlayCircle size={32} className="text-white ml-1" />
+                                <div className="absolute inset-0 bg-[#000000]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    <div className="w-16 h-16 bg-[#ffffff]/20 backdrop-blur-md rounded-full flex items-center justify-center">
+                                        <PlayCircle size={32} className="text-white force-white ml-1" />
                                     </div>
                                 </div>
                             </div>
