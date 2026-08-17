@@ -81,10 +81,10 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Company Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-4 font-inter leading-none">
                             Company
                         </h3>
-                        <ul className="-space-y-2">
+                        <ul className="space-y-1.5">
                             <li>
                                 <Link
                                     to="/about"
@@ -140,10 +140,10 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Resources Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-4 font-inter leading-none">
                             Resources
                         </h3>
-                        <ul className="-space-y-2">
+                        <ul className="space-y-1.5">
                             <li>
                                 <Link
                                     to="/courses"
@@ -214,10 +214,10 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Legal Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-4 font-inter leading-none">
                             Legal
                         </h3>
-                        <ul className="-space-y-2">
+                        <ul className="space-y-1.5">
                             <li>
                                 <Link
                                     to="/privacy"
@@ -263,10 +263,10 @@ const Footer = ({ forceVisible = false }) => {
 
                     {/* Contact Section */}
                     <div className="lg:col-span-2">
-                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-3 font-inter leading-none">
+                        <h3 className="text-white font-bold text-sm uppercase tracking-wider mb-4 font-inter leading-none">
                             Contact
                         </h3>
-                        <ul className="-space-y-2">
+                        <ul className="space-y-1.5">
                             <li>
                                 <a href="mailto:support@skilldad.com" className="text-gray-400 hover:text-white text-sm transition-colors duration-200 inline-flex items-center group font-inter leading-tight">
                                     <Mail size={16} className="mr-3 flex-shrink-0 group-hover:text-primary transition-colors" />

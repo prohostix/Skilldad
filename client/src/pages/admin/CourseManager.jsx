@@ -49,7 +49,8 @@ const CourseManager = ({ wblOnly = false }) => {
         features: [],
         learning_outcomes: [],
         programType: 'course',
-        skillDadUniversityId: ''
+        skillDadUniversityId: '',
+        displayOrder: 999
     });
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [brochureUploading, setBrochureUploading] = useState(false);
@@ -118,7 +119,8 @@ const CourseManager = ({ wblOnly = false }) => {
             features: [],
             learning_outcomes: [],
             programType: defaultProgramType || (wblOnly ? 'degree_programme' : 'course'),
-            skillDadUniversityId: ''
+            skillDadUniversityId: '',
+            displayOrder: 999
         });
         setEditingCourse(null);
         setShowCreateModal(true);
@@ -141,7 +143,8 @@ const CourseManager = ({ wblOnly = false }) => {
             features: course.features || [],
             learning_outcomes: course.learning_outcomes || [],
             programType: course.programType || course.program_type || (wblOnly ? 'degree_programme' : 'course'),
-            skillDadUniversityId: course.skillDadUniversityId || course.skill_dad_university_id || ''
+            skillDadUniversityId: course.skillDadUniversityId || course.skill_dad_university_id || '',
+            displayOrder: course.displayOrder !== undefined ? course.displayOrder : (course.display_order !== undefined ? course.display_order : 999)
         });
         setEditingCourse(course);
         setShowCreateModal(true);
@@ -454,7 +457,7 @@ const CourseManager = ({ wblOnly = false }) => {
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-white">{course.title}</p>
-                                                <p className="text-xs text-white/50">ID: {course._id.slice(-6).toUpperCase()}</p>
+                                                <p className="text-xs text-white/50">ID: {course._id.slice(-6).toUpperCase()} • Order: {course.displayOrder ?? course.display_order ?? 999}</p>
                                                 {(course.programType || course.program_type) === 'degree_programme' && (
                                                     <span className="inline-block mt-1 px-2.5 py-0.5 bg-primary/20 text-primary rounded-full text-[9px] font-bold uppercase tracking-tight">
                                                         Degree Programme
@@ -667,6 +670,23 @@ const CourseManager = ({ wblOnly = false }) => {
                                         const val = e.target.value;
                                         const parsed = parseFloat(val);
                                         setFormData({ ...formData, price: isNaN(parsed) ? 0 : parsed });
+                                    }}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
+                                    Display Order (1 is first)
+                                </label>
+                                <input
+                                    type="number"
+                                    required
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
+                                    placeholder="e.g. 1"
+                                    value={formData.displayOrder}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setFormData({ ...formData, displayOrder: val === '' ? '' : parseInt(val, 10) });
                                     }}
                                 />
                             </div>

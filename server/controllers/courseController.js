@@ -38,12 +38,12 @@ const getCourses = asyncHandler(async (req, res) => {
 
                 queryStr = queryStr.replace('SELECT c.*,', `SELECT c.*, (${relevanceCases.join(' + ')}) as relevance,`);
                 queryStr += ` AND (${orConditions.join(' OR ')})`;
-                queryStr += ` ORDER BY relevance DESC, c.is_featured DESC, c.created_at DESC LIMIT 10`;
+                queryStr += ` ORDER BY relevance DESC, c.display_order ASC, c.is_featured DESC, c.created_at DESC LIMIT 10`;
             } else {
-                queryStr += ` ORDER BY c.is_featured DESC, c.created_at DESC`;
+                queryStr += ` ORDER BY c.display_order ASC, c.is_featured DESC, c.created_at DESC`;
             }
         } else {
-            queryStr += ` ORDER BY c.is_featured DESC, c.created_at DESC`;
+            queryStr += ` ORDER BY c.display_order ASC, c.is_featured DESC, c.created_at DESC`;
         }
 
         coursesRes = await query(queryStr, queryParams);
@@ -62,7 +62,8 @@ const getCourses = asyncHandler(async (req, res) => {
                 name: course.instructor_name,
                 profile: course.instructor_profile,
                 role: 'university'
-            }
+            },
+            displayOrder: course.display_order
         }));
 
         res.status(200).json(validCourses);
@@ -84,7 +85,7 @@ const getAdminCourses = asyncHandler(async (req, res) => {
                 SELECT c.*, u.name as instructor_name
                 FROM courses c
                 LEFT JOIN users u ON c.instructor_id = u.id
-                ORDER BY c.is_featured DESC, c.created_at DESC
+                ORDER BY c.display_order ASC, c.is_featured DESC, c.created_at DESC
             `);
         } else if (userRole === 'partner') {
             // Partners see courses they created or are instructors for
@@ -93,7 +94,7 @@ const getAdminCourses = asyncHandler(async (req, res) => {
                 FROM courses c
                 LEFT JOIN users u ON c.instructor_id = u.id
                 WHERE c.instructor_id = $1 OR c.submitted_by = $1
-                ORDER BY c.is_featured DESC, c.created_at DESC
+                ORDER BY c.display_order ASC, c.is_featured DESC, c.created_at DESC
             `, [userId]);
         } else {
             // Universities/Instructors see courses they are instructors for
@@ -102,7 +103,7 @@ const getAdminCourses = asyncHandler(async (req, res) => {
                 FROM courses c
                 LEFT JOIN users u ON c.instructor_id = u.id
                 WHERE c.instructor_id = $1
-                ORDER BY c.is_featured DESC, c.created_at DESC
+                ORDER BY c.display_order ASC, c.is_featured DESC, c.created_at DESC
             `, [userId]);
         }
 
@@ -115,7 +116,8 @@ const getAdminCourses = asyncHandler(async (req, res) => {
             instructorName: c.instructor_name,
             universityName: c.university_name,
             programType: c.program_type,
-            skillDadUniversityId: c.skill_dad_university_id
+            skillDadUniversityId: c.skill_dad_university_id,
+            displayOrder: c.display_order
         })));
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -204,13 +206,14 @@ const getCourse = asyncHandler(async (req, res) => {
             name: course.instructor_name,
             profile: course.instructor_profile,
             role: 'university'
-        }
+        },
+        displayOrder: course.display_order
     });
 });
 
 // @desc    Create new course
 const createCourse = asyncHandler(async (req, res) => {
-    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes } = req.body;
+    const { title, description, category, price, isPublished, instructorId, instructorName, universityName, isFeatured, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes, displayOrder } = req.body;
     const isDegreeProgramme = (programType || 'course') === 'degree_programme';
 
     // For Admin, a provider is mandatory - a real university for Skill Courses, a SkillDad University for Degree Programmes
@@ -232,9 +235,9 @@ const createCourse = asyncHandler(async (req, res) => {
     const initialStatus = req.user.role === 'admin' ? 'approved' : 'pending';
 
     await query(`
-        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, status, submitted_by, program_type, skill_dad_university_id, features, learning_outcomes, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW(), NOW())
-    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '', initialStatus, req.user.id, programType || 'course', finalSkillDadUniversityId, JSON.stringify(features || []), JSON.stringify(learning_outcomes || [])]);
+        INSERT INTO courses (id, title, description, category, price, is_published, is_featured, instructor_id, instructor_name, university_name, brochure_url, university_tools, thumbnail, status, submitted_by, program_type, skill_dad_university_id, features, learning_outcomes, display_order, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, NOW(), NOW())
+    `, [newId, title, description, category, price || 0, isPublished || false, isFeatured || false, finalInstructorId, instructorName || '', universityName || '', brochure_url || '', JSON.stringify(university_tools || []), thumbnail || '', initialStatus, req.user.id, programType || 'course', finalSkillDadUniversityId, JSON.stringify(features || []), JSON.stringify(learning_outcomes || []), displayOrder !== undefined ? displayOrder : 999]);
 
     // Auto-sync with University profile.assigned_courses
     try {
@@ -262,14 +265,15 @@ const createCourse = asyncHandler(async (req, res) => {
         instructorName: saved.rows[0].instructor_name,
         universityName: saved.rows[0].university_name,
         programType: saved.rows[0].program_type,
-        skillDadUniversityId: saved.rows[0].skill_dad_university_id
+        skillDadUniversityId: saved.rows[0].skill_dad_university_id,
+        displayOrder: saved.rows[0].display_order
     });
 });
 
 // @desc    Update course
 const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes } = req.body;
+    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes, displayOrder } = req.body;
 
     // Get old course to check for instructor changes
     const oldCourseRes = await query('SELECT instructor_id FROM courses WHERE id = $1', [id]);
@@ -296,9 +300,10 @@ const updateCourse = asyncHandler(async (req, res) => {
             program_type = COALESCE($12, program_type),
             features = COALESCE($13, features),
             learning_outcomes = COALESCE($14, learning_outcomes),
+            display_order = COALESCE($15, display_order),
             updated_at = NOW()
-        WHERE id = $15
-    `, [title, description, category, price, isPublished, isFeatured, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, programType, features ? JSON.stringify(features) : null, learning_outcomes ? JSON.stringify(learning_outcomes) : null, id]);
+        WHERE id = $16
+    `, [title, description, category, price, isPublished, isFeatured, instructorName, universityName, brochure_url, university_tools ? JSON.stringify(university_tools) : null, thumbnail, programType, features ? JSON.stringify(features) : null, learning_outcomes ? JSON.stringify(learning_outcomes) : null, displayOrder, id]);
 
     // instructor_id and skill_dad_university_id are mutually exclusive - a Degree Programme is
     // linked to a SkillDad University (no login account), a Skill Course to a real instructor user.
@@ -352,7 +357,8 @@ const updateCourse = asyncHandler(async (req, res) => {
         instructorName: updated.rows[0].instructor_name,
         universityName: updated.rows[0].university_name,
         programType: updated.rows[0].program_type,
-        skillDadUniversityId: updated.rows[0].skill_dad_university_id
+        skillDadUniversityId: updated.rows[0].skill_dad_university_id,
+        displayOrder: updated.rows[0].display_order
     });
 });
 
