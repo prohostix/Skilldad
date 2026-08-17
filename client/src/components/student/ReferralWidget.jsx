@@ -80,7 +80,7 @@ export const ReferralDrawer = ({ open, onClose }) => {
             try {
                 await navigator.share({
                     title: 'Join SkillDad',
-                    text: `Join me on SkillDad - Placement Guaranteed European University Skill Programs! Use my code ${referralData.code} and get 50 bonus reward points.`,
+                    text: `Join me on SkillDad - Placement Opportunities European University Skill Programs! Use my code ${referralData.code} and get 50 bonus reward points.`,
                     url: referralData.link,
                 });
                 return;

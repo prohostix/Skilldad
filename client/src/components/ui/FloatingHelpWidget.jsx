@@ -19,7 +19,7 @@ const LMS_RULES = [
     },
     {
         match: (q) => q.includes('what do you do') || q.includes('what you do') || q.includes('about skilldad') || q.includes('what is skilldad'),
-        response: "SkillDad is India's premier educational platform offering Placement Guaranteed European University Programs with EU Work Rights.\n\nWe provide:\n* Guaranteed Placements & Career Support\n* Advanced AI-powered learning via our custom LMS\n* Dual certifications from top global universities\n* A direct bridge to study and work abroad\n\nWould you like to explore our latest courses or university partners?",
+        response: "SkillDad is India's premier educational platform offering Placement Opportunities European University Programs with EU Work Rights.\n\nWe provide:\n* Guaranteed Placements & Career Support\n* Advanced AI-powered learning via our custom LMS\n* Dual certifications from top global universities\n* A direct bridge to study and work abroad\n\nWould you like to explore our latest courses or university partners?",
         options: [
             { label: 'Browse Courses', link: '/courses' },
             { label: 'View Universities', link: '/platform' }
