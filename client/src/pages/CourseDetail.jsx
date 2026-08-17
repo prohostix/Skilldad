@@ -283,8 +283,8 @@ const CourseDetail = () => {
 
                                 {/* YOUR JOURNEY Section */}
                                 <div className="relative mt-8">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 z-10 bg-transparent">
-                                        <h3 className="font-extrabold tracking-widest uppercase text-[14px] md:text-[16px] whitespace-nowrap !text-[#5D24D6]">YOUR JOURNEY</h3>
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 z-10" style={{ backgroundColor: '#FAF9F6' }}>
+                                        <h3 className="font-extrabold tracking-widest uppercase text-[14px] md:text-[16px] whitespace-nowrap !text-[#1C0645]">YOUR JOURNEY</h3>
                                     </div>
                                     
                                     <div className="rounded-[2rem] p-6 md:p-8 pt-10 md:pt-12 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
@@ -299,7 +299,7 @@ const CourseDetail = () => {
                                             ].map((step, idx, arr) => (
                                                 <div key={idx} className="flex flex-row md:flex-col items-center md:text-center flex-1 relative px-1 py-3 md:py-0 w-full md:w-auto gap-4 md:gap-0">
                                                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center md:mb-3 shrink-0 relative z-10" style={{ backgroundColor: '#F3E8FF' }}>
-                                                        <step.icon size={28} strokeWidth={2} style={{ color: '#210A52' }} />
+                                                        <step.icon size={28} strokeWidth={2} style={{ color: '#1C0645' }} />
                                                     </div>
                                                     <div className="flex flex-col md:items-center text-left md:text-center">
                                                         <h4 className="font-bold text-[14px] md:text-[15px] mb-1.5" style={{ color: '#111111' }}>{step.title}</h4>
@@ -308,7 +308,7 @@ const CourseDetail = () => {
                                                     
                                                     {/* Chevron positioned exactly between items */}
                                                     {idx < arr.length - 1 && (
-                                                        <div className="hidden md:block absolute top-[32px] -right-3 -translate-y-1/2 z-0" style={{ color: '#210A52' }}>
+                                                        <div className="hidden md:block absolute top-[32px] -right-3 -translate-y-1/2 z-0" style={{ color: '#1C0645' }}>
                                                             <ChevronRight size={22} strokeWidth={2.5} />
                                                         </div>
                                                     )}
