@@ -283,8 +283,8 @@ const CourseDetail = () => {
 
                                 {/* YOUR JOURNEY Section */}
                                 <div className="relative mt-8">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 z-10" style={{ backgroundColor: '#FFFFFF' }}>
-                                        <h3 className="font-extrabold tracking-widest uppercase text-[14px] md:text-[16px] whitespace-nowrap" style={{ color: '#2B0E68' }}>YOUR JOURNEY</h3>
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 z-10 bg-transparent">
+                                        <h3 className="font-extrabold tracking-widest uppercase text-[14px] md:text-[16px] whitespace-nowrap !text-[#5D24D6]">YOUR JOURNEY</h3>
                                     </div>
                                     
                                     <div className="rounded-[2rem] p-6 md:p-8 pt-10 md:pt-12 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
