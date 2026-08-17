@@ -253,29 +253,28 @@ const CourseDetail = () => {
                         {(course.programType === 'degree_programme' || course.program_type === 'degree_programme') ? (
                             <div className="mt-8 space-y-12">
                                 {/* Top Banner */}
-                                <div className="bg-gradient-to-r from-[#2A1664] to-[#402390] rounded-3xl p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 border border-primary/30 shadow-2xl relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[80px] rounded-full pointer-events-none"></div>
+                                <div className="rounded-3xl p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 shadow-xl relative overflow-hidden" style={{ background: 'linear-gradient(90deg, #2A1468 0%, #3B1F87 100%)', border: '1px solid #4F3699' }}>
                                     <div className="flex-1 flex gap-5 items-start relative z-10">
-                                        <div className="w-14 h-14 rounded-full border-2 border-white/20 bg-white/5 flex items-center justify-center shrink-0">
-                                            <Laptop size={26} className="text-white" />
+                                        <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                                            <Laptop size={26} style={{ color: '#FFFFFF' }} />
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-bold text-lg mb-2 tracking-wide">WORK WHILE YOU STUDY</h3>
-                                            <p className="text-white/80 text-sm leading-relaxed">
-                                                Get opportunities for internships, part-time roles and live projects in leading companies and industry partners.
+                                            <h3 className="font-bold text-lg mb-2 tracking-wide" style={{ color: '#FFFFFF' }}>WORK WHILE YOU STUDY</h3>
+                                            <p className="text-sm leading-relaxed" style={{ color: '#E2D5F8' }}>
+                                                Get opportunities for internships, part-time roles and live projects in hospitals, clinics and healthcare organizations.
                                             </p>
                                         </div>
                                     </div>
                                     
-                                    <div className="hidden md:block w-px bg-white/10 self-stretch relative z-10"></div>
+                                    <div className="hidden md:block w-px self-stretch relative z-10" style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}></div>
                                     
                                     <div className="flex-1 flex gap-5 items-start relative z-10">
-                                        <div className="w-14 h-14 rounded-full border-2 border-white/20 bg-white/5 flex items-center justify-center shrink-0">
-                                            <Star size={26} className="text-white" />
+                                        <div className="w-14 h-14 rounded-full border-2 flex items-center justify-center shrink-0" style={{ borderColor: 'rgba(255,255,255,0.3)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                                            <Star size={26} style={{ color: '#FFFFFF' }} />
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-bold text-lg mb-2 tracking-wide">WHY IT MATTERS</h3>
-                                            <p className="text-white/80 text-sm leading-relaxed">
+                                            <h3 className="font-bold text-lg mb-2 tracking-wide" style={{ color: '#FFFFFF' }}>WHY IT MATTERS</h3>
+                                            <p className="text-sm leading-relaxed" style={{ color: '#E2D5F8' }}>
                                                 You earn, gain experience and build confidence — so you're job-ready even before you graduate.
                                             </p>
                                         </div>
@@ -284,11 +283,11 @@ const CourseDetail = () => {
 
                                 {/* YOUR JOURNEY Section */}
                                 <div className="relative pt-6">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#080512] px-6 z-10 border border-primary/20 rounded-full py-1">
-                                        <h3 className="text-primary font-bold tracking-widest uppercase text-xs">YOUR JOURNEY</h3>
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-6 z-10 rounded-full py-1" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0' }}>
+                                        <h3 className="font-bold tracking-widest uppercase text-xs" style={{ color: '#2A1468' }}>YOUR JOURNEY</h3>
                                     </div>
                                     
-                                    <div className="border border-white/10 bg-white/[0.02] rounded-[2rem] p-8 md:p-12 pt-14 relative overflow-hidden">
+                                    <div className="rounded-[2rem] p-8 md:p-12 pt-14 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
                                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 md:gap-4 relative z-10">
                                             {[
                                                 { icon: BookOpen, title: 'Learn', desc: 'Gain knowledge & industry skills' },
@@ -296,20 +295,20 @@ const CourseDetail = () => {
                                                 { icon: Briefcase, title: 'Work & Learn', desc: 'Work on real projects & gain practical experience' },
                                                 { icon: UserCheck, title: 'Gain Experience', desc: 'Strengthen your skills & grow professionally' },
                                                 { icon: FileText, title: 'Stronger Resume', desc: 'Experience + Skills = Better career opportunities' },
-                                                { icon: CheckCircle2, title: 'Get Placed', desc: 'We connect you to top partner organizations until you get placed.' },
+                                                { icon: CheckCircle2, title: 'Get Placed', desc: 'We connect you to top organizations until you get placed.' },
                                             ].map((step, idx, arr) => (
                                                 <React.Fragment key={idx}>
                                                     <div className="flex flex-row md:flex-col items-center md:text-center md:max-w-[140px] flex-1 gap-4 md:gap-0">
-                                                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center md:mb-5 shrink-0 shadow-[0_0_20px_rgba(110,40,255,0.15)] border border-primary/20">
-                                                            <step.icon className="text-primary" size={26} />
+                                                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center md:mb-5 shrink-0" style={{ backgroundColor: '#F3E8FF' }}>
+                                                            <step.icon size={26} style={{ color: '#4B22A2' }} />
                                                         </div>
                                                         <div className="flex flex-col md:items-center">
-                                                            <h4 className="font-bold text-white text-[15px] mb-1.5">{step.title}</h4>
-                                                            <p className="text-[11px] text-text-secondary leading-snug">{step.desc}</p>
+                                                            <h4 className="font-bold text-[15px] mb-1.5" style={{ color: '#1A0B3B' }}>{step.title}</h4>
+                                                            <p className="text-[11px] leading-snug md:text-center" style={{ color: '#4A3B69' }}>{step.desc}</p>
                                                         </div>
                                                     </div>
                                                     {idx < arr.length - 1 && (
-                                                        <div className="hidden md:flex items-center text-white/10 -mt-8">
+                                                        <div className="hidden md:flex items-center -mt-8" style={{ color: '#C4B5FD' }}>
                                                             <ChevronRight size={24} />
                                                         </div>
                                                     )}
