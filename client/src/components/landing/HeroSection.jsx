@@ -262,7 +262,7 @@ const HeroSection = () => {
 
 
     return (
-        <section className="relative h-[100vh] md:min-h-[100vh] flex items-start md:items-center overflow-hidden bg-transparent">
+        <section className="relative min-h-[800px] h-[100dvh] md:min-h-[100vh] flex items-start md:items-center overflow-hidden bg-transparent">
             <style dangerouslySetInnerHTML={{ __html: HERO_CSS }} />
 
             <div className="absolute inset-0 z-0 gpu-accelerated">
@@ -275,13 +275,13 @@ const HeroSection = () => {
             </div>
 
             {/* Hero Content */}
-            <div className="max-w-[1400px] mx-auto px-0 sm:px-6 lg:px-12 w-full relative z-[20]">
-                <div className="max-w-[900px] pt-[300px] pb-[80px] md:pb-[100px] md:pt-[120px] md:pb-[120px] md:py-28 text-left md:text-center mx-auto flex flex-col items-start md:items-center">
+            <div className="max-w-[1400px] h-full mx-auto px-0 sm:px-6 lg:px-12 w-full relative z-[20]">
+                <div className="max-w-[900px] h-full pt-[100px]  md:pb-[100px] md:pt-[120px] md:pb-[120px] md:py-28 text-left md:text-center mx-auto flex flex-col items-start md:items-center">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.9, ease: 'easeOut' }}
-                        className="w-full flex flex-col items-start md:items-center"
+                        className="w-full h-full flex flex-col items-start md:items-center"
                     >
 
 
@@ -350,7 +350,7 @@ const HeroSection = () => {
             </div>
 
             {/* University Ticker */}
-            <div className="absolute bottom-24 md:bottom-8 left-0 right-0 py-2 sm:py-5 overflow-hidden whitespace-nowrap z-[20] pointer-events-none sm:pointer-events-auto">
+            <div className="absolute bottom-64 md:bottom-8 left-0 right-0 py-2 sm:py-5 overflow-hidden whitespace-nowrap z-[20] pointer-events-none sm:pointer-events-auto">
                 <div className="md:hidden px-4 sm:px-6 mb-5 flex flex-col items-start">
                     <div className="w-10 h-[2px] bg-primary mb-2 opacity-70"></div>
                     <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] font-inter">Trusted by learners from</span>

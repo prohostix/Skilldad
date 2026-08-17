@@ -300,7 +300,7 @@ const LandingPage = () => {
 
             {/* Trending / Featured Courses Section - admin-curated via the Featured toggle */}
             {featuredCourses.length > 0 && (
-                <section id="courses" className="relative pt-16 md:pt-20 pb-16 md:pb-20 px-6 z-10 section-optimize">
+                <section id="courses" className="relative pt-20 md:pt-20 pb-16 md:pb-20 px-6 z-10 section-optimize">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 md:mb-12">
                             <div className="text-center sm:text-left">
