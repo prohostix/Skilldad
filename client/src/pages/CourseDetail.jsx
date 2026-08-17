@@ -282,12 +282,12 @@ const CourseDetail = () => {
                                 </div>
 
                                 {/* YOUR JOURNEY Section */}
-                                <div className="relative pt-6">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-6 z-10" style={{ backgroundColor: '#FFFFFF' }}>
-                                        <h3 className="font-extrabold tracking-widest uppercase text-[13px] md:text-[15px]" style={{ color: '#210A52' }}>YOUR JOURNEY</h3>
+                                <div className="relative mt-8">
+                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 z-10" style={{ backgroundColor: '#FFFFFF' }}>
+                                        <h3 className="font-extrabold tracking-widest uppercase text-[14px] md:text-[16px] whitespace-nowrap" style={{ color: '#2B0E68' }}>YOUR JOURNEY</h3>
                                     </div>
                                     
-                                    <div className="rounded-[2rem] p-6 md:p-8 pt-12 md:pt-14 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+                                    <div className="rounded-[2rem] p-6 md:p-8 pt-10 md:pt-12 relative overflow-hidden" style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2D8F0', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
                                         <div className="flex flex-col md:flex-row items-start md:items-start justify-between w-full relative z-10">
                                             {[
                                                 { icon: BookOpen, title: 'Learn', desc: 'Gain knowledge & industry skills' },
