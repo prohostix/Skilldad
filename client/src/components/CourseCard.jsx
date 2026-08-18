@@ -42,7 +42,7 @@ const CourseCard = ({ course }) => {
     const isFeatured = Boolean(course.isFeatured || course.is_featured);
 
     const programType = course.programType || course.program_type || 'course';
-    const isSpecialCategory = programType === 'degree_programme' || programType === 'wbl_abroad' || programType === 'wbl_domestic';
+    const isSpecialCategory = programType === 'wbl_abroad' || programType === 'wbl_domestic';
 
     if (isSpecialCategory) {
         return (
