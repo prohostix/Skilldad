@@ -102,7 +102,7 @@ const CourseCard = ({ course }) => {
                             {course.title}
                         </h3>
 
-                        <p className="text-[10px] md:text-[11px] font-inter text-white/60 mb-2 md:mb-4 leading-relaxed line-clamp-2">
+                        <p className={`text-[10px] md:text-[11px] font-inter text-white/60 mb-2 md:mb-4 leading-relaxed ${titleIsTwoLines ? 'line-clamp-1' : 'line-clamp-2'}`}>
                             {course.description}
                         </p>
 
@@ -209,7 +209,7 @@ const CourseCard = ({ course }) => {
                         {course.title}
                     </h3>
 
-                    <p className="text-[10px] md:text-[11px] font-inter text-white/50 mb-1.5 md:mb-3 leading-relaxed line-clamp-2">
+                    <p className={`text-[10px] md:text-[11px] font-inter text-white/50 mb-1.5 md:mb-3 leading-relaxed ${titleIsTwoLines ? 'line-clamp-1' : 'line-clamp-2'}`}>
                         {course.description}
                     </p>
 
