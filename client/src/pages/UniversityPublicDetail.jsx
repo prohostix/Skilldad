@@ -466,14 +466,14 @@ const UniversityPublicDetail = () => {
                 <div className="max-w-7xl mx-auto px-6 relative z-10 w-full pt-32 pb-12">
                     <div className="flex flex-col lg:flex-row items-center lg:items-start lg:grid lg:grid-cols-12 gap-10 lg:gap-16">
                         {/* Mobile & Desktop Logo Container */}
-                        <div className="lg:col-span-4 w-full flex justify-center lg:justify-end order-1 lg:order-2">
+                        <div className="lg:col-span-4 w-full flex justify-start lg:justify-end order-1 lg:order-2">
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
-                                className={`relative group p-2 sm:p-3 bg-white/5 border border-white/10 rounded-[48px] sm:rounded-[64px] backdrop-blur-xl w-48 sm:w-64 lg:w-full max-w-[280px]`}
+                                className={`relative group p-2 sm:p-3 bg-white/5 border border-white/10 rounded-[32px] sm:rounded-[64px] backdrop-blur-xl w-28 sm:w-40 lg:w-full max-w-[280px]`}
                             >
-                                <div className="aspect-square rounded-[36px] sm:rounded-[48px] overflow-hidden border border-white/20 relative">
+                                <div className="aspect-square rounded-[24px] sm:rounded-[48px] overflow-hidden border border-white/20 relative">
                                     <img
                                         src={(university.profileImage || university.profile?.profileImage || university.profile_image) ? getMediaUrl(university.profileImage || university.profile?.profileImage || university.profile_image) : 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?auto=format&fit=crop&q=80&w=400'}
                                         alt={university.name}
@@ -510,14 +510,14 @@ const UniversityPublicDetail = () => {
                             </motion.div>
                         </div>
 
-                        <div className="lg:col-span-8 order-2 lg:order-1 text-center lg:text-left">
+                        <div className="lg:col-span-8 order-2 lg:order-1 text-left">
                             <motion.div
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.8 }}
                                 className="space-y-6 sm:space-y-8"
                             >
-                                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-primary-accent text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] backdrop-blur-3xl mx-auto lg:mx-0">
+                                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-primary-accent text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] backdrop-blur-3xl mx-0">
                                     <Award size={18} className="text-primary-accent" />
                                     <span>Global Academic Partner</span>
                                 </div>
@@ -526,10 +526,10 @@ const UniversityPublicDetail = () => {
                                     {university.name}
                                 </h1>
 
-                                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 sm:gap-10 pt-4 sm:pt-6">
+                                <div className="flex flex-wrap items-center justify-start gap-6 sm:gap-10 pt-4 sm:pt-6">
                                     <div className="group min-w-[120px] sm:min-w-[140px]">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-primary transition-colors">Global Campus</p>
-                                        <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
+                                        <div className="flex items-center justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
                                             <MapPin size={18} className="text-primary shrink-0" />
                                             <span className="truncate max-w-[150px] sm:max-w-none">{university.profile?.location || university.location || 'Excellence Hub'}</span>
                                         </div>
@@ -537,14 +537,14 @@ const UniversityPublicDetail = () => {
                                     <div className="h-8 sm:h-12 w-px bg-white/10 hidden sm:block"></div>
                                     <div className="group min-w-[120px] sm:min-w-[140px]">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-amber-400 transition-colors">Foundation</p>
-                                        <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
+                                        <div className="flex items-center justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
                                             <Calendar size={18} className="text-amber-400" /> {university.profile?.foundedYear || university.established || 'Est. Heritage'}
                                         </div>
                                     </div>
                                     <div className="h-8 sm:h-12 w-px bg-white/10 hidden sm:block"></div>
                                     <div className="group min-w-[120px] sm:min-w-[140px]">
                                         <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 group-hover:text-emerald-400 transition-colors">Total Scholars</p>
-                                        <div className="flex items-center justify-center lg:justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
+                                        <div className="flex items-center justify-start gap-2 sm:gap-3 text-white font-bold text-sm sm:text-lg">
                                             <Users size={18} className="text-emerald-400 shrink-0" /> {university.students || '25k+ Users'}
                                         </div>
                                     </div>
