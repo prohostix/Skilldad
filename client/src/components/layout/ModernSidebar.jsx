@@ -18,12 +18,12 @@ const NavItem = ({ icon: Icon, label, isActive, onClick, isCollapsed }) => {
             className={`w-full flex items-center ${isCollapsed ? 'justify-center p-3' : 'space-x-3 px-4 py-3'} rounded-xl text-sm font-bold font-inter whitespace-nowrap transition-all duration-200 group
                 ${isActive
                     ? 'bg-[#4C1D95]/10 dark:bg-[#C026FF]/20 text-[#4C1D95] dark:text-[#C026FF]'
-                    : 'text-[#4C1D95]/70 dark:text-white/50 bg-transparent hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#4C1D95] dark:hover:text-[#C026FF]'
+                    : 'text-purple-800 dark:text-white/50 bg-transparent hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#4C1D95] dark:hover:text-[#C026FF]'
                 }`}
         >
             <Icon
                 size={20}
-                className={`flex-shrink-0 transition-colors ${isActive ? 'text-[#4C1D95] dark:text-[#C026FF]' : 'text-[#4C1D95]/70 dark:text-white/50 group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF]'}`}
+                className={`flex-shrink-0 transition-colors ${isActive ? 'text-[#4C1D95] dark:text-[#C026FF]' : 'text-purple-800 dark:text-white/50 group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF]'}`}
             />
             {!isCollapsed && <span>{label}</span>}
             {isActive && !isCollapsed && (
@@ -41,9 +41,9 @@ const HomeNavItem = ({ onClick, isCollapsed }) => {
         <button
             onClick={onClick}
             title={isCollapsed ? 'Home' : ''}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-3' : 'space-x-3 px-4 py-3'} rounded-xl border border-gray-200 dark:border-[#C026FF]/20 text-[#4C1D95]/70 dark:text-white/60 hover:text-[#4C1D95] dark:hover:text-white hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:border-[#4C1D95]/30 text-sm font-bold font-inter transition-all duration-200 group`}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-3' : 'space-x-3 px-4 py-3'} rounded-xl border border-gray-200 dark:border-[#C026FF]/20 text-purple-800 dark:text-white/60 hover:text-[#4C1D95] dark:hover:text-white hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:border-[#4C1D95]/30 text-sm font-bold font-inter transition-all duration-200 group`}
         >
-            <Home size={20} className="flex-shrink-0 text-[#4C1D95]/70 dark:text-white/60 group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF] transition-colors" />
+            <Home size={20} className="flex-shrink-0 text-purple-800 dark:text-white/60 group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF] transition-colors" />
             {!isCollapsed && <span>Home</span>}
         </button>
     );
@@ -240,11 +240,11 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                             className={`w-full flex items-center justify-between ${isCollapsed ? 'p-3' : 'px-4 py-3'} rounded-xl text-sm font-bold font-inter transition-all duration-200 group
                                                 ${isAnySubActive
                                                     ? 'bg-[#4C1D95]/10 dark:bg-[#C026FF]/20 text-[#4C1D95] dark:text-[#C026FF]'
-                                                    : 'text-[#4C1D95]/70 dark:text-white/50 bg-transparent hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#4C1D95] dark:hover:text-[#C026FF]'
+                                                    : 'text-purple-800 dark:text-white/50 bg-transparent hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#4C1D95] dark:hover:text-[#C026FF]'
                                                 }`}
                                         >
                                             <div className="flex items-center space-x-3">
-                                                <Icon size={20} className={`flex-shrink-0 transition-colors ${isAnySubActive ? 'text-[#4C1D95] dark:text-[#C026FF]' : 'text-[#4C1D95]/70 dark:text-white/50 group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF]'}`} />
+                                                <Icon size={20} className={`flex-shrink-0 transition-colors ${isAnySubActive ? 'text-[#4C1D95] dark:text-[#C026FF]' : 'text-purple-800 dark:text-white/50 group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF]'}`} />
                                                 {!isCollapsed && <span>{item.name}</span>}
                                             </div>
                                             {!isCollapsed && (
@@ -270,7 +270,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                                                 className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium font-inter transition-all duration-200
                                                                     ${isSubActive
                                                                         ? 'text-[#4C1D95] dark:text-[#C026FF] bg-[#4C1D95]/5 dark:bg-[#C026FF]/10'
-                                                                        : 'text-[#4C1D95]/70 dark:text-white/40 hover:text-[#4C1D95] dark:hover:text-[#C026FF] hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/5'
+                                                                        : 'text-purple-800 dark:text-white/40 hover:text-[#4C1D95] dark:hover:text-[#C026FF] hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/5'
                                                                     }`}
                                                             >
                                                                 {sub.name}
