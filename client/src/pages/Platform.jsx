@@ -10,7 +10,8 @@ import {
     Calendar,
     TrendingUp,
     Globe,
-    Star
+    Star,
+    ArrowRight
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
@@ -22,6 +23,7 @@ const Platform = () => {
     const [dynamicUnis, setDynamicUnis] = React.useState([]);
     const [dynamicSkillDadUnis, setDynamicSkillDadUnis] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
+    const [showAllMobile, setShowAllMobile] = React.useState(false);
 
     React.useEffect(() => {
         const fetchUnis = async () => {
@@ -105,15 +107,17 @@ const Platform = () => {
                         </p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-20">
-                        {allUniversities.map((university, index) => (
+                    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 ${(!showAllMobile && allUniversities.length > 5) ? 'mb-6' : 'mb-20'}`}>
+                        {allUniversities.map((university, index) => {
+                            const isHiddenOnMobile = !showAllMobile && index >= 5;
+                            return (
                             <motion.div
                                 key={university.id}
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
                                 whileHover={{ y: -10 }}
-                                className="group cursor-pointer"
+                                className={`group cursor-pointer ${isHiddenOnMobile ? 'hidden md:block' : 'block'}`}
                                 onClick={() => {
                                     navigate(`/university-profile/${encodeURIComponent(university.name)}`, { state: { university } });
                                 }}
@@ -160,8 +164,20 @@ const Platform = () => {
                                     </div>
                                 </GlassCard>
                             </motion.div>
-                        ))}
+                            );
+                        })}
                     </div>
+                    
+                    {!showAllMobile && allUniversities.length > 5 && (
+                        <div className="mb-20 flex justify-end md:hidden w-full max-w-sm mx-auto pr-4">
+                            <button 
+                                onClick={() => setShowAllMobile(true)} 
+                                className="text-[10px] font-medium text-primary hover:text-white transition-colors flex items-center gap-1 uppercase tracking-widest"
+                            >
+                                View More <ArrowRight size={12} />
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
 
