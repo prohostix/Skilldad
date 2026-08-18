@@ -521,8 +521,8 @@ const UniversityPublicDetail = () => {
                                 transition={{ duration: 0.8 }}
                                 className="space-y-6 sm:space-y-8"
                             >
-                                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-primary-accent text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] backdrop-blur-3xl mx-0">
-                                    <Award size={18} className="text-primary-accent" />
+                                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 text-[#4C1D95] dark:text-primary-accent text-[10px] sm:text-[12px] font-black uppercase tracking-[0.4em] backdrop-blur-3xl mx-0">
+                                    <Award size={18} className="text-[#4C1D95] dark:text-primary-accent" />
                                     <span>Global Academic Partner</span>
                                 </div>
 
