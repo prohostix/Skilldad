@@ -422,8 +422,12 @@ const UniversityPublicDetail = () => {
                             />
                         );
                     })()}
-                    <div className="absolute inset-0 bg-gradient-to-b from-[#05030B]/15 via-[#05030B]/45 to-[#05030B]/90"></div>
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#05030B]/70 via-transparent to-[#05030B]/10"></div>
+                    {/* Dark mode overlays */}
+                    <div className="absolute inset-0 hidden dark:block bg-gradient-to-b from-[#05030B]/15 via-[#05030B]/45 to-[#05030B]/90"></div>
+                    <div className="absolute inset-0 hidden dark:block bg-gradient-to-r from-[#05030B]/70 via-transparent to-[#05030B]/10"></div>
+                    
+                    {/* Light mode overlays */}
+                    <div className="absolute inset-0 block dark:hidden bg-gradient-to-b from-white/10 via-white/50 to-[#f8fafc]"></div>
                 </div>
 
                 {/* Admin edit shortcut for SkillDad Universities (no login account, so no self-upload UI) */}
