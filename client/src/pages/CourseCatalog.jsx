@@ -11,7 +11,8 @@ import {
     Sparkles,
     SearchX,
     ShieldCheck,
-    ChevronDown
+    ChevronDown,
+    ArrowRight
 } from 'lucide-react';
 
 import Navbar from '../components/ui/Navbar';
@@ -146,6 +147,7 @@ const CourseCatalog = () => {
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [universityName, setUniversityName] = useState('');
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+    const [showAllMobile, setShowAllMobile] = useState(false);
     const [enquiryType, setEnquiryType] = useState('General Course Enquiry');
 
     useEffect(() => {
@@ -285,8 +287,12 @@ const CourseCatalog = () => {
                             <div className="flex justify-center mt-6 w-full px-4 md:px-0">
                                 <div className="flex flex-wrap items-center justify-center gap-2 md:gap-1 md:bg-white/5 md:border md:border-white/10 md:p-1 md:rounded-2xl w-full md:w-auto pb-2 md:pb-0">
                                     <button
-                                        onClick={() => setProgramType('course')}
-                                        className={`whitespace-nowrap shrink-0 snap-start px-3 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black font-inter text-[8px] md:text-xs uppercase tracking-wider md:tracking-widest transition-all duration-300 ${programType === 'course'
+                                        onClick={() => {
+                                            setProgramType('course');
+                                            setShowAllMobile(false);
+                                        }}
+                                        style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
+                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'course'
                                             ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
@@ -294,8 +300,12 @@ const CourseCatalog = () => {
                                         Skill Courses
                                     </button>
                                     <button
-                                        onClick={() => setProgramType('degree_programme')}
-                                        className={`whitespace-nowrap shrink-0 snap-start px-3 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black font-inter text-[8px] md:text-xs uppercase tracking-wider md:tracking-widest transition-all duration-300 ${programType === 'degree_programme'
+                                        onClick={() => {
+                                            setProgramType('degree_programme');
+                                            setShowAllMobile(false);
+                                        }}
+                                        style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
+                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'degree_programme'
                                             ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
@@ -303,8 +313,12 @@ const CourseCatalog = () => {
                                         Skill Integrated Degree Programmes
                                     </button>
                                     <button
-                                        onClick={() => setProgramType('wbl')}
-                                        className={`whitespace-nowrap shrink-0 snap-start px-3 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-black font-inter text-[8px] md:text-xs uppercase tracking-wider md:tracking-widest transition-all duration-300 ${programType.startsWith('wbl')
+                                        onClick={() => {
+                                            setProgramType('wbl');
+                                            setShowAllMobile(false);
+                                        }}
+                                        style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
+                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType.startsWith('wbl')
                                             ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
@@ -325,19 +339,27 @@ const CourseCatalog = () => {
                                     >
                                         <div className="inline-flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl flex-wrap justify-center">
                                             <button
-                                                onClick={() => setProgramType('wbl_abroad')}
-                                                className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_abroad'
-                                                    ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
-                                                    : 'text-white/50 hover:text-white'
+                                                onClick={() => {
+                                                    setProgramType('wbl_abroad');
+                                                    setShowAllMobile(false);
+                                                }}
+                                                style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
+                                                className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'wbl_abroad'
+                                                    ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                                    : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                                     }`}
                                             >
                                                 International Programmes
                                             </button>
                                             <button
-                                                onClick={() => setProgramType('wbl_domestic')}
-                                                className={`px-2 md:px-3 py-1 md:py-1.5 rounded-lg font-bold font-inter text-[8px] md:text-[10px] uppercase tracking-wider transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
-                                                    ? 'bg-primary text-white shadow-[0_0_15px_rgba(110,40,255,0.3)]'
-                                                    : 'text-white/50 hover:text-white'
+                                                onClick={() => {
+                                                    setProgramType('wbl_domestic');
+                                                    setShowAllMobile(false);
+                                                }}
+                                                style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
+                                                className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
+                                                    ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                                    : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                                     }`}
                                             >
                                                 Domestic Programmes
@@ -438,16 +460,33 @@ const CourseCatalog = () => {
                             </ModernButton>
                         </motion.div>
                     ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 gpu-accelerated">
-                            {filteredCourses.map((course) => (
-                                <CourseCard key={course._id} course={course} />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 gpu-accelerated max-w-sm sm:max-w-none mx-auto">
+                                {filteredCourses.map((course, index) => {
+                                    const isHiddenOnMobile = !showAllMobile && index >= 4;
+                                    return (
+                                        <div key={course._id} className={`${isHiddenOnMobile ? 'hidden sm:block' : 'block'} h-full`}>
+                                            <CourseCard course={course} />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            {!showAllMobile && filteredCourses.length > 4 && (
+                                <div className="mt-6 flex justify-end sm:hidden w-full max-w-sm mx-auto">
+                                    <button 
+                                        onClick={() => setShowAllMobile(true)} 
+                                        className="text-[9px] font-medium text-primary hover:text-white transition-colors flex items-center gap-1"
+                                    >
+                                        View More <ArrowRight size={10} />
+                                    </button>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
 
                 {/* Enquiry & FAQ Section */}
-                <div className="max-w-[1400px] mx-auto mt-40 grid lg:grid-cols-2 gap-24">
+                <div className="max-w-[1400px] mx-auto mt-16 md:mt-40 grid lg:grid-cols-2 gap-12 md:gap-24">
                     <div className="space-y-16">
                         <div className="text-left space-y-6">
                             <div className="w-20 h-1 bg-gradient-to-r from-primary to-transparent mb-8"></div>
@@ -457,47 +496,47 @@ const CourseCatalog = () => {
                             </p>
                         </div>
 
-                        <div className="grid sm:grid-cols-2 gap-8">
-                            <div className="p-10 bg-white/[0.03] rounded-[32px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-2xl">
-                                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-8 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(110,40,255,0.4)] transition-all">
-                                    <Sparkles size={28} />
+                        <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
+                            <div className="p-5 md:p-6 bg-white/[0.03] rounded-[20px] md:rounded-[24px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-2xl">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 md:mb-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(110,40,255,0.4)] transition-all">
+                                    <Sparkles size={20} />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-3 font-space">Academic Sync</h3>
-                                <p className="text-sm text-text-muted leading-relaxed font-inter">Direct connection with our curriculum design team for custom track enquiries.</p>
+                                <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-space">Academic Sync</h3>
+                                <p className="text-xs md:text-sm text-text-muted leading-relaxed font-inter">Direct connection with our curriculum design team for custom track enquiries.</p>
                             </div>
-                            <div className="p-10 bg-white/[0.03] rounded-[32px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-2xl">
-                                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-8 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(109,40,255,0.4)] transition-all">
-                                    <ShieldCheck size={28} />
+                            <div className="p-5 md:p-6 bg-white/[0.03] rounded-[20px] md:rounded-[24px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-2xl">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 md:mb-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(109,40,255,0.4)] transition-all">
+                                    <ShieldCheck size={20} />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-3 font-space">Institutional Core</h3>
-                                <p className="text-sm text-text-muted leading-relaxed font-inter">Enterprise-grade solutions for universities and corporate learning clusters.</p>
+                                <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-space">Institutional Core</h3>
+                                <p className="text-xs md:text-sm text-text-muted leading-relaxed font-inter">Enterprise-grade solutions for universities and corporate learning clusters.</p>
                             </div>
                         </div>
                     </div>
 
-                    <GlassCard className="!p-6 md:!p-8 border-white/10 shadow-glow-purple relative overflow-hidden group">
+                    <GlassCard className="!p-5 md:!p-6 border-white/10 shadow-glow-purple relative overflow-hidden group">
                         {/* Interior Glow */}
                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[80px] rounded-full group-hover:bg-primary/15 transition-colors" />
 
-                        <div className="relative z-10 space-y-6">
-                            <div className="space-y-2">
-                                <h3 className="text-xl font-bold text-white font-inter uppercase tracking-widest">Initialise Enquiry</h3>
-                                <p className="text-text-muted text-sm font-inter">Average response time: &lt; 24 hours</p>
+                        <div className="relative z-10 space-y-4 md:space-y-5">
+                            <div className="space-y-1">
+                                <h3 className="text-lg md:text-xl font-bold text-white font-inter uppercase tracking-widest">Initialise Enquiry</h3>
+                                <p className="text-text-muted text-xs md:text-sm font-inter">Average response time: &lt; 24 hours</p>
                             </div>
 
-                            <form className="space-y-5">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Identity Name</label>
-                                        <input type="text" className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-3.5 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-sm" placeholder="Full Name" />
+                            <form className="space-y-3 md:space-y-4">
+                                <div className="grid md:grid-cols-2 gap-3 md:gap-4">
+                                    <div className="space-y-1.5 md:space-y-2">
+                                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Identity Name</label>
+                                        <input type="text" className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-2.5 md:py-3 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs md:text-sm" placeholder="Full Name" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Auth Email</label>
-                                        <input type="email" className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-3.5 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-sm" placeholder="email@nexus.com" />
+                                    <div className="space-y-1.5 md:space-y-2">
+                                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Auth Email</label>
+                                        <input type="email" className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-2.5 md:py-3 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs md:text-sm" placeholder="email@nexus.com" />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Selection Matrix</label>
+                                <div className="space-y-1.5 md:space-y-2">
+                                    <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Selection Matrix</label>
                                     <FormSelect 
                                         value={enquiryType}
                                         onChange={setEnquiryType}
@@ -507,19 +546,19 @@ const CourseCatalog = () => {
                                             'Corporate Training',
                                             'University Integration'
                                         ]}
-                                        className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-3.5 hover:border-primary/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 font-inter text-sm"
+                                        className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-2.5 md:py-3 hover:border-primary/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 font-inter text-xs md:text-sm"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Message Detail</label>
-                                    <textarea rows="3" className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-sm" placeholder="Structure your requirements here..."></textarea>
+                                <div className="space-y-1.5 md:space-y-2">
+                                    <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Message Detail</label>
+                                    <textarea rows="2" className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-3 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs md:text-sm resize-none" placeholder="Structure your requirements here..."></textarea>
                                 </div>
                                 <ModernButton
                                     onClick={(e) => {
                                         e.preventDefault();
                                         toast.success('Ticket Raised Successfully. Our advisors will contact you shortly.');
                                     }}
-                                    className="w-full !py-4 shadow-glow-gradient font-black uppercase tracking-[0.3em] text-[10px]"
+                                    className="w-full !py-3 shadow-glow-gradient font-black uppercase tracking-[0.3em] text-[9px] md:text-[10px] mt-2"
                                 >
                                     Raise a Ticket
                                 </ModernButton>

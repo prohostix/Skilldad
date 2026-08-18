@@ -26,6 +26,8 @@ const StudentDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showStats, setShowStats] = useState(true);
     const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [viewingMonthDate, setViewingMonthDate] = useState(new Date());
     const [pendingProjectsCount, setPendingProjectsCount] = useState(0);
     const [pendingCertsCount, setPendingCertsCount] = useState(0);
     const navigate = useNavigate();
@@ -146,38 +148,107 @@ const StudentDashboard = () => {
         };
     });
 
+    const handlePrevMonth = (e) => {
+        e.stopPropagation();
+        setViewingMonthDate(new Date(viewingMonthDate.getFullYear(), viewingMonthDate.getMonth() - 1, 1));
+    };
+
+    const handleNextMonth = (e) => {
+        e.stopPropagation();
+        setViewingMonthDate(new Date(viewingMonthDate.getFullYear(), viewingMonthDate.getMonth() + 1, 1));
+    };
+
+    const getDaysInMonth = (date) => {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        
+        const days = [];
+        let startingDayOfWeek = firstDay.getDay(); 
+        if (startingDayOfWeek === 0) startingDayOfWeek = 7; // Treat Sunday as 7
+        
+        const prevMonthLastDay = new Date(year, month, 0).getDate();
+        
+        // Add previous month days
+        for (let i = startingDayOfWeek - 1; i > 0; i--) {
+            const d = new Date(year, month - 1, prevMonthLastDay - i + 1);
+            days.push({ date: d, dateNum: d.getDate(), isCurrentMonth: false, isToday: d.toDateString() === today.toDateString() });
+        }
+        
+        // Add current month days
+        for (let i = 1; i <= lastDay.getDate(); i++) {
+            const d = new Date(year, month, i);
+            days.push({ date: d, dateNum: i, isCurrentMonth: true, isToday: d.toDateString() === today.toDateString() });
+        }
+        
+        // Pad next month days to 42 items (6 weeks)
+        const remainingDays = 42 - days.length;
+        for (let i = 1; i <= remainingDays; i++) {
+            const d = new Date(year, month + 1, i);
+            days.push({ date: d, dateNum: i, isCurrentMonth: false, isToday: d.toDateString() === today.toDateString() });
+        }
+        
+        return days;
+    };
+
+    const monthDaysGrid = isCalendarExpanded ? getDaysInMonth(viewingMonthDate) : [];
+    const viewingMonthStr = viewingMonthDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    // Filter schedule by selected date
+    const filteredSessions = upcomingSessions.filter(s => new Date(s.startTime).toDateString() === selectedDate.toDateString());
+    const filteredExams = upcomingExams.filter(e => new Date(e.scheduledStartTime).toDateString() === selectedDate.toDateString());
+
     return (
-        <div className="student-dashboard-container bg-transparent min-h-screen px-4 sm:px-6 lg:px-8 py-4 lg:py-6 font-inter text-gray-900 text-dark-white overflow-x-hidden w-full max-w-full">
+        <div className="student-dashboard-container bg-transparent min-h-screen px-4 sm:px-6 lg:px-8 pt-2 pb-4 lg:pt-3 lg:pb-6 font-inter text-gray-900 text-dark-white overflow-x-hidden w-full max-w-full">
+            {/* Top Header */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-3">
+                <DashboardHeading title="Overviews" />
+            </div>
+
             <div className="flex flex-col xl:flex-row gap-8">
                 {/* Main Content Area */}
                 <div className="flex-1 space-y-8 min-w-0">
-                    
-                    {/* Top Header */}
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                        <DashboardHeading title="Overviews" />
-                    </div>
                     
                     {/* Hero and Daily Question Grid */}
                     <div className="grid lg:grid-cols-3 gap-6">
                         
                         {/* Hero Card */}
-                        <div className="lg:col-span-3 bg-[#F6EDDB] rounded-[32px] p-8 flex flex-col justify-between relative overflow-hidden border border-[#e8dfcd] min-h-[250px] glass-panel-hero">
-                            <div className="relative z-10 w-[70%]">
-                                <h2 className="text-3xl sm:text-5xl font-extrabold text-[#4C1D95] dark:text-[#E879F9] mb-2 leading-tight">
-                                    Welcome back,<br/>{userName}!
+                        <div className="lg:col-span-3 bg-gradient-to-r from-[#4C1D95] via-[#51239E] to-[#4C1D95] rounded-[32px] py-6 px-8 flex flex-col justify-between relative overflow-hidden min-h-[220px] shadow-lg shadow-purple-900/20">
+                            
+                            {/* Decorative Background Elements */}
+                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                                {/* Blurred glowing orbs */}
+                                <div className="absolute top-[-20%] left-[30%] w-64 h-64 bg-white/5 rounded-full mix-blend-screen blur-[80px]"></div>
+                                <div className="absolute bottom-[-10%] left-[50%] w-48 h-48 bg-purple-300/10 rounded-full mix-blend-screen blur-[60px]"></div>
+                                
+                                {/* Floating particles */}
+                                <div className="absolute top-[30%] left-[45%] w-2 h-2 bg-white/20 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"></div>
+                                <div className="absolute bottom-[35%] left-[55%] w-3 h-3 bg-white/10 rounded-full"></div>
+                                <div className="absolute top-[60%] left-[38%] w-1.5 h-1.5 bg-white/30 rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)]"></div>
+                                <div className="absolute top-[20%] left-[60%] w-2 h-2 bg-purple-300/30 rounded-full"></div>
+                            </div>
+
+                            <div className="relative z-10 w-[85%] sm:w-[70%] lg:w-[65%] xl:w-[60%]">
+                                <h2 className="text-3xl lg:text-4xl xl:text-5xl font-extrabold !text-white mb-2 leading-tight">
+                                    <span className="whitespace-nowrap">Welcome back,</span> {userName}!
                                 </h2>
+                                <p className="!text-white text-xs sm:text-sm mt-3 max-w-md font-medium leading-relaxed">
+                                    Ready to achieve your goals? Pick up right where you left off and continue your learning journey today.
+                                </p>
                                 <button 
                                     onClick={() => navigate(enrolledCourses.length > 0 ? `/dashboard/course/${enrolledCourses[0].course._id}` : '/dashboard/courses')} 
-                                    className="mt-6 sm:mt-8 px-6 py-3 bg-[#4C1D95] text-white font-bold rounded-full shadow-sm hover:shadow-lg transition-all hover:bg-[#3b1775]"
+                                    className="mt-4 sm:mt-5 px-8 py-3 bg-white text-[#4C1D95] font-bold rounded-xl shadow-sm hover:shadow-lg transition-all hover:bg-gray-100 hover:scale-105 transform duration-200"
                                 >
                                     {enrolledCourses.length > 0 ? 'Resume Learning' : 'Browse Courses'}
                                 </button>
                             </div>
                             
                             {/* Abstract Student Illustration */}
-                            <div className="absolute right-0 bottom-0 w-1/2 h-full flex items-end justify-end pointer-events-none pr-8 pb-4">
-                                <div className="w-full h-[120%] bg-gradient-to-t from-[#4C1D95]/10 to-transparent rounded-full translate-x-1/4 translate-y-1/4 blur-3xl absolute"></div>
-                                <img src="/student_hero_illustration.png" alt="Student" className="h-[95%] w-auto object-contain object-right-bottom z-10 opacity-100 mix-blend-darken" />
+                            <div className="absolute right-0 bottom-0 w-1/2 h-full flex items-center justify-end pointer-events-none pr-8 z-10">
+                                {/* Decorative background circle */}
+                                <div className="absolute right-[5%] w-48 h-48 sm:w-64 sm:h-64 bg-white/10 rounded-full mix-blend-screen z-0"></div>
+                                <img src="/student_hero_illustration_transparent.png" alt="Student" className="h-[100%] scale-[1.15] origin-center w-auto object-contain object-right z-10 opacity-100" />
                             </div>
                         </div>
                     </div>
@@ -260,76 +331,126 @@ const StudentDashboard = () => {
 
                 {/* Right Sidebar */}
                 {showStats && (
-                <div className="w-full xl:w-80 space-y-6 shrink-0 animate-in slide-in-from-right-8 duration-300">
+                <div className="w-full xl:w-80 space-y-4 shrink-0 animate-in slide-in-from-right-8 duration-300">
                     
                     {/* Statistic Header */}
-                    <div className="flex items-center gap-4 bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-full p-2 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm statistic-header">
-                        <button onClick={() => setShowStats(false)} className="w-10 h-10 rounded-full hover:bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray hover:text-red-500 transition-colors shrink-0">
-                            <X size={18} />
+                    <div className="flex items-center gap-3 bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-full py-1.5 px-2 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm statistic-header">
+                        <button onClick={() => setShowStats(false)} className="w-8 h-8 rounded-full hover:bg-gray-50 dark:bg-white/5 flex items-center justify-center text-gray-500 text-dark-gray dark:text-gray-400 hover:text-red-500 transition-colors shrink-0">
+                            <X size={16} />
                         </button>
-                        <div className="flex-1 mt-1">
-                            <DashboardHeading title="Statistic" />
-                        </div>
+                        <h3 className="font-extrabold text-base premium-gradient-text flex-1">Statistic</h3>
                     </div>
 
                     {/* Profile Summary Widget */}
-                    <div className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-5 flex items-center gap-4 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm glass-panel">
-                        <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 shrink-0 border-2 border-white shadow-sm flex items-center justify-center">
+                    <div className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[20px] py-3 px-4 flex items-center gap-3 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm glass-panel">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 shrink-0 border-2 border-white shadow-sm flex items-center justify-center">
                             <img src={userInfo.profileImage || `https://ui-avatars.com/api/?name=${userName}&background=4C1D95&color=fff`} alt={userName} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-900 text-dark-white dark:text-white truncate">{userInfo.name || 'Scholar'}</h3>
-                            <p className="text-sm text-[#F48F56] font-bold truncate">{rewardPoints} Reward Points</p>
+                            <h3 className="font-bold text-gray-900 text-dark-white dark:text-white truncate text-sm">{userInfo.name || 'Scholar'}</h3>
+                            <p className="text-xs text-[#F48F56] font-bold truncate">{rewardPoints} Reward Points</p>
                         </div>
                     </div>
 
                     {/* Calendar Widget */}
                     <div className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-6 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm transition-all duration-300 glass-panel">
                         <div className="flex items-center justify-between mb-5 cursor-pointer group" onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}>
-                            <h3 className="font-bold text-gray-900 text-dark-white dark:text-white text-sm">{currentMonth}</h3>
+                            <div className="flex items-center gap-2">
+                                {isCalendarExpanded && (
+                                    <button onClick={handlePrevMonth} className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                )}
+                                <h3 className="font-bold text-gray-900 text-dark-white dark:text-white text-sm">
+                                    {isCalendarExpanded ? viewingMonthStr : currentMonth}
+                                </h3>
+                                {isCalendarExpanded && (
+                                    <button onClick={handleNextMonth} className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">
+                                        <ChevronRight size={16} />
+                                    </button>
+                                )}
+                            </div>
                             <div className="w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-gray-50 dark:bg-white/5 transition-colors">
                                 <ChevronRight size={16} className={`text-gray-400 dark:text-gray-500 text-dark-gray transition-transform duration-300 ${isCalendarExpanded ? '-rotate-90' : 'rotate-90'}`} />
                             </div>
                         </div>
                         
-                        <div className="flex justify-between items-center text-center">
-                            {currentWeekDates.map((d, i) => (
-                                <div key={i} className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-dark-gray">{d.day}</span>
-                                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${d.isToday ? 'bg-[#F48F56] text-white shadow-md shadow-[#F48F56]/30' : 'text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray hover:bg-gray-50 dark:bg-white/5 cursor-pointer'}`}>
-                                        {d.dateNum}
+                        {!isCalendarExpanded ? (
+                            <div className="flex justify-between items-center text-center">
+                                {currentWeekDates.map((d, i) => (
+                                    <div key={i} className="flex flex-col gap-2">
+                                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-dark-gray">{d.day}</span>
+                                        <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${d.isToday ? 'bg-[#F48F56] text-white shadow-md shadow-[#F48F56]/30' : 'text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray hover:bg-gray-50 dark:bg-white/5 cursor-pointer'}`}>
+                                            {d.dateNum}
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="animate-in fade-in duration-300">
+                                <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                                    {weekDays.map((day, i) => (
+                                        <div key={i} className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-dark-gray py-1">
+                                            {day}
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                                <div className="grid grid-cols-7 gap-1 text-center">
+                                    {monthDaysGrid.map((d, i) => {
+                                        const isSelected = d.date.toDateString() === selectedDate.toDateString();
+                                        return (
+                                            <div 
+                                                key={i} 
+                                                onClick={(e) => { e.stopPropagation(); setSelectedDate(d.date); }}
+                                                className={`w-7 h-7 sm:w-8 sm:h-8 mx-auto rounded-full flex items-center justify-center text-xs font-bold transition-all cursor-pointer ${
+                                                    isSelected 
+                                                        ? 'bg-[#4C1D95] text-white shadow-md shadow-[#4C1D95]/30' 
+                                                        : d.isToday 
+                                                            ? 'bg-[#F48F56] text-white shadow-md shadow-[#F48F56]/30' 
+                                                            : d.isCurrentMonth 
+                                                                ? 'text-gray-700 text-dark-white dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10' 
+                                                                : 'text-gray-300 dark:text-gray-600 hover:bg-gray-50 dark:hover:bg-white/5'
+                                                }`}
+                                            >
+                                                {d.dateNum}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Expanded Schedule */}
                         {isCalendarExpanded && (
                             <div className="mt-6 pt-4 border-t border-gray-100 dark:border-[#C026FF]/20 space-y-4 animate-in slide-in-from-top-2 fade-in duration-300">
-                                <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-dark-gray uppercase tracking-wider mb-2">Upcoming Schedule</h4>
-                                {upcomingSessions.length === 0 && upcomingExams.length === 0 ? (
-                                    <p className="text-xs text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray text-center py-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-[#C026FF]/20">No upcoming schedule</p>
+                                <div className="flex justify-between items-center mb-2">
+                                    <h4 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 text-dark-gray uppercase tracking-wider">Schedule</h4>
+                                    <span className="text-[10px] font-semibold text-[#4C1D95] dark:text-[#E879F9]">{selectedDate.toLocaleDateString()}</span>
+                                </div>
+                                
+                                {filteredSessions.length === 0 && filteredExams.length === 0 ? (
+                                    <p className="text-xs text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray text-center py-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-[#C026FF]/20">No schedule for this date</p>
                                 ) : (
-                                    <div className="space-y-3">
-                                        {upcomingSessions.map(session => (
+                                    <div className="space-y-3 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                                        {filteredSessions.map(session => (
                                             <div key={session._id} className="flex items-start gap-3 p-2 rounded-xl hover:bg-gray-50 dark:bg-white/5 border border-transparent hover:border-gray-100 dark:border-[#C026FF]/20 transition-colors cursor-pointer" onClick={() => navigate('/dashboard/live-classes')}>
                                                 <div className="w-8 h-8 rounded-full bg-[#4C1D95]/10 flex items-center justify-center text-[#4C1D95] dark:text-[#E879F9] shrink-0 mt-0.5">
                                                     <Play size={12} className="ml-0.5" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="text-xs font-bold text-gray-900 text-dark-white dark:text-white truncate leading-tight mb-0.5">{session.topic || 'Live Session'}</h4>
-                                                    <p className="text-[9px] font-semibold text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">{new Date(session.startTime).toLocaleDateString()} • {new Date(session.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                                                    <p className="text-[9px] font-semibold text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">{new Date(session.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                                                 </div>
                                             </div>
                                         ))}
-                                        {upcomingExams.map(exam => (
+                                        {filteredExams.map(exam => (
                                             <div key={exam._id} className="flex items-start gap-3 p-2 rounded-xl hover:bg-gray-50 dark:bg-white/5 border border-transparent hover:border-gray-100 dark:border-[#C026FF]/20 transition-colors cursor-pointer" onClick={() => navigate('/dashboard/exams')}>
                                                 <div className="w-8 h-8 rounded-full bg-[#F48F56]/10 flex items-center justify-center text-[#F48F56] shrink-0 mt-0.5">
                                                     <CalendarIcon size={12} />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="text-xs font-bold text-gray-900 text-dark-white dark:text-white truncate leading-tight mb-0.5">{exam.title || 'Exam'}</h4>
-                                                    <p className="text-[9px] font-semibold text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">{new Date(exam.scheduledStartTime).toLocaleDateString()}</p>
+                                                    <p className="text-[9px] font-semibold text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray">{new Date(exam.scheduledStartTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                                                 </div>
                                             </div>
                                         ))}

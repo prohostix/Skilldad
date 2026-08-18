@@ -189,11 +189,11 @@ const DocumentReview = () => {
                     {/* Table Header Bar */}
                     {filteredDocs.length > 0 && (
                         <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/5">
-                            <div className="col-span-4">Document Details</div>
+                            <div className="col-span-3">Document Details</div>
                             <div className="col-span-3">Student</div>
                             <div className="col-span-2">Submitted Date</div>
                             <div className="col-span-1 text-center">Status</div>
-                            <div className="col-span-2 text-right">Actions</div>
+                            <div className="col-span-3 text-right">Actions</div>
                         </div>
                     )}
 
@@ -207,8 +207,8 @@ const DocumentReview = () => {
                             <GlassCard className="p-4 hover:border-primary/30 transition-all group">
                                 <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-4">
                                     
-                                    {/* 1. Document Info (col-span-4) */}
-                                    <div className="col-span-1 sm:col-span-4 flex items-center gap-3.5 min-w-0">
+                                    {/* 1. Document Info (col-span-3) */}
+                                    <div className="col-span-1 sm:col-span-3 flex items-center gap-3.5 min-w-0">
                                         <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
                                             <FileText size={20} />
                                         </div>
@@ -250,8 +250,8 @@ const DocumentReview = () => {
                                         </span>
                                     </div>
 
-                                    {/* 5. Actions (col-span-2) */}
-                                    <div className="col-span-1 sm:col-span-2 flex items-center justify-start sm:justify-end gap-2 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
+                                    {/* 5. Actions (col-span-3) */}
+                                    <div className="col-span-1 sm:col-span-3 flex items-center justify-start sm:justify-end gap-2 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
                                         <ModernButton 
                                             variant="secondary" 
                                             className="!py-2 !px-3 text-[11px] font-bold"
