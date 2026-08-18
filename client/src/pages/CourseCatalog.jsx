@@ -466,7 +466,7 @@ const CourseCatalog = () => {
                                     const isHiddenOnMobile = !showAllMobile && index >= 4;
                                     return (
                                         <div key={course._id} className={`${isHiddenOnMobile ? 'hidden sm:block' : 'block'} h-full`}>
-                                            <CourseCard course={course} />
+                                            <CourseCard course={course} isWBLView={programType.startsWith('wbl')} />
                                         </div>
                                     );
                                 })}

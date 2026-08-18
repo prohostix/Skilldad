@@ -16,7 +16,7 @@ import ModernButton from './ui/ModernButton';
 import EnrollEnquiryModal from './ui/EnrollEnquiryModal';
 import { getMediaUrl } from '../utils/media';
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, isWBLView = false }) => {
     const navigate = useNavigate();
     const [showEnquiry, setShowEnquiry] = useState(false);
     const titleRef = useRef(null);
@@ -42,7 +42,7 @@ const CourseCard = ({ course }) => {
     const isFeatured = Boolean(course.isFeatured || course.is_featured);
 
     const programType = course.programType || course.program_type || 'course';
-    const isSpecialCategory = programType === 'wbl_abroad' || programType === 'wbl_domestic';
+    const isSpecialCategory = isWBLView || programType === 'wbl_abroad' || programType === 'wbl_domestic';
 
     if (isSpecialCategory) {
         return (

@@ -130,7 +130,7 @@ const WBLPage = () => {
                             ) : (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 gpu-accelerated">
                                     {filteredCourses.map((course) => (
-                                        <CourseCard key={course._id} course={course} />
+                                        <CourseCard key={course._id} course={course} isWBLView={true} />
                                     ))}
                                 </div>
                             )}
