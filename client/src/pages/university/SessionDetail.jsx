@@ -278,35 +278,12 @@ const SessionDetail = () => {
     });
   };
 
-  const formatDuration = (ms) => {
-    if (!ms) return 'N/A';
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    }
-    return `${minutes}m ${seconds}s`;
-  };
-
-  const formatFileSize = (bytes) => {
-    if (!bytes) return 'N/A';
-    const mb = bytes / (1024 * 1024);
-    if (mb < 1024) {
-      return `${mb.toFixed(2)} MB`;
-    }
-    const gb = mb / 1024;
-    return `${gb.toFixed(2)} GB`;
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0b2e] to-[#0a0118] flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-[#0a0118] dark:via-[#1a0b2e] dark:to-[#0a0118] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
-          <p className="text-white/60">Loading session...</p>
+          <p className="text-gray-500 dark:text-white/60">Loading session...</p>
         </div>
       </div>
     );
@@ -314,15 +291,15 @@ const SessionDetail = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0b2e] to-[#0a0118] flex items-center justify-center p-4">
-        <GlassCard className="max-w-md w-full p-8 text-center">
+      <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-[#0a0118] dark:via-[#1a0b2e] dark:to-[#0a0118] flex items-center justify-center p-4">
+        <GlassCard className="max-w-md w-full p-8 text-center !bg-white dark:!bg-white/[0.03]">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
             <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Error Loading Session</h2>
-          <p className="text-white/60 mb-6">{error}</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Error Loading Session</h2>
+          <p className="text-gray-500 dark:text-white/60 mb-6">{error}</p>
           <ModernButton
             onClick={() => {
               const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -414,7 +391,7 @@ const SessionDetail = () => {
 
   // Show session details with join button
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#050505] via-[#0a0a0f] to-[#050505] p-6 lg:p-10">
+    <div className="min-h-screen bg-white dark:bg-gradient-to-br dark:from-[#050505] dark:via-[#0a0a0f] dark:to-[#050505] p-6 lg:p-10">
       <div className="max-w-5xl mx-auto">
         {/* Back Button */}
         <button
@@ -423,9 +400,9 @@ const SessionDetail = () => {
             const role = userInfo.role || 'student';
             navigate(role === 'student' ? '/dashboard/live-classes' : `/${role}/live-sessions`);
           }}
-          className="group flex items-center gap-3 text-white/40 hover:text-primary mb-10 transition-all"
+          className="group flex items-center gap-3 text-gray-500 dark:text-white/40 hover:text-primary mb-10 transition-all"
         >
-          <div className="p-2 rounded-xl bg-white/5 border border-white/5 group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
+          <div className="p-2 rounded-xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/5 group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
             <ArrowLeft size={18} />
           </div>
           <span className="text-xs font-black tracking-widest uppercase">Return to Hub</span>
@@ -434,7 +411,7 @@ const SessionDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Info Column */}
           <div className="lg:col-span-2 space-y-8">
-            <GlassCard className="p-10 overflow-hidden relative">
+            <GlassCard className="p-10 overflow-hidden relative !bg-white dark:!bg-white/[0.03]">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
 
               <div className="relative z-10">
@@ -443,7 +420,7 @@ const SessionDetail = () => {
                       ? 'bg-red-600/10 text-red-500 border-red-600/20'
                       : session.status === 'scheduled'
                         ? 'bg-amber-600/10 text-amber-500 border-amber-600/20'
-                        : 'bg-white/5 text-white/40 border-white/10'
+                        : 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-white/5 dark:text-white/40 dark:border-white/10'
                     }`}>
                     {session.status === 'live' ? '• Live Broadcast' : session.status === 'scheduled' ? 'Upcoming Session' : 'Archive available'}
                   </div>
@@ -454,26 +431,26 @@ const SessionDetail = () => {
                   )}
                 </div>
 
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight tracking-tight">{session.topic}</h1>
-                <p className="text-white/50 text-base lg:text-lg leading-relaxed mb-10 max-w-2xl">{session.description}</p>
+                <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight tracking-tight">{session.topic}</h1>
+                <p className="text-gray-600 dark:text-white/50 text-base lg:text-lg leading-relaxed mb-10 max-w-2xl">{session.description}</p>
 
-                <div className="flex flex-wrap gap-8 pt-8 border-t border-white/5">
+                <div className="flex flex-wrap gap-8 pt-8 border-t border-gray-200 dark:border-white/5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5">
+                    <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-primary border border-gray-200 dark:border-white/5">
                       <Calendar size={20} />
                     </div>
                     <div>
-                      <p className="text-white/20 text-[9px] font-black tracking-widest uppercase">Date</p>
-                      <p className="text-white text-sm font-bold">{formatDate(session.startTime)}</p>
+                      <p className="text-gray-400 dark:text-white/20 text-[9px] font-black tracking-widest uppercase">Date</p>
+                      <p className="text-gray-900 dark:text-white text-sm font-bold">{formatDate(session.startTime)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-primary border border-white/5">
+                    <div className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-primary border border-gray-200 dark:border-white/5">
                       <Clock size={20} />
                     </div>
                     <div>
-                      <p className="text-white/20 text-[9px] font-black tracking-widest uppercase">Schedule</p>
-                      <p className="text-white text-sm font-bold">{formatTime(session.startTime)} ({session.duration} min)</p>
+                      <p className="text-gray-400 dark:text-white/20 text-[9px] font-black tracking-widest uppercase">Schedule</p>
+                      <p className="text-gray-900 dark:text-white text-sm font-bold">{formatTime(session.startTime)} ({session.duration} min)</p>
                     </div>
                   </div>
                 </div>
@@ -482,14 +459,14 @@ const SessionDetail = () => {
 
             {/* Join Section */}
             {(session.status === 'live' || session.status === 'scheduled') && (
-              <GlassCard className={`p-10 border-2 transition-all duration-500 ${session.status === 'live' ? 'border-primary/40 bg-primary/5' : 'border-white/5 bg-transparent'
+              <GlassCard className={`p-10 border-2 transition-all duration-500 !bg-white dark:!bg-transparent ${session.status === 'live' ? 'border-primary/40 !bg-primary/5' : 'border-gray-200 dark:border-white/5'
                 }`}>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                   <div className="text-center md:text-left">
-                    <h2 className="text-2xl font-bold text-white mb-2">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                       {session.status === 'live' ? (isHost ? 'Studio is Live' : 'The Broadcast is Live!') : (isHost ? 'Ready to Broadcast?' : 'Scheduled for Broadcast')}
                     </h2>
-                    <p className="text-white/40 text-sm max-w-md">
+                    <p className="text-gray-500 dark:text-white/40 text-sm max-w-md">
                       {session.status === 'live'
                         ? (isHost ? 'Your audience is watching. Enter the studio to resume your session.' : 'Join now to participate in this interactive learning experience.')
                         : (isHost ? 'Enter the studio to prepare your camera. Your students will be notified the second you join!' : `This session will go live at ${formatTime(session.startTime)}. Please return 5 minutes before the start time.`)
@@ -506,7 +483,7 @@ const SessionDetail = () => {
                       {session.status === 'live' ? (isHost ? 'Back to Studio' : 'Watch Broadcast') : 'Start Broadcast'}
                     </button>
                   ) : (
-                    <div className="px-10 py-4 bg-white/5 border border-white/10 text-white/40 text-[10px] font-black tracking-widest uppercase rounded-2xl cursor-not-allowed italic">
+                    <div className="px-10 py-4 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-white/40 text-[10px] font-black tracking-widest uppercase rounded-2xl cursor-not-allowed italic">
                       Waiting for Schedule
                     </div>
                   )}
@@ -518,23 +495,23 @@ const SessionDetail = () => {
           {/* Sidebar Column */}
           <div className="space-y-8">
             {/* Instructor Details */}
-            <GlassCard className="p-8">
-              <h3 className="text-white/20 text-[10px] font-black tracking-widest uppercase mb-6">Instructor in Charge</h3>
+            <GlassCard className="p-8 !bg-white dark:!bg-white/[0.03]">
+              <h3 className="text-gray-400 dark:text-white/20 text-[10px] font-black tracking-widest uppercase mb-6">Instructor in Charge</h3>
               {session.instructor && (
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-primary/20 flex items-center justify-center text-primary text-xl font-black">
                     {session.instructor.name?.charAt(0) || 'I'}
                   </div>
                   <div>
-                    <p className="text-white font-bold leading-tight">{session.instructor.name || session.instructor.email}</p>
-                    <p className="text-white/40 text-[10px] font-bold tracking-widest uppercase mt-1">Lead Instructor</p>
+                    <p className="text-gray-900 dark:text-white font-bold leading-tight">{session.instructor.name || session.instructor.email}</p>
+                    <p className="text-gray-500 dark:text-white/40 text-[10px] font-bold tracking-widest uppercase mt-1">Lead Instructor</p>
                   </div>
                 </div>
               )}
-              <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
+              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-white/5 space-y-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/40">Engagement</span>
-                  <span className="text-white font-bold">
+                  <span className="text-gray-500 dark:text-white/40">Engagement</span>
+                  <span className="text-gray-900 dark:text-white font-bold">
                     {typeof session.enrolledStudents === 'number'
                       ? session.enrolledStudents
                       : (Array.isArray(session.enrolledStudents)
@@ -543,47 +520,23 @@ const SessionDetail = () => {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-white/40">Broadcasting Type</span>
+                  <span className="text-gray-500 dark:text-white/40">Broadcasting Type</span>
                   <span className="text-primary font-black uppercase tracking-widest text-[9px]">Premium Studio</span>
                 </div>
               </div>
             </GlassCard>
-
-            {/* Session ended / Recording */}
-            {session.status === 'ended' && (
-              <GlassCard className="p-8 bg-emerald-500/5 border-emerald-500/20">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                    <svg size={16} fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-4 h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <h3 className="text-white text-sm font-bold uppercase tracking-wide">Archived Content</h3>
-                </div>
-                <p className="text-white/40 text-xs leading-relaxed mb-6">This broadcast has concluded. You can access the recording below.</p>
-
-                {session.recording?.status === 'completed' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="text-white/30 lowercase italic">duration: {formatDuration(session.recording.durationMs)}</span>
-                      <span className="text-white/30 lowercase italic">size: {formatFileSize(session.recording.fileSizeBytes)}</span>
-                    </div>
-                  </div>
-                )}
-              </GlassCard>
-            )}
           </div>
         </div>
 
         {/* Recording Player Full Width */}
         {session.status === 'ended' && (
           <div className="mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <h2 className="text-xs font-black text-white/20 uppercase tracking-[0.3em] mb-6 mb-12 flex items-center gap-4">
-              <div className="h-px flex-1 bg-white/5"></div>
+            <h2 className="text-xs font-black text-gray-400 dark:text-white/20 uppercase tracking-[0.3em] mb-6 mb-12 flex items-center gap-4">
+              <div className="h-px flex-1 bg-gray-200 dark:bg-white/5"></div>
               Review Broadcast Recording
-              <div className="h-px flex-1 bg-white/5"></div>
+              <div className="h-px flex-1 bg-gray-200 dark:bg-white/5"></div>
             </h2>
-            <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/5">
+            <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-200 dark:border-white/5">
               <MeetingRecordingPlayer
                 sessionId={sessionId}
                 onError={handleMeetingError}

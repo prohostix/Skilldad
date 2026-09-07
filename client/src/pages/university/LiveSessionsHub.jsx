@@ -4,7 +4,7 @@ import axios from 'axios';
 import {
     Video, Calendar, Clock, Users, Plus, MoreVertical,
     Sparkles, ArrowRight, VideoOff, Radio, Bell, X,
-    Link, BookOpen, Target, Send, CheckCircle2, AlertCircle, Info, UploadCloud, Film
+    Link, BookOpen, Target, Send, CheckCircle2, AlertCircle, Info, UploadCloud, Film, Trash2
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
@@ -586,6 +586,7 @@ const LiveSessionsHub = () => {
     const [recordModalData, setRecordModalData] = useState(null);
     const [notifyingId, setNotifyingId] = useState(null);
     const [sessionToEnd, setSessionToEnd] = useState(null);
+    const [sessionToDelete, setSessionToDelete] = useState(null);
     const [toasts, setToasts] = useState([]);
 
     /* ── Toast helpers ── */
@@ -713,6 +714,27 @@ const LiveSessionsHub = () => {
             setTimeout(() => fetchSessions(), 2000);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to end session', 'error');
+        }
+    };
+
+    const handleDeleteSession = (sessionId) => {
+        setSessionToDelete(sessionId);
+    };
+
+    const confirmDeleteSession = async () => {
+        const sessionId = sessionToDelete;
+        setSessionToDelete(null);
+        if (!sessionId) return;
+
+        try {
+            if (!sessionId.startsWith('local_') && !sessionId.startsWith('demo')) {
+                const config = getAuthConfig();
+                await axios.delete(`/api/sessions/${sessionId}`, config);
+            }
+            setLiveSessions(prev => prev.filter(s => s.id !== sessionId));
+            showToast('Session deleted.', 'success');
+        } catch (err) {
+            showToast(err.response?.data?.message || 'Failed to delete session', 'error');
         }
     };
 
@@ -897,6 +919,16 @@ const LiveSessionsHub = () => {
                                                             Rec
                                                         </button>
                                                     )}
+
+                                                    {session.status !== 'live' && session.isOwner && (
+                                                        <button
+                                                            title="Delete session"
+                                                            onClick={() => handleDeleteSession(session.id)}
+                                                            className="h-10 w-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/40 hover:bg-red-500/15 hover:border-red-500/30 hover:text-red-400 transition-all shrink-0"
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </GlassCard>
@@ -998,6 +1030,17 @@ const LiveSessionsHub = () => {
                 danger
                 onConfirm={confirmEndSession}
                 onCancel={() => setSessionToEnd(null)}
+            />
+
+            <ConfirmDialog
+                open={!!sessionToDelete}
+                title="Delete this session?"
+                message="This will permanently remove the session from the hub. Students will no longer see it or be able to join."
+                confirmLabel="Delete Session"
+                cancelLabel="Cancel"
+                danger
+                onConfirm={confirmDeleteSession}
+                onCancel={() => setSessionToDelete(null)}
             />
         </>
     );
