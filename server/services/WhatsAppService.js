@@ -14,6 +14,20 @@ class WhatsAppService {
     }
 
     /**
+     * Resolve a Gupshup template ID from env, falling back to a hardcoded UUID.
+     * Gupshup's send API silently "succeeds" (submitted) even when given a
+     * human-readable template name instead of the real dashboard UUID - it
+     * only fails later, asynchronously, via the delivery webhook ("template
+     * did not match"). So an env var holding a name instead of a UUID looks
+     * fine until you check delivery status. Only trust the env value if it's
+     * actually shaped like a UUID.
+     */
+    _resolveTemplateId(envValue, fallbackUuid) {
+        const isUuid = envValue && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(envValue);
+        return isUuid ? envValue : fallbackUuid;
+    }
+
+    /**
      * Send a template message to a student via Gupshup
      * @param {string} phone - Student phone number with country code (e.g., 919999999999)
      * @param {string} templateId - The Template ID from Gupshup Dashboard
@@ -94,9 +108,11 @@ class WhatsAppService {
         });
 
         // skilldad_live_session [Name, CourseTitle, Topic, DateTime]
+        const templateId = this._resolveTemplateId(process.env.GUPSHUP_TEMPLATE_LIVE, 'b77e149c-70ac-4002-86f8-f38bc1f2049c');
+
         return this.sendTemplateMessage(
             phone,
-            process.env.GUPSHUP_TEMPLATE_LIVE || 'common_status',
+            templateId,
             [studentName, courseTitle || 'Your Course', topic, formattedTime]
         );
     }
@@ -112,10 +128,7 @@ class WhatsAppService {
         });
 
         // skilldad_exam_scheduled [Name, CourseTitle, ExamTitle, DateTime]
-        // Using the exact UUID from Gupshup dashboard to prevent "template did not match" errors
-        const templateId = (process.env.GUPSHUP_TEMPLATE_EXAM && !process.env.GUPSHUP_TEMPLATE_EXAM.startsWith('skilldad_')) 
-            ? process.env.GUPSHUP_TEMPLATE_EXAM 
-            : '698a0181-1504-4eea-bfc6-3180e7a21ebb';
+        const templateId = this._resolveTemplateId(process.env.GUPSHUP_TEMPLATE_EXAM, '698a0181-1504-4eea-bfc6-3180e7a21ebb');
 
         return this.sendTemplateMessage(
             phone,
@@ -155,12 +168,25 @@ class WhatsAppService {
      * Notify about admin enrollment in a course
      */
     async notifyAdminEnrollment(studentName, phone, courseTitle, enrolledBy) {
-        // common_status [Item, NewStatus]
-        return this.sendTemplateMessage(
-            phone,
-            process.env.GUPSHUP_TEMPLATE_ENROLL || 'common_status',
-            [`Enrollment in ${courseTitle}`, `Activated by ${enrolledBy}`]
-        );
+        return this.notifyEnrollment(studentName, phone, courseTitle);
+    }
+
+    /**
+     * Notify a new user with a welcome message right after registration
+     */
+    async notifyWelcome(studentName, phone) {
+        // skilldad_welcome [Name]
+        const templateId = this._resolveTemplateId(process.env.GUPSHUP_TEMPLATE_WELCOME, '067cd9c3-ce68-417c-90cf-aaf81aa74232');
+        return this.sendTemplateMessage(phone, templateId, [studentName]);
+    }
+
+    /**
+     * Notify about a course enrollment being confirmed
+     */
+    async notifyEnrollment(studentName, phone, courseTitle) {
+        // skilldad_enrollment [Name, CourseTitle]
+        const templateId = this._resolveTemplateId(process.env.GUPSHUP_TEMPLATE_ENROLL, 'e0659c7e-0ec9-48e2-876c-6a233594326b');
+        return this.sendTemplateMessage(phone, templateId, [studentName, courseTitle]);
     }
 
 

@@ -159,12 +159,10 @@ class NotificationService {
             let result;
             switch (type) {
                 case 'welcome':
-                    // skilldad_welcome [Name] - template body already says "Welcome {{1}}"
-                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_WELCOME || 'common_status', [user.name]);
+                    result = await whatsAppService.notifyWelcome(user.name, phone);
                     break;
                 case 'enrollment':
-                    // skilldad_enrollment [Name, CourseTitle]
-                    result = await whatsAppService.sendTemplateMessage(phone, process.env.GUPSHUP_TEMPLATE_ENROLL || 'common_status', [user.name, data.courseTitle]);
+                    result = await whatsAppService.notifyEnrollment(user.name, phone, data.courseTitle);
                     break;
                 case 'liveSession':
                     result = await whatsAppService.notifyLiveSessionScheduled(user.name, phone, data.topic, data.startTime, data.courseTitle);
