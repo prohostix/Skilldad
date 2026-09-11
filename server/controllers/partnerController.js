@@ -89,7 +89,12 @@ const getDiscounts = async (req, res) => {
 const registerStudent = async (req, res) => {
     const { name, email, password, phone, partnerCode, course, courses, university } = req.body;
     try {
-        const userExists = await query('SELECT 1 FROM users WHERE email = $1', [email]);
+        // Login always looks up by a lowercased/trimmed email - if the partner types
+        // the student's email with any uppercase letter and it's stored as-is here,
+        // the student's own login attempt (which does lowercase) will never match
+        // and always fails with "Invalid email or password".
+        const lowerEmail = email.toLowerCase().trim();
+        const userExists = await query('SELECT 1 FROM users WHERE email = $1', [lowerEmail]);
         if (userExists.rows.length > 0) return res.status(400).json({ message: 'User already exists' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -99,9 +104,9 @@ const registerStudent = async (req, res) => {
             INSERT INTO users (id, name, email, password, role, registered_by, partner_code, university_id, is_verified, profile, created_at, updated_at)
             VALUES ($1, $2, $3, $4, 'student', $5, $6, $7, true, $8, NOW(), NOW())
         `, [
-            userId, 
-            name, 
-            email, 
+            userId,
+            name,
+            lowerEmail,
             hashedPassword,
             req.user.id || req.user._id,
             partnerCode?.toUpperCase(), 
