@@ -147,6 +147,41 @@ const StudyAbroadManagement = () => {
         setShowModal(true);
     };
 
+    const [featureEnabled, setFeatureEnabled] = useState(true);
+    const [savingSettings, setSavingSettings] = useState(false);
+
+    useEffect(() => {
+        // Fetch global settings
+        const fetchSettings = async () => {
+            try {
+                const { data } = await axios.get('/api/public/cms/global_settings');
+                if (data.study_abroad_feature) {
+                    setFeatureEnabled(data.study_abroad_feature.enabled !== false); // Default to true
+                }
+            } catch (error) {
+                console.error("Failed to load settings", error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const handleToggleFeature = async () => {
+        const newValue = !featureEnabled;
+        setFeatureEnabled(newValue);
+        setSavingSettings(true);
+        try {
+            await axios.put('/api/admin/cms/global_settings/study_abroad_feature', {
+                content: { enabled: newValue }
+            });
+            toast.success(`Study Abroad feature is now ${newValue ? 'Visible' : 'Hidden'} globally`);
+        } catch (error) {
+            toast.error("Failed to save setting");
+            setFeatureEnabled(!newValue); // Revert
+        } finally {
+            setSavingSettings(false);
+        }
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -154,9 +189,29 @@ const StudyAbroadManagement = () => {
                     title="Study Abroad Management" 
                     subtitle="Manage global educational opportunities" 
                 />
-                <ModernButton onClick={openAddModal}>
-                    <Plus size={20} className="mr-2" /> Add {activeTab.slice(0, -1)}
-                </ModernButton>
+                
+                <div className="flex items-center gap-4">
+                    {/* Toggle Feature Button */}
+                    <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                        <span className="text-sm font-medium text-white/70">
+                            Public Visibility:
+                        </span>
+                        <button 
+                            onClick={handleToggleFeature}
+                            disabled={savingSettings}
+                            className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${featureEnabled ? 'bg-primary' : 'bg-white/20'}`}
+                        >
+                            <span className={`inline-block h-[18px] w-[18px] transform rounded-full bg-white transition-transform ${featureEnabled ? 'translate-x-[26px]' : 'translate-x-[2px]'}`} />
+                        </button>
+                        <span className={`text-xs font-bold ${featureEnabled ? 'text-green-400' : 'text-red-400'}`}>
+                            {featureEnabled ? 'ON' : 'OFF'}
+                        </span>
+                    </div>
+                    
+                    <ModernButton onClick={openAddModal}>
+                        <Plus size={20} className="mr-2" /> Add {activeTab.slice(0, -1)}
+                    </ModernButton>
+                </div>
             </div>
 
             {/* Tabs */}

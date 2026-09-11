@@ -16,7 +16,7 @@ const parseProfile = (profile) => {
 const updateEntity = async (req, res) => {
     try {
         console.log('[updateEntity] body:', req.body, 'id:', req.params.id);
-        const { name, email, role, discountRate, bio, password, profileImage } = req.body;
+        const { name, email, role, discountRate, bio, password, profileImage, achievements } = req.body;
 
         const userRes = await query('SELECT * FROM users WHERE id = $1', [req.params.id]);
         const user = userRes.rows[0];
@@ -29,6 +29,10 @@ const updateEntity = async (req, res) => {
         let updatedBio = bio !== undefined ? bio : user.bio;
         let updatedPassword = user.password;
         let updatedProfileImage = profileImage !== undefined ? profileImage : user.profile_image;
+
+        if (achievements !== undefined) {
+            updatedProfile.achievements = achievements;
+        }
 
         if (name && name.trim()) {
             updatedName = name.trim();

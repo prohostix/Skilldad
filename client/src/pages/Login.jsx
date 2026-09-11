@@ -114,7 +114,7 @@ const Login = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="w-full max-w-sm relative z-10 mx-auto"
+                className="w-full max-w-md relative z-10 mx-auto"
             >
                 <div className="text-center mb-5">
                     <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight font-inter">
@@ -219,7 +219,7 @@ const Login = () => {
                         <p className="text-[11px] font-inter text-white/50">
                             New to the platform?{' '}
                             <Link to="/register" className="text-primary font-bold hover:text-primary-light transition-colors inline-flex items-center gap-1">
-                                Request Access <ArrowRight size={12} />
+                                Sign Up <ArrowRight size={12} />
                             </Link>
                         </p>
                     </div>

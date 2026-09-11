@@ -15,19 +15,20 @@ const NavItem = ({ icon: Icon, label, isActive, onClick, isCollapsed }) => {
         <button
             onClick={onClick}
             title={isCollapsed ? label : ''}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-3' : 'space-x-3 px-4 py-3'} rounded-xl text-sm font-bold font-inter whitespace-nowrap transition-all duration-200 group
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-2.5' : 'space-x-2.5 px-3 py-2.5'} rounded-lg text-[13px] font-semibold font-inter whitespace-nowrap transition-all duration-200 group
                 ${isActive
-                    ? 'bg-[#4C1D95]/10 dark:bg-[#C026FF]/20 text-[#4C1D95] dark:text-[#C026FF]'
-                    : 'text-[#6D28FF] bg-transparent hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#4C1D95] dark:hover:text-[#C026FF]'
+                    ? 'bg-[#311B92]/10 dark:bg-[#C026FF]/20 text-[#311B92] dark:text-[#C026FF]'
+                    : 'text-[#4A148C] dark:text-white bg-transparent hover:bg-[#311B92]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#311B92] dark:hover:text-[#C026FF]'
                 }`}
         >
             <Icon
-                size={20}
-                className={`flex-shrink-0 transition-colors ${isActive ? 'text-[#4C1D95] dark:text-[#C026FF]' : 'text-[#6D28FF] group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF]'}`}
+                size={17}
+                strokeWidth={2}
+                className={`flex-shrink-0 transition-colors ${isActive ? 'text-[#311B92] dark:text-[#C026FF]' : 'text-[#4A148C] dark:text-white group-hover:text-[#311B92] dark:group-hover:text-[#C026FF]'}`}
             />
             {!isCollapsed && <span>{label}</span>}
             {isActive && !isCollapsed && (
-                <div className="ml-auto w-2 h-2 rounded-full bg-white shadow-sm" />
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-sm" />
             )}
             {isActive && isCollapsed && (
                 <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-white shadow-sm" />
@@ -41,9 +42,9 @@ const HomeNavItem = ({ onClick, isCollapsed }) => {
         <button
             onClick={onClick}
             title={isCollapsed ? 'Home' : ''}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-3' : 'space-x-3 px-4 py-3'} rounded-xl border border-gray-200 dark:border-[#C026FF]/20 text-[#6D28FF] hover:text-[#4C1D95] dark:hover:text-white hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:border-[#4C1D95]/30 text-sm font-bold font-inter transition-all duration-200 group`}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-2.5' : 'space-x-2.5 px-3 py-2.5'} rounded-lg border border-gray-200 dark:border-[#C026FF]/20 text-[#4A148C] dark:text-white hover:text-[#311B92] dark:hover:text-[#C026FF] hover:bg-[#311B92]/5 dark:hover:bg-[#C026FF]/10 hover:border-[#311B92]/30 text-[13px] font-semibold font-inter transition-all duration-200 group`}
         >
-            <Home size={20} className="flex-shrink-0 text-[#6D28FF] group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF] transition-colors" />
+            <Home size={17} strokeWidth={2} className="flex-shrink-0 text-[#4A148C] dark:text-white group-hover:text-[#311B92] dark:group-hover:text-[#C026FF] transition-colors" />
             {!isCollapsed && <span>Home</span>}
         </button>
     );
@@ -54,9 +55,9 @@ const LogoutItem = ({ onClick, isCollapsed }) => {
         <button
             onClick={onClick}
             title={isCollapsed ? 'Logout' : ''}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-3' : 'space-x-3 px-4 py-3'} rounded-xl text-red-500 dark:text-white/70 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 text-sm font-bold font-inter transition-all duration-200`}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center p-2.5' : 'space-x-2.5 px-3 py-2.5'} rounded-lg text-red-500 dark:text-white/70 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 text-[13px] font-semibold font-inter transition-all duration-200`}
         >
-            <LogOut size={20} className="flex-shrink-0" />
+            <LogOut size={17} strokeWidth={2} className="flex-shrink-0" />
             {!isCollapsed && <span>Logout</span>}
         </button>
     );
@@ -129,6 +130,9 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
         } else if (userRole === 'partner') {
             return [
                 { name: 'Dashboard', icon: LayoutDashboard, path: '/partner/dashboard' },
+                { name: 'Our Courses', icon: BookOpen, path: '/partner/courses' },
+                { name: 'Live Sessions', icon: Video, path: '/partner/live-sessions' },
+                { name: 'Exam Management', icon: FileText, path: '/partner/exams' },
                 { name: 'Students Manage', icon: Users, path: '/partner/students' },
                 { name: 'Commission & Wallet', icon: Wallet, path: '/partner/commission' },
                 { name: 'Support', icon: LifeBuoy, path: '/partner/support' },
@@ -171,7 +175,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
     };
 
     // Calculate dynamic width
-    const sidebarWidth = isCollapsed ? 88 : 280;
+    const sidebarWidth = isCollapsed ? 76 : 240;
 
     return (
         <>
@@ -196,11 +200,11 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                 className={`fixed lg:sticky top-0 left-0 h-screen bg-white dark:bg-[#020005]/95 dark:backdrop-blur-2xl border-r border-gray-100 dark:border-[#C026FF]/20 z-[100] flex flex-col shadow-sm overflow-hidden shrink-0 transition-all duration-300 ${!isDesktop && !isOpen ? 'pointer-events-none' : ''} modern-sidebar`}
             >
                 {/* Logo Area */}
-                <div className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-between px-6'} py-6 min-h-[80px]`}>
-                    <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} cursor-pointer`} onClick={() => navigate('/')}>
-                        <img src={logoImg} alt="SkillDad" className="w-10 h-10 object-contain shrink-0" />
+                <div className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-between px-5'} py-5 min-h-[68px]`}>
+                    <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5'} cursor-pointer`} onClick={() => navigate('/')}>
+                        <img src={logoImg} alt="SkillDad" className="w-8 h-8 object-contain shrink-0" />
                         {!isCollapsed && (
-                            <span className="text-xl font-black text-[#4C1D95] dark:text-white font-space tracking-wider whitespace-nowrap">
+                            <span className="text-base font-black text-[#311B92] dark:text-white font-space tracking-wider whitespace-nowrap">
                                 SKILL DAD
                             </span>
                         )}
@@ -208,24 +212,24 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                     {!isDesktop && (
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="lg:hidden p-2 text-gray-500 hover:text-[#4C1D95] bg-gray-100 rounded-xl"
+                            className="lg:hidden p-2 text-gray-500 hover:text-[#311B92] bg-gray-100 rounded-xl"
                         >
                             <X size={20} />
                         </button>
                     )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide px-4 pb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                    
+                <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide px-3 pb-6" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+
                     {/* Home Button */}
-                    <div className="mb-4">
+                    <div className="mb-3">
                         <HomeNavItem onClick={() => navigate('/')} isCollapsed={isCollapsed} />
                     </div>
-                    
-                    <div className="h-px bg-gray-100 dark:bg-white/10 mb-6 mx-2" />
+
+                    <div className="h-px bg-gray-100 dark:bg-white/10 mb-4 mx-2" />
 
                     {/* Nav Items */}
-                    <nav className="space-y-1.5">
+                    <nav className="space-y-1">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
 
@@ -235,23 +239,30 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                 return (
                                     <div key={item.name} className="space-y-1">
                                         <button
-                                            onClick={() => setUniversitiesDropdownOpen(o => !o)}
+                                            onClick={() => {
+                                                if (isCollapsed) {
+                                                    setIsOpen(true);
+                                                    setUniversitiesDropdownOpen(true);
+                                                } else {
+                                                    setUniversitiesDropdownOpen(o => !o);
+                                                }
+                                            }}
                                             title={isCollapsed ? item.name : ''}
-                                            className={`w-full flex items-center justify-between ${isCollapsed ? 'p-3' : 'px-4 py-3'} rounded-xl text-sm font-bold font-inter transition-all duration-200 group
+                                            className={`w-full flex items-center justify-between ${isCollapsed ? 'p-2.5' : 'px-3 py-2.5'} rounded-lg text-[13px] font-semibold font-inter transition-all duration-200 group
                                                 ${isAnySubActive
-                                                    ? 'bg-[#4C1D95]/10 dark:bg-[#C026FF]/20 text-[#4C1D95] dark:text-[#C026FF]'
-                                                    : 'text-[#6D28FF] bg-transparent hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#4C1D95] dark:hover:text-[#C026FF]'
+                                                    ? 'bg-[#311B92]/10 dark:bg-[#C026FF]/20 text-[#311B92] dark:text-[#C026FF]'
+                                                    : 'text-[#4A148C] dark:text-white bg-transparent hover:bg-[#311B92]/5 dark:hover:bg-[#C026FF]/10 hover:text-[#311B92] dark:hover:text-[#C026FF]'
                                                 }`}
                                         >
-                                            <div className="flex items-center space-x-3">
-                                                <Icon size={20} className={`flex-shrink-0 transition-colors ${isAnySubActive ? 'text-[#4C1D95] dark:text-[#C026FF]' : 'text-[#6D28FF] group-hover:text-[#4C1D95] dark:group-hover:text-[#C026FF]'}`} />
+                                            <div className="flex items-center space-x-2.5">
+                                                <Icon size={17} strokeWidth={2} className={`flex-shrink-0 transition-colors ${isAnySubActive ? 'text-[#311B92] dark:text-[#C026FF]' : 'text-[#4A148C] dark:text-white group-hover:text-[#311B92] dark:group-hover:text-[#C026FF]'}`} />
                                                 {!isCollapsed && <span>{item.name}</span>}
                                             </div>
                                             {!isCollapsed && (
-                                                universitiesDropdownOpen ? <ChevronDown size={16} className="text-[#4C1D95]/50" /> : <ChevronRight size={16} className="text-[#4C1D95]/50" />
+                                                universitiesDropdownOpen ? <ChevronDown size={14} className="text-[#311B92]/50" /> : <ChevronRight size={14} className="text-[#311B92]/50" />
                                             )}
                                         </button>
-                                        
+
                                         <AnimatePresence>
                                             {universitiesDropdownOpen && !isCollapsed && (
                                                 <motion.div
@@ -259,7 +270,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                                     animate={{ height: 'auto', opacity: 1 }}
                                                     exit={{ height: 0, opacity: 0 }}
                                                     transition={{ duration: 0.2 }}
-                                                    className="overflow-hidden ml-11 mt-1 space-y-1 pr-2"
+                                                    className="overflow-hidden ml-9 mt-1 space-y-0.5 pr-2"
                                                 >
                                                     {item.subItems.map(sub => {
                                                         const isSubActive = location.pathname.startsWith(sub.path);
@@ -267,10 +278,10 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                                                             <button
                                                                 key={sub.name}
                                                                 onClick={() => handleNav(sub.path)}
-                                                                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium font-inter transition-all duration-200
+                                                                className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium font-inter transition-all duration-200
                                                                     ${isSubActive
-                                                                        ? 'text-[#4C1D95] dark:text-[#C026FF] bg-[#4C1D95]/5 dark:bg-[#C026FF]/10'
-                                                                        : 'text-[#6D28FF] hover:text-[#4C1D95] dark:hover:text-[#C026FF] hover:bg-[#4C1D95]/5 dark:hover:bg-[#C026FF]/5'
+                                                                        ? 'text-[#311B92] dark:text-[#C026FF] bg-[#311B92]/5 dark:bg-[#C026FF]/10'
+                                                                        : 'text-[#4A148C] dark:text-white hover:text-[#311B92] dark:hover:text-[#C026FF] hover:bg-[#311B92]/5 dark:hover:bg-[#C026FF]/5'
                                                                     }`}
                                                             >
                                                                 {sub.name}
@@ -299,7 +310,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                             );
                         })}
 
-                        <div className="pt-6">
+                        <div className="pt-4">
                             <LogoutItem onClick={handleLogout} isCollapsed={isCollapsed} />
                         </div>
                     </nav>

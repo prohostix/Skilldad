@@ -87,7 +87,7 @@ router.get('/skilldad-universities', async (req, res) => {
     try {
         const result = await query(`
             SELECT id, name, location, website, phone, email, description, profile_image, cover_image, gallery,
-                   youtube_url, achievements, assigned_courses, certificates
+                   youtube_url, achievements, assigned_courses, certificates, videos
             FROM skill_dad_universities
             WHERE is_active = true
             ORDER BY created_at ASC
@@ -104,17 +104,17 @@ router.get('/skilldad-universities', async (req, res) => {
 // @access  Public
 router.get('/universities/:name/courses', async (req, res) => {
     try {
-        const uniName = req.params.name;
+        const uniName = decodeURIComponent(req.params.name);
         
-        // 1. Find the university by name
-        const uniRes = await query('SELECT id, profile FROM users WHERE role = $1 AND name = $2 AND is_verified = $3', ['university', uniName, true]);
+        // 1. Find the university by name (case-insensitive)
+        const uniRes = await query('SELECT id, profile FROM users WHERE role = $1 AND name ILIKE $2 AND is_verified = $3', ['university', uniName, true]);
         
         let assignedCourseIds = [];
         let instructorId = null;
 
         if (uniRes.rows.length === 0) {
-            // Check skill_dad_universities if not found in users
-            const sdUniRes = await query('SELECT id, assigned_courses FROM skill_dad_universities WHERE name = $1 AND is_active = $2', [uniName, true]);
+            // Check skill_dad_universities if not found in users (case-insensitive)
+            const sdUniRes = await query('SELECT id, assigned_courses FROM skill_dad_universities WHERE name ILIKE $1 AND is_active = $2', [uniName, true]);
             if (sdUniRes.rows.length === 0) {
                 return res.status(404).json({ message: 'University not found' });
             }
@@ -180,15 +180,15 @@ router.get('/universities/profile/:name', async (req, res) => {
         const uniRes = await query(`
             SELECT id, name, email, profile, profile_image as "profileImage", bio
             FROM users 
-            WHERE role = 'university' AND name = $1 AND is_verified = true
+            WHERE role = 'university' AND name ILIKE $1 AND is_verified = true
         `, [uniName]);
         
         if (uniRes.rows.length === 0) {
             // Check skill_dad_universities if not found in users
             const sdUniRes = await query(`
-                SELECT id, name, email, phone, location as bio, description as "profile", profile_image as "profileImage", cover_image as "coverImage", website
+                SELECT id, name, email, phone, location as bio, description as "profile", profile_image as "profileImage", cover_image as "coverImage", website, gallery, youtube_url, achievements, assigned_courses, certificates, videos
                 FROM skill_dad_universities
-                WHERE name = $1 AND is_active = true
+                WHERE name ILIKE $1 AND is_active = true
             `, [uniName]);
 
             if (sdUniRes.rows.length === 0) {
@@ -196,13 +196,20 @@ router.get('/universities/profile/:name', async (req, res) => {
             }
 
             const uni = sdUniRes.rows[0];
+            const rawVideos = uni.videos ? (typeof uni.videos === 'string' ? JSON.parse(uni.videos) : uni.videos) : [];
+            const parsedVideos = (Array.isArray(rawVideos) && rawVideos.length > 0) ? rawVideos : (uni.youtube_url ? [uni.youtube_url] : []);
             const profile = { 
                 description: uni.profile, 
                 location: uni.bio, 
                 email: uni.email, 
                 phone: uni.phone,
                 coverImage: uni.coverImage,
-                website: uni.website
+                website: uni.website,
+                gallery: uni.gallery || [],
+                youtubeUrl: uni.youtube_url || '',
+                videos: parsedVideos,
+                achievements: typeof uni.achievements === 'string' ? JSON.parse(uni.achievements) : (uni.achievements || []),
+                certificates: typeof uni.certificates === 'string' ? JSON.parse(uni.certificates) : (uni.certificates || [])
             };
             
             return res.json({

@@ -339,7 +339,7 @@ const FloatingHelpWidget = () => {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-4 right-6 w-[350px] sm:w-[400px] bg-[#0B071A]/80 backdrop-blur-xl border border-[#7C3AED]/40 rounded-2xl shadow-2xl overflow-hidden shadow-[#7C3AED]/20 flex flex-col h-[550px] max-h-[85vh] z-[101]"
+                        className="fixed bottom-4 right-6 w-[350px] sm:w-[400px] bg-white dark:bg-[#0B071A]/80 backdrop-blur-xl border border-gray-200 dark:border-[#7C3AED]/40 rounded-2xl shadow-2xl overflow-hidden shadow-[#7C3AED]/20 flex flex-col h-[550px] max-h-[85vh] z-[101]"
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-[#7C3AED] via-[#9333EA] to-[#E879F9] px-4 py-3 text-white flex justify-between items-center shrink-0 shadow-lg z-10 relative overflow-hidden">
@@ -376,7 +376,7 @@ const FloatingHelpWidget = () => {
                         </div>
 
                         {/* Chat Body */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-5 text-white bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.05),transparent),linear-gradient(to_bottom,#0B071A,#160E3A)]">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-5 text-gray-800 dark:text-white bg-gray-50 dark:bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.05),transparent),linear-gradient(to_bottom,#0B071A,#160E3A)]">
                             {messages.map((msg) => (
                                 <div key={msg.id} className={`flex flex-col max-w-[85%] ${msg.isBot ? 'self-start' : 'self-end'}`}>
                                     <div className="flex gap-2 items-end">
@@ -388,7 +388,7 @@ const FloatingHelpWidget = () => {
                                         <div className={`
                                             p-3 rounded-2xl text-[13px] sm:text-sm leading-relaxed shadow-lg
                                             ${msg.isBot
-                                                ? 'bg-white/10 border border-white/5 rounded-bl-none text-white/95'
+                                                ? 'bg-white dark:bg-white/10 border border-gray-200 dark:border-white/5 rounded-bl-none text-gray-800 dark:text-white/95'
                                                 : 'bg-gradient-to-r from-[#7C3AED] to-[#E879F9] rounded-br-none text-white shadow-[#7C3AED]/20'}
                                         `}>
                                             {msg.isBot ? (
@@ -439,9 +439,9 @@ const FloatingHelpWidget = () => {
                                                                 if (opt.action) handleOptionAction(opt.action);
                                                                 if (opt.text) setMessages(prev => [...prev, { id: 'msg_' + Date.now().toString(), isBot: true, text: opt.text }]);
                                                             }}
-                                                            className="text-left w-full text-[12px] sm:text-[13px] py-2 px-3 bg-white/5 hover:bg-[#7C3AED]/20 border border-white/10 hover:border-[#7C3AED]/50 rounded-xl transition-all flex items-center justify-between group shadow-sm"
+                                                            className="text-left w-full text-[12px] sm:text-[13px] py-2 px-3 bg-white dark:bg-white/5 hover:bg-[#7C3AED]/10 dark:hover:bg-[#7C3AED]/20 border border-gray-200 dark:border-white/10 hover:border-[#7C3AED]/50 rounded-xl transition-all flex items-center justify-between group shadow-sm"
                                                         >
-                                                            <span className="group-hover:text-white transition-colors">{opt.label}</span>
+                                                            <span className="text-gray-700 dark:text-white group-hover:text-[#7C3AED] dark:group-hover:text-white transition-colors">{opt.label}</span>
                                                             <ChevronRight size={14} className="opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-[#A78BFA]" />
                                                         </button>
                                                     ))}
@@ -450,19 +450,19 @@ const FloatingHelpWidget = () => {
 
                                             {/* Feedback for FAQ responses */}
                                             {msg.isBot && msg.faqId && (
-                                                <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-                                                    <span className="text-[10px] text-white/40 italic">Was this helpful?</span>
+                                                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-white/5 flex items-center justify-between">
+                                                    <span className="text-[10px] text-gray-500 dark:text-white/40 italic">Was this helpful?</span>
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => handleFeedback(msg.id, msg.faqId, true)}
-                                                            className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'up' ? 'bg-green-500/20 text-green-400' : 'bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80'}`}
+                                                            className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'up' ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-white/40 hover:text-gray-700 dark:hover:text-white/80'}`}
                                                             disabled={feedbackSent[msg.id]}
                                                         >
                                                             <ThumbsUp size={12} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleFeedback(msg.id, msg.faqId, false)}
-                                                            className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'down' ? 'bg-red-500/20 text-red-400' : 'bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80'}`}
+                                                            className={`p-1.5 rounded-lg transition-all ${feedbackSent[msg.id] === 'down' ? 'bg-red-500/20 text-red-600 dark:text-red-400' : 'bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-white/40 hover:text-gray-700 dark:hover:text-white/80'}`}
                                                             disabled={feedbackSent[msg.id]}
                                                         >
                                                             <ThumbsDown size={12} />
@@ -475,9 +475,9 @@ const FloatingHelpWidget = () => {
                                             {msg.type === 'faq_results' && (
                                                 <div className="mt-3 flex flex-col gap-2">
                                                     {msg.faqs.map((faq) => (
-                                                        <div key={faq._id} className="bg-black/30 border border-white/10 rounded-xl p-3 space-y-1.5">
-                                                            <p className="font-semibold text-[10px] text-[#A78BFA]">{faq.question}</p>
-                                                            <p className="text-[10px] text-white/75 leading-relaxed">{faq.answer}</p>
+                                                        <div key={faq._id} className="bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-white/10 rounded-xl p-3 space-y-1.5">
+                                                            <p className="font-semibold text-[10px] text-[#7C3AED] dark:text-[#A78BFA]">{faq.question}</p>
+                                                            <p className="text-[10px] text-gray-700 dark:text-white/75 leading-relaxed">{faq.answer}</p>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -487,7 +487,7 @@ const FloatingHelpWidget = () => {
                                             {msg.type === 'no_results' && (
                                                 <button
                                                     onClick={() => navigate('/support')}
-                                                    className="mt-3 text-xs py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors flex items-center w-full justify-between"
+                                                    className="mt-3 text-xs py-2 px-3 bg-white dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 border border-gray-200 dark:border-white/10 rounded-lg transition-colors flex items-center w-full justify-between"
                                                 >
                                                     <span className="text-[#E879F9]">Contact Support</span>
                                                     <ChevronRight size={14} className="text-[#A78BFA]" />
@@ -495,7 +495,7 @@ const FloatingHelpWidget = () => {
                                             )}
                                         </div>
                                     </div>
-                                    <span className={`text-[9px] text-white/30 mt-1 ${msg.isBot ? 'ml-9' : 'mr-1 text-right'}`}>
+                                    <span className={`text-[9px] text-gray-400 dark:text-white/30 mt-1 ${msg.isBot ? 'ml-9' : 'mr-1 text-right'}`}>
                                         {msg.isBot ? 'SkillDad AI' : 'You'}
                                     </span>
                                 </div>
@@ -507,10 +507,10 @@ const FloatingHelpWidget = () => {
                                         <div className="w-6 h-6 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#E879F9] flex items-center justify-center shrink-0 mb-1 shadow-sm opacity-50">
                                             <Bot size={12} className="text-white" />
                                         </div>
-                                        <div className="p-3 px-4 bg-white/5 border border-white/5 rounded-2xl rounded-bl-none flex items-center gap-1.5 h-[38px]">
-                                            <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                            <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                            <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        <div className="p-3 px-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/5 rounded-2xl rounded-bl-none flex items-center gap-1.5 h-[38px]">
+                                            <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                         </div>
                                     </div>
                                 </div>
@@ -519,12 +519,12 @@ const FloatingHelpWidget = () => {
                         </div>
 
                         {/* Input Area */}
-                        <form onSubmit={handleSend} className="p-3 bg-black/40 border-t border-white/10 shrink-0">
+                        <form onSubmit={handleSend} className="p-3 bg-white dark:bg-black/40 border-t border-gray-200 dark:border-white/10 shrink-0">
                             <div className="relative flex items-center">
                                 <input
                                     type="text"
                                     placeholder="Type your question..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-full py-3 pl-4 pr-12 text-sm focus:outline-none focus:border-[#A78BFA] focus:bg-white/10 text-white transition-all shadow-inner placeholder-white/30"
+                                    className="w-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full py-3 pl-4 pr-12 text-sm focus:outline-none focus:border-[#7C3AED] dark:focus:border-[#A78BFA] focus:bg-white dark:focus:bg-white/10 text-gray-800 dark:text-white transition-all shadow-inner placeholder-gray-400 dark:placeholder-white/30"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     disabled={isTyping}

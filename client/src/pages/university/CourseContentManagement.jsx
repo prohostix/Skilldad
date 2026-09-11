@@ -6,7 +6,7 @@ import {
     Upload, FileText, CheckCircle2, AlertCircle, X,
     Layout, BookOpen, Clock, Users, Link,
     ChevronDown, ChevronUp, ArrowLeft, Image as ImageIcon,
-    HelpCircle, Play, ClipboardList, Send, Download, FileSpreadsheet
+    HelpCircle, Play, ClipboardList, Send, Download, FileSpreadsheet, Edit2
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import GlassCard from '../../components/ui/GlassCard';
@@ -29,7 +29,8 @@ const CourseContentManagement = () => {
 
     const [openAddVideo, setOpenAddVideo] = useState(false);
     const [activeModuleId, setActiveModuleId] = useState(null);
-    const [newVideoData, setNewVideoData] = useState({ title: '', url: '' });
+    const [newVideoData, setNewVideoData] = useState({ title: '', url: '', thumbnail: '' });
+    const [lessonCoverUploading, setLessonCoverUploading] = useState(false);
 
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [videoUploading, setVideoUploading] = useState(false);
@@ -39,6 +40,16 @@ const CourseContentManagement = () => {
     const [lessonMode, setLessonMode] = useState('link'); // 'link' | 'video' | 'document'
     const [selectedDocFile, setSelectedDocFile] = useState(null);
     const [activeTab, setActiveTab] = useState('curriculum'); // 'curriculum' or 'batches'
+
+    // Edit Lesson state - lets a lesson created with just a title get its
+    // video link / thumbnail attached later, since Add Lesson no longer requires them upfront.
+    const [openEditLesson, setOpenEditLesson] = useState(false);
+    const [editingLesson, setEditingLesson] = useState(null); // { moduleId, lesson }
+    const [editLessonTitle, setEditLessonTitle] = useState('');
+    const [editLessonUrl, setEditLessonUrl] = useState('');
+    const [editLessonThumbnail, setEditLessonThumbnail] = useState('');
+    const [editLessonThumbnailUploading, setEditLessonThumbnailUploading] = useState(false);
+    const [editLessonSaving, setEditLessonSaving] = useState(false);
 
     // Quiz editor state
     const [openQuizEditor, setOpenQuizEditor] = useState(false);
@@ -121,12 +132,44 @@ const CourseContentManagement = () => {
         }
     };
 
-    const handleAddVideo = async () => {
-        if (!newVideoData.title || !newVideoData.url) return;
+    const handleLessonCoverUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('coverImage', file);
+
+        setLessonCoverUploading(true);
         try {
-            await axios.post(`/api/courses/${courseId}/modules/${activeModuleId}/videos`, newVideoData, getAuthConfig());
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    ...getAuthConfig().headers
+                }
+            };
+            const { data } = await axios.post('/api/courses/upload-cover-image', formData, config);
+            const coverPath = data.url || data.thumbnail || data.imageUrl;
+            setNewVideoData(prev => ({ ...prev, thumbnail: coverPath }));
+            showToast('Cover image uploaded!', 'success');
+        } catch (error) {
+            console.error('Cover upload error:', error);
+            showToast(error.response?.data?.message || 'Failed to upload cover image', 'error');
+        } finally {
+            setLessonCoverUploading(false);
+            if (e.target) e.target.value = '';
+        }
+    };
+
+    const handleAddVideo = async () => {
+        if (!newVideoData.title) return;
+        try {
+            await axios.post(`/api/courses/${courseId}/modules/${activeModuleId}/videos`, {
+                title: newVideoData.title,
+                url: newVideoData.url,
+                thumbnail: newVideoData.thumbnail || ''
+            }, getAuthConfig());
             setOpenAddVideo(false);
-            setNewVideoData({ title: '', url: '' });
+            setNewVideoData({ title: '', url: '', thumbnail: '' });
             fetchCourse();
             showToast('Chapter added!', 'success');
         } catch (error) {
@@ -142,6 +185,68 @@ const CourseContentManagement = () => {
             showToast('Chapter removed', 'success');
         } catch (error) {
             showToast('Deletion failed', 'error');
+        }
+    };
+
+    const handleOpenEditLesson = (modId, vid) => {
+        setEditingLesson({ moduleId: modId, lesson: vid });
+        setEditLessonTitle(vid.title || '');
+        setEditLessonUrl(vid.url || '');
+        setEditLessonThumbnail(vid.thumbnail || '');
+        setOpenEditLesson(true);
+    };
+
+    const handleEditLessonCoverUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('coverImage', file);
+
+        setEditLessonThumbnailUploading(true);
+        try {
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    ...getAuthConfig().headers
+                }
+            };
+            const { data } = await axios.post('/api/courses/upload-cover-image', formData, config);
+            const coverPath = data.url || data.thumbnail || data.imageUrl;
+            setEditLessonThumbnail(coverPath);
+            showToast('Cover image uploaded!', 'success');
+        } catch (error) {
+            console.error('Cover upload error:', error);
+            showToast(error.response?.data?.message || 'Failed to upload cover image', 'error');
+        } finally {
+            setEditLessonThumbnailUploading(false);
+            if (e.target) e.target.value = '';
+        }
+    };
+
+    const handleSaveLessonEdit = async () => {
+        if (!editLessonTitle.trim()) {
+            showToast('Please enter a lesson title', 'error');
+            return;
+        }
+        const { moduleId, lesson } = editingLesson || {};
+        if (!moduleId || !lesson) return;
+
+        setEditLessonSaving(true);
+        try {
+            await axios.put(`/api/courses/${courseId}/modules/${moduleId}/videos/${lesson._id}`, {
+                title: editLessonTitle,
+                url: editLessonUrl,
+                thumbnail: editLessonThumbnail
+            }, getAuthConfig());
+            showToast('Lesson updated successfully!', 'success');
+            setOpenEditLesson(false);
+            setEditingLesson(null);
+            fetchCourse();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to update lesson', 'error');
+        } finally {
+            setEditLessonSaving(false);
         }
     };
 
@@ -195,7 +300,8 @@ const CourseContentManagement = () => {
             // 1. Create the video record first
             const { data: videoRecord } = await axios.post(`/api/courses/${courseId}/modules/${activeModuleId}/videos`, {
                 title: newVideoData.title,
-                url: 'uploading...'
+                url: 'uploading...',
+                thumbnail: newVideoData.thumbnail || ''
             }, getAuthConfig());
 
             // 2. Upload the file to that record
@@ -217,7 +323,7 @@ const CourseContentManagement = () => {
 
             showToast('Video uploaded and saved!', 'success');
             setOpenAddVideo(false);
-            setNewVideoData({ title: '', url: '' });
+            setNewVideoData({ title: '', url: '', thumbnail: '' });
             fetchCourse();
         } catch (error) {
             console.error(error);
@@ -274,7 +380,7 @@ const CourseContentManagement = () => {
             );
             showToast('Document lesson uploaded!', 'success');
             setOpenAddVideo(false);
-            setNewVideoData({ title: '', url: '' });
+            setNewVideoData({ title: '', url: '', thumbnail: '' });
             setSelectedDocFile(null);
             setLessonMode('link');
             fetchCourse();
@@ -288,15 +394,11 @@ const CourseContentManagement = () => {
     const handleDeleteFile = async (moduleId, videoId, fileId) => {
         if (!window.confirm('Delete this file?')) return;
         try {
-            const updatedCourse = { ...course };
-            const mIdx = updatedCourse.modules.findIndex(m => m._id === moduleId);
-            const vIdx = updatedCourse.modules[mIdx].videos.findIndex(v => v._id === videoId);
-            updatedCourse.modules[mIdx].videos[vIdx].attachments = updatedCourse.modules[mIdx].videos[vIdx].attachments.filter(f => f._id !== fileId);
-
-            await axios.put(`/api/courses/${courseId}`, updatedCourse, getAuthConfig());
+            await axios.delete(`/api/courses/${courseId}/modules/${moduleId}/videos/${videoId}/files/${encodeURIComponent(fileId)}`, getAuthConfig());
             fetchCourse();
             showToast('File removed', 'success');
         } catch (error) {
+            console.error('File remove failed:', error);
             showToast('Failed to remove file', 'error');
         }
     };
@@ -672,10 +774,21 @@ const CourseContentManagement = () => {
                                                             className="p-3 bg-white/5 rounded-xl border border-transparent hover:border-white/10 flex items-center justify-between transition-all group/item"
                                                         >
                                                             <div className="flex items-center gap-3">
-                                                                <Video size={16} className="text-white/30 group-hover/item:text-primary transition-colors" />
+                                                                {vid.thumbnail ? (
+                                                                    <img src={getMediaUrl(vid.thumbnail)} alt="" className="w-6 h-6 rounded object-cover border border-white/20 shrink-0" />
+                                                                ) : (
+                                                                    <Video size={16} className="text-white/30 group-hover/item:text-primary transition-colors shrink-0" />
+                                                                )}
                                                                 <span className="text-xs text-white/60 group-hover/item:text-white font-medium">{vid.title}</span>
                                                             </div>
                                                             <div className="flex items-center gap-2">
+                                                                <button
+                                                                    className="p-1.5 text-white/10 group-hover/item:text-amber-400/60 hover:!text-amber-400 hover:bg-amber-500/10 rounded-lg transition-all"
+                                                                    onClick={() => handleOpenEditLesson(mod._id, vid)}
+                                                                    title="Edit Lesson"
+                                                                >
+                                                                    <Edit2 size={14} />
+                                                                </button>
                                                                 <label className="p-1.5 text-white/10 hover:text-primary-light hover:bg-white/5 rounded-lg transition-all cursor-pointer" title="Upload Attachment">
                                                                     <Upload size={14} />
                                                                     <input type="file" className="hidden" onChange={(e) => handleLessonFileUpload(mod._id, vid._id, e)} />
@@ -692,15 +805,16 @@ const CourseContentManagement = () => {
                                                         {/* Attachments List */}
                                                         {vid.attachments?.length > 0 && (
                                                             <div className="ml-8 space-y-1">
-                                                                {vid.attachments.map(file => (
-                                                                    <div key={file._id} className="flex items-center justify-between p-2 bg-white/[0.02] border border-white/5 rounded-lg group/file">
+                                                                {vid.attachments.map((file, fIdx) => (
+                                                                    <div key={file._id || file.url || fIdx} className="flex items-center justify-between p-2 bg-white/[0.02] border border-white/5 rounded-lg group/file">
                                                                         <div className="flex items-center gap-2 overflow-hidden">
                                                                             <FileText size={12} className="text-white/20" />
                                                                             <span className="text-[10px] text-white/40 truncate max-w-[150px]">{file.name}</span>
                                                                         </div>
                                                                         <button
-                                                                            className="p-1 text-white/10 hover:text-red-500 opacity-0 group-file/file:opacity-100 transition-all"
-                                                                            onClick={() => handleDeleteFile(mod._id, vid._id, file._id)}
+                                                                            type="button"
+                                                                            className="p-1 text-white/10 hover:text-red-500 opacity-0 group-hover/file:opacity-100 transition-all"
+                                                                            onClick={() => handleDeleteFile(mod._id, vid._id, file._id || file.url || file.name)}
                                                                         >
                                                                             <X size={10} />
                                                                         </button>
@@ -799,10 +913,64 @@ const CourseContentManagement = () => {
                                 />
                             </div>
 
+                            {/* Cover Image (Optional) - for video links and uploaded videos */}
+                            {(lessonMode === 'link' || lessonMode === 'video') && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest">
+                                            Cover Image / Thumbnail (Optional)
+                                        </label>
+                                        {newVideoData.thumbnail && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewVideoData(prev => ({ ...prev, thumbnail: '' }))}
+                                                className="text-red-400 hover:text-red-300 text-[10px] font-bold lowercase flex items-center gap-0.5"
+                                            >
+                                                <X size={10} /> remove
+                                            </button>
+                                        )}
+                                    </div>
+                                    {newVideoData.thumbnail ? (
+                                        <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/20 group">
+                                            <img
+                                                src={getMediaUrl(newVideoData.thumbnail)}
+                                                alt="Cover preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                <label className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold cursor-pointer transition-colors">
+                                                    Change Image
+                                                    <input type="file" accept="image/*" className="hidden" onChange={handleLessonCoverUpload} disabled={lessonCoverUploading} />
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setNewVideoData(prev => ({ ...prev, thumbnail: '' }))}
+                                                    className="px-3 py-1.5 rounded-lg bg-red-500/30 hover:bg-red-500/50 text-red-200 text-xs font-bold transition-colors"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <label className={`flex items-center gap-3 w-full px-4 py-3 border border-dashed rounded-xl cursor-pointer transition-all ${
+                                            lessonCoverUploading ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-primary/30 hover:bg-white/5'
+                                        }`}>
+                                            <ImageIcon size={18} className="text-white/40 shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <span className="text-xs text-white/50 block truncate">
+                                                    {lessonCoverUploading ? 'Uploading cover...' : 'Upload custom cover image (PNG, JPG, WEBP)'}
+                                                </span>
+                                            </div>
+                                            <input type="file" accept="image/*" className="hidden" onChange={handleLessonCoverUpload} disabled={lessonCoverUploading} />
+                                        </label>
+                                    )}
+                                </div>
+                            )}
+
                             {/* VIDEO LINK MODE */}
                             {lessonMode === 'link' && (
                                 <div>
-                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-1.5">Video / Content URL</label>
+                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-1.5">Video / Content URL (Optional)</label>
                                     <div className="relative">
                                         <Link size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" />
                                         <input
@@ -812,6 +980,7 @@ const CourseContentManagement = () => {
                                             onChange={e => setNewVideoData({...newVideoData, url: e.target.value})}
                                         />
                                     </div>
+                                    <p className="text-[10px] text-white/30 mt-1.5">Leave blank to create the lesson now and add the link later from Edit Lesson.</p>
                                     <div className="flex gap-4 mt-6">
                                         <ModernButton variant="secondary" className="flex-1 border border-white/10" onClick={() => setOpenAddVideo(false)}>Cancel</ModernButton>
                                         <ModernButton className="flex-1" onClick={handleAddVideo}>Add to Module</ModernButton>
@@ -887,6 +1056,110 @@ const CourseContentManagement = () => {
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    </GlassCard>
+                </div>
+            )}
+            {openEditLesson && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[300] flex items-center justify-center p-4" onClick={() => setOpenEditLesson(false)}>
+                    <GlassCard className="w-full max-w-md p-8 border-white/20" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                                <Edit2 size={18} className="text-amber-400" /> Edit Lesson
+                            </h4>
+                            <button onClick={() => setOpenEditLesson(false)} className="text-white/40 hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-5">
+                            <div>
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Lesson Title</label>
+                                <input
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-primary/50 transition-all text-sm"
+                                    placeholder="Enter lesson title"
+                                    value={editLessonTitle}
+                                    onChange={e => setEditLessonTitle(e.target.value)}
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Video / Content URL (Optional)</label>
+                                <div className="relative">
+                                    <Link size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" />
+                                    <input
+                                        className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-primary/50 transition-all text-xs font-mono"
+                                        placeholder="https://vimeo.com/..."
+                                        value={editLessonUrl}
+                                        onChange={e => setEditLessonUrl(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="flex items-center justify-between mb-1.5">
+                                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest">
+                                        Cover Image / Thumbnail (Optional)
+                                    </label>
+                                    {editLessonThumbnail && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditLessonThumbnail('')}
+                                            className="text-red-400 hover:text-red-300 text-[10px] font-bold lowercase flex items-center gap-0.5"
+                                        >
+                                            <X size={10} /> remove
+                                        </button>
+                                    )}
+                                </div>
+                                {editLessonThumbnail ? (
+                                    <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/20 group">
+                                        <img
+                                            src={getMediaUrl(editLessonThumbnail)}
+                                            alt="Cover preview"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <label className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold cursor-pointer transition-colors">
+                                                Change Image
+                                                <input type="file" accept="image/*" className="hidden" onChange={handleEditLessonCoverUpload} disabled={editLessonThumbnailUploading} />
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditLessonThumbnail('')}
+                                                className="px-3 py-1.5 rounded-lg bg-red-500/30 hover:bg-red-500/50 text-red-200 text-xs font-bold transition-colors"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <label className={`flex items-center gap-3 w-full px-4 py-3 border border-dashed rounded-xl cursor-pointer transition-all ${
+                                        editLessonThumbnailUploading ? 'border-amber-500/50 bg-amber-500/5' : 'border-white/10 hover:border-amber-400/30 hover:bg-white/5'
+                                    }`}>
+                                        <ImageIcon size={18} className="text-white/40 shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                            <span className="text-xs text-white/50 block truncate">
+                                                {editLessonThumbnailUploading ? 'Uploading cover...' : 'Upload custom cover image (PNG, JPG, WEBP)'}
+                                            </span>
+                                        </div>
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleEditLessonCoverUpload} disabled={editLessonThumbnailUploading} />
+                                    </label>
+                                )}
+                            </div>
+
+                            <div className="flex gap-4 pt-2">
+                                <ModernButton variant="secondary" className="flex-1 border border-white/10" onClick={() => setOpenEditLesson(false)}>
+                                    Cancel
+                                </ModernButton>
+                                <ModernButton
+                                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold"
+                                    onClick={handleSaveLessonEdit}
+                                    disabled={editLessonSaving}
+                                >
+                                    {editLessonSaving ? 'Saving...' : 'Save Changes'}
+                                </ModernButton>
+                            </div>
                         </div>
                     </GlassCard>
                 </div>

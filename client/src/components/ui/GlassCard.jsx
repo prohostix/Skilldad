@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const GlassCard = ({ children, className = '', title, icon: Icon, onClick, style, lowBlur = false, noHover = false, ...rest }) => {
+const GlassCard = ({ children, className = '', contentClassName = '', title, icon: Icon, onClick, style, lowBlur = false, noHover = false, ...rest }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -37,7 +37,7 @@ const GlassCard = ({ children, className = '', title, icon: Icon, onClick, style
                     )}
                 </div>
             )}
-            <div className="relative z-10">
+            <div className={`relative z-10 ${contentClassName}`}>
                 {children}
             </div>
         </motion.div>

@@ -42,10 +42,7 @@ const DashboardFooter = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex flex-col md:flex-row items-center gap-3 text-sm text-gray-400">
                         <p>© 2026 SkillDad. All rights reserved.</p>
-                        <span className="hidden md:block text-gray-600">•</span>
-                        <p className="flex items-center gap-2">
-                            Built with <Heart size={14} className="text-red-500 fill-red-500 animate-pulse" /> for modern learning
-                        </p>
+
                     </div>
                 </div>
             </div>

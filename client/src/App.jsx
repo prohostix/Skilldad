@@ -207,6 +207,7 @@ function App() {
                 {/* University Routes */}
                 <Route element={<ProtectedRoute allowedRoles={['university', 'admin']} />}>
                   <Route path="/university" element={<DashboardLayout />}>
+                    <Route index element={<UniversityDashboard />} />
                     <Route path="dashboard" element={<UniversityDashboard />} />
                     <Route path="courses" element={<UniversityDashboard />} />
                     <Route path="courses/:courseId" element={<CourseContentManagement />} />
@@ -231,6 +232,7 @@ function App() {
                 {/* Partner Routes */}
                 <Route element={<ProtectedRoute allowedRoles={['partner', 'admin']} />}>
                   <Route path="/partner" element={<DashboardLayout />}>
+                    <Route index element={<PartnerDashboard />} />
                     <Route path="dashboard" element={<PartnerDashboard />} />
                     <Route path="students" element={<PartnerStudentManagement />} />
                     <Route path="courses" element={<PartnerCourseManager />} />
@@ -249,6 +251,7 @@ function App() {
                 {/* Admin Routes */}
                 <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
                   <Route path="/admin" element={<DashboardLayout />}>
+                    <Route index element={<AdminDashboard />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="courses" element={<CourseManager />} />
                     <Route path="course-enquiries" element={<CourseEnquiries />} />
@@ -290,6 +293,7 @@ function App() {
                 {/* Finance Routes */}
                 <Route element={<ProtectedRoute allowedRoles={['finance', 'admin']} />}>
                   <Route path="/finance" element={<DashboardLayout />}>
+                    <Route index element={<FinanceDashboard />} />
                     <Route path="dashboard" element={<FinanceDashboard />} />
                     <Route path="payouts" element={<FinanceDashboard />} />
                     <Route path="reports" element={<FinanceDashboard />} />

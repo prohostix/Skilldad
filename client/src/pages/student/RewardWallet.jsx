@@ -117,8 +117,8 @@ const RewardWallet = () => {
 
     const TABS = [
         { id: 'overview', label: 'Overview' },
-        { id: 'network', label: 'Network Assets' },
-        { id: 'ledger', label: 'Performance Ledger' }
+        { id: 'network', label: 'My Referrals' },
+        { id: 'ledger', label: 'Reward History' }
     ];
 
     if (loading) {
@@ -195,10 +195,10 @@ const RewardWallet = () => {
                         {/* Metrics Grid */}
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                             {[
-                                { label: 'Platform Balance', val: balance.total, suffix: ' pts', icon: Wallet, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
-                                { label: 'Network Size', val: referrals.length, suffix: ' refs', icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+                                { label: 'Wallet Balance', val: balance.total, suffix: ' pts', icon: Wallet, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
+                                { label: 'Total Referrals', val: referrals.length, suffix: ' referred', icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
                                 { label: 'Pending Points', val: '0', icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-                                { label: 'Growth Status', val: 'Bronze', icon: Award, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' }
+                                { label: 'Reward Level', val: 'Bronze', icon: Award, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' }
                             ].map((stat, i) => (
                                 <div key={i} className="rounded-xl border border-white/10 bg-white/[0.02] p-5 flex items-center gap-3 transition-colors hover:bg-white/[0.04]">
                                     <div className={`p-2.5 rounded-lg border ${stat.bg} ${stat.color} ${stat.border}`}>
@@ -212,11 +212,11 @@ const RewardWallet = () => {
                             ))}
                         </div>
 
-                        {/* Referral Protocol Section */}
+                        {/* Referral Program Section */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
                                 <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 whitespace-nowrap font-mono">
-                                    <Share2 size={8} /> Protocol: Growth
+                                    <Share2 size={8} /> Referral Program
                                 </div>
                                 <div className="h-px flex-1 bg-gradient-to-r from-white/5 to-transparent"></div>
                             </div>
@@ -229,10 +229,10 @@ const RewardWallet = () => {
                                 <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                                     <div className="max-w-xl">
                                         <h3 className="text-sm font-black text-white mb-3 flex items-center gap-2 uppercase tracking-widest text-primary">
-                                            Academic Referral Network <Sparkles size={14} className="text-amber-400" />
+                                            Invite Friends & Earn Rewards <Sparkles size={14} className="text-amber-400" />
                                         </h3>
                                         <p className="text-[11px] text-white/40 font-bold leading-relaxed">
-                                            Expand the SkillDad global network to unlock premium rewards. Gain <span className="text-emerald-400">100 points</span> for every valid student activation via your unique terminal. New activations receive a <span className="text-primary font-bold">50 point</span> initialization bonus.
+                                            Invite your friends to SkillDad and unlock exciting rewards! You earn <span className="text-emerald-400">100 points</span> for every friend who joins using your link, and your friend gets a <span className="text-primary font-bold">50 point</span> welcome bonus.
                                         </p>
                                     </div>
                                     
@@ -250,7 +250,7 @@ const RewardWallet = () => {
                                                 className="px-6 py-3 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-lg text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 whitespace-nowrap shadow-lg shadow-primary/5"
                                             >
                                                 {copied ? <Check size={12} /> : <Copy size={12} />}
-                                                {copied ? 'Captured' : 'Execute Copy'}
+                                                {copied ? 'Copied!' : 'Copy Link'}
                                             </button>
                                         </div>
                                     </div>
@@ -270,7 +270,7 @@ const RewardWallet = () => {
                     >
                         <div className="flex items-center gap-3">
                             <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 whitespace-nowrap font-mono">
-                                <Users size={8} /> Referral Network
+                                <Users size={8} /> My Referrals
                             </div>
                             <div className="h-px flex-1 bg-gradient-to-r from-white/5 to-transparent"></div>
                         </div>
@@ -296,7 +296,7 @@ const RewardWallet = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                                        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Asset Gained</span>
+                                        <span className="text-[8px] font-black text-white/20 uppercase tracking-widest">Points Earned</span>
                                         <div className="flex items-center gap-1">
                                             <span className="text-xs font-black text-emerald-400">+{ref.points_awarded}</span>
                                             <TrendingUp size={10} className="text-emerald-400" />
@@ -307,7 +307,7 @@ const RewardWallet = () => {
                             {filteredReferrals.length === 0 && (
                                 <div className="col-span-full py-16 text-center border border-dashed border-white/10 rounded-2xl">
                                     <Users size={24} className="mx-auto text-white/10 mb-3" />
-                                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{searchQuery ? 'No Results Found' : 'No Assets Detected'}</p>
+                                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{searchQuery ? 'No Results Found' : 'No Referrals Yet'}</p>
                                 </div>
                             )}
                         </div>
@@ -324,7 +324,7 @@ const RewardWallet = () => {
                     >
                         <div className="flex items-center gap-3">
                             <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-1.5 whitespace-nowrap font-mono">
-                                <History size={8} /> Performance Ledger
+                                <History size={8} /> Reward History
                             </div>
                             <div className="h-px flex-1 bg-gradient-to-r from-white/5 to-transparent"></div>
                         </div>
@@ -354,11 +354,11 @@ const RewardWallet = () => {
                                     </div>
                                     <div className="text-right shrink-0">
                                         <div className={`text-[11px] font-black ${log.points > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {log.points > 0 ? '+' : ''}{log.points} <span className="text-[8px] uppercase tracking-tighter opacity-60 ml-0.5">{log.points > 0 ? 'PTS' : 'PTS'}</span>
+                                            {log.points > 0 ? '+' : ''}{log.points} <span className="text-[8px] uppercase tracking-tighter opacity-60 ml-0.5">PTS</span>
                                         </div>
                                         <div className="mt-1 flex items-center gap-1 justify-end">
                                             <span className={`w-1.5 h-1.5 rounded-full ${log.points > 0 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
-                                            <p className="text-[8px] text-white/20 uppercase font-black tracking-widest uppercase">Verified Log</p>
+                                            <p className="text-[8px] text-white/20 uppercase font-black tracking-widest uppercase">Completed</p>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -366,7 +366,7 @@ const RewardWallet = () => {
                             {filteredHistory.length === 0 && (
                                 <div className="col-span-full py-16 text-center border border-dashed border-white/10 rounded-2xl">
                                     <History size={24} className="mx-auto text-white/10 mb-3" />
-                                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{searchQuery ? 'No Results Found' : 'Log History Empty'}</p>
+                                    <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">{searchQuery ? 'No Results Found' : 'No Reward History Yet'}</p>
                                 </div>
                             )}
                         </div>

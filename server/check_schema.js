@@ -1,25 +1,14 @@
 require('dotenv').config();
-const { connectPostgres, query } = require('./config/postgres');
+const { query } = require('./config/postgres');
 
-async function checkSchema() {
+async function run() {
+    await new Promise(r => setTimeout(r, 1000));
     try {
-        await connectPostgres();
-        
-        console.log('--- EXAMS SCHEMA ---');
-        const examsRes = await query(`
-            SELECT column_name, data_type 
-            FROM information_schema.columns 
-            WHERE table_name = 'exams'
-        `);
-        examsRes.rows.forEach(col => {
-            console.log(`${col.column_name}: ${col.data_type}`);
-        });
-
-    } catch (err) {
-        console.error(err);
-    } finally {
-        process.exit();
+        const res = await query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'study_abroad_universities'");
+        console.log(res.rows);
+    } catch (e) {
+        console.error(e);
     }
+    process.exit(0);
 }
-
-checkSchema();
+run();

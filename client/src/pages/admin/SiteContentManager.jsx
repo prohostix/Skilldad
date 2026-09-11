@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Edit2, Trash2, Save, X, Building2, User as UserIcon, Users,
     Image as ImageIcon, LayoutGrid, List, Heart, Upload, Loader2,
-    Target, Rocket, Globe, Award, Activity, GraduationCap, Eye, EyeOff, Sliders
+    Target, Rocket, Globe, Award, Activity, GraduationCap, Eye, EyeOff, Sliders, Sparkles
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -794,11 +794,87 @@ const CmsSectionCard = ({ title, icon: Icon, fields, onSave }) => {
     );
 };
 
+const HeroBubbleTextsEditor = ({ items, onUpdate }) => {
+    const [newText, setNewText] = useState('');
+    const [saving, setSaving] = useState(false);
+
+    const persist = async (nextItems) => {
+        setSaving(true);
+        await onUpdate('landing_page', 'hero_bubbles', { items: nextItems });
+        setSaving(false);
+    };
+
+    const handleAdd = () => {
+        const text = newText.trim();
+        if (!text) return;
+        setNewText('');
+        persist([...items, { id: `hb_${Date.now()}`, text }]);
+    };
+
+    const handleRemove = (id) => {
+        persist(items.filter(i => i.id !== id));
+    };
+
+    return (
+        <GlassCard className="p-6 md:p-8 border-primary/30">
+            <div className="flex items-start gap-4 pb-6 border-b border-white/10">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 bg-primary/20 text-primary border-primary/30">
+                    <Sparkles size={22} />
+                </div>
+                <div>
+                    <h3 className="text-lg font-black text-white font-jakarta">Hero Bubble Pop-up Text</h3>
+                    <p className="text-xs text-white/60 mt-1 max-w-2xl leading-relaxed font-medium">
+                        Text shown when a floating bubble bursts in the homepage hero animation (right side). Use this for live job vacancy counts, enrollment numbers, or any short highlight - not tied to course names. Rotates across the bubbles automatically.
+                    </p>
+                </div>
+            </div>
+
+            <div className="pt-6 flex flex-col sm:flex-row gap-3">
+                <input
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-primary outline-none transition-all"
+                    placeholder="e.g. 1,200+ Data Analyst Openings"
+                    value={newText}
+                    onChange={e => setNewText(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAdd(); } }}
+                />
+                <button
+                    onClick={handleAdd}
+                    disabled={saving || !newText.trim()}
+                    className="px-6 py-3 bg-primary/20 text-primary border border-primary/30 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-primary hover:text-white transition-all disabled:opacity-40 shrink-0"
+                >
+                    Add
+                </button>
+            </div>
+
+            <div className="pt-4 space-y-2">
+                {items.length === 0 ? (
+                    <p className="text-xs text-white/30 italic px-1 py-2">No entries yet - bubbles will just rise and pop with no text until you add some.</p>
+                ) : items.map(item => (
+                    <div key={item.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl">
+                        <span className="text-sm text-white/90 font-medium">{item.text}</span>
+                        <button
+                            onClick={() => handleRemove(item.id)}
+                            disabled={saving}
+                            className="p-1.5 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-40"
+                            title="Remove"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </GlassCard>
+    );
+};
+
 const LandingPageControls = ({ landingCmsData, onUpdate }) => {
     const isCampusImpactVisible = landingCmsData?.campus_impact?.show_section === true;
+    const heroBubbleItems = landingCmsData?.hero_bubbles?.items || [];
 
     return (
         <div className="space-y-6 text-left my-2">
+            <HeroBubbleTextsEditor items={heroBubbleItems} onUpdate={onUpdate} />
+
             <GlassCard className="p-6 md:p-8 border-primary/30">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/10">
                     <div className="flex items-start gap-4">

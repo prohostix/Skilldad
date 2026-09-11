@@ -21,7 +21,10 @@ const {
     uploadLessonVideo,
     uploadLessonFile,
     uploadLessonDocument,
-    saveModuleQuiz
+    saveModuleQuiz,
+    saveLessonQuiz,
+    updateLessonDocument,
+    deleteLessonFile
 } = require('../controllers/courseController');
 const {
     linkZoomRecordingToVideo,
@@ -40,6 +43,16 @@ router.route('/upload-brochure-file').post(protect, upload.single('brochure'), (
     if (!req.file) return res.status(400).json({ message: 'Please select a file to upload' });
     const filePath = `/uploads/${req.file.filename}`;
     res.json({ message: 'Brochure uploaded successfully', brochure_url: filePath, url: filePath });
+});
+router.route('/upload-cover-image').post(protect, (req, res, next) => {
+    upload.single('coverImage')(req, res, (err) => {
+        if (err) return res.status(400).json({ message: err.message || err });
+        next();
+    });
+}, (req, res) => {
+    if (!req.file) return res.status(400).json({ message: 'Please select an image file to upload' });
+    const filePath = `/uploads/${req.file.filename}`;
+    res.json({ message: 'Cover image uploaded successfully', imageUrl: filePath, url: filePath, thumbnail: filePath });
 });
 router.route('/:id/upload-thumbnail').post(protect, upload.single('thumbnail'), uploadThumbnail);
 router.route('/:id/upload-brochure').post(protect, upload.single('brochure'), uploadBrochure);
@@ -61,6 +74,7 @@ router.route('/:id/modules/:moduleId/videos/:videoId/files').post(protect, (req,
         next();
     });
 }, uploadLessonFile);
+router.route('/:id/modules/:moduleId/videos/:videoId/files/:fileId').delete(protect, deleteLessonFile);
 
 router.route('/:id/modules/:moduleId/upload-document').post(protect, (req, res, next) => {
     upload.single('document')(req, res, (err) => {
@@ -68,7 +82,14 @@ router.route('/:id/modules/:moduleId/upload-document').post(protect, (req, res, 
         next();
     });
 }, uploadLessonDocument);
+router.route('/:id/modules/:moduleId/videos/:videoId/update-document').put(protect, (req, res, next) => {
+    upload.single('document')(req, res, (err) => {
+        if (err) return res.status(400).json({ message: err.message || err });
+        next();
+    });
+}, updateLessonDocument);
 router.route('/:id/modules/:moduleId/quiz').put(protect, saveModuleQuiz);
+router.route('/:id/modules/:moduleId/videos/:videoId/quiz').put(protect, saveLessonQuiz);
 router.route('/:id/modules/:moduleId/videos/:videoId/exercises').post(protect, addExercise);
 router.route('/:courseId/modules/:moduleIndex/videos/:videoIndex/link-zoom-recording').post(protect, linkZoomRecordingToVideo);
 router.route('/:courseId/modules/:moduleIndex/videos/:videoIndex/unlink-zoom-recording').delete(protect, unlinkZoomRecordingFromVideo);

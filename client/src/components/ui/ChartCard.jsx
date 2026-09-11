@@ -54,13 +54,14 @@ const ChartCard = ({ title, subtitle, data, type = 'line', dataKey = 'value', co
             axisLine: false,
             tickLine: false,
             tick: { fill: '#6E72A5', fontSize: window.innerWidth < 640 ? 9 : 10, fontWeight: 600 },
-            width: window.innerWidth < 640 ? 30 : 40
+            // Wide enough that a 3-digit value like "100" never gets clipped
+            width: window.innerWidth < 640 ? 34 : 46
         };
 
         const chartMargin = {
             top: 10,
             right: 10,
-            left: window.innerWidth < 640 ? -10 : -20,
+            left: window.innerWidth < 640 ? -4 : -8,
             bottom: 10
         };
 

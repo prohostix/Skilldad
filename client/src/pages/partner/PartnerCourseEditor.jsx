@@ -6,7 +6,8 @@ import {
     Upload, FileText, CheckCircle2, AlertCircle, X,
     Layout, BookOpen, Clock, Users, Link,
     ChevronDown, ChevronUp, ArrowLeft, Image as ImageIcon,
-    HelpCircle, Play, Send, Download, FileSpreadsheet
+    HelpCircle, Play, Send, Download, FileSpreadsheet,
+    Edit2, CheckSquare, Pencil
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import GlassCard from '../../components/ui/GlassCard';
@@ -29,7 +30,8 @@ const PartnerCourseEditor = () => {
     
     const [openAddVideo, setOpenAddVideo] = useState(false);
     const [activeModuleId, setActiveModuleId] = useState(null);
-    const [newVideoData, setNewVideoData] = useState({ title: '', url: '' });
+    const [newVideoData, setNewVideoData] = useState({ title: '', url: '', thumbnail: '' });
+    const [lessonCoverUploading, setLessonCoverUploading] = useState(false);
     
     const [thumbnailUploading, setThumbnailUploading] = useState(false);
     const [videoUploading, setVideoUploading] = useState(false);
@@ -40,15 +42,31 @@ const PartnerCourseEditor = () => {
     const [lessonMode, setLessonMode] = useState('link'); // 'link' | 'video' | 'document'
     const [selectedDocFile, setSelectedDocFile] = useState(null);
     const [activeTab, setActiveTab] = useState('curriculum'); // 'curriculum' or 'batches'
+    
+    // Delete Confirmation Modal State
+    const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, text: '', onConfirm: null });
 
-    // Quiz editor state
+    // Quiz editor state (Module or Class/Lesson wise)
     const [openQuizEditor, setOpenQuizEditor] = useState(false);
+    const [quizTarget, setQuizTarget] = useState('module'); // 'module' | 'lesson'
     const [activeQuizModuleId, setActiveQuizModuleId] = useState(null);
+    const [activeQuizVideoId, setActiveQuizVideoId] = useState(null);
+    const [quizTargetTitle, setQuizTargetTitle] = useState('');
     const [quizQuestions, setQuizQuestions] = useState([]);
     const [quizSaving, setQuizSaving] = useState(false);
     const [newQuestion, setNewQuestion] = useState({
         question: '', options: ['', '', '', ''], correctIndex: 0, explanation: ''
     });
+
+    // Edit Lesson / Document state
+    const [openEditLesson, setOpenEditLesson] = useState(false);
+    const [editingLesson, setEditingLesson] = useState(null); // { moduleId, lesson }
+    const [editLessonTitle, setEditLessonTitle] = useState('');
+    const [editLessonUrl, setEditLessonUrl] = useState('');
+    const [editLessonThumbnail, setEditLessonThumbnail] = useState('');
+    const [editLessonThumbnailUploading, setEditLessonThumbnailUploading] = useState(false);
+    const [editLessonFile, setEditLessonFile] = useState(null);
+    const [editLessonSaving, setEditLessonSaving] = useState(false);
 
     // Publish-to-batch state
     const [openPublishModal, setOpenPublishModal] = useState(false);
@@ -56,10 +74,34 @@ const PartnerCourseEditor = () => {
     const [selectedPublishBatchIds, setSelectedPublishBatchIds] = useState([]);
     const [publishSaving, setPublishSaving] = useState(false);
 
+    // Safe auth helpers — prevent "Cannot read properties of null (reading 'token')"
+    const getAuthToken = () => {
+        try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            if (!userInfo?.token) {
+                navigate('/login?session=expired');
+                return null;
+            }
+            return userInfo.token;
+        } catch {
+            navigate('/login?session=expired');
+            return null;
+        }
+    };
+
+    const getAuthConfig = (contentType) => {
+        const token = getAuthToken();
+        if (!token) return null;
+        const headers = { Authorization: `Bearer ${token}` };
+        if (contentType) headers['Content-Type'] = contentType;
+        return { headers };
+    };
+
     const fetchCourse = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`/api/courses/${id}`);
+            const config = getAuthConfig();
+            const { data } = await axios.get(`/api/courses/${id}`, config || undefined);
             setCourse(data);
         } catch (error) {
             console.error('Error fetching course:', error);
@@ -85,8 +127,8 @@ const PartnerCourseEditor = () => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const config = getAuthConfig();
+        if (!config) return;
         try {
             await axios.put(`/api/courses/${id}`, course, config);
             showToast('Course updated successfully!', 'success');
@@ -97,8 +139,8 @@ const PartnerCourseEditor = () => {
 
     const handleAddModule = async () => {
         if (!newModuleTitle) return;
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const config = getAuthConfig();
+        if (!config) return;
         try {
             await axios.post(`/api/courses/${id}/modules`, { title: newModuleTitle }, config);
             setOpenAddModule(false);
@@ -110,27 +152,78 @@ const PartnerCourseEditor = () => {
         }
     };
 
-    const handleDeleteModule = async (moduleId) => {
-        if (!window.confirm('Delete this entire module and its videos?')) return;
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+    const handleDeleteModule = (moduleId) => {
+        setDeleteConfirm({
+            isOpen: true,
+            text: 'Delete this entire module and its videos?',
+            onConfirm: async () => {
+                const config = getAuthConfig();
+                if (!config) return;
+                try {
+                    await axios.delete(`/api/courses/${id}/modules/${moduleId}`, config);
+                    fetchCourse();
+                    showToast('Module removed', 'success');
+                } catch (error) {
+                    showToast('Deletion failed', 'error');
+                }
+            }
+        });
+    };
+
+    const handleLessonCoverUpload = async (e, isEdit = false) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select an image file (PNG, JPG, WEBP)', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('coverImage', file);
+
+        const config = getAuthConfig('multipart/form-data');
+        if (!config) return;
+
+        if (isEdit) {
+            setEditLessonThumbnailUploading(true);
+        } else {
+            setLessonCoverUploading(true);
+        }
+
         try {
-            await axios.delete(`/api/courses/${id}/modules/${moduleId}`, config);
-            fetchCourse();
-            showToast('Module removed', 'success');
+            const { data } = await axios.post('/api/courses/upload-cover-image', formData, config);
+            const coverPath = data.url || data.imageUrl || data.thumbnail;
+            if (isEdit) {
+                setEditLessonThumbnail(coverPath);
+            } else {
+                setNewVideoData(prev => ({ ...prev, thumbnail: coverPath }));
+            }
+            showToast('Cover image uploaded!', 'success');
         } catch (error) {
-            showToast('Deletion failed', 'error');
+            console.error('Cover upload error:', error);
+            showToast(error.response?.data?.message || 'Failed to upload cover image', 'error');
+        } finally {
+            if (isEdit) {
+                setEditLessonThumbnailUploading(false);
+            } else {
+                setLessonCoverUploading(false);
+            }
+            if (e.target) e.target.value = '';
         }
     };
 
     const handleAddVideo = async () => {
-        if (!newVideoData.title || !newVideoData.url) return;
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        if (!newVideoData.title) return;
+        const config = getAuthConfig();
+        if (!config) return;
         try {
-            await axios.post(`/api/courses/${id}/modules/${activeModuleId}/videos`, newVideoData, config);
+            await axios.post(`/api/courses/${id}/modules/${activeModuleId}/videos`, {
+                title: newVideoData.title,
+                url: newVideoData.url,
+                thumbnail: newVideoData.thumbnail || ''
+            }, config);
             setOpenAddVideo(false);
-            setNewVideoData({ title: '', url: '' });
+            setNewVideoData({ title: '', url: '', thumbnail: '' });
             fetchCourse();
             showToast('Chapter added!', 'success');
         } catch (error) {
@@ -138,17 +231,22 @@ const PartnerCourseEditor = () => {
         }
     };
 
-    const handleDeleteVideo = async (moduleId, videoId) => {
-        if (!window.confirm('Delete this chapter?')) return;
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        try {
-            await axios.delete(`/api/courses/${id}/modules/${moduleId}/videos/${videoId}`, config);
-            fetchCourse();
-            showToast('Chapter removed', 'success');
-        } catch (error) {
-            showToast('Deletion failed', 'error');
-        }
+    const handleDeleteVideo = (moduleId, videoId) => {
+        setDeleteConfirm({
+            isOpen: true,
+            text: 'Delete this chapter?',
+            onConfirm: async () => {
+                const config = getAuthConfig();
+                if (!config) return;
+                try {
+                    await axios.delete(`/api/courses/${id}/modules/${moduleId}/videos/${videoId}`, config);
+                    fetchCourse();
+                    showToast('Chapter removed', 'success');
+                } catch (error) {
+                    showToast('Deletion failed', 'error');
+                }
+            }
+        });
     };
 
     const thumbnailInputRef = React.useRef(null);
@@ -162,13 +260,8 @@ const PartnerCourseEditor = () => {
 
         setThumbnailUploading(true);
         try {
-            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-            const config = {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${userInfo.token}`
-                }
-            };
+            const config = getAuthConfig('multipart/form-data');
+            if (!config) return;
             const { data } = await axios.post(`/api/courses/${id}/upload-thumbnail`, formData, config);
             setCourse(prev => ({ ...prev, thumbnail: data.thumbnail }));
             fetchCourse();
@@ -193,36 +286,29 @@ const PartnerCourseEditor = () => {
             return;
         }
 
-        // We need a videoId to upload. If it's a new video, we'll create the video record first.
-        // Actually, to make it simple for the user, we can upload first to a temp endpoint or 
-        // just ask for title, create video with empty url, then upload.
-        
         if (!newVideoData.title) {
             showToast('Please enter a lesson title first', 'error');
             return;
         }
 
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const config = getAuthConfig();
+        if (!config) return;
         
         setVideoUploading(true);
         try {
-            // 1. Create the video record first
+            // 1. Create the video record first with thumbnail
             const { data: videoRecord } = await axios.post(`/api/courses/${id}/modules/${activeModuleId}/videos`, {
                 title: newVideoData.title,
-                url: 'uploading...'
+                url: 'uploading...',
+                thumbnail: newVideoData.thumbnail || ''
             }, config);
 
             // 2. Upload the file to that record
             const formData = new FormData();
             formData.append('video', file);
             
-            const uploadConfig = {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${userInfo.token}`
-                }
-            };
+            const uploadConfig = getAuthConfig('multipart/form-data');
+            if (!uploadConfig) return;
 
             const { data: uploadRes } = await axios.post(
                 `/api/courses/${id}/modules/${activeModuleId}/videos/${videoRecord._id}/upload`, 
@@ -232,7 +318,7 @@ const PartnerCourseEditor = () => {
 
             showToast('Video uploaded and saved!', 'success');
             setOpenAddVideo(false);
-            setNewVideoData({ title: '', url: '' });
+            setNewVideoData({ title: '', url: '', thumbnail: '' });
             fetchCourse();
         } catch (error) {
             console.error(error);
@@ -251,13 +337,8 @@ const PartnerCourseEditor = () => {
 
         console.log('[Upload] Starting file upload:', { moduleId, videoId, fileName: file.name, fileSize: file.size });
 
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${userInfo.token}`
-            }
-        };
+        const config = getAuthConfig('multipart/form-data');
+        if (!config) return;
 
         const formData = new FormData();
         formData.append('file', file);
@@ -283,7 +364,8 @@ const PartnerCourseEditor = () => {
             showToast('Please select a document file', 'error');
             return;
         }
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        const config = getAuthConfig('multipart/form-data');
+        if (!config) return;
         const formData = new FormData();
         formData.append('document', selectedDocFile);
         formData.append('title', newVideoData.title);
@@ -292,7 +374,7 @@ const PartnerCourseEditor = () => {
             await axios.post(
                 `/api/courses/${id}/modules/${activeModuleId}/upload-document`,
                 formData,
-                { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${userInfo.token}` } }
+                config
             );
             showToast('Document lesson uploaded!', 'success');
             setOpenAddVideo(false);
@@ -307,37 +389,141 @@ const PartnerCourseEditor = () => {
         }
     };
 
-    const handleDeleteFile = async (moduleId, videoId, fileId) => {
-        if (!window.confirm('Delete this file?')) return;
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        try {
-            const updatedCourse = { ...course };
-            const mIdx = updatedCourse.modules.findIndex(m => m._id === moduleId);
-            const vIdx = updatedCourse.modules[mIdx].videos.findIndex(v => v._id === videoId);
-            updatedCourse.modules[mIdx].videos[vIdx].attachments = updatedCourse.modules[mIdx].videos[vIdx].attachments.filter(f => f._id !== fileId);
-            
-            await axios.put(`/api/courses/${id}`, updatedCourse, config);
-            fetchCourse();
-            showToast('File removed', 'success');
-        } catch (error) {
-            showToast('Failed to remove file', 'error');
-        }
+    const handleDeleteFile = (moduleId, videoId, fileId) => {
+        setDeleteConfirm({
+            isOpen: true,
+            text: 'Delete this file?',
+            onConfirm: async () => {
+                const config = getAuthConfig();
+                if (!config) return;
+                try {
+                    await axios.delete(`/api/courses/${id}/modules/${moduleId}/videos/${videoId}/files/${encodeURIComponent(fileId)}`, config);
+                    
+                    const updatedCourse = { ...course };
+                    const mIdx = updatedCourse.modules.findIndex(m => m._id === moduleId);
+                    if (mIdx !== -1) {
+                        const vIdx = updatedCourse.modules[mIdx].videos.findIndex(v => v._id === videoId);
+                        if (vIdx !== -1 && updatedCourse.modules[mIdx].videos[vIdx].attachments) {
+                            updatedCourse.modules[mIdx].videos[vIdx].attachments = updatedCourse.modules[mIdx].videos[vIdx].attachments.filter(f => f._id !== fileId && f.name !== fileId && f.url !== fileId);
+                        }
+                    }
+                    setCourse(updatedCourse);
+                    showToast('File deleted', 'success');
+                } catch (error) {
+                    console.error('File delete failed:', error);
+                    showToast('Deletion failed', 'error');
+                }
+            }
+        });
     };
 
-    // ---- Quiz Editor ----
+    // ---- Quiz Editor (Module & Lesson/Class Wise) ----
     const handleOpenQuizEditor = (mod) => {
+        setQuizTarget('module');
         setActiveQuizModuleId(mod._id);
+        setActiveQuizVideoId(null);
+        setQuizTargetTitle(mod.title);
         setQuizQuestions(mod.quiz?.questions || []);
         setNewQuestion({ question: '', options: ['', '', '', ''], correctIndex: 0, explanation: '' });
         setOpenQuizEditor(true);
     };
 
+    const handleOpenLessonQuiz = (mod, vid) => {
+        setQuizTarget('lesson');
+        setActiveQuizModuleId(mod._id);
+        setActiveQuizVideoId(vid._id);
+        setQuizTargetTitle(vid.title);
+        // Load quiz questions if available, or convert existing exercises
+        let existingQuestions = vid.quiz?.questions || [];
+        if (existingQuestions.length === 0 && vid.exercises && vid.exercises.length > 0) {
+            existingQuestions = vid.exercises.map((ex, i) => ({
+                _id: ex._id || `q_${Date.now()}_${i}`,
+                question: ex.question || '',
+                options: ex.options || ['', '', '', ''],
+                correctIndex: ex.options?.indexOf(ex.correctAnswer) >= 0 ? ex.options.indexOf(ex.correctAnswer) : 0,
+                explanation: ex.explanation || ''
+            }));
+        }
+        setQuizQuestions(existingQuestions);
+        setNewQuestion({ question: '', options: ['', '', '', ''], correctIndex: 0, explanation: '' });
+        setOpenQuizEditor(true);
+    };
+
+    // ---- Edit Lesson / Document Handler ----
+    const handleOpenEditLesson = (modId, vid) => {
+        setEditingLesson({ moduleId: modId, lesson: vid });
+        setEditLessonTitle(vid.title || '');
+        setEditLessonUrl(vid.url || '');
+        setEditLessonThumbnail(vid.thumbnail || '');
+        setEditLessonFile(null);
+        setOpenEditLesson(true);
+    };
+
+    const handleSaveLessonEdit = async () => {
+        if (!editLessonTitle.trim()) {
+            showToast('Please enter a lesson title', 'error');
+            return;
+        }
+        const { moduleId, lesson } = editingLesson || {};
+        if (!moduleId || !lesson) return;
+
+        setEditLessonSaving(true);
+        try {
+            if (lesson.contentType === 'document' || editLessonFile) {
+                const config = getAuthConfig('multipart/form-data');
+                if (!config) return;
+                const formData = new FormData();
+                formData.append('title', editLessonTitle);
+                if (editLessonThumbnail) {
+                    formData.append('thumbnail', editLessonThumbnail);
+                }
+                if (editLessonFile) {
+                    formData.append('document', editLessonFile);
+                }
+                await axios.put(`/api/courses/${id}/modules/${moduleId}/videos/${lesson._id}/update-document`, formData, config);
+            } else {
+                const config = getAuthConfig();
+                if (!config) return;
+                await axios.put(`/api/courses/${id}/modules/${moduleId}/videos/${lesson._id}`, {
+                    title: editLessonTitle,
+                    url: editLessonUrl,
+                    thumbnail: editLessonThumbnail
+                }, config);
+            }
+            showToast('Lesson updated successfully!', 'success');
+            setOpenEditLesson(false);
+            setEditingLesson(null);
+            fetchCourse();
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to update lesson', 'error');
+        } finally {
+            setEditLessonSaving(false);
+        }
+    };
+
     const handleAddQuestion = () => {
         if (!newQuestion.question.trim()) { showToast('Enter a question', 'error'); return; }
         if (newQuestion.options.some(o => !o.trim())) { showToast('Fill all 4 options', 'error'); return; }
-        setQuizQuestions(prev => [...prev, { ...newQuestion, _id: `q_${Date.now()}` }]);
+        
+        if (newQuestion._id) {
+            setQuizQuestions(prev => prev.map(q => q._id === newQuestion._id ? { ...newQuestion } : q));
+            showToast('Question updated', 'success');
+        } else {
+            setQuizQuestions(prev => [...prev, { ...newQuestion, _id: `q_${Date.now()}` }]);
+        }
         setNewQuestion({ question: '', options: ['', '', '', ''], correctIndex: 0, explanation: '' });
+    };
+    
+    const handleEditQuestion = (q) => {
+        setNewQuestion({
+            _id: q._id,
+            question: q.question,
+            options: [...q.options],
+            correctIndex: q.correctIndex,
+            explanation: q.explanation || ''
+        });
+        // Scroll to form
+        document.getElementById('quiz-question-form')?.scrollIntoView({ behavior: 'smooth' });
     };
 
     const downloadQuizExcelTemplate = () => {
@@ -431,12 +617,17 @@ const PartnerCourseEditor = () => {
     };
 
     const handleSaveQuiz = async () => {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const config = getAuthConfig();
+        if (!config) return;
         setQuizSaving(true);
         try {
-            await axios.put(`/api/courses/${id}/modules/${activeQuizModuleId}/quiz`, { questions: quizQuestions }, config);
-            showToast('Quiz saved!', 'success');
+            if (quizTarget === 'lesson') {
+                await axios.put(`/api/courses/${id}/modules/${activeQuizModuleId}/videos/${activeQuizVideoId}/quiz`, { questions: quizQuestions }, config);
+                showToast('Class assessment saved!', 'success');
+            } else {
+                await axios.put(`/api/courses/${id}/modules/${activeQuizModuleId}/quiz`, { questions: quizQuestions }, config);
+                showToast('Section quiz saved!', 'success');
+            }
             setOpenQuizEditor(false);
             fetchCourse();
         } catch (error) {
@@ -461,8 +652,8 @@ const PartnerCourseEditor = () => {
     };
 
     const handleSavePublishTargets = async () => {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        const config = getAuthConfig();
+        if (!config) return;
         setPublishSaving(true);
         try {
             await axios.put(`/api/courses/${id}/modules/${activePublishModuleId}/publish`, { batchIds: selectedPublishBatchIds }, config);
@@ -502,7 +693,7 @@ const PartnerCourseEditor = () => {
                         course.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
                         'bg-amber-500/10 text-amber-400 border-amber-500/20'
                     }`}>
-                        {course.status || 'Pending'} Approval
+                        {course.status === 'approved' ? 'Approved' : `${course.status || 'Pending'} Approval`}
                     </span>
                     <ModernButton onClick={handleUpdate} className="flex items-center h-12">
                         <Save size={18} className="mr-2" /> Save Draft
@@ -683,18 +874,66 @@ const PartnerCourseEditor = () => {
                                                         <div 
                                                             className="p-3 bg-white/5 rounded-xl border border-transparent hover:border-white/10 flex items-center justify-between transition-all group/item"
                                                         >
-                                                            <div className="flex items-center gap-3">
-                                                                <Video size={16} className="text-white/30 group-hover/item:text-primary transition-colors" />
-                                                                <span className="text-xs text-white/60 group-hover/item:text-white font-medium">{vid.title}</span>
+                                                            <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
+                                                                {vid.contentType === 'document' ? (
+                                                                    <FileText size={16} className="text-emerald-400 shrink-0" />
+                                                                ) : vid.thumbnail ? (
+                                                                    <img src={getMediaUrl(vid.thumbnail)} alt="" className="w-6 h-6 rounded object-cover border border-white/20 shrink-0" />
+                                                                ) : (
+                                                                    <Video size={16} className="text-white/30 group-hover/item:text-primary transition-colors shrink-0" />
+                                                                )}
+                                                                <span className="text-xs text-white/80 group-hover/item:text-white font-medium truncate">{vid.title}</span>
+                                                                {vid.contentType === 'document' && (
+                                                                    <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 shrink-0">
+                                                                        Doc
+                                                                    </span>
+                                                                )}
+                                                                {(vid.quiz?.questions?.length > 0 || vid.exercises?.length > 0) && (
+                                                                    <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-blue-500/15 text-blue-300 border border-blue-500/20 shrink-0">
+                                                                        ✓ {vid.quiz?.questions?.length || vid.exercises?.length}Q Assessment
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <label className="p-1.5 text-white/10 hover:text-primary-light hover:bg-white/5 rounded-lg transition-all cursor-pointer" title="Upload Attachment">
+                                                            <div className="flex items-center gap-1.5 shrink-0">
+                                                                {/* Class Wise Assessment Button */}
+                                                                <button
+                                                                    type="button"
+                                                                    className={`p-1.5 rounded-lg transition-all text-xs flex items-center gap-1 ${
+                                                                        vid.quiz?.questions?.length > 0 || vid.exercises?.length > 0
+                                                                            ? 'text-blue-400 bg-blue-500/10 hover:bg-blue-500/20'
+                                                                            : 'text-white/30 hover:text-blue-400 hover:bg-white/5'
+                                                                    }`}
+                                                                    onClick={() => handleOpenLessonQuiz(mod, vid)}
+                                                                    title="Class Assessment (Quiz)"
+                                                                >
+                                                                    <CheckSquare size={14} />
+                                                                    <span className="text-[10px] font-bold hidden sm:inline">
+                                                                        {vid.quiz?.questions?.length > 0 || vid.exercises?.length > 0 ? 'Assessment' : '+ Assessment'}
+                                                                    </span>
+                                                                </button>
+
+                                                                {/* Edit Document/Lesson Button */}
+                                                                <button
+                                                                    type="button"
+                                                                    className="p-1.5 text-white/30 hover:text-amber-400 hover:bg-white/5 rounded-lg transition-all"
+                                                                    onClick={() => handleOpenEditLesson(mod._id, vid)}
+                                                                    title="Edit Lesson / Replace Document"
+                                                                >
+                                                                    <Edit2 size={14} />
+                                                                </button>
+
+                                                                {/* Upload Attachment */}
+                                                                <label className="p-1.5 text-white/30 hover:text-primary-light hover:bg-white/5 rounded-lg transition-all cursor-pointer" title="Upload Attachment">
                                                                     <Upload size={14} />
                                                                     <input type="file" className="hidden" onChange={(e) => handleLessonFileUpload(mod._id, vid._id, e)} />
                                                                 </label>
+
+                                                                {/* Delete Lesson */}
                                                                 <button 
-                                                                    className="p-1.5 text-white/10 group-hover/item:text-red-500/50 hover:!text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                    type="button"
+                                                                    className="p-1.5 text-white/30 group-hover/item:text-red-500/50 hover:!text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                                                                     onClick={() => handleDeleteVideo(mod._id, vid._id)}
+                                                                    title="Delete Lesson"
                                                                 >
                                                                     <Trash2 size={14} />
                                                                 </button>
@@ -704,15 +943,16 @@ const PartnerCourseEditor = () => {
                                                         {/* Attachments List */}
                                                         {vid.attachments?.length > 0 && (
                                                             <div className="ml-8 space-y-1">
-                                                                {vid.attachments.map(file => (
-                                                                    <div key={file._id} className="flex items-center justify-between p-2 bg-white/[0.02] border border-white/5 rounded-lg group/file">
+                                                                {vid.attachments.map((file, fIdx) => (
+                                                                    <div key={file._id || file.url || fIdx} className="flex items-center justify-between p-2 bg-white/[0.02] border border-white/5 rounded-lg group/file">
                                                                         <div className="flex items-center gap-2 overflow-hidden">
                                                                             <FileText size={12} className="text-white/20" />
                                                                             <span className="text-[10px] text-white/40 truncate max-w-[150px]">{file.name}</span>
                                                                         </div>
                                                                         <button 
-                                                                            className="p-1 text-white/10 hover:text-red-500 opacity-0 group-file/file:opacity-100 transition-all"
-                                                                            onClick={() => handleDeleteFile(mod._id, vid._id, file._id)}
+                                                                            type="button"
+                                                                            className="p-1 text-white/10 hover:text-red-500 opacity-0 group-hover/file:opacity-100 transition-all"
+                                                                            onClick={() => handleDeleteFile(mod._id, vid._id, file._id || file.url || file.name)}
                                                                         >
                                                                             <X size={10} />
                                                                         </button>
@@ -811,10 +1051,64 @@ const PartnerCourseEditor = () => {
                                 />
                             </div>
 
+                            {/* Cover Image (Optional) - for video links and uploaded videos */}
+                            {(lessonMode === 'link' || lessonMode === 'video') && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest">
+                                            Cover Image / Thumbnail (Optional)
+                                        </label>
+                                        {newVideoData.thumbnail && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewVideoData(prev => ({ ...prev, thumbnail: '' }))}
+                                                className="text-red-400 hover:text-red-300 text-[10px] font-bold lowercase flex items-center gap-0.5"
+                                            >
+                                                <X size={10} /> remove
+                                            </button>
+                                        )}
+                                    </div>
+                                    {newVideoData.thumbnail ? (
+                                        <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/20 group">
+                                            <img
+                                                src={getMediaUrl(newVideoData.thumbnail)}
+                                                alt="Cover preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                <label className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold cursor-pointer transition-colors">
+                                                    Change Image
+                                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLessonCoverUpload(e, false)} disabled={lessonCoverUploading} />
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setNewVideoData(prev => ({ ...prev, thumbnail: '' }))}
+                                                    className="px-3 py-1.5 rounded-lg bg-red-500/30 hover:bg-red-500/50 text-red-200 text-xs font-bold transition-colors"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <label className={`flex items-center gap-3 w-full px-4 py-3 border border-dashed rounded-xl cursor-pointer transition-all ${
+                                            lessonCoverUploading ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-primary/30 hover:bg-white/5'
+                                        }`}>
+                                            <ImageIcon size={18} className="text-white/40 shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <span className="text-xs text-white/50 block truncate">
+                                                    {lessonCoverUploading ? 'Uploading cover...' : 'Upload custom cover image (PNG, JPG, WEBP)'}
+                                                </span>
+                                            </div>
+                                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLessonCoverUpload(e, false)} disabled={lessonCoverUploading} />
+                                        </label>
+                                    )}
+                                </div>
+                            )}
+
                             {/* VIDEO LINK MODE */}
                             {lessonMode === 'link' && (
                                 <div>
-                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-1.5">Video / Content URL</label>
+                                    <label className="block text-[10px] font-black text-white/30 uppercase tracking-widest mb-1.5">Video / Content URL (Optional)</label>
                                     <div className="relative">
                                         <Link size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" />
                                         <input
@@ -824,6 +1118,7 @@ const PartnerCourseEditor = () => {
                                             onChange={e => setNewVideoData({...newVideoData, url: e.target.value})}
                                         />
                                     </div>
+                                    <p className="text-[10px] text-white/30 mt-1.5">Leave blank to create the lesson now and add the link later from Edit Lesson.</p>
                                     <div className="flex gap-4 mt-6">
                                         <ModernButton variant="secondary" className="flex-1 border border-white/10" onClick={() => setOpenAddVideo(false)}>Cancel</ModernButton>
                                         <ModernButton className="flex-1" onClick={handleAddVideo}>Add to Module</ModernButton>
@@ -907,9 +1202,17 @@ const PartnerCourseEditor = () => {
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[300] flex items-center justify-center p-4" onClick={() => setOpenQuizEditor(false)}>
                     <GlassCard className="w-full max-w-2xl p-8 border-white/20 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-6">
-                            <h4 className="text-xl font-bold text-white flex items-center gap-2">
-                                <HelpCircle className="text-emerald-400" /> Module Assessment (Quiz)
-                            </h4>
+                            <div>
+                                <h4 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <HelpCircle className={quizTarget === 'lesson' ? 'text-blue-400' : 'text-emerald-400'} /> 
+                                    {quizTarget === 'lesson' ? 'Class Assessment (Quiz)' : 'Section Assessment (Quiz)'}
+                                </h4>
+                                {quizTargetTitle && (
+                                    <p className="text-xs text-white/50 mt-1">
+                                        For: <span className="text-white font-bold">{quizTargetTitle}</span>
+                                    </p>
+                                )}
+                            </div>
                             <div className="flex items-center gap-2">
                                 <button
                                     type="button"
@@ -949,13 +1252,23 @@ const PartnerCourseEditor = () => {
                                     <h5 className="text-[10px] font-black text-white/40 uppercase tracking-widest">Existing Questions ({quizQuestions.length})</h5>
                                     {quizQuestions.map((q, idx) => (
                                         <div key={q._id || idx} className="p-4 bg-white/5 rounded-xl border border-white/10 relative group">
-                                            <button 
-                                                onClick={() => handleRemoveQuestion(q._id)}
-                                                className="absolute top-3 right-3 text-white/20 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                            <p className="font-bold text-sm text-white mb-2">{idx + 1}. {q.question}</p>
+                                            <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button 
+                                                    onClick={() => handleEditQuestion(q)}
+                                                    className="p-1.5 text-white/20 hover:text-blue-400 bg-black/20 hover:bg-black/40 rounded-lg transition-all"
+                                                    title="Edit Question"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleRemoveQuestion(q._id)}
+                                                    className="p-1.5 text-white/20 hover:text-red-400 bg-black/20 hover:bg-black/40 rounded-lg transition-all"
+                                                    title="Delete Question"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                            <p className="font-bold text-sm text-white mb-2 pr-16">{idx + 1}. {q.question}</p>
                                             <div className="grid grid-cols-2 gap-2">
                                                 {q.options.map((opt, oIdx) => (
                                                     <div key={oIdx} className={`text-xs p-2 rounded-lg ${oIdx === q.correctIndex ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-black/20 text-white/50 border border-transparent'}`}>
@@ -968,9 +1281,21 @@ const PartnerCourseEditor = () => {
                                 </div>
                             )}
 
-                            {/* Add New Question Form */}
-                            <div className="p-5 bg-white/[0.02] rounded-2xl border border-dashed border-white/20 space-y-4">
-                                <h5 className="text-[12px] font-black text-white/60 uppercase tracking-widest">Add New Question</h5>
+                            {/* Add/Edit Question Form */}
+                            <div id="quiz-question-form" className={`p-5 rounded-2xl border border-dashed space-y-4 ${newQuestion._id ? 'bg-blue-500/[0.02] border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]' : 'bg-white/[0.02] border-white/20'}`}>
+                                <div className="flex items-center justify-between">
+                                    <h5 className="text-[12px] font-black text-white/60 uppercase tracking-widest">
+                                        {newQuestion._id ? 'Edit Question' : 'Add New Question'}
+                                    </h5>
+                                    {newQuestion._id && (
+                                        <button 
+                                            onClick={() => setNewQuestion({ question: '', options: ['', '', '', ''], correctIndex: 0, explanation: '' })}
+                                            className="text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300"
+                                        >
+                                            Cancel Edit
+                                        </button>
+                                    )}
+                                </div>
                                 
                                 <div>
                                     <label className="block text-xs font-medium text-white/50 mb-1">Question Text</label>
@@ -1019,8 +1344,12 @@ const PartnerCourseEditor = () => {
                                     />
                                 </div>
 
-                                <ModernButton onClick={handleAddQuestion} variant="secondary" size="sm" className="w-full mt-4 border-white/10 hover:border-white/20">
-                                    <Plus size={16} className="mr-2" /> Add Question to Quiz
+                                <ModernButton onClick={handleAddQuestion} variant={newQuestion._id ? "primary" : "secondary"} size="sm" className={`w-full mt-4 ${!newQuestion._id && 'border-white/10 hover:border-white/20'}`}>
+                                    {newQuestion._id ? (
+                                        <>Save Changes</>
+                                    ) : (
+                                        <><Plus size={16} className="mr-2" /> Add Question to Quiz</>
+                                    )}
                                 </ModernButton>
                             </div>
 
@@ -1029,7 +1358,150 @@ const PartnerCourseEditor = () => {
                                     Cancel
                                 </ModernButton>
                                 <ModernButton onClick={handleSaveQuiz} disabled={quizSaving} className="bg-emerald-500 hover:bg-emerald-400">
-                                    {quizSaving ? 'Saving...' : 'Save Quiz Assessment'}
+                                    {quizSaving ? 'Saving...' : (quizTarget === 'lesson' ? 'Save Class Assessment' : 'Save Section Assessment')}
+                                </ModernButton>
+                            </div>
+                        </div>
+                    </GlassCard>
+                </div>
+            )}
+
+            {/* EDIT LESSON / DOCUMENT MODAL */}
+            {openEditLesson && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[300] flex items-center justify-center p-4" onClick={() => setOpenEditLesson(false)}>
+                    <GlassCard className="w-full max-w-md p-8 border-white/20" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                                <Edit2 size={18} className="text-amber-400" /> Edit Lesson
+                            </h4>
+                            <button onClick={() => setOpenEditLesson(false)} className="text-white/40 hover:text-white">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-5">
+                            <div>
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Lesson Title</label>
+                                <input
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-primary/50 transition-all text-sm"
+                                    placeholder="Enter lesson title"
+                                    value={editLessonTitle}
+                                    onChange={e => setEditLessonTitle(e.target.value)}
+                                    autoFocus
+                                />
+                            </div>
+
+                            {editingLesson?.lesson?.contentType === 'document' && (
+                                <div>
+                                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">
+                                        Replace Document File (Optional)
+                                    </label>
+                                    <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
+                                        editLessonFile ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-white/10 hover:border-emerald-400/30 hover:bg-white/5'
+                                    }`}>
+                                        <FileText size={24} className={editLessonFile ? 'text-emerald-400 mb-2' : 'text-white/20 mb-2'} />
+                                        {editLessonFile ? (
+                                            <>
+                                                <span className="text-xs font-bold text-emerald-400 max-w-[220px] truncate">{editLessonFile.name}</span>
+                                                <span className="text-[10px] text-white/30 mt-1">{(editLessonFile.size / 1024).toFixed(0)} KB</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-xs text-white/40">Current: {editingLesson?.lesson?.fileName || 'Document uploaded'}</span>
+                                                <span className="text-[10px] text-white/20 mt-1">Click to select new file (PDF, Word, Excel, PPT)</span>
+                                            </>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip"
+                                            className="hidden"
+                                            onChange={e => setEditLessonFile(e.target.files[0] || null)}
+                                        />
+                                    </label>
+                                    {editingLesson?.lesson?.url && (
+                                        <p className="text-[10px] text-emerald-400/70 mt-2">
+                                            Current file linked and active. Uploading a new file will replace it.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                            {editingLesson?.lesson?.contentType !== 'document' && (
+                                <div>
+                                    <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5">Video / Content URL (Optional)</label>
+                                    <div className="relative">
+                                        <Link size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/20" />
+                                        <input
+                                            className="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-primary/50 transition-all text-xs font-mono"
+                                            placeholder="https://vimeo.com/..."
+                                            value={editLessonUrl}
+                                            onChange={e => setEditLessonUrl(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {editingLesson?.lesson?.contentType !== 'document' && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest">
+                                            Cover Image / Thumbnail (Optional)
+                                        </label>
+                                        {editLessonThumbnail && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditLessonThumbnail('')}
+                                                className="text-red-400 hover:text-red-300 text-[10px] font-bold lowercase flex items-center gap-0.5"
+                                            >
+                                                <X size={10} /> remove
+                                            </button>
+                                        )}
+                                    </div>
+                                    {editLessonThumbnail ? (
+                                        <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/20 group">
+                                            <img
+                                                src={getMediaUrl(editLessonThumbnail)}
+                                                alt="Cover preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                <label className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold cursor-pointer transition-colors">
+                                                    Change Image
+                                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLessonCoverUpload(e, true)} disabled={editLessonThumbnailUploading} />
+                                                </label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditLessonThumbnail('')}
+                                                    className="px-3 py-1.5 rounded-lg bg-red-500/30 hover:bg-red-500/50 text-red-200 text-xs font-bold transition-colors"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <label className={`flex items-center gap-3 w-full px-4 py-3 border border-dashed rounded-xl cursor-pointer transition-all ${
+                                            editLessonThumbnailUploading ? 'border-amber-500/50 bg-amber-500/5' : 'border-white/10 hover:border-amber-400/30 hover:bg-white/5'
+                                        }`}>
+                                            <ImageIcon size={18} className="text-white/40 shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <span className="text-xs text-white/50 block truncate">
+                                                    {editLessonThumbnailUploading ? 'Uploading cover...' : 'Upload custom cover image (PNG, JPG, WEBP)'}
+                                                </span>
+                                            </div>
+                                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleLessonCoverUpload(e, true)} disabled={editLessonThumbnailUploading} />
+                                        </label>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex gap-4 pt-2">
+                                <ModernButton variant="secondary" className="flex-1 border border-white/10" onClick={() => setOpenEditLesson(false)}>
+                                    Cancel
+                                </ModernButton>
+                                <ModernButton
+                                    className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold"
+                                    onClick={handleSaveLessonEdit}
+                                    disabled={editLessonSaving}
+                                >
+                                    {editLessonSaving ? 'Saving...' : 'Save Changes'}
                                 </ModernButton>
                             </div>
                         </div>
@@ -1087,6 +1559,39 @@ const PartnerCourseEditor = () => {
                             </ModernButton>
                         </div>
                     </GlassCard>
+                </div>
+            )}
+            {deleteConfirm.isOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[500] flex items-center justify-center p-4" onClick={() => setDeleteConfirm({ isOpen: false, text: '', onConfirm: null })}>
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-500"></div>
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                                <Trash2 className="text-red-400" size={20} />
+                            </div>
+                            <h3 className="text-lg font-bold text-white tracking-tight">Confirm Deletion</h3>
+                        </div>
+                        <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+                            {deleteConfirm.text}
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <ModernButton variant="secondary" onClick={() => setDeleteConfirm({ isOpen: false, text: '', onConfirm: null })} className="!py-2 !px-4 text-sm">
+                                Cancel
+                            </ModernButton>
+                            <ModernButton 
+                                className="!bg-red-500 hover:!bg-red-600 !py-2 !px-4 text-sm"
+                                onClick={() => {
+                                    if(deleteConfirm.onConfirm) deleteConfirm.onConfirm();
+                                    setDeleteConfirm({ isOpen: false, text: '', onConfirm: null });
+                                }}
+                            >
+                                Delete
+                            </ModernButton>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

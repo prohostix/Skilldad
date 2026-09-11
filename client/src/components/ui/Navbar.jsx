@@ -11,13 +11,15 @@ const Navbar = ({ compact = false }) => {
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
     useEffect(() => {
         if (theme === 'light') {
             document.documentElement.classList.add('light-mode');
+            document.documentElement.classList.remove('dark');
         } else {
             document.documentElement.classList.remove('light-mode');
+            document.documentElement.classList.add('dark');
         }
         localStorage.setItem('theme', theme);
     }, [theme]);
@@ -43,12 +45,29 @@ const Navbar = ({ compact = false }) => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+    const [studyAbroadEnabled, setStudyAbroadEnabled] = useState(true);
+
+    useEffect(() => {
+        // Check global visibility of Study Abroad feature
+        const fetchSettings = async () => {
+            try {
+                // Ensure axios is available or import it dynamically if not at top level
+                const axios = (await import('axios')).default;
+                const { data } = await axios.get('/api/public/cms/global_settings');
+                if (data.study_abroad_feature) {
+                    setStudyAbroadEnabled(data.study_abroad_feature.enabled !== false);
+                }
+            } catch (err) {
+                // ignore
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const navItems = [
         { name: 'Home', href: '/' },
         { name: 'Courses', href: '/courses' },
         { name: 'Universities', href: '/platform' },
-        { name: 'Study Abroad', href: '/study-abroad' },
         { name: 'Services', href: '/services' },
         { name: 'About Us', href: '/about' },
     ];

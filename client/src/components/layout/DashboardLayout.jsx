@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import ModernSidebar from './ModernSidebar';
 import DashboardNavbar from './DashboardNavbar';
 import BottomNav from '../ui/BottomNav';
-import Footer from '../ui/Footer';
+
 import FloatingHelpWidget from '../ui/FloatingHelpWidget';
 import { ReferFAB } from '../student/ReferralWidget';
 import ReferralModal from '../student/ReferralModal';
@@ -52,18 +52,13 @@ const DashboardLayout = () => {
                 <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 max-w-full">
                     <DashboardNavbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-                    <main className={`${location.pathname.includes('/session/') || location.pathname.includes('/course/') ? 'p-0' : 'px-3 sm:px-6 lg:px-8 py-3 lg:py-4 max-w-[1600px] mx-auto'} w-full flex-1`}>
+                    <main className={`${location.pathname.includes('/session/') || location.pathname.includes('/course/') ? 'p-0' : 'px-3 sm:px-6 lg:px-8 pt-1.5 pb-3 lg:pt-2 lg:pb-4 max-w-[1600px] mx-auto'} w-full flex-1`}>
                         <Outlet />
                     </main>
                 </div>
             </div>
 
-            {/* Bottom Section: Full Width Footer */}
-            {!location.pathname.includes('/session/') && (
-                <div className="z-20">
-                    <Footer forceVisible={true} />
-                </div>
-            )}
+            {/* Bottom Section: Full Width Footer Removed as requested */}
             {!location.pathname.includes('/session/') && <BottomNav />}
 
             {!location.pathname.includes('/session/') && <FloatingHelpWidget />}

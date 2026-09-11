@@ -7,8 +7,15 @@ import App from './App.jsx'
 import { ToastProvider } from './context/ToastContext'
 
 // Configure axios base URL for entire app
-// Uses VITE_API_URL env var, or defaults to same-origin (handled by Nginx proxy)
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || ''
+// In production or on any remote host, always use same-origin (handled by Nginx reverse proxy)
+const envApi = import.meta.env.VITE_API_URL;
+if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  axios.defaults.baseURL = '';
+} else if (import.meta.env.PROD) {
+  axios.defaults.baseURL = (envApi && !envApi.includes('localhost')) ? envApi : '';
+} else {
+  axios.defaults.baseURL = envApi || '';
+}
 
 
 createRoot(document.getElementById('root')).render(

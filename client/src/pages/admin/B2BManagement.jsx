@@ -526,7 +526,7 @@ const B2BManagement = () => {
                                             </div>
                                             <button
                                                 onClick={() => navigate(`/admin/b2b/${partner._id}`)}
-                                                className="font-bold text-white hover:text-primary transition-colors text-left"
+                                                className="font-bold dark:text-white text-slate-900 hover:text-primary transition-colors text-left"
                                             >
                                                 {partner.name}
                                             </button>

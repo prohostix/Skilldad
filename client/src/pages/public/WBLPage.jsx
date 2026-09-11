@@ -8,7 +8,11 @@ import CourseCard from '../../components/CourseCard';
 import ModernButton from '../../components/ui/ModernButton';
 
 const WBLPage = () => {
-    const [activeTab, setActiveTab] = useState('domestic');
+    const [activeTab, setActiveTab] = useState(sessionStorage.getItem('wblActiveTab') || 'domestic');
+
+    useEffect(() => {
+        sessionStorage.setItem('wblActiveTab', activeTab);
+    }, [activeTab]);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -37,7 +41,7 @@ const WBLPage = () => {
         return courses.filter(course => {
             const programType = course.programType || course.program_type || 'course';
             if (activeTab === 'domestic') {
-                return programType === 'degree_programme';
+                return programType === 'wbl_domestic';
             } else if (activeTab === 'abroad') {
                 return programType === 'wbl_abroad';
             }
@@ -46,7 +50,7 @@ const WBLPage = () => {
     }, [courses, activeTab]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] text-white selection:bg-primary/30 relative overflow-hidden">
+        <div className="min-h-screen selection:bg-primary/30 relative overflow-hidden text-text-primary bg-black">
             <Navbar />
             
             {/* Background Glows */}

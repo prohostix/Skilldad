@@ -51,7 +51,7 @@ const getMyCourses = asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
     const enrollRes = await query(`
-        SELECT e.*, c.title, c.thumbnail, c.category, u.name as instructor_name, b.name as batch_name
+        SELECT e.*, c.title, c.thumbnail, c.category, c.modules, u.name as instructor_name, b.name as batch_name
         FROM enrollments e
         JOIN courses c ON e.course_id = c.id
         LEFT JOIN users u ON c.instructor_id = u.id
@@ -59,19 +59,42 @@ const getMyCourses = asyncHandler(async (req, res) => {
         WHERE e.student_id = $1 AND e.status != 'inactive' AND (b.is_active IS NULL OR b.is_active = true)
     `, [userId]);
 
-    const transformed = enrollRes.rows.map(row => ({
-        ...row,
-        _id: row.id,
-        completedVideos: Array.isArray(row.completed_videos) ? row.completed_videos : [],
-        completedExercises: Array.isArray(row.completed_exercises) ? row.completed_exercises : [],
-        course: {
-            _id: row.course_id,
-            title: row.title,
-            thumbnail: row.thumbnail,
-            category: row.category,
-            instructor: { name: row.instructor_name }
+    const transformed = enrollRes.rows.map(row => {
+        const rawModules = Array.isArray(row.modules) 
+            ? row.modules 
+            : (typeof row.modules === 'string' ? JSON.parse(row.modules || '[]') : []);
+        const modules = Array.isArray(rawModules) ? rawModules : [];
+        const totalModules = modules.length > 0 ? modules.length : (row.total_modules || 0);
+        const completedVideos = Array.isArray(row.completed_videos) ? row.completed_videos : [];
+
+        let completedModules = 0;
+        if (totalModules > 0 && completedVideos.length > 0) {
+            completedModules = modules.filter(m => {
+                const vids = Array.isArray(m.videos) ? m.videos : [];
+                if (vids.length === 0) return false;
+                return vids.every(v => completedVideos.includes(v._id || v.id));
+            }).length;
+        } else {
+            completedModules = row.completed_modules || 0;
         }
-    }));
+
+        return {
+            ...row,
+            _id: row.id,
+            completedVideos,
+            completedExercises: Array.isArray(row.completed_exercises) ? row.completed_exercises : [],
+            totalModules,
+            completedModules,
+            course: {
+                _id: row.course_id,
+                title: row.title,
+                thumbnail: row.thumbnail,
+                category: row.category,
+                modules,
+                instructor: { name: row.instructor_name }
+            }
+        };
+    });
 
     res.json(transformed);
 });
@@ -114,21 +137,43 @@ const updateProgress = asyncHandler(async (req, res) => {
         }
 
         // 2. Recalculate and update the progress percentage
-        // We fetch the course to get total videos count
+        // We fetch the course to get total videos count and modules count
         const courseRes = await query('SELECT modules FROM courses WHERE id = $1', [courseId]);
         if (courseRes.rows[0]) {
-            const modules = courseRes.rows[0].modules || [];
-            const totalVideos = modules.reduce((acc, m) => acc + (m.videos?.length || 0), 0) || 1;
+            const rawModules = courseRes.rows[0].modules || [];
+            const modules = Array.isArray(rawModules) 
+                ? rawModules 
+                : (typeof rawModules === 'string' ? JSON.parse(rawModules || '[]') : []);
+            const totalModules = modules.length;
+            const courseVideoIds = new Set();
+            modules.forEach(m => (m.videos || []).forEach(v => {
+                const vid = v._id || v.id;
+                if (vid) courseVideoIds.add(String(vid));
+            }));
+            const totalVideos = courseVideoIds.size || 1;
             
             const enrollData = await query('SELECT completed_videos FROM enrollments WHERE student_id = $1 AND course_id = $2', [userId, courseId]);
             if (enrollData.rows[0]) {
-                const completed = Array.isArray(enrollData.rows[0].completed_videos) ? enrollData.rows[0].completed_videos.length : 0;
-                const newProgress = Math.min(100, Math.round((completed / totalVideos) * 100));
+                const completedVideos = Array.isArray(enrollData.rows[0].completed_videos) ? enrollData.rows[0].completed_videos : [];
+                const completed = completedVideos.filter(id => courseVideoIds.has(String(id))).length;
+                const newProgress = Math.min(100, Math.max(0, Math.round((completed / totalVideos) * 100)));
                 
-                await query('UPDATE enrollments SET progress = $1 WHERE student_id = $2 AND course_id = $3', [newProgress, userId, courseId]);
-                console.log(`[Progress Update] Student ${userId} course ${courseId} is now ${newProgress}%`);
+                let completedModules = 0;
+                if (totalModules > 0 && completedVideos.length > 0) {
+                    completedModules = modules.filter(m => {
+                        const vids = Array.isArray(m.videos) ? m.videos : [];
+                        if (vids.length === 0) return false;
+                        return vids.every(v => completedVideos.includes(v._id || v.id));
+                    }).length;
+                }
+
+                await query(
+                    'UPDATE enrollments SET progress = $1, completed_modules = $2, total_modules = $3, updated_at = NOW() WHERE student_id = $4 AND course_id = $5',
+                    [newProgress, completedModules, totalModules, userId, courseId]
+                );
+                console.log(`[Progress Update] Student ${userId} course ${courseId} is now ${newProgress}%, modules: ${completedModules}/${totalModules}`);
                 
-                return res.json({ success: true, progress: newProgress });
+                return res.json({ success: true, progress: newProgress, completedModules, totalModules });
             }
         }
     } else if (progress !== undefined) {

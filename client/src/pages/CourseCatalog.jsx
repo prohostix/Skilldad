@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -20,6 +20,7 @@ import CourseCard from '../components/CourseCard';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
+import StudyAbroad from './StudyAbroad';
 import { toast } from 'react-hot-toast';
 
 const CustomSelect = ({ value, onChange, options, className, align = "right" }) => {
@@ -139,16 +140,35 @@ const FormSelect = ({ value, onChange, options, className }) => {
 
 const CourseCatalog = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('');
-    const [programType, setProgramType] = useState('course');
-    const [selectedUniversity, setSelectedUniversity] = useState('All');
+    const [filter, setFilter] = useState(searchParams.get('search') || '');
+    const [programType, setProgramType] = useState(() => {
+        const saved = sessionStorage.getItem('catalogProgramType');
+        if (saved === 'wbl') return 'wbl_abroad';
+        return saved || 'course';
+    });
+    const [selectedUniversity, setSelectedUniversity] = useState(sessionStorage.getItem('catalogUniversity') || 'All');
+
+    useEffect(() => {
+        sessionStorage.setItem('catalogProgramType', programType);
+    }, [programType]);
+
+    useEffect(() => {
+        sessionStorage.setItem('catalogUniversity', selectedUniversity);
+    }, [selectedUniversity]);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [universityName, setUniversityName] = useState('');
     const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
     const [showAllMobile, setShowAllMobile] = useState(false);
     const [enquiryType, setEnquiryType] = useState('General Course Enquiry');
+
+    useEffect(() => {
+        if (searchParams.get('search')) {
+            setFilter(searchParams.get('search'));
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -202,8 +222,8 @@ const CourseCatalog = () => {
             const courseUniversity = course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad';
             const matchesUniversity = selectedUniversity === 'All' || courseUniversity === selectedUniversity;
 
-            const effectiveProgramType = programType === 'wbl_domestic' ? 'degree_programme' : programType;
-            const matchesProgramType = (course.programType || course.program_type || 'course') === effectiveProgramType;
+            // If there is an active search, search across ALL program types (Courses, SIDP, WBL)
+            const matchesProgramType = filter ? true : (course.programType || course.program_type || 'course') === programType;
 
             return matchesSearch && matchesUniversity && matchesProgramType;
         });
@@ -314,7 +334,7 @@ const CourseCatalog = () => {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            setProgramType('wbl');
+                                            setProgramType('wbl_abroad');
                                             setShowAllMobile(false);
                                         }}
                                         style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
@@ -324,6 +344,19 @@ const CourseCatalog = () => {
                                             }`}
                                     >
                                         Work-Based Learning
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setProgramType('study_abroad');
+                                            setShowAllMobile(false);
+                                        }}
+                                        style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
+                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'study_abroad'
+                                            ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
+                                            : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
+                                            }`}
+                                    >
+                                        Study Abroad
                                     </button>
                                 </div>
                             </div>
@@ -357,7 +390,7 @@ const CourseCatalog = () => {
                                                     setShowAllMobile(false);
                                                 }}
                                                 style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
-                                                className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'wbl_domestic' || programType === 'degree_programme'
+                                                className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'wbl_domestic'
                                                     ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                                     : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                                     }`}
@@ -375,62 +408,68 @@ const CourseCatalog = () => {
 
 
                 {/* Controls Section */}
-                <div className="max-w-[1300px] mx-auto mb-6 px-4">
-                    <div className="flex flex-col gap-4 items-stretch">
-                        {/* Search & Mobile Filter Toggle */}
-                        <div className="flex items-center gap-3 w-full">
-                            <div
-                                className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1 cursor-text`}
-                                onClick={() => document.getElementById('catalog-search')?.focus()}
-                            >
-                                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
-                                    <Search size={16} />
-                                </div>
-                                <input
-                                    id="catalog-search"
-                                    type="text"
-                                    placeholder="Search by tech, track, or instructor..."
-                                    className="w-full pl-10 pr-4 py-2.5 md:py-3.5 bg-white/[0.04] backdrop-blur-2xl shadow-2xl rounded-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-inter text-white placeholder:text-white/20 font-medium text-xs md:text-sm"
-                                    value={filter}
-                                    onChange={(e) => setFilter(e.target.value)}
-                                    onFocus={() => setIsSearchFocused(true)}
-                                    onBlur={() => {
-                                        // Delay blurring to allow Clear Search button to be clicked
-                                        setTimeout(() => {
-                                            if (!filter) setIsSearchFocused(false);
-                                        }, 200);
-                                    }}
-                                />
-                            </div>
-                            {/* University Filter - same row as search on desktop */}
-                            {!isFixedUniversity && universities.length > 2 && (
-                                <div className="hidden md:block shrink-0">
-                                    <CustomSelect
-                                        value={selectedUniversity}
-                                        onChange={setSelectedUniversity}
-                                        options={universities}
-                                        align="right"
-                                        className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-3 py-2.5 md:py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all font-inter text-xs md:text-sm shadow-xl min-w-[160px] max-w-[220px]"
+                {programType !== 'study_abroad' && (
+                    <div className="max-w-[1300px] mx-auto mb-6 px-4">
+                        <div className="flex flex-col gap-4 items-stretch">
+                            {/* Search & Mobile Filter Toggle */}
+                            <div className="flex items-center gap-3 w-full">
+                                <div
+                                    className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1 cursor-text`}
+                                    onClick={() => document.getElementById('catalog-search')?.focus()}
+                                >
+                                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
+                                        <Search size={16} />
+                                    </div>
+                                    <input
+                                        id="catalog-search"
+                                        type="text"
+                                        placeholder="Search by tech, track, or instructor..."
+                                        className="w-full pl-10 pr-4 py-2.5 md:py-3.5 bg-white/[0.04] backdrop-blur-2xl shadow-2xl rounded-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-inter text-white placeholder:text-white/20 font-medium text-xs md:text-sm"
+                                        value={filter}
+                                        onChange={(e) => setFilter(e.target.value)}
+                                        onFocus={() => setIsSearchFocused(true)}
+                                        onBlur={() => {
+                                            // Delay blurring to allow Clear Search button to be clicked
+                                            setTimeout(() => {
+                                                if (!filter) setIsSearchFocused(false);
+                                            }, 200);
+                                        }}
                                     />
                                 </div>
-                            )}
-
-                            <button
-                                onClick={() => setIsMobileFilterOpen(true)}
-                                className="md:hidden p-3.5 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 text-white/70 hover:text-white transition-colors flex shrink-0 items-center justify-center relative"
-                            >
-                                <Filter size={20} />
-                                {selectedUniversity !== 'All' && (
-                                    <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-primary border border-[#0A0714]"></span>
+                                {/* University Filter - same row as search on desktop */}
+                                {!isFixedUniversity && universities.length > 2 && (
+                                    <div className="hidden md:block shrink-0">
+                                        <CustomSelect
+                                            value={selectedUniversity}
+                                            onChange={setSelectedUniversity}
+                                            options={universities}
+                                            align="right"
+                                            className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-3 py-2.5 md:py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all font-inter text-xs md:text-sm shadow-xl min-w-[160px] max-w-[220px]"
+                                        />
+                                    </div>
                                 )}
-                            </button>
+
+                                <button
+                                    onClick={() => setIsMobileFilterOpen(true)}
+                                    className="md:hidden p-3.5 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 text-white/70 hover:text-white transition-colors flex shrink-0 items-center justify-center relative"
+                                >
+                                    <Filter size={20} />
+                                    {selectedUniversity !== 'All' && (
+                                        <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-primary border border-[#0A0714]"></span>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Grid Section */}
-                <div className="max-w-[1180px] mx-auto px-4">
-                    {programType === 'wbl' ? (
+                <div className={programType === 'study_abroad' ? "w-full mx-auto" : "max-w-[1180px] mx-auto px-4"}>
+                    {programType === 'study_abroad' ? (
+                        <div>
+                            <StudyAbroad isEmbedded={true} />
+                        </div>
+                    ) : programType === 'wbl' ? (
                         <div className="py-20 text-center">
                             <p className="text-white/60 text-lg">Please select International or Domestic programmes above.</p>
                         </div>
@@ -455,7 +494,7 @@ const CourseCatalog = () => {
                                 <h3 className="text-3xl font-black text-white font-space">No matches found</h3>
                                 <p className="text-text-muted font-inter max-w-sm mx-auto text-lg leading-relaxed">Try adjusting your search or filters to find what you're looking for.</p>
                             </div>
-                            <ModernButton variant="secondary" onClick={() => setFilter('')} className="!px-10 !py-5 uppercase tracking-widest font-black text-xs">
+                            <ModernButton variant="secondary" onClick={() => setFilter('')} className="!px-6 !py-3 uppercase tracking-widest font-bold text-xs">
                                 Reset Filters
                             </ModernButton>
                         </motion.div>
@@ -482,6 +521,13 @@ const CourseCatalog = () => {
                                 </div>
                             )}
                         </>
+                    )}
+
+                    {/* Study Abroad Section placed after Work-Based Learning */}
+                    {programType.startsWith('wbl') && !filter && (
+                        <div className="mt-20 pt-16 border-t border-white/10">
+                            <StudyAbroad isEmbedded={true} />
+                        </div>
                     )}
                 </div>
 

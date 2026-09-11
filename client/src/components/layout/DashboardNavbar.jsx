@@ -11,7 +11,8 @@ const Navbar = ({ onToggleSidebar }) => {
     const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [searchQuery, setSearchQuery] = useState('');
     
     useEffect(() => {
         if (theme === 'light') {
@@ -78,7 +79,14 @@ const Navbar = ({ onToggleSidebar }) => {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" size={18} />
                     <input
                         type="text"
-                        placeholder="Search resources, topics..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && searchQuery.trim()) {
+                                navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                            }
+                        }}
+                        placeholder="Search courses..."
                         className="w-full pl-12 pr-4 py-2 bg-gray-100 dark:bg-black border border-transparent dark:border-white/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/20 text-sm"
                     />
                 </div>
@@ -106,7 +114,15 @@ const Navbar = ({ onToggleSidebar }) => {
                             <input
                                 autoFocus
                                 type="text"
-                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && searchQuery.trim()) {
+                                        navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                                        setIsMobileSearchOpen(false);
+                                    }
+                                }}
+                                placeholder="Search courses..."
                                 className="w-full pl-11 pr-10 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-white text-sm"
                             />
                             <button 

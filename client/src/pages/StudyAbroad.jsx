@@ -19,10 +19,27 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import ModernButton from '../components/ui/ModernButton';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
-const StudyAbroad = () => {
+const StudyAbroad = ({ isEmbedded = false }) => {
+    const navigate = useNavigate();
     const [view, setView] = useState('countries'); // countries, universities, course-details
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (isEmbedded) return;
+        const checkEnabled = async () => {
+            try {
+                const { data } = await axios.get('/api/public/cms/global_settings');
+                if (data.study_abroad_feature && data.study_abroad_feature.enabled === false) {
+                    navigate('/');
+                }
+            } catch (error) {
+                // Ignore
+            }
+        };
+        checkEnabled();
+    }, [navigate, isEmbedded]);
 
     // Data State
     const [countries, setCountries] = useState([]);
@@ -106,15 +123,12 @@ const StudyAbroad = () => {
         c.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    return (
-        <div className="min-h-screen bg-[#050514] text-white selection:bg-primary/30">
-            <Navbar />
+    const content = (
+        <div className={isEmbedded ? "max-w-7xl mx-auto" : "pt-32 pb-20 px-6"}>
+            <div className="max-w-7xl mx-auto">
 
-            <div className="pt-32 pb-20 px-6">
-                <div className="max-w-7xl mx-auto">
-
-                    {/* Breadcrumbs / Back Navigation */}
-                    {view !== 'countries' && (
+                {/* Breadcrumbs / Back Navigation */}
+                {view !== 'countries' && (
                         <motion.button
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -416,7 +430,16 @@ const StudyAbroad = () => {
 
                 </div>
             </div>
+    );
 
+    if (isEmbedded) {
+        return content;
+    }
+
+    return (
+        <div className="min-h-screen bg-[#050514] text-white selection:bg-primary/30">
+            <Navbar />
+            {content}
             <Footer />
         </div>
     );

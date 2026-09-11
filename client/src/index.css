@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@700;800&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   /* Alyra Primary Gradient Colors (Purple Dominant) */
@@ -116,10 +117,14 @@ body {
 
 /* Touch Target Standard */
 button,
-input,
+input:not([type="range"]),
 select {
   min-height: 44px;
   /* Apple/Google accessibility minimum */
+}
+
+input[type="range"] {
+  min-height: unset;
 }
 
 /* Reset min-height for footer nav links (desktop layout) */
@@ -527,17 +532,17 @@ select option {
 
 /* LIGHT MODE GLOBAL OVERRIDES */
 html.light-mode {
-  --color-background: #FAF9F6;
-  --color-background-mid: #FAF9F6;
-  --color-background-light: #FAF9F6;
+  --color-background: #FFFFFF;
+  --color-background-mid: #FFFFFF;
+  --color-background-light: #FFFFFF;
   --color-text-primary: #111827;
   --color-text-secondary: #4b5563;
   --color-text-muted: #6b7280;
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
 }
 
 html.light-mode body {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
   color: #1f2937 !important;
 }
 
@@ -551,15 +556,15 @@ html.light-mode .bg-alyra-gradient,
 html.light-mode .bg-background,
 html.light-mode .bg-background-mid,
 html.light-mode .bg-background-light {
-  background: #FAF9F6 !important;
-  background-color: #FAF9F6 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
 }
 
 html.light-mode .course-catalog-page,
 html.light-mode .platform-page,
 html.light-mode .about-us-page {
-  background: #FAF9F6 !important;
-  background-color: #FAF9F6 !important;
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
   background-image: none !important;
 }
 
@@ -593,11 +598,11 @@ html.light-mode .border-primary-light {
 /* Ensure absolute/fixed overlays also become light */
 html.light-mode [class*="bg-black/"],
 html.light-mode [class*="bg-background/"] {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
 }
 
 html.light-mode nav {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
 }
 
 html.light-mode .text-white,
@@ -729,7 +734,7 @@ html.light-mode .glass-card {
 
 html.light-mode .about-card-bg,
 html.light-mode .about-card-bg:hover {
-  background-color: #f5f5f5 !important;
+  background-color: #ffffff !important;
   border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
@@ -738,7 +743,7 @@ html.light-mode .about-card-bg:hover {
 }
 
 html.light-mode .about-inner-card-bg {
-  background-color: #f5f5f5 !important;
+  background-color: #ffffff !important;
   border-color: rgba(0, 0, 0, 0.05) !important;
 }
 
@@ -760,18 +765,18 @@ html.light-mode .bg-white\/10 {
 
 html.light-mode .bg-gray-900,
 html.light-mode .bg-zinc-900 {
-  background-color: #f9fafb !important;
+  background-color: #ffffff !important;
 }
 
 html.light-mode .bg-gray-800,
 html.light-mode .bg-zinc-800 {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
 }
 
 html.light-mode input,
 html.light-mode select:not(.text-transparent),
 html.light-mode textarea {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
   color: #111827 !important;
   border: 1px solid #d1d5db !important;
 }
@@ -781,7 +786,7 @@ html.light-mode .text-transparent {
 }
 
 html.light-mode select option {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
   color: #111827 !important;
 }
 
@@ -803,7 +808,7 @@ html.light-mode .text-\[\#E9D5FF\]:hover {
 
 /* --- LIGHT MODE GLOBAL OVERRIDES --- */
 html.light-mode body {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
   background-image: none !important;
 }
 
@@ -829,12 +834,12 @@ html.light-mode [class*="bg-gray-9"],
 html.light-mode [class*="bg-gray-8"],
 html.light-mode [class*="bg-slate-9"],
 html.light-mode [class*="bg-slate-8"] {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
   border-color: #e2e8f0 !important;
 }
 
 html.light-mode nav[style] {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
   border-bottom: none !important;
   backdrop-filter: none !important;
 }
@@ -887,7 +892,7 @@ html.light-mode .text-white\/80 {
 
 /* Make sure the hero container doesn't force black */
 html.light-mode .bg-black {
-  background-color: #FAF9F6 !important;
+  background-color: #FFFFFF !important;
 }
 
 /* Force text visibility in hero */
@@ -904,7 +909,7 @@ html.light-mode .network-diagram-fade {
 
 /* Fix the black line crack in HeroSection NetworkDiagram */
 html.light-mode .absolute.inset-y-0.right-0.w-20.pointer-events-none {
-  background: linear-gradient(to right, transparent, #FAF9F6) !important;
+  background: linear-gradient(to right, transparent, #FFFFFF) !important;
 }
 
 /* Restore canvas rule */

@@ -43,6 +43,7 @@ const VacancyDetails = () => {
     }, [id]);
 
     const isApplied = myApplications.some(a => a.vacancy_id === id);
+    const isClosed = vacancy?.status === 'closed' || (vacancy?.deadline && new Date(vacancy.deadline).getTime() < Date.now());
 
     const handleApply = async (e) => {
         e.preventDefault();
@@ -71,11 +72,11 @@ const VacancyDetails = () => {
     );
 
     if (!vacancy) return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-            <AlertCircle size={48} className="text-white/20" />
-            <p className="text-white/40 text-lg font-semibold">Vacancy not found.</p>
+        <div className="text-center py-20">
+            <h2 className="text-2xl font-bold text-white">Opening Not Found</h2>
+            <p className="text-white/40 mt-2 mb-6">This opening may have been removed or does not exist.</p>
             <ModernButton onClick={() => navigate('/dashboard/placements')}>
-                <ArrowLeft size={16} className="mr-2" /> Back to Portal
+                Back to Placements
             </ModernButton>
         </div>
     );
@@ -89,35 +90,31 @@ const VacancyDetails = () => {
         : [];
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6 pb-20 animate-in fade-in duration-700">
+        <div className="space-y-8 pb-16 animate-in fade-in duration-500 max-w-5xl mx-auto">
             {/* Back Button */}
             <button
                 onClick={() => navigate('/dashboard/placements')}
-                className="flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors group"
+                className="flex items-center gap-2 text-white/40 hover:text-white transition-colors group text-sm font-medium"
             >
                 <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-                Back to Career Portal
+                Back to Career & Placements
             </button>
 
             {/* Hero Card */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                <GlassCard className="!p-0 overflow-hidden border-white/10">
-                    {/* Top gradient bar */}
-                    <div className="h-2 w-full bg-gradient-to-r from-primary via-purple-500 to-indigo-500" />
-
-                    <div className="p-8 flex flex-col sm:flex-row sm:items-start justify-between gap-6">
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+                <GlassCard className="border-white/10 p-0 overflow-hidden relative">
+                    <div className="p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                         <div className="flex items-start gap-5">
-                            {/* Company Icon */}
-                            <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                                <Building2 size={32} className="text-primary" />
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-purple-600/10 border border-primary/30 flex items-center justify-center shrink-0 shadow-lg shadow-primary/10">
+                                <Building2 size={28} className="text-primary" />
                             </div>
-                            <div className="space-y-1">
+                            <div>
                                 <div className="flex flex-wrap items-center gap-2 mb-2">
                                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${typeColor}`}>
                                         {vacancy.job_type}
                                     </span>
-                                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${vacancy.status === 'open' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
-                                        {vacancy.status}
+                                    <span className={`px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border ${!isClosed ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
+                                        {isClosed ? 'Closed' : 'Open'}
                                     </span>
                                 </div>
                                 <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">{vacancy.title}</h1>
@@ -132,11 +129,14 @@ const VacancyDetails = () => {
                                     <CheckCircle size={18} />
                                     Applied Successfully
                                 </div>
+                            ) : isClosed ? (
+                                <div className="flex items-center gap-2 text-white/40 text-sm font-bold px-5 py-3 bg-white/5 rounded-2xl border border-white/10">
+                                    Applications Closed
+                                </div>
                             ) : (
                                 <ModernButton
                                     className="!px-8 !py-3 text-sm font-black"
                                     onClick={() => setShowApplyModal(true)}
-                                    disabled={vacancy.status !== 'open'}
                                 >
                                     Apply Now
                                 </ModernButton>

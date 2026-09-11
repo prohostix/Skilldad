@@ -138,6 +138,7 @@ app.use('/api/grading', require('./routes/manualGradingQueueRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/progress', require('./routes/progressRoutes'));
 app.use('/api/enrollment', require('./routes/enrollmentRoutes'));
+app.use('/api/students/performance', require('./routes/studentPerformanceRoutes'));
 app.use('/api/university', require('./routes/universityRoutes'));
 app.use('/api/partner', require('./routes/partnerRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
@@ -174,6 +175,7 @@ app.use('/', require('./routes/seoRoutes'));
 
 // Payment Routes
 app.use('/api/payment', require('./routes/paymentRoutes'));
+app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/admin/payment', require('./routes/adminPaymentRoutes'));
 app.use('/api/admin/reconciliation', require('./routes/reconciliationRoutes'));
 app.use('/api/admin/monitoring', require('./routes/monitoringRoutes'));
@@ -499,6 +501,22 @@ const startServer = async () => {
             )
         `);
       console.log('[Migration] wbl_courses table verified/created'.green);
+
+      // Auto-migrate: daily performance snapshots, one row per student per
+      // calendar day, so the student dashboard's Performance Overview chart
+      // can plot a real day-by-day trend instead of a single-point line.
+      await query(`
+            CREATE TABLE IF NOT EXISTS student_daily_performance (
+                id TEXT PRIMARY KEY,
+                student_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                date DATE NOT NULL,
+                avg_progress NUMERIC NOT NULL DEFAULT 0,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                UNIQUE (student_id, date)
+            )
+        `);
+      console.log('[Migration] student_daily_performance table verified/created'.green);
     } catch (migErr) {
       console.warn('[Migration] Database migration warning:', migErr.message);
     }

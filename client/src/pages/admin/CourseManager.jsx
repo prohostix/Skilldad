@@ -118,9 +118,11 @@ const CourseManager = ({ wblOnly = false }) => {
             university_tools: [],
             features: [],
             learning_outcomes: [],
-            programType: defaultProgramType || (wblOnly ? 'degree_programme' : 'course'),
+            programType: defaultProgramType || (wblOnly ? 'wbl_domestic' : 'course'),
             skillDadUniversityId: '',
-            displayOrder: 999
+            displayOrder: 999,
+            minSalary: '',
+            jobsAvailable: ''
         });
         setEditingCourse(null);
         setShowCreateModal(true);
@@ -142,9 +144,11 @@ const CourseManager = ({ wblOnly = false }) => {
             university_tools: course.university_tools || [],
             features: course.features || [],
             learning_outcomes: course.learning_outcomes || [],
-            programType: course.programType || course.program_type || (wblOnly ? 'degree_programme' : 'course'),
+            programType: course.programType || course.program_type || (wblOnly ? 'wbl_domestic' : 'course'),
             skillDadUniversityId: course.skillDadUniversityId || course.skill_dad_university_id || '',
-            displayOrder: course.displayOrder !== undefined ? course.displayOrder : (course.display_order !== undefined ? course.display_order : 999)
+            displayOrder: course.displayOrder !== undefined ? course.displayOrder : (course.display_order !== undefined ? course.display_order : 999),
+            minSalary: course.minSalary || course.min_salary || '',
+            jobsAvailable: course.jobsAvailable || course.jobs_available || ''
         });
         setEditingCourse(course);
         setShowCreateModal(true);
@@ -284,9 +288,14 @@ const CourseManager = ({ wblOnly = false }) => {
         }
     };
 
-    const pendingCount = courses.filter(c => c.status === 'pending').length;
-    const approvedCount = courses.filter(c => c.status === 'approved' || (!c.status && c.isPublished)).length;
-    const rejectedCount = courses.filter(c => c.status === 'rejected').length;
+    const baseCoursesForCounts = courses.filter(course => {
+        const isWblCourse = (course.programType || course.program_type) === 'wbl_domestic' || (course.programType || course.program_type) === 'wbl_abroad';
+        return wblOnly ? isWblCourse : !isWblCourse;
+    });
+
+    const pendingCount = baseCoursesForCounts.filter(c => c.status === 'pending').length;
+    const approvedCount = baseCoursesForCounts.filter(c => c.status === 'approved' || (!c.status && c.isPublished)).length;
+    const rejectedCount = baseCoursesForCounts.filter(c => c.status === 'rejected').length;
 
     // Same fallback chain the table uses to display the provider name, so the
     // filter dropdown and what's shown in each row always agree.
@@ -314,7 +323,7 @@ const CourseManager = ({ wblOnly = false }) => {
         const matchesProvider =
             providerFilter === 'all' || getProviderName(course) === providerFilter;
 
-        const isWblCourse = (course.programType || course.program_type) === 'degree_programme' || (course.programType || course.program_type) === 'wbl_abroad';
+        const isWblCourse = (course.programType || course.program_type) === 'wbl_domestic' || (course.programType || course.program_type) === 'wbl_abroad';
         const matchesWblOnly = wblOnly ? isWblCourse : !isWblCourse;
 
         return matchesSearch && matchesStatus && matchesProvider && matchesWblOnly;
@@ -354,7 +363,7 @@ const CourseManager = ({ wblOnly = false }) => {
                                     : 'text-white/50 hover:text-white'
                             }`}
                         >
-                            All ({courses.length})
+                            All ({baseCoursesForCounts.length})
                         </button>
 
                         <button
@@ -463,7 +472,7 @@ const CourseManager = ({ wblOnly = false }) => {
                                                         Degree Programme
                                                     </span>
                                                 )}
-                                                {(course.programType || course.program_type) === 'wbl_abroad' && (
+                                                {((course.programType || course.program_type) === 'wbl_abroad' || (course.programType || course.program_type) === 'wbl_domestic') && (
                                                     <span className="inline-block mt-1 px-2.5 py-0.5 bg-sky-500/20 text-sky-400 rounded-full text-[9px] font-bold uppercase tracking-tight">
                                                         Study Abroad
                                                     </span>
@@ -528,7 +537,7 @@ const CourseManager = ({ wblOnly = false }) => {
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
+                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end space-x-1">
                                             <button
                                                 onClick={() => handleToggleFeatured(course)}
@@ -542,9 +551,16 @@ const CourseManager = ({ wblOnly = false }) => {
                                                 <Star size={17} className={(course.isFeatured || course.is_featured) ? 'fill-amber-400' : ''} />
                                             </button>
                                             <button
+                                                onClick={() => navigate(`/admin/courses/edit/${course._id}`)}
+                                                className="p-2 text-white/40 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-all"
+                                                title="Manage Content & Modules"
+                                            >
+                                                <BookOpen size={18} />
+                                            </button>
+                                            <button
                                                 onClick={() => handleEdit(course)}
                                                 className="p-2 text-white/40 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
-                                                title="Edit Course"
+                                                title="Edit Course Details"
                                             >
                                                 <Edit3 size={18} />
                                             </button>
@@ -708,7 +724,8 @@ const CourseManager = ({ wblOnly = false }) => {
                                         })}
                                     >
                                         {!wblOnly && <option value="course" className="bg-[#0B071A]">Skill Course</option>}
-                                        <option value="degree_programme" className="bg-[#0B071A]">Skill Integrated Degree Programme</option>
+                                        {!wblOnly && <option value="degree_programme" className="bg-[#0B071A]">Skill Integrated Degree Programme</option>}
+                                        <option value="wbl_domestic" className="bg-[#0B071A]">WBL Domestic Programme</option>
                                         <option value="wbl_abroad" className="bg-[#0B071A]">Study Abroad Programme</option>
                                         {!wblOnly && <option value="featured" className="bg-[#0B071A]">Featured Course</option>}
                                     </select>
@@ -720,7 +737,7 @@ const CourseManager = ({ wblOnly = false }) => {
                                     <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
                                         Provider University
                                     </label>
-                                    {(formData.programType === 'degree_programme' || formData.programType === 'wbl_abroad') ? (
+                                    {(formData.programType === 'degree_programme' || formData.programType === 'wbl_abroad' || formData.programType === 'wbl_domestic') ? (
                                         <select
                                             required
                                             className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter appearance-none"
@@ -824,6 +841,33 @@ const CourseManager = ({ wblOnly = false }) => {
                                     {!editingCourse && (
                                         <p className="text-[10px] text-amber-400/60 mt-1.5 font-medium italic">Save course first to enable brochure uploads.</p>
                                     )}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
+                                        Median / Minimum Salary (₹)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
+                                        placeholder="e.g. 378883"
+                                        value={formData.minSalary || ''}
+                                        onChange={(e) => setFormData({ ...formData, minSalary: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-white/70 mb-2 font-inter">
+                                        Jobs Available
+                                    </label>
+                                    <input
+                                        type="number"
+                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-inter"
+                                        placeholder="e.g. 103522"
+                                        value={formData.jobsAvailable || ''}
+                                        onChange={(e) => setFormData({ ...formData, jobsAvailable: e.target.value })}
+                                    />
                                 </div>
                             </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, rgba } from 'framer-motion';
 import { Mail, MessageCircle, Send, CheckCircle, AlertCircle, Loader2, Bell, Zap, History, ShieldCheck, Globe } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';

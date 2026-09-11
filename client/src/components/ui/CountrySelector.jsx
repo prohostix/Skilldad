@@ -24,7 +24,7 @@ const CountrySelector = ({ countryCodes, selectedCode, onSelect }) => {
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-3 py-2.5 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white text-sm cursor-pointer hover:bg-white/10 w-full justify-between"
+                className="flex items-center gap-2 px-3 py-2.5 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white [.light-mode_&]:!text-black text-sm cursor-pointer hover:bg-white/10 [.light-mode_&]:hover:!bg-gray-50 w-full justify-between"
             >
                 <div className="flex items-center gap-2">
                     <img 

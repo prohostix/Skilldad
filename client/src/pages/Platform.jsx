@@ -122,9 +122,9 @@ const Platform = () => {
                                     navigate(`/university-profile/${encodeURIComponent(university.name)}`, { state: { university } });
                                 }}
                             >
-                                <GlassCard className="overflow-hidden h-full hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 !p-0">
+                                <GlassCard className="overflow-hidden h-full flex flex-col hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 !p-0">
                                     {/* University Image */}
-                                    <div className="relative h-40 md:h-48 overflow-hidden">
+                                    <div className="relative h-40 md:h-48 overflow-hidden shrink-0">
                                         <img
                                             src={university.image}
                                             alt={university.name}
@@ -139,7 +139,7 @@ const Platform = () => {
                                     </div>
 
                                     {/* University Details */}
-                                    <div className="p-4 md:p-5">
+                                    <div className="p-4 md:p-5 flex flex-col flex-grow">
                                         <h3 className="text-base md:text-lg font-bold text-white mb-1.5 font-space">
                                             {university.name}
                                         </h3>
@@ -154,11 +154,19 @@ const Platform = () => {
                                         </p>
 
                                         {/* Stats */}
-                                        <div className="flex items-center text-gray-400 mb-2">
+                                        <div className="flex items-center text-gray-400 mb-4">
                                             <BookOpen size={12} className="text-emerald-400 mr-1.5 flex-shrink-0" />
                                             <span className="text-xs">
-                                                <strong className="text-white">{university.programs}</strong> Programs Available
+                                                <strong className="text-white dark:text-white text-gray-900">{university.programs}</strong> Programs Available
                                             </span>
+                                        </div>
+
+                                        {/* View Details Link */}
+                                        <div className="pt-3 border-t border-gray-100 dark:border-white/10 mt-auto">
+                                            <div className="flex items-center justify-between text-primary font-medium text-sm group-hover:text-primary-light transition-colors">
+                                                <span>View Details</span>
+                                                <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
+                                            </div>
                                         </div>
 
                                     </div>

@@ -6,6 +6,20 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [rewardPoints, setRewardPoints] = useState({ total: 0, history: [] });
+    const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
+
+    const fetchEnrollments = async (u) => {
+        if (!u?.token || u.role !== 'student') return;
+        try {
+            const { data } = await axios.get('/api/enrollment/my-courses', {
+                headers: { Authorization: `Bearer ${u.token}` }
+            });
+            const courseIds = data.map(e => e.course?._id || e.course_id || e.course);
+            setEnrolledCourseIds(courseIds);
+        } catch (error) {
+            console.error('Error fetching enrollments:', error);
+        }
+    };
 
     const refreshPoints = async (userInfoParam = null) => {
         const u = userInfoParam || user || JSON.parse(localStorage.getItem('userInfo') || 'null');
@@ -26,6 +40,7 @@ export const UserProvider = ({ children }) => {
         if (userInfo) {
             setUser(userInfo);
             refreshPoints(userInfo);
+            fetchEnrollments(userInfo);
         }
     }, []);
 
@@ -35,18 +50,20 @@ export const UserProvider = ({ children }) => {
         if (updatedUser?.token) {
             localStorage.setItem('token', updatedUser.token);
             refreshPoints(updatedUser);
+            fetchEnrollments(updatedUser);
         }
     };
 
     const logout = () => {
         setUser(null);
         setRewardPoints({ total: 0, history: [] });
+        setEnrolledCourseIds([]);
         localStorage.removeItem('userInfo');
         localStorage.removeItem('token');
     };
 
     return (
-        <UserContext.Provider value={{ user, updateUser, logout, rewardPoints, refreshPoints }}>
+        <UserContext.Provider value={{ user, updateUser, logout, rewardPoints, refreshPoints, enrolledCourseIds, fetchEnrollments }}>
             {children}
         </UserContext.Provider>
     );

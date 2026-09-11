@@ -79,8 +79,9 @@ const FinanceDashboard = () => {
         if (!rawUrl) return null;
         if (rawUrl.startsWith('http')) return rawUrl;
         // Normalize: ensure single leading slash, then prepend backend origin
-        const normalized = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
-        return `http://localhost:3030${normalized}`;
+        const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+        const origin = isLocal ? 'http://localhost:3030' : (typeof window !== 'undefined' ? window.location.origin : '');
+        return `${origin}${normalized}`;
     };
 
     // Set active tab based on path

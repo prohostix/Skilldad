@@ -250,7 +250,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Matrix Stats Grid */}
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
                 {widgetStats.map((item, i) => (
                     <motion.div
                         key={i}

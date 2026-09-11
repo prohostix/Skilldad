@@ -105,7 +105,7 @@ const ReferralModal = ({ isOpen, onClose }) => {
 
                             {/* Code Badge */}
                             <div className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-6 mb-6">
-                                <div className="text-[7.5px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono mb-4">Your Unique Terminal</div>
+                                <div className="text-[7.5px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono mb-4">Your Referral Code</div>
                                 
                                 {loading ? (
                                     <div className="h-12 flex items-center justify-center">
@@ -131,7 +131,7 @@ const ReferralModal = ({ isOpen, onClose }) => {
                                                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-primary hover:bg-primary/90 rounded-xl text-[10px] font-black text-white uppercase tracking-widest transition-all shadow-lg shadow-primary/20"
                                             >
                                                 <Share2 size={14} />
-                                                BroadCast
+                                                Share Link
                                             </button>
                                         </div>
                                     </div>

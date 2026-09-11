@@ -50,10 +50,12 @@ const LandingPage = () => {
     const [activeVideo, setActiveVideo] = useState(null); // { url, name }
     const [successIndex, setSuccessIndex] = useState(0);
     const [uniStartIndex, setUniStartIndex] = useState(0);
+    const [featuredCourseIndex, setFeaturedCourseIndex] = useState(0);
 
     useEffect(() => {
         const interval = setInterval(() => {
             setSuccessIndex(prev => prev + 1);
+            setFeaturedCourseIndex(prev => prev + 1);
         }, 3000);
         return () => clearInterval(interval);
     }, []);
@@ -194,7 +196,7 @@ const LandingPage = () => {
 
     // Prepare partner rows - using final verified SVG URLs
     const row1Static = [
-        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Tata_Consultancy_Services_Logo.svg' },
+        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Tata_Consultancy_Services_Logo.svg' },
         { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
         { name: 'Wipro', logo: null },
         { name: 'Accenture', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Accenture.svg' },
@@ -212,7 +214,7 @@ const LandingPage = () => {
         { name: 'Meta', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
         { name: 'Oracle', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg' },
         { name: 'SAP', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg' },
-        { name: 'Adobe', logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Adobe_Systems_logo_and_wordmark.svg' },
+        { name: 'Adobe', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Adobe_Systems_logo_and_wordmark.svg' },
         { name: 'Intel', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Intel_logo_%282020%2C_light_blue%29.svg' },
         { name: 'Goldman Sachs', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg' },
         { name: 'Salesforce', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg' }
@@ -266,7 +268,14 @@ const LandingPage = () => {
         };
     });
 
-    const allUniversities = [...universities, ...skillDadUniversityCards];
+    // Merge partner universities and SkillDad universities, deduplicating by lowercase name to prevent duplicates
+    const seenNames = new Set();
+    const allUniversities = [...universities, ...skillDadUniversityCards].filter(u => {
+        const key = u.name?.trim().toLowerCase();
+        if (!key || seenNames.has(key)) return false;
+        seenNames.add(key);
+        return true;
+    });
 
 
     let marqueeRow1 = [];
@@ -292,6 +301,9 @@ const LandingPage = () => {
         ? [0, 1, 2, 3].map(offset => allUniversities[(uniStartIndex + offset) % allUniversities.length])
         : [];
 
+    const featuredSkillCourses = featuredCourses.filter(c => c.programType === 'course' || !c.programType);
+    const featuredWBLCourses = featuredCourses.filter(c => c.programType === 'wbl_domestic' || c.programType === 'wbl_abroad' || c.program_type === 'wbl_domestic');
+
     return (
         <div className="min-h-screen selection:bg-primary/30 relative overflow-x-hidden text-text-primary bg-black">
             <Navbar />
@@ -300,16 +312,15 @@ const LandingPage = () => {
 
             {/* Trending / Featured Courses Section - admin-curated via the Featured toggle */}
             {featuredCourses.length > 0 && (
-                <section id="courses" className="relative pt-20 md:pt-20 pb-16 md:pb-20 px-6 z-10 section-optimize">
+                <section id="courses" className="relative pt-20 md:pt-20 pb-6 md:pb-8 px-6 z-10 section-optimize">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 md:mb-12">
                             <div className="text-center sm:text-left">
                                 <motion.div
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.5 }}
-                                    className="inline-flex font-normal items-center space-x-2 text-primary text-xs font-black uppercase tracking-widest"
+                                    className="flex items-center font-normal justify-center sm:justify-start space-x-2 text-primary text-xs uppercase tracking-widest mb-1 md:mb-2"
                                 >
                                     <TrendingUp size={15} />
                                     <span>Trending Now</span>
@@ -318,42 +329,114 @@ const LandingPage = () => {
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.7, delay: 0.1 }}
-                                    className="text-2xl sm:text-3xl font-black text-white font-jakarta tracking-tight"
+                                    className="text-2xl md:text-4xl lg:text-5xl font-black text-white font-jakarta tracking-tight mb-1 leading-tight"
                                 >
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Featured</span> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Courses</span>
+                                    Our <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark">Career Transforming Programmes</span>
                                 </motion.h2>
                                 <motion.p
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.7, delay: 0.2 }}
-                                    className="text-text-secondary font-inter text-sm sm:text-base max-w-xl"
+                                    transition={{ delay: 0.1 }}
+                                    className="text-sm md:text-base lg:text-lg text-white/70 max-w-2xl font-inter leading-relaxed"
                                 >
-                                    Hand-picked by our team - the courses learners are enrolling in right now.
+                                    Learn the skills and knowledge you need to build a successful career
                                 </motion.p>
                             </div>
-                            <ModernButton
-                                onClick={() => navigate('/courses')}
-                                className="hidden sm:inline-flex !px-6 !py-3 !text-[10px] uppercase tracking-widest font-black shrink-0"
-                            >
-                                Explore Full Catalog <ChevronRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform duration-500 ease-in-out" />
-                            </ModernButton>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-                            {featuredCourses.slice(0, 6).map((course) => (
-                                <CourseCard key={course._id} course={course} />
-                            ))}
-                        </div>
+                        <div className="mt-8 overflow-hidden relative">
+                            {featuredWBLCourses.length > 0 && (
+                                <div className="mb-12">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 ml-1">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-6 bg-gradient-to-b from-primary to-[#C026FF] rounded-full"></div>
+                                            <h3 className="text-base sm:text-lg md:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark uppercase tracking-widest">Work-Based Learning Programme</h3>
+                                        </div>
+                                        <ModernButton 
+                                            onClick={() => navigate('/wbl')} 
+                                            className="inline-flex !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[9px] sm:!text-[10px] uppercase tracking-widest font-black shrink-0"
+                                        >
+                                            Explore WBL Catalog <ChevronRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform duration-500 ease-in-out" />
+                                        </ModernButton>
+                                    </div>
+                                    {featuredWBLCourses.length <= 2 ? (
+                                        <div className={`grid gap-4 sm:gap-5 ${featuredWBLCourses.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                                            {featuredWBLCourses.map((course) => (
+                                                <div key={course._id} className="w-full h-full flex">
+                                                    <CourseCard course={course} horizontal={featuredWBLCourses.length === 2} forceStandardLayout={true} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            className="flex transition-transform duration-1000 ease-in-out -mx-2 sm:-mx-2.5"
+                                            style={{
+                                                transform: `translateX(-${(featuredCourseIndex % Math.max(1, featuredWBLCourses.length)) * (100 / Math.min(featuredWBLCourses.length, window.innerWidth > 640 ? 2 : 1))}%)`,
+                                                width: `${featuredWBLCourses.length * (100 / Math.min(featuredWBLCourses.length, window.innerWidth > 640 ? 2 : 1))}%`
+                                            }}
+                                        >
+                                            {featuredWBLCourses.map((course) => (
+                                                <div 
+                                                    key={course._id} 
+                                                    className="w-full shrink-0 px-2 sm:px-2.5" 
+                                                    style={{ width: `${100 / featuredWBLCourses.length}%` }}
+                                                >
+                                                    <div className="h-full">
+                                                        <CourseCard course={course} horizontal={true} forceStandardLayout={true} />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
-                        <div className="flex justify-center mt-10 sm:hidden">
-                            <ModernButton
-                                onClick={() => navigate('/courses')}
-                                className="w-full !py-4 !text-[10px] uppercase tracking-widest font-black"
-                            >
-                                Explore Full Catalog <ChevronRight size={14} className="ml-1 group-hover:translate-x-1" style={{ transition: 'transform 800ms ease-in-out' }} />
-                            </ModernButton>
+                            {featuredSkillCourses.length > 0 && (
+                                <div>
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4 ml-1">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-6 bg-gradient-to-b from-primary to-[#C026FF] rounded-full"></div>
+                                            <h3 className="text-base sm:text-lg md:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary-dark uppercase tracking-widest">Skill Courses</h3>
+                                        </div>
+                                        <ModernButton 
+                                            onClick={() => navigate('/courses')} 
+                                            className="inline-flex !px-4 sm:!px-6 !py-2.5 sm:!py-3 !text-[9px] sm:!text-[10px] uppercase tracking-widest font-black shrink-0"
+                                        >
+                                            Explore Skill Courses <ChevronRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform duration-500 ease-in-out" />
+                                        </ModernButton>
+                                    </div>
+                                    {featuredSkillCourses.length <= 2 ? (
+                                        <div className={`grid gap-4 sm:gap-5 ${featuredSkillCourses.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                                            {featuredSkillCourses.map((course) => (
+                                                <div key={course._id} className="w-full h-full flex">
+                                                    <CourseCard course={course} horizontal={true} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div 
+                                            className="flex transition-transform duration-1000 ease-in-out -mx-2 sm:-mx-2.5"
+                                            style={{
+                                                transform: `translateX(-${(featuredCourseIndex % Math.max(1, featuredSkillCourses.length)) * (100 / Math.min(featuredSkillCourses.length, window.innerWidth > 640 ? 2 : 1))}%)`,
+                                                width: `${featuredSkillCourses.length * (100 / Math.min(featuredSkillCourses.length, window.innerWidth > 640 ? 2 : 1))}%`
+                                            }}
+                                        >
+                                            {featuredSkillCourses.map((course) => (
+                                                <div 
+                                                    key={course._id} 
+                                                    className="w-full shrink-0 px-2 sm:px-2.5" 
+                                                    style={{ width: `${100 / featuredSkillCourses.length}%` }}
+                                                >
+                                                    <div className="h-full">
+                                                        <CourseCard course={course} horizontal={true} />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </section>
@@ -384,12 +467,12 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
                                 <div className="px-4 py-2.5 sm:py-3 flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
                                     {(company.logo || company.imageUrl) ? (
-                                        <div className="relative h-8 sm:h-15 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                                        <div className="relative w-24 sm:w-32 h-8 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                                             {/* Invisible spacer to set correct dimensions */}
                                             <img
                                                 src={company.logo || getMediaUrl(company.imageUrl)}
                                                 alt={company.name}
-                                                className="h-full w-auto object-contain invisible"
+                                                className="h-full w-full object-contain invisible"
                                             />
                                             {/* Solid Purple Silhouette */}
                                             <div
@@ -405,7 +488,7 @@ const LandingPage = () => {
                                             <img
                                                 src={company.logo || getMediaUrl(company.imageUrl)}
                                                 alt={company.name}
-                                                className="absolute inset-0 h-full w-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                className="absolute inset-0 h-full w-full object-contain opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                                             />
                                         </div>
                                     ) : (
@@ -428,12 +511,12 @@ const LandingPage = () => {
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
                                 <div className="px-4 s:px-6 py-2.5 sm:py-3 flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
                                     {(company.logo || company.imageUrl) ? (
-                                        <div className="relative h-8 sm:h-15 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                                        <div className="relative w-24 sm:w-32 h-8 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                                             {/* Invisible spacer to set correct dimensions */}
                                             <img
                                                 src={company.logo || getMediaUrl(company.imageUrl)}
                                                 alt={company.name}
-                                                className="h-full w-auto object-contain invisible"
+                                                className="h-full w-full object-contain invisible"
                                             />
                                             {/* Solid Purple Silhouette */}
                                             <div
@@ -449,7 +532,7 @@ const LandingPage = () => {
                                             <img
                                                 src={company.logo || getMediaUrl(company.imageUrl)}
                                                 alt={company.name}
-                                                className="absolute inset-0 h-full w-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                                                className="absolute inset-0 h-full w-full object-contain opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                                             />
                                         </div>
                                     ) : (
@@ -531,7 +614,7 @@ const LandingPage = () => {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1, delay: 0.3 }}
-                            className="hidden lg:block h-130 gpu-accelerated"
+                            className="hidden lg:block h-96 lg:h-[400px] gpu-accelerated"
                         >
                             <Animated3DShape />
                         </motion.div>
@@ -540,7 +623,7 @@ const LandingPage = () => {
             </section>
 
             {/* University Partners Section */}
-            <section className="relative pt-16 md:pt-24 pb-8 md:pb-0 z-10 bg-transparent section-optimize">
+            <section className="relative pt-6 md:pt-10 pb-8 md:pb-0 z-10 bg-transparent section-optimize">
                 <div className="max-w-7xl mx-auto">
                     {/* Heading row - text left, 3D orb right */}
                     <div className="flex px-6 flex-col lg:flex-row items-center justify-between gap-8 mb-12 md:mb-16">
@@ -625,7 +708,7 @@ const LandingPage = () => {
                                                             <Library size={18} strokeWidth={2.5} />
                                                         )}
                                                     </div>
-                                                    <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">Ivy-Alliance</span>
+
                                                 </div>
 
                                                 {/* University Name */}

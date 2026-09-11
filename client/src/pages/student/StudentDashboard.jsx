@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-    Search, Heart, Archive, Bell, X, ChevronLeft, ChevronRight, MoreHorizontal, Calendar as CalendarIcon, Play, BarChart2
+    Search, Heart, Archive, Bell, X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Play, BarChart2
 } from 'lucide-react';
 import axios from 'axios';
 import { getMediaUrl } from '../../utils/media';
 import DashboardHeading from '../../components/ui/DashboardHeading';
+import PerformanceOverviewCard from '../../components/ui/PerformanceOverviewCard';
 
 const StudentDashboard = () => {
     const [upcomingSessions, setUpcomingSessions] = useState([]);
@@ -30,6 +31,7 @@ const StudentDashboard = () => {
     const [viewingMonthDate, setViewingMonthDate] = useState(new Date());
     const [pendingProjectsCount, setPendingProjectsCount] = useState(0);
     const [pendingCertsCount, setPendingCertsCount] = useState(0);
+    const [weeklyPerformanceData, setWeeklyPerformanceData] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -102,6 +104,16 @@ const StudentDashboard = () => {
                 const totalProgress = courses.reduce((sum, c) => sum + (Number(c.progress) || 0), 0);
                 const avgProgress = courses.length > 0 ? Math.round(totalProgress / courses.length) : 0;
                 setStats(prev => ({ ...prev, completionRate: avgProgress }));
+
+                // Real day-by-day performance for the chart below: record
+                // today's snapshot (upsert, so repeat dashboard visits the
+                // same day just refresh today's value) then pull the last 7
+                // real days back. Non-blocking - a failure here shouldn't
+                // block the rest of the dashboard from loading.
+                axios.post('/api/students/performance/snapshot', {}, config)
+                    .then(() => axios.get('/api/students/performance/weekly', config))
+                    .then(({ data }) => setWeeklyPerformanceData(data))
+                    .catch(err => console.error('Error loading performance overview:', err.message));
 
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
@@ -199,8 +211,12 @@ const StudentDashboard = () => {
     const filteredSessions = upcomingSessions.filter(s => new Date(s.startTime).toDateString() === selectedDate.toDateString());
     const filteredExams = upcomingExams.filter(e => new Date(e.scheduledStartTime).toDateString() === selectedDate.toDateString());
 
+    // A newly-enrolled student hasn't watched anything yet, so "Resume Learning"
+    // would be misleading until at least one course shows real progress.
+    const hasStartedLearning = enrolledCourses.some(e => (e.progress != null ? e.progress : (e.completedModules || 0)) > 0);
+
     return (
-        <div className="student-dashboard-container bg-transparent min-h-screen px-4 sm:px-6 lg:px-8 pt-2 pb-4 lg:pt-3 lg:pb-6 font-inter text-gray-900 text-dark-white overflow-x-hidden w-full max-w-full">
+        <div className="student-dashboard-container bg-transparent min-h-screen pb-4 lg:pb-6 font-inter text-gray-900 text-dark-white overflow-x-hidden w-full max-w-full">
             {/* Top Header */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-3">
                 <DashboardHeading title="Overviews" />
@@ -208,7 +224,7 @@ const StudentDashboard = () => {
 
             <div className="flex flex-col xl:flex-row gap-8">
                 {/* Main Content Area */}
-                <div className="flex-1 space-y-8 min-w-0">
+                <div className="flex-1 space-y-5 min-w-0">
                     
                     {/* Hero and Daily Question Grid */}
                     <div className="grid lg:grid-cols-3 gap-6">
@@ -230,22 +246,22 @@ const StudentDashboard = () => {
                             </div>
 
                             <div className="relative z-10 w-[85%] sm:w-[70%] lg:w-[65%] xl:w-[60%]">
-                                <h2 className="text-3xl lg:text-4xl xl:text-5xl font-extrabold !text-white mb-2 leading-tight">
-                                    <span className="whitespace-nowrap">Welcome back,</span> {userName}!
+                                <h2 className="text-2xl lg:text-3xl xl:text-4xl font-extrabold !text-white mb-2 leading-tight">
+                                    <span className="whitespace-nowrap">{userInfo?.isFirstLogin ? 'Welcome,' : 'Welcome back,'}</span> {userName}!
                                 </h2>
-                                <p className="!text-white text-xs sm:text-sm mt-3 max-w-md font-medium leading-relaxed">
+                                <p className="!text-white text-xs mt-3 max-w-md font-medium leading-relaxed">
                                     Ready to achieve your goals? Pick up right where you left off and continue your learning journey today.
                                 </p>
-                                <button 
-                                    onClick={() => navigate(enrolledCourses.length > 0 ? `/dashboard/course/${enrolledCourses[0].course._id}` : '/dashboard/courses')} 
-                                    className="mt-4 sm:mt-5 px-8 py-3 bg-white text-[#4C1D95] font-bold rounded-xl shadow-sm hover:shadow-lg transition-all hover:bg-gray-100 hover:scale-105 transform duration-200"
+                                <button
+                                    onClick={() => navigate(enrolledCourses.length > 0 ? `/dashboard/course/${enrolledCourses[0].course._id}` : '/dashboard/courses')}
+                                    className="mt-4 sm:mt-5 px-6 py-2.5 bg-white text-[#4C1D95] font-bold text-sm rounded-xl shadow-sm hover:shadow-lg transition-all hover:bg-gray-100 hover:scale-105 transform duration-200"
                                 >
-                                    {enrolledCourses.length > 0 ? 'Resume Learning' : 'Browse Courses'}
+                                    {enrolledCourses.length === 0 ? 'Browse Courses' : hasStartedLearning ? 'Resume Learning' : 'Start Learning'}
                                 </button>
                             </div>
                             
                             {/* Abstract Student Illustration */}
-                            <div className="absolute right-0 bottom-0 w-1/2 h-full flex items-center justify-end pointer-events-none pr-8 z-10">
+                            <div className="absolute right-0 bottom-0 w-1/2 h-full flex items-center justify-end pointer-events-none pr-0 sm:pr-8 translate-x-6 sm:translate-x-0 z-10">
                                 {/* Decorative background circle */}
                                 <div className="absolute right-[5%] w-48 h-48 sm:w-64 sm:h-64 bg-white/10 rounded-full mix-blend-screen z-0"></div>
                                 <img src="/student_hero_illustration_transparent.png" alt="Student" className="h-[100%] scale-[1.15] origin-center w-auto object-contain object-right z-10 opacity-100" />
@@ -256,7 +272,7 @@ const StudentDashboard = () => {
                     {/* Continue Watching */}
                     <div>
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 text-dark-white dark:text-white">Continue Watching</h2>
+                            <h2 className="text-xs sm:text-sm font-semibold text-gray-900 text-dark-white dark:text-white">{hasStartedLearning ? 'Continue Watching' : 'Start Learning'}</h2>
                             <div className="flex gap-2">
                                 <button className="w-8 h-8 rounded-full border border-gray-200 dark:border-[#C026FF]/20 flex items-center justify-center hover:bg-gray-50 dark:bg-white/5 transition-colors">
                                     <ChevronLeft size={16} className="text-gray-600 text-dark-gray dark:text-gray-300" />
@@ -267,25 +283,62 @@ const StudentDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {enrolledCourses.length > 0 ? enrolledCourses.map((enrollment, index) => (
-                                <div key={enrollment._id || index} className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[24px] p-5 border border-gray-100 dark:border-[#C026FF]/20 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col glass-panel" onClick={() => navigate(`/dashboard/course/${enrollment.course._id}`)}>
-                                    <div className="flex justify-between items-center mb-4">
-                                        <span className="px-3 py-1 bg-gray-50 dark:bg-white/5 text-gray-600 text-dark-gray dark:text-gray-300 text-xs font-bold rounded-full border border-gray-100 dark:border-[#C026FF]/20">
-                                            {enrollment.completedModules || 0}/{enrollment.totalModules || 12}
-                                        </span>
-                                        <button className="text-gray-400 dark:text-gray-500 text-dark-gray hover:text-gray-600 text-dark-gray dark:text-gray-300">
-                                            <MoreHorizontal size={18} />
-                                        </button>
+                        <div className="grid gap-4 grid-cols-[repeat(auto-fit,minmax(240px,300px))]">
+                            {enrolledCourses.length > 0 ? enrolledCourses.map((enrollment, index) => {
+                                const totalModules = enrollment.totalModules || 12;
+                                const completedModules = enrollment.completedModules || 0;
+                                const progress = enrollment.progress != null
+                                    ? Math.round(enrollment.progress)
+                                    : Math.round((completedModules / totalModules) * 100);
+                                const isCompleted = progress >= 100;
+
+                                return (
+                                    <div
+                                        key={enrollment._id || index}
+                                        className="bg-white dark:bg-white/[0.04] dark:backdrop-blur-md rounded-[20px] border border-gray-100 dark:border-[#C026FF]/20 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col overflow-hidden glass-panel group"
+                                        onClick={() => navigate(`/dashboard/course/${enrollment.course._id}`)}
+                                    >
+                                        <div className="relative h-28 w-full overflow-hidden bg-gray-100 dark:bg-white/5">
+                                            <img
+                                                src={enrollment.course.thumbnail ? getMediaUrl(enrollment.course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                                alt={enrollment.course.title}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'; }}
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0" />
+                                            <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-[10px] font-bold rounded-full shadow-sm">
+                                                {completedModules}/{totalModules}
+                                            </span>
+                                            <div className="absolute bottom-2.5 right-2.5 w-8 h-8 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center text-[#4C1D95] shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Play size={13} className="ml-0.5" fill="currentColor" />
+                                            </div>
+                                        </div>
+
+                                        <div className="p-3.5 flex flex-col flex-1">
+                                            <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 text-dark-gray uppercase tracking-wider mb-1 line-clamp-1">
+                                                {enrollment.course.instructor?.profile?.universityName || 'Course'}
+                                            </p>
+                                            <h4 className="text-sm font-bold text-gray-900 text-dark-white dark:text-white leading-snug line-clamp-2 mb-2">
+                                                {enrollment.course.title}
+                                            </h4>
+
+                                            <div className="mt-auto">
+                                                <div className="w-full h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={`h-full rounded-full transition-all duration-700 ${isCompleted ? 'bg-emerald-500' : 'bg-[#4C1D95]'}`}
+                                                        style={{ width: `${Math.min(progress, 100)}%` }}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center justify-between mt-1">
+                                                    <span className={`text-[10px] font-bold ${isCompleted ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-500 text-dark-gray'}`}>
+                                                        {isCompleted ? 'Completed' : `${progress}% complete`}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 text-dark-gray uppercase tracking-wider mb-2 line-clamp-1">
-                                        {enrollment.course.instructor?.profile?.universityName || 'Course'}
-                                    </p>
-                                    <h4 className="font-bold text-gray-900 text-dark-white dark:text-white leading-snug line-clamp-2 min-h-[2.5rem]">
-                                        {enrollment.course.title}
-                                    </h4>
-                                </div>
-                            )) : (
+                                );
+                            }) : (
                                 <div className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-8 text-gray-400 dark:text-gray-500 text-dark-gray border-2 border-dashed border-gray-200 dark:border-[#C026FF]/20 rounded-[24px]">
                                     No active courses found.
                                 </div>
@@ -303,8 +356,8 @@ const StudentDashboard = () => {
                                 <Archive size={24} />
                             </div>
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-900 text-dark-white dark:text-white font-inter">{pendingProjectsCount}</h3>
-                                <p className="text-sm text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray font-medium font-inter">Pending Projects</p>
+                                <h3 className="text-xl font-bold text-gray-900 text-dark-white dark:text-white font-inter">{pendingProjectsCount}</h3>
+                                <p className="text-xs text-gray-500 text-dark-gray dark:text-gray-400 dark:text-gray-500 text-dark-gray font-medium font-inter">Pending Projects</p>
                             </div>
                             <div className="ml-auto text-gray-300 group-hover:text-orange-500 transition-colors">
                                 <ChevronRight size={20} />
@@ -327,6 +380,13 @@ const StudentDashboard = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* Performance Overview */}
+                    {weeklyPerformanceData.length > 0 && (
+                        <div className="mt-8">
+                            <PerformanceOverviewCard data={weeklyPerformanceData} />
+                        </div>
+                    )}
                 </div>
 
                 {/* Right Sidebar */}

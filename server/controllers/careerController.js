@@ -10,7 +10,7 @@ const socketService = require('../services/SocketService');
 exports.getVacancies = async (req, res) => {
     try {
         const result = await query(
-            "SELECT * FROM skilldad_vacancies WHERE status = 'open' ORDER BY created_at DESC"
+            "SELECT * FROM skilldad_vacancies WHERE status != 'archived' ORDER BY created_at DESC"
         );
         res.json({ success: true, vacancies: result.rows });
     } catch (error) {

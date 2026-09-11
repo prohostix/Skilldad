@@ -460,8 +460,8 @@ const PartnerExamManagement = () => {
             }}
             className={`flex items-center px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-500 relative group ${
                 activeTab === id
-                    ? 'text-white'
-                    : 'text-white/40 hover:text-white/70'
+                    ? 'text-gray-900 dark:text-white'
+                    : 'text-gray-400 hover:text-gray-600 dark:text-white/40 dark:hover:text-white/70'
             }`}
         >
             <Icon size={14} className={`mr-2 transition-transform duration-500 ${activeTab === id ? 'scale-110' : 'group-hover:scale-105'}`} />
@@ -500,7 +500,7 @@ const PartnerExamManagement = () => {
             <div className="max-w-7xl mx-auto px-6 pt-0 space-y-0">
                 
                 {/* Header Section */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 -mt-8 mb-4">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 mb-4">
                     <div className="space-y-0">
                         <DashboardHeading title="Exam Management" className="!text-2xl !tracking-tighter" />
                     </div>

@@ -316,8 +316,8 @@ const Documents = () => {
     const filterOptions = [
         { value: 'all', label: 'All', count: displayItems.length },
         { value: 'certificates', label: 'Certificates', count: certificates.filter(c => c.status === 'ISSUED').length },
-        { value: 'pending', label: 'Requests', count: documents.filter(d => d.status === 'pending').length },
-        { value: 'approved', label: 'Verified', count: documents.filter(d => d.status === 'approved').length },
+        { value: 'pending', label: 'Pending', count: processedDocuments.filter(d => d.status === 'pending').length },
+        { value: 'approved', label: 'Verified', count: processedDocuments.filter(d => d.status === 'approved').length },
     ];
 
     if (loading) {

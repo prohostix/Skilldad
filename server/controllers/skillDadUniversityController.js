@@ -39,11 +39,11 @@ const createSkillDadUniversity = async (req, res) => {
             name, location, website, phone, email, description,
             badge, foundation_year, total_scholars, specialized_courses,
             quality_rating, career_success, global_network,
-            youtubeUrl, achievements, assignedCourses, certificates
+            youtubeUrl, achievements, assignedCourses, certificates, videos
         } = req.body;
 
         if (!name) {
-            return res.status(400).json({ message: 'University name is required' });
+            return res.status(400).json({ message: 'Name is required' });
         }
 
         const result = await query(
@@ -51,8 +51,8 @@ const createSkillDadUniversity = async (req, res) => {
                 name, location, website, phone, email, description,
                 badge, foundation_year, total_scholars, specialized_courses,
                 quality_rating, career_success, global_network,
-                youtube_url, achievements, assigned_courses, certificates
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *`,
+                youtube_url, achievements, assigned_courses, certificates, videos
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
             [
                 name, location, website, phone, email, description,
                 badge, foundation_year, total_scholars, specialized_courses,
@@ -60,7 +60,8 @@ const createSkillDadUniversity = async (req, res) => {
                 youtubeUrl,
                 achievements ? JSON.stringify(achievements) : '[]',
                 assignedCourses ? JSON.stringify(assignedCourses) : '[]',
-                certificates ? JSON.stringify(certificates) : '[]'
+                certificates ? JSON.stringify(certificates) : '[]',
+                videos ? JSON.stringify(videos) : '[]'
             ]
         );
 
@@ -80,7 +81,7 @@ const updateSkillDadUniversity = async (req, res) => {
             name, location, website, phone, email, description, isActive,
             badge, foundation_year, total_scholars, specialized_courses,
             quality_rating, career_success, global_network,
-            youtubeUrl, achievements, assignedCourses, certificates
+            youtubeUrl, achievements, assignedCourses, certificates, videos
         } = req.body;
         const result = await query(`
             UPDATE skill_dad_universities 
@@ -95,8 +96,9 @@ const updateSkillDadUniversity = async (req, res) => {
                 achievements = COALESCE($16, achievements),
                 assigned_courses = COALESCE($17, assigned_courses),
                 certificates = COALESCE($18, certificates),
+                videos = COALESCE($19, videos),
                 updated_at = NOW()
-            WHERE id = $19 RETURNING *
+            WHERE id = $20 RETURNING *
         `, [
             name, location, website, phone, email, description, isActive,
             badge, foundation_year, total_scholars, specialized_courses,
@@ -105,6 +107,7 @@ const updateSkillDadUniversity = async (req, res) => {
             achievements ? JSON.stringify(achievements) : null,
             assignedCourses ? JSON.stringify(assignedCourses) : null,
             certificates ? JSON.stringify(certificates) : null,
+            videos ? JSON.stringify(videos) : null,
             req.params.id
         ]);
 

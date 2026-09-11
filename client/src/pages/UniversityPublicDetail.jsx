@@ -140,43 +140,44 @@ const UniversityPublicDetail = () => {
     // right here (routed to the skill_dad_universities table instead of the users table).
     const canEditImages = isOwner || (isSkillDadUni && currentUser?.role === 'admin');
 
-    useEffect(() => {
-        if (university) {
-            console.log('[Profile Debug] Current User ID:', currentUser?._id);
-            console.log('[Profile Debug] University ID:', university?._id);
-            console.log('[Profile Debug] Is Owner:', isOwner);
-        }
-    }, [currentUser, university, isOwner]);
-
     const universityName = decodeURIComponent(name);
 
     const getYoutubeId = (url) => {
-        if (!url) return null;
+        if (!url || typeof url !== 'string') return null;
+        // Check for shorts: youtube.com/shorts/VIDEO_ID
+        const shortsMatch = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/i);
+        if (shortsMatch && shortsMatch[1]) return shortsMatch[1];
+
+        // Standard watch?v= or youtu.be/ or embed/
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
+    };
+
+    const isYoutubeChannel = (url) => {
+        if (!url || typeof url !== 'string') return false;
+        return url.includes('youtube.com/@') || url.includes('youtube.com/channel/') || url.includes('youtube.com/c/') || url.includes('youtube.com/user/');
     };
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
                 setLoadingProfile(true);
-                const { data } = await axios.get(`/api/public/universities/profile/${encodeURIComponent(universityName)}`);
-                setUniversity(data);
-            } catch (error) {
-                // Not a real university account - check if this is a SkillDad University instead
-                // (no login account, so it isn't in /api/public/universities/profile). Covers being
-                // reached directly (bookmark/typed URL) rather than via a card click that already
-                // passed state, since those don't hit this fallback at all.
+                let regularUniData = null;
+                let skillDadUniData = null;
+
+                try {
+                    const { data } = await axios.get(`/api/public/universities/profile/${encodeURIComponent(universityName)}`);
+                    regularUniData = data;
+                } catch (error) {
+                    console.log('Regular university profile not found or error');
+                }
+
                 try {
                     const { data: skillDadUnis } = await axios.get('/api/public/skilldad-universities');
-                    const match = skillDadUnis.find(u => u.name === universityName);
+                    const match = skillDadUnis.find(u => u.name?.trim().toLowerCase() === universityName?.trim().toLowerCase());
                     if (match) {
-                        // Always use the freshly-fetched record, even if location.state already had a
-                        // university object - that state is a snapshot from whenever the Platform/Landing
-                        // page last loaded its university list, and goes stale the moment someone edits
-                        // the logo/cover here (edits would otherwise appear to "revert" on next visit).
-                        setUniversity({
+                        skillDadUniData = {
                             _id: `sd-${match.id}`,
                             name: match.name,
                             location: match.location || 'Global',
@@ -188,23 +189,40 @@ const UniversityPublicDetail = () => {
                                 phone: match.phone,
                                 coverImage: match.cover_image || undefined,
                                 gallery: match.gallery || [],
-                                youtubeUrl: match.youtube_url || undefined,
-                                videos: match.youtube_url ? [match.youtube_url] : [],
+                                videos: (() => {
+                                    const raw = match.videos ? (typeof match.videos === 'string' ? JSON.parse(match.videos) : match.videos) : [];
+                                    const filtered = Array.isArray(raw) ? raw.filter(v => typeof v === 'string' && v.trim() !== '') : [];
+                                    return filtered.length > 0 ? filtered : (match.youtube_url ? [match.youtube_url] : []);
+                                })(),
                                 achievements: typeof match.achievements === 'string' ? JSON.parse(match.achievements) : (match.achievements || []),
                                 certificates: typeof match.certificates === 'string' ? JSON.parse(match.certificates) : (match.certificates || [])
                             }
-                        });
-                        return;
+                        };
                     }
                 } catch (skillDadError) {
                     console.error('Error checking SkillDad universities:', skillDadError);
                 }
 
-                console.error("Error fetching university profile:", error);
-                if (!university) {
+                if (skillDadUniData && regularUniData) {
+                    setUniversity({
+                        ...regularUniData,
+                        ...skillDadUniData,
+                        _id: skillDadUniData._id, // Prefer sd- id for admin edit logic
+                        profile: {
+                            ...(regularUniData.profile || {}),
+                            ...skillDadUniData.profile
+                        }
+                    });
+                } else if (skillDadUniData) {
+                    setUniversity(skillDadUniData);
+                } else if (regularUniData) {
+                    setUniversity(regularUniData);
+                } else {
                     const fallback = fallbackUniversities.find(u => u.name === universityName);
                     if (fallback) setUniversity(fallback);
                 }
+            } catch (error) {
+                console.error("Error in fetchProfile:", error);
             } finally {
                 setLoadingProfile(false);
             }
@@ -584,45 +602,42 @@ const UniversityPublicDetail = () => {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-32 space-y-20 md:space-y-32">
 
-                {/* Institutional Identity */}
+{/* Institutional Identity */}
                 <div className="grid lg:grid-cols-12 gap-20 items-start">
                     <div className="lg:col-span-8 space-y-12">
-                        <section className="space-y-8">
-                            <div className="flex items-center gap-4">
-                                <div className="h-px flex-1 bg-white/10"></div>
-                                <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">Institutional Overview</span>
-                                <div className="h-px flex-1 bg-white/10"></div>
-                            </div>
-                            <h2 className="text-4xl md:text-5xl font-black text-white font-jakarta tracking-tight">
-                                Pioneering Knowledge & <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400 italic font-medium">Innovation</span>
-                            </h2>
-                            <p className="text-base sm:text-lg text-white/60 leading-relaxed font-inter font-medium">
-                                {university.bio || university.profile?.bio || university.description || "As a premier global knowledge hub, our institution is dedicated to fostering an environment of intellectual rigor, creative innovation, and cross-cultural leadership."}
-                            </p>
-                        </section>
+
 
                         {/* Achievements Grid */}
-                        <section className="space-y-12">
-                            <h3 className="text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
-                                <div className="w-2 h-8 bg-primary rounded-full"></div>
-                                National & Global Milestones
-                            </h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                                {(university.profile?.achievements || [
-                                    { title: "Academic Excellence 2024", desc: "Ranked #1 for regional innovation and research quality." },
-                                    { title: "Industry Integration Leader", desc: "Strategic partnerships with 100+ Fortune 500 companies." }
-                                ]).map((ach, i) => (
-                                    <div key={i} className="p-6 sm:p-8 rounded-[32px] sm:rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] -translate-y-1/2 translate-x-1/2"></div>
-                                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
-                                            <Award size={24} className="sm:w-7 sm:h-7" />
-                                        </div>
-                                        <h4 className="text-lg sm:text-xl font-black text-white mb-2 sm:mb-3 tracking-tight">{ach.title || ach}</h4>
-                                        <p className="text-white/40 leading-relaxed text-xs sm:text-sm font-medium">{ach.desc || "Outstanding contribution to the higher education ecosystem and research excellence."}</p>
+                        {(() => {
+                            const validAchievements = (university.profile?.achievements || []).filter(ach => typeof ach === 'object' ? ach.title?.trim() : (typeof ach === 'string' && ach.trim()));
+                            if (validAchievements.length === 0) return null;
+                            return (
+                                <section className="space-y-12">
+                                    <h3 className="text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
+                                        <div className="w-2 h-8 bg-primary rounded-full"></div>
+                                        National & Global Milestones
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                                        {validAchievements.map((ach, i) => (
+                                            <div key={i} className="p-6 sm:p-8 rounded-[32px] sm:rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group relative overflow-hidden">
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] -translate-y-1/2 translate-x-1/2"></div>
+                                                {ach.image ? (
+                                                    <div className="w-full h-32 sm:h-40 mb-4 sm:mb-6 rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-700">
+                                                        <img src={ach.image.startsWith('http') ? ach.image : getMediaUrl(ach.image)} alt={ach.title || (typeof ach === 'string' ? ach : '')} className="w-full h-full object-cover" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
+                                                        <Award size={24} className="sm:w-7 sm:h-7" />
+                                                    </div>
+                                                )}
+                                                <h4 className="text-lg sm:text-xl font-black text-white mb-2 sm:mb-3 tracking-tight">{typeof ach === 'string' ? ach : ach?.title}</h4>
+                                                <p className="text-white/40 leading-relaxed text-xs sm:text-sm font-medium">{typeof ach === 'string' ? "Outstanding contribution to the higher education ecosystem and research excellence." : (ach?.desc || "Outstanding contribution to the higher education ecosystem and research excellence.")}</p>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        </section>
+                                </section>
+                            );
+                        })()}
                     </div>
 
                     <aside className="lg:col-span-4 space-y-6 sm:space-y-8">
@@ -679,84 +694,66 @@ const UniversityPublicDetail = () => {
                     </aside>
                 </div>
 
-                {/* Media & Accreditations Matrix */}
-                <div className="grid lg:grid-cols-2 gap-16 items-start">
-                    {/* Media Spotlights */}
-                    {(() => {
-                        const videos = (university.profile?.videos?.length > 0 ? university.profile.videos : [university.profile?.youtubeUrl]).filter(url => !!url);
-                        return videos.length > 0 ? (
-                            <div className="space-y-6 sm:space-y-10">
-                                <h3 className="text-xl sm:text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
-                                    <div className="w-2 h-8 bg-red-600 rounded-full"></div>
-                                    Success Story
-                                </h3>
-                                <div
-                                    className="relative aspect-video rounded-[32px] sm:rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl"
-                                    onMouseEnter={() => setIsHoveringVideo(true)}
-                                    onMouseLeave={() => setIsHoveringVideo(false)}
-                                >
-                                    <AnimatePresence mode="wait">
-                                        <motion.div
-                                            key={currentVideoIndex}
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -20 }}
-                                            transition={{ duration: 0.5 }}
-                                            className="absolute inset-0"
-                                        >
-                                            <iframe
-                                                className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
-                                                src={`https://www.youtube.com/embed/${getYoutubeId(videos[currentVideoIndex])}?autoplay=0&controls=1&modestbranding=1&rel=0&iv_load_policy=3`}
-                                                title={`Success Story ${currentVideoIndex + 1}`}
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                            ></iframe>
-                                        </motion.div>
-                                    </AnimatePresence>
+                {/* Programs Showcase - THE CORE REQUEST */}
+                <section id="programs-section" className="space-y-12 pt-10">
+                    <div className="text-center space-y-4 max-w-3xl mx-auto mb-20">
+                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">Curriculum Catalog</p>
+                        <h2 className="text-5xl font-black text-white font-jakarta">Programs Provided by <span className="text-primary italic"> {university.name.split(' ')[0]}</span></h2>
+                        <p className="text-white/40 font-medium">Explore professional certifications and academic curricula directly accredited by this institution.</p>
+                    </div>
 
-                                    {/* Carousel Indicators */}
-                                    {videos.length > 1 && (
-                                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 pointer-events-none">
-                                            {videos.map((_, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentVideoIndex ? 'w-6 bg-primary' : 'w-2 bg-white/30'}`}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="p-12 bg-white/[0.02] border border-white/5 rounded-[48px] flex items-center justify-center text-white/20 italic">No Success Story Available</div>
-                        );
-                    })()}
-
-                    {/* Elite Accreditations Section */}
-                    <section className="space-y-10">
-                        <h3 className="text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
-                            <div className="w-2 h-8 bg-amber-500 rounded-full"></div>
-                            Institutional Accreditations
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                            {(university.profile?.certificates || [
-                                { title: "ISO 9001:2015 Certified", issuer: "Quality Board" },
-                                { title: "Global Innovation Shield", issuer: "World Tech Forum" }
-                            ]).slice(0, 4).map((cert, i) => (
-                                <div key={i} className="p-6 sm:p-8 pb-8 sm:pb-10 rounded-[32px] sm:rounded-[40px] bg-amber-500/[0.03] border border-amber-500/10 hover:border-amber-500/40 transition-all group flex flex-col items-center text-center">
-                                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 sm:mb-6 group-hover:rotate-12 transition-transform">
-                                        <Award size={24} className="sm:w-7 sm:h-7" />
-                                    </div>
-                                    <h4 className="text-sm sm:text-md font-black text-white mb-2 leading-tight uppercase tracking-tight">{cert.title || cert}</h4>
-                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 text-center">{cert.issuer || 'Official SkillDad Verification'}</p>
-                                </div>
+                    {loadingCourses ? (
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="h-[400px] w-full bg-white/5 rounded-[48px] animate-pulse"></div>
                             ))}
                         </div>
-                    </section>
-                </div>
+                    ) : courses.length > 0 ? (
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {courses.map(course => (
+                                <CourseCard key={course.id || course._id} course={course} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-24 text-center bg-white/[0.02] border-2 border-dashed border-white/5 rounded-[48px] space-y-4">
+                            <BookOpen size={48} className="text-white/10 mx-auto" />
+                            <p className="text-white/30 font-black uppercase tracking-widest">No Active Enrollment Programs Shared Publicly</p>
+                            <ModernButton variant="secondary" onClick={() => navigate('/courses')}>Explore Global Catalog</ModernButton>
+                        </div>
+                    )}
+                </section>
 
-                {/* Campus Gallery */}
+                
+                {/* Elite Accreditations Section */}
+                <div>
+                    {/* Elite Accreditations Section */}
+                    {(() => {
+                        const validCerts = (university.profile?.certificates || []).filter(cert => typeof cert === 'object' ? (cert.title?.trim() || cert.issuer?.trim()) : (typeof cert === 'string' && cert.trim()));
+                        if (validCerts.length === 0) return null;
+                        
+                        return (
+                            <section className="space-y-10">
+                                <h3 className="text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
+                                    <div className="w-2 h-8 bg-amber-500 rounded-full"></div>
+                                    Institutional Accreditations
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                                    {validCerts.slice(0, 4).map((cert, i) => (
+                                        <div key={i} className="p-6 sm:p-8 pb-8 sm:pb-10 rounded-[32px] sm:rounded-[40px] bg-amber-500/[0.03] border border-amber-500/10 hover:border-amber-500/40 transition-all group flex flex-col items-center text-center">
+                                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mb-4 sm:mb-6 group-hover:rotate-12 transition-transform">
+                                                <Award size={24} className="sm:w-7 sm:h-7" />
+                                            </div>
+                                            <h4 className="text-sm sm:text-md font-black text-white mb-2 leading-tight uppercase tracking-tight">{cert.title || cert}</h4>
+                                            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30 text-center">{cert.issuer || 'Official SkillDad Verification'}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        );
+                    })()}
+                
+                </div>
+{/* Campus Gallery */}
                 {university.profile?.gallery && university.profile.gallery.length > 0 && (
                     <section className="space-y-12">
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4">
@@ -796,36 +793,114 @@ const UniversityPublicDetail = () => {
                     </section>
                 )}
 
-                {/* Programs Showcase - THE CORE REQUEST */}
-                <section id="programs-section" className="space-y-12 pt-10">
-                    <div className="text-center space-y-4 max-w-3xl mx-auto mb-20">
-                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">Curriculum Catalog</p>
-                        <h2 className="text-5xl font-black text-white font-jakarta">Programs Provided by <span className="text-primary italic"> {university.name.split(' ')[0]}</span></h2>
-                        <p className="text-white/40 font-medium">Explore professional certifications and academic curricula directly accredited by this institution.</p>
-                    </div>
+                
+                {/* Media Spotlights (Success Story) */}
+                <div className="max-w-4xl mx-auto">
+                    {/* Media Spotlights */}
+                    {(() => {
+                        const videos = (university.profile?.videos?.length > 0 ? university.profile.videos : [university.profile?.youtubeUrl]).filter(url => typeof url === 'string' && url.trim() !== '');
+                        if (videos.length === 0) return null;
+                        
+                        return (
+                            <div className="space-y-6 sm:space-y-10">
+                                <h3 className="text-xl sm:text-2xl font-black text-white font-jakarta uppercase tracking-tighter flex items-center gap-4">
+                                    <div className="w-2 h-8 bg-red-600 rounded-full"></div>
+                                    Success Story
+                                </h3>
+                                <div
+                                    className="relative aspect-video rounded-[32px] sm:rounded-[48px] overflow-hidden border border-white/10 bg-black group shadow-3xl"
+                                    onMouseEnter={() => setIsHoveringVideo(true)}
+                                    onMouseLeave={() => setIsHoveringVideo(false)}
+                                >
+                                    <AnimatePresence mode="wait">
+                                        <motion.div
+                                            key={currentVideoIndex}
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.5 }}
+                                            className="absolute inset-0"
+                                        >
+                                            {(() => {
+                                                const url = videos[currentVideoIndex];
+                                                const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+                                                const isVideo = url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.ogg');
+                                                const ytId = getYoutubeId(url);
+                                                
+                                                if (isYouTube && ytId) {
+                                                    return (
+                                                        <iframe
+                                                            className="w-full h-full grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
+                                                            src={`https://www.youtube.com/embed/${ytId}?autoplay=0&controls=1&modestbranding=1&rel=0&iv_load_policy=3`}
+                                                            title={`Success Story ${currentVideoIndex + 1}`}
+                                                            frameBorder="0"
+                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                        ></iframe>
+                                                    );
+                                                } else if (isYouTube || isYoutubeChannel(url)) {
+                                                    const channelName = url.includes('@') ? '@' + url.split('@')[1].split(/[?&/]/)[0] : 'Official Channel';
+                                                    return (
+                                                        <div className="w-full h-full bg-gradient-to-br from-red-950/40 via-neutral-900 to-black flex flex-col items-center justify-center p-6 text-center space-y-4">
+                                                            <div className="w-20 h-20 rounded-full bg-red-600/20 border border-red-500/30 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                                                                <Youtube className="w-10 h-10 text-red-500" />
+                                                            </div>
+                                                            <div className="space-y-1 max-w-md">
+                                                                <h4 className="text-lg sm:text-xl font-bold text-white tracking-wide">{university.name}</h4>
+                                                                <p className="text-xs sm:text-sm text-white/60 font-mono">{channelName}</p>
+                                                                <p className="text-xs text-white/40 pt-1">Watch university success stories, campus spotlights, and student interviews.</p>
+                                                            </div>
+                                                            <a
+                                                                href={url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-500 text-white font-semibold text-xs tracking-wider uppercase transition-all shadow-lg hover:shadow-red-600/30"
+                                                            >
+                                                                <Youtube size={16} />
+                                                                Watch on YouTube
+                                                            </a>
+                                                        </div>
+                                                    );
+                                                } else if (isVideo) {
+                                                    return (
+                                                        <video 
+                                                            src={url} 
+                                                            controls 
+                                                            className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
+                                                        />
+                                                    );
+                                                } else {
+                                                    return (
+                                                        <img 
+                                                            src={url} 
+                                                            alt={`Success Story ${currentVideoIndex + 1}`} 
+                                                            className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 transition-all duration-700"
+                                                        />
+                                                    );
+                                                }
+                                            })()}
+                                        </motion.div>
+                                    </AnimatePresence>
 
-                    {loadingCourses ? (
-                        <div className="grid md:grid-cols-3 gap-8">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="h-[400px] w-full bg-white/5 rounded-[48px] animate-pulse"></div>
-                            ))}
-                        </div>
-                    ) : courses.length > 0 ? (
-                        <div className="grid md:grid-cols-3 gap-8">
-                            {courses.map(course => (
-                                <CourseCard key={course.id || course._id} course={course} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="py-24 text-center bg-white/[0.02] border-2 border-dashed border-white/5 rounded-[48px] space-y-4">
-                            <BookOpen size={48} className="text-white/10 mx-auto" />
-                            <p className="text-white/30 font-black uppercase tracking-widest">No Active Enrollment Programs Shared Publicly</p>
-                            <ModernButton variant="secondary" onClick={() => navigate('/courses')}>Explore Global Catalog</ModernButton>
-                        </div>
-                    )}
-                </section>
+                                    {/* Carousel Indicators */}
+                                    {videos.length > 1 && (
+                                        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 pointer-events-none">
+                                            {videos.map((_, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentVideoIndex ? 'w-6 bg-primary' : 'w-2 bg-white/30'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })()}
 
-                {/* Faculty & Academic Leadership */}
+                    
+                </div>
+{/* Faculty & Academic Leadership */}
                 {(university.profile?.faculty?.length > 0 || university.profile?.personnel?.length > 0) && (
                     <section className="space-y-12">
                         <div className="inline-flex items-center gap-2 text-primary font-black uppercase tracking-[0.3em] text-[10px] mb-4">

@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
 
 const PartnerDashboard = () => {
@@ -224,12 +225,12 @@ const PartnerDashboard = () => {
                 courses: registerData.selectedCourses
             };
             await axios.post('/api/partner/register-student', payload, config);
-            alert(`Student ${registerData.name} registered and enrolled successfully!`);
+            showToast(`Student ${registerData.name} registered and enrolled successfully!`, 'success');
             setShowRegisterModal(false);
             setRegisterData({ name: '', email: '', phone: '', password: '', partnerCode: '', selectedCourses: [] });
             fetchStats();
         } catch (error) {
-            alert(error.response?.data?.message || 'Registration failed');
+            showToast(error.response?.data?.message || 'Registration failed', 'error');
         } finally {
             setLoading(false);
         }
@@ -327,13 +328,7 @@ const PartnerDashboard = () => {
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                     <div>
-                        <motion.h1
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="text-sm font-semibold text-white font-inter text-left"
-                        >
-                            B2B Partner Portal
-                        </motion.h1>
+                        <DashboardHeading title="B2B Partner Portal" />
                     </div>
                     <div className="flex items-center space-x-3">
                         <ModernButton variant="secondary" className="group">
@@ -386,18 +381,18 @@ const PartnerDashboard = () => {
                                     transition={{ delay: i * 0.05 }}
                                     className="flex-1 min-w-[200px] sm:min-w-[220px]"
                                 >
-                                    <GlassCard className="py-1.5 px-3 bg-slate-900/10 flex items-center justify-between gap-2 border border-white/5 rounded-md hover:border-white/10 transition-all w-full h-full">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`p-1 bg-${stat.color === 'primary' ? 'primary/10 text-primary' : stat.color === 'emerald' ? 'emerald-500/10 text-emerald-400' : stat.color === 'amber' ? 'amber-500/10 text-amber-400' : 'purple-500/10 text-purple-400'} rounded shrink-0`}>
-                                                <stat.icon size={14} />
+                                    <GlassCard className="!p-4 bg-slate-900/10 flex items-center justify-between gap-3 border border-white/5 rounded-xl hover:border-white/10 transition-all w-full h-full">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`p-2 bg-${stat.color === 'primary' ? 'primary/10 text-primary' : stat.color === 'emerald' ? 'emerald-500/10 text-emerald-400' : stat.color === 'amber' ? 'amber-500/10 text-amber-400' : 'purple-500/10 text-purple-400'} rounded-lg shrink-0`}>
+                                                <stat.icon size={20} />
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-slate-500 uppercase font-bold tracking-wider text-[9px] leading-tight">{stat.label}</span>
-                                                <span className="font-extrabold text-white text-[13px] mt-0.5">{stat.val}</span>
+                                                <span className="text-slate-400 uppercase font-bold tracking-wider text-xs leading-tight">{stat.label}</span>
+                                                <span className="font-extrabold text-white text-lg mt-0.5">{stat.val}</span>
                                             </div>
                                         </div>
                                         {stat.status && (
-                                            <span className="text-[8px] font-bold text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0 bg-emerald-500/10">{stat.status}</span>
+                                            <span className="text-[10px] font-bold text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded shrink-0 bg-emerald-500/10">{stat.status}</span>
                                         )}
                                     </GlassCard>
                                 </motion.div>
