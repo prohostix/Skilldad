@@ -96,6 +96,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                 { name: 'Users', icon: Users, path: '/admin/users' },
                 { name: 'Students', icon: GraduationCap, path: '/admin/students' },
                 { name: 'Career Manager', icon: Briefcase, path: '/admin/career-manager' },
+                { name: 'Job Alerts', icon: Bell, path: '/admin/job-alerts' },
                 { name: 'Certificates', icon: Trophy, path: '/admin/certificates' },
                 { name: 'Document Review', icon: FileText, path: '/admin/document-review' },
                 { name: 'B2B Partners', icon: Briefcase, path: '/admin/b2b' },

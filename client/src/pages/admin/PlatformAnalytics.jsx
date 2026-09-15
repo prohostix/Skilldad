@@ -114,39 +114,48 @@ const PlatformAnalytics = () => {
                 <div className="text-left">
                     <DashboardHeading title="Intelligence & Metrics" />
                 </div>
-                <div className="flex items-center space-x-3">
-                    <ModernButton variant="secondary" onClick={handleExportAnalytics} className="!bg-emerald-500/10 !text-emerald-400 !border-emerald-500/20 hover:!bg-emerald-500/20">
-                        <Download size={18} className="mr-2" /> Export Data
-                    </ModernButton>
-                    <ModernButton variant="secondary" onClick={() => setShowCustomRange(true)}>
-                        <Calendar size={18} className="mr-2" /> Custom Range
-                    </ModernButton>
-                    <ModernButton onClick={() => setShowGoals(true)}>
-                        <Target size={18} className="mr-2" /> View Goals
-                    </ModernButton>
+                <div className="flex items-center space-x-2">
+                    <button
+                        onClick={handleExportAnalytics}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all shadow-sm"
+                    >
+                        <Download size={13} /> <span>Export Data</span>
+                    </button>
+                    <button
+                        onClick={() => setShowCustomRange(true)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:border-primary/40 hover:text-primary transition-all shadow-sm"
+                    >
+                        <Calendar size={13} /> <span>Custom Range</span>
+                    </button>
+                    <button
+                        onClick={() => setShowGoals(true)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-white transition-all shadow-sm"
+                    >
+                        <Target size={13} /> <span>View Goals</span>
+                    </button>
                 </div>
             </div>
 
             {/* Impact Metric Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {Object.entries(analytics.revenueImpact).map(([key, val], i) => (
-                    <GlassCard key={key} className="relative overflow-hidden group border-[#7C3AED]/30 !p-6 min-h-[140px] flex flex-col justify-center">
+                    <div key={key} className="relative overflow-hidden group bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col justify-between min-h-[120px]">
                         <div className="relative z-10 text-left">
-                            <p className="text-[10px] font-black text-[#A78BFA] uppercase tracking-[0.2em] mb-2">
+                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 font-inter mb-1">
                                 {key.replace('_', ' ')} Impact
                             </p>
-                            <p className="text-3xl font-black text-white tracking-tighter">
+                            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">
                                 ₹{val.toLocaleString()}
                             </p>
-                            <div className="mt-4 flex items-center space-x-2 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
-                                <TrendingUp size={12} />
+                            <div className="mt-3 flex items-center space-x-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-semibold font-inter">
+                                <TrendingUp size={13} />
                                 <span>+14.2% Growth</span>
                             </div>
                         </div>
-                        <div className="absolute right-[-20px] bottom-[-20px] opacity-[0.03] group-hover:opacity-[0.07] group-hover:scale-110 transition-all duration-700">
-                            <CircleDollarSign size={140} color={COLORS[i % COLORS.length]} />
+                        <div className="absolute right-[-10px] bottom-[-10px] opacity-[0.04] group-hover:opacity-[0.08] group-hover:scale-110 transition-all duration-500 pointer-events-none">
+                            <CircleDollarSign size={110} color={COLORS[i % COLORS.length]} />
                         </div>
-                    </GlassCard>
+                    </div>
                 ))}
             </div>
 

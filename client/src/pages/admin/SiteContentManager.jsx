@@ -11,6 +11,7 @@ import { useToast } from '../../context/ToastContext';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import NetworkDiagramEditor from '../../components/admin/NetworkDiagramEditor';
 
 const SiteContentManager = () => {
     const [activeTab, setActiveTab] = useState('corporate'); 
@@ -238,6 +239,7 @@ const SiteContentManager = () => {
         { id: 'university', label: 'University Partners (Ticker Banner)', icon: GraduationCap },
         { id: 'directors', label: 'Team & Advisory', icon: UserIcon },
         { id: 'success_stories', label: 'Success Stories', icon: Heart },
+        { id: 'diagram', label: 'Network Diagram Nodes', icon: Sparkles },
         { id: 'page_sections', label: 'Landing Page Controls', icon: Sliders },
         { id: 'about_cms', label: 'About Page CMS', icon: ImageIcon },
     ];
@@ -251,26 +253,26 @@ const SiteContentManager = () => {
     }
 
     return (
-        <div className="space-y-8 pb-20">
+        <div className="space-y-6 pb-20 font-inter">
             <DashboardHeading 
                 title="Site Content Manager" 
                 subtitle="Manage your platform's public facing assets and CMS content"
                 icon={LayoutGrid}
             />
 
-            {/* Tab Navigation */}
-            <div className="flex flex-wrap gap-2 p-1 bg-white/5 rounded-2xl w-fit">
+            {/* Tab Navigation styled like Course Library */}
+            <div className="flex bg-slate-100/90 dark:bg-white/5 p-1 rounded-xl border border-slate-200/80 dark:border-white/10 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full flex-wrap gap-1">
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`px-6 py-3 rounded-xl text-sm font-bold flex items-center space-x-2 transition-all duration-300 ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                             activeTab === tab.id 
-                            ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                            : 'text-white/40 hover:text-white hover:bg-white/5'
+                            ? 'bg-primary text-white shadow-sm' 
+                            : 'text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/5'
                         }`}
                     >
-                        <tab.icon size={18} />
+                        <tab.icon size={14} />
                         <span>{tab.label}</span>
                     </button>
                 ))}
@@ -278,44 +280,46 @@ const SiteContentManager = () => {
 
             {/* Content Section */}
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {activeTab === 'page_sections' ? (
+                {activeTab === 'diagram' ? (
+                    <NetworkDiagramEditor landingCmsData={landingCmsData} onUpdate={handleCmsUpdate} />
+                ) : activeTab === 'page_sections' ? (
                     <LandingPageControls landingCmsData={landingCmsData} onUpdate={handleCmsUpdate} />
                 ) : activeTab === 'about_cms' ? (
                     <AboutCmsEditor data={cmsData} onUpdate={handleCmsUpdate} />
                 ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                         {activeTab === 'success_stories' && (
                             <LandingPageControls landingCmsData={landingCmsData} onUpdate={handleCmsUpdate} />
                         )}
 
-
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-black text-white px-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80 dark:border-white/10">
+                            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-inter">
                                 {tabs.find(t => t.id === activeTab)?.label}
                             </h2>
-                            <ModernButton onClick={() => { resetForm(); setShowAddModal(true); }}>
+                            <ModernButton onClick={() => { resetForm(); setShowAddModal(true); }} className="w-full sm:w-auto !px-3 !py-1.5 text-xs font-semibold">
+                                <Plus size={14} className="mr-1" />
                                 Add {activeTab === 'directors' ? 'Member' : activeTab === 'success_stories' ? 'Story' : activeTab === 'university' ? 'Ticker Partner' : 'Logo'}
                             </ModernButton>
                         </div>
                         
                         {activeTab === 'directors' && (
-                            <div className="flex space-x-2 mb-6 p-1 bg-white/5 rounded-xl w-fit">
+                            <div className="flex space-x-1 p-0.5 bg-slate-100/90 dark:bg-white/5 rounded-lg border border-slate-200/80 dark:border-white/10 w-fit">
                                 <button
                                     onClick={() => setDirectorSubTab('BOARD')}
-                                    className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                                    className={`px-3 py-1 rounded-md text-[11px] font-semibold transition-all ${
                                         directorSubTab === 'BOARD' 
-                                        ? 'bg-white/10 text-white shadow-sm' 
-                                        : 'text-white/30 hover:text-white/60'
+                                        ? 'bg-white dark:bg-white/15 text-slate-900 dark:text-white shadow-sm font-bold' 
+                                        : 'text-slate-600 dark:text-white/50 hover:text-slate-900 dark:hover:text-white'
                                     }`}
                                 >
                                     BOARD & ADVISORY
                                 </button>
                                 <button
                                     onClick={() => setDirectorSubTab('IIT_LEADERSHIP')}
-                                    className={`px-4 py-2 rounded-lg text-xs font-black transition-all ${
+                                    className={`px-3 py-1 rounded-md text-[11px] font-semibold transition-all ${
                                         directorSubTab === 'IIT_LEADERSHIP' 
-                                        ? 'bg-primary/20 text-primary border border-primary/30' 
-                                        : 'text-white/30 hover:text-white/60'
+                                        ? 'bg-primary text-white shadow-sm font-bold' 
+                                        : 'text-slate-600 dark:text-white/50 hover:text-slate-900 dark:hover:text-white'
                                     }`}
                                 >
                                     IIT LEADERSHIP PANEL
@@ -335,16 +339,16 @@ const SiteContentManager = () => {
 
                             if (filteredItems.length === 0) {
                                 return (
-                                    <div className="p-12 text-center rounded-3xl bg-white/5 border border-dashed border-white/10 my-6">
-                                        <Building2 className="w-12 h-12 mx-auto text-white/20 mb-3" />
-                                        <h3 className="text-base font-bold text-white mb-1">
+                                    <div className="p-8 text-center rounded-xl bg-slate-50 dark:bg-white/5 border border-dashed border-slate-200 dark:border-white/10 my-4">
+                                        <Building2 className="w-8 h-8 mx-auto text-slate-400 dark:text-white/20 mb-2" />
+                                        <h3 className="text-xs font-bold text-slate-800 dark:text-white mb-1">
                                             No {tabs.find(t => t.id === activeTab)?.label} Added Yet
                                         </h3>
-                                        <p className="text-xs text-white/40 max-w-md mx-auto mb-5">
-                                            There are currently no items in this category. Click the button below to add your first item.
+                                        <p className="text-[11px] text-slate-500 dark:text-white/40 max-w-md mx-auto mb-3">
+                                            There are currently no items in this category. Click below to add your first item.
                                         </p>
-                                        <ModernButton onClick={() => { resetForm(); setShowAddModal(true); }}>
-                                            <Plus size={16} className="mr-2" />
+                                        <ModernButton onClick={() => { resetForm(); setShowAddModal(true); }} className="!px-3 !py-1.5 text-xs font-semibold">
+                                            <Plus size={13} className="mr-1" />
                                             Add {activeTab === 'directors' ? 'Member' : activeTab === 'success_stories' ? 'Story' : activeTab === 'university' ? 'Ticker Partner' : 'Logo'}
                                         </ModernButton>
                                     </div>
@@ -352,14 +356,17 @@ const SiteContentManager = () => {
                             }
 
                             return (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
                                     {filteredItems.map(item => {
                                         const itemId = item._id || item.id;
                                         return (
-                                            <GlassCard key={itemId} className="relative group overflow-hidden border-white/5 hover:border-primary/30 transition-all duration-500">
-                                                <div className="flex flex-col items-center text-center p-6">
-                                                    <div className="relative mb-4">
-                                                        <div className="w-24 h-24 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all bg-black/40">
+                                            <div 
+                                                key={itemId} 
+                                                className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col items-center text-center justify-between"
+                                            >
+                                                <div className="flex flex-col items-center text-center w-full">
+                                                    <div className="relative mb-2.5">
+                                                        <div className="w-20 h-20 rounded-lg overflow-hidden border border-slate-200/80 dark:border-white/10 bg-slate-50 dark:bg-black/30 p-2 flex items-center justify-center transition-all group-hover:border-primary/40">
                                                             <img 
                                                                 src={
                                                                     (item.imageUrl || item.image || item.logo) 
@@ -369,11 +376,11 @@ const SiteContentManager = () => {
                                                                         : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name || 'N/A')}&background=5B5CFF&color=fff&bold=true`
                                                                 } 
                                                                 alt={item.name}
-                                                                className="w-full h-full object-cover"
+                                                                className="w-full h-full object-contain"
                                                             />
                                                         </div>
-                                                        <label className="absolute -bottom-2 -right-2 p-2 bg-primary rounded-xl cursor-pointer hover:scale-110 transition-all shadow-lg" title="Change logo/image">
-                                                            <Upload size={14} className="text-white" />
+                                                        <label className="absolute -bottom-1 -right-1 p-1 bg-primary text-white rounded-md cursor-pointer hover:scale-105 transition-all shadow-sm" title="Change logo/image">
+                                                            <Upload size={11} />
                                                             <input 
                                                                 type="file" 
                                                                 className="hidden" 
@@ -382,69 +389,72 @@ const SiteContentManager = () => {
                                                             />
                                                         </label>
                                                         {uploading === itemId && (
-                                                            <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center">
-                                                                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                                                            <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center">
+                                                                <Loader2 className="w-5 h-5 text-primary animate-spin" />
                                                             </div>
                                                         )}
                                                     </div>
 
                                                     <div className="w-full">
-                                                        <h3 className="text-sm font-bold text-white mb-1 text-center">{item.name}</h3>
-                                                        <p className="text-[10px] text-white/50 uppercase tracking-widest text-center">{item.title || item.role || item.type || item.package}</p>
+                                                        <h3 className="text-xs font-bold text-slate-900 dark:text-white mb-0.5 text-center font-inter truncate w-full" title={item.name}>{item.name}</h3>
+                                                        <p className="text-[10px] text-slate-500 dark:text-white/50 uppercase tracking-wider text-center font-inter truncate w-full">{item.title || item.role || item.type || item.package || 'Partner'}</p>
                                                         
-                                                        <div className="text-center mt-2">
-                                                            {activeTab === 'directors' && (
-                                                                <div className="text-[8px] font-black px-2 py-0.5 bg-primary/20 text-primary border border-primary/30 rounded-full inline-block">
+                                                        {activeTab === 'directors' && (
+                                                            <div className="mt-1">
+                                                                <span className="text-[8px] font-bold px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded-md inline-block">
                                                                     {item.display_target || 'ABOUT_DIRECTOR'}
-                                                                </div>
-                                                            )}
-                                                            {activeTab === 'success_stories' && (
-                                                                <div className="space-y-1">
-                                                                    <div className="text-[8px] font-black px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full inline-block">
-                                                                        {item.campus}
-                                                                    </div>
-                                                                    <div className="flex items-center justify-center mt-2">
-                                                                        <label className={`flex items-center gap-1 px-3 py-1.5 rounded-xl cursor-pointer text-[9px] font-black uppercase tracking-widest transition-all ${item.video_url || item.videoUrl ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30'}`}>
-                                                                            {videoUploading === itemId ? (
-                                                                                <Loader2 size={10} className="animate-spin" />
-                                                                            ) : (
-                                                                                <Upload size={10} />
-                                                                            )}
-                                                                            {item.video_url || item.videoUrl ? 'Change Video' : 'Upload Video'}
-                                                                            <input
-                                                                                type="file"
-                                                                                accept="video/mp4,video/webm,video/ogg,video/quicktime"
-                                                                                className="hidden"
-                                                                                onChange={(e) => handleVideoUpload(itemId, e.target.files[0])}
-                                                                                disabled={videoUploading === itemId}
-                                                                            />
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                                                </span>
+                                                            </div>
+                                                        )}
 
-                                                        {/* Action buttons - ALWAYS visible so user easily spots the Edit button */}
-                                                        <div className="flex items-center justify-center gap-2 mt-5 pt-3 border-t border-white/10 w-full">
-                                                            <button 
-                                                                onClick={() => handleEditStart(item)} 
-                                                                className="flex-1 py-2 px-3 bg-white/5 hover:bg-primary/20 hover:text-primary border border-white/10 hover:border-primary/30 rounded-xl text-xs font-bold text-white/90 flex items-center justify-center gap-1.5 transition-all shadow-sm"
-                                                            >
-                                                                <Edit2 size={13} />
-                                                                <span>Edit</span>
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleDelete(itemId)} 
-                                                                className="py-2 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
-                                                                title="Delete Item"
-                                                            >
-                                                                <Trash2 size={13} />
-                                                                <span>Delete</span>
-                                                            </button>
-                                                        </div>
+                                                        {activeTab === 'success_stories' && (
+                                                            <div className="mt-1 space-y-1">
+                                                                {item.campus && (
+                                                                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-md inline-block">
+                                                                        {item.campus}
+                                                                    </span>
+                                                                )}
+                                                                <div className="flex items-center justify-center mt-1">
+                                                                    <label className={`flex items-center gap-1 px-2 py-1 rounded-md cursor-pointer text-[9px] font-semibold transition-all ${item.video_url || item.videoUrl ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'}`}>
+                                                                        {videoUploading === itemId ? (
+                                                                            <Loader2 size={10} className="animate-spin" />
+                                                                        ) : (
+                                                                            <Upload size={10} />
+                                                                        )}
+                                                                        {item.video_url || item.videoUrl ? 'Change Video' : 'Upload Video'}
+                                                                        <input
+                                                                            type="file"
+                                                                            accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                                                                            className="hidden"
+                                                                            onChange={(e) => handleVideoUpload(itemId, e.target.files[0])}
+                                                                            disabled={videoUploading === itemId}
+                                                                        />
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
-                                            </GlassCard>
+
+                                                {/* Compact Action buttons */}
+                                                <div className="flex items-center justify-center gap-1.5 mt-2.5 pt-2 border-t border-slate-200/80 dark:border-white/10 w-full">
+                                                    <button 
+                                                        onClick={() => handleEditStart(item)} 
+                                                        className="flex-1 py-1 px-2 bg-slate-100 hover:bg-primary/15 hover:text-primary dark:bg-white/5 dark:hover:bg-primary/20 border border-slate-200/80 hover:border-primary/30 dark:border-white/10 rounded-lg text-xs font-semibold text-slate-700 dark:text-white/90 flex items-center justify-center gap-1 transition-all shadow-sm"
+                                                    >
+                                                        <Edit2 size={11} />
+                                                        <span>Edit</span>
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDelete(itemId)} 
+                                                        className="py-1 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                                                        title="Delete Item"
+                                                    >
+                                                        <Trash2 size={11} />
+                                                        <span>Delete</span>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         );
                                     })}
                                 </div>
@@ -454,23 +464,23 @@ const SiteContentManager = () => {
                 )}
             </div>
 
-            {/* Add Modal */}
+            {/* Add / Edit Modal */}
             <AnimatePresence>
                 {showAddModal && (
                     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAddModal(false)} className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="relative w-full max-w-lg bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 shadow-2xl overflow-y-auto max-h-[90vh]">
-                            <div className="flex justify-between items-center mb-8">
-                                <h3 className="text-xl font-black text-white">{isEditing ? 'Edit' : 'Add New'} {activeTab === 'directors' ? 'Team Member' : activeTab === 'success_stories' ? 'Success Story' : 'Partner'}</h3>
-                                <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white/5 rounded-xl text-white/50"><X size={20} /></button>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAddModal(false)} className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-lg bg-white dark:bg-[#0E0B1A] border border-slate-200/80 dark:border-white/10 rounded-2xl p-5 sm:p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+                            <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-200/80 dark:border-white/10">
+                                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">{isEditing ? 'Edit' : 'Add New'} {activeTab === 'directors' ? 'Team Member' : activeTab === 'success_stories' ? 'Success Story' : 'Partner'}</h3>
+                                <button onClick={() => setShowAddModal(false)} className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg text-slate-500 dark:text-white/50"><X size={16} /></button>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="space-y-2">
-                                     <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">{activeTab === 'success_stories' ? 'Student Name' : 'Name / Company'}</label>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="space-y-1">
+                                     <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">{activeTab === 'success_stories' ? 'Student Name' : 'Name / Company'}</label>
                                      <input 
                                          required
-                                         className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                         className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                          value={formData.name}
                                          onChange={e => setFormData({ ...formData, name: e.target.value })}
                                      />
@@ -478,19 +488,19 @@ const SiteContentManager = () => {
 
                                  {activeTab === 'directors' && (
                                      <>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Role / Title</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Role / Title</label>
                                              <input 
                                                  required
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.title}
                                                  onChange={e => setFormData({ ...formData, title: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Display Location</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Display Location</label>
                                              <select
-                                                 className="w-full px-6 py-4 bg-[#1A1A1A] border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#1A1A1A] border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.display_target}
                                                  onChange={e => setFormData({ ...formData, display_target: e.target.value })}
                                              >
@@ -500,28 +510,28 @@ const SiteContentManager = () => {
                                                  <option value="ABOUT_ADVISORY">About Us (Advisory Board)</option>
                                              </select>
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">University / Alumni (Internal Notes)</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">University / Alumni</label>
                                              <input 
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.university}
                                                  placeholder="e.g. IIT Delhi"
                                                  onChange={e => setFormData({ ...formData, university: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Bio / Description (Displayed on Landing)</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Bio / Description</label>
                                              <textarea 
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all h-24"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all h-20"
                                                  value={formData.bio}
-                                                 placeholder="Short description for the IIT Leadership section..."
+                                                 placeholder="Short description..."
                                                  onChange={e => setFormData({ ...formData, bio: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Accent Dot Color (Theme)</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Accent Color (Theme)</label>
                                              <select
-                                                 className="w-full px-6 py-4 bg-[#1A1A1A] border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-[#1A1A1A] border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.accent_color}
                                                  onChange={e => setFormData({ ...formData, accent_color: e.target.value })}
                                              >
@@ -537,67 +547,67 @@ const SiteContentManager = () => {
 
                                  {activeTab === 'success_stories' && (
                                      <>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Campus / University</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Campus / University</label>
                                              <input 
                                                  required
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.campus}
                                                  placeholder="e.g. CIT Campus"
                                                  onChange={e => setFormData({ ...formData, campus: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Role / Job Title</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Role / Job Title</label>
                                              <input 
                                                  required
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.role}
                                                  placeholder="e.g. Full Stack Dev"
                                                  onChange={e => setFormData({ ...formData, role: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Package (LPA)</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Package (LPA)</label>
                                              <input 
                                                  required
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.package}
                                                  placeholder="e.g. 18 LPA"
                                                  onChange={e => setFormData({ ...formData, package: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Story / Testimonial</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Story / Testimonial</label>
                                              <textarea 
                                                  required
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all h-24"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all h-20"
                                                  value={formData.story}
                                                  onChange={e => setFormData({ ...formData, story: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Video URL (YouTube / External Link)</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Video URL (YouTube / External Link)</label>
                                              <input 
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.video_url}
                                                  placeholder="https://youtube.com/watch?v=..."
                                                  onChange={e => setFormData({ ...formData, video_url: e.target.value })}
                                              />
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Or Upload Video from Device</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Or Upload Video from Device</label>
                                              {isEditing ? (
-                                                 <label className={`flex items-center justify-center gap-2 w-full px-6 py-4 border border-dashed rounded-2xl cursor-pointer transition-all ${videoUploading === editingId ? 'border-primary/40 bg-primary/5' : 'border-white/10 bg-white/5 hover:border-primary/40 hover:bg-primary/5'}`}>
+                                                 <label className={`flex items-center justify-center gap-2 w-full px-3 py-2 border border-dashed rounded-lg cursor-pointer transition-all ${videoUploading === editingId ? 'border-primary/40 bg-primary/5' : 'border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:border-primary/40'}`}>
                                                      {videoUploading === editingId ? (
                                                          <>
-                                                             <Loader2 size={16} className="animate-spin text-primary" />
-                                                             <span className="text-sm text-primary font-bold">Uploading...</span>
+                                                             <Loader2 size={13} className="animate-spin text-primary" />
+                                                             <span className="text-xs text-primary font-semibold">Uploading...</span>
                                                          </>
                                                      ) : (
                                                          <>
-                                                             <Upload size={16} className="text-white/40" />
-                                                             <span className="text-sm text-white/40">{formData.video_url && !formData.video_url.startsWith('http') ? 'Change video file' : 'Choose video file (MP4, WEBM, MOV)'}</span>
+                                                             <Upload size={13} className="text-slate-500 dark:text-white/40" />
+                                                             <span className="text-xs text-slate-600 dark:text-white/50">{formData.video_url && !formData.video_url.startsWith('http') ? 'Change video file' : 'Choose video file (MP4, WEBM, MOV)'}</span>
                                                          </>
                                                      )}
                                                      <input
@@ -609,7 +619,6 @@ const SiteContentManager = () => {
                                                              const file = e.target.files[0];
                                                              if (!file) return;
                                                              await handleVideoUpload(editingId, file);
-                                                             // refresh formData video_url after upload
                                                              const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
                                                              const res = await axios.get('/api/admin/success-stories', { headers: { Authorization: `Bearer ${userInfo?.token}` } });
                                                              const updated = res.data.find(s => s._id === editingId || s.id === editingId);
@@ -618,14 +627,14 @@ const SiteContentManager = () => {
                                                      />
                                                  </label>
                                              ) : (
-                                                 <p className="text-[9px] text-white/30 px-1 py-2">Save the story first, then upload a video file from the card or re-open edit.</p>
+                                                 <p className="text-[10px] text-slate-400 dark:text-white/30 px-1 py-1">Save the story first, then upload a video file.</p>
                                              )}
                                          </div>
-                                         <div className="space-y-2">
-                                             <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Display Order</label>
+                                         <div className="space-y-1">
+                                             <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Display Order</label>
                                              <input 
                                                  type="number"
-                                                 className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                                 className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                                  value={formData.order}
                                                  onChange={e => setFormData({ ...formData, order: e.target.value })}
                                              />
@@ -634,18 +643,18 @@ const SiteContentManager = () => {
                                  )}
 
                                  {activeTab !== 'directors' && activeTab !== 'success_stories' && (
-                                     <div className="space-y-2">
-                                         <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">Order Index</label>
+                                     <div className="space-y-1">
+                                         <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">Order Index</label>
                                          <input 
                                              type="number"
-                                             className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:border-primary outline-none transition-all"
+                                             className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                              value={formData.order}
                                              onChange={e => setFormData({ ...formData, order: e.target.value })}
                                          />
                                      </div>
                                  )}
 
-                                 <ModernButton type="submit" className="w-full !py-5 uppercase font-black tracking-widest">
+                                 <ModernButton type="submit" className="w-full !py-2 text-xs font-semibold">
                                      {isEditing ? 'Save Changes' : 'Confirm Addition'}
                                  </ModernButton>
                              </form>
@@ -755,27 +764,27 @@ const CmsSectionCard = ({ title, icon: Icon, fields, onSave }) => {
     }, [fields]);
 
     return (
-        <GlassCard className="h-fit">
-            <div className="flex items-center space-x-3 mb-8 border-b border-white/5 pb-4">
-                <div className="p-2 bg-primary/20 text-primary rounded-xl">
-                    <Icon size={20} />
+        <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm h-fit">
+            <div className="flex items-center space-x-2.5 mb-4 border-b border-slate-200/80 dark:border-white/10 pb-3">
+                <div className="p-1.5 bg-primary/10 text-primary rounded-lg">
+                    <Icon size={16} />
                 </div>
-                <h3 className="font-bold text-white uppercase tracking-widest text-sm">{title}</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs font-inter">{title}</h3>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-3.5">
                 {fields.map(field => (
-                    <div key={field.key} className="space-y-2 text-left">
-                        <label className="text-[10px] font-black text-white/40 uppercase tracking-widest px-1">{field.label}</label>
+                    <div key={field.key} className="space-y-1 text-left">
+                        <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">{field.label}</label>
                         {field.type === 'textarea' ? (
                             <textarea
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-sm focus:border-primary outline-none h-24 transition-all"
+                                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none h-20 transition-all"
                                 value={values[field.key] || ''}
                                 onChange={e => setValues({ ...values, [field.key]: e.target.value })}
                             />
                         ) : (
                             <input
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-sm focus:border-primary outline-none transition-all"
+                                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                                 value={values[field.key] || ''}
                                 onChange={e => setValues({ ...values, [field.key]: e.target.value })}
                             />
@@ -786,11 +795,12 @@ const CmsSectionCard = ({ title, icon: Icon, fields, onSave }) => {
 
             <button
                 onClick={() => onSave(values)}
-                className="w-full mt-8 py-3 bg-primary/20 text-primary border border-primary/30 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all"
+                className="w-full mt-4 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5 font-inter"
             >
-                Save {title.split(' ')[0]} Section
+                <Save size={13} />
+                <span>Save {title.split(' ')[0]} Section</span>
             </button>
-        </GlassCard>
+        </div>
     );
 };
 
@@ -816,22 +826,22 @@ const HeroBubbleTextsEditor = ({ items, onUpdate }) => {
     };
 
     return (
-        <GlassCard className="p-6 md:p-8 border-primary/30">
-            <div className="flex items-start gap-4 pb-6 border-b border-white/10">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 bg-primary/20 text-primary border-primary/30">
-                    <Sparkles size={22} />
+        <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm">
+            <div className="flex items-start gap-3 pb-4 border-b border-slate-200/80 dark:border-white/10">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center border shrink-0 bg-primary/10 text-primary border-primary/20">
+                    <Sparkles size={18} />
                 </div>
                 <div>
-                    <h3 className="text-lg font-black text-white font-jakarta">Hero Bubble Pop-up Text</h3>
-                    <p className="text-xs text-white/60 mt-1 max-w-2xl leading-relaxed font-medium">
-                        Text shown when a floating bubble bursts in the homepage hero animation (right side). Use this for live job vacancy counts, enrollment numbers, or any short highlight - not tied to course names. Rotates across the bubbles automatically.
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white font-inter">Hero Bubble Pop-up Text</h3>
+                    <p className="text-[11px] text-slate-500 dark:text-white/60 mt-0.5 max-w-2xl leading-relaxed font-inter">
+                        Text shown when a floating bubble bursts in the homepage hero animation (right side). Rotates automatically.
                     </p>
                 </div>
             </div>
 
-            <div className="pt-6 flex flex-col sm:flex-row gap-3">
+            <div className="pt-3.5 flex flex-col sm:flex-row gap-2">
                 <input
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:border-primary outline-none transition-all"
+                    className="flex-1 px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
                     placeholder="e.g. 1,200+ Data Analyst Openings"
                     value={newText}
                     onChange={e => setNewText(e.target.value)}
@@ -840,30 +850,30 @@ const HeroBubbleTextsEditor = ({ items, onUpdate }) => {
                 <button
                     onClick={handleAdd}
                     disabled={saving || !newText.trim()}
-                    className="px-6 py-3 bg-primary/20 text-primary border border-primary/30 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-primary hover:text-white transition-all disabled:opacity-40 shrink-0"
+                    className="px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold shadow-sm transition-all disabled:opacity-40 shrink-0 font-inter"
                 >
                     Add
                 </button>
             </div>
 
-            <div className="pt-4 space-y-2">
+            <div className="pt-3 space-y-1.5">
                 {items.length === 0 ? (
-                    <p className="text-xs text-white/30 italic px-1 py-2">No entries yet - bubbles will just rise and pop with no text until you add some.</p>
+                    <p className="text-[11px] text-slate-400 dark:text-white/30 italic px-1 py-1">No entries yet - bubbles will just rise and pop with no text until you add some.</p>
                 ) : items.map(item => (
-                    <div key={item.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-white/[0.03] border border-white/5 rounded-xl">
-                        <span className="text-sm text-white/90 font-medium">{item.text}</span>
+                    <div key={item.id} className="flex items-center justify-between gap-2 px-3 py-2 bg-slate-50 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/5 rounded-lg">
+                        <span className="text-xs text-slate-800 dark:text-white/90 font-medium font-inter">{item.text}</span>
                         <button
                             onClick={() => handleRemove(item.id)}
                             disabled={saving}
-                            className="p-1.5 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all disabled:opacity-40"
+                            className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-40"
                             title="Remove"
                         >
-                            <X size={14} />
+                            <X size={13} />
                         </button>
                     </div>
                 ))}
             </div>
-        </GlassCard>
+        </div>
     );
 };
 
@@ -872,77 +882,78 @@ const LandingPageControls = ({ landingCmsData, onUpdate }) => {
     const heroBubbleItems = landingCmsData?.hero_bubbles?.items || [];
 
     return (
-        <div className="space-y-6 text-left my-2">
+        <div className="space-y-4 text-left my-2 font-inter">
+            <NetworkDiagramEditor landingCmsData={landingCmsData} onUpdate={onUpdate} />
             <HeroBubbleTextsEditor items={heroBubbleItems} onUpdate={onUpdate} />
 
-            <GlassCard className="p-6 md:p-8 border-primary/30">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/10">
-                    <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 ${
+            <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-white/10">
+                    <div className="flex items-start gap-3">
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center border shrink-0 ${
                             isCampusImpactVisible 
-                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
-                                : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
+                                : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
                         }`}>
-                            {isCampusImpactVisible ? <Eye size={24} /> : <EyeOff size={24} />}
+                            {isCampusImpactVisible ? <Eye size={18} /> : <EyeOff size={18} />}
                         </div>
                         <div>
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <h3 className="text-lg font-black text-white font-jakarta">Campus Impact & Testimonials Section</h3>
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white font-inter">Campus Impact & Testimonials Section</h3>
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
                                     isCampusImpactVisible 
-                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
-                                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30' 
+                                        : 'bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30'
                                 }`}>
-                                    {isCampusImpactVisible ? '● VISIBLE ON LANDING PAGE' : '○ TEMPORARILY HIDDEN'}
+                                    {isCampusImpactVisible ? '● VISIBLE' : '○ HIDDEN'}
                                 </span>
                             </div>
-                            <p className="text-xs text-white/60 mt-1 max-w-2xl leading-relaxed font-medium">
-                                Control whether the <span className="text-white font-semibold">Campus Impact</span> section (Student Success Stories video cards & testimonials) is displayed on the public landing page (`/`).
+                            <p className="text-[11px] text-slate-500 dark:text-white/60 mt-0.5 max-w-2xl leading-relaxed font-inter">
+                                Control whether the <span className="text-slate-800 dark:text-white font-semibold">Campus Impact</span> section (Student Success Stories video cards & testimonials) is displayed on the public landing page.
                             </p>
                         </div>
                     </div>
 
                     <button
                         onClick={() => onUpdate('landing_page', 'campus_impact', { show_section: !isCampusImpactVisible })}
-                        className={`w-full md:w-auto px-6 py-3.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg shrink-0 ${
+                        className={`w-full md:w-auto px-3 py-1.5 rounded-lg font-semibold text-xs transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm shrink-0 font-inter ${
                             isCampusImpactVisible
-                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black shadow-amber-500/20'
-                                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-black shadow-emerald-500/20'
+                                ? 'bg-amber-500 hover:bg-amber-600 text-black'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                         }`}
                     >
                         {isCampusImpactVisible ? (
                             <>
-                                <EyeOff size={16} /> Temporarily Hide Section
+                                <EyeOff size={13} /> Hide Section
                             </>
                         ) : (
                             <>
-                                <Eye size={16} /> Show Section on Landing Page
+                                <Eye size={13} /> Show on Landing Page
                             </>
                         )}
                     </button>
                 </div>
 
-                <div className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                            <Sliders size={16} />
+                <div className="pt-3.5 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5 flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                            <Sliders size={13} />
                         </div>
                         <div>
-                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Instant Toggle Control</h4>
-                            <p className="text-[11px] text-white/40">Toggle visibility anytime without losing student video data.</p>
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider font-inter">Instant Toggle Control</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-white/40 font-inter">Toggle visibility anytime without losing student video data.</p>
                         </div>
                     </div>
-                    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                            <Heart size={16} />
+                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5 flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                            <Heart size={13} />
                         </div>
                         <div>
-                            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Success Stories Preserved</h4>
-                            <p className="text-[11px] text-white/40">All saved student testimonials remain intact in the database.</p>
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider font-inter">Success Stories Preserved</h4>
+                            <p className="text-[10px] text-slate-500 dark:text-white/40 font-inter">All saved student testimonials remain intact in the database.</p>
                         </div>
                     </div>
                 </div>
-            </GlassCard>
+            </div>
         </div>
     );
 };

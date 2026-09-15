@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { 
     Calendar, Clock, Trophy, FileText, X,
-    BookOpen, GraduationCap, Info, Eye, CheckCircle2, AlertCircle 
+    BookOpen, GraduationCap, Info, Eye, CheckCircle2, AlertCircle, Search 
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import DashboardHeading from '../../components/ui/DashboardHeading';
@@ -12,6 +12,7 @@ const ExamScheduler = () => {
     const [exams, setExams] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [selectedProvider, setSelectedProvider] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedExam, setSelectedExam] = useState(null);
     const { showToast } = useToast();
 
@@ -80,10 +81,13 @@ const ExamScheduler = () => {
 
             const matchesStatus = selectedStatus === 'all' || status === selectedStatus;
             const matchesProvider = selectedProvider === 'all' || getExamProvider(exam) === selectedProvider;
+            const matchesSearch = !searchQuery.trim() || 
+                (exam.title && exam.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                (exam.course?.title && exam.course.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
-            return matchesStatus && matchesProvider;
+            return matchesStatus && matchesProvider && matchesSearch;
         });
-    }, [exams, selectedStatus, selectedProvider]);
+    }, [exams, selectedStatus, selectedProvider, searchQuery]);
 
     const providerOptions = useMemo(() =>
         Array.from(new Set(exams.map(getExamProvider).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
@@ -182,80 +186,87 @@ const ExamScheduler = () => {
             </div>
 
             {/* Filter Bar */}
-            <GlassCard
-                className="!p-3"
-                style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px', alignItems: 'center' }}
-            >
-                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '12px' }}>
+            <div className="bg-white/90 dark:bg-[#0E0B1A]/80 backdrop-blur-md p-2 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col md:flex-row items-stretch md:items-center gap-2">
+                <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/40 pointer-events-none" size={13} />
+                    <input
+                        type="text"
+                        placeholder="Search exam or course..."
+                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
                     <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-primary/50"
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer"
                     >
-                        <option value="all" className="bg-[#0f0720]">All Statuses</option>
-                        <option value="scheduled" className="bg-[#0f0720]">Scheduled</option>
-                        <option value="ongoing" className="bg-[#0f0720]">Ongoing</option>
-                        <option value="completed" className="bg-[#0f0720]">Completed</option>
-                        <option value="graded" className="bg-[#0f0720]">Graded</option>
-                        <option value="published" className="bg-[#0f0720]">Published</option>
+                        <option value="all" className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">All Statuses</option>
+                        <option value="scheduled" className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">Scheduled</option>
+                        <option value="ongoing" className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">Ongoing</option>
+                        <option value="completed" className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">Completed</option>
+                        <option value="graded" className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">Graded</option>
+                        <option value="published" className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">Published</option>
                     </select>
 
                     <select
                         value={selectedProvider}
                         onChange={(e) => setSelectedProvider(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-primary/50"
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer max-w-[160px] truncate"
                     >
-                        <option value="all" className="bg-[#0f0720]">All Universities</option>
+                        <option value="all" className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">All Universities</option>
                         {providerOptions.map((name) => (
-                            <option key={name} value={name} className="bg-[#0f0720]">{name}</option>
+                            <option key={name} value={name} className="bg-white dark:bg-[#0f0720] text-slate-900 dark:text-white">{name}</option>
                         ))}
                     </select>
                 </div>
-            </GlassCard>
+            </div>
 
             {/* Main Table Grid */}
-            <GlassCard className="!p-0 overflow-hidden">
-                <div className="overflow-x-auto">
+            <GlassCard className="!p-0 overflow-hidden border border-slate-200/80 dark:border-white/10 shadow-sm">
+                <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     <table className="w-full text-left">
-                        <thead className="bg-white/5 text-white/50 text-[11px] uppercase font-bold tracking-wider border-b border-white/5">
+                        <thead className="bg-white/5 text-white/50 text-[10px] uppercase font-bold tracking-wider border-b border-white/5">
                             <tr>
-                                <th className="px-6 py-4">Exam Title</th>
-                                <th className="px-6 py-4">Institution</th>
-                                <th className="px-6 py-4">Course</th>
-                                <th className="px-6 py-4">Type</th>
-                                <th className="px-6 py-4">Date & Time</th>
-                                <th className="px-6 py-4">Duration</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4 text-center">Inspect</th>
+                                <th className="px-3.5 py-2.5">Exam Title</th>
+                                <th className="px-3.5 py-2.5">Institution</th>
+                                <th className="px-3.5 py-2.5">Course</th>
+                                <th className="px-3.5 py-2.5">Type</th>
+                                <th className="px-3.5 py-2.5">Date & Time</th>
+                                <th className="px-3.5 py-2.5">Duration</th>
+                                <th className="px-3.5 py-2.5">Status</th>
+                                <th className="px-3.5 py-2.5 text-center">Inspect</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5 text-sm">
+                        <tbody className="divide-y divide-white/5 text-xs">
                             {filteredExams.map((exam) => (
-                                <tr key={exam._id} className="hover:bg-white/5 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <div className="text-white font-semibold">{exam.title}</div>
+                                <tr key={exam._id} className="hover:bg-white/[0.03] transition-colors">
+                                    <td className="px-3.5 py-2">
+                                        <div className="text-white font-semibold text-xs">{exam.title}</div>
                                         {exam.isMockExam && (
-                                            <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded text-[9px] font-black uppercase mt-1 inline-block">MOCK EXAM</span>
+                                            <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase mt-0.5 inline-block">MOCK EXAM</span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-white/70">
-                                        <div className="flex items-center gap-2">
-                                            <GraduationCap size={14} className="text-primary" />
-                                            <span>
+                                    <td className="px-3.5 py-2 text-white/70">
+                                        <div className="flex items-center gap-1.5 text-xs">
+                                            <GraduationCap size={13} className="text-primary shrink-0" />
+                                            <span className="truncate max-w-[140px]">
                                                 {exam.university
                                                     ? (exam.university.profile?.universityName || exam.university.name || 'University')
                                                     : 'All Universities'}
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-white/70">
-                                        <div className="flex items-center gap-2">
-                                            <BookOpen size={14} className="text-indigo-400" />
-                                            <span>{exam.course?.title || 'N/A'}</span>
+                                    <td className="px-3.5 py-2 text-white/70">
+                                        <div className="flex items-center gap-1.5 text-xs">
+                                            <BookOpen size={13} className="text-indigo-400 shrink-0" />
+                                            <span className="truncate max-w-[140px]">{exam.course?.title || 'N/A'}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider ${
+                                    <td className="px-3.5 py-2">
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                                             exam.examType === 'pdf-based' ? 'bg-purple-500/10 border border-purple-500/20 text-purple-400' :
                                             exam.examType === 'online-mcq' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' :
                                             exam.examType === 'online-descriptive' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400' :
@@ -264,22 +275,22 @@ const ExamScheduler = () => {
                                             {exam.examType?.replace('-', ' ') || 'N/A'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-white/70 font-inter">
+                                    <td className="px-3.5 py-2 text-white/70 font-inter text-[11px]">
                                         {new Date(exam.scheduledStartTime).toLocaleDateString('en-IN', {
-                                            day: 'numeric', month: 'short', year: 'numeric'
+                                            day: 'numeric', month: 'short'
                                         })} &bull; {new Date(exam.scheduledStartTime).toLocaleTimeString('en-IN', {
                                             hour: '2-digit', minute: '2-digit'
                                         })}
                                     </td>
-                                    <td className="px-6 py-4 text-white/70 font-inter">{exam.duration} mins</td>
-                                    <td className="px-6 py-4">{getStatusBadge(exam)}</td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-3.5 py-2 text-white/70 font-inter text-xs">{exam.duration}m</td>
+                                    <td className="px-3.5 py-2">{getStatusBadge(exam)}</td>
+                                    <td className="px-3.5 py-2 text-center">
                                         <button
                                             onClick={() => setSelectedExam(exam)}
-                                            className="p-2 bg-white/5 hover:bg-primary/20 text-white/70 hover:text-white rounded-xl transition-all border border-white/10"
+                                            className="p-1.5 bg-white/5 hover:bg-primary/20 text-white/70 hover:text-white rounded border border-white/10 transition-all"
                                             title="View Full Details"
                                         >
-                                            <Eye size={14} />
+                                            <Eye size={13} />
                                         </button>
                                     </td>
                                 </tr>

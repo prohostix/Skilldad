@@ -36,6 +36,7 @@ import Animated3DShape from '../components/landing/Animated3DShape';
 import Animated3DSphere from '../components/landing/Animated3DSphere';
 import UniversityOrb3D from '../components/landing/UniversityOrb3D';
 import { getMediaUrl } from '../utils/media';
+import { getBelievableUniversityStats } from '../utils/universityStats';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -228,37 +229,46 @@ const LandingPage = () => {
     ];
 
     const universities = dynamicUniversities.length > 0
-        ? dynamicUniversities.map(u => ({
-            _id: u._id,
-            name: u.name,
-            location: u.profile?.location || 'Global',
-            students: u.studentCount > 0 ? `${u.studentCount}+` : '1,200+',
-            programs: u.courseCount > 0 ? `${u.courseCount}+` : '24+',
-            logo: (u.profileImage || u.profile?.profileImage || u.profile_image) ? getMediaUrl(u.profileImage || u.profile?.profileImage || u.profile_image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
-            image: (u.profileImage || u.profile?.profileImage || u.profile_image) ? getMediaUrl(u.profileImage || u.profile?.profileImage || u.profile_image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
-            description: u.bio || 'World-class institution providing excellence in global education through SkillDad.',
-            established: u.profile?.foundedYear || u.profile?.established || (u.createdAt ? new Date(u.createdAt).getFullYear() : '2023'),
-            rating: (4.8 + (Math.random() * 0.15)).toFixed(1), // Dynamic-ish rating
-            specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
-        }))
-        : universityPartners.length > 0 ? universityPartners.map(p => ({
-            ...p,
-            image: p.logo, // Compatibility
-            description: 'Strategic academic partner integrated within the SkillDad learning ecosystem.',
-            established: '2020',
-            rating: 4.9,
-            specialties: ['Digital Transformation', 'Enterprise Learning']
-        })) : staticUnis;
+        ? dynamicUniversities.map(u => {
+            const stats = getBelievableUniversityStats(u);
+            return {
+                _id: u._id,
+                name: u.name,
+                location: u.profile?.location || 'Global',
+                students: stats.scholars,
+                programs: stats.modules,
+                logo: (u.profileImage || u.profile?.profileImage || u.profile_image) ? getMediaUrl(u.profileImage || u.profile?.profileImage || u.profile_image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+                image: (u.profileImage || u.profile?.profileImage || u.profile_image) ? getMediaUrl(u.profileImage || u.profile?.profileImage || u.profile_image) : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`,
+                description: u.bio || 'World-class institution providing excellence in global education through SkillDad.',
+                established: u.profile?.foundedYear || u.profile?.established || (u.createdAt ? new Date(u.createdAt).getFullYear() : '2023'),
+                rating: (4.8 + (Math.random() * 0.15)).toFixed(1), // Dynamic-ish rating
+                specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
+            };
+        })
+        : universityPartners.length > 0 ? universityPartners.map(p => {
+            const stats = getBelievableUniversityStats(p);
+            return {
+                ...p,
+                students: p.students && p.students !== 'New' && p.students !== '1+' ? p.students : stats.scholars,
+                programs: p.programs && p.programs !== 'New' ? p.programs : stats.modules,
+                image: p.logo, // Compatibility
+                description: 'Strategic academic partner integrated within the SkillDad learning ecosystem.',
+                established: '2020',
+                rating: 4.9,
+                specialties: ['Digital Transformation', 'Enterprise Learning']
+            };
+        }) : staticUnis;
 
     // SkillDad-owned universities are display-only (no login/dashboard) - always shown after partner universities
     const skillDadUniversityCards = dynamicSkillDadUniversities.map(u => {
+        const stats = getBelievableUniversityStats(u);
         const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`;
         return {
             _id: `sd-${u.id}`,
             name: u.name,
             location: u.location || 'Global',
-            students: '1,200+',
-            programs: '24+',
+            students: stats.scholars,
+            programs: stats.modules,
             logo: u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo,
             image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo),
             description: u.description || 'World-class institution providing excellence in global education through SkillDad.',
@@ -737,7 +747,7 @@ const LandingPage = () => {
                                                     }}
                                                     className="mt-3 pt-3 border-t border-white/10 w-full flex items-center justify-between group/link cursor-pointer hover:bg-white/[0.02] transition-colors -mx-6 px-6"
                                                 >
-                                                    <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Expand Logic</span>
+                                                    <span className="text-[9px] font-black text-text-secondary uppercase tracking-widest group-hover/link:text-primary transition-colors">Explore Programs</span>
                                                     <ArrowRight size={14} className="text-text-muted group-hover/link:text-primary transition-all group-hover/link:translate-x-1" />
                                                 </div>
                                             </GlassCard>

@@ -440,84 +440,79 @@ const UniversityManagement = () => {
                     <DashboardHeading title="University Management" />
                 </div>
                 <div className="flex items-center space-x-3">
-                    <ModernButton onClick={() => setOpenOnboard(true)}>
-                        <Plus size={18} className="mr-2" /> Add University
-                    </ModernButton>
+                    <button
+                        onClick={() => setOpenOnboard(true)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-white transition-all shadow-sm"
+                    >
+                        <Plus size={14} /> <span>Add University</span>
+                    </button>
                 </div>
             </div>
 
             {/* B2B Overview Stats */}
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <GlassCard className="group hover:border-primary/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-primary/10 text-primary rounded-2xl group-hover:scale-110 transition-transform">
-                            <Building2 size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">Total Universities</p>
-                            <p className="text-base font-semibold text-white font-inter">{partners.length}</p>
-                        </div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <Building2 size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">Total Universities</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">{partners.length}</p>
+                    </div>
+                </div>
 
-                <GlassCard className="group hover:border-emerald-500/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-emerald-100 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
-                            <Users size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">B2B Learners</p>
-                            <p className="text-base font-semibold text-white font-inter">1,240</p>
-                        </div>
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-emerald-500/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <Users size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">B2B Learners</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">1,240</p>
+                    </div>
+                </div>
 
-                <GlassCard className="group hover:border-amber-500/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-amber-100 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
-                            <DollarSign size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">B2B Revenue</p>
-                            <p className="text-base font-semibold text-white font-inter">₹84.2k</p>
-                        </div>
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-amber-500/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <DollarSign size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">B2B Revenue</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">₹84.2k</p>
+                    </div>
+                </div>
 
-                <GlassCard className="group hover:border-secondary-purple/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-secondary-purple/10 text-secondary-purple rounded-2xl group-hover:scale-110 transition-transform">
-                            <TrendingUp size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">Avg. ROI</p>
-                            <p className="text-base font-semibold text-white font-inter">24%</p>
-                        </div>
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-purple-500/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <TrendingUp size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">Avg. ROI</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">24%</p>
+                    </div>
+                </div>
             </div>
 
             {/* Entity Table */}
-            <GlassCard className="!p-0 border-white/10 overflow-hidden shadow-xl">
-                <div className="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h3 className="text-base font-semibold text-white font-inter">Partner Network</h3>
-                    <div className="flex space-x-2">
-                        <div className="flex bg-white/5 p-1 rounded-xl">
+            <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-3 sm:p-4 border-b border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-inter">Partner Network</h3>
+                    <div className="flex items-center space-x-2">
+                        <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200/80 dark:border-white/10">
                             <button
                                 onClick={() => setRoleFilter('all')}
-                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${roleFilter === 'all' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${roleFilter === 'all' ? 'bg-white dark:bg-white/10 text-primary shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 All
                             </button>
                             <button
                                 onClick={() => setRoleFilter('university')}
-                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${roleFilter === 'university' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${roleFilter === 'university' ? 'bg-white dark:bg-white/10 text-primary shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 Universities
                             </button>
                             <button
                                 onClick={() => setRoleFilter('partner')}
-                                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${roleFilter === 'partner' ? 'bg-primary text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${roleFilter === 'partner' ? 'bg-white dark:bg-white/10 text-primary shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}`}
                             >
                                 Partners
                             </button>
@@ -526,11 +521,11 @@ const UniversityManagement = () => {
                             <input
                                 type="text"
                                 placeholder="Search entity..."
-                                className="pl-10 pr-4 py-2 bg-transparent border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-primary w-full sm:w-64 font-inter"
+                                className="pl-8 pr-3 py-1.5 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary w-full sm:w-56 font-inter"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
-                            <Users className="absolute left-3 top-2.5 text-white/40" size={16} />
+                            <Users className="absolute left-2.5 top-2 text-slate-400 dark:text-slate-500" size={14} />
                         </div>
                     </div>
                 </div>
@@ -736,7 +731,7 @@ const UniversityManagement = () => {
                         ))}
                     </div>
                 </div>
-            </GlassCard>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
                 {/* ROI Analytics Chart */}

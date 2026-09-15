@@ -562,7 +562,8 @@ html.light-mode .bg-background-light {
 
 html.light-mode .course-catalog-page,
 html.light-mode .platform-page,
-html.light-mode .about-us-page {
+html.light-mode .about-us-page,
+html.light-mode .job-alerts-page {
   background: #FFFFFF !important;
   background-color: #FFFFFF !important;
   background-image: none !important;

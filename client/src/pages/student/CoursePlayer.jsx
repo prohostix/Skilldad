@@ -51,6 +51,10 @@ const CoursePlayer = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [liveSessions, setLiveSessions] = useState([]);
     const [showQuiz, setShowQuiz] = useState(false);
+    // Distinguishes which quiz the shared quiz UI is currently showing - a section-level
+    // assessment (module.quiz) or a single lesson's own assessment (video.quiz) - since
+    // both are rendered by the same block below, keyed off `activeQuiz`.
+    const [quizSource, setQuizSource] = useState('module');
     const [quizIndex, setQuizIndex] = useState(0);
     const [quizAnswers, setQuizAnswers] = useState({});
     const [quizResult, setQuizResult] = useState(null);
@@ -62,6 +66,7 @@ const CoursePlayer = () => {
     useEffect(() => {
         const module = course?.modules?.[currentModuleIndex];
         if (module && (!module.videos || module.videos.length === 0) && module.quiz && !showQuiz) {
+            setQuizSource('module');
             setShowQuiz(true);
         }
     }, [currentModuleIndex, course, showQuiz]);
@@ -199,17 +204,28 @@ const CoursePlayer = () => {
     }
 
     const currentVideo = hasVideos ? currentModule.videos[currentVideoIndex] : {};
-    // Support exercises or quiz on lesson
-    const currentExercise = currentVideo?.exercises?.[0] || (currentVideo?.quiz?.questions?.[0] ? {
-        _id: currentVideo.quiz.questions[0]._id,
-        question: currentVideo.quiz.questions[0].question,
-        options: currentVideo.quiz.questions[0].options,
-        correctAnswer: currentVideo.quiz.questions[0].options[currentVideo.quiz.questions[0].correctIndex],
-        explanation: currentVideo.quiz.questions[0].explanation
-    } : null);
+    // A lesson's own multi-question assessment (video.quiz), when it has one - rendered
+    // through the same full quiz UI as the section-level assessment (see activeQuiz below).
+    const hasLessonQuiz = currentVideo?.quiz?.questions?.length > 0;
+    // Legacy single-question exercise format - only used as a fallback for lessons that
+    // predate the quiz.questions structure and only ever set a bare `exercises` array.
+    const currentExercise = !hasLessonQuiz ? (currentVideo?.exercises?.[0] || null) : null;
+    // The shared quiz-taking UI below reads from whichever quiz is currently active -
+    // the section's module.quiz, or the single lesson's own video.quiz.
+    const activeQuiz = quizSource === 'lesson' ? currentVideo?.quiz : currentModule?.quiz;
+
+    const openLessonQuiz = () => {
+        setQuizSource('lesson');
+        setQuizIndex(0);
+        setQuizAnswers({});
+        setQuizResult(null);
+        setShowQuiz(true);
+    };
 
     const handleVideoEnd = () => {
-        if (currentExercise && !userProgress.completedExercises?.some(ex => ex.video === currentVideo._id)) {
+        if (hasLessonQuiz && !userProgress.completedExercises?.some(ex => ex.video === currentVideo._id)) {
+            openLessonQuiz();
+        } else if (currentExercise && !userProgress.completedExercises?.some(ex => ex.video === currentVideo._id)) {
             setShowExercise(true);
         } else {
             handleNext();
@@ -260,6 +276,10 @@ const CoursePlayer = () => {
             if (mod.quiz) {
                 setCurrentModuleIndex(i);
                 setCurrentVideoIndex(0);
+                setQuizSource('module');
+                setQuizIndex(0);
+                setQuizAnswers({});
+                setQuizResult(null);
                 setShowQuiz(true);
                 return;
             }
@@ -268,14 +288,22 @@ const CoursePlayer = () => {
     };
 
     const goToNextSection = () => {
-        if (showQuiz) {
+        // Finishing a lesson's own assessment advances like finishing that lesson's
+        // video would - only a section-level (module) assessment jumps to the next module.
+        if (showQuiz && quizSource === 'module') {
             advanceToNextValidContent(currentModuleIndex + 1);
             return;
         }
 
+        setShowQuiz(false);
+
         if (currentModule && currentModule.videos && currentVideoIndex < currentModule.videos.length - 1) {
             setCurrentVideoIndex(prev => prev + 1);
         } else if (currentModule && currentModule.quiz) {
+            setQuizSource('module');
+            setQuizIndex(0);
+            setQuizAnswers({});
+            setQuizResult(null);
             setShowQuiz(true);
         } else {
             advanceToNextValidContent(currentModuleIndex + 1);
@@ -286,7 +314,9 @@ const CoursePlayer = () => {
         const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
-        if (!showQuiz) {
+        // A lesson-quiz finish (like a plain video finish) marks that lesson's video
+        // complete; only a section-level (module) quiz finish skips this.
+        if (!showQuiz || quizSource === 'lesson') {
             const vidId = currentVideo?._id || currentVideo?.id;
             if (vidId) {
                 try {
@@ -298,6 +328,9 @@ const CoursePlayer = () => {
                     setUserProgress(prev => ({
                         ...prev,
                         completedVideos: [...(prev.completedVideos || []), vidId],
+                        completedExercises: (showQuiz && quizSource === 'lesson' && quizResult)
+                            ? [...(prev.completedExercises || []), { video: vidId, score: Math.round((quizResult.score / quizResult.total) * 100) }]
+                            : prev.completedExercises,
                         progress: resp.data.progress
                     }));
                 } catch (err) {
@@ -498,7 +531,7 @@ const CoursePlayer = () => {
                                         return (
                                         <li key={vIndex}>
                                             <button
-                                                className={`w-full px-6 py-4 flex items-center justify-between transition-all group ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz
+                                                className={`w-full px-6 py-4 flex items-center justify-between transition-all group ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && (!showQuiz || quizSource === 'lesson')
                                                     ? 'bg-primary/5 text-primary border-l-4 border-primary'
                                                     : 'hover:bg-white/5 text-slate-400 border-l-4 border-transparent'
                                                     } ${!accessible ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -507,6 +540,8 @@ const CoursePlayer = () => {
                                                     setCurrentModuleIndex(mIndex);
                                                     setCurrentVideoIndex(vIndex);
                                                     setShowExercise(false);
+                                                    setSelectedAnswer('');
+                                                    setExerciseFeedback(null);
                                                     setShowQuiz(false);
                                                     setShowCourseCompletion(false);
                                                 }}
@@ -527,7 +562,7 @@ const CoursePlayer = () => {
                                                                     ) : userProgress.completedVideos?.includes(video._id) ? (
                                                                         <CheckCircle className="text-emerald-500 bg-black/50 rounded-full" size={14} />
                                                                     ) : (
-                                                                        <Play className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-primary' : 'text-white/60'} bg-black/30 rounded-full`} size={14} />
+                                                                        <Play className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex && (!showQuiz || quizSource === 'lesson') ? 'text-primary' : 'text-white/60'} bg-black/30 rounded-full`} size={14} />
                                                                     )}
                                                                 </div>
                                                             </div>
@@ -537,14 +572,14 @@ const CoursePlayer = () => {
                                                             ) : userProgress.completedVideos?.includes(video._id) ? (
                                                                 <CheckCircle className="text-emerald-500" size={16} />
                                                             ) : (video.contentType === 'document' || video.videoType === 'document') ? (
-                                                                <FileText className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-emerald-400' : 'text-emerald-400/50'}`} size={16} />
+                                                                <FileText className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex && (!showQuiz || quizSource === 'lesson') ? 'text-emerald-400' : 'text-emerald-400/50'}`} size={16} />
                                                             ) : (
-                                                                <Play className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-primary' : 'text-slate-500/40'}`} size={16} />
+                                                                <Play className={`${mIndex === currentModuleIndex && vIndex === currentVideoIndex && (!showQuiz || quizSource === 'lesson') ? 'text-primary' : 'text-slate-500/40'}`} size={16} />
                                                             )
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className={`text-xs font-medium font-poppins line-clamp-1 ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-primary' : 'text-slate-300'}`}>
+                                                        <p className={`text-xs font-medium font-poppins line-clamp-1 ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && (!showQuiz || quizSource === 'lesson') ? 'text-primary' : 'text-slate-300'}`}>
                                                             {video.title}
                                                         </p>
                                                         {(video.duration || video.quiz?.questions?.length > 0 || video.exercises?.length > 0) && (
@@ -553,13 +588,37 @@ const CoursePlayer = () => {
                                                                     <span className="flex items-center"><Clock size={8} className="mr-1" /> {video.duration}</span>
                                                                 ) : null}
                                                                 {(video.quiz?.questions?.length > 0 || video.exercises?.length > 0) && (
-                                                                    <span className="text-blue-400 font-bold">• ASSESSMENT</span>
+                                                                    <span
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            if (!accessible) return;
+                                                                            setCurrentModuleIndex(mIndex);
+                                                                            setCurrentVideoIndex(vIndex);
+                                                                            setShowExercise(false);
+                                                                            setSelectedAnswer('');
+                                                                            setExerciseFeedback(null);
+                                                                            setShowCourseCompletion(false);
+                                                                            if (video.quiz?.questions?.length > 0) {
+                                                                                setQuizSource('lesson');
+                                                                                setQuizIndex(0);
+                                                                                setQuizAnswers({});
+                                                                                setQuizResult(null);
+                                                                                setShowQuiz(true);
+                                                                            } else {
+                                                                                setShowQuiz(false);
+                                                                                setShowExercise(true);
+                                                                            }
+                                                                        }}
+                                                                        className="text-blue-400 font-bold hover:text-blue-300 hover:underline transition-colors cursor-pointer"
+                                                                    >
+                                                                        • ASSESSMENT
+                                                                    </span>
                                                                 )}
                                                             </p>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <ChevronRight size={12} className={`opacity-0 group-hover:opacity-100 transition-opacity ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && !showQuiz ? 'text-primary opacity-100' : 'text-slate-600'}`} />
+                                                <ChevronRight size={12} className={`opacity-0 group-hover:opacity-100 transition-opacity ${mIndex === currentModuleIndex && vIndex === currentVideoIndex && (!showQuiz || quizSource === 'lesson') ? 'text-primary opacity-100' : 'text-slate-600'}`} />
                                             </button>
                                         </li>
                                     )})}
@@ -569,13 +628,14 @@ const CoursePlayer = () => {
                                         return (
                                         <li>
                                             <button
-                                                className={`w-full px-6 py-4 flex items-center justify-between transition-all group ${mIndex === currentModuleIndex && showQuiz
+                                                className={`w-full px-6 py-4 flex items-center justify-between transition-all group ${mIndex === currentModuleIndex && showQuiz && quizSource === 'module'
                                                     ? 'bg-emerald-500/5 text-emerald-500 border-l-4 border-emerald-500'
                                                     : 'hover:bg-white/5 text-slate-400 border-l-4 border-transparent'
                                                     } ${!quizAccessible ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 onClick={() => {
                                                     if (!quizAccessible) return;
                                                     setCurrentModuleIndex(mIndex);
+                                                    setQuizSource('module');
                                                     setShowQuiz(true);
                                                     setQuizIndex(0);
                                                     setQuizAnswers({});
@@ -588,11 +648,11 @@ const CoursePlayer = () => {
                                                         {!quizAccessible ? (
                                                             <Lock className="text-slate-500/40" size={16} />
                                                         ) : (
-                                                            <HelpCircle className={mIndex === currentModuleIndex && showQuiz ? 'text-emerald-500' : 'text-emerald-400/60'} size={16} />
+                                                            <HelpCircle className={mIndex === currentModuleIndex && showQuiz && quizSource === 'module' ? 'text-emerald-500' : 'text-emerald-400/60'} size={16} />
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className={`text-xs font-semibold font-poppins line-clamp-1 ${mIndex === currentModuleIndex && showQuiz ? 'text-emerald-400' : 'text-slate-300'}`}>Assessment {mIndex + 1}</p>
+                                                        <p className={`text-xs font-semibold font-poppins line-clamp-1 ${mIndex === currentModuleIndex && showQuiz && quizSource === 'module' ? 'text-emerald-400' : 'text-slate-300'}`}>Assessment {mIndex + 1}</p>
                                                         <p className="text-[9px] font-medium text-slate-500 uppercase tracking-wider mt-0.5">Section Assessment</p>
                                                     </div>
                                                 </div>
@@ -673,9 +733,11 @@ const CoursePlayer = () => {
                                     <div className="inline-flex items-center space-x-1.5 text-primary font-medium text-[10px] uppercase tracking-wider">
                                         <span>Module {currentModuleIndex + 1}</span>
                                         <span className="text-slate-400 dark:text-slate-500">•</span>
-                                        <span>{showQuiz ? 'Assessment' : `Lesson ${currentVideoIndex + 1}`}</span>
+                                        <span>{showQuiz ? (quizSource === 'lesson' ? 'Class Assessment' : 'Section Assessment') : `Lesson ${currentVideoIndex + 1}`}</span>
                                     </div>
-                                    <h1 className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 font-poppins capitalize tracking-normal">{showQuiz ? `Assessment ${currentModuleIndex + 1}` : currentVideo.title}</h1>
+                                    <h1 className="text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 font-poppins capitalize tracking-normal">
+                                        {showQuiz ? (quizSource === 'lesson' ? currentVideo.title : `Assessment ${currentModuleIndex + 1}`) : currentVideo.title}
+                                    </h1>
                                 </div>
                             </div>
 
@@ -734,7 +796,7 @@ const CoursePlayer = () => {
                                                                 {passed ? 'Assessment Passed' : 'Assessment Failed'}
                                                             </p>
                                                             <h2 className="text-2xl font-black text-white font-poppins">Quiz Results</h2>
-                                                            <p className="text-slate-400 text-xs mt-0.5">{currentModule.title} • Section Assessment</p>
+                                                            <p className="text-slate-400 text-xs mt-0.5">{quizSource === 'lesson' ? `${currentVideo.title} • Class Assessment` : `${currentModule.title} • Section Assessment`}</p>
                                                         </div>
                                                     </div>
 
@@ -789,7 +851,7 @@ const CoursePlayer = () => {
                                                                 <Eye size={16} className="text-primary" />
                                                                 <h3 className="text-xs font-black text-white uppercase tracking-wider">Answer Sheet Breakdown</h3>
                                                                 <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[9px] font-black text-white/50">
-                                                                    {currentModule.quiz.questions.length} Questions
+                                                                    {activeQuiz.questions.length} Questions
                                                                 </span>
                                                             </div>
                                                             <div className={`p-1 rounded-lg transition-all ${showAnswerSheet ? 'bg-primary/10 text-primary' : 'bg-white/5 text-white/40'}`}>
@@ -799,7 +861,7 @@ const CoursePlayer = () => {
 
                                                         {showAnswerSheet && (
                                                             <div className="p-4 space-y-3 border-t border-white/5 max-h-96 overflow-y-auto">
-                                                                {currentModule.quiz.questions.map((q, idx) => {
+                                                                {activeQuiz.questions.map((q, idx) => {
                                                                     const userAns = quizAnswers[idx];
                                                                     const correctAns = q.options[q.correctIndex];
                                                                     const isCorrect = userAns === correctAns;
@@ -885,21 +947,21 @@ const CoursePlayer = () => {
                                             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
                                                 <div className="flex items-center justify-between mb-3.5">
                                                     <div className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full border border-emerald-500/20">
-                                                        Question {quizIndex + 1} of {currentModule.quiz.questions.length}
+                                                        Question {quizIndex + 1} of {activeQuiz.questions.length}
                                                     </div>
                                                     <div className="flex gap-1">
-                                                        {currentModule.quiz.questions.map((_, i) => (
+                                                        {activeQuiz.questions.map((_, i) => (
                                                             <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i === quizIndex ? 'w-5 bg-emerald-500' : 'w-2.5 bg-white/10'}`}></div>
                                                         ))}
                                                     </div>
                                                 </div>
 
                                                 <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-3.5 font-poppins leading-snug">
-                                                    {currentModule.quiz.questions[quizIndex].question}
+                                                    {activeQuiz.questions[quizIndex].question}
                                                 </h3>
 
                                                 <div className="space-y-2 mb-4">
-                                                    {currentModule.quiz.questions[quizIndex].options.map((opt, i) => {
+                                                    {activeQuiz.questions[quizIndex].options.map((opt, i) => {
                                                         const isSelected = quizAnswers[quizIndex] === opt;
                                                         return (
                                                             <button
@@ -927,14 +989,14 @@ const CoursePlayer = () => {
                                                         Previous
                                                     </button>
 
-                                                    {quizIndex === currentModule.quiz.questions.length - 1 ? (
+                                                    {quizIndex === activeQuiz.questions.length - 1 ? (
                                                         <ModernButton
                                                             disabled={!quizAnswers[quizIndex]}
                                                             onClick={() => {
-                                                                const score = currentModule.quiz.questions.reduce((acc, q, i) => {
+                                                                const score = activeQuiz.questions.reduce((acc, q, i) => {
                                                                     return acc + (quizAnswers[i] === q.options[q.correctIndex] ? 1 : 0);
                                                                 }, 0);
-                                                                setQuizResult({ score, total: currentModule.quiz.questions.length });
+                                                                setQuizResult({ score, total: activeQuiz.questions.length });
                                                             }}
                                                             className="!px-5 !py-1.5 !text-xs shadow-md shadow-emerald-500/20 !bg-emerald-500"
                                                         >
@@ -981,7 +1043,7 @@ const CoursePlayer = () => {
                                                     {currentExercise && (
                                                         <ModernButton
                                                             onClick={() => setShowExercise(true)}
-                                                            className="!bg-blue-600 hover:!bg-blue-500"
+                                                            className="!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
                                                         >
                                                             <CheckSquare size={16} className="mr-1.5 inline" /> Attend Class Assessment
                                                         </ModernButton>
@@ -1009,6 +1071,19 @@ const CoursePlayer = () => {
                                                 }}
                                                 controlsList="nodownload"
                                             />
+                                        ) : !currentVideo.url ? (
+                                            // Lesson was created with just a title and has no video link
+                                            // attached yet (see Edit Lesson in the course editor) - show
+                                            // a clear placeholder instead of a blank, confusing black box.
+                                            <div className="w-full h-full bg-[#0d1117] flex flex-col items-center justify-center p-8 text-center">
+                                                <div className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-5">
+                                                    <Video size={36} className="text-white/30" />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-white mb-2">{currentVideo.title}</h3>
+                                                <p className="text-slate-400 max-w-md text-xs leading-relaxed flex items-center justify-center gap-1.5">
+                                                    <Clock size={14} /> Video not available yet - check back soon.
+                                                </p>
+                                            </div>
                                         ) : (
                                             <CustomYoutubePlayer
                                                 url={currentVideo.url}
@@ -1023,6 +1098,33 @@ const CoursePlayer = () => {
 
                             <div className="flex flex-col gap-8 w-full mx-auto max-w-6xl">
                                 <div className="flex-1 space-y-8">
+                                    {/* Document lessons get this button inline with their own content above,
+                                        but a video lesson's assessment otherwise only opens automatically when
+                                        the video ends - and never again once completed. This gives every
+                                        lesson type a persistent way in, matching the module quiz's reliability.
+                                        Lessons with a full quiz.questions set open the same multi-question quiz
+                                        UI as the section assessment; only legacy single-question `exercises`
+                                        lessons fall back to the simpler inline Knowledge Check box. */}
+                                    {currentVideo.contentType !== 'document' && currentVideo.videoType !== 'document' && (hasLessonQuiz || currentExercise) && !showExercise && !(showQuiz && quizSource === 'lesson') && (
+                                        <ModernButton
+                                            onClick={() => {
+                                                if (hasLessonQuiz) {
+                                                    openLessonQuiz();
+                                                } else {
+                                                    setSelectedAnswer('');
+                                                    setExerciseFeedback(null);
+                                                    setShowExercise(true);
+                                                }
+                                            }}
+                                            className="!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
+                                        >
+                                            <CheckSquare size={16} className="mr-1.5 inline" />
+                                            {userProgress.completedExercises?.some(ex => ex.video === (currentVideo._id || currentVideo.id))
+                                                ? 'Review Class Assessment'
+                                                : 'Attend Class Assessment'}
+                                        </ModernButton>
+                                    )}
+
                                     {showExercise && currentExercise && (
                                         <GlassCard className="animate-in slide-in-from-bottom-6 duration-700 bg-black/40 shadow-xl border-emerald-500/20">
                                             <div className="flex items-center space-x-3 mb-6">

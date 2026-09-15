@@ -151,58 +151,56 @@ const CertificateManagement = () => {
             </div>
 
             {/* Filters & Control Bar */}
-            <GlassCard className="p-4 sm:p-6 border-white/5">
-                <div className="flex flex-col lg:flex-row gap-4 items-center">
-                    <div className="relative flex-1 w-full">
-                        <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-                        <input
-                            type="text"
-                            placeholder="Search by student, course, or university..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50"
-                        />
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 min-w-[140px]"
-                        >
-                            <option value="all" className="bg-[#0B0F1A]">All Statuses</option>
-                            <option value="PENDING" className="bg-[#0B0F1A]">Pending</option>
-                            <option value="APPROVED" className="bg-[#0B0F1A]">Approved</option>
-                            <option value="ISSUED" className="bg-[#0B0F1A]">Issued</option>
-                        </select>
-                        <select
-                            value={universityFilter}
-                            onChange={(e) => setUniversityFilter(e.target.value)}
-                            className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary/50 min-w-[180px]"
-                        >
-                            <option value="all" className="bg-[#0B0F1A]">All Universities</option>
-                            {universities.map(uni => (
-                                <option key={uni._id} value={uni._id} className="bg-[#0B0F1A]">{uni.name}</option>
-                            ))}
-                        </select>
-                    </div>
+            <div className="bg-white/90 dark:bg-[#0E0B1A]/80 backdrop-blur-md p-2 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col md:flex-row items-stretch md:items-center gap-2">
+                <div className="relative flex-1 min-w-[200px]">
+                    <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/40 pointer-events-none" />
+                    <input
+                        type="text"
+                        placeholder="Search by student, course, or university..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
+                    />
                 </div>
-            </GlassCard>
+                <div className="flex items-center gap-1.5 shrink-0">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer"
+                    >
+                        <option value="all" className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">All Statuses</option>
+                        <option value="PENDING" className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">Pending</option>
+                        <option value="APPROVED" className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">Approved</option>
+                        <option value="ISSUED" className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">Issued</option>
+                    </select>
+                    <select
+                        value={universityFilter}
+                        onChange={(e) => setUniversityFilter(e.target.value)}
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer max-w-[160px] truncate"
+                    >
+                        <option value="all" className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">All Universities</option>
+                        {universities.map(uni => (
+                            <option key={uni._id} value={uni._id} className="bg-white dark:bg-[#0B0F1A] text-slate-900 dark:text-white">{uni.name}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
 
             {/* Main Table */}
-            <GlassCard className="overflow-hidden border-white/5">
-                <div className="overflow-x-auto">
+            <GlassCard className="overflow-hidden border border-slate-200/80 dark:border-white/10 shadow-sm !p-0">
+                <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     <table className="w-full border-collapse">
                         <thead>
                             <tr className="border-b border-white/5 bg-white/[0.02]">
-                                <th className="px-6 py-4 text-left text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Student & ID</th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Affiliated University</th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Course Name</th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Current Status</th>
-                                <th className="px-6 py-4 text-left text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Date</th>
-                                <th className="px-6 py-4 text-right text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Actions</th>
+                                <th className="px-3.5 py-2.5 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Student & ID</th>
+                                <th className="px-3.5 py-2.5 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Affiliated University</th>
+                                <th className="px-3.5 py-2.5 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Course Name</th>
+                                <th className="px-3.5 py-2.5 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Current Status</th>
+                                <th className="px-3.5 py-2.5 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Date</th>
+                                <th className="px-3.5 py-2.5 text-right text-[10px] font-bold text-white/50 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-white/5 text-xs">
                             <AnimatePresence mode="popLayout">
                                 {filteredCertificates.map((cert) => (
                                     <motion.tr 
@@ -213,66 +211,63 @@ const CertificateManagement = () => {
                                         exit={{ opacity: 0 }}
                                         className="hover:bg-white/[0.03] transition-colors group"
                                     >
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center text-primary font-bold">
+                                        <td className="px-3.5 py-2">
+                                            <div className="flex items-center gap-2.5">
+                                                <div className="w-7 h-7 rounded-lg bg-primary/20 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
                                                     {cert.student_name.charAt(0)}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-sm font-bold text-white truncate">{cert.student_name}</p>
-                                                    <p className="text-[10px] font-mono text-white/20">UUID: {cert.id.slice(-8)}</p>
+                                                    <p className="text-xs font-semibold text-white truncate">{cert.student_name}</p>
+                                                    <p className="text-[10px] font-mono text-white/30">ID: {cert.id.slice(-6)}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="p-1.5 rounded-lg bg-white/5 text-white/40">
-                                                    <Building2 size={14} />
-                                                </div>
-                                                <span className="text-sm text-white/70 font-medium">{cert.university_name}</span>
+                                        <td className="px-3.5 py-2">
+                                            <div className="flex items-center gap-1.5 text-xs text-white/70">
+                                                <Building2 size={13} className="text-white/40 shrink-0" />
+                                                <span className="truncate max-w-[150px]">{cert.university_name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-3.5 py-2">
                                             <div className="flex flex-col">
-                                                <span className="text-sm text-white/70 font-bold line-clamp-1">{cert.course_title}</span>
-                                                <span className="text-[10px] text-primary/60 font-semibold uppercase tracking-tighter">SkillDad Certified</span>
+                                                <span className="text-xs text-white/80 font-medium truncate max-w-[160px]">{cert.course_title}</span>
+                                                <span className="text-[9px] text-primary/70 font-semibold uppercase">SkillDad Certified</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border ${
-                                                cert.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                                cert.status === 'APPROVED' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                                                cert.status === 'ISSUED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                                        <td className="px-3.5 py-2">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                                                cert.status === 'PENDING' ? 'bg-amber-500/15 text-amber-400 border-amber-500/25' :
+                                                cert.status === 'APPROVED' ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25' :
+                                                cert.status === 'ISSUED' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' :
                                                 'bg-white/10 text-white/40 border-white/10'
                                             }`}>
                                                 {cert.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm text-white/50">{new Date(cert.apply_date).toLocaleDateString()}</span>
-                                                <span className="text-[10px] text-white/20 uppercase tracking-tighter">Applied At</span>
+                                        <td className="px-3.5 py-2">
+                                            <div className="flex flex-col text-[11px] text-white/60">
+                                                <span>{new Date(cert.apply_date).toLocaleDateString()}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2">
+                                        <td className="px-3.5 py-2 text-right">
+                                            <div className="flex items-center justify-end gap-1.5">
                                                 {/* Upload Certificate Button */}
                                                 <button 
                                                     onClick={() => { setSelectedCert(cert); setShowUploadModal(true); }}
-                                                    className="px-3 py-1.5 bg-primary/20 hover:bg-primary text-primary hover:text-white border border-primary/30 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                                                    className="px-2 py-1 bg-primary/15 hover:bg-primary text-primary hover:text-white border border-primary/25 rounded text-[11px] font-semibold transition-all flex items-center gap-1"
                                                     title="Upload Official Certificate PDF"
                                                 >
-                                                    <Upload size={14} /> {cert.status === 'ISSUED' ? 'Re-upload PDF' : 'Upload PDF & Issue'}
+                                                    <Upload size={12} /> {cert.status === 'ISSUED' ? 'Re-upload' : 'Upload & Issue'}
                                                 </button>
 
                                                 {/* Download if Issued */}
                                                 {cert.status === 'ISSUED' && cert.file_url && (
                                                     <button 
                                                         onClick={() => window.open(cert.file_url, '_blank')}
-                                                        className="p-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg transition-all"
+                                                        className="p-1 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 rounded transition-all"
                                                         title="View Issued Certificate"
                                                     >
-                                                        <Download size={16} />
+                                                        <Download size={13} />
                                                     </button>
                                                 )}
 
@@ -280,7 +275,7 @@ const CertificateManagement = () => {
                                                 <select
                                                     value={cert.status}
                                                     onChange={(e) => handleStatusUpdate(cert.id, e.target.value)}
-                                                    className="bg-white/5 border border-white/10 rounded-lg px-2.5 py-1 text-xs text-white/80 focus:outline-none focus:border-primary/50"
+                                                    className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-[11px] text-white/80 focus:outline-none focus:border-primary/50"
                                                 >
                                                     <option value="PENDING" className="bg-[#0B0F1A]">PENDING</option>
                                                     <option value="APPROVED" className="bg-[#0B0F1A]">APPROVED</option>

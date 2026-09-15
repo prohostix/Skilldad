@@ -18,7 +18,10 @@ import {
     Eye,
     Wallet,
     Ticket,
-    Activity
+    Activity,
+    Sparkles,
+    BookOpen,
+    Globe
 } from 'lucide-react';
 import {
     ResponsiveContainer,
@@ -72,6 +75,15 @@ const B2BManagement = () => {
         value: 0
     });
     const { showToast } = useToast();
+
+    // Recharts' ResponsiveContainer measures its parent on mount via ResizeObserver,
+    // which can fire once with a stale/unlaid-out size (width/height -1) if the chart
+    // mounts in the same paint as its container - deferring one tick avoids that.
+    const [chartReady, setChartReady] = useState(false);
+    useEffect(() => {
+        const raf = requestAnimationFrame(() => setChartReady(true));
+        return () => cancelAnimationFrame(raf);
+    }, []);
 
     const roiData = [
         { name: 'Jan', engagement: 45, roi: 30 },
@@ -328,175 +340,174 @@ const B2BManagement = () => {
                 <div className="text-left">
                     <DashboardHeading title="B2B Partners" />
                 </div>
-                <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
-                    <ModernButton variant="secondary" onClick={fetchPartners} className="flex-1 sm:flex-none !px-3 sm:!px-4">
-                        <Activity size={16} className="mr-1.5 sm:mr-2" /> Refresh
-                    </ModernButton>
-                    <ModernButton onClick={() => setOpenOnboard(true)} className="flex-1 sm:flex-none !px-3 sm:!px-4">
-                        <Plus size={16} className="mr-1.5 sm:mr-2" /> Add Partner
-                    </ModernButton>
+                <div className="flex items-center space-x-2 w-full sm:w-auto">
+                    <button
+                        onClick={fetchPartners}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:border-primary/40 hover:text-primary transition-all shadow-sm"
+                    >
+                        <Activity size={14} /> <span>Refresh</span>
+                    </button>
+                    <button
+                        onClick={() => setOpenOnboard(true)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-white transition-all shadow-sm"
+                    >
+                        <Plus size={14} /> <span>Add Partner</span>
+                    </button>
                 </div>
             </div>
 
             {/* B2B Overview Stats */}
-            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <GlassCard className="group hover:border-primary/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-primary/10 text-primary rounded-2xl group-hover:scale-110 transition-transform">
-                            <Building2 size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">Total Entities</p>
-                            <p className="text-base font-semibold text-white font-inter">{partners.length}</p>
-                        </div>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <Building2 size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">Total Entities</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">{partners.length}</p>
+                    </div>
+                </div>
 
-                <GlassCard className="group hover:border-emerald-500/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-emerald-100 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
-                            <Users size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">B2B Learners</p>
-                            <p className="text-base font-semibold text-white font-inter">1,240</p>
-                        </div>
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-emerald-500/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <Users size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">B2B Learners</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">1,240</p>
+                    </div>
+                </div>
 
-                <GlassCard className="group hover:border-amber-500/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-amber-100 text-amber-600 rounded-2xl group-hover:scale-110 transition-transform">
-                            <DollarSign size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">B2B Revenue</p>
-                            <p className="text-base font-semibold text-white font-inter">₹84.2k</p>
-                        </div>
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-amber-500/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <DollarSign size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">B2B Revenue</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">₹84.2k</p>
+                    </div>
+                </div>
 
-                <GlassCard className="group hover:border-secondary-purple/40">
-                    <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-secondary-purple/10 text-secondary-purple rounded-2xl group-hover:scale-110 transition-transform">
-                            <TrendingUp size={24} />
-                        </div>
-                        <div className="text-left">
-                            <p className="text-white/50 text-xs font-bold uppercase tracking-wider font-inter">Avg. ROI</p>
-                            <p className="text-base font-semibold text-white font-inter">24%</p>
-                        </div>
+                <div className="group relative bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-purple-500/40 transition-all duration-200 flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 flex-shrink-0">
+                        <TrendingUp size={16} />
                     </div>
-                </GlassCard>
+                    <div className="text-left min-w-0">
+                        <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter">Avg. ROI</p>
+                        <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">24%</p>
+                    </div>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* ROI Analytics Chart */}
-                <GlassCard className="lg:col-span-2 shadow-xl border-white/10">
-                    <div className="flex items-center justify-between mb-8">
+                <div className="lg:col-span-2 bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h3 className="text-base font-semibold text-white font-inter flex items-center">
-                                <BarChart3 size={18} className="mr-2 text-primary" /> Engagement  vs  ROI
+                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-inter flex items-center gap-2">
+                                <BarChart3 size={15} className="text-primary" /> <span>Engagement vs ROI</span>
                             </h3>
-                            <p className="text-xs text-white/40 font-semibold uppercase tracking-widest mt-1">Cross-entity performance analysis</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-inter mt-0.5">Cross-entity performance analysis</p>
                         </div>
-                        <div className="flex bg-white/5 p-1 rounded-lg">
+                        <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200/80 dark:border-white/10">
                             <button
                                 onClick={() => setTimeframe('monthly')}
-                                className={`px-3 py-1 text-xs font-bold rounded-md shadow-sm transition-all ${timeframe === 'monthly' ? 'bg-white/10 text-primary' : 'text-white/50'}`}
+                                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${timeframe === 'monthly' ? 'bg-white dark:bg-white/10 text-primary shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
                             >
                                 Monthly
                             </button>
                             <button
                                 onClick={() => setTimeframe('yearly')}
-                                className={`px-3 py-1 text-xs font-bold rounded-md shadow-sm transition-all ${timeframe === 'yearly' ? 'bg-white/10 text-primary' : 'text-white/50'}`}
+                                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-all ${timeframe === 'yearly' ? 'bg-white dark:bg-white/10 text-primary shadow-sm' : 'text-slate-500 dark:text-slate-400'}`}
                             >
                                 Yearly
                             </button>
                         </div>
                     </div>
-                    <div className="h-[300px] w-full relative" style={{ minWidth: 0 }}>
+                    <div className="h-[280px] w-full relative" style={{ minWidth: 0 }}>
+                        {chartReady && (
                         <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={250} debounce={50}>
                             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorEngage" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#5B5CF0" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#5B5CF0" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#5B5CF0" stopOpacity={0.25} />
+                                        <stop offset="95%" stopColor="#5B5CF0" stopOpacity={0.01} />
                                     </linearGradient>
                                     <linearGradient id="colorRoi" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
+                                        <stop offset="95%" stopColor="#10B981" stopOpacity={0.01} />
                                     </linearGradient>
                                 </defs>
-                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(148, 163, 184, 0.15)" />
+                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
                                 <Tooltip
                                     contentStyle={{
-                                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                        borderRadius: '16px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                        borderRadius: '12px',
                                         border: '1px solid #e2e8f0',
-                                        boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
-                                        color: '#000'
+                                        boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+                                        color: '#0f172a',
+                                        fontSize: '12px',
+                                        fontFamily: 'Inter, sans-serif'
                                     }}
                                 />
-                                <Area type="monotone" dataKey="engagement" stroke="#5B5CF0" strokeWidth={3} fillOpacity={1} fill="url(#colorEngage)" />
-                                <Area type="monotone" dataKey="roi" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorRoi)" />
+                                <Area type="monotone" dataKey="engagement" stroke="#5B5CF0" strokeWidth={2.5} fillOpacity={1} fill="url(#colorEngage)" />
+                                <Area type="monotone" dataKey="roi" stroke="#10B981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRoi)" />
                             </AreaChart>
                         </ResponsiveContainer>
+                        )}
                     </div>
-                </GlassCard>
+                </div>
 
                 {/* Assignment Fast-Actions */}
-                <div className="space-y-6">
-                    <GlassCard className="bg-white/5 text-white border-white/10 shadow-2xl shadow-primary/20 relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h4 className="text-base font-semibold font-inter mb-2 flex items-center">
-                                <ShieldCheck size={18} className="mr-2 text-emerald-400" /> Compliance Status
-                            </h4>
-                            <p className="text-white/70 text-sm font-inter mb-6">92% of corporate partners have completed the annual security audit.</p>
-                            <ModernButton onClick={() => setOpenAudits(true)} className="w-full !bg-white !text-slate-900 font-bold shadow-none">Review Audits</ModernButton>
-                        </div>
-                        <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-primary/20 rounded-full blur-[40px]"></div>
-                    </GlassCard>
-
-                    <GlassCard className="border-white/10 overflow-hidden !p-0">
-                        <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
-                            <p className="text-xs font-bold text-white/50 uppercase tracking-widest">Rapid Assignments</p>
-                            <Layers size={14} className="text-white/40" />
-                        </div>
-                        <div className="p-4 space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-primary/20 text-primary rounded-lg"><Briefcase size={14} /></div>
-                                    <span className="text-sm font-bold text-white">Enterprise AI</span>
+                <div className="space-y-4">
+                    <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm">
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-inter mb-3 flex items-center justify-between">
+                            <span>Fast Course Assignment</span>
+                            <Sparkles size={14} className="text-primary" />
+                        </h3>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200/60 dark:border-white/5">
+                                <div className="flex items-center space-x-2.5">
+                                    <div className="p-1.5 bg-primary/10 text-primary rounded-md"><BookOpen size={13} /></div>
+                                    <span className="text-xs font-semibold text-slate-800 dark:text-white font-inter">Full Stack MERN</span>
                                 </div>
-                                <button onClick={() => handleRapidAssign('Enterprise AI')} className="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors"><Plus size={16} /></button>
+                                <button onClick={() => handleRapidAssign('Full Stack MERN')} className="text-primary hover:bg-primary/10 p-1 rounded-md transition-colors"><Plus size={14} /></button>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-purple-500/20 text-purple-400 rounded-lg"><Briefcase size={14} /></div>
-                                    <span className="text-sm font-bold text-white">Project Management</span>
+                            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200/60 dark:border-white/5">
+                                <div className="flex items-center space-x-2.5">
+                                    <div className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-md"><Globe size={13} /></div>
+                                    <span className="text-xs font-semibold text-slate-800 dark:text-white font-inter">Enterprise AI</span>
                                 </div>
-                                <button onClick={() => handleRapidAssign('Project Management')} className="text-primary hover:bg-primary/10 p-1.5 rounded-lg transition-colors"><Plus size={16} /></button>
+                                <button onClick={() => handleRapidAssign('Enterprise AI')} className="text-primary hover:bg-primary/10 p-1 rounded-md transition-colors"><Plus size={14} /></button>
+                            </div>
+                            <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200/60 dark:border-white/5">
+                                <div className="flex items-center space-x-2.5">
+                                    <div className="p-1.5 bg-purple-500/10 text-purple-500 rounded-md"><Briefcase size={13} /></div>
+                                    <span className="text-xs font-semibold text-slate-800 dark:text-white font-inter">Project Management</span>
+                                </div>
+                                <button onClick={() => handleRapidAssign('Project Management')} className="text-primary hover:bg-primary/10 p-1 rounded-md transition-colors"><Plus size={14} /></button>
                             </div>
                         </div>
-                    </GlassCard>
+                    </div>
                 </div>
             </div>
 
             {/* Entity Table */}
-            <GlassCard className="!p-0 border-white/10 overflow-hidden shadow-xl">
-                <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <h3 className="text-base font-semibold text-white font-inter">Partner Network</h3>
+            <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-3 sm:p-4 border-b border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-inter">Partner Network</h3>
                     <div className="flex space-x-2">
                         <div className="relative">
                             <input
                                 type="text"
                                 placeholder="Search entity..."
-                                className="pl-10 pr-4 py-2 bg-transparent border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-primary w-full sm:w-64 font-inter"
+                                className="pl-8 pr-3 py-1.5 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-primary w-full sm:w-56 font-inter"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
-                            <Users className="absolute left-3 top-2.5 text-white/40" size={16} />
+                            <Users className="absolute left-2.5 top-2 text-slate-400 dark:text-slate-500" size={14} />
                         </div>
                     </div>
                 </div>
@@ -621,7 +632,7 @@ const B2BManagement = () => {
                         </tbody>
                     </table>
                 </div>
-            </GlassCard>
+            </div>
 
             {/* Partner Details Modal */}
             {openStats && selectedPartner && (

@@ -188,35 +188,41 @@ const ProjectManager = () => {
 
     return (
         <div className="space-y-8 pb-20">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div>
                     <DashboardHeading title="Project & Submission Manager" />
-                    <p className="text-white/40 text-sm font-inter">Manage project definitions and review student submissions across courses.</p>
+                    <p className="text-white/40 text-xs font-inter mt-1">Manage project definitions and review student submissions across courses.</p>
                 </div>
                 {activeTab === 'projects' && (
-                    <ModernButton onClick={() => { setShowModal(true); setEditingProject(null); setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100, batchIds: [] }); }} className="!px-6 !py-3">
-                        <Plus size={18} className="mr-2" /> Create Project
-                    </ModernButton>
+                    <button
+                        onClick={() => { setShowModal(true); setEditingProject(null); setFormData({ title: '', description: '', course: '', universityId: '', deadline: '', points: 100, batchIds: [] }); }}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold transition-all shadow-sm shadow-primary/25 self-start md:self-auto"
+                    >
+                        <Plus size={14} /> <span>Create Project</span>
+                    </button>
                 )}
                 {activeTab === 'submissions' && (
-                    <ModernButton onClick={() => setActiveTab('projects')} className="!px-6 !py-3 !bg-white/10 hover:!bg-white/20 !text-white border border-white/10">
+                    <button
+                        onClick={() => setActiveTab('projects')}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-lg text-xs font-semibold border border-white/10 transition-all self-start md:self-auto"
+                    >
                         Back to Projects
-                    </ModernButton>
+                    </button>
                 )}
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 border-b border-white/10 pb-px">
+            <div className="flex gap-1 border-b border-white/10 pb-px">
                 <button
                     onClick={() => setActiveTab('projects')}
-                    className={`px-6 py-3 text-sm font-bold uppercase tracking-widest transition-all relative ${activeTab === 'projects' ? 'text-primary' : 'text-white/40 hover:text-white/70'}`}
+                    className={`px-4 py-2 text-xs font-semibold transition-all relative ${activeTab === 'projects' ? 'text-primary' : 'text-white/40 hover:text-white/70'}`}
                 >
                     Project Definitions
                     {activeTab === 'projects' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_-4px_12px_rgba(var(--color-primary-rgb),0.5)]" />}
                 </button>
                 <button
                     onClick={() => setActiveTab('submissions')}
-                    className={`px-6 py-3 text-sm font-bold uppercase tracking-widest transition-all relative ${activeTab === 'submissions' ? 'text-primary' : 'text-white/40 hover:text-white/70'}`}
+                    className={`px-4 py-2 text-xs font-semibold transition-all relative ${activeTab === 'submissions' ? 'text-primary' : 'text-white/40 hover:text-white/70'}`}
                 >
                     Student Submissions
                     {activeTab === 'submissions' && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary shadow-[0_-4px_12px_rgba(var(--color-primary-rgb),0.5)]" />}
@@ -227,51 +233,51 @@ const ProjectManager = () => {
                 <div className="grid grid-cols-1 gap-6">
                     {projects.length > 0 ? (
                         <GlassCard className="!p-0 overflow-hidden border-white/10">
-                            <div className="overflow-x-auto">
+                            <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                 <table className="w-full text-left">
-                                    <thead className="bg-white/5 text-white/40 text-[10px] font-bold uppercase tracking-widest border-b border-white/10">
+                                    <thead className="bg-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider border-b border-white/5">
                                         <tr>
-                                            <th className="px-8 py-5">Project Details</th>
-                                            <th className="px-6 py-5">Target Course</th>
-                                            <th className="px-6 py-5">Timeline</th>
-                                            <th className="px-6 py-5">Scoring</th>
-                                            <th className="px-8 py-5 text-right">Actions</th>
+                                            <th className="px-3.5 py-2.5">Project Details</th>
+                                            <th className="px-3.5 py-2.5">Target Course</th>
+                                            <th className="px-3.5 py-2.5">Timeline</th>
+                                            <th className="px-3.5 py-2.5">Scoring</th>
+                                            <th className="px-3.5 py-2.5 text-right">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/5">
+                                    <tbody className="divide-y divide-white/5 text-xs">
                                         {projects.map((project) => (
-                                            <tr key={project._id} className="hover:bg-white/[0.02] transition-colors group">
-                                                <td className="px-8 py-6">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-white font-bold mb-1">{project.title}</span>
-                                                        <span className="text-xs text-white/30 line-clamp-1 max-w-xs">{project.description}</span>
+                                            <tr key={project._id} className="hover:bg-white/[0.03] transition-colors group">
+                                                <td className="px-3.5 py-2">
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-white font-semibold text-xs truncate max-w-xs">{project.title}</span>
+                                                        <span className="text-[11px] text-white/40 line-clamp-1 max-w-xs">{project.description}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-6">
-                                                    <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-lg text-xs font-bold">
-                                                        {project.courseTitle || 'N/A'}
+                                                <td className="px-3.5 py-2">
+                                                    <span className="px-2 py-0.5 bg-primary/15 text-primary border border-primary/25 rounded text-[11px] font-semibold">
+                                                        {project.courseTitle || 'All Courses'}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-6">
-                                                    <div className="flex items-center gap-2 text-xs text-white/60 font-medium">
-                                                        <Clock size={14} className="text-primary" />
+                                                <td className="px-3.5 py-2">
+                                                    <div className="flex items-center gap-1.5 text-[11px] text-white/60 font-medium">
+                                                        <Clock size={12} className="text-primary" />
                                                         {project.deadline ? new Date(project.deadline).toLocaleDateString() : 'Continuous'}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-6">
-                                                    <div className="flex items-center gap-2 text-xs font-black text-white/80">
-                                                        <Trophy size={14} className="text-yellow-500" />
+                                                <td className="px-3.5 py-2">
+                                                    <div className="flex items-center gap-1.5 text-xs font-bold text-white/80">
+                                                        <Trophy size={13} className="text-amber-400" />
                                                         {project.points} PTS
                                                     </div>
                                                 </td>
-                                                <td className="px-8 py-6 text-right">
-                                                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <td className="px-3.5 py-2 text-right">
+                                                    <div className="flex items-center justify-end gap-1.5">
                                                         <button
                                                             onClick={() => fetchSubmissions(project.id)}
-                                                            className="p-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg hover:bg-emerald-500 hover:text-white transition-all"
+                                                            className="p-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded hover:bg-emerald-500/20 transition-all"
                                                             title="View Submissions"
                                                         >
-                                                            <Users size={16} />
+                                                            <Users size={13} />
                                                         </button>
                                                         <button
                                                             onClick={() => {
@@ -290,15 +296,17 @@ const ProjectManager = () => {
                                                                 });
                                                                 setShowModal(true);
                                                             }}
-                                                            className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary hover:text-white transition-all"
+                                                            className="p-1.5 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary/20 transition-all"
+                                                            title="Edit Project"
                                                         >
-                                                            <Edit3 size={16} />
+                                                            <Edit3 size={13} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(project._id)}
-                                                            className="p-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                                                            className="p-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded hover:bg-rose-500/20 transition-all"
+                                                            title="Delete Project"
                                                         >
-                                                            <Trash2 size={16} />
+                                                            <Trash2 size={13} />
                                                         </button>
                                                     </div>
                                                 </td>
@@ -333,7 +341,7 @@ const ProjectManager = () => {
                         </div>
                         <div className="flex items-center gap-2">
                             <select
-                                className="bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-primary transition-all"
+                                className="bg-white/5 border border-white/10 text-white rounded-lg px-2.5 py-1.5 text-xs font-inter focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all cursor-pointer"
                                 value={selectedProjectForSubmissions || ''}
                                 onChange={(e) => fetchSubmissions(e.target.value)}
                             >
@@ -347,58 +355,58 @@ const ProjectManager = () => {
 
                     {submissions.length > 0 ? (
                         <GlassCard className="!p-0 overflow-hidden border-white/10">
-                            <div className="overflow-x-auto">
+                            <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                 <table className="w-full text-left">
-                                    <thead className="bg-white/5 text-white/40 text-[10px] font-bold uppercase tracking-widest border-b border-white/10">
+                                    <thead className="bg-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider border-b border-white/5">
                                         <tr>
-                                            <th className="px-8 py-5">Student</th>
-                                            <th className="px-6 py-5">Submission Date</th>
-                                            <th className="px-6 py-5">Status</th>
-                                            <th className="px-6 py-5">Grade</th>
-                                            <th className="px-8 py-5 text-right">Actions</th>
+                                            <th className="px-3.5 py-2.5">Student</th>
+                                            <th className="px-3.5 py-2.5">Submission Date</th>
+                                            <th className="px-3.5 py-2.5">Status</th>
+                                            <th className="px-3.5 py-2.5">Grade</th>
+                                            <th className="px-3.5 py-2.5 text-right">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/5">
+                                    <tbody className="divide-y divide-white/5 text-xs">
                                         {submissions.map((sub) => (
-                                            <tr key={sub.id} className="hover:bg-white/[0.02] transition-colors group">
-                                                <td className="px-8 py-6">
+                                            <tr key={sub.id} className="hover:bg-white/[0.03] transition-colors group">
+                                                <td className="px-3.5 py-2">
                                                     <div className="flex flex-col">
-                                                        <span className="text-white font-bold mb-1">{sub.studentName}</span>
-                                                        <span className="text-[10px] text-white/30 uppercase tracking-tighter">{sub.studentEmail}</span>
+                                                        <span className="text-white font-semibold text-xs">{sub.studentName}</span>
+                                                        <span className="text-[11px] text-white/40">{sub.studentEmail}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-6">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-xs text-white/80">{new Date(sub.submission_date).toLocaleDateString()}</span>
-                                                        <span className="text-[10px] text-white/40 uppercase tracking-widest">{new Date(sub.submission_date).toLocaleTimeString()}</span>
+                                                <td className="px-3.5 py-2">
+                                                    <div className="flex items-center gap-1.5 text-[11px] text-white/70">
+                                                        <span>{new Date(sub.submission_date).toLocaleDateString()}</span>
+                                                        <span className="text-white/30">• {new Date(sub.submission_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-6">
-                                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${sub.status === 'graded'
-                                                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                                                            : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                <td className="px-3.5 py-2">
+                                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${sub.status === 'graded'
+                                                            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25'
+                                                            : 'bg-amber-500/15 text-amber-400 border-amber-500/25'
                                                         }`}>
                                                         {sub.status}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-6">
+                                                <td className="px-3.5 py-2">
                                                     {sub.grade ? (
-                                                        <span className="text-sm font-black text-primary">{sub.grade}</span>
+                                                        <span className="text-xs font-bold text-primary">{sub.grade}</span>
                                                     ) : (
-                                                        <span className="text-[10px] text-white/20 uppercase font-bold tracking-widest">Pending</span>
+                                                        <span className="text-[10px] text-white/30 uppercase font-semibold">Pending</span>
                                                     )}
                                                 </td>
-                                                <td className="px-8 py-6 text-right">
-                                                    <div className="flex items-center justify-end gap-3">
+                                                <td className="px-3.5 py-2 text-right">
+                                                    <div className="flex items-center justify-end gap-1.5">
                                                         {sub.file_url && (
                                                             <a
                                                                 href={`${axios.defaults.baseURL || ''}${sub.file_url}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="p-2 bg-white/5 text-white/40 border border-white/10 rounded-lg hover:bg-white/10 hover:text-white transition-all"
+                                                                className="p-1.5 bg-white/5 text-white/60 border border-white/10 rounded hover:bg-white/10 hover:text-white transition-all"
                                                                 title="View File"
                                                             >
-                                                                <Eye size={16} />
+                                                                <Eye size={13} />
                                                             </a>
                                                         )}
                                                         <button
@@ -407,10 +415,10 @@ const ProjectManager = () => {
                                                                 setGradeData({ grade: sub.grade || '', feedback: sub.feedback || '' });
                                                                 setShowGradeModal(true);
                                                             }}
-                                                            className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary hover:text-white transition-all"
+                                                            className="p-1.5 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary/20 transition-all"
                                                             title="Grade Submission"
                                                         >
-                                                            <CheckCircle size={16} />
+                                                            <CheckCircle size={13} />
                                                         </button>
                                                     </div>
                                                 </td>

@@ -52,7 +52,7 @@ const DashboardLayout = () => {
                 <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 max-w-full">
                     <DashboardNavbar onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-                    <main className={`${location.pathname.includes('/session/') || location.pathname.includes('/course/') ? 'p-0' : 'px-3 sm:px-6 lg:px-8 pt-1.5 pb-3 lg:pt-2 lg:pb-4 max-w-[1600px] mx-auto'} w-full flex-1`}>
+                    <main className={`${location.pathname.includes('/session/') || location.pathname.includes('/course/') ? 'p-0' : 'px-3 sm:px-6 lg:px-8 pt-1.5 pb-28 lg:pt-2 lg:pb-4 max-w-[1600px] mx-auto'} w-full flex-1`}>
                         <Outlet />
                     </main>
                 </div>

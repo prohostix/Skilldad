@@ -167,17 +167,20 @@ const CareerManager = () => {
                         Manage corporate vacancies and review student applications.
                     </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                     {activeTab === 'vacancies' && (
-                        <ModernButton onClick={() => { setFormData({ job_type: 'Job', status: 'open' }); setEditingItem(null); setShowVacancyModal(true); }}>
-                            <Plus size={16} className="mr-2" /> Add Vacancy
-                        </ModernButton>
+                        <button
+                            onClick={() => { setFormData({ job_type: 'Job', status: 'open' }); setEditingItem(null); setShowVacancyModal(true); }}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold transition-all shadow-sm shadow-primary/25"
+                        >
+                            <Plus size={14} /> <span>Add Vacancy</span>
+                        </button>
                     )}
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex bg-white/5 p-1.5 rounded-2xl border border-white/10 w-fit backdrop-blur-xl">
+            <div className="flex bg-slate-100/90 dark:bg-white/5 p-1 rounded-xl border border-slate-200/80 dark:border-white/10 w-fit">
                 {[
                     { id: 'vacancies', label: 'Vacancies', icon: Briefcase },
                     { id: 'applications', label: 'Applications', icon: FileText }
@@ -185,139 +188,139 @@ const CareerManager = () => {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2.5 px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
+                        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                             activeTab === tab.id 
-                            ? 'bg-primary text-white shadow-xl shadow-primary/30' 
-                            : 'text-white/40 hover:text-white hover:bg-white/5'
+                            ? 'bg-primary text-white shadow-sm' 
+                            : 'text-slate-600 dark:text-white/50 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
-                        <tab.icon size={16} />
+                        <tab.icon size={13} />
                         {tab.label}
                     </button>
                 ))}
             </div>
 
             {/* List Content */}
-            <GlassCard className="!p-0 overflow-hidden border-white/10">
-                <div className="p-6 border-b border-white/10 flex items-center justify-between gap-4">
+            <GlassCard className="!p-0 overflow-hidden border border-slate-200/80 dark:border-white/10 shadow-sm">
+                <div className="p-2.5 sm:p-3 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3">
                     <div className="relative max-w-sm w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/40 pointer-events-none" size={13} />
                         <input 
                             type="text" 
                             placeholder={`Search ${activeTab}...`}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder-white/20"
+                            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     {loading ? (
                         <div className="p-20 text-center">
                             <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto"></div>
                         </div>
                     ) : (
                         <table className="w-full text-left font-inter">
-                            <thead className="bg-white/5 text-white/40 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+                            <thead className="bg-white/5 text-white/50 text-[10px] font-bold uppercase tracking-wider border-b border-white/5">
                                 {activeTab === 'vacancies' && (
                                     <tr>
-                                        <th className="px-6 py-4">Vacancy Details</th>
-                                        <th className="px-6 py-4">Company & Location</th>
-                                        <th className="px-6 py-4">Type & Salary</th>
-                                        <th className="px-6 py-4">Deadline</th>
-                                        <th className="px-6 py-4">Status</th>
-                                        <th className="px-6 py-4 text-right">Actions</th>
+                                        <th className="px-3.5 py-2.5">Vacancy Details</th>
+                                        <th className="px-3.5 py-2.5">Company & Location</th>
+                                        <th className="px-3.5 py-2.5">Type & Salary</th>
+                                        <th className="px-3.5 py-2.5">Deadline</th>
+                                        <th className="px-3.5 py-2.5">Status</th>
+                                        <th className="px-3.5 py-2.5 text-right">Actions</th>
                                     </tr>
                                 )}
                                 {activeTab === 'applications' && (
                                     <tr>
-                                        <th className="px-6 py-4">Student</th>
-                                        <th className="px-6 py-4">Vacancy</th>
-                                        <th className="px-6 py-4">Applied At</th>
-                                        <th className="px-6 py-4">Resume</th>
-                                        <th className="px-6 py-4">Status</th>
-                                        <th className="px-6 py-4 text-right">Decision</th>
+                                        <th className="px-3.5 py-2.5">Student</th>
+                                        <th className="px-3.5 py-2.5">Vacancy</th>
+                                        <th className="px-3.5 py-2.5">Applied At</th>
+                                        <th className="px-3.5 py-2.5">Resume</th>
+                                        <th className="px-3.5 py-2.5">Status</th>
+                                        <th className="px-3.5 py-2.5 text-right">Decision</th>
                                     </tr>
                                 )}
                                 {activeTab === 'placements' && (
                                     <tr>
-                                        <th className="px-6 py-4">Student</th>
-                                        <th className="px-6 py-4">Company</th>
-                                        <th className="px-6 py-4">Designation</th>
-                                        <th className="px-6 py-4">Placed Date</th>
-                                        <th className="px-6 py-4 text-right">Actions</th>
+                                        <th className="px-3.5 py-2.5">Student</th>
+                                        <th className="px-3.5 py-2.5">Company</th>
+                                        <th className="px-3.5 py-2.5">Designation</th>
+                                        <th className="px-3.5 py-2.5">Placed Date</th>
+                                        <th className="px-3.5 py-2.5 text-right">Actions</th>
                                     </tr>
                                 )}
                             </thead>
-                            <tbody className="divide-y divide-white/5 text-sm">
+                            <tbody className="divide-y divide-white/5 text-xs">
                                 {activeTab === 'vacancies' && vacancies.map(v => (
-                                    <tr key={v.id} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-6 py-5">
-                                            <div className="font-bold text-white">{v.title}</div>
+                                    <tr key={v.id} className="hover:bg-white/[0.03] transition-colors group">
+                                        <td className="px-3.5 py-2">
+                                            <div className="font-semibold text-xs text-white">{v.title}</div>
                                             <div className="text-[10px] text-white/30 font-medium uppercase mt-0.5 tracking-wider">ID: {v.id.split('-')[0]}</div>
                                         </td>
-                                        <td className="px-6 py-5">
+                                        <td className="px-3.5 py-2">
                                             <div className="flex flex-col">
-                                                <span className="text-white/80 font-semibold">{v.company}</span>
-                                                <span className="text-white/40 text-xs flex items-center gap-1 mt-0.5"><MapPin size={12} /> {v.location}</span>
+                                                <span className="text-white/80 font-medium text-xs">{v.company}</span>
+                                                <span className="text-white/40 text-[11px] flex items-center gap-1 mt-0.5"><MapPin size={11} /> {v.location}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5">
+                                        <td className="px-3.5 py-2">
                                             <div className="flex flex-col">
-                                                <span className={`text-[10px] font-black uppercase tracking-widest mb-1 ${v.job_type === 'Job' ? 'text-blue-400' : 'text-purple-400'}`}>{v.job_type}</span>
-                                                <span className="text-emerald-400 font-bold text-xs">{v.salary_range}</span>
+                                                <span className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${v.job_type === 'Job' ? 'text-blue-400' : 'text-purple-400'}`}>{v.job_type}</span>
+                                                <span className="text-emerald-400 font-semibold text-xs">{v.salary_range}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5 text-white/60 font-medium">
+                                        <td className="px-3.5 py-2 text-white/60 font-medium text-xs">
                                             {new Date(v.deadline).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border ${v.status === 'open' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
+                                        <td className="px-3.5 py-2">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${v.status === 'open' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25' : 'bg-rose-500/15 text-rose-400 border-rose-500/25'}`}>
                                                 {v.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-5 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => { setFormData(v); setEditingItem(v); setShowVacancyModal(true); }} className="p-2 text-white/40 hover:text-primary transition-colors"><Edit3 size={18} /></button>
-                                                <button onClick={() => handleDeleteVacancy(v.id)} className="p-2 text-white/40 hover:text-rose-500 transition-colors"><Trash2 size={18} /></button>
+                                        <td className="px-3.5 py-2 text-right">
+                                            <div className="flex justify-end gap-1.5">
+                                                <button onClick={() => { setFormData(v); setEditingItem(v); setShowVacancyModal(true); }} className="p-1.5 text-white/50 hover:text-primary hover:bg-primary/10 rounded transition-colors" title="Edit Vacancy"><Edit3 size={13} /></button>
+                                                <button onClick={() => handleDeleteVacancy(v.id)} className="p-1.5 text-white/50 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-colors" title="Delete Vacancy"><Trash2 size={13} /></button>
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
 
                                 {activeTab === 'applications' && applications.map(a => (
-                                    <tr key={a.id} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-6 py-5">
-                                            <div className="font-bold text-white">{a.student_name}</div>
-                                            <div className="text-[10px] text-white/30 font-medium lowercase tracking-wider">{a.student_email}</div>
+                                    <tr key={a.id} className="hover:bg-white/[0.03] transition-colors group">
+                                        <td className="px-3.5 py-2">
+                                            <div className="font-semibold text-xs text-white">{a.student_name}</div>
+                                            <div className="text-[10px] text-white/30 lowercase tracking-wider">{a.student_email}</div>
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <div className="font-bold text-white/80">{a.vacancy_title}</div>
-                                            <div className="text-[10px] text-white/30 font-black uppercase tracking-widest">{a.vacancy_company}</div>
+                                        <td className="px-3.5 py-2">
+                                            <div className="font-medium text-xs text-white/80">{a.vacancy_title}</div>
+                                            <div className="text-[10px] text-white/40 uppercase tracking-wider">{a.vacancy_company}</div>
                                         </td>
-                                        <td className="px-6 py-5 text-white/40 font-medium">
+                                        <td className="px-3.5 py-2 text-white/40 text-xs">
                                             {new Date(a.applied_at).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-5">
+                                        <td className="px-3.5 py-2">
                                             {a.resume_url ? (
-                                                <a href={a.resume_url} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-primary hover:underline font-bold text-xs">
-                                                    <FileText size={14} /> VIEW PDF
+                                                <a href={a.resume_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary hover:underline font-bold text-xs">
+                                                    <FileText size={12} /> PDF
                                                 </a>
                                             ) : (
                                                 <span className="text-white/20 text-xs italic">No Resume</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-5">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter border ${getStatusColor(a.status)}`}>
+                                        <td className="px-3.5 py-2">
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(a.status)}`}>
                                                 {a.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-5 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <button onClick={() => handleUpdateAppStatus(a.id, 'shortlisted')} className="px-2.5 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all">Shortlist</button>
-                                                <button onClick={() => handleUpdateAppStatus(a.id, 'rejected')} className="px-2.5 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all">Reject</button>
-                                                <button onClick={() => handleUpdateAppStatus(a.id, 'approved')} className="px-2.5 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all">Direct Hired</button>
+                                        <td className="px-3.5 py-2 text-right">
+                                            <div className="flex justify-end gap-1">
+                                                <button onClick={() => handleUpdateAppStatus(a.id, 'shortlisted')} className="px-2 py-0.5 bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 border border-blue-500/25 rounded text-[10px] font-semibold uppercase tracking-wider transition-all">Shortlist</button>
+                                                <button onClick={() => handleUpdateAppStatus(a.id, 'rejected')} className="px-2 py-0.5 bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 border border-rose-500/25 rounded text-[10px] font-semibold uppercase tracking-wider transition-all">Reject</button>
+                                                <button onClick={() => handleUpdateAppStatus(a.id, 'approved')} className="px-2 py-0.5 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/25 rounded text-[10px] font-semibold uppercase tracking-wider transition-all">Direct Hired</button>
                                             </div>
                                         </td>
                                     </tr>

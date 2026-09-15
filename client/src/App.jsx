@@ -29,6 +29,7 @@ const AboutUs = lazy(() => lazyRetry(() => import('./pages/AboutUs')));
 const Partners = lazy(() => lazyRetry(() => import('./pages/Partners')));
 const StudyAbroad = lazy(() => lazyRetry(() => import('./pages/StudyAbroad')));
 const WBLPage = lazy(() => lazyRetry(() => import('./pages/public/WBLPage')));
+const JobAlerts = lazy(() => lazyRetry(() => import('./pages/public/JobAlerts')));
 const Settings = lazy(() => lazyRetry(() => import('./pages/Settings')));
 const CourseDetail = lazy(() => lazyRetry(() => import('./pages/CourseDetail')));
 const HostRoom = lazy(() => lazyRetry(() => import('./pages/HostRoom')));
@@ -116,6 +117,7 @@ const ServicesManagement = lazy(() => lazyRetry(() => import('./pages/admin/Serv
 const StudyAbroadManagement = lazy(() => lazyRetry(() => import('./pages/admin/StudyAbroadManagement')));
 
 const CareerManager = lazy(() => lazyRetry(() => import('./pages/admin/CareerManager')));
+const JobAlertsManager = lazy(() => lazyRetry(() => import('./pages/admin/JobAlertsManager')));
 const CertificateManagement = lazy(() => lazyRetry(() => import('./pages/admin/CertificateManagement')));
 const DocumentReview = lazy(() => lazyRetry(() => import('./pages/admin/DocumentReview')));
 const UniversityDocumentReview = lazy(() => lazyRetry(() => import('./pages/university/UniversityDocumentReview')));
@@ -153,6 +155,7 @@ function App() {
                 <Route path="/test-courses" element={<TestCourses />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/about" element={<AboutUs />} />
+                <Route path="/job-alerts" element={<JobAlerts />} />
                 <Route path="/partners" element={<Partners />} />
                 <Route path="/study-abroad" element={<StudyAbroad />} />
                 <Route path="/wbl" element={<WBLPage />} />
@@ -262,6 +265,7 @@ function App() {
                     <Route path="users" element={<UserList />} />
                     <Route path="students" element={<StudentManagement />} />
                     <Route path="career-manager" element={<CareerManager />} />
+                    <Route path="job-alerts" element={<JobAlertsManager />} />
                     <Route path="wbl" element={<CourseManager wblOnly={true} />} />
                     <Route path="university" element={<UniversityManagement />} />
                     <Route path="university/:id" element={<UniversityDetail />} />

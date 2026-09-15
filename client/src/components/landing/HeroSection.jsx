@@ -118,6 +118,60 @@ html.light-mode .hero-diagram-node-label,
     letter-spacing: 0.08em !important;
     filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 2px #ffffff) !important;
 }
+
+/* Diagram images: always 100% solid opacity, perfectly crisp, zero fog or wash-out in both light and dark modes */
+.hero-diagram-foreign-object.hero-diagram-has-image {
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+.hero-diagram-node-img {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+/* Eliminate the right fade gradient overlay entirely so it never casts smoke or fog across right-side nodes like Jobs */
+.hero-diagram-fade-edge {
+    display: none !important;
+}
+
+html.light-mode .hero-diagram-foreign-object.hero-diagram-has-image,
+.light-mode .hero-diagram-foreign-object.hero-diagram-has-image,
+.light .hero-diagram-foreign-object.hero-diagram-has-image,
+[data-theme="light"] .hero-diagram-foreign-object.hero-diagram-has-image {
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+html.light-mode .hero-diagram-node-img,
+.light-mode .hero-diagram-node-img,
+.light .hero-diagram-node-img,
+[data-theme="light"] .hero-diagram-node-img {
+    opacity: 1 !important;
+    filter: none !important;
+}
+
+html.light-mode .hero-diagram-node-img.hero-diagram-img-cover,
+.light-mode .hero-diagram-node-img.hero-diagram-img-cover,
+.light .hero-diagram-node-img.hero-diagram-img-cover,
+[data-theme="light"] .hero-diagram-node-img.hero-diagram-img-cover {
+    filter: none !important;
+}
+
+html.light-mode .hero-diagram-core-circle,
+.light-mode .hero-diagram-core-circle,
+.light .hero-diagram-core-circle,
+[data-theme="light"] .hero-diagram-core-circle {
+    animation: none !important;
+    filter: drop-shadow(0 2px 6px rgba(88, 28, 135, 0.22)) !important;
+}
+
+html.light-mode .hero-diagram-pulse-ring,
+.light-mode .hero-diagram-pulse-ring,
+.light .hero-diagram-pulse-ring,
+[data-theme="light"] .hero-diagram-pulse-ring {
+    stroke: rgba(168, 85, 247, 0.45) !important;
+}
 `;
 
 /* ─── Floating course bubbles (right side) ───────────────────────
@@ -297,15 +351,34 @@ const DiagramEdge = ({ from, to, index, nodeMap }) => {
 };
 
 const DiagramNode = ({ node, index }) => {
-    // Resolve image URL if string or asset
-    const rawImage = node.image;
+    const [imgError, setImgError] = useState(false);
+
+    useEffect(() => {
+        setImgError(false);
+    }, [node.image, node.defaultImage]);
+
+    // If current image fails, gracefully fallback to default diagram image
+    const rawImage = !imgError
+        ? (node.image || node.defaultImage)
+        : (node.image !== node.defaultImage ? node.defaultImage : null);
+
     const resolvedImage = rawImage
-        ? (typeof rawImage === 'string' && (rawImage.startsWith('http') || rawImage.startsWith('data:') || rawImage.startsWith('/assets') || rawImage.startsWith('/src'))
+        ? (typeof rawImage === 'string' && (rawImage.startsWith('http') || rawImage.startsWith('data:') || rawImage.startsWith('/assets'))
             ? rawImage
-            : getMediaUrl(rawImage))
+            : (typeof rawImage === 'string' && rawImage.startsWith('/src') ? skilldadLogo : getMediaUrl(rawImage)))
         : null;
 
     const IconComponent = node.icon || Sparkles;
+    const isCover = node.imageFit === 'cover';
+
+    // When an image is present, make it reach the outer pulse circle radius (r + 9)
+    const coreR = node.isRoot
+        ? 24
+        : (resolvedImage ? (node.r + 9) : node.r);
+
+    // Cover fills the entire circle right up to the stroke border; contain adds slight breathing room
+    const imgScale = resolvedImage ? (isCover ? 0.98 : 0.78) : 0.62;
+    const defaultBg = isCover ? '#2E1065' : '#ffffff';
 
     return (
         <motion.g
@@ -321,7 +394,7 @@ const DiagramNode = ({ node, index }) => {
             {/* Highlight ring - only root/highlighted node gets wider pulse ring */}
             {node.highlight && (
                 <circle
-                    cx={node.x} cy={node.y} r={node.r + 15}
+                    cx={node.x} cy={node.y} r={coreR + 15}
                     fill="none" stroke="#C026FF" strokeWidth="0.8"
                     style={{
                         transformOrigin: `${node.x}px ${node.y}px`,
@@ -330,33 +403,39 @@ const DiagramNode = ({ node, index }) => {
                     }}
                 />
             )}
-            {/* Outer pulse ring */}
+            {/* Outer pulse ring - only for icon-only fallback nodes; image nodes read cleaner without it */}
+            {!resolvedImage && (
+                <circle
+                    cx={node.x} cy={node.y} r={coreR + 9}
+                    fill="none" stroke="#C026FF" strokeWidth="0.6"
+                    className="hero-diagram-pulse-ring"
+                    style={{
+                        transformOrigin: `${node.x}px ${node.y}px`,
+                        animation: `hero-node-pulse ${2.5 + index * 0.3}s ease-in-out infinite`,
+                        animationDelay: `${node.delay + 0.8}s`
+                    }}
+                />
+            )}
+            {/* Core Circle */}
             <circle
-                cx={node.x} cy={node.y} r={node.r + 9}
-                fill="none" stroke="#C026FF" strokeWidth="0.6"
-                style={{
-                    transformOrigin: `${node.x}px ${node.y}px`,
-                    animation: `hero-node-pulse ${2.5 + index * 0.3}s ease-in-out infinite`,
-                    animationDelay: `${node.delay + 0.8}s`
-                }}
-            />
-            {/* Core */}
-            <circle
-                cx={node.x} cy={node.y} r={node.r}
-                fill={resolvedImage ? (node.imageBg || '#ffffff') : 'url(#nGrad)'}
-                stroke="#9333EA"
-                strokeWidth={node.highlight ? 2.25 : 1.5}
+                cx={node.x} cy={node.y} r={coreR}
+                fill={resolvedImage ? (node.imageBg || defaultBg) : 'url(#nGrad)'}
+                stroke={resolvedImage ? 'none' : '#9333EA'}
+                strokeWidth={resolvedImage ? 0 : (node.highlight ? 2.25 : 1.75)}
+                className="hero-diagram-core-circle"
                 style={{
                     animation: `hero-node-core-glow 3s ease-in-out infinite ${node.delay}s`,
-                    filter: node.highlight ? 'drop-shadow(0 0 10px rgba(192,38,255,0.55))' : undefined
+                    filter: node.highlight ? 'drop-shadow(0 0 10px rgba(192,38,255,0.55))' : (resolvedImage ? 'drop-shadow(0 0 8px rgba(147,51,234,0.4))' : undefined)
                 }}
             />
             {/* Real image when available, otherwise the lucide icon fallback */}
             <foreignObject
-                x={node.x - node.r * (resolvedImage ? 0.78 : 0.62)} y={node.y - node.r * (resolvedImage ? 0.78 : 0.62)}
-                width={node.r * (resolvedImage ? 1.56 : 1.24)} height={node.r * (resolvedImage ? 1.56 : 1.24)}
+                x={node.x - coreR * imgScale} y={node.y - coreR * imgScale}
+                width={coreR * imgScale * 2} height={coreR * imgScale * 2}
+                className={`hero-diagram-foreign-object ${resolvedImage ? 'hero-diagram-has-image' : ''}`}
                 style={{
-                    animation: `hero-node-white-pulse 2s ease-in-out infinite ${node.delay}s`
+                    animation: resolvedImage ? 'none' : `hero-node-white-pulse 2s ease-in-out infinite ${node.delay}s`,
+                    opacity: 1
                 }}
             >
                 <div
@@ -367,16 +446,18 @@ const DiagramNode = ({ node, index }) => {
                         <img
                             src={resolvedImage}
                             alt={node.label}
-                            style={{ width: '100%', height: '100%', objectFit: node.imageFit || 'cover' }}
+                            onError={() => setImgError(true)}
+                            className={`hero-diagram-node-img ${isCover ? 'hero-diagram-img-cover' : 'hero-diagram-img-contain'}`}
+                            style={{ width: '100%', height: '100%', objectFit: node.imageFit || 'cover', borderRadius: '50%' }}
                         />
                     ) : (
-                        <IconComponent size={node.r * 1.15} color="#fff" strokeWidth={2.25} />
+                        <IconComponent size={coreR * 1.15} color="#fff" strokeWidth={2.25} />
                     )}
                 </div>
             </foreignObject>
             {/* Label - visible in both light mode and dark mode */}
             <text
-                x={node.x} y={node.y + node.r + 14}
+                x={node.x} y={node.y + coreR + 14}
                 textAnchor="middle"
                 className="hero-diagram-node-label"
                 fontSize="9.5"
@@ -447,12 +528,16 @@ const NetworkDiagram = ({ customNodesConfig }) => {
 
                     {/* Travel dots */}
                     {[
-                        { from: 'root', to: 'courses', delay: 1.0 },
-                        { from: 'root', to: 'university', delay: 1.8 },
-                        { from: 'root', to: 'partner', delay: 2.5 },
-                        { from: 'courses', to: 'cert', delay: 3.2 },
+                        { from: 'root', to: 'courses', delay: 0.8 },
+                        { from: 'root', to: 'university', delay: 1.4 },
+                        { from: 'root', to: 'partner', delay: 2.0 },
+                        { from: 'root', to: 'ai', delay: 1.2 },
+                        { from: 'courses', to: 'cert', delay: 2.6 },
+                        { from: 'university', to: 'cert', delay: 3.2 },
                         { from: 'partner', to: 'job', delay: 3.8 },
-                        { from: 'cert', to: 'student', delay: 4.5 },
+                        { from: 'ai', to: 'student', delay: 4.2 },
+                        { from: 'cert', to: 'student', delay: 4.6 },
+                        { from: 'student', to: 'job', delay: 5.0 },
                     ].map((t, i) => (
                         <TravelDot key={i} {...t} nodeMap={activeNodeMap} />
                     ))}
@@ -463,12 +548,6 @@ const NetworkDiagram = ({ customNodesConfig }) => {
                     ))}
                 </svg>
             </div>
-
-            {/* Fade right edge to blend into hero */}
-            <div
-                className="absolute inset-y-0 right-0 w-20 pointer-events-none"
-                style={{ background: 'linear-gradient(to right, transparent, #000)' }}
-            />
         </div>
     );
 };

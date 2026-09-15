@@ -14,7 +14,7 @@ import {
     Download,
     X,
     CheckCircle2,
-    Sparkles,
+    CalendarClock,
     Sun,
     Moon,
     Sunset,
@@ -339,7 +339,7 @@ const MyCourses = () => {
                         <div className="flex items-start justify-between border-b border-white/10 pb-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-3 rounded-2xl bg-primary/20 border border-primary/30 text-primary">
-                                    <Sparkles size={22} />
+                                    <CalendarClock size={22} />
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-bold text-white flex items-center gap-2">

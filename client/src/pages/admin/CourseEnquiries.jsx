@@ -112,34 +112,37 @@ const CourseEnquiries = () => {
 
     return (
         <div className="space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <DashboardHeading title="Course Enquiries" uniform />
-                    <p className="text-white/50 text-sm mt-2">Students who submitted the Enroll form, waiting for a counsellor follow-up</p>
+                    <p className="text-white/50 text-xs mt-1">Students who submitted the Enroll form, waiting for a counsellor follow-up</p>
                 </div>
-                <ModernButton variant="secondary" onClick={handleDownload}>
-                    <Download size={16} className="mr-2" />
-                    Download {statusFilter !== 'all' ? `(${STATUS_LABELS[statusFilter]})` : 'All'}
-                </ModernButton>
+                <button 
+                    onClick={handleDownload}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white/70 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-semibold transition-all shadow-sm self-start sm:self-auto"
+                >
+                    <Download size={13} />
+                    <span>Download {statusFilter !== 'all' ? `(${STATUS_LABELS[statusFilter]})` : 'All'}</span>
+                </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="bg-white/90 dark:bg-[#0E0B1A]/80 backdrop-blur-md p-2 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={16} />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/40 pointer-events-none" size={13} />
                     <input
                         type="text"
                         placeholder="Search by name, email, phone, course, or university..."
-                        className="w-full pl-11 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary transition-all"
+                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
+                <div className="flex bg-slate-100/90 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200/80 dark:border-white/10 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0">
                     {['all', ...STATUS_OPTIONS].map(status => (
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status)}
-                            className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${statusFilter === status ? 'bg-primary text-white' : 'text-white/40 hover:text-white/70'}`}
+                            className={`px-2.5 py-1 text-xs font-semibold rounded-md whitespace-nowrap transition-all ${statusFilter === status ? 'bg-primary text-white shadow-sm' : 'text-slate-600 dark:text-white/50 hover:text-slate-900 dark:hover:text-white'}`}
                         >
                             {status === 'all' ? 'All' : STATUS_LABELS[status]} ({statusCounts[status]})
                         </button>
@@ -157,63 +160,63 @@ const CourseEnquiries = () => {
                     <p className="text-white/30 text-sm">No enquiries found.</p>
                 </div>
             ) : (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                     {filteredEnquiries.map((enquiry) => (
-                        <GlassCard key={enquiry.id} className="!p-2.5 sm:!p-3.5">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
-                                <div className="min-w-0 sm:w-48 flex-shrink-0 space-y-0.5">
-                                    <h3 className="text-white font-semibold text-sm truncate leading-snug">{enquiry.name}</h3>
+                        <GlassCard key={enquiry.id} className="!p-2 sm:!p-2.5 hover:bg-white/[0.03] transition-colors">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                                <div className="min-w-0 sm:w-44 flex-shrink-0 space-y-0.5">
+                                    <h3 className="text-white font-semibold text-xs truncate leading-tight">{enquiry.name}</h3>
                                     {enquiry.course_name && (
-                                        <div className="flex items-center gap-1.5 text-primary text-xs font-bold min-w-0">
-                                            <BookOpen size={12} className="flex-shrink-0" />
+                                        <div className="flex items-center gap-1 text-primary text-[11px] font-semibold min-w-0">
+                                            <BookOpen size={11} className="flex-shrink-0" />
                                             <span className="truncate">{enquiry.course_name}</span>
                                         </div>
                                     )}
                                     {enquiry.university_name && (
-                                        <div className="flex items-center gap-1.5 text-white/50 text-[10px] font-bold uppercase tracking-wider min-w-0">
-                                            <Building2 size={11} className="flex-shrink-0" />
+                                        <div className="flex items-center gap-1 text-white/40 text-[10px] font-bold uppercase tracking-wider min-w-0">
+                                            <Building2 size={10} className="flex-shrink-0" />
                                             <span className="truncate">{enquiry.university_name}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="min-w-0 sm:w-52 flex-shrink-0 space-y-1 text-xs sm:border-l sm:border-white/5 sm:pl-4">
+                                <div className="min-w-0 sm:w-48 flex-shrink-0 space-y-0.5 text-[11px] sm:border-l sm:border-white/5 sm:pl-3">
                                     <a
                                         href={`mailto:${enquiry.email}`}
-                                        className="flex items-center gap-2 text-white/70 hover:text-primary transition-colors min-w-0 group"
+                                        className="flex items-center gap-1.5 text-white/60 hover:text-primary transition-colors min-w-0 group"
                                     >
-                                        <Mail size={13} className="flex-shrink-0 text-white/40 group-hover:text-primary transition-colors" />
+                                        <Mail size={11} className="flex-shrink-0 text-white/30 group-hover:text-primary transition-colors" />
                                         <span className="truncate">{enquiry.email}</span>
                                     </a>
                                     <a
                                         href={`tel:${enquiry.phone}`}
-                                        className="flex items-center gap-2 text-white/70 hover:text-primary transition-colors min-w-0 group"
+                                        className="flex items-center gap-1.5 text-white/60 hover:text-primary transition-colors min-w-0 group"
                                     >
-                                        <Phone size={13} className="flex-shrink-0 text-white/40 group-hover:text-primary transition-colors" />
+                                        <Phone size={11} className="flex-shrink-0 text-white/30 group-hover:text-primary transition-colors" />
                                         <span className="truncate">{enquiry.phone}</span>
                                     </a>
                                 </div>
 
-                                <div className="min-w-0 flex-1 sm:border-l sm:border-white/5 sm:pl-4">
+                                <div className="min-w-0 flex-1 sm:border-l sm:border-white/5 sm:pl-3">
                                     {enquiry.message ? (
-                                        <div className="flex items-start gap-1.5 text-white/50 text-xs italic">
-                                            <MessageSquare size={12} className="flex-shrink-0 mt-0.5 text-white/30" />
+                                        <div className="flex items-start gap-1 text-white/40 text-[11px] italic">
+                                            <MessageSquare size={11} className="flex-shrink-0 mt-0.5 text-white/25" />
                                             <p className="line-clamp-1">{enquiry.message}</p>
                                         </div>
                                     ) : (
-                                        <span className="text-white/20 text-xs italic">No message</span>
+                                        <span className="text-white/20 text-[11px] italic">No message</span>
                                     )}
                                 </div>
 
-                                <div className="flex items-center text-white/40 text-xs flex-shrink-0 sm:w-36 sm:border-l sm:border-white/5 sm:pl-4">
-                                    <Calendar size={12} className="mr-1.5 flex-shrink-0" />
-                                    <span className="text-[11px]">{new Date(enquiry.created_at).toLocaleString()}</span>
+                                <div className="flex items-center text-white/40 text-[11px] flex-shrink-0 sm:w-32 sm:border-l sm:border-white/5 sm:pl-3">
+                                    <Calendar size={11} className="mr-1 flex-shrink-0 text-white/30" />
+                                    <span className="truncate">{new Date(enquiry.created_at).toLocaleDateString()}</span>
                                 </div>
 
                                 <select
                                     value={enquiry.status || 'new'}
                                     onChange={(e) => handleStatusChange(enquiry.id, e.target.value)}
-                                    className={`flex-shrink-0 self-start sm:self-center text-[10px] font-bold uppercase px-2 py-1 rounded-lg border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
+                                    className={`flex-shrink-0 self-start sm:self-center text-[10px] font-bold uppercase px-2 py-0.5 rounded border focus:outline-none cursor-pointer ${STATUS_STYLES[enquiry.status] || STATUS_STYLES.new}`}
                                 >
                                     {STATUS_OPTIONS.map(s => (
                                         <option key={s} value={s} className="bg-black text-white">{STATUS_LABELS[s]}</option>

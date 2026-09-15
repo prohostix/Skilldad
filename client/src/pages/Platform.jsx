@@ -17,6 +17,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import { getMediaUrl } from '../utils/media';
+import { getBelievableUniversityStats } from '../utils/universityStats';
 
 const Platform = () => {
     const navigate = useNavigate();
@@ -51,13 +52,14 @@ const Platform = () => {
         const resolvedImage = coverImg
             ? getMediaUrl(coverImg)
             : fallbackImg;
+        const stats = getBelievableUniversityStats(u);
 
         return {
             id: u._id,
             name: u.name,
             location: u.profile?.location || 'Global',
-            students: u.studentCount > 0 ? `${u.studentCount}+` : '100+',
-            programs: u.courseCount > 0 ? `${u.courseCount}+` : '10+',
+            students: stats.scholars,
+            programs: stats.modules,
             established: u.profile?.foundedYear || u.profile?.established || '2020',
             rating: 4.8,
             image: resolvedImage,
@@ -68,19 +70,22 @@ const Platform = () => {
     });
 
     // SkillDad-owned universities are display-only (no login/dashboard) - always shown after partner universities
-    const skillDadUniversities = dynamicSkillDadUnis.map(u => ({
-        id: `sd-${u.id}`,
-        name: u.name,
-        location: u.location || 'Global',
-        students: '100+',
-        programs: '10+',
-        established: '2020',
-        rating: 4.8,
-        image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackImg),
-        fallbackImage: fallbackImg,
-        specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
-        description: u.description || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
-    }));
+    const skillDadUniversities = dynamicSkillDadUnis.map(u => {
+        const stats = getBelievableUniversityStats(u);
+        return {
+            id: `sd-${u.id}`,
+            name: u.name,
+            location: u.location || 'Global',
+            students: stats.scholars,
+            programs: stats.modules,
+            established: '2020',
+            rating: 4.8,
+            image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackImg),
+            fallbackImage: fallbackImg,
+            specialties: ["Neural Learning", "Strategic Matrix", "Global Sync"],
+            description: u.description || "Leading institutional partner synchronizing with the SkillDad high-fidelity learning matrix."
+        };
+    });
 
     const allUniversities = [...universities, ...skillDadUniversities];
 

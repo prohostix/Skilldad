@@ -132,52 +132,40 @@ const DocumentReview = () => {
                     <DashboardHeading title="Student Document Review" />
                     <p className="text-white/40 text-sm font-inter">Manage and verify learner submissions across the platform</p>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                    <ModernButton 
-                        variant={statusFilter === 'all' ? 'primary' : 'secondary'}
-                        onClick={() => setStatusFilter('all')}
-                        className="!px-3.5 !py-1.5 text-xs"
-                    >
-                        All
-                    </ModernButton>
-                    <ModernButton 
-                        variant={statusFilter === 'submitted' ? 'primary' : 'secondary'}
-                        onClick={() => setStatusFilter('submitted')}
-                        className="!px-3.5 !py-1.5 text-xs"
-                    >
-                        Pending
-                    </ModernButton>
-                    <ModernButton 
-                        variant={statusFilter === 'approved' ? 'primary' : 'secondary'}
-                        onClick={() => setStatusFilter('approved')}
-                        className="!px-3.5 !py-1.5 text-xs"
-                    >
-                        Approved
-                    </ModernButton>
-                    <ModernButton 
-                        variant={statusFilter === 'rejected' ? 'primary' : 'secondary'}
-                        onClick={() => setStatusFilter('rejected')}
-                        className="!px-3.5 !py-1.5 text-xs"
-                    >
-                        Rejected
-                    </ModernButton>
+                <div className="flex bg-slate-100/90 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200/80 dark:border-white/10 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0">
+                    {[
+                        { id: 'all', label: 'All' },
+                        { id: 'submitted', label: 'Pending' },
+                        { id: 'approved', label: 'Approved' },
+                        { id: 'rejected', label: 'Rejected' },
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setStatusFilter(tab.id)}
+                            className={`px-3 py-1 text-xs font-semibold rounded-md whitespace-nowrap transition-all ${
+                                statusFilter === tab.id
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'text-slate-600 dark:text-white/50 hover:text-slate-900 dark:hover:text-white'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            <GlassCard className="!p-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={18} />
-                        <input 
-                            type="text"
-                            placeholder="Search by student name, email or document title..."
-                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-white text-sm focus:outline-none focus:border-primary transition-all"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+            <div className="bg-white/90 dark:bg-[#0E0B1A]/80 backdrop-blur-md p-2 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-sm flex items-center">
+                <div className="relative flex-1">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/40 pointer-events-none" size={13} />
+                    <input 
+                        type="text" 
+                        placeholder="Search by student name, email or document title..."
+                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
-            </GlassCard>
+            </div>
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 space-y-4">
@@ -188,7 +176,7 @@ const DocumentReview = () => {
                 <div className="space-y-3">
                     {/* Table Header Bar */}
                     {filteredDocs.length > 0 && (
-                        <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-white/40 border-b border-white/5">
+                        <div className="hidden sm:grid grid-cols-12 gap-3 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white/50 border-b border-white/5">
                             <div className="col-span-3">Document Details</div>
                             <div className="col-span-3">Student</div>
                             <div className="col-span-2">Submitted Date</div>
@@ -200,44 +188,44 @@ const DocumentReview = () => {
                     {filteredDocs.map((doc) => (
                         <motion.div
                             layout
-                            initial={{ opacity: 0, y: 8 }}
+                            initial={{ opacity: 0, y: 4 }}
                             animate={{ opacity: 1, y: 0 }}
                             key={doc._id}
                         >
-                            <GlassCard className="p-4 hover:border-primary/30 transition-all group">
-                                <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-4">
+                            <GlassCard className="!p-2 sm:!p-2.5 hover:border-primary/30 hover:bg-white/[0.03] transition-all group">
+                                <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2.5 sm:gap-3">
                                     
                                     {/* 1. Document Info (col-span-3) */}
-                                    <div className="col-span-1 sm:col-span-3 flex items-center gap-3.5 min-w-0">
-                                        <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                                            <FileText size={20} />
+                                    <div className="col-span-1 sm:col-span-3 flex items-center gap-2.5 min-w-0">
+                                        <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                                            <FileText size={14} />
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="text-white font-bold text-sm tracking-tight truncate">{doc.title}</h3>
-                                            <p className="text-white/40 text-[10px] font-black uppercase tracking-wider mt-0.5">{doc.type}</p>
+                                            <h3 className="text-white font-semibold text-xs truncate">{doc.title}</h3>
+                                            <p className="text-white/40 text-[10px] font-bold uppercase tracking-wider mt-0.5">{doc.type}</p>
                                         </div>
                                     </div>
 
                                     {/* 2. Student Info (col-span-3) */}
-                                    <div className="col-span-1 sm:col-span-3 flex items-center gap-3 text-white/70 min-w-0">
-                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-primary/70 shrink-0">
-                                            <User size={14} />
+                                    <div className="col-span-1 sm:col-span-3 flex items-center gap-2 text-white/70 min-w-0 sm:border-l sm:border-white/5 sm:pl-2.5">
+                                        <div className="w-6 h-6 rounded bg-white/5 flex items-center justify-center text-primary/70 shrink-0">
+                                            <User size={12} />
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-xs font-bold text-white truncate">{doc.student_name || 'Student'}</p>
-                                            <p className="text-[10px] text-white/40 truncate">{doc.student_email}</p>
+                                            <p className="text-xs font-semibold text-white truncate">{doc.student_name || 'Student'}</p>
+                                            <p className="text-[11px] text-white/40 truncate">{doc.student_email}</p>
                                         </div>
                                     </div>
 
                                     {/* 3. Date & University (col-span-2) */}
-                                    <div className="col-span-1 sm:col-span-2 flex flex-col text-[11px] text-white/50 min-w-0">
-                                        <div className="flex items-center gap-1.5 font-mono">
-                                            <Calendar size={12} className="text-emerald-400/70 shrink-0" />
+                                    <div className="col-span-1 sm:col-span-2 flex flex-col text-[11px] text-white/50 min-w-0 sm:border-l sm:border-white/5 sm:pl-2.5">
+                                        <div className="flex items-center gap-1 font-mono">
+                                            <Calendar size={11} className="text-emerald-400/70 shrink-0" />
                                             <span className="truncate">{new Date(doc.created_at).toLocaleDateString()}</span>
                                         </div>
                                         {doc.university_name && (
-                                            <div className="flex items-center gap-1.5 text-[10px] text-white/40 truncate mt-0.5">
-                                                <Building2 size={12} className="text-indigo-400/70 shrink-0" />
+                                            <div className="flex items-center gap-1 text-[10px] text-white/40 truncate mt-0.5">
+                                                <Building2 size={10} className="text-indigo-400/70 shrink-0" />
                                                 <span className="truncate">{doc.university_name}</span>
                                             </div>
                                         )}
@@ -245,44 +233,40 @@ const DocumentReview = () => {
 
                                     {/* 4. Status Badge (col-span-1) */}
                                     <div className="col-span-1 flex items-center sm:justify-center">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shrink-0 ${getStatusStyle(doc.status)}`}>
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shrink-0 ${getStatusStyle(doc.status)}`}>
                                             {doc.status}
                                         </span>
                                     </div>
 
                                     {/* 5. Actions (col-span-3) */}
-                                    <div className="col-span-1 sm:col-span-3 flex items-center justify-start sm:justify-end gap-2 border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
-                                        <ModernButton 
-                                            variant="secondary" 
-                                            className="!py-2 !px-3 text-[11px] font-bold"
+                                    <div className="col-span-1 sm:col-span-3 flex items-center justify-start sm:justify-end gap-1.5 border-t sm:border-t-0 border-white/5 pt-2 sm:pt-0">
+                                        <button 
+                                            className="px-2 py-1 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded text-[11px] font-semibold border border-white/10 transition-all flex items-center gap-1"
                                             onClick={() => {
                                                 setDocToEdit(doc);
                                                 setEditForm({ title: doc.title || '', type: doc.type || '' });
                                             }}
                                         >
-                                            <Edit3 size={14} className="mr-1.5" /> Edit
-                                        </ModernButton>
-                                        <ModernButton 
-                                            variant="secondary" 
-                                            className="!py-2 !px-3 text-[11px] font-bold"
+                                            <Edit3 size={11} /> Edit
+                                        </button>
+                                        <button 
+                                            className="px-2 py-1 bg-primary/15 hover:bg-primary text-primary hover:text-white rounded text-[11px] font-semibold border border-primary/25 transition-all flex items-center gap-1"
                                             onClick={() => setSelectedDoc(doc)}
                                         >
-                                            <Eye size={14} className="mr-1.5" /> Review
-                                        </ModernButton>
+                                            <Eye size={11} /> Review
+                                        </button>
                                         {doc.file_url && (
                                             <a 
                                                 href={getMediaUrl(doc.file_url)} 
                                                 target="_blank" 
                                                 rel="noreferrer"
-                                                download
-                                                className="p-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-xl transition-all flex items-center justify-center shrink-0"
-                                                title="Download Document"
+                                                className="p-1 text-white/40 hover:text-white hover:bg-white/10 border border-white/10 rounded transition-all"
+                                                title="Open Original Document"
                                             >
-                                                <Download size={15} />
+                                                <ExternalLink size={12} />
                                             </a>
                                         )}
                                     </div>
-
                                 </div>
                             </GlassCard>
                         </motion.div>

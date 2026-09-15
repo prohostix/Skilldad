@@ -58,11 +58,11 @@ export const DEFAULT_DIAGRAM_NODES = [
         id: 'courses',
         x: 55,
         y: 100,
-        r: 13,
+        r: 22,
         label: 'Courses',
         delay: 0.3,
         iconName: 'BookOpen',
-        image: '',
+        image: '/assets/diagram_courses.jpg?v=2',
         imageFit: 'cover',
         imageBg: '',
         description: 'Industry-aligned curriculum & learning tracks'
@@ -71,11 +71,11 @@ export const DEFAULT_DIAGRAM_NODES = [
         id: 'university',
         x: 275,
         y: 80,
-        r: 13,
+        r: 22,
         label: 'University',
         delay: 0.6,
         iconName: 'Landmark',
-        image: '',
+        image: '/assets/diagram_university.jpg?v=1',
         imageFit: 'cover',
         imageBg: '',
         description: 'Global university partners & ECTS credits'
@@ -84,24 +84,24 @@ export const DEFAULT_DIAGRAM_NODES = [
         id: 'partner',
         x: 315,
         y: 245,
-        r: 13,
+        r: 22,
         label: 'Partners',
         delay: 0.9,
         iconName: 'Handshake',
-        image: '',
+        image: '/assets/diagram_partners.jpg?v=2',
         imageFit: 'cover',
         imageBg: '',
-        description: 'Corporate hiring partners & enterprises'
+        description: 'B2B course providers & enterprise training partners'
     },
     {
         id: 'ai',
         x: 45,
         y: 335,
-        r: 13,
+        r: 22,
         label: 'AI Engine',
         delay: 1.2,
         iconName: 'Bot',
-        image: '',
+        image: '/assets/diagram_ai.jpg?v=2',
         imageFit: 'cover',
         imageBg: '',
         description: 'AI LMS, smart recommendations & tracking'
@@ -110,11 +110,11 @@ export const DEFAULT_DIAGRAM_NODES = [
         id: 'cert',
         x: 225,
         y: 385,
-        r: 11,
+        r: 22,
         label: 'Certs',
         delay: 1.5,
         iconName: 'Award',
-        image: '',
+        image: '/assets/diagram_certs.jpg?v=2',
         imageFit: 'cover',
         imageBg: '',
         description: 'Verified certificates & graduation credentials'
@@ -123,11 +123,11 @@ export const DEFAULT_DIAGRAM_NODES = [
         id: 'job',
         x: 350,
         y: 355,
-        r: 11,
+        r: 22.5,
         label: 'Jobs',
         delay: 1.8,
         iconName: 'Briefcase',
-        image: '',
+        image: '/assets/diagram_jobs.jpg?v=5',
         imageFit: 'cover',
         imageBg: '',
         description: 'Placement drives & career opportunities'
@@ -136,11 +136,11 @@ export const DEFAULT_DIAGRAM_NODES = [
         id: 'student',
         x: 130,
         y: 460,
-        r: 11,
+        r: 22,
         label: 'Student',
         delay: 2.1,
         iconName: 'GraduationCap',
-        image: '',
+        image: '/assets/diagram_student.jpg?v=2',
         imageFit: 'cover',
         imageBg: '',
         description: 'Learners, candidates & alumni'
@@ -153,19 +153,22 @@ export const getMergedDiagramNodes = (customConfig = {}) => {
         if (!custom) {
             return {
                 ...defNode,
+                defaultImage: defNode.image,
                 icon: DIAGRAM_ICON_MAP[defNode.iconName] || Sparkles
             };
         }
 
         const iconName = custom.iconName || defNode.iconName;
         const iconComponent = DIAGRAM_ICON_MAP[iconName] || DIAGRAM_ICON_MAP[defNode.iconName] || Sparkles;
+        const customImg = (typeof custom.image === 'string' && custom.image.trim() !== '') ? custom.image : null;
 
         return {
             ...defNode,
             label: custom.label !== undefined && custom.label !== '' ? custom.label : defNode.label,
             iconName: iconName,
             icon: iconComponent,
-            image: custom.image !== undefined ? custom.image : defNode.image,
+            image: customImg || defNode.image,
+            defaultImage: defNode.image,
             imageFit: custom.imageFit || defNode.imageFit || 'cover',
             imageBg: custom.imageBg !== undefined ? custom.imageBg : defNode.imageBg
         };

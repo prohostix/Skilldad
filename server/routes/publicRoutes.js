@@ -85,12 +85,21 @@ router.get('/universities', async (req, res) => {
 // @access  Public
 router.get('/skilldad-universities', async (req, res) => {
     try {
+        // scholarCount counts real distinct students enrolled in any of this university's
+        // assigned_courses - these universities have no login accounts of their own, so
+        // enrollments can only be attributed to them indirectly, through their courses.
         const result = await query(`
-            SELECT id, name, location, website, phone, email, description, profile_image, cover_image, gallery,
-                   youtube_url, achievements, assigned_courses, certificates, videos
-            FROM skill_dad_universities
-            WHERE is_active = true
-            ORDER BY created_at ASC
+            SELECT su.id, su.name, su.location, su.website, su.phone, su.email, su.description,
+                   su.profile_image, su.cover_image, su.gallery, su.youtube_url, su.achievements,
+                   su.assigned_courses, su.certificates, su.videos,
+                   su.total_scholars, su.specialized_courses,
+                   (
+                       SELECT COUNT(DISTINCT e.student_id) FROM enrollments e
+                       WHERE e.course_id IN (SELECT jsonb_array_elements_text(su.assigned_courses))
+                   ) as "scholarCount"
+            FROM skill_dad_universities su
+            WHERE su.is_active = true
+            ORDER BY su.created_at ASC
         `);
         res.json(result.rows || []);
     } catch (error) {

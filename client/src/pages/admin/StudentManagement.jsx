@@ -590,55 +590,67 @@ const StudentManagement = () => {
     return (
         <div className="space-y-6 pb-20">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <DashboardHeading title="Student Management" />
                 </div>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <ModernButton variant="secondary" onClick={handleExportStudents} title="Export CSV" className="flex-1 sm:flex-none !px-3 !py-2.5">
-                        <Download size={14} className="mr-1.5" /> CSV
-                    </ModernButton>
-                    <ModernButton variant="secondary" onClick={handleExportPDF} title="Export PDF" className="flex-1 sm:flex-none !px-3 !py-2.5">
-                        <FileText size={14} className="mr-1.5" /> PDF
-                    </ModernButton>
-                    <ModernButton onClick={() => setAddStudentOpen(true)} className="w-full sm:w-auto !px-4 !py-2.5">
-                        <Plus size={16} className="mr-1.5" /> Add Student
-                    </ModernButton>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={handleExportStudents}
+                        title="Export CSV"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white/70 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                    >
+                        <Download size={13} />
+                        <span>CSV</span>
+                    </button>
+                    <button
+                        onClick={handleExportPDF}
+                        title="Export PDF"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-white/70 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                    >
+                        <FileText size={13} />
+                        <span>PDF</span>
+                    </button>
+                    <button
+                        onClick={() => setAddStudentOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold transition-all shadow-sm shadow-primary/25"
+                    >
+                        <Plus size={14} />
+                        <span>Add Student</span>
+                    </button>
                 </div>
             </div>
 
-            {/* Search & Filter Bar */}
-            <div className="flex flex-col sm:flex-row gap-2">
-                <GlassCard className="!p-2 flex-1">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                        <input
-                            type="text"
-                            placeholder="Search students by name or email..."
-                            className="w-full pl-8 pr-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </GlassCard>
-                <GlassCard className="!p-2 flex flex-row gap-2 shrink-0">
+            {/* Search & Filter Bar - Unified Toolbar */}
+            <div className="bg-white/90 dark:bg-[#0E0B1A]/80 backdrop-blur-md p-2 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col md:flex-row items-stretch md:items-center gap-2">
+                <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/40 pointer-events-none" size={13} />
+                    <input
+                        type="text"
+                        placeholder="Search students by name or email..."
+                        className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 shrink-0">
                     <select
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
-                        className="w-32 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer"
                     >
-                        <option value="all" className="bg-slate-900">All Status</option>
-                        <option value="active" className="bg-slate-900">Active</option>
-                        <option value="inactive" className="bg-slate-900">Inactive / Pending</option>
+                        <option value="all" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">All Status</option>
+                        <option value="active" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Active</option>
+                        <option value="inactive" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Inactive / Pending</option>
                     </select>
                     <select
                         value={selectedCourseId}
                         onChange={(e) => setSelectedCourseId(e.target.value)}
-                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer max-w-[140px] truncate"
                     >
-                        <option value="all" className="bg-slate-900">All Courses</option>
+                        <option value="all" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">All Courses</option>
                         {courses.map(c => (
-                            <option key={c._id} value={c._id} className="bg-slate-900">{c.title}</option>
+                            <option key={c._id} value={c._id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{c.title}</option>
                         ))}
                     </select>
                     <select
@@ -646,11 +658,11 @@ const StudentManagement = () => {
                         onChange={(e) => setSelectedBatchId(e.target.value)}
                         disabled={selectedCourseId === 'all' || batchFilterOptions.length === 0}
                         title={selectedCourseId === 'all' ? 'Select a course first to filter by batch' : ''}
-                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer max-w-[130px] truncate disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        <option value="all" className="bg-slate-900">All Batches</option>
+                        <option value="all" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">All Batches</option>
                         {batchFilterOptions.map(b => (
-                            <option key={b.id} value={b.id} className="bg-slate-900">{b.name}</option>
+                            <option key={b.id} value={b.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">{b.name}</option>
                         ))}
                     </select>
                     <select
@@ -667,55 +679,55 @@ const StudentManagement = () => {
                                 return prev;
                             });
                         }}
-                        className="w-36 bg-white/5 border border-white/10 rounded-lg text-sm text-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/50 appearance-none cursor-pointer"
+                        className="px-2.5 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg text-xs font-inter text-slate-700 dark:text-white/80 focus:outline-none focus:ring-1 focus:ring-primary/40 cursor-pointer max-w-[140px] truncate"
                     >
-                        <option value="all" className="bg-slate-900">All Universities</option>
+                        <option value="all" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">All Universities</option>
                         {universities.map(u => (
-                            <option key={u._id} value={u._id} className="bg-slate-900">
+                            <option key={u._id} value={u._id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                                 {u.profile?.universityName || u.name} {u.role === 'partner' ? '(Partner)' : ''}
                             </option>
                         ))}
                     </select>
-                </GlassCard>
+                </div>
             </div>
 
             {/* Students Table */}
-            <GlassCard className="overflow-hidden !p-0 sm:!p-6">
+            <GlassCard className="overflow-hidden !p-0 border border-slate-200/80 dark:border-white/10 shadow-sm">
                 {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-white/5 border-b border-white/10">
+                <div className="hidden md:block overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    <table className="w-full text-left">
+                        <thead className="bg-white/5 border-b border-white/5">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase">Student</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase">University / Institution</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase">Registered By</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase">Enrolled Course</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase">Enrollments</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-400 uppercase">Status</th>
-                                <th className="px-6 py-3 text-right text-xs font-bold text-gray-400 uppercase">Actions</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Student</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">University / Institution</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Registered By</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Enrolled Course</th>
+                                <th className="px-3 py-2 text-center text-[10px] font-bold text-white/50 uppercase tracking-wider">Courses</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-white/50 uppercase tracking-wider">Status</th>
+                                <th className="px-3 py-2 text-right text-[10px] font-bold text-white/50 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/10">
+                        <tbody className="divide-y divide-white/5 text-xs">
                             {filteredStudents.map((student) => (
-                                <tr key={student._id} className="hover:bg-white/5 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                                <tr key={student._id} className="hover:bg-white/[0.03] transition-colors">
+                                    <td className="px-3 py-2">
+                                        <div className="flex items-center space-x-2.5">
+                                            <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
                                                 {student.name?.charAt(0).toUpperCase()}
                                             </div>
-                                            <div className="cursor-pointer group/name" onClick={() => handleViewStudent(student)}>
-                                                <div className="text-sm font-medium text-white group-hover/name:text-primary transition-colors">{student.name}</div>
-                                                <div className="text-xs text-gray-400">ID: {student._id.slice(-6)}</div>
+                                            <div className="cursor-pointer group/name min-w-0" onClick={() => handleViewStudent(student)}>
+                                                <div className="text-xs font-semibold text-white group-hover/name:text-primary transition-colors truncate">{student.name}</div>
+                                                <div className="text-[11px] text-white/40">ID: {student._id.slice(-6)}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-sm font-medium text-white">{getUniversityName(student)}</div>
-                                        <div className="text-[10px] text-gray-500">{student.email}</div>
+                                    <td className="px-3 py-2">
+                                        <div className="text-xs font-medium text-white truncate max-w-[160px]">{getUniversityName(student)}</div>
+                                        <div className="text-[11px] text-white/40 truncate max-w-[160px]">{student.email}</div>
                                     </td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-3 py-2">
                                         <div className="flex flex-col">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border inline-block w-max mb-1.5 ${
+                                            <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border inline-block w-max mb-0.5 ${
                                                 student.connectionType === 'Course Enrolled' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' :
                                                 student.connectionType === 'Discount Code' ? 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30' :
                                                 student.connectionType === 'Directly Registered' ? 'bg-primary/20 text-primary border-primary/30' :
@@ -725,54 +737,55 @@ const StudentManagement = () => {
                                                 {student.connectionType || 'Self-registered'}
                                             </span>
                                             {student.registeredBy ? (
-                                                <div>
-                                                    <div className="text-sm font-medium text-white leading-tight">{student.registeredBy.name}</div>
-                                                    <div className="text-[10px] text-gray-500 uppercase">{student.registeredBy.role}</div>
+                                                <div className="text-[11px] text-white/60 truncate">
+                                                    <span>{student.registeredBy.name}</span>
                                                     {student.partnerCode && student.connectionType === 'Discount Code' && (
-                                                        <div className="text-[9px] text-amber-400 font-mono mt-0.5">Code: {student.partnerCode}</div>
+                                                        <span className="text-[9px] text-amber-400 font-mono ml-1">({student.partnerCode})</span>
                                                     )}
                                                 </div>
                                             ) : (
-                                                <div className="text-xs text-gray-500 italic">No Reference</div>
+                                                <div className="text-[11px] text-white/30 italic">Direct</div>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-xs text-white/70 font-medium italic">{student.course || 'No Course'}</div>
+                                    <td className="px-3 py-2">
+                                        <div className="text-xs text-white/80 font-medium truncate max-w-[150px]">{student.course || 'No Course'}</div>
                                         {student.batchName && (
-                                            <span className="inline-block mt-1 px-2 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded text-[9px] font-bold">
-                                                Batch: {student.batchName}
+                                            <span className="inline-block px-1.5 py-0.2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded text-[9px] font-semibold">
+                                                {student.batchName}
                                             </span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-white">{student.enrollmentCount || 0}</td>
-                                    <td className="px-6 py-4">
+                                    <td className="px-3 py-2 text-center text-xs text-white/80 font-semibold">{student.enrollmentCount || 0}</td>
+                                    <td className="px-3 py-2">
                                          <button
                                              onClick={() => handleToggleStudentStatus(student)}
-                                             className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95 border ${
+                                             className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all cursor-pointer border ${
                                                  student.isVerified
-                                                     ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30'
-                                                     : 'bg-rose-500/20 text-rose-400 border-rose-500/30 hover:bg-rose-500/30'
+                                                     ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25 hover:bg-emerald-500/25'
+                                                     : 'bg-rose-500/15 text-rose-400 border-rose-500/25 hover:bg-rose-500/25'
                                              }`}
                                              title={`Click to mark student as ${student.isVerified ? 'Inactive' : 'Active'}`}
                                          >
-                                             <span className={`w-1.5 h-1.5 rounded-full ${student.isVerified ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                                             <span className={`w-1.5 h-1.5 rounded-full ${student.isVerified ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                                              {student.isVerified ? 'Active' : 'Inactive'}
                                          </button>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end space-x-2">
+                                    <td className="px-3 py-2 text-right">
+                                        <div className="flex items-center justify-end space-x-1.5">
                                             <button
                                                 onClick={() => handleViewStudent(student)}
-                                                className="p-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+                                                className="p-1.5 bg-primary/10 text-primary border border-primary/20 rounded hover:bg-primary/20 transition-colors"
+                                                title="View Details"
                                             >
-                                                <Eye size={16} />
+                                                <Eye size={13} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteStudent(student._id)}
-                                                className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                                                className="p-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded hover:bg-rose-500/20 transition-colors"
+                                                title="Delete Student"
                                             >
-                                                <Trash2 size={16} />
+                                                <Trash2 size={13} />
                                             </button>
                                         </div>
                                     </td>

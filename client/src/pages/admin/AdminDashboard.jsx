@@ -190,37 +190,37 @@ const AdminDashboard = () => {
     ];
 
     return (
-        <div className="space-y-6 sm:space-y-10 animate-in fade-in duration-700 pb-20">
+        <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500 pb-20">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <DashboardHeading title="System Intelligence" />
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                     <div className="relative">
-                        <ModernButton
-                            variant="secondary"
-                            className="group"
+                        <button
+                            type="button"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setShowExportMenu(!showExportMenu);
                             }}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:border-primary/40 hover:text-primary transition-all shadow-sm group"
                         >
-                            <Download size={18} className="mr-2 group-hover:translate-y-0.5 transition-transform" />
-                            Export Analytics
-                            <ChevronDown size={16} className="ml-2" />
-                        </ModernButton>
+                            <Download size={13} className="group-hover:translate-y-0.5 transition-transform" />
+                            <span>Export Analytics</span>
+                            <ChevronDown size={13} />
+                        </button>
 
                         {showExportMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-[100] overflow-hidden">
+                            <div className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-[#0E0B1A] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl z-[100] overflow-hidden py-1">
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleExportAnalytics('csv');
                                     }}
-                                    className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/5 transition-colors flex items-center space-x-3"
+                                    className="w-full px-3.5 py-2 text-left text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center space-x-2.5 font-inter"
                                 >
-                                    <FileSpreadsheet size={16} className="text-primary" />
+                                    <FileSpreadsheet size={14} className="text-primary" />
                                     <span>Export as CSV</span>
                                 </button>
                                 <button
@@ -228,9 +228,9 @@ const AdminDashboard = () => {
                                         e.stopPropagation();
                                         handleExportAnalytics('excel');
                                     }}
-                                    className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/5 transition-colors flex items-center space-x-3"
+                                    className="w-full px-3.5 py-2 text-left text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center space-x-2.5 font-inter"
                                 >
-                                    <FileSpreadsheet size={16} className="text-primary" />
+                                    <FileSpreadsheet size={14} className="text-primary" />
                                     <span>Export as Excel</span>
                                 </button>
                                 <button
@@ -238,9 +238,9 @@ const AdminDashboard = () => {
                                         e.stopPropagation();
                                         handleExportAnalytics('pdf');
                                     }}
-                                    className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/5 transition-colors flex items-center space-x-3"
+                                    className="w-full px-3.5 py-2 text-left text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors flex items-center space-x-2.5 font-inter"
                                 >
-                                    <FileText size={16} className="text-primary" />
+                                    <FileText size={14} className="text-primary" />
                                     <span>Export as PDF</span>
                                 </button>
                             </div>
@@ -249,58 +249,69 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
-            {/* Matrix Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3">
+            {/* Matrix Stats Grid: perfectly balanced 4x2 grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
                 {widgetStats.map((item, i) => (
                     <motion.div
                         key={i}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
+                        transition={{ delay: i * 0.04 }}
+                        className="h-full"
                     >
-                        <GlassCard className="hover:border-primary/40 hover:shadow-glow-purple group relative overflow-hidden !p-3">
+                        <div className="group relative h-full bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col justify-between overflow-hidden">
                             <div
-                                className="absolute top-0 right-0 w-16 h-16 -mr-8 -mt-8 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700 opacity-20"
+                                className="absolute top-0 right-0 w-14 h-14 -mr-7 -mt-7 rounded-full blur-xl pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity"
                                 style={{ backgroundColor: item.color }}
-                            ></div>
+                            />
 
-                            <div className="flex justify-between items-start mb-3 relative z-10">
+                            <div className="flex justify-between items-start relative z-10 mb-2">
                                 <div
-                                    className="p-2 rounded-xl group-hover:scale-110 transition-transform duration-300 border"
+                                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
                                     style={{
-                                        backgroundColor: `${item.color}20`,
-                                        color: item.color,
-                                        borderColor: `${item.color}30`
+                                        backgroundColor: `${item.color}15`,
+                                        color: item.color
                                     }}
                                 >
-                                    <item.icon size={18} />
+                                    <item.icon size={15} />
                                 </div>
-                                <div className="flex items-center space-x-1 text-primary font-bold text-[11px] bg-primary/10 backdrop-blur-sm px-1.5 py-0.5 rounded-lg border border-primary/30">
-                                    <TrendingUp size={9} />
+                                <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold font-inter ${
+                                    item.trend.startsWith('+')
+                                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                        : 'bg-primary/10 text-primary dark:text-primary-light border border-primary/20'
+                                }`}>
+                                    {item.trend.startsWith('+') && <TrendingUp size={10} />}
                                     <span>{item.trend}</span>
                                 </div>
                             </div>
 
                             <div className="text-left relative z-10">
-                                <p className="text-white/50 text-[9px] font-bold uppercase tracking-[0.2em] font-inter opacity-70 mb-1">{item.title}</p>
-                                <p className="text-lg sm:text-xl font-black text-white font-jakarta">{item.value}</p>
+                                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter tracking-normal mb-0.5">
+                                    {item.title}
+                                </p>
+                                <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">
+                                    {item.value}
+                                </p>
                             </div>
-                        </GlassCard>
+                        </div>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Enrollment Momentum - full width, no longer sharing a grid row with Live Pulse */}
+            {/* Enrollment Momentum */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-white/5 rounded-3xl p-1"
+                transition={{ delay: 0.25 }}
+                className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm"
             >
-                <div className="h-[400px] w-full">
+                <div className="mb-4">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-inter">Enrollment Momentum</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-inter mt-0.5">Last 7 Days</p>
+                </div>
+                <div className="h-[280px] sm:h-[340px] w-full">
                     <ChartCard
-                        title="Enrollment Momentum"
-                        subtitle="Last 7 Days"
+                        noCard
                         data={displayChartData}
                         type="area"
                         color="#5B5CFF"
@@ -308,16 +319,17 @@ const AdminDashboard = () => {
                 </div>
             </motion.div>
 
-            {/* Live Pulse - its own full-width row instead of being squeezed under/beside the graph */}
+            {/* Live Pulse */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.35 }}
             >
-                <GlassCard className="flex flex-col">
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-base font-semibold text-white font-poppins flex items-center">
-                            <Activity size={18} className="mr-2 text-primary" /> Live Pulse
+                <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm flex flex-col">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white font-inter flex items-center gap-2">
+                            <Activity size={15} className="text-primary" />
+                            <span>Live Pulse</span>
                         </h2>
                         <span className="flex h-2 w-2 relative">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -325,21 +337,21 @@ const AdminDashboard = () => {
                         </span>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         {(stats.recentActivities && stats.recentActivities.length > 0 ? stats.recentActivities : [
                             { user: 'Sarah Jenkins', action: 'Enrolled in Python Masterclass', time: '2m ago', initial: 'SJ' },
                             { user: 'Tech University', action: 'Added 50 new seats', time: '1h ago', initial: 'TU' },
                             { user: 'Marcus Thorne', action: 'Certificate generated', time: '5h ago', initial: 'MT' },
                             { user: 'Fin Global', action: 'Payout approved', time: '1d ago', initial: 'FG' },
                         ]).map((activity, i) => (
-                            <div key={i} className="flex items-center space-x-4 group cursor-pointer">
-                                <div className="w-10 h-10 rounded-xl bg-white/5 flex-shrink-0 flex items-center justify-center text-xs font-bold text-white/50 border border-white/10 group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                            <div key={i} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-slate-200/60 dark:hover:border-white/5">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center text-xs font-bold font-inter border border-primary/20">
                                     {activity.initial}
                                 </div>
                                 <div className="flex-1 min-w-0 text-left">
-                                    <p className="text-sm font-bold text-white truncate group-hover:text-primary transition-colors">{activity.user}</p>
-                                    <p className="text-xs text-white/50 truncate">{activity.action}</p>
-                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-tighter whitespace-nowrap">{activity.time}</span>
+                                    <p className="text-xs font-semibold text-slate-900 dark:text-white truncate font-inter">{activity.user}</p>
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate font-inter">{activity.action}</p>
+                                    <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 whitespace-nowrap font-inter">{activity.time}</span>
                                 </div>
                             </div>
                         ))}
@@ -347,54 +359,54 @@ const AdminDashboard = () => {
 
                     <button
                         onClick={() => toast.success('Activity logs fetched for the last 30 days')}
-                        className="w-full mt-8 py-3 text-xs font-bold text-primary hover:bg-primary/10 rounded-xl border border-dashed border-primary/30 transition-all uppercase tracking-widest"
+                        className="w-full mt-4 py-2 text-xs font-semibold text-primary hover:bg-primary/10 rounded-lg border border-dashed border-primary/30 transition-all font-inter"
                     >
                         Comprehensive Logs
                     </button>
-                </GlassCard>
+                </div>
             </motion.div>
 
-            {/* Infrastructure Status - its own full-width row so it isn't squeezed
-                to the bottom of the taller Live Pulse column and cut off by the footer */}
+            {/* Infrastructure Status */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.45 }}
             >
-                <GlassCard className="bg-transparent border-primary/20">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="font-semibold text-white flex items-center">
-                            <Shield size={18} className="mr-2 text-primary" /> Infrastructure
+                <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white font-inter flex items-center gap-2">
+                            <Shield size={15} className="text-primary" />
+                            <span>Infrastructure</span>
                         </h3>
-                        <MoreVertical size={16} className="text-white/50" />
+                        <MoreVertical size={14} className="text-slate-400 dark:text-slate-500" />
                     </div>
-                    <div className="grid sm:grid-cols-2 gap-6 text-left">
-                        <div className="space-y-2">
-                            <div className="flex justify-between items-center text-xs">
-                                <span className="text-white/50 font-bold uppercase tracking-widest">Database Size (Allocated)</span>
-                                <span className="font-bold text-primary">{stats.dbSize}</span>
+                    <div className="grid sm:grid-cols-2 gap-4 text-left">
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-xs font-inter">
+                                <span className="text-slate-500 dark:text-slate-400 font-medium">Database Size (Allocated)</span>
+                                <span className="font-semibold text-primary">{stats.dbSize}</span>
                             </div>
-                            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
+                            <div className="w-full h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden border border-slate-200/80 dark:border-white/10">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: '100%' }}
                                     transition={{ duration: 2, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-r from-primary via-primary-light to-primary-dark rounded-full shadow-glow-purple"
+                                    className="h-full bg-primary rounded-full"
                                 />
                             </div>
                         </div>
-                        <div className="flex items-center space-x-3 text-[10px] text-white/50 font-inter">
-                            <div className="flex items-center">
-                                <span className="w-2 h-2 rounded-full bg-primary mr-2 shadow-glow-purple"></span>
-                                API: Healthy
+                        <div className="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400 font-inter">
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span>API: Healthy</span>
                             </div>
-                            <div className="flex items-center">
-                                <span className="w-2 h-2 rounded-full bg-primary mr-2 shadow-glow-purple"></span>
-                                DB: {stats.dbSize ? 'Active' : 'Optimized'}
+                            <div className="flex items-center gap-1.5">
+                                <span className="w-2 h-2 rounded-full bg-primary"></span>
+                                <span>DB: {stats.dbSize ? 'Active' : 'Optimized'}</span>
                             </div>
                         </div>
                     </div>
-                </GlassCard>
+                </div>
             </motion.div>
         </div>
     );

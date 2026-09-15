@@ -70,6 +70,7 @@ const Navbar = ({ compact = false }) => {
         { name: 'Universities', href: '/platform' },
         { name: 'Services', href: '/services' },
         { name: 'About Us', href: '/about' },
+        { name: 'Job Alerts', href: '/job-alerts' },
     ];
 
     // Helper to get dashboard link based on role

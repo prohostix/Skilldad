@@ -403,38 +403,41 @@ const UserList = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div className="text-left">
                     <DashboardHeading title="User Directory" />
                 </div>
-                <ModernButton onClick={() => setShowInviteModal(true)}>
-                    <UserPlus size={20} className="mr-2" /> Invite User
-                </ModernButton>
+                <button
+                    onClick={() => setShowInviteModal(true)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold transition-all shadow-sm shadow-primary/25 self-start md:self-auto"
+                >
+                    <UserPlus size={14} /> <span>Invite User</span>
+                </button>
             </div>
 
-            <GlassCard className="!p-0 overflow-hidden">
-                <div className="p-6 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <GlassCard className="!p-0 overflow-hidden border border-slate-200/80 dark:border-white/10 shadow-sm">
+                <div className="p-2.5 sm:p-3 border-b border-slate-200/80 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-2.5">
                     <div className="relative max-w-sm w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-white/40 pointer-events-none" size={13} />
                         <input
                             type="text"
                             placeholder="Search name or email..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-inter text-white placeholder-white/40"
+                            className="w-full pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all font-inter text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2.5">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center space-x-2 px-4 py-2 border rounded-xl transition-colors font-inter text-sm font-medium ${showFilters ? 'bg-primary/20 border-primary text-primary' : 'border-white/10 text-white/70 hover:bg-white/5'
+                            className={`flex items-center space-x-1.5 px-2.5 py-1.5 border rounded-lg transition-colors font-inter text-xs font-medium ${showFilters ? 'bg-primary/20 border-primary text-primary' : 'border-slate-200 dark:border-white/10 text-slate-700 dark:text-white/70 hover:bg-slate-100 dark:hover:bg-white/5'
                                 }`}
                         >
-                            <Filter size={16} />
-                            <span>More Filters</span>
+                            <Filter size={13} />
+                            <span>Filters</span>
                         </button>
-                        <div className="h-4 w-px bg-white/10" />
-                        <span className="text-sm font-medium text-white/70 font-inter">{filteredUsers.length} Users total</span>
+                        <div className="h-3.5 w-px bg-slate-200 dark:bg-white/10" />
+                        <span className="text-xs font-medium text-slate-500 dark:text-white/50 font-inter">{filteredUsers.length} total</span>
                     </div>
                 </div>
 
@@ -442,146 +445,140 @@ const UserList = () => {
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
-                        className="p-6 bg-white/[0.02] border-b border-white/10 grid grid-cols-1 md:grid-cols-3 gap-6"
+                        className="p-3 bg-slate-50/70 dark:bg-white/[0.02] border-b border-slate-200/80 dark:border-white/10 grid grid-cols-1 md:grid-cols-3 gap-3"
                     >
-                        <div className="space-y-2">
-                            <label className="text-xs font-semibold text-white/40 uppercase tracking-wider">Role</label>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-wider">Role</label>
                             <select
                                 value={filters.role}
                                 onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-primary/40"
+                                className="w-full bg-white dark:bg-[#0B0F1A] border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
                             >
-                                <option value="all" className="bg-[#0B0F1A]">All Roles</option>
-                                <option value="student" className="bg-[#0B0F1A]">Student</option>
-                                <option value="university" className="bg-[#0B0F1A]">University</option>
-                                <option value="partner" className="bg-[#0B0F1A]">Partner</option>
-                                <option value="sales" className="bg-[#0B0F1A]">Sales</option>
-                                <option value="admin" className="bg-[#0B0F1A]">Admin</option>
-                                <option value="finance" className="bg-[#0B0F1A]">Finance</option>
+                                <option value="all">All Roles</option>
+                                <option value="student">Student</option>
+                                <option value="university">University</option>
+                                <option value="partner">Partner</option>
+                                <option value="sales">Sales</option>
+                                <option value="admin">Admin</option>
+                                <option value="finance">Finance</option>
                             </select>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-semibold text-white/40 uppercase tracking-wider">Verification Status</label>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-wider">Verification Status</label>
                             <select
                                 value={filters.status}
                                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-primary/40"
+                                className="w-full bg-white dark:bg-[#0B0F1A] border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
                             >
-                                <option value="all" className="bg-[#0B0F1A]">All Statuses</option>
-                                <option value="verified" className="bg-[#0B0F1A]">Verified Only</option>
-                                <option value="pending" className="bg-[#0B0F1A]">Pending Only</option>
+                                <option value="all">All Statuses</option>
+                                <option value="verified">Verified Only</option>
+                                <option value="pending">Pending Only</option>
                             </select>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-semibold text-white/40 uppercase tracking-wider">Sort By</label>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 dark:text-white/40 uppercase tracking-wider">Sort By</label>
                             <select
                                 value={filters.sortBy}
                                 onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-primary/40"
+                                className="w-full bg-white dark:bg-[#0B0F1A] border border-slate-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-1 focus:ring-primary/40"
                             >
-                                <option value="newest" className="bg-[#0B0F1A]">Newest First</option>
-                                <option value="name-asc" className="bg-[#0B0F1A]">Name (A-Z)</option>
-                                <option value="name-desc" className="bg-[#0B0F1A]">Name (Z-A)</option>
+                                <option value="newest">Newest First</option>
+                                <option value="name-asc">Name (A-Z)</option>
+                                <option value="name-desc">Name (Z-A)</option>
                             </select>
-                        </div>
-                        <div className="flex items-end">
-                            <button
-                                onClick={() => setFilters({ role: 'all', status: 'all', sortBy: 'newest' })}
-                                className="text-xs font-semibold text-white/30 hover:text-white uppercase tracking-widest transition-colors mb-2"
-                            >
-                                Reset Filters
-                            </button>
                         </div>
                     </motion.div>
                 )}
 
                 {/* Desktop Table View */}
-                <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full text-left font-inter">
-                        <thead className="bg-white/5 text-white/70 text-xs uppercase tracking-wider font-semibold">
+                <div className="hidden md:block overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    <table className="w-full text-left font-inter table-fixed">
+                        <thead className="bg-white/5 text-white/50 text-[10px] uppercase tracking-wider font-bold border-b border-white/5">
                             <tr>
-                                <th className="px-6 py-4">User</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Current Role</th>
-                                <th className="px-6 py-4">Actions</th>
+                                <th className="px-3.5 py-2.5 w-[38%]">User</th>
+                                <th className="px-3.5 py-2.5 w-[16%]">Status</th>
+                                <th className="px-3.5 py-2.5 w-[18%]">Current Role</th>
+                                <th className="px-3.5 py-2.5 w-[28%] text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/10 text-sm">
+                        <tbody className="divide-y divide-white/5 text-xs">
                             {filteredUsers.map((user) => (
-                                <tr key={user._id} className="hover:bg-primary/[0.05] transition-colors group">
-                                    <td className="px-6 py-6">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 overflow-hidden shadow-sm">
-                                                <img src={`https://ui-avatars.com/api/?name=${user.name}&background=random`} alt="" />
+                                <tr key={user._id} className="hover:bg-white/[0.03] transition-colors group">
+                                    <td className="px-3.5 py-2">
+                                        <div className="flex items-center space-x-2.5 min-w-0">
+                                            <div className="w-7 h-7 rounded-lg bg-white/10 border border-white/20 overflow-hidden shadow-sm shrink-0">
+                                                <img src={`https://ui-avatars.com/api/?name=${user.name}&background=random`} alt="" className="w-full h-full object-cover" />
                                             </div>
-                                            <div className="text-left">
-                                                <p className="font-bold text-white">{user.name}</p>
-                                                {user.profile?.universityName && (
-                                                    <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] leading-none mt-1">
-                                                        {user.profile.universityName}
-                                                    </p>
-                                                )}
-                                                <p className="text-xs text-white/50 flex items-center font-medium mt-1">
-                                                    <Mail size={12} className="mr-1" /> {user.email}
-                                                </p>
-                                                {user.profile?.phone && (
-                                                    <p className="text-[10px] text-white/40 flex items-center mt-1">
-                                                        <span className="mr-1.5 opacity-50">📞</span> {user.profile.phone}
-                                                    </p>
-                                                )}
-
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-semibold text-xs text-white truncate">{user.name}</p>
+                                                    {user.profile?.universityName && (
+                                                        <span className="text-[9px] font-bold text-primary uppercase tracking-wider truncate max-w-[140px]">
+                                                            • {user.profile.universityName}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-3 text-[11px] text-white/40 mt-0.5">
+                                                    <span className="truncate flex items-center gap-1">
+                                                        <Mail size={11} className="shrink-0 text-white/30" /> {user.email}
+                                                    </span>
+                                                    {user.profile?.phone && (
+                                                        <span className="shrink-0 flex items-center gap-1">
+                                                            <span className="opacity-40">📞</span> {user.profile.phone}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-6">
-                                        <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase transition-all w-fit ${user.isVerified
-                                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                    <td className="px-3.5 py-2">
+                                        <div className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${user.isVerified
+                                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'
+                                            : 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
                                             }`}>
-                                            {user.isVerified ? <CheckCircle size={12} /> : <XCircle size={12} />}
+                                            {user.isVerified ? <CheckCircle size={10} /> : <XCircle size={10} />}
                                             <span>{user.isVerified ? 'Verified' : 'Pending'}</span>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-6">
-                                        <span className="px-3 py-1.5 bg-primary/20 text-primary border border-primary/30 rounded-lg text-xs font-bold uppercase">
+                                    <td className="px-3.5 py-2">
+                                        <span className="px-2 py-0.5 bg-primary/15 text-primary border border-primary/25 rounded text-[11px] font-bold uppercase tracking-wide">
                                             {user.role}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-6">
-                                         <div className="flex items-center gap-2">
+                                    <td className="px-3.5 py-2 text-right">
+                                         <div className="inline-flex items-center justify-end gap-1.5">
                                              {user.isVerified ? (
                                                  <button
                                                      onClick={() => openPermissionModal(user)}
-                                                     className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-bold hover:bg-emerald-500/20 transition-all flex items-center gap-1.5 shadow-sm"
+                                                     className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-[11px] font-semibold hover:bg-emerald-500/20 transition-all flex items-center gap-1 shadow-sm"
                                                      title="Permission Approved. Click to edit role."
                                                  >
-                                                     <CheckCircle size={14} className="text-emerald-400" />
-                                                     Approved
+                                                     <CheckCircle size={12} className="text-emerald-400" />
+                                                     <span>Approved</span>
                                                  </button>
                                              ) : (
                                                  <button
                                                      onClick={() => openPermissionModal(user)}
-                                                     className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500/30 transition-all flex items-center gap-1 shadow-sm"
+                                                     className="px-2 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded text-[11px] font-semibold hover:bg-emerald-500/30 transition-all flex items-center gap-1 shadow-sm"
                                                  >
-                                                     <ShieldCheck size={14} />
-                                                     Grant Permission
+                                                     <ShieldCheck size={12} />
+                                                     <span>Grant</span>
                                                  </button>
                                              )}
                                              {user.isVerified && user.role !== 'student' && (
                                                  <button
                                                      onClick={() => handleRevokePermission(user)}
-                                                     className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all"
+                                                     className="px-2 py-1 bg-rose-500/15 text-rose-400 border border-rose-500/25 rounded text-[11px] font-semibold hover:bg-rose-500/25 transition-all"
                                                  >
                                                      Revoke
                                                  </button>
                                              )}
                                              <button
                                                  onClick={() => handleDeleteUser(user)}
-                                                 className="px-3 py-1.5 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg text-xs font-bold hover:bg-red-500/30 transition-all flex items-center gap-1"
+                                                 className="p-1.5 text-white/40 hover:text-rose-400 hover:bg-rose-500/10 rounded transition-all"
                                                  title="Delete User"
                                              >
-                                                 <Trash2 size={14} />
-                                                 Delete
+                                                 <Trash2 size={13} />
                                              </button>
                                          </div>
                                     </td>
