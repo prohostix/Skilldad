@@ -271,10 +271,10 @@ const Register = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-sm relative z-10 my-auto"
+                className="w-full max-w-[21rem] relative z-10 my-auto"
             >
                 <div className="text-center mb-3">
-                    <h1 className="text-2xl md:text-3xl font-black text-primary tracking-tight font-jakarta">Welcome to SkillDad</h1>
+                    <h1 className="text-xl md:text-2xl font-black text-primary tracking-tight font-jakarta whitespace-nowrap">Welcome to SkillDad</h1>
                     <p className="text-xs text-white/60 [.light-mode_&]:!text-slate-500 mt-1 font-inter max-w-sm mx-auto leading-relaxed">
                         Create your account and start your journey toward a job-assured career.
                     </p>
@@ -533,10 +533,11 @@ const Register = () => {
 // Right-panel visual for the registration split-screen — full uncropped image showing 100% of top and bottom
 const CareerVisualPanel = () => (
     <div className="h-full flex items-start justify-end overflow-hidden">
-        <img 
-            src={jobIllustration} 
-            alt="The key to your bright future — SkillDad" 
-            className="h-full w-auto max-h-screen object-contain object-right-top block select-none" 
+        <img
+            src={jobIllustration}
+            alt="The key to your bright future — SkillDad"
+            className="h-full w-auto max-h-screen object-contain object-right-top block select-none"
+            style={{ transform: 'scaleX(0.93)', transformOrigin: 'right top' }}
         />
     </div>
 );
