@@ -503,7 +503,7 @@ const NetworkDiagram = ({ customNodesConfig }) => {
 
     return (
         <div
-            className="absolute -left-28 sm:-left-10 lg:left-0 top-[40%] sm:top-[36%] md:top-[34%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
+            className="absolute -left-16 sm:-left-10 lg:left-0 top-[40%] sm:top-[36%] md:top-[34%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-55 sm:scale-65 md:scale-75 xl:scale-100 origin-left opacity-35 sm:opacity-50 md:opacity-80 lg:opacity-100"
             style={{ width: 420, height: 500 }}
         >
             <div
