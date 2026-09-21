@@ -668,7 +668,7 @@ const HeroSection = () => {
                         <div
                             role="heading"
                             aria-level="1"
-                            className="text-[36px] xs:text-[42px] sm:text-[50px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-tight mb-4 font-jakarta px-4 sm:px-0 text-left md:text-center"
+                            className="text-[36px] sm:text-[50px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-tight mb-4 font-jakarta px-4 sm:px-0 text-left md:text-center"
                         >
                             <span
                                 className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary"
@@ -682,7 +682,7 @@ const HeroSection = () => {
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-[14.5px] sm:text-xl text-text-secondary mb-8 max-w-[280px] xs:max-w-[320px] sm:max-w-3xl font-inter leading-[1.6] px-4 sm:px-0 text-left md:text-center mx-0 md:mx-auto">
+                        <p className="text-[14.5px] sm:text-xl text-text-secondary mb-8 max-w-[280px] sm:max-w-3xl font-inter leading-[1.6] px-4 sm:px-0 text-left md:text-center mx-0 md:mx-auto">
                             A collaborative venture initiated by <span className="text-primary font-semibold">IITians</span> and leading job providers in India, in partnership with reputed universities across the world.
                         </p>
 

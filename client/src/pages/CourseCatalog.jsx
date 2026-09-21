@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -155,6 +155,20 @@ const CourseCatalog = () => {
         sessionStorage.setItem('catalogProgramType', programType);
     }, [programType]);
 
+    // Reset the university/partner filter whenever the tab (Skill Courses / SIDP /
+    // WBL abroad / WBL domestic) changes, since the provider list is now scoped
+    // per-tab - a provider selected under one tab may not exist under another,
+    // which would otherwise silently zero out the results. Skipped on the very
+    // first render so a persisted selection from sessionStorage isn't clobbered.
+    const isFirstProgramTypeRender = useRef(true);
+    useEffect(() => {
+        if (isFirstProgramTypeRender.current) {
+            isFirstProgramTypeRender.current = false;
+            return;
+        }
+        setSelectedUniversity('All');
+    }, [programType]);
+
     useEffect(() => {
         sessionStorage.setItem('catalogUniversity', selectedUniversity);
     }, [selectedUniversity]);
@@ -265,9 +279,13 @@ const CourseCatalog = () => {
 
     const universities = useMemo(() => {
         if (isFixedUniversity) return []; // No need to show filter if pinned
-        const allUnis = courses.map(course => course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad');
+        // Scope the provider list to only the universities/partners that actually
+        // have courses under the currently selected tab (Skill Courses / SIDP /
+        // WBL abroad / WBL domestic), instead of every provider platform-wide.
+        const coursesInTab = courses.filter(course => (course.programType || course.program_type || 'course') === programType);
+        const allUnis = coursesInTab.map(course => course.universityName || course.instructor?.profile?.universityName || course.instructor?.name || 'SkillDad');
         return ['All', ...new Set(allUnis.filter(Boolean))];
-    }, [courses, isFixedUniversity]);
+    }, [courses, isFixedUniversity, programType]);
 
     return (
         <div className="min-h-screen course-catalog-page bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] relative overflow-hidden">
@@ -305,14 +323,14 @@ const CourseCatalog = () => {
                             )}
 
                             <div className="flex justify-center mt-6 w-full px-4 md:px-0">
-                                <div className="flex flex-wrap items-center justify-center gap-2 md:gap-1 md:bg-white/5 md:border md:border-white/10 md:p-1 md:rounded-2xl w-full md:w-auto pb-2 md:pb-0">
+                                <div className="grid grid-cols-2 md:flex md:flex-wrap items-stretch md:items-center justify-center gap-2 md:gap-1 md:bg-white/5 md:border md:border-white/10 md:p-1 md:rounded-2xl w-full md:w-auto pb-2 md:pb-0">
                                     <button
                                         onClick={() => {
                                             setProgramType('course');
                                             setShowAllMobile(false);
                                         }}
                                         style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
-                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'course'
+                                        className={`w-full md:w-auto whitespace-normal md:flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'course'
                                             ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
@@ -325,7 +343,7 @@ const CourseCatalog = () => {
                                             setShowAllMobile(false);
                                         }}
                                         style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
-                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'degree_programme'
+                                        className={`w-full md:w-auto whitespace-normal md:flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'degree_programme'
                                             ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
@@ -338,7 +356,7 @@ const CourseCatalog = () => {
                                             setShowAllMobile(false);
                                         }}
                                         style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
-                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType.startsWith('wbl')
+                                        className={`w-full md:w-auto whitespace-normal md:flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType.startsWith('wbl')
                                             ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
@@ -351,7 +369,7 @@ const CourseCatalog = () => {
                                             setShowAllMobile(false);
                                         }}
                                         style={{ fontSize: '9px', fontFamily: 'Inter, sans-serif' }}
-                                        className={`w-auto whitespace-normal flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'study_abroad'
+                                        className={`w-full md:w-auto whitespace-normal md:flex-auto px-1.5 md:px-6 py-1.5 md:py-2.5 rounded-lg md:rounded-xl font-medium md:font-black md:text-xs uppercase tracking-normal md:tracking-widest transition-all duration-300 ${programType === 'study_abroad'
                                             ? 'bg-primary text-white border border-transparent shadow-[0_0_20px_rgba(110,40,255,0.3)]'
                                             : 'text-white/50 hover:text-white bg-white/5 border border-white/10 md:bg-transparent md:border-transparent'
                                             }`}
@@ -417,24 +435,27 @@ const CourseCatalog = () => {
                                     className={`relative group transition-all duration-500 ${isSearchFocused ? 'scale-[1.01]' : 'scale-100'} flex-1 cursor-text`}
                                     onClick={() => document.getElementById('catalog-search')?.focus()}
                                 >
-                                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-primary transition-colors">
-                                        <Search size={16} />
+                                    <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                                    <div className="relative flex items-center">
+                                        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+                                            <Search size={16} />
+                                        </div>
+                                        <input
+                                            id="catalog-search"
+                                            type="text"
+                                            placeholder="Search by tech, track, or instructor..."
+                                            className="w-full pl-9 pr-4 py-2.5 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-slate-200 rounded-2xl text-xs placeholder:text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
+                                            value={filter}
+                                            onChange={(e) => setFilter(e.target.value)}
+                                            onFocus={() => setIsSearchFocused(true)}
+                                            onBlur={() => {
+                                                // Delay blurring to allow Clear Search button to be clicked
+                                                setTimeout(() => {
+                                                    if (!filter) setIsSearchFocused(false);
+                                                }, 200);
+                                            }}
+                                        />
                                     </div>
-                                    <input
-                                        id="catalog-search"
-                                        type="text"
-                                        placeholder="Search by tech, track, or instructor..."
-                                        className="w-full pl-10 pr-4 py-2.5 md:py-3.5 bg-white/[0.04] backdrop-blur-2xl shadow-2xl rounded-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all font-inter text-white placeholder:text-white/20 font-medium text-xs md:text-sm"
-                                        value={filter}
-                                        onChange={(e) => setFilter(e.target.value)}
-                                        onFocus={() => setIsSearchFocused(true)}
-                                        onBlur={() => {
-                                            // Delay blurring to allow Clear Search button to be clicked
-                                            setTimeout(() => {
-                                                if (!filter) setIsSearchFocused(false);
-                                            }, 200);
-                                        }}
-                                    />
                                 </div>
                                 {/* University Filter - same row as search on desktop */}
                                 {!isFixedUniversity && universities.length > 2 && (
@@ -444,16 +465,16 @@ const CourseCatalog = () => {
                                             onChange={setSelectedUniversity}
                                             options={universities}
                                             align="right"
-                                            className="bg-white/5 border border-white/10 hover:border-primary/30 rounded-xl pl-4 pr-3 py-2.5 md:py-3.5 text-white/80 focus:border-primary/50 focus:outline-none transition-all font-inter text-xs md:text-sm shadow-xl min-w-[160px] max-w-[220px]"
+                                            className="bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-slate-200 hover:border-primary/30 rounded-2xl pl-4 pr-3 py-2.5 text-gray-900 dark:text-white/80 focus:border-primary/50 focus:outline-none transition-all font-inter text-xs shadow-sm min-w-[160px] max-w-[220px]"
                                         />
                                     </div>
                                 )}
 
                                 <button
                                     onClick={() => setIsMobileFilterOpen(true)}
-                                    className="md:hidden p-3.5 bg-white/[0.03] backdrop-blur-xl shadow-xl rounded-2xl border border-white/10 text-white/70 hover:text-white transition-colors flex shrink-0 items-center justify-center relative"
+                                    className="md:hidden p-2.5 bg-white/5 [.light-mode_&]:!bg-white shadow-sm rounded-2xl border border-white/10 [.light-mode_&]:!border-slate-200 text-gray-400 hover:text-primary transition-colors flex shrink-0 items-center justify-center relative"
                                 >
-                                    <Filter size={20} />
+                                    <Filter size={18} />
                                     {selectedUniversity !== 'All' && (
                                         <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-primary border border-[#0A0714]"></span>
                                     )}
@@ -523,39 +544,33 @@ const CourseCatalog = () => {
                         </>
                     )}
 
-                    {/* Study Abroad Section placed after Work-Based Learning */}
-                    {programType.startsWith('wbl') && !filter && (
-                        <div className="mt-20 pt-16 border-t border-white/10">
-                            <StudyAbroad isEmbedded={true} />
-                        </div>
-                    )}
                 </div>
 
                 {/* Enquiry & FAQ Section */}
-                <div className="max-w-[1400px] mx-auto mt-16 md:mt-40 grid lg:grid-cols-2 gap-12 md:gap-24">
-                    <div className="space-y-16">
-                        <div className="text-left space-y-6">
-                            <div className="w-20 h-1 bg-gradient-to-r from-primary to-transparent mb-8"></div>
-                            <h2 className="text-5xl font-black text-white font-space leading-tight">Course Intelligence</h2>
-                            <p className="text-text-muted text-xl leading-relaxed font-inter max-w-xl">
+                <div className="max-w-[1400px] mx-auto mt-12 md:mt-24 grid lg:grid-cols-2 gap-8 md:gap-14">
+                    <div className="space-y-8 md:space-y-10">
+                        <div className="text-left space-y-4">
+                            <div className="w-16 h-1 bg-gradient-to-r from-primary to-transparent mb-4"></div>
+                            <h2 className="text-2xl md:text-3xl font-bold text-white font-space leading-tight">Course Intelligence</h2>
+                            <p className="text-text-muted text-sm md:text-base leading-relaxed font-inter max-w-lg">
                                 Have questions about our certification protocols or curriculum architecture? Our expert advisors are ready to sync with your learning goals.
                             </p>
                         </div>
 
-                        <div className="grid sm:grid-cols-2 gap-4 md:gap-6">
-                            <div className="p-5 md:p-6 bg-white/[0.03] rounded-[20px] md:rounded-[24px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-2xl">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 md:mb-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(110,40,255,0.4)] transition-all">
-                                    <Sparkles size={20} />
+                        <div className="grid sm:grid-cols-2 gap-4">
+                            <div className="p-4 md:p-5 bg-white/[0.03] rounded-[18px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-xl">
+                                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3.5 group-hover:scale-110 group-hover:shadow-[0_0_16px_rgba(110,40,255,0.4)] transition-all">
+                                    <Sparkles size={18} />
                                 </div>
-                                <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-space">Academic Sync</h3>
-                                <p className="text-xs md:text-sm text-text-muted leading-relaxed font-inter">Direct connection with our curriculum design team for custom track enquiries.</p>
+                                <h3 className="text-sm md:text-base font-bold text-white mb-1.5 font-space">Academic Sync</h3>
+                                <p className="text-xs text-text-muted leading-relaxed font-inter">Direct connection with our curriculum design team for custom track enquiries.</p>
                             </div>
-                            <div className="p-5 md:p-6 bg-white/[0.03] rounded-[20px] md:rounded-[24px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-2xl">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4 md:mb-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(109,40,255,0.4)] transition-all">
-                                    <ShieldCheck size={20} />
+                            <div className="p-4 md:p-5 bg-white/[0.03] rounded-[18px] border border-white/5 hover:border-primary/40 transition-all duration-500 group shadow-xl">
+                                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3.5 group-hover:scale-110 group-hover:shadow-[0_0_16px_rgba(109,40,255,0.4)] transition-all">
+                                    <ShieldCheck size={18} />
                                 </div>
-                                <h3 className="text-lg md:text-xl font-bold text-white mb-2 font-space">Institutional Core</h3>
-                                <p className="text-xs md:text-sm text-text-muted leading-relaxed font-inter">Enterprise-grade solutions for universities and corporate learning clusters.</p>
+                                <h3 className="text-sm md:text-base font-bold text-white mb-1.5 font-space">Institutional Core</h3>
+                                <p className="text-xs text-text-muted leading-relaxed font-inter">Enterprise-grade solutions for universities and corporate learning clusters.</p>
                             </div>
                         </div>
                     </div>
@@ -564,25 +579,25 @@ const CourseCatalog = () => {
                         {/* Interior Glow */}
                         <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 blur-[80px] rounded-full group-hover:bg-primary/15 transition-colors" />
 
-                        <div className="relative z-10 space-y-4 md:space-y-5">
+                        <div className="relative z-10 space-y-4">
                             <div className="space-y-1">
-                                <h3 className="text-lg md:text-xl font-bold text-white font-inter uppercase tracking-widest">Initialise Enquiry</h3>
-                                <p className="text-text-muted text-xs md:text-sm font-inter">Average response time: &lt; 24 hours</p>
+                                <h3 className="text-base md:text-lg font-bold text-white font-inter uppercase tracking-wider">Initialise Enquiry</h3>
+                                <p className="text-text-muted text-xs font-inter">Average response time: &lt; 24 hours</p>
                             </div>
 
-                            <form className="space-y-3 md:space-y-4">
-                                <div className="grid md:grid-cols-2 gap-3 md:gap-4">
-                                    <div className="space-y-1.5 md:space-y-2">
-                                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Identity Name</label>
-                                        <input type="text" className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-2.5 md:py-3 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs md:text-sm" placeholder="Full Name" />
+                            <form className="space-y-3">
+                                <div className="grid md:grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 ml-1">Identity Name</label>
+                                        <input type="text" className="w-full bg-white/[0.05] border border-white/10 rounded-[10px] md:rounded-[12px] px-3.5 py-2 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs" placeholder="Full Name" />
                                     </div>
-                                    <div className="space-y-1.5 md:space-y-2">
-                                        <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Auth Email</label>
-                                        <input type="email" className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-2.5 md:py-3 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs md:text-sm" placeholder="email@nexus.com" />
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 ml-1">Auth Email</label>
+                                        <input type="email" className="w-full bg-white/[0.05] border border-white/10 rounded-[10px] md:rounded-[12px] px-3.5 py-2 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs" placeholder="email@nexus.com" />
                                     </div>
                                 </div>
-                                <div className="space-y-1.5 md:space-y-2">
-                                    <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Selection Matrix</label>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 ml-1">Selection Matrix</label>
                                     <FormSelect 
                                         value={enquiryType}
                                         onChange={setEnquiryType}
@@ -592,19 +607,19 @@ const CourseCatalog = () => {
                                             'Corporate Training',
                                             'University Integration'
                                         ]}
-                                        className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-2.5 md:py-3 hover:border-primary/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 font-inter text-xs md:text-sm"
+                                        className="w-full bg-white/[0.05] border border-white/10 rounded-[10px] md:rounded-[12px] px-3.5 py-2 hover:border-primary/50 focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/20 font-inter text-xs"
                                     />
                                 </div>
-                                <div className="space-y-1.5 md:space-y-2">
-                                    <label className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-white/40 ml-1">Message Detail</label>
-                                    <textarea rows="2" className="w-full bg-white/[0.05] border border-white/10 rounded-[12px] md:rounded-[14px] px-4 py-3 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs md:text-sm resize-none" placeholder="Structure your requirements here..."></textarea>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold uppercase tracking-wider text-white/50 ml-1">Message Detail</label>
+                                    <textarea rows="2" className="w-full bg-white/[0.05] border border-white/10 rounded-[10px] md:rounded-[12px] px-3.5 py-2 text-white focus:border-primary/50 focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all placeholder:text-white/10 font-inter text-xs resize-none" placeholder="Structure your requirements here..."></textarea>
                                 </div>
                                 <ModernButton
                                     onClick={(e) => {
                                         e.preventDefault();
                                         toast.success('Ticket Raised Successfully. Our advisors will contact you shortly.');
                                     }}
-                                    className="w-full !py-3 shadow-glow-gradient font-black uppercase tracking-[0.3em] text-[9px] md:text-[10px] mt-2"
+                                    className="w-full !py-2.5 shadow-glow-gradient font-bold uppercase tracking-wider text-xs mt-2"
                                 >
                                     Raise a Ticket
                                 </ModernButton>

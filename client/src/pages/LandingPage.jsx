@@ -40,6 +40,11 @@ import { getBelievableUniversityStats } from '../utils/universityStats';
 
 const LandingPage = () => {
     const navigate = useNavigate();
+    // Hiring-partner logos are hotlinked from Wikimedia Commons, which
+    // occasionally renames/moves files (e.g. TCS's logo 404ing) - track any
+    // that fail to load so those entries gracefully fall back to a text
+    // badge, the same treatment already used for partners with no logo URL.
+    const [brokenLogos, setBrokenLogos] = useState(() => new Set());
     const [dynamicDirectors, setDynamicDirectors] = useState([]);
     const [dynamicLogos, setDynamicLogos] = useState([]);
     const [featuredCourses, setFeaturedCourses] = useState([]);
@@ -197,7 +202,7 @@ const LandingPage = () => {
 
     // Prepare partner rows - using final verified SVG URLs
     const row1Static = [
-        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Tata_Consultancy_Services_Logo.svg' },
+        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/9b/TATA_Consultancy_Services_Logo.svg' },
         { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
         { name: 'Wipro', logo: null },
         { name: 'Accenture', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Accenture.svg' },
@@ -476,12 +481,13 @@ const LandingPage = () => {
                             <div key={i} className="ml-2 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
                                 <div className="px-4 py-2.5 sm:py-3 flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                                    {(company.logo || company.imageUrl) ? (
+                                    {(company.logo || company.imageUrl) && !brokenLogos.has(company.name) ? (
                                         <div className="relative w-24 sm:w-32 h-8 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                                             {/* Invisible spacer to set correct dimensions */}
                                             <img
                                                 src={company.logo || getMediaUrl(company.imageUrl)}
                                                 alt={company.name}
+                                                onError={() => setBrokenLogos((prev) => new Set(prev).add(company.name))}
                                                 className="h-full w-full object-contain invisible"
                                             />
                                             {/* Solid Purple Silhouette */}
@@ -519,13 +525,14 @@ const LandingPage = () => {
                         {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
                             <div key={i} className="ml-2 flex items-center space-x-3 group cursor-default">
                                 <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="px-4 s:px-6 py-2.5 sm:py-3 flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                                    {(company.logo || company.imageUrl) ? (
+                                <div className="px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
+                                    {(company.logo || company.imageUrl) && !brokenLogos.has(company.name) ? (
                                         <div className="relative w-24 sm:w-32 h-8 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
                                             {/* Invisible spacer to set correct dimensions */}
                                             <img
                                                 src={company.logo || getMediaUrl(company.imageUrl)}
                                                 alt={company.name}
+                                                onError={() => setBrokenLogos((prev) => new Set(prev).add(company.name))}
                                                 className="h-full w-full object-contain invisible"
                                             />
                                             {/* Solid Purple Silhouette */}
@@ -581,7 +588,7 @@ const LandingPage = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8, delay: 0.1 }}
-                                className="text-2xl xs:text-3xl lg:text-4xl font-black text-text-primary mb-4 md:mb-6 font-jakarta tracking-tighter leading-[1.1] md:leading-[1.1]"
+                                className="text-2xl sm:text-3xl lg:text-4xl font-black text-text-primary mb-4 md:mb-6 font-jakarta tracking-tighter leading-[1.1] md:leading-[1.1]"
                             >
                                 Master the <br className="hidden sm:block" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-primary-dark">Institutional</span> Flow
                             </motion.h2>
@@ -697,7 +704,7 @@ const LandingPage = () => {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: -100 }}
                                             transition={{ duration: 0.6, ease: "easeInOut" }}
-                                            className="w-full sm:w-[calc(50%-0.75rem)] md:w-[calc(25%-1.125rem)] shrink-0 flex"
+                                            className="w-full sm:w-[calc(50%-0.75rem)] md:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)] shrink-0 flex"
                                         >
                                             <GlassCard
                                                 className="!bg-white/[0.03] border-primary/30 hover:border-primary/60 hover:bg-white/[0.07] transition-all duration-300 w-full group flex flex-col items-start p-4 text-left hover:shadow-glow-purple cursor-pointer"
@@ -1056,7 +1063,7 @@ const LandingPage = () => {
                         </motion.p>
                     </div>
 
-                    <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                         {directors.map((director, i) => (
                             <motion.div
                                 key={i}

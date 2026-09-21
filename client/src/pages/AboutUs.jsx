@@ -268,7 +268,7 @@ const ExecutiveLeadershipCard = ({ member }) => {
                                 </motion.a>
                             </motion.div>
                         ) : (
-                            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                            <div className="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                                 <span>SKILLDAD EXECUTIVE BOARD</span>
                                 <div className="flex items-center gap-1.5">
                                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
