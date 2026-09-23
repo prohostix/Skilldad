@@ -31,6 +31,7 @@ import {
 
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
+import skilldadLogo from '../assets/logo_deep_purple.png';
 
 // Dynamic Icon resolver with fallback
 const iconMap = {
@@ -620,36 +621,58 @@ const Services = () => {
                         <div className="absolute -top-24 -left-24 w-80 h-80 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
                         <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
-                        {/* Origami Flying Kite with Trailing Loop String from Video Reference */}
-                        <div className="absolute top-6 right-6 sm:top-10 sm:right-12 z-0 pointer-events-none select-none">
+                        {/* Beautiful Floating SkillDad Logo Emblem with Soft Aura & Trailing Curve */}
+                        <div className="absolute top-4 right-4 sm:top-8 sm:right-10 z-0 pointer-events-none select-none">
                             <motion.div
-                                animate={{ y: [-4, 6, -4], rotate: [-2, 2.5, -2] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                                className="relative"
+                                animate={{ y: [-5, 7, -5], rotate: [-2, 3, -2] }}
+                                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+                                className="relative flex items-center justify-center"
                             >
-                                {/* 4-Faceted Geometric Origami Kite */}
-                                <svg width="120" height="150" viewBox="0 0 100 130" fill="none" className="w-16 sm:w-24 md:w-28 drop-shadow-xl overflow-visible">
-                                    {/* Top Left Facet - Lime Green */}
-                                    <path d="M50 10 L10 55 L50 75 Z" fill="#84CC16" />
-                                    {/* Top Right Facet - Crisp White */}
-                                    <path d="M50 10 L90 55 L50 75 Z" fill="#FFFFFF" />
-                                    {/* Bottom Left Facet - Royal Purple */}
-                                    <path d="M50 75 L10 55 L50 120 Z" fill="#4F26C6" />
-                                    {/* Bottom Right Facet - Cyan */}
-                                    <path d="M50 75 L90 55 L50 120 Z" fill="#00C0F9" />
-                                    {/* Center crease line */}
-                                    <line x1="50" y1="10" x2="50" y2="120" stroke="white" strokeWidth="1" strokeOpacity="0.4" />
-                                </svg>
+                                {/* Multi-layered Ambient Glow Aura */}
+                                <div className="absolute -inset-6 bg-gradient-to-tr from-[#6D28D9]/25 via-[#4C1D95]/30 to-[#8B5CF6]/20 rounded-full blur-2xl pointer-events-none animate-pulse" />
+                                
+                                {/* Glassmorphic Floating Shield Badge */}
+                                <div className="relative p-3.5 sm:p-5 rounded-[28px] sm:rounded-[34px] bg-white/85 dark:bg-purple-950/75 backdrop-blur-xl border border-white dark:border-purple-600/40 shadow-[0_20px_45px_-10px_rgba(76,29,149,0.25)] flex items-center justify-center overflow-hidden group">
+                                    {/* Subtle Radial Gradient Inner Highlight */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 via-transparent to-purple-200/20 pointer-events-none" />
+
+                                    {/* Official High-Resolution SkillDad Logo */}
+                                    <motion.img
+                                        src={skilldadLogo}
+                                        alt="SkillDad Logo"
+                                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_8px_16px_rgba(76,29,149,0.28)] relative z-10"
+                                        animate={{ scale: [1, 1.04, 1] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    />
+
+                                    {/* Shimmering Diagonal Light Ray */}
+                                    <motion.div
+                                        animate={{ x: ['-200%', '200%'] }}
+                                        transition={{
+                                            duration: 4,
+                                            repeat: Infinity,
+                                            ease: 'linear',
+                                            repeatDelay: 2.5
+                                        }}
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-25 z-20 pointer-events-none"
+                                    />
+
+                                    {/* Sparkling Accent Star on Corner */}
+                                    <div className="absolute -top-1 -right-1 z-20">
+                                        <Sparkles size={16} className="text-amber-400 drop-shadow-md animate-bounce" />
+                                    </div>
+                                </div>
 
                                 {/* Curving Wavy String trailing down behind cards */}
                                 <svg
-                                    className="absolute top-[105px] right-[24px] sm:right-[36px] w-[260px] sm:w-[380px] h-[340px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
+                                    className="absolute top-[85px] right-[24px] sm:right-[36px] w-[260px] sm:w-[380px] h-[340px] pointer-events-none overflow-visible stroke-purple-400/35 dark:stroke-purple-500/25 fill-none"
                                     viewBox="0 0 300 280"
                                 >
                                     <path
                                         d="M200 0 C 180 80, 220 160, 160 200 C 100 240, 60 170, 100 130 C 140 90, 170 170, 100 240"
-                                        strokeWidth="3"
+                                        strokeWidth="2.5"
                                         strokeLinecap="round"
+                                        strokeDasharray="4 2"
                                     />
                                 </svg>
                             </motion.div>
