@@ -168,7 +168,7 @@ const Services = () => {
             title: 'Skill Courses',
             description: 'Industry-relevant, job-focused courses to help you build in-demand skills.',
             icon: GraduationCap,
-            iconBg: 'bg-purple-100/90 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300',
+            iconBg: 'bg-cyan-500 text-white shadow-cyan-500/30',
             link: '/courses',
             badge: 'Job Ready'
         },
@@ -177,7 +177,7 @@ const Services = () => {
             title: 'Skill Integrated Diploma Programmes',
             description: 'Structured programmes that combine skill learning with certification and career support.',
             icon: Award,
-            iconBg: 'bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300',
+            iconBg: 'bg-emerald-500 text-white shadow-emerald-500/30',
             link: '/courses',
             badge: 'Certified'
         },
@@ -186,7 +186,7 @@ const Services = () => {
             title: 'WBL (Work Based Learning)',
             description: 'Gain real-world experience through industry collaborations and live projects.',
             icon: Briefcase,
-            iconBg: 'bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-300',
+            iconBg: 'bg-[#7C3AED] text-white shadow-purple-600/30',
             link: '/wbl',
             badge: 'Industry Live'
         },
@@ -195,7 +195,7 @@ const Services = () => {
             title: 'Study Abroad',
             description: 'Explore global education opportunities with end-to-end guidance and support.',
             icon: Plane,
-            iconBg: 'bg-rose-100/80 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300',
+            iconBg: 'bg-emerald-500 text-white shadow-emerald-500/30',
             link: '/study-abroad',
             badge: 'Global Pathways'
         }
@@ -410,76 +410,60 @@ const Services = () => {
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: idx * 0.1 }}
                                     whileHover={{ y: -4 }}
-                                    className={`h-full rounded-[22px] transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between group ${
-                                        isPrimary
-                                            ? 'bg-gradient-to-br from-[#4C1D95] via-[#431785] to-[#38126E] text-white shadow-[0_12px_30px_-6px_rgba(76,29,149,0.35)] border border-purple-800/40'
-                                            : 'bg-[#F8F9FA] dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-200/80 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700/60 shadow-xs hover:shadow-[0_10px_25px_-5px_rgba(76,29,149,0.08)]'
-                                    }`}
+                                    className="h-full"
                                 >
-                                    <div className="space-y-4 text-left">
-                                        {/* Header: Circular Icon Badge (White on primary, Purple on secondary) + Badge */}
-                                        <div className="flex items-center justify-between">
-                                            <div
-                                                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
-                                                    isPrimary
-                                                        ? 'bg-white text-[#4C1D95]'
-                                                        : 'bg-[#4C1D95] dark:bg-purple-600 text-white shadow-purple-900/20'
-                                                }`}
-                                            >
-                                                <IconComponent
-                                                    size={22}
-                                                    strokeWidth={2.2}
-                                                    className={isPrimary ? 'text-[#4C1D95]' : 'text-white'}
-                                                />
+                                    <div
+                                        className={`h-full rounded-[22px] transition-all duration-300 p-6 flex flex-col justify-between group ${
+                                            isPrimary
+                                                ? 'bg-gradient-to-br from-[#4C1D95] via-[#3B1578] to-[#2E0F61] text-white shadow-[0_12px_30px_-6px_rgba(76,29,149,0.35)] border border-purple-800/40'
+                                                : 'bg-white dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-100 dark:border-purple-900/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_28px_-6px_rgba(76,29,149,0.12)] hover:border-purple-200 dark:hover:border-purple-700/60'
+                                        }`}
+                                    >
+                                        <div className="text-left">
+                                            {/* Circular Icon Badge */}
+                                            <div className="mb-4">
+                                                <div className={`w-11 h-11 rounded-full ${offering.iconBg} flex items-center justify-center shrink-0 shadow-md group-hover:scale-108 transition-transform`}>
+                                                    <IconComponent size={20} strokeWidth={2.2} />
+                                                </div>
                                             </div>
 
-                                            <span
-                                                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                                                    isPrimary
-                                                        ? 'bg-white/15 text-purple-200 border border-white/20'
-                                                        : 'text-slate-400 dark:text-slate-500'
-                                                }`}
-                                            >
-                                                {offering.badge}
-                                            </span>
+                                            {/* Title */}
+                                            <h3 className={`text-base sm:text-[17px] font-bold tracking-tight leading-snug mb-2 font-sans ${
+                                                isPrimary ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-[#4C1D95] dark:group-hover:text-purple-300 transition-colors'
+                                            }`}>
+                                                {offering.title}
+                                            </h3>
+
+                                            {/* Description */}
+                                            <p className={`text-xs sm:text-[13px] leading-relaxed font-normal ${
+                                                isPrimary ? 'text-purple-100/90' : 'text-slate-500 dark:text-slate-400'
+                                            }`}>
+                                                {offering.description}
+                                            </p>
                                         </div>
 
-                                        {/* Title */}
-                                        <h3
-                                            className={`text-base sm:text-lg font-bold tracking-tight leading-snug font-sans transition-colors ${
-                                                isPrimary
-                                                    ? 'text-white'
-                                                    : 'text-slate-900 dark:text-white group-hover:text-[#4C1D95] dark:group-hover:text-purple-300'
-                                            }`}
-                                        >
-                                            {offering.title}
-                                        </h3>
+                                        {/* Bottom Row: Badge Tag + Action Button */}
+                                        <div className={`pt-6 mt-6 border-t flex items-center justify-between ${
+                                            isPrimary ? 'border-white/10' : 'border-slate-100 dark:border-purple-900/30'
+                                        }`}>
+                                            <span className={`text-[11px] font-bold tracking-wider uppercase ${
+                                                isPrimary ? 'text-purple-200' : 'text-slate-500 dark:text-slate-400'
+                                            }`}>
+                                                {offering.badge}
+                                            </span>
 
-                                        {/* Description */}
-                                        <p
-                                            className={`text-xs sm:text-[13px] leading-relaxed font-normal ${
-                                                isPrimary
-                                                    ? 'text-purple-100/90'
-                                                    : 'text-slate-500 dark:text-slate-400'
-                                            }`}
-                                        >
-                                            {offering.description}
-                                        </p>
-                                    </div>
-
-                                    {/* Action Arrow Button */}
-                                    <div className="pt-6 mt-2 text-left">
-                                        <Link
-                                            to={offering.link}
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
-                                                isPrimary
-                                                    ? 'bg-white/20 hover:bg-white text-white hover:text-[#4C1D95] border border-white/25'
-                                                    : 'bg-white dark:bg-purple-950/60 border border-slate-200 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 group-hover:bg-[#4C1D95] group-hover:text-white dark:group-hover:bg-purple-600'
-                                            }`}
-                                            aria-label={`Explore ${offering.title}`}
-                                        >
-                                            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                                        </Link>
+                                            <Link
+                                                to={offering.link}
+                                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
+                                                    isPrimary
+                                                        ? 'bg-white/15 hover:bg-white/25 text-white'
+                                                        : 'bg-[#FAF8FF] dark:bg-purple-950/60 border border-purple-100 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 group-hover:bg-[#4C1D95] group-hover:text-white'
+                                                }`}
+                                                aria-label={`Explore ${offering.title}`}
+                                            >
+                                                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                            </Link>
+                                        </div>
                                     </div>
                                 </motion.div>
                             );
