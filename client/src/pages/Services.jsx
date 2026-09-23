@@ -148,7 +148,7 @@ const Services = () => {
             <Navbar />
 
             {/* ── HERO SECTION (MATCHING REFERENCE DESIGN) ── */}
-            <section className="relative pt-10 sm:pt-14 md:pt-16 pb-16 sm:pb-20 md:pb-24 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-[#FAF8FF] dark:from-[#080512] dark:via-[#0E091D] dark:to-[#150D2B] border-b border-slate-100 dark:border-purple-900/30">
+            <section className="relative pt-24 sm:pt-28 md:pt-32 lg:pt-36 pb-16 sm:pb-20 md:pb-24 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-[#FAF8FF] dark:from-[#080512] dark:via-[#0E091D] dark:to-[#150D2B] border-b border-slate-100 dark:border-purple-900/30">
                 {/* Decorative background subtle wave curves matching reference */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-[#4C1D95]/15 dark:stroke-purple-600/10 fill-none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M-100 220 C 150 120, 320 300, 520 220 C 720 140, 880 300, 1250 170" strokeWidth="1.5" />
