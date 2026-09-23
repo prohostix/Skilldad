@@ -194,26 +194,26 @@ const ModernStudyAbroadIcon = ({ className = "w-5 h-5" }) => (
 
 // Partner / Tech Leaders Row from Reference Video
 const PartnerLogosRow = () => (
-    <div className="w-full flex items-center justify-between gap-6 sm:gap-10 overflow-x-auto no-scrollbar py-2 opacity-40 hover:opacity-80 transition-opacity select-none text-slate-300">
+    <div className="w-full flex items-center justify-between gap-6 sm:gap-10 overflow-x-auto no-scrollbar py-2 opacity-65 hover:opacity-95 transition-opacity select-none text-slate-700 dark:text-slate-300">
         <span className="font-extrabold tracking-wider text-sm sm:text-base flex items-center gap-1.5 shrink-0">
-            <span className="text-emerald-400 font-black">nVIDIA</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-black">nVIDIA</span>
         </span>
-        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 lowercase">
+        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 lowercase text-slate-800 dark:text-slate-200">
             amazon
         </span>
         <span className="font-medium tracking-tight text-sm sm:text-base flex items-center gap-1.5 shrink-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" /> Google Domains
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" /> Google Domains
         </span>
-        <span className="font-semibold tracking-tight text-sm sm:text-base shrink-0 flex items-center gap-1">
-            Robinhood <span className="text-xs">✦</span>
+        <span className="font-semibold tracking-tight text-sm sm:text-base shrink-0 flex items-center gap-1 text-slate-800 dark:text-slate-200">
+            Robinhood <span className="text-xs text-amber-500">✦</span>
         </span>
-        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 flex items-center gap-1.5">
-            <span className="text-blue-400 text-lg leading-none">∞</span> Meta
+        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
+            <span className="text-blue-600 dark:text-blue-400 text-lg leading-none">∞</span> Meta
         </span>
-        <span className="font-black tracking-widest text-sm sm:text-base text-red-500 shrink-0">
+        <span className="font-black tracking-widest text-sm sm:text-base text-red-600 dark:text-red-500 shrink-0">
             NETFLIX
         </span>
-        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 text-purple-300">
+        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 text-[#4C1D95] dark:text-purple-300">
             Fanatics
         </span>
     </div>
@@ -241,21 +241,21 @@ const Services = () => {
         fetchServices();
     }, []);
 
-    // ── WHAT WE OFFER (MATCHING REFERENCE VIDEO 'SERVICES' & SCREENSHOT) ──
+    // ── WHAT WE OFFER (PURPLE GRADIENTS & SHADES FOR SKILLDAD) ──
     const coreOfferings = [
         {
             id: 'skill-courses',
             title: 'Skill Courses',
             description: 'Industry-relevant, job-focused courses to help you build in-demand skills.',
             icon: ModernSkillCoursesIcon,
-            badgeBg: 'bg-[#00D2FF]',
-            cardBg: 'bg-gradient-to-br from-[#4F26C6] via-[#4318FF] to-[#3B1578] text-white shadow-[0_20px_45px_-15px_rgba(67,24,255,0.45)] border border-purple-500/30',
+            badgeBg: 'bg-[#4C1D95]',
+            cardBg: 'bg-gradient-to-br from-[#4C1D95] via-[#3B1578] to-[#2E0F61] text-white shadow-[0_20px_45px_-12px_rgba(76,29,149,0.38)] border border-purple-700/50',
             textColor: 'text-white',
             descColor: 'text-purple-100/90',
             rotation: 'lg:-rotate-[3.5deg]',
             link: '/courses',
             badge: 'Job Ready',
-            tagColor: 'text-cyan-300 font-bold',
+            tagColor: 'text-purple-200 font-bold',
             btnBg: 'bg-white/15 hover:bg-white/25 text-white'
         },
         {
@@ -264,14 +264,14 @@ const Services = () => {
             description: 'Structured programmes that combine skill learning with certification and career support.',
             icon: ModernDiplomaIcon,
             badgeBg: 'bg-[#84CC16]',
-            cardBg: 'bg-white text-slate-900 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.22)] border border-white',
+            cardBg: 'bg-white text-slate-900 shadow-[0_20px_45px_-12px_rgba(76,29,149,0.12)] border border-purple-100/90',
             textColor: 'text-slate-900',
             descColor: 'text-slate-600',
             rotation: 'lg:rotate-[1.8deg]',
             link: '/courses',
             badge: 'Certified',
-            tagColor: 'text-emerald-600 font-bold',
-            btnBg: 'bg-slate-100 hover:bg-[#84CC16] hover:text-white text-slate-800'
+            tagColor: 'text-[#4C1D95] font-bold',
+            btnBg: 'bg-purple-50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
         },
         {
             id: 'wbl-learning',
@@ -279,13 +279,13 @@ const Services = () => {
             description: 'Gain real-world experience through industry collaborations and live projects.',
             icon: ModernWblIcon,
             badgeBg: 'bg-[#7C3AED]',
-            cardBg: 'bg-gradient-to-br from-[#00C0F9] via-[#00AEEF] to-[#0096C7] text-white shadow-[0_20px_45px_-15px_rgba(0,192,249,0.4)] border border-cyan-400/40',
+            cardBg: 'bg-gradient-to-br from-[#7C3AED] via-[#6D28D9] to-[#4F46E5] text-white shadow-[0_20px_45px_-12px_rgba(124,58,237,0.38)] border border-purple-400/40',
             textColor: 'text-white',
-            descColor: 'text-cyan-50/95',
+            descColor: 'text-purple-100/90',
             rotation: 'lg:-rotate-[2.2deg]',
             link: '/wbl',
             badge: 'Industry Live',
-            tagColor: 'text-white font-bold',
+            tagColor: 'text-purple-200 font-bold',
             btnBg: 'bg-white/20 hover:bg-white/30 text-white'
         },
         {
@@ -294,14 +294,14 @@ const Services = () => {
             description: 'Explore global education opportunities with end-to-end guidance and support.',
             icon: ModernStudyAbroadIcon,
             badgeBg: 'bg-[#84CC16]',
-            cardBg: 'bg-white text-slate-900 shadow-[0_20px_45px_-15px_rgba(0,0,0,0.22)] border border-white',
+            cardBg: 'bg-white text-slate-900 shadow-[0_20px_45px_-12px_rgba(76,29,149,0.12)] border border-purple-100/90',
             textColor: 'text-slate-900',
             descColor: 'text-slate-600',
             rotation: 'lg:rotate-[3deg]',
             link: '/study-abroad',
             badge: 'Global Pathways',
-            tagColor: 'text-emerald-600 font-bold',
-            btnBg: 'bg-slate-100 hover:bg-[#84CC16] hover:text-white text-slate-800'
+            tagColor: 'text-[#4C1D95] font-bold',
+            btnBg: 'bg-purple-50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
         }
     ];
 
@@ -498,19 +498,19 @@ const Services = () => {
                 </div>
             </section>
 
-            {/* ── SECTION 2: WHAT WE OFFER / SERVICE OUTCOMES (REDESIGNED MATCHING VIDEO & REFERENCE) ── */}
-            <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-12 relative z-10">
+            {/* ── SECTION 2: WHAT WE OFFER / SERVICE OUTCOMES (LIGHT PURPLE THEME WITH SKILLDAD GRADIENTS) ── */}
+            <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512]">
                 <div className="max-w-7xl mx-auto">
                     
-                    {/* Sleek Dark Blue/Purple Rounded Container Card from Video Reference */}
-                    <div className="relative rounded-[32px] sm:rounded-[44px] bg-gradient-to-b from-[#130E2E] via-[#0E0A24] to-[#080516] border border-purple-900/50 p-6 sm:p-10 lg:p-14 text-white shadow-[0_25px_60px_-15px_rgba(15,10,36,0.7)] overflow-hidden">
+                    {/* Light Purple Gradient Rounded Container Card with SkillDad Theme */}
+                    <div className="relative rounded-[36px] sm:rounded-[48px] bg-gradient-to-br from-[#FAF5FF] via-[#F3E8FF] to-[#E9D5FF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/90 dark:border-purple-800/50 p-6 sm:p-10 lg:p-14 text-slate-900 dark:text-white shadow-[0_20px_50px_-15px_rgba(76,29,149,0.12)] overflow-hidden">
                         
-                        {/* Background glow accents */}
-                        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+                        {/* Background glow accents in shades of purple */}
+                        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-300/30 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-violet-300/25 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
                         {/* Top: Partner / Tech Leaders Wordmarks Row */}
-                        <div className="border-b border-purple-900/40 pb-6 mb-8 sm:mb-12">
+                        <div className="border-b border-purple-200/80 dark:border-purple-900/40 pb-6 mb-8 sm:mb-12">
                             <PartnerLogosRow />
                         </div>
 
@@ -522,16 +522,16 @@ const Services = () => {
                             transition={{ duration: 0.6 }}
                             className="text-left space-y-3 max-w-2xl mb-12 sm:mb-16 relative z-10"
                         >
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-[11px] font-bold tracking-widest uppercase">
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[11px] font-bold tracking-widest uppercase shadow-2xs">
                                 WHAT AND WHY
                             </div>
-                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-[1.2] font-sans">
+                            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.2] font-sans">
                                 Service Outcomes <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-cyan-300">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4C1D95] via-[#6D28D9] to-[#8B5CF6] dark:from-purple-300 dark:via-pink-200 dark:to-cyan-300">
                                     You Shouldn't Miss
                                 </span>
                             </h2>
-                            <p className="text-xs sm:text-sm text-purple-200/70 leading-relaxed font-normal max-w-xl">
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-xl">
                                 End-to-end support for your learning journey — from skill building to global opportunities.
                             </p>
                         </motion.div>
