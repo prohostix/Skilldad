@@ -117,17 +117,22 @@ const getModuleStats = (moduleObj) => {
     let totalMins = 0;
     
     videos.forEach(v => {
-        let type = v.type || 'video';
+        let type = v.type || v.videoType || 'video';
         if (v.title && v.title.toLowerCase().includes('note')) {
             type = 'note';
         } else if (v.title && (v.title.toLowerCase().includes('exercise') || v.title.toLowerCase().includes('excercise'))) {
             type = 'exercise';
+        } else if (type === 'document') {
+            type = 'pdf';
         }
         counts[type] = (counts[type] || 0) + 1;
         
         if (v.duration) {
-            const mins = parseInt(v.duration.replace(/\D/g, ''));
-            if (!isNaN(mins)) totalMins += mins;
+            const durLower = v.duration.toLowerCase();
+            if (!durLower.includes('month') && !durLower.includes('week') && !durLower.includes('year') && !durLower.includes('day')) {
+                const mins = parseInt(v.duration.replace(/\D/g, ''));
+                if (!isNaN(mins)) totalMins += mins;
+            }
         }
     });
     
@@ -628,7 +633,7 @@ const CourseDetail = () => {
                                     <div className="flex flex-col items-start justify-center w-full px-3.5 py-2.5 bg-white/95 backdrop-blur-xl dark:bg-[#1A1438]/95 border border-gray-100 dark:border-white/20 rounded-xl shadow-lg">
                                         <div className="flex flex-col items-start justify-center gap-y-2 w-full">
                                             {course.minSalary && (
-                                                <div className="flex items-baseline gap-1.5">
+                                                <div className="flex flex-wrap items-baseline gap-1.5">
                                                     <span className="font-semibold text-gray-900 dark:text-white text-base sm:text-[17px] tracking-tight">
                                                         ₹{Number(course.minSalary).toLocaleString('en-IN')}
                                                     </span>
@@ -638,7 +643,7 @@ const CourseDetail = () => {
                                                 </div>
                                             )}
                                             {course.jobsAvailable && (
-                                                <div className="flex items-baseline gap-1.5">
+                                                <div className="flex flex-wrap items-baseline gap-1.5">
                                                     <span className="font-black text-gray-900 dark:text-white text-base sm:text-[17px] tracking-tight">
                                                         {Number(course.jobsAvailable).toLocaleString('en-IN')}
                                                     </span>
@@ -695,7 +700,7 @@ const CourseDetail = () => {
                                 </div>
                                 
                                 <div className="rounded-[2rem] p-4 md:p-6 pt-8 md:pt-10 pb-4 md:pb-6 relative overflow-hidden bg-white dark:!bg-[#0A0714] border border-[#E2D8F0] dark:border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
-                                    <div className="flex flex-col md:flex-row items-start md:items-start justify-between w-full relative z-10">
+                                    <div className="flex flex-col lg:flex-row items-start lg:items-start justify-between w-full relative z-10">
                                         {[
                                             { icon: CustomIconLearn, title: 'Learn', desc: 'Gain knowledge & industry skills' },
                                             { icon: CustomIconGraduate, title: 'Graduate', desc: `Complete your ${course.title?.includes('+') ? course.title.split('+')[0].trim() : 'BCom'} Degree` },
@@ -704,18 +709,18 @@ const CourseDetail = () => {
                                             { icon: CustomIconResume, title: 'Stronger Resume', desc: 'Experience + Skills = Better career opportunities' },
                                             { icon: CustomIconPlaced, title: 'Get Placed', desc: 'We connect you to top healthcare organizations until you get placed.' },
                                         ].map((step, idx, arr) => (
-                                            <div key={idx} className="flex flex-row md:flex-col items-center md:text-center flex-1 relative px-1 py-3 md:py-0 w-full md:w-auto gap-4 md:gap-0">
-                                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center md:mb-3 shrink-0 relative z-10 bg-[#F3E8FF] dark:bg-primary/20">
+                                            <div key={idx} className="flex flex-row lg:flex-col items-center lg:text-center flex-1 relative px-1 py-3 lg:py-0 w-full lg:w-auto gap-4 lg:gap-0">
+                                                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center lg:mb-3 shrink-0 relative z-10 bg-[#F3E8FF] dark:bg-primary/20">
                                                     <step.icon size={28} strokeWidth={2} className="text-[#4C1D95] dark:text-primary" />
                                                 </div>
-                                                <div className="flex flex-col md:items-center text-left md:text-center">
+                                                <div className="flex flex-col lg:items-center text-left lg:text-center">
                                                     <h4 className="font-bold text-[13px] md:text-[14px] mb-1.5 text-[#111111] dark:text-white">{step.title}</h4>
                                                     <p className="text-[11px] md:text-[11px] leading-tight text-[#444444] dark:text-gray-400">{step.desc}</p>
                                                 </div>
-                                                
+
                                                 {/* Chevron positioned exactly between items */}
                                                 {idx < arr.length - 1 && (
-                                                    <div className="hidden md:block absolute top-[32px] -right-3 -translate-y-1/2 z-0 text-[#4C1D95] dark:text-primary-accent">
+                                                    <div className="hidden lg:block absolute top-[32px] -right-3 -translate-y-1/2 z-0 text-[#4C1D95] dark:text-primary-accent">
                                                         <ChevronRight size={22} strokeWidth={2.5} />
                                                     </div>
                                                 )}
@@ -769,7 +774,7 @@ const CourseDetail = () => {
                                 </div>
                             </div>
                             
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                 {course.learning_outcomes.map((outcome, i) => {
                                     const isString = typeof outcome === 'string';
                                     const title = isString ? outcome : outcome.title;
@@ -893,7 +898,7 @@ const CourseDetail = () => {
                             </div>
                             
                             {/* Decorative Graphic Element (matching the paper airplane illustration in the mockup) */}
-                            <div className="hidden lg:flex w-64 shrink-0 items-center justify-end relative pl-8">
+                            <div className="hidden xl:flex w-64 shrink-0 items-center justify-end relative pl-8">
                                 <div className="absolute w-32 h-32 bg-purple-100 rounded-full right-8 blur-[40px] opacity-80"></div>
                                 <svg width="240" height="180" viewBox="0 0 240 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="relative z-10 translate-x-4">
                                     {/* Main Envelope Body */}
@@ -942,7 +947,7 @@ const CourseDetail = () => {
                                     <div className="w-1.5 h-6 bg-primary rounded-full"></div>
                                     More from {course.universityName || course.instructor?.profile?.universityName || 'this University'}
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {recommendations.universityCourses.map(recCourse => (
                                         <CourseCard key={recCourse._id} course={recCourse} />
                                     ))}
@@ -956,7 +961,7 @@ const CourseDetail = () => {
                                     <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
                                     Related Courses
                                 </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                     {recommendations.relatedCourses.map(recCourse => (
                                         <CourseCard key={recCourse._id} course={recCourse} />
                                     ))}

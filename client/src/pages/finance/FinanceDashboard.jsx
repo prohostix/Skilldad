@@ -667,8 +667,11 @@ const FinanceDashboard = () => {
                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            <tab.icon size={window.innerWidth < 640 ? 14 : 16} className="sm:w-[18px] sm:h-[18px]" />
-                            <span className="text-[11px] sm:text-sm">{window.innerWidth < 640 ? tab.label.split(' ')[0] : tab.label}</span>
+                            <tab.icon size={14} className="sm:w-[18px] sm:h-[18px]" />
+                            <span className="text-[11px] sm:text-sm">
+                                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                                <span className="hidden sm:inline">{tab.label}</span>
+                            </span>
                         </button>
                     ))}
                 </div>
@@ -684,7 +687,7 @@ const FinanceDashboard = () => {
                     >
                         {/* Filters */}
                         <GlassCard className="p-4 sm:p-6">
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
+                            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 items-stretch sm:items-center">
                                 <div className="relative flex-1 group">
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
                                     <input
@@ -804,7 +807,7 @@ const FinanceDashboard = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-6"
                     >
-                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                             {enrollmentSummaries.map((summary, index) => (
                                 <GlassCard key={index} className="!p-6 hover:border-primary/40 transition-colors">
                                     <div className="flex items-center space-x-4 mb-5">
@@ -1031,7 +1034,7 @@ const FinanceDashboard = () => {
             {/* Payout Review Modal */}
             {selectedPayout && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-900 rounded-2xl p-8 max-w-lg w-full border border-white/10 shadow-2xl">
+                    <div className="bg-slate-900 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className={`text-xl font-bold ${selectedPayout._action === 'approved' ? 'text-emerald-400' : 'text-red-400'}`}>
                                 {selectedPayout._action === 'approved' ? 'Approve' : 'Reject'} Payout Request

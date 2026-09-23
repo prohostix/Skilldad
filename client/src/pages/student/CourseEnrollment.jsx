@@ -16,12 +16,11 @@ import {
     Target,
     TrendingUp,
     FileText,
-    Video
+    Video,
+    ShieldCheck
 } from 'lucide-react';
 import axios from 'axios';
-import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
-import DashboardHeading from '../../components/ui/DashboardHeading';
 import { getMediaUrl } from '../../utils/media';
 
 const CourseEnrollment = () => {
@@ -118,17 +117,6 @@ const CourseEnrollment = () => {
                     "Protected Routes",
                     "Navigation Guards"
                 ]
-            },
-            {
-                title: "Testing and Deployment",
-                duration: "10 hours",
-                lessons: 12,
-                topics: [
-                    "Unit Testing with Jest",
-                    "Component Testing with React Testing Library",
-                    "Integration Testing",
-                    "Deployment Strategies"
-                ]
             }
         ],
         features: [
@@ -179,8 +167,10 @@ const CourseEnrollment = () => {
                 }
 
                 const { data } = await axios.get(`/api/courses/${courseId}`, config);
-                // Merge real data with mock defaults to preserve UI layout
-                setCourse({ ...mockCourse, ...data });
+                const mergedInstructor = (typeof data.instructor === 'object' && data.instructor !== null)
+                    ? { ...mockCourse.instructor, ...data.instructor }
+                    : mockCourse.instructor;
+                setCourse({ ...mockCourse, ...data, instructor: mergedInstructor });
                 setIsEnrolled(data.isEnrolled || false);
                 setLoading(false);
             } catch (error) {
@@ -197,317 +187,311 @@ const CourseEnrollment = () => {
 
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
-            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-4 border-[#4C1D95]/20 border-t-[#4C1D95] rounded-full animate-spin"></div>
         </div>
     );
 
     if (!course) return (
-        <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-white mb-4">Course Not Found</h2>
-            <p className="text-slate-400 mb-6">The course you're looking for doesn't exist.</p>
-            <ModernButton onClick={() => navigate('/courses')}>
+        <div className="text-center py-16">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Course Not Found</h2>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">The course you're looking for doesn't exist or has been moved.</p>
+            <button
+                onClick={() => navigate('/courses')}
+                className="px-6 py-2.5 bg-[#4C1D95] hover:bg-[#3b1675] text-white text-sm font-bold rounded-xl transition-all"
+            >
                 Browse Courses
-            </ModernButton>
+            </button>
         </div>
     );
 
+    const features = course.features || mockCourse.features;
+    const whatYouWillLearn = course.whatYouWillLearn || mockCourse.whatYouWillLearn;
+    const syllabus = course.syllabus || mockCourse.syllabus;
+    const prerequisites = course.prerequisites || mockCourse.prerequisites;
+    const reviews = course.reviews || mockCourse.reviews;
+
     return (
-        <div className="min-h-screen bg-slate-900 -mx-6 -mt-10">
+        <div className="min-h-screen pb-16 font-inter text-slate-900 dark:text-white">
+            {/* Back Button */}
+            <button
+                onClick={() => navigate(-1)}
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-500 hover:text-[#4C1D95] dark:text-slate-400 dark:hover:text-purple-300 mb-6 transition-colors group"
+            >
+                <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+                <span>Back to Courses</span>
+            </button>
+
             {/* Hero Section */}
-            <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pt-20 pb-16">
-                <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%236366f1%22 fill-opacity=%220.05%22%3E%3Ccircle cx=%2230%22 cy=%2230%22 r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+            <div className="bg-gradient-to-br from-purple-50/80 via-[#FAF8FF] to-white dark:from-[#1F1235] dark:via-[#160B28] dark:to-[#0D051A] rounded-[24px] p-6 sm:p-8 border border-purple-100 dark:border-purple-900/30 shadow-sm mb-8">
+                <div className="grid md:grid-cols-3 gap-8 items-start">
+                    {/* Course Main Details */}
+                    <div className="md:col-span-2 space-y-5">
+                        {/* Meta Tags */}
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                            <span className="px-3 py-1 bg-purple-100/70 dark:bg-purple-950/60 text-[#4C1D95] dark:text-purple-300 font-bold rounded-full border border-purple-200/50 dark:border-purple-800/40">
+                                {course.level}
+                            </span>
+                            <span className="text-slate-300 dark:text-slate-600">•</span>
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">{course.language}</span>
+                            <span className="text-slate-300 dark:text-slate-600">•</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium">Updated {new Date(course.lastUpdated).toLocaleDateString()}</span>
+                        </div>
 
-                <div className="relative max-w-7xl mx-auto px-6">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="flex items-center text-slate-400 hover:text-white mb-8 transition-colors"
-                    >
-                        <ArrowLeft size={20} className="mr-2" />
-                        Back to Courses
-                    </button>
+                        {/* Title */}
+                        <h1 className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                            {course.title}
+                        </h1>
 
-                    <div className="grid lg:grid-cols-3 gap-12">
-                        {/* Course Info */}
-                        <div className="lg:col-span-2 space-y-8">
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-2 text-sm">
-                                    <span className="px-3 py-1 bg-primary/20 text-primary rounded-full font-medium">
-                                        {course.level}
-                                    </span>
-                                    <span className="text-slate-400">•</span>
-                                    <span className="text-slate-400">{course.language}</span>
-                                    <span className="text-slate-400">•</span>
-                                    <span className="text-slate-400">Updated {new Date(course.lastUpdated).toLocaleDateString()}</span>
+                        {/* Description */}
+                        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                            {course.description}
+                        </p>
+
+                        {/* Rating, students & metrics */}
+                        <div className="flex flex-wrap items-center gap-5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 pt-1">
+                            <div className="flex items-center gap-1.5">
+                                <div className="flex items-center text-amber-400">
+                                    {[...Array(5)].map((_, i) => (
+                                        <Star
+                                            key={i}
+                                            size={15}
+                                            className={i < Math.floor(course.rating || 4.8) ? 'fill-current' : 'text-slate-300 dark:text-slate-600'}
+                                        />
+                                    ))}
                                 </div>
+                                <span className="font-bold text-slate-900 dark:text-white">{course.rating || 4.8}</span>
+                                <span className="text-slate-400">({((course.instructor?.students ?? course.studentsEnrolled) || 0).toLocaleString()} students)</span>
+                            </div>
 
-                                <DashboardHeading
-                                    title={course.title}
-                                    className="!text-2xl lg:!text-3xl"
-                                />
+                            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                <Clock size={15} className="text-[#4C1D95] dark:text-purple-400" />
+                                <span>{course.duration || 'Self-paced'}</span>
+                            </div>
 
-                                <p className="text-xl text-slate-300 leading-relaxed">
-                                    {course.description}
-                                </p>
-
-                                <div className="flex flex-wrap items-center gap-6 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex items-center">
-                                            {[...Array(5)].map((_, i) => (
-                                                <Star
-                                                    key={i}
-                                                    size={16}
-                                                    className={`${i < Math.floor(course.rating)
-                                                        ? 'text-amber-400 fill-current'
-                                                        : 'text-slate-400'
-                                                        }`}
-                                                />
-                                            ))}
-                                        </div>
-                                        <span className="text-white font-medium">{course.rating}</span>
-                                        <span className="text-slate-400">({course.studentsEnrolled.toLocaleString()} students)</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 text-slate-400">
-                                        <Clock size={16} />
-                                        <span>{course.duration}</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 text-slate-400">
-                                        <Globe size={16} />
-                                        <span>{course.language}</span>
-                                    </div>
-                                </div>
-
-                                {/* Instructor */}
-                                <div className="flex items-center gap-4 p-6 bg-slate-800/50 rounded-xl">
-                                    <img
-                                        src={course.instructor.avatar}
-                                        alt={course.instructor.name}
-                                        className="w-16 h-16 rounded-full"
-                                    />
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-white">{course.instructorName || course.instructor?.name}</h3>
-                                        <p className="text-slate-400 text-sm mb-1">{course.instructor.bio}</p>
-                                        {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && (
-                                            <p className="text-primary text-xs font-bold uppercase tracking-wider mb-2">
-                                                {course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}
-                                            </p>
-                                        )}
-                                        <div className="flex items-center gap-4 text-sm text-slate-400">
-                                            <span className="flex items-center gap-1">
-                                                <Star size={14} className="text-amber-400" />
-                                                {course.instructor.rating}
-                                            </span>
-                                            <span>{course.instructor.students.toLocaleString()} students</span>
-                                            <span>{course.instructor.courses} courses</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                <Globe size={15} className="text-[#4C1D95] dark:text-purple-400" />
+                                <span>{course.language || 'English'}</span>
                             </div>
                         </div>
 
-                        {/* Enrollment Card */}
-                        <div className="lg:col-span-1">
-                            <div className="sticky top-8">
-                                <GlassCard className="p-6 space-y-6">
-                                    {/* Course Preview */}
-                                    <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-800">
-                                        <img
-                                            src={course.thumbnail ? getMediaUrl(course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
-                                            alt={course.title}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800' }}
-                                        />
-                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                            <button className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
-                                                <PlayCircle size={32} className="text-white ml-1" />
-                                            </button>
+                        {/* Instructor Profile Card */}
+                        <div className="bg-white dark:bg-[#150d2a] rounded-2xl p-4 sm:p-5 border border-purple-100 dark:border-white/10 shadow-sm flex items-center gap-4 mt-6">
+                            <img
+                                src={course.instructor?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructorName || course.instructor?.name || 'Instructor')}&background=6366f1&color=fff`}
+                                alt={course.instructor?.name || course.instructorName || 'Instructor'}
+                                className="w-14 h-14 rounded-full object-cover border border-purple-100 dark:border-white/10"
+                            />
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                                    {course.instructorName || course.instructor?.name || 'Course Instructor'}
+                                </h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 line-clamp-1">
+                                    {course.instructor?.bio || 'Experienced educator and industry professional'}
+                                </p>
+                                {(course.universityName || course.instructor?.profile?.universityName || (course.instructor?.role === 'university' && course.instructor?.name)) && (
+                                    <p className="text-[#4C1D95] dark:text-purple-400 text-[11px] font-bold uppercase tracking-wider">
+                                        {course.universityName || course.instructor?.profile?.universityName || course.instructor?.name}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Sticky Enrollment Card (Right) */}
+                    <div className="md:col-span-1">
+                        <div className="bg-white dark:bg-[#150d2a] rounded-[24px] p-5 sm:p-6 border border-purple-100 dark:border-purple-900/30 shadow-xl space-y-5 md:sticky md:top-6">
+                            {/* Course Preview */}
+                            <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 dark:bg-white/10 shadow-inner group">
+                                <img
+                                    src={course.thumbnail ? getMediaUrl(course.thumbnail) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'}
+                                    alt={course.title}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800'; }}
+                                />
+                                <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
+                                    <div className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+                                        <PlayCircle size={28} className="text-[#4C1D95] ml-0.5" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Action / Enrollment Button */}
+                            <div className="space-y-3">
+                                {isEnrolled ? (
+                                    <div className="space-y-2.5">
+                                        <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/40 text-xs font-semibold">
+                                            <CheckCircle size={18} className="shrink-0" />
+                                            <span>You are enrolled in this course</span>
                                         </div>
+                                        <button
+                                            className="w-full py-3 px-5 rounded-xl bg-[#4C1D95] hover:bg-[#3b1675] text-white font-bold text-sm shadow-md transition-all active:scale-[0.99]"
+                                            onClick={() => navigate(`/dashboard/course/${courseId}`)}
+                                        >
+                                            Start Learning
+                                        </button>
                                     </div>
+                                ) : (
+                                    <button
+                                        className="w-full py-3.5 px-5 rounded-xl bg-[#4C1D95] hover:bg-[#3b1675] text-white font-bold text-sm sm:text-base shadow-lg shadow-purple-900/20 hover:shadow-purple-900/30 transition-all active:scale-[0.99]"
+                                        onClick={handleEnrollment}
+                                        disabled={enrolling}
+                                    >
+                                        {enrolling ? 'Enrolling...' : 'Enroll Now'}
+                                    </button>
+                                )}
 
-                                    {/* Pricing */}
-                                    <div className="space-y-4">
+                                <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 font-medium">
+                                    <ShieldCheck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                                    <span>30-day money-back guarantee</span>
+                                </div>
+                            </div>
 
-                                        {isEnrolled ? (
-                                            <div className="space-y-3">
-                                                <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/20 p-3 rounded-lg">
-                                                    <CheckCircle size={20} />
-                                                    <span className="font-medium">Successfully Enrolled!</span>
-                                                </div>
-                                                <ModernButton
-                                                    className="w-full"
-                                                    onClick={() => navigate(`/dashboard/course/${courseId}`)}
-                                                >
-                                                    Start Learning
-                                                </ModernButton>
-                                            </div>
-                                        ) : (
-                                            <ModernButton
-                                                className="w-full"
-                                                onClick={handleEnrollment}
-                                                disabled={enrolling}
-                                            >
-                                                {enrolling ? 'Enrolling...' : 'Enroll Now'}
-                                            </ModernButton>
-                                        )}
-
-                                        <p className="text-center text-sm text-slate-400">
-                                            30-day money-back guarantee
-                                        </p>
-                                    </div>
-
-                                    {/* Course Features */}
-                                    <div className="space-y-3">
-                                        <h3 className="font-semibold text-white">This course includes:</h3>
-                                        <div className="space-y-2">
-                                            {course.features.slice(0, 6).map((feature, index) => (
-                                                <div key={index} className="flex items-center gap-2 text-sm text-slate-300">
-                                                    <CheckCircle size={16} className="text-emerald-400 flex-shrink-0" />
-                                                    <span>{feature}</span>
-                                                </div>
-                                            ))}
+                            {/* Course Features */}
+                            <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-white/10">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
+                                    This course includes:
+                                </h4>
+                                <div className="space-y-2">
+                                    {features.slice(0, 6).map((feature, index) => (
+                                        <div key={index} className="flex items-center gap-2 text-xs sm:text-[13px] text-slate-700 dark:text-slate-300">
+                                            <CheckCircle size={15} className="text-emerald-500 shrink-0" />
+                                            <span>{feature}</span>
                                         </div>
-                                    </div>
-                                </GlassCard>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Course Content */}
-            <div className="max-w-7xl mx-auto px-6 py-16">
-                <div className="grid lg:grid-cols-3 gap-12">
-                    <div className="lg:col-span-2 space-y-12">
-                        {/* What You'll Learn */}
-                        <section>
-                            <h2 className="text-2xl font-bold text-white mb-6">What you'll learn</h2>
-                            <GlassCard className="p-6">
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    {course.whatYouWillLearn.map((item, index) => (
-                                        <div key={index} className="flex items-start gap-3">
-                                            <CheckCircle size={16} className="text-emerald-400 mt-1 flex-shrink-0" />
-                                            <span className="text-slate-300 text-sm">{item}</span>
-                                        </div>
-                                    ))}
+            {/* Course Content Details Grid */}
+            <div className="grid md:grid-cols-3 gap-8">
+                <div className="md:col-span-2 space-y-8">
+                    {/* What You'll Learn */}
+                    <div className="bg-white dark:bg-[#150d2a] rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 sm:p-7">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-5">
+                            What you'll learn
+                        </h2>
+                        <div className="grid sm:grid-cols-2 gap-3.5">
+                            {whatYouWillLearn.map((item, index) => (
+                                <div key={index} className="flex items-start gap-2.5">
+                                    <CheckCircle size={16} className="text-emerald-500 mt-0.5 shrink-0" />
+                                    <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{item}</span>
                                 </div>
-                            </GlassCard>
-                        </section>
-
-                        {/* Course Syllabus */}
-                        <section>
-                            <h2 className="text-2xl font-bold text-white mb-6">Course content</h2>
-                            <div className="space-y-4">
-                                {course.syllabus.map((module, index) => (
-                                    <GlassCard key={index} className="p-6">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h3 className="text-lg font-semibold text-white">{module.title}</h3>
-                                            <div className="flex items-center gap-4 text-sm text-slate-400">
-                                                <span className="flex items-center gap-1">
-                                                    <Video size={14} />
-                                                    {module.lessons} lessons
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock size={14} />
-                                                    {module.duration}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {module.topics.map((topic, topicIndex) => (
-                                                <div key={topicIndex} className="flex items-center gap-2 text-sm text-slate-300">
-                                                    <PlayCircle size={14} className="text-slate-400" />
-                                                    <span>{topic}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </GlassCard>
-                                ))}
-                            </div>
-                        </section>
-
-                        {/* Prerequisites */}
-                        <section>
-                            <h2 className="text-2xl font-bold text-white mb-6">Prerequisites</h2>
-                            <GlassCard className="p-6">
-                                <div className="space-y-3">
-                                    {course.prerequisites.map((prereq, index) => (
-                                        <div key={index} className="flex items-start gap-3">
-                                            <Target size={16} className="text-primary mt-1 flex-shrink-0" />
-                                            <span className="text-slate-300">{prereq}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </GlassCard>
-                        </section>
-
-                        {/* Reviews */}
-                        <section>
-                            <h2 className="text-2xl font-bold text-white mb-6">Student reviews</h2>
-                            <div className="space-y-4">
-                                {course.reviews.map((review) => (
-                                    <GlassCard key={review.id} className="p-6">
-                                        <div className="flex items-start gap-4">
-                                            <img
-                                                src={review.avatar}
-                                                alt={review.user}
-                                                className="w-12 h-12 rounded-full"
-                                            />
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <h4 className="font-semibold text-white">{review.user}</h4>
-                                                    <div className="flex items-center">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <Star
-                                                                key={i}
-                                                                size={14}
-                                                                className={`${i < review.rating
-                                                                    ? 'text-amber-400 fill-current'
-                                                                    : 'text-slate-400'
-                                                                    }`}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                    <span className="text-sm text-slate-400">
-                                                        {new Date(review.date).toLocaleDateString()}
-                                                    </span>
-                                                </div>
-                                                <p className="text-slate-300 leading-relaxed">{review.comment}</p>
-                                            </div>
-                                        </div>
-                                    </GlassCard>
-                                ))}
-                            </div>
-                        </section>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Sidebar */}
-                    <div className="lg:col-span-1">
-                        <div className="sticky top-8 space-y-6">
-                            {/* Course Stats */}
-                            <GlassCard className="p-6">
-                                <h3 className="font-semibold text-white mb-4">Course Statistics</h3>
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-slate-400">Students enrolled</span>
-                                        <span className="text-white font-medium">{course.studentsEnrolled.toLocaleString()}</span>
+                    {/* Course Syllabus */}
+                    <div className="bg-white dark:bg-[#150d2a] rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 sm:p-7">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-5">
+                            Course Content
+                        </h2>
+                        <div className="space-y-3">
+                            {syllabus.map((module, index) => (
+                                <div key={index} className="border border-slate-100 dark:border-white/5 rounded-xl p-4 bg-slate-50/50 dark:bg-white/[0.02]">
+                                    <div className="flex items-center justify-between mb-2.5">
+                                        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">{module.title}</h3>
+                                        <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                                            <span className="flex items-center gap-1">
+                                                <Video size={13} />
+                                                {module.lessons} lessons
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Clock size={13} />
+                                                {module.duration}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-slate-400">Course rating</span>
-                                        <span className="text-white font-medium">{course.rating}/5</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-slate-400">Total duration</span>
-                                        <span className="text-white font-medium">{course.duration}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-slate-400">Certificate</span>
-                                        <span className="text-emerald-400 font-medium">
-                                            {course.certificate ? 'Yes' : 'No'}
-                                        </span>
+                                    <div className="space-y-1.5 pl-1">
+                                        {module.topics.map((topic, topicIndex) => (
+                                            <div key={topicIndex} className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                                                <PlayCircle size={13} className="text-[#4C1D95] dark:text-purple-400 shrink-0" />
+                                                <span>{topic}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-                            </GlassCard>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Prerequisites */}
+                    <div className="bg-white dark:bg-[#150d2a] rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 sm:p-7">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-4">
+                            Prerequisites
+                        </h2>
+                        <div className="space-y-2.5">
+                            {prerequisites.map((prereq, index) => (
+                                <div key={index} className="flex items-start gap-2.5">
+                                    <Target size={15} className="text-[#4C1D95] dark:text-purple-400 mt-0.5 shrink-0" />
+                                    <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">{prereq}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Reviews */}
+                    <div className="bg-white dark:bg-[#150d2a] rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 sm:p-7">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-5">
+                            Student Reviews
+                        </h2>
+                        <div className="space-y-4">
+                            {reviews.map((review) => (
+                                <div key={review.id} className="p-4 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 flex items-start gap-3.5">
+                                    <img
+                                        src={review.avatar}
+                                        alt={review.user}
+                                        className="w-10 h-10 rounded-full object-cover shrink-0"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{review.user}</h4>
+                                            <span className="text-[11px] text-slate-400">{new Date(review.date).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="flex items-center text-amber-400 mb-2">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star
+                                                    key={i}
+                                                    size={13}
+                                                    className={i < review.rating ? 'fill-current' : 'text-slate-300 dark:text-slate-600'}
+                                                />
+                                            ))}
+                                        </div>
+                                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{review.comment}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Sidebar Stats Widget */}
+                <div className="md:col-span-1">
+                    <div className="bg-white dark:bg-[#150d2a] rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm p-6 space-y-4 sticky top-6">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
+                            Course Statistics
+                        </h3>
+                        <div className="divide-y divide-slate-100 dark:divide-white/5 text-xs sm:text-sm">
+                            <div className="flex items-center justify-between py-2.5">
+                                <span className="text-slate-500 dark:text-slate-400">Enrolled Students</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{((course.instructor?.students ?? course.studentsEnrolled) || 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center justify-between py-2.5">
+                                <span className="text-slate-500 dark:text-slate-400">Rating</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{course.rating || 4.8} / 5.0</span>
+                            </div>
+                            <div className="flex items-center justify-between py-2.5">
+                                <span className="text-slate-500 dark:text-slate-400">Total Duration</span>
+                                <span className="font-bold text-slate-900 dark:text-white">{course.duration || 'Self-paced'}</span>
+                            </div>
+                            <div className="flex items-center justify-between py-2.5">
+                                <span className="text-slate-500 dark:text-slate-400">Certificate</span>
+                                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                    {course.certificate ? 'Included' : 'Not Included'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

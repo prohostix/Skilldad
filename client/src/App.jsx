@@ -47,6 +47,7 @@ const MyCourses = lazy(() => lazyRetry(() => import('./pages/student/MyCourses')
 const StudentDashboard = lazy(() => lazyRetry(() => import('./pages/student/StudentDashboard')));
 const CoursePlayer = lazy(() => lazyRetry(() => import('./pages/student/CoursePlayer')));
 const LiveClasses = lazy(() => lazyRetry(() => import('./pages/student/LiveClasses')));
+const CourseFinder = lazy(() => lazyRetry(() => import('./pages/student/CourseFinder')));
 const ProjectView = lazy(() => lazyRetry(() => import('./pages/student/ProjectView')));
 const Documents = lazy(() => lazyRetry(() => import('./pages/student/Documents')));
 const Exams = lazy(() => lazyRetry(() => import('./pages/student/Exams')));
@@ -117,6 +118,8 @@ const ServicesManagement = lazy(() => lazyRetry(() => import('./pages/admin/Serv
 const StudyAbroadManagement = lazy(() => lazyRetry(() => import('./pages/admin/StudyAbroadManagement')));
 
 const CareerManager = lazy(() => lazyRetry(() => import('./pages/admin/CareerManager')));
+const CourseFinderManager = lazy(() => lazyRetry(() => import('./pages/admin/CourseFinderManager')));
+const CatalogCardSettings = lazy(() => lazyRetry(() => import('./pages/admin/CatalogCardSettings')));
 const JobAlertsManager = lazy(() => lazyRetry(() => import('./pages/admin/JobAlertsManager')));
 const CertificateManagement = lazy(() => lazyRetry(() => import('./pages/admin/CertificateManagement')));
 const DocumentReview = lazy(() => lazyRetry(() => import('./pages/admin/DocumentReview')));
@@ -184,6 +187,7 @@ function App() {
                     <Route index element={<StudentDashboard />} />
                     <Route path="my-courses" element={<MyCourses />} />
                     <Route path="live-classes" element={<LiveClasses />} />
+                    <Route path="course-finder" element={<CourseFinder />} />
                     <Route path="session/:sessionId" element={<SessionDetail />} />
                     <Route path="watch/:id" element={<WatchStream />} />
                     <Route path="documents" element={<Documents />} />
@@ -265,6 +269,8 @@ function App() {
                     <Route path="users" element={<UserList />} />
                     <Route path="students" element={<StudentManagement />} />
                     <Route path="career-manager" element={<CareerManager />} />
+                    <Route path="course-finder" element={<CourseFinderManager />} />
+                    <Route path="catalog-cards" element={<CatalogCardSettings />} />
                     <Route path="job-alerts" element={<JobAlertsManager />} />
                     <Route path="wbl" element={<CourseManager wblOnly={true} />} />
                     <Route path="university" element={<UniversityManagement />} />

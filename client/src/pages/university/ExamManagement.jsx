@@ -541,12 +541,12 @@ const ExamManagement = () => {
                                 {filteredExams.length > 0 ? filteredExams.map((exam) => (
                                     <GlassCard key={exam._id} className="p-4 group hover:bg-white/[0.04] transition-all duration-500">
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-500">
+                                            <div className="flex items-center gap-4 min-w-0">
+                                                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 group-hover:scale-105 transition-transform duration-500 shrink-0">
                                                     <BookOpen size={20} />
                                                 </div>
-                                                <div className="space-y-0.5">
-                                                    <h4 className="text-base font-bold text-white tracking-tight">{exam.title}</h4>
+                                                <div className="space-y-0.5 min-w-0">
+                                                    <h4 className="text-base font-bold text-white tracking-tight truncate">{exam.title}</h4>
                                                     <p className="text-[10px] text-white/40 font-medium">{exam.course?.title || 'General Assessment'}</p>
                                                     <div className="flex items-center gap-3 pt-0.5">
                                                         <span className="flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest text-white/30">
@@ -643,19 +643,19 @@ const ExamManagement = () => {
                             <div className="space-y-8">
                                 {!selectedSubmission ? (
                                     <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                            <div className="flex items-center gap-4 min-w-0">
                                                 {selectedExamForGrading && (
-                                                    <button 
+                                                    <button
                                                         onClick={() => setSelectedExamForGrading(null)}
-                                                        className="p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 text-white/60 transition-all"
+                                                        className="p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 text-white/60 transition-all shrink-0"
                                                     >
                                                         <ArrowLeft size={20} />
                                                     </button>
                                                 )}
-                                                <h3 className="text-xl font-black text-white/90 tracking-tight flex items-center gap-3">
-                                                    <div className="w-2 h-8 bg-amber-500 rounded-full" />
-                                                    {selectedExamForGrading ? 'Assessment Submissions' : 'Submissions Command'}
+                                                <h3 className="text-xl font-black text-white/90 tracking-tight flex items-center gap-3 min-w-0">
+                                                    <div className="w-2 h-8 bg-amber-500 rounded-full shrink-0" />
+                                                    <span className="truncate">{selectedExamForGrading ? 'Assessment Submissions' : 'Submissions Command'}</span>
                                                 </h3>
                                             </div>
                                             {selectedExamForGrading && (
@@ -690,13 +690,13 @@ const ExamManagement = () => {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {exams.map(exam => (
                                                     <GlassCard key={exam._id} className="p-6 group cursor-pointer hover:bg-white/[0.04] transition-all duration-500" onClick={() => fetchSubmissions(exam._id)}>
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-5">
-                                                                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 group-hover:scale-105 transition-transform duration-500">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <div className="flex items-center gap-5 min-w-0">
+                                                                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 group-hover:scale-105 transition-transform duration-500 shrink-0">
                                                                     <Edit size={24} />
                                                                 </div>
-                                                                <div className="space-y-1">
-                                                                    <h4 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{exam.title}</h4>
+                                                                <div className="space-y-1 min-w-0">
+                                                                    <h4 className="font-bold text-lg text-white group-hover:text-primary transition-colors truncate">{exam.title}</h4>
                                                                     <p className="text-xs text-white/30 font-bold uppercase tracking-widest">{exam.course?.title}</p>
                                                                     <div className="flex items-center gap-3 pt-1">
                                                                         {exam.batchId?.name && (
@@ -758,15 +758,15 @@ const ExamManagement = () => {
                                                 {/* Submission List */}
                                                 <div className="grid grid-cols-1 gap-3">
                                                     {submissions.map(sub => (
-                                                        <GlassCard key={sub._id} className="p-5 flex items-center justify-between group hover:bg-white/[0.04] transition-all duration-500">
-                                                            <div className="flex items-center gap-5">
-                                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${sub.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/40 border-white/10'}`}>
+                                                        <GlassCard key={sub._id} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:bg-white/[0.04] transition-all duration-500">
+                                                            <div className="flex items-center gap-5 min-w-0">
+                                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shrink-0 ${sub.status === 'graded' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/40 border-white/10'}`}>
                                                                     <Users size={20} />
                                                                 </div>
-                                                                <div className="space-y-1">
-                                                                    <h5 className="font-bold text-white">{sub.student?.name || 'Anonymous Student'}</h5>
-                                                                    <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest">
-                                                                        <span className="text-white/30">{sub.student?.email}</span>
+                                                                <div className="space-y-1 min-w-0">
+                                                                    <h5 className="font-bold text-white truncate">{sub.student?.name || 'Anonymous Student'}</h5>
+                                                                    <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                                                                        <span className="text-white/30 truncate">{sub.student?.email}</span>
                                                                         <span className="w-1 h-1 bg-white/20 rounded-full" />
                                                                         <span className={sub.status === 'graded' ? 'text-emerald-400' : 'text-amber-500'}>{sub.status}</span>
                                                                         {sub.status === 'graded' && (
@@ -795,20 +795,20 @@ const ExamManagement = () => {
                                 ) : (
                                     /* DETAILED GRADING VIEW */
                                     <div className="max-w-4xl mx-auto space-y-8">
-                                        <div className="flex items-center justify-between pb-8 border-b border-white/10">
-                                            <div className="flex items-center gap-6">
-                                                <button onClick={() => setSelectedSubmission(null)} className="p-4 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 border-b border-white/10">
+                                            <div className="flex items-center gap-6 min-w-0">
+                                                <button onClick={() => setSelectedSubmission(null)} className="p-4 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all shrink-0">
                                                     <ArrowLeft size={24} />
                                                 </button>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-1">Student Analysis</p>
-                                                    <h3 className="text-3xl font-black text-white tracking-tight">{selectedSubmission.student?.name}</h3>
-                                                    <p className="text-sm text-white/40 font-medium">{selectedSubmission.student?.email}</p>
+                                                    <h3 className="text-3xl font-black text-white tracking-tight truncate">{selectedSubmission.student?.name}</h3>
+                                                    <p className="text-sm text-white/40 font-medium truncate">{selectedSubmission.student?.email}</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="sm:text-right shrink-0">
                                                 <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Submission Token</p>
-                                                <p className="text-xs font-mono text-white/40">{selectedSubmission._id}</p>
+                                                <p className="text-xs font-mono text-white/40 break-all">{selectedSubmission._id}</p>
                                             </div>
                                         </div>
 
@@ -899,7 +899,7 @@ const ExamManagement = () => {
                                             })}
                                         </div>
 
-                                        <div className="flex items-center justify-between pt-10 border-t border-white/10">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-10 border-t border-white/10">
                                             <p className="text-white/30 text-xs italic font-medium max-w-xs">Confirming these scores will synchronize the data with the Student Results Vault and trigger a status update.</p>
                                             <div className="flex gap-4">
                                                 <ModernButton variant="secondary" onClick={() => setSelectedSubmission(null)} className="!px-10 !rounded-2xl">Cancel</ModernButton>
@@ -920,19 +920,19 @@ const ExamManagement = () => {
                                 </h3>
                                 <div className="space-y-4">
                                     {filteredHistoryExams.length > 0 ? filteredHistoryExams.map(exam => (
-                                        <div key={exam._id} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex items-center justify-between group">
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-white/20 border border-white/10">
+                                        <div key={exam._id} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 group">
+                                            <div className="flex items-center gap-6 min-w-0">
+                                                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-white/20 border border-white/10 shrink-0">
                                                     <Activity size={20} />
                                                 </div>
-                                                <div>
-                                                    <h5 className="font-bold text-white tracking-tight">{exam.title}</h5>
+                                                <div className="min-w-0">
+                                                    <h5 className="font-bold text-white tracking-tight truncate">{exam.title}</h5>
                                                     <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">
                                                         Finalized {exam.createdAt || exam.created_at ? new Date(exam.createdAt || exam.created_at).toLocaleDateString() : 'Recent'}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-8">
+                                            <div className="flex items-center gap-8 justify-between sm:justify-end">
                                                 <div className="text-right">
                                                     <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Pass Rate</p>
                                                     <p className="text-lg font-black text-emerald-400">{exam.passRate !== undefined ? exam.passRate : (exam.pass_rate || 0)}%</p>
@@ -960,9 +960,9 @@ const ExamManagement = () => {
 
             {/* MODALS (Simplified Styles) */}
             {openSchedule && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-3xl bg-black/80">
-                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md">
-                        <GlassCard className="p-6 border-white/20 shadow-[0_0_60px_rgba(var(--primary-rgb),0.1)]">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto backdrop-blur-3xl bg-black/80">
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md my-8">
+                        <GlassCard className="p-6 border-white/20 shadow-[0_0_60px_rgba(var(--primary-rgb),0.1)] max-h-[85vh] overflow-y-auto">
                             <div className="flex items-center justify-between mb-5">
                                 <h2 className="text-xl font-bold text-white tracking-normal capitalize">Schedule Exam</h2>
                                 <button onClick={() => setOpenSchedule(false)} className="p-1.5 hover:bg-white/10 rounded-lg transition-all text-white/40"><ArrowLeft size={16} className="rotate-45" /></button>
@@ -988,7 +988,7 @@ const ExamManagement = () => {
                                 )}
 
                                 {(!examData.linkedPaper || examData.deploymentMode === 'new') ? (
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div className="space-y-1 col-span-2">
                                             <label className="text-xs font-medium text-white/60 ml-1">Exam Title</label>
                                             <input required type="text" value={examData.title} onChange={e => setExamData({...examData, title: e.target.value})} className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-xl focus:border-primary transition-all text-white text-sm" placeholder="e.g., Midterm Assessment 2026" />
@@ -1024,7 +1024,7 @@ const ExamManagement = () => {
                                         {examData.course && availableBatches.length > 0 && (
                                             <div className="space-y-1 col-span-2">
                                                 <label className="text-xs font-medium text-white/60 ml-1">Target Batches</label>
-                                                <div className="grid grid-cols-2 gap-2 bg-white/5 border border-white/10 rounded-xl p-2.5 max-h-36 overflow-y-auto">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white/5 border border-white/10 rounded-xl p-2.5 max-h-36 overflow-y-auto">
                                                     {availableBatches.map(batch => (
                                                         <label key={batch.id} className="flex items-center gap-2 cursor-pointer group">
                                                             <input

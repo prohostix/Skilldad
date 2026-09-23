@@ -202,9 +202,9 @@ const ProjectView = () => {
                             <GlassCard key={project.id || `proj-${index}`} className="p-8 space-y-6">
                                 {/* Project Header */}
                                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <h2 className="text-sm font-bold text-white font-inter tracking-tight">{project.title}</h2>
+                                    <div className="space-y-2 min-w-0 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h2 className="text-sm font-bold text-white font-inter tracking-tight break-words">{project.title}</h2>
                                             <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest ${getDifficultyColor(project.difficulty || 'Intermediate')}`}>
                                                 {project.difficulty || 'Intermediate'}
                                             </span>
@@ -297,13 +297,13 @@ const ProjectView = () => {
                                             <div className="space-y-2">
                                                 <h4 className="text-xs font-bold text-white/50 uppercase tracking-widest">Selected Files</h4>
                                                 {files.map((file, index) => (
-                                                    <div key={index} className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                                    <div key={index} className="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-xl p-4">
+                                                        <div className="flex items-center gap-3 min-w-0">
+                                                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                                                                 <FileText size={20} className="text-primary" />
                                                             </div>
-                                                            <div>
-                                                                <p className="text-sm font-semibold text-white">{file.name}</p>
+                                                            <div className="min-w-0">
+                                                                <p className="text-sm font-semibold text-white truncate">{file.name}</p>
                                                                 <p className="text-[11px] text-white/40">
                                                                     {(file.size / 1024 / 1024).toFixed(2)} MB
                                                                 </p>
@@ -311,7 +311,7 @@ const ProjectView = () => {
                                                         </div>
                                                         <button
                                                             onClick={() => removeFile(project.id, index)}
-                                                            className="p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                                            className="p-2 text-white/40 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all shrink-0"
                                                         >
                                                             <Trash2 size={18} />
                                                         </button>

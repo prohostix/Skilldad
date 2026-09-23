@@ -163,9 +163,6 @@ const CareerManager = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div>
                     <DashboardHeading title="Career Center Management" />
-                    <p className="text-white/40 text-sm font-medium mt-1">
-                        Manage corporate vacancies and review student applications.
-                    </p>
                 </div>
                 <div className="flex gap-2">
                     {activeTab === 'vacancies' && (
@@ -345,8 +342,8 @@ const CareerManager = () => {
                     <GlassCard className="relative w-full max-w-2xl bg-slate-900 border-white/20 !p-8 max-h-[90vh] overflow-y-auto">
                         <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">{editingItem ? 'Edit Vacancy' : 'Create New Vacancy'}</h3>
                         <form onSubmit={handleUpsertVacancy} className="space-y-5">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="sm:col-span-2">
                                     <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2">Job Title</label>
                                     <input required type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} />
                                 </div>
@@ -406,7 +403,7 @@ const CareerManager = () => {
             {showPlacementModal && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowPlacementModal(false)} />
-                    <GlassCard className="relative w-full max-w-lg bg-slate-900 border-white/20 !p-8">
+                    <GlassCard className="relative w-full max-w-lg bg-slate-900 border-white/20 !p-8 max-h-[85vh] overflow-y-auto">
                         <h3 className="text-xl font-bold text-white mb-6 uppercase tracking-wider">{editingItem ? 'Edit Success Story' : 'New Hall of Fame Entry'}</h3>
                         <form onSubmit={handleUpsertPlacement} className="space-y-5">
                             <div className="flex flex-col items-center gap-4 p-6 bg-white/5 rounded-3xl border border-white/10 border-dashed mb-4">
@@ -428,7 +425,7 @@ const CareerManager = () => {
                                     <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 ml-1">Student Name</label>
                                     <input required type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm" value={formData.student_name || ''} onChange={e => setFormData({...formData, student_name: e.target.value})} />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-1.5 ml-1">Company</label>
                                         <input required type="text" className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm" value={formData.company_name || ''} onChange={e => setFormData({...formData, company_name: e.target.value})} />

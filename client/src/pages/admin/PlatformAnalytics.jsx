@@ -114,7 +114,7 @@ const PlatformAnalytics = () => {
                 <div className="text-left">
                     <DashboardHeading title="Intelligence & Metrics" />
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center flex-wrap gap-2">
                     <button
                         onClick={handleExportAnalytics}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all shadow-sm"

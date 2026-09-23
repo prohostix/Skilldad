@@ -974,7 +974,7 @@ const StudentManagement = () => {
                 <div className="fixed inset-0 bg-black/80 flex items-start justify-center z-[99999] p-4 pt-20 overflow-y-auto">
                     <div className="bg-[#0F1424]/95 backdrop-blur-md rounded-2xl p-6 md:p-8 max-w-4xl w-full relative z-[100000] max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
                         {/* Header */}
-                        <div className="flex justify-between items-center pb-5 border-b border-white/5 mb-6">
+                        <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-white/5 mb-6">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
                                     <Users size={22} />

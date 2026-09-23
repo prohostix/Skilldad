@@ -162,7 +162,7 @@ const JobAlertsManager = () => {
                                     <h4 className="font-bold text-white text-sm truncate">{job.title}</h4>
                                     {job.featured && <Star size={13} className="text-amber-400 fill-amber-400 shrink-0" />}
                                 </div>
-                                <div className="flex items-center gap-3 mt-1 text-xs text-white/50">
+                                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-white/50">
                                     <span>{job.company}</span>
                                     {job.location && <span className="flex items-center gap-1"><MapPin size={11} />{job.location}</span>}
                                     {job.type && <span className="flex items-center gap-1"><Briefcase size={11} />{job.type}</span>}

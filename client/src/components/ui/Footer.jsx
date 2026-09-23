@@ -4,7 +4,7 @@ import { Facebook, Linkedin, Instagram, Mail, Phone, MapPin, Youtube, Heart, Glo
 import logoImg from '../../assets/logo.png';
 import { useUser } from '../../context/UserContext';
 
-const Footer = ({ forceVisible = false }) => {
+const Footer = ({ forceVisible = false, className = '' }) => {
     const { user } = useUser();
     const navigate = useNavigate();
     const footerRef = useRef(null);
@@ -25,7 +25,7 @@ const Footer = ({ forceVisible = false }) => {
     return (
         <footer
             ref={footerRef}
-            className="relative bg-[#05050A] border-t border-white/5 overflow-hidden pt-8 mt-8"
+            className={`relative bg-[#05050A] border-t border-white/5 overflow-hidden pt-8 mt-8 ${className}`}
         >
             {/* Ambient Background Effects */}
             <div className="absolute top-0 left-1/4 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-70" />

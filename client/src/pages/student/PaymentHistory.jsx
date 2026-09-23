@@ -248,20 +248,20 @@ const PaymentHistory = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <DashboardHeading title="Payment History" className="text-2xl font-black" />
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                     <ModernButton onClick={() => setShowUploadModal(true)}>
                         <Upload size={18} className="mr-2" />
                         Upload Payment Proof
                     </ModernButton>
 
-                    <div className="relative">
+                    <div className="relative flex-1 sm:flex-none min-w-[180px] sm:min-w-0">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
                         <input
                             type="text"
                             placeholder="Search transactions..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors text-sm w-64"
+                            className="w-full sm:w-56 lg:w-64 pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 transition-colors text-sm"
                         />
                     </div>
 
@@ -293,7 +293,7 @@ const PaymentHistory = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 max-w-md w-full border border-white/10"
+                        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 max-w-md w-full border border-white/10 max-h-[90vh] overflow-y-auto"
                     >
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-xl font-bold text-white">Upload Payment Proof</h3>
@@ -525,14 +525,14 @@ const PaymentHistory = () => {
 
                     {/* Pagination */}
                     {pagination.totalPages > 1 && (
-                        <div className="flex items-center justify-between mt-8">
+                        <div className="flex flex-wrap items-center justify-between gap-4 mt-8">
                             <p className="text-sm text-gray-400">
                                 Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{' '}
                                 {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
                                 {pagination.totalItems} transactions
                             </p>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <button
                                     onClick={() => setPagination(prev => ({ ...prev, currentPage: prev.currentPage - 1 }))}
                                     disabled={pagination.currentPage === 1}

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@700;800&family=Caveat:wght@600;700&display=swap');
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -90,8 +90,13 @@ html {
   overflow-x: hidden;
   text-rendering: optimizeSpeed;
   /* Optimize for speed over legibility on complex pages */
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   position: relative;
+}
+
+*, ::before, ::after {
+  box-sizing: border-box;
 }
 
 body {
@@ -113,6 +118,8 @@ body {
   /* Prevent horizontal bounce on some browsers */
   position: relative;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Touch Target Standard */
@@ -121,6 +128,17 @@ input:not([type="range"]),
 select {
   min-height: 44px;
   /* Apple/Google accessibility minimum */
+}
+
+button[class*="!min-h"],
+button[class*="min-h-0"],
+button[class*="h-7"],
+button[class*="h-8"],
+button[class*="h-6"],
+button[class*="h-5"],
+button[class*="h-4"],
+button[class*="h-9"] {
+  min-height: unset;
 }
 
 input[type="range"] {
@@ -270,8 +288,8 @@ table td {
 
 #root {
   width: 100%;
-  max-width: 100vw;
-  overflow-x: clip;
+  max-width: 100%;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -1110,3 +1128,103 @@ html:not(.dark) .modern-sidebar nav {
   transform: scaleX(0);
   transform-origin: right;
 }
+
+/* --- COURSE BUILDER SPECIFIC REFERENCE STYLES --- */
+.font-jakarta {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+.cb-page-title,
+html.light-mode .cb-page-title,
+html.light-mode h1 .cb-page-title,
+html.light-mode h1.cb-page-title,
+h1 .cb-page-title,
+span.cb-page-title {
+  color: #380e6f !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+html.dark .cb-page-title,
+html.dark h1 .cb-page-title,
+html.dark span.cb-page-title {
+  color: #c084fc !important;
+}
+
+.cb-card,
+html.light-mode .cb-card {
+  background-color: #ffffff !important;
+  border: 1.5px solid #ecebf5 !important;
+  border-radius: 24px !important;
+  box-shadow: 0 4px 20px rgba(56, 14, 111, 0.03) !important;
+}
+html.dark .cb-card {
+  background-color: #121424 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.cb-input,
+html.light-mode input.cb-input,
+html.light-mode .cb-input {
+  background-color: #f4f6fa !important;
+  border: 1.5px solid #e2e6f0 !important;
+  border-radius: 16px !important;
+  color: #1e293b !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 600 !important;
+  outline: none !important;
+}
+.cb-input:focus,
+html.light-mode input.cb-input:focus,
+html.light-mode .cb-input:focus {
+  border-color: #380e6f !important;
+  background-color: #ffffff !important;
+}
+html.dark .cb-input {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.cb-section-row,
+html.light-mode .cb-section-row {
+  background-color: #f4f6fa !important;
+  border: 1.5px solid #e5e9f2 !important;
+  border-radius: 16px !important;
+}
+.cb-section-row:hover,
+html.light-mode .cb-section-row:hover {
+  background-color: #edf1f8 !important;
+}
+html.dark .cb-section-row {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.cb-primary-btn,
+html.light-mode button.cb-primary-btn,
+html.light-mode .cb-primary-btn {
+  background-color: #380e6f !important;
+  color: #ffffff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.cb-primary-btn:hover,
+html.light-mode button.cb-primary-btn:hover,
+html.light-mode .cb-primary-btn:hover {
+  background-color: #2d0b59 !important;
+  color: #ffffff !important;
+}
+
+.cb-tab-active,
+html.light-mode button.cb-tab-active,
+html.light-mode .cb-tab-active {
+  background-color: #380e6f !important;
+  color: #ffffff !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+.cb-status-approved,
+html.light-mode .cb-status-approved {
+  background-color: #e6f8f1 !important;
+  color: #059669 !important;
+  border: 1.5px solid #a7f3d0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}

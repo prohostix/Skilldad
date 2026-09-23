@@ -193,7 +193,7 @@ const RewardWallet = () => {
                         className="space-y-6"
                     >
                         {/* Metrics Grid */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                             {[
                                 { label: 'Wallet Balance', val: balance.total, suffix: ' pts', icon: Wallet, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
                                 { label: 'Total Referrals', val: referrals.length, suffix: ' referred', icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },

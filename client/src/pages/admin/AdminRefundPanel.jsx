@@ -131,7 +131,7 @@ const AdminRefundPanel = () => {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <DashboardHeading title="Refund Management" />
                 {transaction && (
                     <ModernButton variant="secondary" onClick={handleReset}>

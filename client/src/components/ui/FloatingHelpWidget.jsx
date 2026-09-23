@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, Bot, ChevronRight, Trash2, ThumbsUp, ThumbsDown, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import logoImg from '../../assets/logo.png';
 
@@ -98,6 +98,13 @@ const LMS_RULES = [
 ];
 
 const FloatingHelpWidget = () => {
+    const location = useLocation();
+
+    // Do not render chat widget in exam window, course player, or live session
+    if (location.pathname.includes('/course/') || location.pathname.includes('/exam/') || location.pathname.includes('/session/')) {
+        return null;
+    }
+
     const [isOpen, setIsOpen] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [messages, setMessages] = useState([]);
@@ -332,14 +339,14 @@ const FloatingHelpWidget = () => {
 
 
     return (
-        <div className="fixed bottom-8 right-4 md:bottom-6 md:right-6 z-[100]">
+        <div className="fixed bottom-24 right-4 md:bottom-6 md:right-6 z-[100]">
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                        className="fixed bottom-4 right-6 w-[350px] sm:w-[400px] bg-white dark:bg-[#0B071A]/80 backdrop-blur-xl border border-gray-200 dark:border-[#7C3AED]/40 rounded-2xl shadow-2xl overflow-hidden shadow-[#7C3AED]/20 flex flex-col h-[550px] max-h-[85vh] z-[101]"
+                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-[400px] max-w-[420px] bg-white dark:bg-[#0B071A]/80 backdrop-blur-xl border border-gray-200 dark:border-[#7C3AED]/40 rounded-2xl shadow-2xl overflow-hidden shadow-[#7C3AED]/20 flex flex-col h-[550px] max-h-[85vh] z-[101]"
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-[#7C3AED] via-[#9333EA] to-[#E879F9] px-4 py-3 text-white flex justify-between items-center shrink-0 shadow-lg z-10 relative overflow-hidden">

@@ -127,9 +127,17 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-csrf-token', 'X-CSRF-Token'],
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Fallback for local development: redirect missing uploads to live server
+app.use('/uploads', (req, res, next) => {
+  if (!req.hostname || req.hostname === 'localhost' || req.hostname === '127.0.0.1') {
+    return res.redirect(`https://skilldad.com/uploads${req.url}`);
+  }
+  next();
+});
 
 // Routes
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/users/me', require('./routes/careerProgressRoutes'));
 app.use('/api/db-status', require('./routes/dbStatusRoutes'));
 app.use('/api/courses', require('./routes/courseRoutes'));
 app.use('/api/courses', require('./routes/interactiveContentRoutes'));
@@ -169,6 +177,9 @@ app.use('/api/career', require('./routes/careerRoutes'));
 app.use('/api/certificates', require('./routes/certificateRoutes'));
 app.use('/api/batches', require('./routes/batchRoutes'));
 app.use('/api/sales', require('./routes/salesRoutes'));
+app.use('/api/course-finder', require('./routes/courseFinderRoutes'));
+app.use('/api/admin/course-finder', require('./routes/adminCourseFinderRoutes'));
+app.use('/api/catalog-cards', require('./routes/catalogCardRoutes'));
 
 app.use('/', require('./routes/seoRoutes'));
 
@@ -517,6 +528,127 @@ const startServer = async () => {
             )
         `);
       console.log('[Migration] student_daily_performance table verified/created'.green);
+
+      // Adds threaded replies (parent_id, one level deep) and per-user likes
+      // (liked_by, a JSONB array of user IDs) to the existing flat discussions table.
+      await query(`ALTER TABLE discussions ADD COLUMN IF NOT EXISTS parent_id TEXT`);
+      await query(`ALTER TABLE discussions ADD COLUMN IF NOT EXISTS liked_by JSONB DEFAULT '[]'::jsonb`);
+      console.log('[Migration] discussions.parent_id / liked_by verified/created'.green);
+
+      // Real (non-fabricated) signals backing the redesigned student dashboard's
+      // Career Progress / Career Journey cards and the daily activity streak.
+      // last_streak_date is TEXT ('YYYY-MM-DD'), not DATE, to avoid pg's
+      // DATE -> JS Date driver coercion and keep the comparison a plain string check.
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS career_goal TEXT`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS interview_prep_completed BOOLEAN DEFAULT false`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_streak INT DEFAULT 0`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS longest_streak INT DEFAULT 0`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_streak_date TEXT`);
+      console.log('[Migration] users career_goal/interview_prep/streak columns verified/created'.green);
+
+      // Course Finder: onboarding quiz that maps a student's goals/skills/
+      // preferences to real, weighted course recommendations. Question/answer
+      // text is snapshotted onto each response at submit time (question_snapshot,
+      // category_snapshot, answer_labels_snapshot) so an admin later disabling or
+      // deleting a question/answer never corrupts a student's historical result.
+      await query(`
+            CREATE TABLE IF NOT EXISTS course_finder_questions (
+                id TEXT PRIMARY KEY,
+                question TEXT NOT NULL,
+                helper_text TEXT,
+                category TEXT NOT NULL,
+                type TEXT NOT NULL DEFAULT 'single' CHECK (type IN ('single', 'multi')),
+                required BOOLEAN DEFAULT true,
+                display_order INT NOT NULL DEFAULT 0,
+                active BOOLEAN DEFAULT true,
+                config JSONB DEFAULT '{}'::jsonb,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+      await query(`
+            CREATE TABLE IF NOT EXISTS course_finder_answers (
+                id TEXT PRIMARY KEY,
+                question_id TEXT NOT NULL REFERENCES course_finder_questions(id) ON DELETE CASCADE,
+                label TEXT NOT NULL,
+                description TEXT,
+                icon TEXT,
+                display_order INT NOT NULL DEFAULT 0,
+                active BOOLEAN DEFAULT true,
+                mapping JSONB DEFAULT '{}'::jsonb,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+      await query(`
+            CREATE TABLE IF NOT EXISTS course_finder_attempts (
+                id TEXT PRIMARY KEY,
+                student_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed')),
+                is_current BOOLEAN DEFAULT true,
+                is_preview BOOLEAN DEFAULT false,
+                started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                completed_at TIMESTAMP WITH TIME ZONE
+            )
+        `);
+      await query(`
+            CREATE TABLE IF NOT EXISTS course_finder_responses (
+                id TEXT PRIMARY KEY,
+                attempt_id TEXT NOT NULL REFERENCES course_finder_attempts(id) ON DELETE CASCADE,
+                question_id TEXT NOT NULL REFERENCES course_finder_questions(id) ON DELETE CASCADE,
+                question_snapshot TEXT,
+                category_snapshot TEXT,
+                answer_ids JSONB DEFAULT '[]'::jsonb,
+                answer_labels_snapshot JSONB DEFAULT '[]'::jsonb,
+                custom_text TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                UNIQUE (attempt_id, question_id)
+            )
+        `);
+      await query(`
+            CREATE TABLE IF NOT EXISTS course_finder_recommendations (
+                id TEXT PRIMARY KEY,
+                attempt_id TEXT NOT NULL REFERENCES course_finder_attempts(id) ON DELETE CASCADE,
+                course_id TEXT REFERENCES courses(id) ON DELETE SET NULL,
+                career_role TEXT,
+                score INT NOT NULL DEFAULT 0,
+                rank INT NOT NULL DEFAULT 0,
+                reasons JSONB DEFAULT '[]'::jsonb,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+      await query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS career_roles JSONB DEFAULT '[]'::jsonb`);
+      await query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS career_category TEXT`);
+      await query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS skills_developed JSONB DEFAULT '[]'::jsonb`);
+      await query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS recommended_education JSONB DEFAULT '[]'::jsonb`);
+      await query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS experience_levels JSONB DEFAULT '[]'::jsonb`);
+      await query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS learning_modes JSONB DEFAULT '[]'::jsonb`);
+      await query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS duration_weeks INT`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS course_finder_status TEXT DEFAULT 'NOT_STARTED'`);
+      console.log('[Migration] course_finder_* tables and course/user metadata columns verified/created'.green);
+
+      // Admin-editable cover images for the 4 fixed "Career Path" category
+      // cards on the course catalog page (Skill Courses / Skill Integrated
+      // Diploma / WBL / Study Abroad). NULL image_path means "use the
+      // built-in default image" so existing pages keep working before an
+      // admin ever uploads a replacement.
+      await query(`
+            CREATE TABLE IF NOT EXISTS catalog_category_cards (
+                id TEXT PRIMARY KEY,
+                image_path TEXT,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            )
+        `);
+      await query(`
+            INSERT INTO catalog_category_cards (id, image_path) VALUES
+                ('skill_courses', NULL),
+                ('skill_integrated_diploma', NULL),
+                ('wbl', NULL),
+                ('study_abroad', NULL)
+            ON CONFLICT (id) DO NOTHING
+        `);
+      console.log('[Migration] catalog_category_cards table verified/created'.green);
     } catch (migErr) {
       console.warn('[Migration] Database migration warning:', migErr.message);
     }

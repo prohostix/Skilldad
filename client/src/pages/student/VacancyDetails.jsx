@@ -272,7 +272,7 @@ const VacancyDetails = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl shadow-2xl p-8 z-10"
+                        className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl shadow-2xl p-8 z-10 max-h-[90vh] overflow-y-auto"
                     >
                         <h3 className="text-xl font-black text-white mb-1">Apply for Role</h3>
                         <p className="text-sm text-white/40 mb-6">

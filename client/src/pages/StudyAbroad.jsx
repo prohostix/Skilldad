@@ -151,28 +151,30 @@ const StudyAbroad = ({ isEmbedded = false }) => {
                                 exit={{ opacity: 0, y: -20 }}
                                 className="space-y-12"
                             >
-                                <div className="text-center space-y-4">
-                                    <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                                        Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Boundless</span> Opportunities
-                                    </h1>
-                                    <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                                        Discover world-class education across the globe. Choose your destination and start your journey today.
-                                    </p>
+                                    <div className="text-center space-y-4 px-2">
+                                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight">
+                                            Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Boundless</span> Opportunities
+                                        </h1>
+                                        <p className="text-gray-400 text-sm sm:text-base md:text-lg max-w-2xl mx-auto">
+                                            Discover world-class education across the globe. Choose your destination and start your journey today.
+                                        </p>
+                                    </div>
 
-                                    <div className="max-w-xl mx-auto relative group mt-8">
-                                        <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700"></div>
-                                        <div className="relative flex items-center bg-white/5 border border-white/10 rounded-2xl p-2 focus-within:border-primary/50 transition-all">
-                                            <Search className="ml-4 text-gray-400 shrink-0" size={20} />
+                                    <div className="max-w-md mx-auto relative group">
+                                        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700"></div>
+                                        <div className="relative flex items-center">
+                                            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-primary transition-colors">
+                                                <Search size={16} />
+                                            </div>
                                             <input
                                                 type="text"
                                                 placeholder="Search by country (e.g. Canada, UK...)"
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="!bg-transparent border-none outline-none ring-0 focus:ring-0 w-full ml-3 px-4 py-3 rounded-xl text-gray-900 dark:text-white placeholder:text-gray-500"
+                                                className="w-full pl-9 pr-4 py-2.5 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-slate-200 rounded-2xl text-xs placeholder:text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                                             />
                                         </div>
                                     </div>
-                                </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {loading && countries.length === 0 ? (
@@ -225,10 +227,10 @@ const StudyAbroad = ({ isEmbedded = false }) => {
                             >
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                                        <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30 shrink-0">
                                             <Globe className="text-primary" size={24} />
                                         </div>
-                                        <h2 className="text-4xl font-bold">Top Universities in {selectedCountry?.name}</h2>
+                                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold min-w-0">Top Universities in {selectedCountry?.name}</h2>
                                     </div>
                                     <p className="text-white/40 max-w-2xl">
                                         Choose from the most prestigious institutions recognized globally for excellence in education and research.
@@ -350,25 +352,25 @@ const StudyAbroad = ({ isEmbedded = false }) => {
                                         <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-primary text-xs font-bold uppercase tracking-widest">
                                             <BookOpen size={14} /> {selectedCourse.level} Program
                                         </div>
-                                        <h1 className="text-5xl md:text-6xl font-bold">{selectedCourse.name}</h1>
+                                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold break-words">{selectedCourse.name}</h1>
 
-                                        <div className="flex flex-wrap items-center gap-12 pt-4">
-                                            <div className="flex items-center gap-4">
+                                        <div className="flex flex-wrap items-center gap-6 sm:gap-12 pt-4">
+                                            <div className="flex items-center gap-4 min-w-0">
                                                 <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden">
                                                     {selectedCourse.universityLogo ? <img src={selectedCourse.universityLogo} className="w-full h-full object-cover" /> : <School className="text-white/20" size={24} />}
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Awarding University</p>
-                                                    <h3 className="font-bold text-lg">{selectedCourse.universityName}</h3>
+                                                    <h3 className="font-bold text-lg truncate">{selectedCourse.universityName}</h3>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-4 min-w-0">
                                                 <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                                                     <Globe className="text-primary" size={24} />
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Location</p>
-                                                    <h3 className="font-bold text-lg">{selectedCourse.universityLocation}, {selectedCourse.countryName}</h3>
+                                                    <h3 className="font-bold text-lg truncate">{selectedCourse.universityLocation}, {selectedCourse.countryName}</h3>
                                                 </div>
                                             </div>
                                         </div>

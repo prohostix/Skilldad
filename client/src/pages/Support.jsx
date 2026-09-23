@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
     Mail, MessageSquare, Phone, ChevronDown, ChevronUp, Send, Search,
     PlayCircle, BookOpen, Rocket, User, CreditCard, Award,
     Smartphone, RefreshCcw, Video, HelpCircle, ArrowRight, LifeBuoy,
-    Briefcase, Gift, Shield, Zap, Globe, CheckCircle2, Clock, AlertCircle, Ticket
+    Briefcase, Gift, Shield, Zap, Globe, CheckCircle2, Clock, AlertCircle, Ticket, X
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
@@ -15,29 +15,130 @@ import DashboardHeading from '../components/ui/DashboardHeading';
 import axios from 'axios';
 import { useToast } from '../context/ToastContext';
 
-const STATIC_FAQS = [];
+const highlightMatch = (text, query) => {
+    if (!text || !query || !query.trim()) return text;
+    const cleanQuery = query.trim();
+    const parts = text.split(new RegExp(`(${cleanQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+    return parts.map((part, i) =>
+        part.toLowerCase() === cleanQuery.toLowerCase() ? (
+            <mark key={i} className="bg-primary/30 text-white rounded px-1 py-0.5 font-bold">
+                {part}
+            </mark>
+        ) : (
+            part
+        )
+    );
+};
 
-const FAQItem = ({ faq }) => {
+const STATIC_FAQS = [
+    {
+        _id: 'static-faq-1',
+        question: 'How to create a new SkillDad account',
+        answer: "Welcome to SkillDad! Creating an account is quick and simple:\n\n1. Click on the 'Register' button located at the top-right corner of the website.\n2. Enter your Full Name, Email Address, and create a strong Password.\n3. Verify your phone number with the OTP code sent via SMS.\n4. Select your role as 'Student' to access course materials.\n5. Click 'Create Account'.\n\nYou will instantly receive a welcome email with your credentials and a quick-start guide to navigate the platform.",
+        category: 'Getting Started',
+        help_link: '/support'
+    },
+    {
+        _id: 'static-faq-2',
+        question: 'How to enroll in courses and learning tracks',
+        answer: "To start learning, you need to enroll in a course or learning track:\n\n1. From your Dashboard or the main menu, navigate to the 'Course Catalog'.\n2. Browse through our available programs or use the search bar to find a specific topic.\n3. Click on the course card to view detailed information, curriculum, and instructor details.\n4. Click the 'Enroll Now' button on the course page.\n5. You will be redirected to the secure payment gateway. Complete your transaction using a Card, Net Banking, or UPI.\n6. Once payment is successful, the course will instantly appear under 'My Courses' in your Student Dashboard.",
+        category: 'Courses'
+    },
+    {
+        _id: 'static-faq-3',
+        question: 'How to join live classes and Zoom sessions',
+        answer: "Live sessions are deeply integrated into the SkillDad platform. You do not need external software:\n\n1. Log into your Student Dashboard.\n2. On the left sidebar, click on 'Live Classes'.\n3. Here you will see all 'Upcoming Sessions' for courses you are enrolled in.\n4. When a session is within 15 minutes of its scheduled start time, the 'Join Session' button will light up.\n5. Click 'Join Session' to enter our integrated Web Viewer.",
+        category: 'Live Classes',
+        help_link: '/dashboard/live-classes'
+    },
+    {
+        _id: 'static-faq-4',
+        question: 'How to apply for job and internship',
+        answer: 'Navigate to the Career & Placements portal in your student dashboard. Browse the available vacancies in the "Jobs" or "Internships" tabs. Click on any listing to view details, requirements, and job description, then click "Apply" to submit your profile and resume.',
+        category: 'Career & Placements',
+        help_link: '/dashboard/placements'
+    },
+    {
+        _id: 'static-faq-5',
+        question: 'Payment is failing, declined or stuck',
+        answer: "If your payment is failing during checkout, please try these steps:\n\n1. Double-check your card details (Expiry Date, CVV) or UPI ID.\n2. Ensure your card is authorized for online transactions.\n3. If using UPI, ensure your UPI app is actively running and approve the request within 5 minutes.\n\nIf money was deducted but the course is not showing in your dashboard, please DO NOT pay again. Contact our Support team or raise a ticket with your Transaction ID, and we will manually verify within 2 hours.",
+        category: 'Payments'
+    },
+    {
+        _id: 'static-faq-6',
+        question: 'Where can I find invoice and billing history?',
+        answer: 'You can download all your transaction receipts directly from your dashboard:\n\n1. Go to your Student Dashboard.\n2. Click on the Payment History tab in the left sidebar.\n3. Here you will see a list of all your past transactions and payments.\n4. Click on any transaction to download or view your invoice receipt.',
+        category: 'Payments',
+        help_link: '/dashboard/payment-history'
+    },
+    {
+        _id: 'static-faq-7',
+        question: 'How does the Refer & Earn program work?',
+        answer: 'Share your unique referral code with friends. When they join SkillDad using your link and enroll, you earn reward points instantly. These points are tracked in your Reward Wallet and can be redeemed for course discounts or exclusive benefits.',
+        category: 'Rewards & Referrals',
+        help_link: '/dashboard/reward-wallet'
+    },
+    {
+        _id: 'static-faq-8',
+        question: 'I forgot my password / How to reset my password?',
+        answer: "If you cannot log into your account, you can easily restore access:\n\n1. Go to the SkillDad Login page.\n2. Click the 'Forgot Password?' link below the password field.\n3. Enter the email address associated with your account and click 'Send Reset Link'.\n4. Check your inbox (and spam folder) for an email from SkillDad.\n5. Click the secure link to set your new password.",
+        category: 'Account & Login',
+        help_link: '/forgot-password'
+    },
+    {
+        _id: 'static-faq-9',
+        question: 'How do I download my certificate after course completion?',
+        answer: 'Upon completing all course modules, lessons, and required quizzes or project submissions with a passing score, your Certificate of Completion will automatically be generated in your dashboard under Documents > Certificates. You can download it as a high-resolution PDF with verifiable credentials.',
+        category: 'Documents & Certificates',
+        help_link: '/dashboard/documents'
+    },
+    {
+        _id: 'static-faq-10',
+        question: 'Video playback is stuttering or buffering',
+        answer: "If you face video buffering:\n\n1. The player automatically adjusts to your internet speed, but you can manually click the gear icon on the video player to select 720p or 480p.\n2. Clear your browser cache and cookies, then refresh the page.\n3. Ensure no heavy downloads or torrents are running on your connection.\n4. If using a VPN, temporarily disable it.",
+        category: 'Technical Issues'
+    },
+    {
+        _id: 'static-faq-11',
+        question: 'Do I get a university certificate?',
+        answer: 'Yes! Upon successful completion of a university-affiliated course, you receive a digital certificate co-branded by SkillDad and the respective partner university. This certificate is globally verifiable.',
+        category: 'Universities'
+    },
+    {
+        _id: 'static-faq-12',
+        question: 'Can I access course materials offline?',
+        answer: 'While video streaming requires an internet connection, you can download all reading materials, source code, and project briefs for offline study via the SkillDad portal.',
+        category: 'Courses'
+    }
+];
+
+const FAQItem = ({ faq, isForceOpen, searchQuery }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [feedbackGiven, setFeedbackGiven] = useState(false);
+
+    useEffect(() => {
+        if (isForceOpen !== undefined) {
+            setIsOpen(isForceOpen);
+        }
+    }, [isForceOpen]);
 
     const handleHelpful = async (isHelpful) => {
         if (feedbackGiven) return;
         try {
-            await axios.post(`/api/faqs/${faq._id}/feedback`, { isHelpful });
+            await axios.post(`/api/faqs/${faq._id || faq.id}/feedback`, { isHelpful });
             setFeedbackGiven(true);
         } catch (error) { console.error("Feedback error", error); }
     };
 
     const handleToggle = async () => {
         if (!isOpen) {
-            try { await axios.post(`/api/faqs/${faq._id}/view`); } catch (error) { }
+            try { await axios.post(`/api/faqs/${faq._id || faq.id}/view`); } catch (error) { }
         }
         setIsOpen(!isOpen);
     };
 
     return (
-        <div className={`border-b border-white/5 transition-all duration-300 ${isOpen ? 'bg-white/[0.02]' : 'hover:bg-white/[0.01]'}`}>
+        <div id={`faq-${faq._id || faq.id}`} className={`border-b border-white/5 transition-all duration-300 rounded-xl ${isOpen ? 'bg-white/[0.03] shadow-sm my-1 border border-primary/20' : 'hover:bg-white/[0.01]'}`}>
             <button
                 onClick={handleToggle}
                 className="w-full flex items-center justify-between text-left py-6 px-4 focus:outline-none group"
@@ -47,7 +148,7 @@ const FAQItem = ({ faq }) => {
                         {faq.category || 'General Help'}
                     </span>
                     <span className={`text-sm md:text-md font-bold transition-colors ${isOpen ? 'text-primary' : 'text-white/80 group-hover:text-white'}`}>
-                        {faq.question}
+                        {highlightMatch(faq.question, searchQuery)}
                     </span>
                 </div>
                 <div className={`p-2 rounded-full border border-white/5 transition-all ${isOpen ? 'rotate-180 bg-primary/10 border-primary/30 text-primary' : 'text-white/20'}`}>
@@ -142,6 +243,10 @@ const Support = () => {
     const [faqs, setFaqs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [selectedFaqId, setSelectedFaqId] = useState(null);
+    const searchInputRef = useRef(null);
+    const dropdownRef = useRef(null);
     const [formData, setFormData] = useState({ name: '', email: '', subject: 'Technical Issue', message: '' });
     const [loading, setLoading] = useState(false);
     const [myTickets, setMyTickets] = useState([]);
@@ -159,7 +264,9 @@ const Support = () => {
             const dynamicFaqs = res.data || [];
             const merged = [...STATIC_FAQS];
             dynamicFaqs.forEach(df => {
-                if (!merged.find(sf => sf._id === df._id)) merged.push(df);
+                if (!merged.find(sf => (sf._id && sf._id === df._id) || (sf.question && sf.question.toLowerCase() === (df.question || '').toLowerCase()))) {
+                    merged.push(df);
+                }
             });
             setFaqs(merged);
         } catch (error) {
@@ -193,6 +300,21 @@ const Support = () => {
     }, []);
 
     useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(e.target) &&
+                searchInputRef.current &&
+                !searchInputRef.current.contains(e.target)
+            ) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
         if (location.hash === '#ticket-form') {
             setTimeout(() => {
                 document.getElementById('ticket-form')?.scrollIntoView({ behavior: 'smooth' });
@@ -210,15 +332,68 @@ const Support = () => {
         }));
     }, [faqs]);
 
+    // Matches for the live floating autocomplete dropdown
+    const dropdownMatches = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) return [];
+        return faqs.filter(faq => {
+            const question = (faq.question || '').toLowerCase();
+            const answer = (faq.answer || '').toLowerCase();
+            const category = (faq.category || '').toLowerCase();
+            const tags = Array.isArray(faq.tags) ? faq.tags.join(' ').toLowerCase() : '';
+            return question.includes(q) || answer.includes(q) || category.includes(q) || tags.includes(q);
+        });
+    }, [faqs, searchQuery]);
+
+    // Filtered FAQs for the main Knowledge Base section
     const filteredFaqs = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
         let results = faqs;
-        if (selectedCategory !== 'All') results = results.filter(faq => faq.category === selectedCategory);
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            results = results.filter(faq => faq.question.toLowerCase().includes(q) || faq.answer.toLowerCase().includes(q));
+
+        if (q) {
+            results = results.filter(faq => {
+                const question = (faq.question || '').toLowerCase();
+                const answer = (faq.answer || '').toLowerCase();
+                const category = (faq.category || '').toLowerCase();
+                const tags = Array.isArray(faq.tags) ? faq.tags.join(' ').toLowerCase() : '';
+                return question.includes(q) || answer.includes(q) || category.includes(q) || tags.includes(q);
+            });
+
+            if (selectedCategory !== 'All') {
+                const categoryFiltered = results.filter(faq => faq.category === selectedCategory);
+                if (categoryFiltered.length > 0) {
+                    results = categoryFiltered;
+                }
+            }
+        } else {
+            if (selectedCategory !== 'All') {
+                results = results.filter(faq => faq.category === selectedCategory);
+            }
         }
         return results;
     }, [faqs, selectedCategory, searchQuery]);
+
+    const handleSearchSubmit = () => {
+        setShowDropdown(false);
+        const faqSec = document.getElementById('faq-section');
+        if (faqSec) {
+            faqSec.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    const handleSelectFaq = (faq) => {
+        const id = faq._id || faq.id;
+        setSelectedFaqId(id);
+        setShowDropdown(false);
+        setTimeout(() => {
+            const element = document.getElementById(`faq-${id}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                handleSearchSubmit();
+            }
+        }, 100);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -245,7 +420,7 @@ const Support = () => {
             {!isInDashboard && <Navbar />}
 
             {/* Premium Hero Section */}
-            <div className={`relative overflow-hidden ${isInDashboard ? 'pt-8' : 'pt-40 pb-24 md:pt-48 md:pb-40'}`}>
+            <div className={`relative overflow-hidden ${isInDashboard ? 'pt-8 pb-10' : 'pt-32 pb-14 md:pt-40 md:pb-20'}`}>
                 {/* Background Atmosphere */}
                 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                     <div className="absolute top-[-20%] left-[-10%] w-[100%] h-[100%] bg-primary/10 blur-[180px] rounded-full animate-pulse-slow"></div>
@@ -258,8 +433,8 @@ const Support = () => {
                             <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em] font-mono mb-4 block leading-none">
                                 HELP_CENTER_V2.0
                             </span>
-                            <h1 className="text-4xl md:text-7xl font-black font-inter tracking-tighter leading-[0.9] mb-8">
-                                <span className="opacity-40">Knowledge Hub &</span> <br className="hidden md:block" />
+                            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-inter tracking-tighter leading-[0.9] mb-8">
+                                <span className="premium-gradient-text">Knowledge Hub &</span> <br className="hidden md:block" />
                                 <span className="premium-gradient-text">Support</span>
                             </h1>
                             <p className="text-white/40 text-sm md:text-md max-w-xl mx-auto font-medium leading-relaxed">
@@ -267,49 +442,136 @@ const Support = () => {
                             </p>
                         </motion.div>
 
-                        <div className="relative mt-12">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-blue-500/30 rounded-3xl blur-xl opacity-0 transition duration-500 group-focus-within:opacity-100"></div>
-                            <div className="relative flex items-center">
-                                <Search size={20} className="absolute left-6 text-white/20" />
+                        {/* Search Bar with live autocomplete and direct action */}
+                        <div ref={dropdownRef} className="relative mt-12 max-w-2xl mx-auto group">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 to-blue-500/40 rounded-3xl blur-xl opacity-0 transition duration-500 group-focus-within:opacity-100"></div>
+
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    handleSearchSubmit();
+                                }}
+                                className="relative flex items-center"
+                            >
+                                <Search size={20} className="absolute left-6 text-white/40 pointer-events-none" />
                                 <input
+                                    ref={searchInputRef}
                                     type="text"
                                     placeholder="Search documentation, career guides, or help topics..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl md:rounded-3xl py-6 pl-16 pr-8 text-sm focus:border-primary/50 backdrop-blur-2xl focus:outline-none transition-all shadow-2xl placeholder:text-white/20"
+                                    onFocus={() => { if (searchQuery.trim()) setShowDropdown(true); }}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value);
+                                        setShowDropdown(true);
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Escape') setShowDropdown(false);
+                                    }}
+                                    className="w-full bg-white/[0.05] border border-white/15 rounded-2xl md:rounded-3xl py-5 md:py-6 pl-16 pr-28 text-sm md:text-base text-white focus:border-primary/70 backdrop-blur-2xl focus:outline-none transition-all shadow-2xl placeholder:text-white/30"
                                 />
-                            </div>
+
+                                <div className="absolute right-3 flex items-center gap-1.5">
+                                    {searchQuery && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSearchQuery('');
+                                                setShowDropdown(false);
+                                                setSelectedFaqId(null);
+                                            }}
+                                            className="p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+                                            title="Clear search"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white text-xs font-bold transition-all shadow-md shadow-primary/25"
+                                    >
+                                        <span>Search</span>
+                                        <ArrowRight size={13} />
+                                    </button>
+                                </div>
+                            </form>
+
+                            {/* Live Search Results Dropdown Popover */}
+                            <AnimatePresence>
+                                {showDropdown && searchQuery.trim().length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="absolute left-0 right-0 top-full mt-3 bg-[#0a0618]/95 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-2xl overflow-hidden z-50 text-left divide-y divide-white/5"
+                                    >
+                                        <div className="p-3 px-4 bg-white/[0.02] flex items-center justify-between text-xs text-white/50">
+                                            <span>
+                                                Found <strong className="text-primary-accent font-bold">{dropdownMatches.length}</strong> {dropdownMatches.length === 1 ? 'result' : 'results'} for "{searchQuery}"
+                                            </span>
+                                            <span className="text-[10px] text-white/30 font-mono">Press Enter to view all</span>
+                                        </div>
+
+                                        <div className="max-h-[340px] overflow-y-auto py-1">
+                                            {dropdownMatches.length > 0 ? (
+                                                dropdownMatches.slice(0, 5).map((faq) => (
+                                                    <div
+                                                        key={faq._id || faq.id}
+                                                        onClick={() => handleSelectFaq(faq)}
+                                                        className="p-3.5 px-4 hover:bg-white/[0.06] cursor-pointer transition-colors group/item flex items-start gap-3"
+                                                    >
+                                                        <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5 group-hover/item:bg-primary group-hover/item:text-white transition-colors">
+                                                            <HelpCircle size={15} />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/5">
+                                                                    {faq.category || 'General'}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs md:text-sm font-semibold text-white group-hover/item:text-primary transition-colors line-clamp-1">
+                                                                {highlightMatch(faq.question, searchQuery)}
+                                                            </p>
+                                                            <p className="text-[11px] text-white/40 line-clamp-1 mt-0.5">
+                                                                {faq.answer?.replace(/[#*•\d.)]/g, '').trim()}
+                                                            </p>
+                                                        </div>
+                                                        <ArrowRight size={14} className="text-white/20 group-hover/item:text-primary group-hover/item:translate-x-1 transition-all shrink-0 self-center" />
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="py-8 text-center px-4 space-y-2">
+                                                    <p className="text-xs text-white/50 font-medium">No matching articles found for "{searchQuery}"</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => document.getElementById('ticket-form')?.scrollIntoView({ behavior: 'smooth' })}
+                                                        className="text-xs text-primary font-bold hover:underline"
+                                                    >
+                                                        Need help? Raise a Support Ticket &rarr;
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {dropdownMatches.length > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={handleSearchSubmit}
+                                                className="w-full py-3 px-4 text-center text-xs font-bold text-primary hover:bg-primary/10 transition-colors flex items-center justify-center gap-1.5"
+                                            >
+                                                <span>View all {dropdownMatches.length} results in Knowledge Base</span>
+                                                <ChevronDown size={14} />
+                                            </button>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Quick Actions / Assisted Path */}
-            <div className="max-w-7xl mx-auto px-6 mb-24 grid md:grid-cols-3 gap-4">
-                {[
-                    { title: 'Career Guide', desc: 'Step-by-step application process', icon: Zap, action: () => window.dispatchEvent(new CustomEvent('open-career-guide')), color: 'text-amber-400', bg: 'bg-amber-400/10' },
-                    { title: 'Live Sessions', desc: 'Track your upcoming classes', icon: Video, action: () => navigate('/dashboard/live-classes'), color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
-                    { title: 'Tech Status', desc: 'System online & optimized', icon: Shield, action: null, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-                ].map((item, i) => (
-                    <motion.div 
-                        key={i} 
-                        initial={{ opacity: 0, y: 20 }} 
-                        animate={{ opacity: 1, y: 0 }} 
-                        transition={{ delay: i * 0.1 }}
-                        onClick={item.action}
-                        className={`p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all cursor-pointer group flex items-start gap-5`}
-                    >
-                        <div className={`p-4 rounded-xl ${item.bg} ${item.color} group-hover:scale-110 transition-transform`}>
-                            <item.icon size={22} />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-bold text-white mb-1">{item.title}</h3>
-                            <p className="text-[11px] text-white/40 font-medium">{item.desc}</p>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
-
+            {/* Main Content Area */}
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid lg:grid-cols-12 gap-16">
                     {/* Main Content Area */}
@@ -395,33 +657,83 @@ const Support = () => {
                             </div>
                         )}
 
-                        {/* Dynamic Category Tabs */}
-                        <div className="flex gap-2 mb-8 overflow-x-auto pb-4 no-scrollbar border-b border-white/5">
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCategory(cat.id)}
-                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedCategory === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/30 hover:text-white/60 bg-white/5'}`}
-                                >
-                                    {cat.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="space-y-2">
-                             <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono mb-6">
-                                TOTAL_RESULTS: {filteredFaqs.length}
-                            </div>
-                            
-                            {filteredFaqs.length > 0 ? (
-                                filteredFaqs.map((faq) => (
-                                    <FAQItem key={faq._id} faq={faq} />
-                                ))
-                            ) : (
-                                <div className="text-center py-20 border border-dashed border-white/10 rounded-2xl">
-                                    <p className="text-white/20 text-xs font-bold uppercase tracking-widest">No matching documentation</p>
+                        {/* Dynamic Category Tabs & Knowledge Base */}
+                        <div id="faq-section" className="scroll-mt-24">
+                            {searchQuery.trim() && (
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 px-4 rounded-xl bg-primary/10 border border-primary/25 mb-6 backdrop-blur-md">
+                                    <div className="flex items-center gap-2.5 text-xs">
+                                        <Search size={15} className="text-primary shrink-0" />
+                                        <span className="text-white/80">
+                                            Search results for <strong className="text-white font-bold">"{searchQuery}"</strong> ({filteredFaqs.length} {filteredFaqs.length === 1 ? 'match' : 'matches'})
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSearchQuery('');
+                                            setSelectedFaqId(null);
+                                        }}
+                                        className="text-xs font-bold text-primary hover:text-white flex items-center gap-1 transition-colors self-start sm:self-auto"
+                                    >
+                                        <X size={13} /> Clear Search
+                                    </button>
                                 </div>
                             )}
+
+                            <div className="flex gap-2 mb-8 overflow-x-auto pb-4 no-scrollbar border-b border-white/5">
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setSelectedCategory(cat.id)}
+                                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${selectedCategory === cat.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/30 hover:text-white/60 bg-white/5'}`}
+                                    >
+                                        {cat.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] font-mono mb-6 flex items-center justify-between">
+                                    <span>TOTAL_RESULTS: {filteredFaqs.length}</span>
+                                    {selectedFaqId && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedFaqId(null)}
+                                            className="text-primary hover:underline text-[10px] font-bold normal-case"
+                                        >
+                                            Reset Expanded View
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                {filteredFaqs.length > 0 ? (
+                                    filteredFaqs.map((faq) => (
+                                        <FAQItem 
+                                            key={faq._id || faq.id} 
+                                            faq={faq} 
+                                            isForceOpen={selectedFaqId === (faq._id || faq.id) || (Boolean(searchQuery.trim()) && filteredFaqs.length <= 3)}
+                                            searchQuery={searchQuery}
+                                        />
+                                    ))
+                                ) : (
+                                    <div className="text-center py-20 border border-dashed border-white/10 rounded-2xl space-y-3">
+                                        <p className="text-white/40 text-xs font-bold uppercase tracking-widest">No matching documentation found</p>
+                                        {searchQuery && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setSearchQuery('');
+                                                    setSelectedCategory('All');
+                                                    setSelectedFaqId(null);
+                                                }}
+                                                className="text-xs text-primary font-bold hover:underline block mx-auto"
+                                            >
+                                                Clear search and view all articles
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Direct Support Section */}

@@ -15,6 +15,7 @@ const {
     deleteVideo,
     addExercise,
     getAdminCourses,
+    getRecommendedCourses,
     uploadThumbnail,
     uploadBrochure,
     approveCourse,
@@ -36,6 +37,7 @@ const upload = require('../middleware/uploadMiddleware');
 
 router.route('/').get(getCourses).post(protect, createCourse);
 router.route('/admin').get(protect, getAdminCourses);
+router.route('/recommended').get(protect, getRecommendedCourses);
 router.route('/:id/approve').put(protect, approveCourse);
 router.route('/zoom-recordings/available').get(protect, getAvailableZoomRecordings);
 router.route('/:id').get(optionalProtect, getCourse).put(protect, updateCourse).delete(protect, deleteCourse);

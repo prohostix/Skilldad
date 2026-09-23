@@ -76,12 +76,12 @@ const HostLinkModal = ({ data, onClose }) => {
         setTimeout(() => setCopied(false), 2500);
     };
     return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-[#0d0d1f] border border-white/10 rounded-2xl p-6 w-full max-w-lg shadow-2xl"
+                className="bg-[#0d0d1f] border border-white/10 rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[85vh] overflow-y-auto my-4"
             >
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -326,7 +326,7 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
                     </div>
 
                     {/* Course & Duration */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label className={labelCls}>Course / Category *</label>
                             <div className="relative group">
@@ -366,7 +366,7 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
                     {/* Start Date & Time - split inputs for cross-browser reliability */}
                     <div>
                         <label className={labelCls}>Start Date & Time *</label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="relative">
                                 <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 pointer-events-none" />
                                 <input
@@ -432,7 +432,7 @@ const ScheduleModal = ({ onClose, onCreated, students }) => {
                     </div>
 
                     {JSON.parse(localStorage.getItem('userInfo'))?.role === 'admin' && (
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className={labelCls}>Target University (Auto-Enroll)</label>
                                 <select
@@ -595,7 +595,7 @@ const SessionCard = ({
                 </div>
 
                 {/* Right actions */}
-                <div className="flex gap-2 self-center shrink-0">
+                <div className="flex flex-wrap gap-2 md:self-center shrink-0">
                     {/* Start button */}
                     {session.status === 'scheduled' && (
                         <button

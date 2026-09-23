@@ -271,12 +271,12 @@ const UniversityDocumentReview = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-4xl bg-slate-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+                            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto lg:overflow-hidden bg-slate-900 border border-white/10 rounded-3xl shadow-2xl"
                         >
-                            <div className="flex flex-col lg:flex-row h-[85vh]">
-                                <div className="flex-1 bg-black/40 relative group">
-                                    <iframe 
-                                        src={getMediaUrl(selectedDoc.file_url)} 
+                            <div className="flex flex-col lg:flex-row lg:h-[85vh]">
+                                <div className="flex-1 min-h-[320px] lg:min-h-0 bg-black/40 relative group">
+                                    <iframe
+                                        src={getMediaUrl(selectedDoc.file_url)}
                                         className="w-full h-full border-none"
                                         title="Document Preview"
                                     />
@@ -292,7 +292,7 @@ const UniversityDocumentReview = () => {
                                     </div>
                                 </div>
 
-                                <div className="w-full lg:w-80 p-8 flex flex-col bg-slate-900 border-l border-white/10">
+                                <div className="w-full lg:w-80 p-5 sm:p-8 flex flex-col bg-slate-900 border-l border-white/10">
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
                                             <h2 className="text-xl font-bold text-white">{selectedDoc.title}</h2>

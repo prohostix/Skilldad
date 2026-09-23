@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ModernButton = ({ children, onClick, variant = 'primary', className = '', disabled, type = 'button' }) => {
+const ModernButton = ({ children, onClick, variant = 'primary', className = '', disabled, type = 'button', style, ...props }) => {
     const baseStyles = 'group relative px-3 py-1.5 rounded-lg font-inter font-semibold text-xs transition-all inline-flex items-center justify-center space-x-1.5 touch-manipulation shadow-sm';
 
     const variants = {
@@ -15,6 +15,8 @@ const ModernButton = ({ children, onClick, variant = 'primary', className = '', 
             onClick={onClick}
             disabled={disabled}
             type={type}
+            style={style}
+            {...props}
             className={`${baseStyles} ${variants[variant]} ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
             <span className="relative z-10 flex items-center space-x-1.5">

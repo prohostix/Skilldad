@@ -1,22 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import logoImg from '../../assets/logo.png';
+import logoImg from '../../assets/logo_deep_purple.png';
 
 const SkillDadLogo = ({ className = "w-full h-full", ...props }) => {
     return (
         <div className={`relative ${className} flex items-center justify-center`}>
-            {/* Clear Aura Pulse (Sharp, no blur) */}
+            {/* Clear Aura Pulse in deep purple */}
             <motion.div
                 animate={{
                     scale: [1, 1.1, 1],
-                    opacity: [0.1, 0.2, 0.1],
+                    opacity: [0.08, 0.18, 0.08],
                 }}
                 transition={{
                     duration: 4,
                     repeat: Infinity,
                     ease: "easeInOut"
                 }}
-                className="absolute inset-[-10%] bg-primary/10 rounded-full pointer-events-none"
+                className="absolute inset-[-10%] bg-[#4C1D95]/15 rounded-full pointer-events-none"
             />
 
             {/* Sharp Logo Image */}
@@ -46,7 +46,7 @@ const SkillDadLogo = ({ className = "w-full h-full", ...props }) => {
                 />
             </div>
 
-            {/* Orbiting Points */}
+            {/* Orbiting Points in deep purple */}
             {[...Array(3)].map((_, i) => (
                 <motion.div
                     key={i}
@@ -61,7 +61,7 @@ const SkillDadLogo = ({ className = "w-full h-full", ...props }) => {
                     className="absolute w-[110%] h-[110%] z-0 pointer-events-none"
                 >
                     <div
-                        className="w-1 h-1 bg-primary/40 rounded-full absolute"
+                        className="w-1 h-1 bg-[#4C1D95] dark:bg-purple-400 rounded-full absolute"
                         style={{
                             top: '0',
                             left: '50%',

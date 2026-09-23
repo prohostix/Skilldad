@@ -544,7 +544,7 @@ const UniversityPublicDetail = () => {
                                     <span>Global Academic Partner</span>
                                 </div>
 
-                                <h1 className="text-4xl xs:text-5xl md:text-7xl lg:text-[100px] font-black text-white font-jakarta tracking-tighter leading-[1.1] md:leading-[0.85] py-2">
+                                <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-[100px] font-black text-white font-jakarta tracking-tighter leading-[1.1] md:leading-[0.85] py-2">
                                     {university.name}
                                 </h1>
 
@@ -703,13 +703,13 @@ const UniversityPublicDetail = () => {
                     </div>
 
                     {loadingCourses ? (
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {[1, 2, 3].map(i => (
                                 <div key={i} className="h-[400px] w-full bg-white/5 rounded-[48px] animate-pulse"></div>
                             ))}
                         </div>
                     ) : courses.length > 0 ? (
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {courses.map(course => (
                                 <CourseCard key={course.id || course._id} course={course} />
                             ))}
@@ -775,7 +775,7 @@ const UniversityPublicDetail = () => {
                                 View Virtual Tour
                             </ModernButton>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                             {university.profile.gallery.slice(0, 4).map((img, i) => (
                                 <motion.div
                                     key={i}
@@ -907,7 +907,7 @@ const UniversityPublicDetail = () => {
                             <Users size={16} /> Faculty & Academic Leadership
                         </div>
                         <h2 className="text-4xl font-black text-white font-jakarta mb-16">Distinguished <span className="text-primary italic">Directory</span></h2>
-                        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-10">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
                             {(university.profile.faculty || university.profile.personnel).map((person, i) => (
                                 <div key={i} className="group flex flex-col items-center text-center space-y-6 p-6 rounded-[40px] bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all">
                                     <div className="relative w-40 h-40">

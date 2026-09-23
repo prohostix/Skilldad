@@ -130,6 +130,21 @@ html.light-mode .hero-diagram-node-label,
     filter: none !important;
 }
 
+/* Dark mode: the node illustrations are hand-drawn deep-purple line art on
+   transparent PNGs, which nearly disappears against the dark background.
+   Recolor them to the same light tone as the diagram labels (fill: #e9d5ff
+   above) so the icons stay legible - light mode overrides this back below. */
+.hero-diagram-node-img.hero-diagram-img-cover {
+    filter: brightness(0) invert(1) drop-shadow(0 0 4px rgba(192, 38, 255, 0.5)) !important;
+}
+
+/* Dark mode: the SkillDad logo node has a solid white circle behind it
+   (needed for contrast in light mode) that shows up as a stark white disc
+   against the dark hero background - drop it to transparent, dark mode only. */
+.hero-diagram-root-circle {
+    fill: transparent !important;
+}
+
 /* Eliminate the right fade gradient overlay entirely so it never casts smoke or fog across right-side nodes like Jobs */
 .hero-diagram-fade-edge {
     display: none !important;
@@ -164,6 +179,13 @@ html.light-mode .hero-diagram-core-circle,
 [data-theme="light"] .hero-diagram-core-circle {
     animation: none !important;
     filter: drop-shadow(0 2px 6px rgba(88, 28, 135, 0.22)) !important;
+}
+
+html.light-mode .hero-diagram-root-circle,
+.light-mode .hero-diagram-root-circle,
+.light .hero-diagram-root-circle,
+[data-theme="light"] .hero-diagram-root-circle {
+    fill: #ffffff !important;
 }
 
 html.light-mode .hero-diagram-pulse-ring,
@@ -422,7 +444,7 @@ const DiagramNode = ({ node, index }) => {
                 fill={resolvedImage ? (node.imageBg || defaultBg) : 'url(#nGrad)'}
                 stroke={resolvedImage ? 'none' : '#9333EA'}
                 strokeWidth={resolvedImage ? 0 : (node.highlight ? 2.25 : 1.75)}
-                className="hero-diagram-core-circle"
+                className={`hero-diagram-core-circle${node.isRoot ? ' hero-diagram-root-circle' : ''}`}
                 style={{
                     animation: `hero-node-core-glow 3s ease-in-out infinite ${node.delay}s`,
                     filter: node.highlight ? 'drop-shadow(0 0 10px rgba(192,38,255,0.55))' : (resolvedImage ? 'drop-shadow(0 0 8px rgba(147,51,234,0.4))' : undefined)
@@ -503,7 +525,7 @@ const NetworkDiagram = ({ customNodesConfig }) => {
 
     return (
         <div
-            className="absolute -left-28 sm:-left-10 lg:left-0 top-[40%] sm:top-[36%] md:top-[34%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-40 sm:scale-50 md:scale-75 xl:scale-100 origin-left opacity-10 sm:opacity-25 md:opacity-80 lg:opacity-100"
+            className="absolute -left-16 sm:-left-10 lg:left-0 top-[40%] sm:top-[36%] md:top-[34%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-55 sm:scale-65 md:scale-75 xl:scale-100 origin-left opacity-35 sm:opacity-50 md:opacity-80 lg:opacity-100"
             style={{ width: 420, height: 500 }}
         >
             <div
@@ -642,11 +664,8 @@ const HeroSection = () => {
                 <AlyraOrb />
             </div>
 
-            {/* Mobile-only fade for the ribbon animation at the bottom of the hero */}
-            <div className={`md:hidden absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t ${theme === 'dark' ? 'from-black' : 'from-[#FAF9F6]'} to-transparent z-[1] pointer-events-none`} />
-
-            {/* Purple Network Diagram - left */}
-            <div className="gpu-accelerated">
+            {/* Purple Network Diagram - left (hidden on mobile, visible on desktop) */}
+            <div className="hidden md:block gpu-accelerated">
                 <NetworkDiagram customNodesConfig={networkDiagramNodes} />
             </div>
 
@@ -654,39 +673,39 @@ const HeroSection = () => {
             <CourseBubbles texts={bubbleTexts} />
 
             {/* Hero Content */}
-            <div className="max-w-[1400px] pb-16 h-auto md:h-full mx-auto px-0 sm:px-6 lg:px-12 w-full relative z-[20]">
-                <div className="max-w-[900px] h-auto md:h-full pt-[100px]  md:pb-[100px] md:pt-[120px] md:pb-[120px] md:py-28 text-left md:text-center mx-auto flex flex-col items-start md:items-center">
+            <div className="max-w-[1400px] pb-14 sm:pb-16 h-auto md:h-full mx-auto px-0 sm:px-6 lg:px-12 w-full relative z-[20]">
+                <div className="max-w-[900px] h-auto md:h-full pt-[80px] xs:pt-[95px] sm:pt-[110px] md:pb-[100px] md:pt-[120px] md:py-28 text-left md:text-center mx-auto flex flex-col items-start md:items-center">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.9, ease: 'easeOut' }}
                         className="w-full h-auto md:h-full flex flex-col items-start md:items-center"
                     >
-
-
                         {/* Main Heading */}
                         <div
                             role="heading"
                             aria-level="1"
-                            className="text-[36px] xs:text-[42px] sm:text-[50px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-tight mb-4 font-jakarta px-4 sm:px-0 text-left md:text-center"
+                            className="text-[30px] xs:text-[36px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-tight mb-3 sm:mb-4 font-jakarta px-4 sm:px-0 text-left md:text-center"
                         >
-                            <span
-                                className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary"
-                                style={{
-                                    backgroundSize: '200% auto',
-                                    animation: 'hero-text-gradient 5s linear infinite'
-                                }}
-                            >
-                                Placement-Assured Courses
+                            <span className="text-text-primary">
+                                <span
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary"
+                                    style={{
+                                        backgroundSize: '200% auto',
+                                        animation: 'hero-text-gradient 5s linear infinite'
+                                    }}
+                                >
+                                    Placement-Assured Courses
+                                </span>
                             </span>
                         </div>
 
                         {/* Subtitle */}
-                        <p className="text-[14.5px] sm:text-xl text-text-secondary mb-8 max-w-[280px] xs:max-w-[320px] sm:max-w-3xl font-inter leading-[1.6] px-4 sm:px-0 text-left md:text-center mx-0 md:mx-auto">
+                        <p className="text-[13px] xs:text-[14px] sm:text-base md:text-lg text-text-secondary mb-6 sm:mb-8 max-w-[275px] xs:max-w-[315px] sm:max-w-2xl font-inter leading-[1.5] sm:leading-[1.6] px-4 sm:px-0 text-left md:text-center mx-0 md:mx-auto">
                             A collaborative venture initiated by <span className="text-primary font-semibold">IITians</span> and leading job providers in India, in partnership with reputed universities across the world.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start md:justify-center gap-3 w-full sm:max-w-none mb-12 md:mb-0 px-4 sm:px-0">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start md:justify-center gap-3 w-full sm:max-w-none mb-10 md:mb-0 px-4 sm:px-0">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
                                 className="relative w-[80%] max-w-[260px] sm:max-w-none sm:w-auto px-6 md:px-10 py-3 md:py-4 rounded-full bg-primary text-white font-inter font-normal text-[14px] transition-all flex items-center justify-center gap-2 group hover:shadow-glow-purple active:scale-95 shadow-xl before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white/.5)_50%,transparent_75%,transparent_100%)] dark:before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white)_50%,transparent_75%,transparent_100%)] before:bg-[length:250%_250%,100%_100%] before:bg-[position:200%_0,0_0] before:bg-no-repeat before:[transition:background-position_0s_ease] hover:before:bg-[position:-100%_0,0_0] hover:before:duration-[1500ms]"
@@ -716,55 +735,35 @@ const HeroSection = () => {
                 </div>
             </div>
 
-            {/* Universities & Companies Ticker (combined) */}
-            <div className=" absolute bottom-0 w-full md:left-0 md:right-0 md:bottom-1 py-2 sm:py-5 overflow-hidden whitespace-nowrap z-[20] pointer-events-none sm:pointer-events-auto">
-                <div className="md:hidden z-12 px-4 sm:px-6 mb-5 flex flex-col items-start">
+            {/* University & Partner Ticker */}
+            <div className="absolute bottom-0 w-full md:left-0 md:right-0 md:bottom-2 py-2 sm:py-5 overflow-hidden whitespace-nowrap z-[20] pointer-events-none sm:pointer-events-auto">
+                <div className="md:hidden z-12 px-4 sm:px-6 mb-2.5 flex flex-col items-start">
                     <div className="w-10 h-[2px] bg-primary mb-2 opacity-70"></div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] font-inter">Trusted by leading universities & companies</span>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] font-inter">Trusted by learners from</span>
                 </div>
                 <div className="relative">
-                    <div className="flex animate-scroll hover:pause-on-desktop will-change-transform" style={{ animationDuration: '260s' }}>
+                    <div className="flex animate-scroll hover:pause-on-desktop will-change-transform" style={{ animationDuration: '200s' }}>
                         {[...partners, ...partners, ...partners].map((partner, i) => {
                             const hasRealLogo = !!partner.logo;
-                            const isUniversity = partner.type?.toLowerCase() === 'university';
                             const avatarLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(partner.name)}&size=64&background=6D28D9&color=fff&bold=true`;
                             const logoUrl = hasRealLogo
                                 ? (partner.logo.startsWith('http') ? partner.logo : getMediaUrl(partner.logo))
                                 : avatarLogo;
                             return (
-                                <div key={i} className={`flex items-center transition-all hover:scale-105 cursor-default shrink-0 ${
-                                    isUniversity ? 'mx-2 sm:mx-3 md:mx-4 gap-2 sm:gap-2.5' : 'mx-3 sm:mx-4 md:mx-5'
-                                }`}>
+                                <div key={i} className="mx-4 sm:mx-6 md:mx-8 flex items-center gap-2 sm:gap-2.5 transition-all hover:scale-105 cursor-default shrink-0">
                                     {hasRealLogo ? (
-                                        <>
-                                            <img
-                                                src={logoUrl}
-                                                alt={partner.name}
-                                                className={
-                                                    isUniversity
-                                                        ? "h-6 sm:h-8 max-w-[90px] sm:max-w-[110px] object-contain opacity-85 hover:opacity-100 transition-opacity shrink-0"
-                                                        : "h-8 sm:h-10 md:h-11 max-w-[150px] sm:max-w-[180px] md:max-w-[210px] object-contain opacity-90 hover:opacity-100 transition-all shrink-0"
-                                                }
-                                                onError={(e) => { e.target.onerror = null; e.target.src = avatarLogo; e.target.className = 'w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover shrink-0'; }}
-                                            />
-                                            {isUniversity && (
-                                                <span className={`text-xs sm:text-sm font-semibold normal-case tracking-normal whitespace-nowrap transition-colors font-inter ${theme === 'dark' ? 'text-white/85 hover:text-white' : 'text-slate-800 hover:text-black'}`}>
-                                                    {partner.name}
-                                                </span>
-                                            )}
-                                        </>
+                                        <img
+                                            src={logoUrl}
+                                            alt={partner.name}
+                                            className="h-5 sm:h-7 max-w-[80px] sm:max-w-[110px] object-contain opacity-85 hover:opacity-100 transition-opacity shrink-0"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = avatarLogo; e.target.className = 'w-5 h-5 rounded-full object-cover shrink-0'; }}
+                                        />
                                     ) : (
-                                        <>
-                                            {/* No logo uploaded for this partner yet - use a generated
-                                                initials logo instead of a generic icon */}
-                                            <img
-                                                src={logoUrl}
-                                                alt={partner.name}
-                                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover shrink-0"
-                                            />
-                                            <span className={`text-xs sm:text-sm font-medium normal-case tracking-normal whitespace-nowrap transition-colors font-inter ${theme === 'dark' ? 'text-white/65 hover:text-white/90' : 'text-black hover:text-black/80'}`}>{partner.name}</span>
-                                        </>
+                                        <Landmark className="text-primary shrink-0" size={16} />
                                     )}
+                                    <span className={`text-[11px] xs:text-xs md:text-sm font-bold uppercase tracking-[0.12em] sm:tracking-[0.15em] whitespace-nowrap transition-colors font-inter ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'}`}>
+                                        {partner.name}
+                                    </span>
                                 </div>
                             );
                         })}
@@ -772,12 +771,8 @@ const HeroSection = () => {
                 </div>
             </div>
 
-
-
-
-
             {/* Bottom transition gradient */}
-            <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+            <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
         </section>
     );
 };

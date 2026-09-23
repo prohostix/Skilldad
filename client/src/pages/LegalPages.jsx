@@ -39,7 +39,7 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                         <motion.h1
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="text-4xl md:text-6xl font-black font-space tracking-tight mb-4 bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent"
+                            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-space tracking-tight mb-4 bg-gradient-to-b from-white via-white to-white/40 bg-clip-text text-transparent"
                         >
                             {title}
                         </motion.h1>
@@ -49,7 +49,7 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="text-lg md:text-xl text-gray-400 font-inter max-w-2xl mx-auto mb-6"
+                                className="text-base sm:text-lg md:text-xl text-gray-400 font-inter max-w-2xl mx-auto mb-6"
                             >
                                 {subtitle}
                             </motion.p>
@@ -152,7 +152,7 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-2xl md:text-4xl font-black text-white font-space mb-8 tracking-tight bg-gradient-to-r from-primary via-white to-secondary bg-clip-text text-transparent"
+                            className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-space mb-8 tracking-tight bg-gradient-to-r from-primary via-white to-secondary bg-clip-text text-transparent"
                         >
                             Stay synchronized with our updates.
                         </motion.h3>
@@ -161,7 +161,7 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-gray-400 mb-12 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
+                            className="text-gray-400 mb-12 text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
                         >
                             We transparently communicate all policy changes to our institutional partners and individual learners through our enterprise notification node.
                         </motion.p>

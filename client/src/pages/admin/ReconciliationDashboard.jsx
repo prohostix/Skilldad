@@ -379,12 +379,12 @@ const ReconciliationDashboard = () => {
                                                     : 'border-white/10'
                                             }`}
                                         >
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex items-start space-x-3 flex-1">
+                                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                                                <div className="flex items-start space-x-3 flex-1 min-w-0">
                                                     {getDiscrepancyIcon(discrepancy.type)}
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center space-x-2 mb-2">
-                                                            <span className="text-white font-mono text-sm">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center flex-wrap gap-2 mb-2">
+                                                            <span className="text-white font-mono text-sm break-all">
                                                                 {discrepancy.transactionId}
                                                             </span>
                                                             {discrepancy.resolved && (
@@ -396,7 +396,7 @@ const ReconciliationDashboard = () => {
                                                         <p className="text-xs text-white/50 uppercase tracking-widest mb-2">
                                                             {discrepancy.type.replace(/_/g, ' ')}
                                                         </p>
-                                                        <div className="flex items-center space-x-4 text-sm">
+                                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                                                             {discrepancy.systemAmount !== undefined && (
                                                                 <div>
                                                                     <span className="text-white/50">System: </span>

@@ -190,7 +190,7 @@ const StudyAbroadManagement = () => {
                     subtitle="Manage global educational opportunities" 
                 />
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center flex-wrap gap-4">
                     {/* Toggle Feature Button */}
                     <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
                         <span className="text-sm font-medium text-white/70">
@@ -215,7 +215,7 @@ const StudyAbroadManagement = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex p-1 bg-white/5 border border-white/10 rounded-2xl w-fit">
+            <div className="flex overflow-x-auto no-scrollbar p-1 bg-white/5 border border-white/10 rounded-2xl w-full sm:w-fit">
                 {[
                     { id: 'countries', label: 'Countries', icon: Globe },
                     { id: 'universities', label: 'Universities', icon: School },
@@ -224,7 +224,7 @@ const StudyAbroadManagement = () => {
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm ${
+                        className={`flex items-center gap-2 px-6 py-2.5 rounded-xl transition-all duration-300 font-medium text-sm shrink-0 ${
                             activeTab === tab.id 
                             ? 'bg-primary text-white shadow-lg shadow-primary/20' 
                             : 'text-white/40 hover:text-white/70 hover:bg-white/5'
@@ -307,9 +307,9 @@ const StudyAbroadManagement = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {countries.map(c => (
                                         <div key={c.id} className="p-4 bg-white/5 border border-white/10 rounded-2xl group relative">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h4 className="font-bold text-lg text-white">{c.name}</h4>
-                                                <div className="flex gap-2">
+                                            <div className="flex justify-between items-start gap-2 mb-2">
+                                                <h4 className="font-bold text-lg text-white min-w-0 truncate">{c.name}</h4>
+                                                <div className="flex gap-2 shrink-0">
                                                     <button onClick={() => openEditModal(c)} className="p-2 bg-white/5 hover:bg-primary/20 rounded-lg transition-colors"><Edit2 size={14}/></button>
                                                     <button onClick={() => handleDelete(c.id, 'countries')} className="p-2 bg-white/5 hover:bg-red-500/20 rounded-lg transition-colors"><Trash2 size={14}/></button>
                                                 </div>
@@ -334,17 +334,17 @@ const StudyAbroadManagement = () => {
                                 ) : (
                                     <div className="space-y-4">
                                         {universities.map(u => (
-                                            <div key={u.id} className="p-5 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between">
-                                                <div className="flex items-center gap-4 text-left">
-                                                    <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center overflow-hidden border border-white/20">
+                                            <div key={u.id} className="p-5 bg-white/5 border border-white/10 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                <div className="flex items-center gap-4 text-left min-w-0">
+                                                    <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center overflow-hidden border border-white/20 shrink-0">
                                                         {u.logo_url ? <img src={u.logo_url} alt="" className="w-full h-full object-cover"/> : <School size={24} className="text-white/20"/>}
                                                     </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-white">{u.name}</h4>
-                                                        <p className="text-xs text-white/40">{u.location || 'Location not specified'}</p>
+                                                    <div className="min-w-0">
+                                                        <h4 className="font-bold text-white truncate">{u.name}</h4>
+                                                        <p className="text-xs text-white/40 truncate">{u.location || 'Location not specified'}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-2 shrink-0">
                                                     <button onClick={() => openEditModal(u)} className="p-2.5 bg-white/5 hover:bg-primary/20 rounded-xl transition-all border border-white/10"><Edit2 size={16}/></button>
                                                     <button onClick={() => handleDelete(u.id, 'universities')} className="p-2.5 bg-white/5 hover:bg-red-500/20 rounded-xl transition-all border border-white/10"><Trash2 size={16}/></button>
                                                 </div>
@@ -369,18 +369,18 @@ const StudyAbroadManagement = () => {
                                     <div className="space-y-4">
                                         {courses.map(c => (
                                             <div key={c.id} className="p-6 bg-white/5 border border-white/10 rounded-2xl group hover:border-emerald-500/30 transition-all">
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div className="text-left">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded uppercase">{c.level}</span>
-                                                            <h4 className="font-bold text-white text-lg">{c.name}</h4>
+                                                <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3 mb-4">
+                                                    <div className="text-left min-w-0">
+                                                        <div className="flex items-center flex-wrap gap-2 mb-1">
+                                                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded uppercase shrink-0">{c.level}</span>
+                                                            <h4 className="font-bold text-white text-lg break-words">{c.name}</h4>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs text-white/40">
+                                                        <div className="flex items-center flex-wrap gap-4 text-xs text-white/40">
                                                             <span className="flex items-center gap-1"><Clock size={12}/> {c.duration}</span>
                                                             <span className="flex items-center gap-1"><DollarSign size={12}/> {c.fees}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="flex gap-2">
+                                                    <div className="flex gap-2 shrink-0">
                                                         <button onClick={() => openEditModal(c)} className="p-2 bg-white/5 hover:bg-primary/20 rounded-lg transition-colors"><Edit2 size={14}/></button>
                                                         <button onClick={() => handleDelete(c.id, 'courses')} className="p-2 bg-white/5 hover:bg-red-500/20 rounded-lg transition-colors"><Trash2 size={14}/></button>
                                                     </div>

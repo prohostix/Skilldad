@@ -12,6 +12,7 @@ import DashboardHeading from '../../components/ui/DashboardHeading';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
 import NetworkDiagramEditor from '../../components/admin/NetworkDiagramEditor';
+import { getMediaUrl } from '../../utils/media';
 
 const SiteContentManager = () => {
     const [activeTab, setActiveTab] = useState('corporate'); 
@@ -303,7 +304,7 @@ const SiteContentManager = () => {
                         </div>
                         
                         {activeTab === 'directors' && (
-                            <div className="flex space-x-1 p-0.5 bg-slate-100/90 dark:bg-white/5 rounded-lg border border-slate-200/80 dark:border-white/10 w-fit">
+                            <div className="flex flex-wrap gap-1 p-0.5 bg-slate-100/90 dark:bg-white/5 rounded-lg border border-slate-200/80 dark:border-white/10 w-fit">
                                 <button
                                     onClick={() => setDirectorSubTab('BOARD')}
                                     className={`px-3 py-1 rounded-md text-[11px] font-semibold transition-all ${
@@ -437,20 +438,20 @@ const SiteContentManager = () => {
                                                 </div>
 
                                                 {/* Compact Action buttons */}
-                                                <div className="flex items-center justify-center gap-1.5 mt-2.5 pt-2 border-t border-slate-200/80 dark:border-white/10 w-full">
+                                                <div className="flex items-center justify-center gap-1.5 mt-1.5 pt-1.5 border-t border-slate-200/80 dark:border-white/10 w-full">
                                                     <button 
                                                         onClick={() => handleEditStart(item)} 
-                                                        className="flex-1 py-1 px-2 bg-slate-100 hover:bg-primary/15 hover:text-primary dark:bg-white/5 dark:hover:bg-primary/20 border border-slate-200/80 hover:border-primary/30 dark:border-white/10 rounded-lg text-xs font-semibold text-slate-700 dark:text-white/90 flex items-center justify-center gap-1 transition-all shadow-sm"
+                                                        className="flex-1 h-5 px-1.5 bg-slate-100 hover:bg-primary/15 hover:text-primary dark:bg-white/5 dark:hover:bg-primary/20 border border-slate-200/80 hover:border-primary/30 dark:border-white/10 rounded-md text-[10px] font-medium leading-none text-slate-700 dark:text-white/90 flex items-center justify-center gap-1 transition-all shadow-xs"
                                                     >
-                                                        <Edit2 size={11} />
+                                                        <Edit2 size={9.5} />
                                                         <span>Edit</span>
                                                     </button>
                                                     <button 
                                                         onClick={() => handleDelete(itemId)} 
-                                                        className="py-1 px-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                                                        className="flex-1 h-5 px-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-md text-[10px] font-medium leading-none flex items-center justify-center gap-1 transition-all"
                                                         title="Delete Item"
                                                     >
-                                                        <Trash2 size={11} />
+                                                        <Trash2 size={9.5} />
                                                         <span>Delete</span>
                                                     </button>
                                                 </div>
@@ -669,6 +670,48 @@ const SiteContentManager = () => {
 const AboutCmsEditor = ({ data, onUpdate }) => {
     return (
         <div className="grid lg:grid-cols-2 gap-8 pb-12">
+            {/* Mission Section */}
+            <CmsSectionCard 
+                title="Mission Statement & Visual Collage" 
+                icon={Rocket}
+                fields={[
+                    { key: 'title', label: 'Heading', value: data.mission?.title },
+                    { key: 'description', label: 'Description', type: 'textarea', value: data.mission?.description },
+                    { key: 'main_image', label: 'Main Tall Photo (Left Large)', type: 'image', value: data.mission?.main_image, defaultVal: '/assets/about/mission_laptop.jpg' },
+                    { key: 'top_image', label: 'Top Accent Photo (Upper Right)', type: 'image', value: data.mission?.top_image, defaultVal: '/assets/about/mission_collab.jpg' },
+                    { key: 'bottom_image', label: 'Bottom Accent Photo (Lower Right)', type: 'image', value: data.mission?.bottom_image, defaultVal: '/assets/about/mission_headphones.jpg' },
+                ]}
+                onSave={(content) => onUpdate('mission', content)}
+            />
+
+            {/* Vision Section */}
+            <CmsSectionCard 
+                title="Vision Statement & Visual Collage" 
+                icon={Globe}
+                fields={[
+                    { key: 'title', label: 'Heading', value: data.vision?.title },
+                    { key: 'description', label: 'Description', type: 'textarea', value: data.vision?.description },
+                    { key: 'main_image', label: 'Main Tall Photo (Right Large)', type: 'image', value: data.vision?.main_image, defaultVal: '/assets/about/vision_campus.jpg' },
+                    { key: 'top_image', label: 'Top Accent Photo (Upper Left)', type: 'image', value: data.vision?.top_image, defaultVal: '/assets/about/vision_innovators.jpg' },
+                    { key: 'bottom_image', label: 'Bottom Accent Photo (Lower Left)', type: 'image', value: data.vision?.bottom_image, defaultVal: '/assets/about/vision_graduate.jpg' },
+                ]}
+                onSave={(content) => onUpdate('vision', content)}
+            />
+
+            {/* Values Section */}
+            <CmsSectionCard 
+                title="Core Values & Visual Collage" 
+                icon={Award}
+                fields={[
+                    { key: 'title', label: 'Heading', value: data.values?.title },
+                    { key: 'description', label: 'Description', type: 'textarea', value: data.values?.description },
+                    { key: 'main_image', label: 'Main Tall Photo (Left Large)', type: 'image', value: data.values?.main_image, defaultVal: '/assets/about/values_mastery.jpg' },
+                    { key: 'top_image', label: 'Top Accent Photo (Upper Right)', type: 'image', value: data.values?.top_image, defaultVal: '/assets/about/values_mentor.jpg' },
+                    { key: 'bottom_image', label: 'Bottom Accent Photo (Lower Right)', type: 'image', value: data.values?.bottom_image, defaultVal: '/assets/about/values_success.jpg' },
+                ]}
+                onSave={(content) => onUpdate('values', content)}
+            />
+
             {/* Hero Section */}
             <CmsSectionCard 
                 title="Story Hero & Header" 
@@ -689,45 +732,6 @@ const AboutCmsEditor = ({ data, onUpdate }) => {
                     { key: 'subtitle', label: 'Section Subtitle', type: 'textarea', value: data.impact_hero?.subtitle },
                 ]}
                 onSave={(content) => onUpdate('impact_hero', content)}
-            />
-
-            {/* Mission Section */}
-            <CmsSectionCard 
-                title="Mission Statement" 
-                icon={Rocket}
-                fields={[
-                    { key: 'title', label: 'Heading', value: data.mission?.title },
-                    { key: 'description', label: 'Description', type: 'textarea', value: data.mission?.description },
-                    { key: 'icon', label: 'Lucide Icon Name', value: data.mission?.icon },
-                    { key: 'color', label: 'Theme Color (Hex)', value: data.mission?.color },
-                ]}
-                onSave={(content) => onUpdate('mission', content)}
-            />
-
-            {/* Vision Section */}
-            <CmsSectionCard 
-                title="Vision Statement" 
-                icon={Globe}
-                fields={[
-                    { key: 'title', label: 'Heading', value: data.vision?.title },
-                    { key: 'description', label: 'Description', type: 'textarea', value: data.vision?.description },
-                    { key: 'icon', label: 'Lucide Icon Name', value: data.vision?.icon },
-                    { key: 'color', label: 'Theme Color (Hex)', value: data.vision?.color },
-                ]}
-                onSave={(content) => onUpdate('vision', content)}
-            />
-
-            {/* Values Section */}
-            <CmsSectionCard 
-                title="Core Values" 
-                icon={Award}
-                fields={[
-                    { key: 'title', label: 'Heading', value: data.values?.title },
-                    { key: 'description', label: 'Description', type: 'textarea', value: data.values?.description },
-                    { key: 'icon', label: 'Lucide Icon Name', value: data.values?.icon },
-                    { key: 'color', label: 'Theme Color (Hex)', value: data.values?.color },
-                ]}
-                onSave={(content) => onUpdate('values', content)}
             />
 
             {/* Team Headers */}
@@ -756,12 +760,52 @@ const AboutCmsEditor = ({ data, onUpdate }) => {
 
 const CmsSectionCard = ({ title, icon: Icon, fields, onSave }) => {
     const [values, setValues] = useState({});
+    const [uploadingField, setUploadingField] = useState(null);
+    const { showToast } = useToast();
     
     useEffect(() => {
         const initial = {};
         fields.forEach(f => initial[f.key] = f.value || '');
         setValues(initial);
     }, [fields]);
+
+    const handleImageUpload = async (key, file) => {
+        if (!file) return;
+        try {
+            setUploadingField(key);
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const config = {
+                headers: {
+                    Authorization: `Bearer ${userInfo?.token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+            const uploadFormData = new FormData();
+            uploadFormData.append('file', file);
+            const res = await axios.post('/api/upload/media', uploadFormData, config);
+            if (res.data?.url) {
+                setValues(prev => ({ ...prev, [key]: res.data.url }));
+                showToast('Image uploaded successfully! Click save to apply changes.', 'success');
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            showToast('Failed to upload image. Please check file format and size.', 'error');
+        } finally {
+            setUploadingField(null);
+        }
+    };
+
+    const resolvePreview = (url, defaultVal) => {
+        const target = url || defaultVal;
+        if (!target) return '';
+        if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('data:')) {
+            return target;
+        }
+        if (target.startsWith('/assets/') || target.startsWith('assets/')) {
+            return target.startsWith('/') ? target : `/${target}`;
+        }
+        return getMediaUrl(target);
+    };
 
     return (
         <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-4 sm:p-5 shadow-sm h-fit">
@@ -773,29 +817,120 @@ const CmsSectionCard = ({ title, icon: Icon, fields, onSave }) => {
             </div>
 
             <div className="space-y-3.5">
-                {fields.map(field => (
-                    <div key={field.key} className="space-y-1 text-left">
-                        <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">{field.label}</label>
-                        {field.type === 'textarea' ? (
-                            <textarea
-                                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none h-20 transition-all"
-                                value={values[field.key] || ''}
-                                onChange={e => setValues({ ...values, [field.key]: e.target.value })}
-                            />
-                        ) : (
-                            <input
-                                className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
-                                value={values[field.key] || ''}
-                                onChange={e => setValues({ ...values, [field.key]: e.target.value })}
-                            />
-                        )}
-                    </div>
-                ))}
+                {fields.map(field => {
+                    if (field.type === 'image') {
+                        const currentVal = values[field.key] || '';
+                        const isCustom = currentVal && currentVal !== field.defaultVal;
+                        const previewSrc = resolvePreview(currentVal, field.defaultVal);
+
+                        return (
+                            <div key={field.key} className="space-y-1.5 text-left p-2.5 rounded-lg bg-slate-50 dark:bg-white/[0.03] border border-slate-200/70 dark:border-white/5">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold text-slate-700 dark:text-white/70 uppercase tracking-wider">
+                                        {field.label}
+                                    </label>
+                                    {isCustom && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setValues(prev => ({ ...prev, [field.key]: field.defaultVal || '' }))}
+                                            className="text-[10px] text-primary hover:underline font-semibold"
+                                        >
+                                            Reset to Default
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    {/* Thumbnail Preview */}
+                                    <div className="w-14 h-14 rounded-lg overflow-hidden border border-slate-200 dark:border-white/15 shadow-2xs bg-slate-200 dark:bg-slate-800 shrink-0 relative group">
+                                        {previewSrc ? (
+                                            <img
+                                                src={previewSrc}
+                                                alt={field.label}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "/assets/placeholders/default.png";
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                                <ImageIcon size={16} />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Upload and manual URL input */}
+                                    <div className="flex-1 space-y-1.5 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <label className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all ${
+                                                uploadingField === field.key
+                                                    ? 'bg-primary/20 text-primary cursor-wait'
+                                                    : 'bg-primary text-white hover:bg-primary-dark shadow-2xs'
+                                            }`}>
+                                                {uploadingField === field.key ? (
+                                                    <>
+                                                        <Loader2 size={12} className="animate-spin" />
+                                                        <span>Uploading...</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Upload size={12} />
+                                                        <span>Upload Image</span>
+                                                    </>
+                                                )}
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    disabled={uploadingField === field.key}
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) handleImageUpload(field.key, file);
+                                                    }}
+                                                />
+                                            </label>
+                                            <span className="text-[10px] text-slate-400 dark:text-white/40 truncate">
+                                                {uploadingField === field.key ? 'Processing upload...' : 'or paste URL/path below'}
+                                            </span>
+                                        </div>
+
+                                        <input
+                                            className="w-full px-2.5 py-1 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-md text-[11px] font-mono text-slate-900 dark:text-white focus:border-primary outline-none transition-all truncate"
+                                            placeholder={field.defaultVal || "e.g. /uploads/... or https://..."}
+                                            value={currentVal}
+                                            onChange={e => setValues({ ...values, [field.key]: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div key={field.key} className="space-y-1 text-left">
+                            <label className="text-[10px] font-semibold text-slate-600 dark:text-white/60 uppercase tracking-wider px-0.5">{field.label}</label>
+                            {field.type === 'textarea' ? (
+                                <textarea
+                                    className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none h-20 transition-all"
+                                    value={values[field.key] || ''}
+                                    onChange={e => setValues({ ...values, [field.key]: e.target.value })}
+                                />
+                            ) : (
+                                <input
+                                    className="w-full px-3 py-1.5 bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-lg text-xs font-inter text-slate-900 dark:text-white focus:border-primary outline-none transition-all"
+                                    value={values[field.key] || ''}
+                                    onChange={e => setValues({ ...values, [field.key]: e.target.value })}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             <button
                 onClick={() => onSave(values)}
-                className="w-full mt-4 py-1.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5 font-inter"
+                className="w-full mt-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-1.5 font-inter"
             >
                 <Save size={13} />
                 <span>Save {title.split(' ')[0]} Section</span>

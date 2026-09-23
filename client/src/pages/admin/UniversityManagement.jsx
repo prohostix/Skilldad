@@ -496,7 +496,7 @@ const UniversityManagement = () => {
             <div className="bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-3 sm:p-4 border-b border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-inter">Partner Network</h3>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center flex-wrap gap-2">
                         <div className="flex bg-slate-100 dark:bg-white/5 p-0.5 rounded-lg border border-slate-200/80 dark:border-white/10">
                             <button
                                 onClick={() => setRoleFilter('all')}
@@ -517,7 +517,7 @@ const UniversityManagement = () => {
                                 Partners
                             </button>
                         </div>
-                        <div className="relative">
+                        <div className="relative w-full sm:w-auto">
                             <input
                                 type="text"
                                 placeholder="Search entity..."

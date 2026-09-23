@@ -166,7 +166,7 @@ const CommunicationHub = () => {
 
             {/* Logs Table */}
             <GlassCard className="overflow-hidden">
-                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                <div className="p-6 border-b border-white/5 flex items-center flex-wrap gap-3 justify-between">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-white/5 rounded-lg text-white/40">
                             <Bell size={18} />

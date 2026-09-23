@@ -386,7 +386,7 @@ const PaymentMonitoringDashboard = () => {
                                 <h4 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-3">
                                     Student Information
                                 </h4>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-xs text-white/50">Name</p>
                                         <p className="text-white font-semibold">{selectedProof.student?.name}</p>
@@ -403,7 +403,7 @@ const PaymentMonitoringDashboard = () => {
                                 <h4 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-3">
                                     Payment Details
                                 </h4>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-xs text-white/50">Course</p>
                                         <p className="text-white font-semibold">{selectedProof.course?.title}</p>
@@ -687,7 +687,7 @@ const PaymentMonitoringDashboard = () => {
                     transition={{ delay: 0.5 }}
                 >
                     <GlassCard className="!p-6">
-                        <div className="flex items-center mb-6">
+                        <div className="flex items-center flex-wrap gap-2 mb-6">
                             <Activity className="text-primary mr-3" size={24} />
                             <h2 className="text-lg font-bold text-white font-poppins">System Health</h2>
                             <div className="ml-auto flex items-center space-x-2">
@@ -777,27 +777,27 @@ const PaymentMonitoringDashboard = () => {
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="bg-white/5 rounded-xl p-3 border border-white/10 flex items-center justify-between"
+                                    className="bg-white/5 rounded-xl p-3 border border-white/10 flex items-center justify-between gap-3"
                                 >
-                                    <div className="flex items-center space-x-3 flex-1">
+                                    <div className="flex items-center space-x-3 flex-1 min-w-0">
                                         {transaction.status === 'success' ? (
-                                            <CheckCircle2 className="text-emerald-400" size={18} />
+                                            <CheckCircle2 className="text-emerald-400 shrink-0" size={18} />
                                         ) : transaction.status === 'failed' ? (
-                                            <XCircle className="text-red-400" size={18} />
+                                            <XCircle className="text-red-400 shrink-0" size={18} />
                                         ) : (
-                                            <Clock className="text-amber-400" size={18} />
+                                            <Clock className="text-amber-400 shrink-0" size={18} />
                                         )}
-                                        <div className="flex-1">
-                                            <p className="text-white text-sm font-mono">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-white text-sm font-mono truncate">
                                                 {transaction.transactionId}
                                             </p>
-                                            <p className="text-xs text-white/50">
-                                                {transaction.paymentMethod?.replace(/_/g, ' ')} • 
+                                            <p className="text-xs text-white/50 truncate">
+                                                {transaction.paymentMethod?.replace(/_/g, ' ')} •
                                                 {new Date(transaction.timestamp).toLocaleTimeString()}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right shrink-0">
                                         <p className="text-white font-semibold">
                                             ₹{transaction.amount?.toLocaleString()}
                                         </p>

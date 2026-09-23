@@ -341,6 +341,23 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
         const format = path.extname(fileName).substring(1).toUpperCase();
         const newId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 
+        const lowerFileName = (fileName || '').toLowerCase();
+        const lowerTitle = (title || '').toLowerCase();
+        const lowerType = (type || '').toLowerCase();
+
+        const isResumeDoc = lowerType === 'resume' ||
+            lowerType.includes('resume') ||
+            lowerType.includes('cv') ||
+            lowerTitle.includes('resume') ||
+            lowerTitle.includes('curriculum vitae') ||
+            lowerTitle.includes('cv') ||
+            lowerFileName.includes('resume') ||
+            lowerFileName.includes('cv');
+
+        const resolvedType = isResumeDoc ? 'resume' : (type || 'other');
+        const resolvedTitle = title || (isResumeDoc ? 'Resume / Curriculum Vitae (CV)' : fileName);
+        const studentId = student || (req.user.role?.toLowerCase() === 'student' ? userId : userId);
+
         const insertResult = await query(`
             INSERT INTO documents (
                 id, title, description, type, format, file_name, file_url, file_size, 
@@ -349,16 +366,16 @@ router.post('/upload', protect, upload.single('document'), async (req, res) => {
             RETURNING *, id as _id, file_url as "fileUrl"
         `, [
             newId,
-            title || fileName,
+            resolvedTitle,
             description || '',
-            type || 'other',
+            resolvedType,
             format,
             fileName,
             fileUrl,
             fileSize,
             'submitted',
             userId,
-            student || (req.user.role === 'student' ? userId : null),
+            studentId,
             course || null,
             university_id || (req.user.role === 'university' ? userId : null)
         ]);

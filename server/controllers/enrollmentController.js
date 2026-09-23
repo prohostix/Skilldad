@@ -1,5 +1,12 @@
 const asyncHandler = require('express-async-handler');
 const { query } = require('../config/postgres');
+const { recordDailyActivity } = require('../utils/activityStreak');
+const { awardPoints } = require('../utils/awardPoints');
+
+// Real reward-point values for genuine learning actions, shown in the
+// student dashboard's "My Achievements" points total alongside referral points.
+const POINTS_PER_VIDEO_WATCHED = 5;
+const POINTS_PER_EXERCISE_COMPLETED = 10;
 
 /**
  * @desc    Enroll in a course
@@ -105,35 +112,48 @@ const getMyCourses = asyncHandler(async (req, res) => {
 const updateProgress = asyncHandler(async (req, res) => {
     const { courseId, progress, videoId, exerciseScore } = req.body;
     const userId = req.user.id;
+    recordDailyActivity(userId);
 
     if (videoId) {
         const userId = req.user.id;
         console.log(`[Progress] Updating progress for User: ${userId}, Course: ${courseId}, Video: ${videoId}`);
         
         // 1. Update completion arrays
+        // Both queries are guarded by "AND NOT (... completed_videos ? videoId)", so
+        // rowCount > 0 only when this video was genuinely newly completed just now -
+        // that's the idempotency check we reuse to award points exactly once per video.
+        let completionResult;
         if (exerciseScore !== undefined) {
-             await query(`
-                UPDATE enrollments 
+             completionResult = await query(`
+                UPDATE enrollments
                 SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
                     completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $2::jsonb,
-                    updated_at = NOW() 
+                    updated_at = NOW()
                 WHERE student_id = $3 AND course_id = $4
                 AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $5)
             `, [
-                JSON.stringify([videoId]), 
-                JSON.stringify([{ video: videoId, score: exerciseScore }]), 
-                userId, 
+                JSON.stringify([videoId]),
+                JSON.stringify([{ video: videoId, score: exerciseScore }]),
+                userId,
                 courseId,
                 videoId
             ]);
         } else {
-            await query(`
-                UPDATE enrollments 
+            completionResult = await query(`
+                UPDATE enrollments
                 SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
-                    updated_at = NOW() 
+                    updated_at = NOW()
                 WHERE student_id = $2 AND course_id = $3
                 AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $4)
             `, [JSON.stringify([videoId]), userId, courseId, videoId]);
+        }
+
+        if (completionResult.rowCount > 0) {
+            if (exerciseScore !== undefined) {
+                awardPoints(userId, POINTS_PER_EXERCISE_COMPLETED, 'Completed a lesson exercise', courseId);
+            } else {
+                awardPoints(userId, POINTS_PER_VIDEO_WATCHED, 'Watched a lesson video', courseId);
+            }
         }
 
         // 2. Recalculate and update the progress percentage

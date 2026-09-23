@@ -13,12 +13,27 @@ import axios from 'axios';
  * @param {function} onEnded - Callback when video ends
  * @param {function} onError - Callback when error occurs
  */
-const MeetingRecordingPlayer = ({ recordingUrl, sessionId, title, onEnded, onError }) => {
+const MeetingRecordingPlayer = ({ recordingUrl, sessionId, title, onEnded, onError, autoPlay = false }) => {
   const [url, setUrl] = useState(recordingUrl);
   const [loading, setLoading] = useState(!recordingUrl && !!sessionId);
   const [error, setError] = useState(null);
   const [retrying, setRetrying] = useState(false);
   const playerRef = useRef(null);
+
+  useEffect(() => {
+    if (autoPlay && playerRef.current) {
+      playerRef.current.currentTime = 0;
+      const p = playerRef.current.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          if (playerRef.current) {
+            playerRef.current.muted = true;
+            playerRef.current.play().catch(() => {});
+          }
+        });
+      }
+    }
+  }, [autoPlay, url]);
 
   useEffect(() => {
     if (recordingUrl) {

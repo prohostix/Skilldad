@@ -6,6 +6,7 @@ const fs = require('fs');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { query } = require('../config/postgres');
 const socketService = require('../services/SocketService');
+const { recordDailyActivity } = require('../utils/activityStreak');
 
 // Configure multer for project file uploads with absolute path resolution
 const storage = multer.diskStorage({
@@ -436,6 +437,7 @@ router.post('/:id/submit', protect, upload.array('files', 10), async (req, res) 
             `, [submissionId, studentId, courseId, projectId, projectDef.title, projectDef.description, fileUrl, githubUrl]);
         }
 
+        recordDailyActivity(studentId);
         res.status(201).json({ success: true, message: 'Project submitted successfully' });
     } catch (error) {
         console.error('[Project Submit] 500 Error:', error);

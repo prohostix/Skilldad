@@ -627,7 +627,7 @@ const CourseManager = ({ wblOnly = false }) => {
                         {/* Modal Body - Scrollable with compact two-column grid */}
                         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto pr-1.5 space-y-3.5 [scrollbar-width:thin]">
                             {/* Thumbnail & Cover Image - Compact Row */}
-                            <div className="flex items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-3 bg-white/5 rounded-xl border border-white/10">
                                 <div className="w-24 h-16 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                                     {formData.thumbnail ? (
                                         <img src={getMediaUrl(formData.thumbnail)} alt="Preview" className="w-full h-full object-cover" />

@@ -188,7 +188,7 @@ const PaymentStatus = () => {
 
     return (
         <div className="max-w-5xl mx-auto space-y-6 pb-20">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
                 <button
                     onClick={() => navigate('/dashboard/payment-history')}
                     className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
@@ -225,14 +225,14 @@ const PaymentStatus = () => {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <GlassCard className={`p-6 ${statusConfig.border} border-2`}>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className={`p-4 ${statusConfig.bg} rounded-2xl`}>
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4 min-w-0">
+                            <div className={`p-4 ${statusConfig.bg} rounded-2xl shrink-0`}>
                                 <StatusIcon className={`w-8 h-8 ${statusConfig.text} ${transaction.status === 'processing' ? 'animate-spin' : ''}`} />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <h2 className="text-2xl font-black text-white mb-1">{statusConfig.label}</h2>
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-gray-400 break-all">
                                     Transaction ID: <span className="font-mono">{transaction.transactionId}</span>
                                 </p>
                             </div>

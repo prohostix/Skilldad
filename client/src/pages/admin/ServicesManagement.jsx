@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
 
 const iconMap = {
@@ -184,8 +185,7 @@ const ServicesManagement = () => {
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-white font-space tracking-tight">Services Management</h1>
-                    <p className="text-white/50 text-sm">Configure and manage dynamic platform services</p>
+                    <DashboardHeading title="Services Management" />
                 </div>
                 <ModernButton onClick={() => handleOpenModal()}>
                     <Plus size={18} className="mr-2" /> Add Service
@@ -264,7 +264,7 @@ const ServicesManagement = () => {
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                             <button 
                                                 onClick={() => handleOpenModal(service)}
                                                 className="p-2 bg-white/5 border border-white/10 rounded-lg text-white/60 hover:text-primary hover:border-primary/50 transition-all"

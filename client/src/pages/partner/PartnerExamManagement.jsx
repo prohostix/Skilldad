@@ -585,7 +585,7 @@ const PartnerExamManagement = () => {
                         {/* CONDUCT TAB */}
                         {activeTab === 'conduct' && (
                             <div className="grid grid-cols-1 gap-4">
-                                <div className="flex items-center justify-between mb-2">
+                                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                                     <h3 className="text-base font-black text-white/90 tracking-tight flex items-center gap-2">
                                         <div className="w-1.5 h-6 bg-primary rounded-full" />
                                         Active Examination Protocols
@@ -719,10 +719,10 @@ const PartnerExamManagement = () => {
                             <div className="space-y-8">
                                 {!selectedSubmission ? (
                                     <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex flex-wrap items-center justify-between gap-3">
                                             <div className="flex items-center gap-4">
                                                 {selectedExamForGrading && (
-                                                    <button 
+                                                    <button
                                                         onClick={() => setSelectedExamForGrading(null)}
                                                         className="p-3 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 text-white/60 transition-all"
                                                     >
@@ -871,18 +871,18 @@ const PartnerExamManagement = () => {
                                 ) : (
                                     /* DETAILED GRADING VIEW */
                                     <div className="max-w-4xl mx-auto space-y-8">
-                                        <div className="flex items-center justify-between pb-8 border-b border-white/10">
-                                            <div className="flex items-center gap-6">
-                                                <button onClick={() => setSelectedSubmission(null)} className="p-4 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all">
+                                        <div className="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-white/10">
+                                            <div className="flex items-center gap-6 min-w-0">
+                                                <button onClick={() => setSelectedSubmission(null)} className="p-4 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-all shrink-0">
                                                     <ArrowLeft size={24} />
                                                 </button>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-1">Student Analysis</p>
-                                                    <h3 className="text-3xl font-black text-white tracking-tight">{selectedSubmission.student?.name}</h3>
-                                                    <p className="text-sm text-white/40 font-medium">{selectedSubmission.student?.email}</p>
+                                                    <h3 className="text-3xl font-black text-white tracking-tight truncate">{selectedSubmission.student?.name}</h3>
+                                                    <p className="text-sm text-white/40 font-medium truncate">{selectedSubmission.student?.email}</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="text-right shrink-0">
                                                 <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Submission Token</p>
                                                 <p className="text-xs font-mono text-white/40">{selectedSubmission._id}</p>
                                             </div>
@@ -996,13 +996,13 @@ const PartnerExamManagement = () => {
                                 </h3>
                                 <div className="space-y-4">
                                     {filteredHistoryExams.length > 0 ? filteredHistoryExams.map(exam => (
-                                        <div key={exam._id} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex items-center justify-between group">
-                                            <div className="flex items-center gap-6">
-                                                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-white/20 border border-white/10">
+                                        <div key={exam._id} className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex flex-wrap items-center justify-between gap-4 group">
+                                            <div className="flex items-center gap-6 min-w-0">
+                                                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-white/20 border border-white/10 shrink-0">
                                                     <Activity size={20} />
                                                 </div>
-                                                <div>
-                                                    <h5 className="font-bold text-white tracking-tight">{exam.title}</h5>
+                                                <div className="min-w-0">
+                                                    <h5 className="font-bold text-white tracking-tight truncate">{exam.title}</h5>
                                                     <div className="flex items-center gap-2 mt-0.5">
                                                         <p className="text-[10px] text-white/40 font-medium">{exam.course?.title || 'General Assessment'}</p>
                                                         {exam.batchId?.name && (
@@ -1053,7 +1053,7 @@ const PartnerExamManagement = () => {
             {/* MODALS (Simplified Styles) */}
             {openSchedule && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-3xl bg-black/80">
-                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md">
+                    <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-md max-h-[90vh] overflow-y-auto">
                         <GlassCard className="p-6 border-white/20 shadow-[0_0_60px_rgba(var(--primary-rgb),0.1)]">
                             <div className="flex items-center justify-between mb-5">
                                 <h2 className="text-xl font-bold text-white tracking-normal capitalize">Schedule Exam</h2>

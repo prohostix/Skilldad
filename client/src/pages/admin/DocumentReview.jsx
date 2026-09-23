@@ -303,7 +303,7 @@ const DocumentReview = () => {
                         >
                             <div className="flex flex-col lg:flex-row h-[85vh]">
                                 {/* Preview Side */}
-                                <div className="flex-1 bg-black/40 relative group">
+                                <div className="flex-1 min-h-[280px] lg:min-h-0 bg-black/40 relative group">
                                     <div className="absolute top-4 left-4 z-10 flex gap-2">
                                         <span className="px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-black text-white/70 border border-white/10">
                                             PREVIEW MODE
@@ -327,7 +327,7 @@ const DocumentReview = () => {
                                 </div>
 
                                 {/* Controls Side */}
-                                <div className="w-full lg:w-80 p-8 flex flex-col bg-slate-900 border-l border-white/10">
+                                <div className="w-full lg:w-80 p-5 sm:p-6 lg:p-8 flex flex-col bg-slate-900 border-l border-white/10">
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
                                             <h2 className="text-xl font-bold text-white">{selectedDoc.title}</h2>
@@ -409,7 +409,7 @@ const DocumentReview = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-2xl"
+                            className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-6 shadow-2xl max-h-[85vh] overflow-y-auto"
                         >
                             <div className="flex justify-between items-start mb-6">
                                 <h2 className="text-xl font-bold text-white">Edit Document</h2>

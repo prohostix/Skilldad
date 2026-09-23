@@ -86,15 +86,15 @@ const HostRoom = () => {
     return (
         <div className="fixed inset-0 bg-black flex flex-col">
             {/* Main header */}
-            <div className="flex-shrink-0 bg-[#1a1a1a] border-b border-white/10 px-6 py-3 z-10">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-base font-bold text-white leading-tight">{session.topic}</h1>
-                        <p className="text-white/40 text-xs mt-0.5">
+            <div className="flex-shrink-0 bg-[#1a1a1a] border-b border-white/10 px-4 sm:px-6 py-3 z-10">
+                <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                        <h1 className="text-base font-bold text-white leading-tight truncate">{session.topic}</h1>
+                        <p className="text-white/40 text-xs mt-0.5 truncate">
                             {session.status || 'Live Session'}
                         </p>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 shrink-0">
                         <button
                             onClick={() => navigate('/dashboard')}
                             className="px-4 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm transition-colors"

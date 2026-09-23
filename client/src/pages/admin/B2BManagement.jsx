@@ -637,10 +637,10 @@ const B2BManagement = () => {
             {/* Partner Details Modal */}
             {openStats && selectedPartner && (
                 <div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-300 overflow-y-auto"
                     onClick={(e) => { if (e.target === e.currentTarget) setOpenStats(false); }}
                 >
-                    <div className="w-full max-w-xl bg-black/95 backdrop-blur-xl rounded-[24px] p-6 border-2 border-primary/20 shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="w-full max-w-xl bg-black/95 backdrop-blur-xl rounded-[24px] p-6 border-2 border-primary/20 shadow-2xl my-8 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-start mb-6">
                             <div>
                                 <h3 className="text-xl font-bold text-white mb-1">{selectedPartner.name} - Performance</h3>
@@ -684,7 +684,7 @@ const B2BManagement = () => {
                     onClick={(e) => { if (e.target === e.currentTarget) setOpenDiscount(false); }}
                 >
                     <div
-                        className="w-full max-w-md bg-black/95 backdrop-blur-xl rounded-[24px] p-6 border-2 border-primary/20 shadow-2xl my-8"
+                        className="w-full max-w-md bg-black/95 backdrop-blur-xl rounded-[24px] p-6 border-2 border-primary/20 shadow-2xl my-8 max-h-[85vh] overflow-y-auto"
                         onClick={e => e.stopPropagation()}
                     >
                         <h3 className="text-base font-semibold text-white font-inter mb-2">Partner Incentives</h3>
@@ -729,7 +729,7 @@ const B2BManagement = () => {
                     onClick={(e) => { if (e.target === e.currentTarget) setOpenEdit(false); }}
                 >
                     <div
-                        className="w-full max-w-sm bg-black/95 rounded-[24px] p-6 border-2 border-primary/20 my-8 shadow-2xl"
+                        className="w-full max-w-sm bg-black/95 rounded-[24px] p-6 border-2 border-primary/20 my-8 shadow-2xl max-h-[85vh] overflow-y-auto"
                         onClick={e => e.stopPropagation()}
                     >
                         <h3 className="text-base font-semibold text-white font-inter mb-4">Edit Entity Details</h3>
@@ -819,7 +819,7 @@ const B2BManagement = () => {
                         }
                     }}
                 >
-                    <GlassCard className="w-full max-w-sm bg-black/95 backdrop-blur-xl shadow-2xl relative z-[100000] border-white/20 my-8" onClick={(e) => e.stopPropagation()}>
+                    <GlassCard className="w-full max-w-sm bg-black/95 backdrop-blur-xl shadow-2xl relative z-[100000] border-white/20 my-8 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <h3 className="text-base font-semibold text-white font-inter mb-4">Onboard New Entity</h3>
 
                         <div className="space-y-3 mb-6">
@@ -907,7 +907,7 @@ const B2BManagement = () => {
             {/* Compliance Modal */}
             {openAudits && (
                 <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenAudits(false)}>
-                    <GlassCard className="w-full max-w-2xl bg-black/95 border-white/20 my-8" onClick={e => e.stopPropagation()}>
+                    <GlassCard className="w-full max-w-2xl bg-black/95 border-white/20 my-8 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-semibold text-white font-inter">Compliance Audit Report</h3>
                             <button onClick={() => setOpenAudits(false)} className="text-white/50 hover:text-white">✕</button>
@@ -940,7 +940,7 @@ const B2BManagement = () => {
             {
                 openAssign && (
                     <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenAssign(false)}>
-                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8" onClick={e => e.stopPropagation()}>
+                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-semibold text-white font-inter mb-2">Rapid Assignment</h3>
                             <p className="text-sm text-white/60 mb-6 font-inter underline decoration-primary decoration-2 underline-offset-4">Assigning: {selectedCourse}</p>
 
@@ -971,7 +971,7 @@ const B2BManagement = () => {
             {
                 openGenerateCode && (
                     <div className="fixed inset-0 z-[9999] flex items-start justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto" onClick={() => setOpenGenerateCode(false)}>
-                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <GlassCard className="w-full max-w-md bg-black/95 border-white/20 my-8 shadow-2xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-semibold text-white font-inter mb-2">Generate Discount Code</h3>
                             <p className="text-sm text-white/60 mb-6 font-inter">Create a discount code for: <span className="text-pink-400 font-bold">{selectedPartner?.name}</span></p>
 

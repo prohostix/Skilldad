@@ -9,7 +9,15 @@ import axios from 'axios';
 import { getMediaUrl } from '../../utils/media';
 import GlassCard from '../../components/ui/GlassCard';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 import { toast } from 'react-hot-toast';
+
+// These sets mirror the Course Finder's own seeded answer labels exactly, so
+// a course's recommended_education/experience_levels/learning_modes can be
+// matched against a student's quiz answers by plain string equality.
+const EDUCATION_LEVELS = ['Class 10', 'Class 12', 'Diploma', "Bachelor's Degree", "Master's Degree", 'Professional Degree', 'Currently studying', 'Other'];
+const EXPERIENCE_LEVELS = ['Student / No experience', 'Fresher', 'Less than 1 year', '1-3 years', '3-5 years', '5+ years'];
+const LEARNING_MODES = ['Video lessons', 'Live classes', 'Practical projects', 'Mentor guidance', 'AI-powered learning', 'Quizzes & assessments', 'Group discussions'];
 
 const getModuleIcon = (type) => {
     switch(type) {
@@ -43,6 +51,9 @@ const CourseEditor = () => {
     const [contentUploading, setContentUploading] = useState(false);
     const [itemToDelete, setItemToDelete] = useState(null);
     const fileInputRef = useRef(null);
+
+    // Career & Skills Mapping - powers the Course Finder's recommendation engine.
+    const [tagSuggestions, setTagSuggestions] = useState({ careerRoles: [], skills: [], careerCategories: [] });
     const brochureInputRef = useRef(null);
     const contentInputRef = useRef(null);
     const videoThumbnailInputRef = useRef(null);
@@ -64,6 +75,20 @@ const CourseEditor = () => {
     useEffect(() => {
         fetchCourse();
     }, [id]);
+
+    useEffect(() => {
+        const fetchTagSuggestions = async () => {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                const { data } = await axios.get('/api/admin/course-finder/tag-suggestions', config);
+                setTagSuggestions(data);
+            } catch {
+                // non-critical - just used for autocomplete suggestions
+            }
+        };
+        fetchTagSuggestions();
+    }, []);
 
     const handleUpdate = async (e) => {
         if(e) e.preventDefault();
@@ -263,7 +288,7 @@ const CourseEditor = () => {
                         <ArrowLeft size={24} />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Edit Course</h1>
+                        <DashboardHeading title="Edit Course" />
                         <p className="text-white/50 text-sm mt-1">{course.title}</p>
                     </div>
                 </div>
@@ -531,6 +556,138 @@ const CourseEditor = () => {
                             </button>
                         </div>
 
+                        {/* Career & Skills Mapping - feeds the Course Finder recommendation engine */}
+                        <div className="p-6 bg-white/[0.02] border border-white/10 rounded-2xl space-y-5">
+                            <div>
+                                <h3 className="text-lg font-semibold text-white mb-1 flex items-center gap-2">
+                                    <span className="text-primary text-xl">✦</span> Career &amp; Skills Mapping
+                                </h3>
+                                <p className="text-sm text-white/50">Used by the Course Finder to recommend this course to the right students.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-semibold text-white/60 mb-1.5">Career Category</label>
+                                    <input
+                                        list="career-category-suggestions"
+                                        type="text"
+                                        placeholder="e.g. Healthcare & Hospital Management"
+                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-primary/50"
+                                        value={course.careerCategory || ''}
+                                        onChange={(e) => setCourse({ ...course, careerCategory: e.target.value })}
+                                    />
+                                    <datalist id="career-category-suggestions">
+                                        {tagSuggestions.careerCategories.map((c) => <option key={c} value={c} />)}
+                                    </datalist>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-white/60 mb-1.5">Duration (weeks)</label>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        placeholder="e.g. 8"
+                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-primary/50"
+                                        value={course.durationWeeks || ''}
+                                        onChange={(e) => setCourse({ ...course, durationWeeks: e.target.value ? Number(e.target.value) : null })}
+                                    />
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <label className="block text-xs font-semibold text-white/60 mb-1.5">Career Roles (comma separated)</label>
+                                    <input
+                                        list="career-role-suggestions"
+                                        type="text"
+                                        placeholder="e.g. Hospital Administrator, Healthcare Manager"
+                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-primary/50"
+                                        value={(course.careerRoles || []).join(', ')}
+                                        onChange={(e) => setCourse({ ...course, careerRoles: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
+                                    />
+                                    <datalist id="career-role-suggestions">
+                                        {tagSuggestions.careerRoles.map((c) => <option key={c} value={c} />)}
+                                    </datalist>
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <label className="block text-xs font-semibold text-white/60 mb-1.5">Skills Developed (comma separated)</label>
+                                    <input
+                                        list="skill-suggestions"
+                                        type="text"
+                                        placeholder="e.g. Healthcare Management, Communication"
+                                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-primary/50"
+                                        value={(course.skillsDeveloped || []).join(', ')}
+                                        onChange={(e) => setCourse({ ...course, skillsDeveloped: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
+                                    />
+                                    <datalist id="skill-suggestions">
+                                        {tagSuggestions.skills.map((c) => <option key={c} value={c} />)}
+                                    </datalist>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-white/60 mb-2">Recommended Education</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {EDUCATION_LEVELS.map((level) => {
+                                        const active = (course.recommendedEducation || []).includes(level);
+                                        return (
+                                            <button
+                                                key={level}
+                                                type="button"
+                                                onClick={() => {
+                                                    const list = course.recommendedEducation || [];
+                                                    setCourse({ ...course, recommendedEducation: active ? list.filter((l) => l !== level) : [...list, level] });
+                                                }}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${active ? 'bg-primary text-white border-primary' : 'bg-white/5 text-white/60 border-white/10 hover:border-primary/40'}`}
+                                            >
+                                                {level}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-white/60 mb-2">Experience Levels</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {EXPERIENCE_LEVELS.map((level) => {
+                                        const active = (course.experienceLevels || []).includes(level);
+                                        return (
+                                            <button
+                                                key={level}
+                                                type="button"
+                                                onClick={() => {
+                                                    const list = course.experienceLevels || [];
+                                                    setCourse({ ...course, experienceLevels: active ? list.filter((l) => l !== level) : [...list, level] });
+                                                }}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${active ? 'bg-primary text-white border-primary' : 'bg-white/5 text-white/60 border-white/10 hover:border-primary/40'}`}
+                                            >
+                                                {level}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-white/60 mb-2">Learning Modes</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {LEARNING_MODES.map((mode) => {
+                                        const active = (course.learningModes || []).includes(mode);
+                                        return (
+                                            <button
+                                                key={mode}
+                                                type="button"
+                                                onClick={() => {
+                                                    const list = course.learningModes || [];
+                                                    setCourse({ ...course, learningModes: active ? list.filter((l) => l !== mode) : [...list, mode] });
+                                                }}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${active ? 'bg-primary text-white border-primary' : 'bg-white/5 text-white/60 border-white/10 hover:border-primary/40'}`}
+                                            >
+                                                {mode}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Top Features Checkbox */}
                         <label className="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-colors w-fit">
                             <input 
@@ -690,7 +847,7 @@ const CourseEditor = () => {
         {/* Modal: Add Content Item */}
             {openVideo && (
                 <div className="fixed inset-0 bg-black/50 dark:bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-                    <GlassCard className="w-full max-w-lg bg-white dark:bg-[#0F0A1F] border-gray-200 dark:border-white/10 !p-5 shadow-2xl relative rounded-2xl">
+                    <GlassCard className="w-full max-w-lg bg-white dark:bg-[#0F0A1F] border-gray-200 dark:border-white/10 !p-5 shadow-2xl relative rounded-2xl max-h-[90vh] overflow-y-auto">
                         <button onClick={() => setOpenVideo(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-white/40 dark:hover:text-white transition-colors">
                             <X size={20} />
                         </button>

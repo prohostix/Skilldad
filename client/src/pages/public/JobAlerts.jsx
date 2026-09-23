@@ -245,7 +245,7 @@ const JobAlerts = () => {
                 )}
 
                 {!loading && filteredJobs.length > 0 && (
-                    <div className="text-center mt-14 mb-16">
+                    <div className="text-center mt-14 mb-8">
                         <p className="text-white/40 [.light-mode_&]:!text-slate-500 text-sm mb-4">
                             Want tailored placement support alongside your course?
                         </p>
@@ -254,17 +254,18 @@ const JobAlerts = () => {
                         </ModernButton>
                     </div>
                 )}
+            </div>
 
-                {/* Animated Learning Journey Section - Just Above Footer */}
+            {/* Animated Learning Journey Section - 100% Full Page Width */}
+            <div className="relative z-10 w-full px-0 pb-0 mb-0">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6 }}
-                    className="relative w-full max-w-[840px] mx-auto mt-10 mb-6 group"
+                    className="relative w-full max-w-none mx-0 group mb-0"
                 >
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-purple-500/20 to-primary/30 rounded-3xl blur-2xl opacity-60 dark:opacity-40 pointer-events-none" />
-                    <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200/80 dark:border-white/10 shadow-2xl bg-white dark:bg-[#0B081A]">
+                    <div className="relative w-full rounded-none overflow-hidden border-y border-slate-200/80 dark:border-white/10 shadow-md bg-white dark:bg-[#0B081A] h-[480px] sm:h-[560px] md:h-[660px] lg:h-[720px] flex items-center justify-center">
                         {/* 15s High-Fidelity Animated Journey Video */}
                         <video
                             src={learningJourneyVideo}
@@ -273,7 +274,7 @@ const JobAlerts = () => {
                             loop
                             muted
                             playsInline
-                            className="w-full h-auto object-contain block select-none"
+                            className="w-full h-full object-fill block select-none"
                         />
 
                         {/* Interactive hotspots on destinations */}
@@ -299,7 +300,7 @@ const JobAlerts = () => {
                 </motion.div>
             </div>
 
-            <Footer />
+            <Footer className="!mt-0 !pt-4" />
         </div>
     );
 };

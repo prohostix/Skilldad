@@ -4,7 +4,8 @@ import {
     LayoutDashboard, Briefcase, BookOpen, Users, Building2,
     BarChart3, LifeBuoy, Settings, X, LogOut, FileText,
     Trophy, DollarSign, GraduationCap, Image, Bell, Ticket,
-    Wallet, MessageCircle, ChevronDown, ChevronRight, Home, Video, Inbox, MapPin, ChevronLeft, Globe
+    Wallet, MessageCircle, ChevronDown, ChevronRight, Home, Video, Inbox, MapPin, ChevronLeft, Globe,
+    Radio, ClipboardCheck, Compass
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logoImg from '../../assets/logo.png';
@@ -68,10 +69,21 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
     const location = useLocation();
     const { logout } = useUser();
     
-    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+    // Threshold is xl (1280px), not lg (1024px): the sidebar's own fixed
+    // 76-240px width is subtracted from the viewport for the content area,
+    // but Tailwind's lg:/xl: utilities used throughout every page's grids are
+    // viewport-relative, not container-relative. If the sidebar went persistent
+    // at the same lg breakpoint those grids use to decide "desktop" column
+    // counts, a 1024-1279px window would show 3-4 column grids squeezed into
+    // (viewport - sidebar) width instead of the full width they assume -
+    // exactly the "looks broken on a real laptop window" bug. Keeping the
+    // sidebar as a mobile-style overlay through that range, matching the xl
+    // breakpoint the page-level two-column layouts already use, means content
+    // grids always get the full viewport width their own breakpoint expects.
+    const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1280);
 
     useEffect(() => {
-        const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+        const handleResize = () => setIsDesktop(window.innerWidth >= 1280);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -96,6 +108,8 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                 { name: 'Users', icon: Users, path: '/admin/users' },
                 { name: 'Students', icon: GraduationCap, path: '/admin/students' },
                 { name: 'Career Manager', icon: Briefcase, path: '/admin/career-manager' },
+                { name: 'Course Finder', icon: Compass, path: '/admin/course-finder' },
+                { name: 'Catalog Cards', icon: Image, path: '/admin/catalog-cards' },
                 { name: 'Job Alerts', icon: Bell, path: '/admin/job-alerts' },
                 { name: 'Certificates', icon: Trophy, path: '/admin/certificates' },
                 { name: 'Document Review', icon: FileText, path: '/admin/document-review' },
@@ -151,8 +165,8 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             return [
                 { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
                 { name: 'My Courses', icon: BookOpen, path: '/dashboard/my-courses' },
-                { name: 'Live Classes', icon: Users, path: '/dashboard/live-classes' },
-                { name: 'Exams', icon: Trophy, path: '/dashboard/exams' },
+                { name: 'Live Classes', icon: Radio, path: '/dashboard/live-classes' },
+                { name: 'Exams', icon: ClipboardCheck, path: '/dashboard/exams' },
                 { name: 'Documents', icon: FileText, path: '/dashboard/documents' },
                 { name: 'Placements & Career', icon: Briefcase, path: '/dashboard/placements' },
                 { name: 'Reward Wallet', icon: Wallet, path: '/dashboard/reward-wallet' },
@@ -175,8 +189,8 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
         if (!isDesktop) setIsOpen(false);
     };
 
-    // Calculate dynamic width
-    const sidebarWidth = isCollapsed ? 76 : 240;
+    // Calculate dynamic width - narrower for the student panel specifically
+    const sidebarWidth = isCollapsed ? 76 : (userRole === 'student' ? 208 : 240);
 
     return (
         <>
@@ -186,7 +200,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                     <motion.div
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                         onClick={() => setIsOpen(false)}
-                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] lg:hidden"
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] xl:hidden"
                     />
                 )}
             </AnimatePresence>
@@ -198,7 +212,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                     width: isDesktop ? sidebarWidth : 280,
                     opacity: 1
                 }}
-                className={`fixed lg:sticky top-0 left-0 h-screen bg-white dark:bg-[#020005]/95 dark:backdrop-blur-2xl border-r border-gray-100 dark:border-[#C026FF]/20 z-[100] flex flex-col shadow-sm overflow-hidden shrink-0 transition-all duration-300 ${!isDesktop && !isOpen ? 'pointer-events-none' : ''} modern-sidebar`}
+                className={`fixed top-0 left-0 h-screen bg-white dark:bg-[#020005]/95 dark:backdrop-blur-2xl border-r border-gray-100 dark:border-[#C026FF]/20 z-[100] flex flex-col shadow-sm overflow-hidden shrink-0 transition-all duration-300 ${!isDesktop && !isOpen ? 'pointer-events-none' : ''} modern-sidebar`}
             >
                 {/* Logo Area */}
                 <div className={`flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-between px-5'} py-5 min-h-[68px]`}>
@@ -213,7 +227,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
                     {!isDesktop && (
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="lg:hidden p-2 text-gray-500 hover:text-[#311B92] bg-gray-100 rounded-xl"
+                            className="xl:hidden p-2 text-gray-500 hover:text-[#311B92] bg-gray-100 rounded-xl"
                         >
                             <X size={20} />
                         </button>

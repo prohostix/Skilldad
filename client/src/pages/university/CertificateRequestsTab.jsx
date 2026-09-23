@@ -111,14 +111,14 @@ const CertificateRequestsTab = () => {
                     </div>
                 </div>
                 <div className="flex gap-3 w-full lg:w-auto">
-                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
+                    <div className="grid grid-cols-2 sm:flex bg-white/5 p-1 rounded-xl border border-white/10 gap-1 sm:gap-0 w-full sm:w-auto">
                         {['all', 'PENDING', 'APPROVED', 'ISSUED'].map(status => (
                             <button
                                 key={status}
                                 onClick={() => setStatusFilter(status)}
-                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                                    statusFilter === status 
-                                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
+                                    statusFilter === status
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                         : 'text-white/40 hover:text-white hover:bg-white/5'
                                 }`}
                             >
@@ -169,7 +169,7 @@ const CertificateRequestsTab = () => {
                                     </div>
 
                                     {/* Action Buttons */}
-                                    <div className="flex items-center gap-3 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-white/5">
+                                    <div className="flex flex-wrap items-center gap-3 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-white/5">
                                         {req.status === 'PENDING' && (
                                             <>
                                                 <button 
@@ -250,7 +250,7 @@ const CertificateRequestsTab = () => {
                             initial={{ opacity: 0, scale: 0.95, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            className="relative w-full max-w-lg bg-[#0B0F1A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0B0F1A] border border-white/10 rounded-2xl shadow-2xl"
                         >
                             <div className="p-6">
                                 <div className="flex justify-between items-start mb-6">

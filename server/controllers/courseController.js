@@ -213,7 +213,14 @@ const getCourse = asyncHandler(async (req, res) => {
         },
         displayOrder: course.display_order,
         minSalary: course.min_salary,
-        jobsAvailable: course.jobs_available
+        jobsAvailable: course.jobs_available,
+        careerRoles: course.career_roles,
+        careerCategory: course.career_category,
+        skillsDeveloped: course.skills_developed,
+        recommendedEducation: course.recommended_education,
+        experienceLevels: course.experience_levels,
+        learningModes: course.learning_modes,
+        durationWeeks: course.duration_weeks
     });
 });
 
@@ -282,7 +289,7 @@ const createCourse = asyncHandler(async (req, res) => {
 // @desc    Update course
 const updateCourse = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes, displayOrder, minSalary, jobsAvailable, modules } = req.body;
+    const { title, description, category, price, isPublished, isFeatured, instructorId, instructorName, universityName, brochure_url, university_tools, thumbnail, programType, skillDadUniversityId, features, learning_outcomes, displayOrder, minSalary, jobsAvailable, modules, careerRoles, careerCategory, skillsDeveloped, recommendedEducation, experienceLevels, learningModes, durationWeeks } = req.body;
 
     // Get old course to check for instructor changes
     const oldCourseRes = await query('SELECT instructor_id, submitted_by FROM courses WHERE id = $1', [id]);
@@ -316,9 +323,24 @@ const updateCourse = asyncHandler(async (req, res) => {
             min_salary = COALESCE($16, min_salary),
             jobs_available = COALESCE($17, jobs_available),
             modules = COALESCE($18::jsonb, modules),
+            career_roles = COALESCE($19::jsonb, career_roles),
+            career_category = COALESCE($20, career_category),
+            skills_developed = COALESCE($21::jsonb, skills_developed),
+            recommended_education = COALESCE($22::jsonb, recommended_education),
+            experience_levels = COALESCE($23::jsonb, experience_levels),
+            learning_modes = COALESCE($24::jsonb, learning_modes),
+            duration_weeks = COALESCE($25, duration_weeks),
             updated_at = NOW()
-        WHERE id = $19
-    `, [title, description, category, price, isPublished, isFeatured, instructorName, universityName, brochure_url, JSON.stringify(university_tools || []), thumbnail, programType, JSON.stringify(features || []), JSON.stringify(learning_outcomes || []), displayOrder !== undefined ? displayOrder : null, (minSalary === '' || minSalary === undefined) ? null : minSalary, (jobsAvailable === '' || jobsAvailable === undefined) ? null : jobsAvailable, modulesJson, id]);
+        WHERE id = $26
+    `, [title, description, category, price, isPublished, isFeatured, instructorName, universityName, brochure_url, JSON.stringify(university_tools || []), thumbnail, programType, JSON.stringify(features || []), JSON.stringify(learning_outcomes || []), displayOrder !== undefined ? displayOrder : null, (minSalary === '' || minSalary === undefined) ? null : minSalary, (jobsAvailable === '' || jobsAvailable === undefined) ? null : jobsAvailable, modulesJson,
+        careerRoles !== undefined ? JSON.stringify(careerRoles || []) : null,
+        careerCategory !== undefined ? careerCategory : null,
+        skillsDeveloped !== undefined ? JSON.stringify(skillsDeveloped || []) : null,
+        recommendedEducation !== undefined ? JSON.stringify(recommendedEducation || []) : null,
+        experienceLevels !== undefined ? JSON.stringify(experienceLevels || []) : null,
+        learningModes !== undefined ? JSON.stringify(learningModes || []) : null,
+        (durationWeeks === '' || durationWeeks === undefined) ? null : durationWeeks,
+        id]);
 
     // instructor_id and skill_dad_university_id are mutually exclusive - a Degree Programme is
     // linked to a SkillDad University (no login account), a Skill Course to a real instructor user.
@@ -374,7 +396,14 @@ const updateCourse = asyncHandler(async (req, res) => {
         universityName: updated.rows[0].university_name,
         programType: updated.rows[0].program_type,
         skillDadUniversityId: updated.rows[0].skill_dad_university_id,
-        displayOrder: updated.rows[0].display_order
+        displayOrder: updated.rows[0].display_order,
+        careerRoles: updated.rows[0].career_roles,
+        careerCategory: updated.rows[0].career_category,
+        skillsDeveloped: updated.rows[0].skills_developed,
+        recommendedEducation: updated.rows[0].recommended_education,
+        experienceLevels: updated.rows[0].experience_levels,
+        learningModes: updated.rows[0].learning_modes,
+        durationWeeks: updated.rows[0].duration_weeks
     });
 });
 
@@ -713,12 +742,88 @@ const updateLessonDocument = asyncHandler(async (req, res) => {
 });
 
 
+// Shapes a raw courses-table row into the same client-facing shape used by getCourses,
+// plus a real placement-support flag (program_type is a genuinely stored field - no
+// fabrication) and the recommendation reason it was picked for.
+const shapeRecommendedCourse = (course, reason) => ({
+    ...course,
+    _id: course.id,
+    isPublished: course.is_published,
+    programType: course.program_type,
+    hasPlacementSupport: course.program_type === 'wbl_abroad' || course.program_type === 'wbl_domestic',
+    reason,
+});
+
+// @desc    Get up to 3 real, data-backed course recommendations for the logged-in
+//          student: one Popular (highest total enrollment count), one Trending
+//          (most new enrollments in the last 30 days), and one Recommended
+//          (same category as a course they're already enrolled in). Buckets that
+//          come up empty are simply omitted rather than padded with fabricated data.
+// @route   GET /api/courses/recommended
+// @access  Private (Student)
+const getRecommendedCourses = asyncHandler(async (req, res) => {
+    const studentId = req.user.id;
+
+    const enrolledRes = await query(
+        `SELECT e.course_id, c.category FROM enrollments e
+         JOIN courses c ON e.course_id = c.id
+         WHERE e.student_id = $1`,
+        [studentId]
+    );
+    const enrolledIds = enrolledRes.rows.map(r => r.course_id);
+    const categories = [...new Set(enrolledRes.rows.map(r => r.category).filter(Boolean))];
+
+    const excludeIds = [...enrolledIds];
+    const results = [];
+
+    const popularRes = await query(
+        `SELECT c.id, c.title, c.thumbnail, c.category, c.program_type, c.price, c.university_name, c.is_published FROM courses c
+         WHERE c.is_published = true AND c.status = 'approved' AND NOT (c.id = ANY($1::text[]))
+         ORDER BY (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) DESC
+         LIMIT 1`,
+        [excludeIds]
+    );
+    if (popularRes.rows[0]) {
+        results.push(shapeRecommendedCourse(popularRes.rows[0], 'Popular'));
+        excludeIds.push(popularRes.rows[0].id);
+    }
+
+    const trendingRes = await query(
+        `SELECT c.id, c.title, c.thumbnail, c.category, c.program_type, c.price, c.university_name, c.is_published FROM courses c
+         WHERE c.is_published = true AND c.status = 'approved' AND NOT (c.id = ANY($1::text[]))
+         ORDER BY (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id AND created_at > NOW() - INTERVAL '30 days') DESC
+         LIMIT 1`,
+        [excludeIds]
+    );
+    if (trendingRes.rows[0]) {
+        results.push(shapeRecommendedCourse(trendingRes.rows[0], 'Trending'));
+        excludeIds.push(trendingRes.rows[0].id);
+    }
+
+    if (categories.length > 0) {
+        const recommendedRes = await query(
+            `SELECT c.id, c.title, c.thumbnail, c.category, c.program_type, c.price, c.university_name, c.is_published FROM courses c
+             WHERE c.is_published = true AND c.status = 'approved' AND NOT (c.id = ANY($1::text[]))
+             AND c.category = ANY($2::text[])
+             ORDER BY c.created_at DESC
+             LIMIT 1`,
+            [excludeIds, categories]
+        );
+        if (recommendedRes.rows[0]) {
+            results.push(shapeRecommendedCourse(recommendedRes.rows[0], 'Recommended'));
+        }
+    }
+
+    res.json(results);
+});
+
 module.exports = {
     getCourses,
     getCourse,
     createCourse,
     updateCourse,
     getAdminCourses,
+    getRecommendedCourses,
     saveModuleQuiz,
     saveLessonQuiz,
     updateLessonDocument,

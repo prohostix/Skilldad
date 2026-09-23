@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Star,
@@ -8,7 +8,8 @@ import {
     GraduationCap,
     Briefcase,
     IndianRupee,
-    TrendingUp
+    TrendingUp,
+    Clock
 } from 'lucide-react';
 
 import GlassCard from './ui/GlassCard';
@@ -17,13 +18,13 @@ import EnrollEnquiryModal from './ui/EnrollEnquiryModal';
 import { getMediaUrl } from '../utils/media';
 import { useUser } from '../context/UserContext';
 
-const CourseCard = ({ course, isWBLView = false, horizontal = false, forceStandardLayout = false }) => {
+const CourseCard = memo(({ course, isWBLView = false, horizontal = false, forceStandardLayout = false, variant = 'standard' }) => {
     const navigate = useNavigate();
     const titleRef = useRef(null);
     const [isHovered, setIsHovered] = useState(false);
     const [showEnquiry, setShowEnquiry] = useState(false);
     const [titleIsTwoLines, setTitleIsTwoLines] = useState(false);
-    
+
     let userContext;
     try {
         userContext = useUser();
@@ -55,6 +56,119 @@ const CourseCard = ({ course, isWBLView = false, horizontal = false, forceStanda
     const isSpecialCategory = isWBLView || programType === 'wbl_abroad' || programType === 'wbl_domestic';
     const isSIDPOrWBL = programType === 'degree_programme' || programType.startsWith('wbl');
 
+    // Catalog Modern Card Layout (Efficient, Clean & Cohesive)
+    if (variant === 'catalog') {
+        const getBadgeText = () => {
+            if (isFeatured) return 'Most Popular';
+            return null;
+        };
+
+        const badgeText = getBadgeText();
+        const displayLevel = course.level || null;
+        const cleanDescription = course.shortDescription || course.description?.replace(/<[^>]*>?/gm, '').trim() || '';
+
+        return (
+            <>
+                <div
+                    onClick={() => navigate(`/course/${course._id}`)}
+                    className={`bg-[#0E091D] border border-white/10 hover:border-purple-500/40 hover:shadow-xl hover:shadow-purple-900/10 [.light-mode_&]:!bg-white [.light-mode_&]:!border-slate-200/90 [.light-mode_&]:hover:!border-purple-300 [.light-mode_&]:hover:!shadow-lg [.light-mode_&]:hover:!shadow-purple-100/60 rounded-2xl transition-all duration-300 flex h-full ${
+                        horizontal ? 'flex-col sm:flex-row' : 'flex-col'
+                    } overflow-hidden group cursor-pointer relative hover:-translate-y-1`}
+                >
+                    {/* Thumbnail Section */}
+                    <div className={`relative ${horizontal ? 'sm:w-64 aspect-[16/10] sm:aspect-auto shrink-0' : 'w-full aspect-[16/10]'} overflow-hidden bg-slate-900 [.light-mode_&]:!bg-slate-100`}>
+                        <img
+                            src={thumbnailUrl}
+                            alt={course.title}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800";
+                            }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+
+                        {/* Top-Left Category Badge */}
+                        {badgeText && (
+                            <div className="absolute top-2.5 left-2.5 z-20">
+                                <span className="px-2.5 py-1 bg-purple-600/90 [.light-mode_&]:!bg-purple-700/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-md shadow-sm">
+                                    {badgeText}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="p-3.5 pb-3 flex flex-col flex-1 min-w-0">
+                        <div>
+                            {/* University / Provider Tag */}
+                            {(course.universityName || course.instructor?.profile?.universityName) && (
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#C026FF] [.light-mode_&]:!text-purple-600 truncate block mb-1">
+                                    {course.universityName || course.instructor?.profile?.universityName}
+                                </span>
+                            )}
+
+                            {/* Course Title */}
+                            <h3 ref={titleRef} className="font-bold text-white group-hover:text-[#C026FF] [.light-mode_&]:!text-slate-900 [.light-mode_&]:!group-hover:text-purple-600 text-sm sm:text-[15px] font-sans line-clamp-2 leading-snug transition-colors mb-1">
+                                {course.title}
+                            </h3>
+
+                            {/* Course Description - only 1 line when the title already took 2, so cards with long titles stay the same height as the rest */}
+                            {cleanDescription && (
+                                <p className={`text-[11px] leading-[1.4] text-white/45 [.light-mode_&]:!text-slate-500 mb-1.5 ${titleIsTwoLines ? 'line-clamp-1' : 'line-clamp-2'}`}>
+                                    {cleanDescription}
+                                </p>
+                            )}
+
+                            {/* Optional Level Meta (if present) */}
+                            {displayLevel && (
+                                <div className="flex items-center gap-1.5 text-[11px] text-white/50 [.light-mode_&]:!text-slate-500 font-medium mb-1">
+                                    <GraduationCap size={12} className="text-[#C026FF] [.light-mode_&]:!text-purple-600" />
+                                    <span>{displayLevel}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Action Link - pinned to the bottom so it lines up across cards regardless of title/description length */}
+                        <div className="flex items-center justify-end mt-auto pt-1.5">
+                            {isEnrolled ? (
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/dashboard/course/${course._id}`);
+                                    }}
+                                    className="text-xs font-semibold text-[#C026FF] hover:text-purple-300 [.light-mode_&]:!text-purple-700 [.light-mode_&]:!hover:text-purple-900 underline underline-offset-4 decoration-purple-500/60 hover:decoration-purple-500 flex items-center gap-1 transition-all group/link cursor-pointer"
+                                >
+                                    <span>Go to Course</span>
+                                    <ArrowRight size={12} className="group-hover/link:translate-x-0.5 transition-transform" />
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate(`/course/${course._id}`);
+                                    }}
+                                    className="text-xs font-semibold text-[#C026FF] hover:text-purple-300 [.light-mode_&]:!text-purple-700 [.light-mode_&]:!hover:text-purple-900 underline underline-offset-4 decoration-purple-500/60 hover:decoration-purple-500 flex items-center gap-1 transition-all group/link cursor-pointer"
+                                >
+                                    <span>View Details</span>
+                                    <ArrowRight size={12} className="group-hover/link:translate-x-0.5 transition-transform" />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {showEnquiry && (
+                    <EnrollEnquiryModal course={course} onClose={() => setShowEnquiry(false)} />
+                )}
+            </>
+        );
+    }
+
     if (isSpecialCategory && !forceStandardLayout) {
         return (
             <>
@@ -75,6 +189,8 @@ const CourseCard = ({ course, isWBLView = false, horizontal = false, forceStanda
                         <img
                             src={thumbnailUrl}
                             alt={course.title}
+                            loading="lazy"
+                            decoding="async"
                             className="absolute inset-0 w-full h-full object-cover z-20 group-hover/card:scale-105 transition-transform duration-700"
                             onError={(e) => {
                                 e.target.onerror = null;
@@ -197,6 +313,8 @@ const CourseCard = ({ course, isWBLView = false, horizontal = false, forceStanda
                     <img
                         src={thumbnailUrl}
                         alt={course.title}
+                        loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 w-full h-full object-cover z-20"
                         onError={(e) => {
                             e.target.onerror = null;
@@ -272,6 +390,6 @@ const CourseCard = ({ course, isWBLView = false, horizontal = false, forceStanda
             )}
         </>
     );
-};
+});
 
 export default CourseCard;

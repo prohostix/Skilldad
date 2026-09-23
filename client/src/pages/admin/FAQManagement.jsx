@@ -4,6 +4,7 @@ import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import DashboardHeading from '../../components/ui/DashboardHeading';
 import { useToast } from '../../context/ToastContext';
 
 const FAQManagement = () => {
@@ -131,12 +132,11 @@ const FAQManagement = () => {
 
     return (
         <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold font-jakarta text-white">FAQ Management</h1>
-                    <p className="text-white/50 text-sm">Manage Help Assistant content and track queries</p>
+                    <DashboardHeading title="FAQ Management" />
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                     <ModernButton onClick={handleClearAnalytics} className="!py-2 !bg-red-500/10 !text-red-400 !border-red-500/20 hover:!bg-red-500/25">
                         <Trash size={16} className="mr-2" /> Clear History
                     </ModernButton>
@@ -317,7 +317,7 @@ const FAQManagement = () => {
                                     className="w-full bg-[#020005] border border-white/10 rounded-lg p-3 text-white focus:border-[#7C3AED] outline-none"
                                 ></textarea>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-[#A78BFA] uppercase mb-2">Help Guide Link (Optional)</label>
                                     <input

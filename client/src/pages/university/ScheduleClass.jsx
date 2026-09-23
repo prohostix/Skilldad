@@ -194,7 +194,7 @@ const ScheduleClass = () => {
                         </GlassCard>
 
                         <div className="flex flex-col md:flex-row gap-4 pt-4">
-                            <ModernButton type="submit" className="flex-2 justify-center py-4 bg-primary hover:bg-primary/90 text-lg shadow-[0_0_30px_rgba(124,58,237,0.3)] min-w-[300px]">
+                            <ModernButton type="submit" className="flex-2 justify-center py-4 bg-primary hover:bg-primary/90 text-lg shadow-[0_0_30px_rgba(124,58,237,0.3)] w-full sm:min-w-[300px]">
                                 <Video size={22} className="mr-3" />
                                 Go Live & Notify Students
                             </ModernButton>

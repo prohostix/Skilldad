@@ -432,7 +432,7 @@ const ExamResult = () => {
                     className="bg-white/[0.03] border border-white/8 rounded-2xl p-6"
                 >
                     <h3 className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-4">Submission Details</h3>
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {[
                             {
                                 icon: Calendar,
@@ -527,16 +527,16 @@ const ExamResult = () => {
 
                                                     {answer.questionType === 'mcq' ? (
                                                         <div className="space-y-2 text-xs">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="text-white/40 font-bold w-28">Your Answer:</span>
-                                                                <span className={`font-bold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                            <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
+                                                                <span className="text-white/40 font-bold w-28 shrink-0">Your Answer:</span>
+                                                                <span className={`font-bold min-w-0 break-words ${isCorrect ? 'text-emerald-400' : 'text-red-400'}`}>
                                                                     {(Array.isArray(answer.question?.options) && answer.question.options[answer.selectedOption]?.text) || 'Not answered'}
                                                                 </span>
                                                             </div>
                                                             {!isCorrect && (
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="text-white/40 font-bold w-28">Correct Answer:</span>
-                                                                    <span className="font-bold text-emerald-400">
+                                                                <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
+                                                                    <span className="text-white/40 font-bold w-28 shrink-0">Correct Answer:</span>
+                                                                    <span className="font-bold text-emerald-400 min-w-0 break-words">
                                                                         {(Array.isArray(answer.question?.options) && answer.question.options.find(opt => opt.isCorrect)?.text) || 'N/A'}
                                                                     </span>
                                                                 </div>

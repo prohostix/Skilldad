@@ -423,7 +423,7 @@ const PartnerStudentManagement = () => {
                         />
                     </div>
                     {courses.length > 0 && (
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                             <select
                                 value={filterCourse}
                                 onChange={(e) => setFilterCourse(e.target.value)}
@@ -471,14 +471,14 @@ const PartnerStudentManagement = () => {
                     <div className="space-y-3">
                         {filteredStudents.map(student => (
                             <div key={student._id || student.id} className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-primary/30 transition-colors">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold">
+                                <div className="flex flex-wrap items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4 min-w-0">
+                                        <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold shrink-0">
                                             {student.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || '?'}
                                         </div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <h3 className="font-bold text-white">{student.name}</h3>
+                                        <div className="min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="font-bold text-white truncate">{student.name}</h3>
                                                 <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${
                                                     student.connection_type === 'Course Enrolled' ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' :
                                                     student.connection_type === 'Discount Code' ? 'bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30' :
@@ -518,10 +518,10 @@ const PartnerStudentManagement = () => {
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-4 mt-1 text-xs text-white/40">
-                                                <span className="flex items-center gap-1">
-                                                    <Mail size={12} />
-                                                    {student.email}
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-white/40">
+                                                <span className="flex items-center gap-1 min-w-0">
+                                                    <Mail size={12} className="shrink-0" />
+                                                    <span className="truncate">{student.email}</span>
                                                 </span>
                                                 {student.phone && (
                                                     <span className="flex items-center gap-1">
@@ -835,14 +835,14 @@ const PartnerStudentManagement = () => {
                                 ) : studentDocs.length > 0 ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {studentDocs.map((doc, idx) => (
-                                            <div key={doc._id} className="p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center group hover:border-primary/30 transition-all">
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                                            <div key={doc._id} className="p-4 bg-white/5 rounded-xl border border-white/5 flex flex-wrap justify-between items-center gap-3 group hover:border-primary/30 transition-all">
+                                                <div className="flex items-center space-x-4 min-w-0">
+                                                    <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors shrink-0">
                                                         <FileText className="text-primary" size={20} />
                                                     </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-sm font-bold text-white">{doc.title}</p>
+                                                    <div className="min-w-0">
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <p className="text-sm font-bold text-white truncate">{doc.title}</p>
                                                             <span className={`px-1.5 py-0.5 text-[9px] font-black uppercase rounded border ${
                                                                 doc.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
                                                                 doc.status === 'rejected' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' :

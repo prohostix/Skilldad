@@ -401,7 +401,7 @@ const PartnerDashboard = () => {
 
                         <GlassCard className="text-left">
                             <h2 className="text-base font-bold text-white font-poppins mb-6">Quick Actions</h2>
-                            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                 <button
                                     onClick={() => copyToClipboard(`${window.location.origin}/register?partner=${discountCodes[0]?.code || 'PARTNER'}`)}
                                     className="p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 hover:border-primary/30 transition-all text-left group"
@@ -445,7 +445,7 @@ const PartnerDashboard = () => {
                                         className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-primary/50 transition-all"
                                     />
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-wrap items-center gap-3">
                                     <ModernButton onClick={() => setShowRegisterModal(true)}>
                                         <Plus size={18} className="mr-2" /> Register Student
                                     </ModernButton>
@@ -665,14 +665,14 @@ const PartnerDashboard = () => {
                         <div className="grid gap-4">
                             {filteredStudents.map((s) => (
                                 <GlassCard key={s.id || s._id} className="text-left py-4 px-6 hover:border-primary/30 transition-all">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-bold">
+                                    <div className="flex flex-wrap items-center justify-between gap-4">
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-bold shrink-0">
                                                 {s.name?.charAt(0).toUpperCase()}
                                             </div>
-                                            <div>
-                                                <p className="font-bold text-white">{s.name}</p>
-                                                <p className="text-xs text-white/40">{s.email}</p>
+                                            <div className="min-w-0">
+                                                <p className="font-bold text-white truncate">{s.name}</p>
+                                                <p className="text-xs text-white/40 truncate">{s.email}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-6">
@@ -814,19 +814,19 @@ const PartnerDashboard = () => {
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
                             className="relative w-full max-w-5xl max-h-[90vh] bg-[#0B0F1A] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
                         >
-                            <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-1">
-                                        <h3 className="text-2xl font-bold text-white">{selectedStudent.name}</h3>
-                                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded border border-primary/20">Student Portal</span>
+                            <div className="p-8 border-b border-white/5 flex flex-wrap justify-between items-center gap-4 bg-white/[0.02]">
+                                <div className="min-w-0">
+                                    <div className="flex flex-wrap items-center gap-3 mb-1">
+                                        <h3 className="text-2xl font-bold text-white truncate max-w-full">{selectedStudent.name}</h3>
+                                        <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded border border-primary/20 shrink-0">Student Portal</span>
                                     </div>
-                                    <p className="text-sm text-white/40 flex items-center gap-4">
-                                        <span className="flex items-center gap-1.5"><Mail size={14} /> {selectedStudent.email}</span>
-                                        <span className="text-white/10">|</span>
-                                        <span className="flex items-center gap-1.5"><ShieldCheck size={14} /> ID: {selectedStudent._id || selectedStudent.id}</span>
+                                    <p className="text-sm text-white/40 flex flex-wrap items-center gap-x-4 gap-y-1">
+                                        <span className="flex items-center gap-1.5 min-w-0"><Mail size={14} className="shrink-0" /> <span className="truncate">{selectedStudent.email}</span></span>
+                                        <span className="text-white/10 hidden sm:inline">|</span>
+                                        <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="shrink-0" /> ID: {selectedStudent._id || selectedStudent.id}</span>
                                     </p>
                                 </div>
-                                <button onClick={() => setSelectedStudent(null)} className="p-3 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-2xl transition-all">
+                                <button onClick={() => setSelectedStudent(null)} className="p-3 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-2xl transition-all shrink-0">
                                     <X size={24} />
                                 </button>
                             </div>

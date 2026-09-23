@@ -327,7 +327,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                         </div>
 
                         {/* Course & Duration */}
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label className={labelCls}>Course *</label>
                                 <div className="relative group">
@@ -391,7 +391,7 @@ const ScheduleModal = ({ onClose, onScheduled, onToast, courses = [] }) => {
                         {/* Start Date & Time */}
                         <div>
                             <label className={labelCls}>Start Date & Time *</label>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                 <div className="relative">
                                     <Calendar size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 pointer-events-none" />
                                     <input
@@ -535,9 +535,9 @@ const RecordingUploadModal = ({ session, onClose, onUpload, onToast }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
-            <div className="w-full max-w-md" onClick={e => e.stopPropagation()}>
-                <GlassCard className="border-primary/20 p-6 bg-black/95">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto bg-black/80 backdrop-blur-sm" onClick={onClose}>
+            <div className="w-full max-w-md my-4" onClick={e => e.stopPropagation()}>
+                <GlassCard className="border-primary/20 p-6 bg-black/95 max-h-[85vh] overflow-y-auto">
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h3 className="text-lg font-bold text-white flex items-center gap-2"><Film size={18} className="text-primary" /> Session Recording</h3>

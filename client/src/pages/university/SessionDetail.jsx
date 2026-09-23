@@ -329,9 +329,9 @@ const SessionDetail = () => {
       >
         {/* Header */}
         <div className="flex-shrink-0 bg-[#1a1a1a] border-b border-white/10 px-6 py-3 z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-base font-bold text-white leading-tight">{session.topic}</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-base font-bold text-white leading-tight truncate">{session.topic}</h1>
               <p className="text-white/40 text-xs mt-0.5">
                 {isHost ? 'Host' : 'Student'} &bull; {session.status}
                 {session.instructor?.name ? ` \u2022 ${session.instructor.name}` : ''}
@@ -340,7 +340,7 @@ const SessionDetail = () => {
 
             {/* If host, show custom recording controls */}
             {isHost && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 <button
                   onClick={toggleRecording}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${isRecording

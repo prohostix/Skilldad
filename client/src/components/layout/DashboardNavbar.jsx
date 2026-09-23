@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info, Wallet, Video, Sun, Moon, BarChart2 } from 'lucide-react';
+import { Search, Bell, User as UserIcon, X, LogOut, Settings, ChevronDown, CheckCircle2, MessageSquare, Info, Wallet, Video, Sun, Moon, BarChart2, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../context/UserContext';
 import { useSocket } from '../../context/SocketContext';
@@ -66,11 +66,11 @@ const Navbar = ({ onToggleSidebar }) => {
     // Generic Mock Notifications - Removed in favor of real socket notifications
 
     return (
-        <header className="sticky top-0 z-50 w-full h-14 sm:h-16 bg-white dark:bg-black/60 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 px-3 sm:px-6 flex items-center justify-between will-change-transform font-inter dashboard-navbar">
-            <div className="flex items-center space-x-4 flex-1">
+        <header className="sticky top-0 z-50 w-full max-w-full h-14 sm:h-16 bg-white dark:bg-black/60 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 px-2.5 sm:px-6 flex items-center justify-between will-change-transform font-inter dashboard-navbar">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
                 <button
                     onClick={onToggleSidebar}
-                    className="p-2 text-slate-100 hover:bg-white/10 rounded-xl transition-colors"
+                    className="p-2 text-slate-100 hover:bg-white/10 rounded-xl transition-colors shrink-0"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
                 </button>
@@ -94,7 +94,7 @@ const Navbar = ({ onToggleSidebar }) => {
                 {/* Mobile Search Toggle */}
                 <button 
                     onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-                    className="sm:hidden p-2 text-slate-400 hover:bg-white/5 rounded-xl transition-all"
+                    className="sm:hidden p-2 text-slate-400 hover:bg-white/5 rounded-xl transition-all shrink-0"
                 >
                     <Search size={20} />
                 </button>
@@ -136,7 +136,7 @@ const Navbar = ({ onToggleSidebar }) => {
                 )}
             </AnimatePresence>
 
-            <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
                 
                 {/* Reward Points Persistent Display */}
                 {userRole === 'student' && (
@@ -159,12 +159,24 @@ const Navbar = ({ onToggleSidebar }) => {
                         </div>
                     </motion.div>
                 )}
+
+                {/* Course Finder Quick Access */}
+                {userRole === 'student' && (
+                    <button
+                        onClick={() => navigate('/dashboard/course-finder')}
+                        className="p-1.5 sm:p-2 text-slate-500 dark:text-slate-400 hover:text-[#4C1D95] dark:hover:text-primary hover:bg-purple-50 dark:hover:bg-white/5 rounded-xl transition-all shrink-0"
+                        title="Course Finder"
+                        aria-label="Course Finder"
+                    >
+                        <Compass size={18} className="sm:w-5 sm:h-5" />
+                    </button>
+                )}
                 
                 {/* Statistics Panel Toggle */}
                 {userRole === 'student' && (
                     <button
                         onClick={() => window.dispatchEvent(new Event('toggle-stats'))}
-                        className="hidden sm:flex p-2 text-slate-400 hover:bg-white/5 hover:text-primary rounded-xl transition-all"
+                        className="hidden sm:flex p-2 text-slate-400 hover:bg-white/5 hover:text-primary rounded-xl transition-all shrink-0"
                         title="Toggle Statistics Panel"
                     >
                         <BarChart2 size={18} className="sm:w-5 sm:h-5" />
@@ -174,17 +186,17 @@ const Navbar = ({ onToggleSidebar }) => {
                 {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}
-                    className="p-2 text-slate-400 hover:bg-white/5 hover:text-primary rounded-xl transition-all"
+                    className="p-1.5 sm:p-2 text-slate-400 hover:bg-white/5 hover:text-primary rounded-xl transition-all shrink-0"
                     aria-label="Toggle theme"
                 >
                     {theme === 'light' ? <Moon size={18} className="sm:w-5 sm:h-5" /> : <Sun size={18} className="sm:w-5 sm:h-5" />}
                 </button>
 
                 {/* Notification Bell Dropdown */}
-                <div className="relative" ref={notifRef}>
+                <div className="relative shrink-0" ref={notifRef}>
                     <button 
                         onClick={() => setIsNotifOpen(!isNotifOpen)}
-                        className={`relative p-2 rounded-xl transition-all ${isNotifOpen ? 'bg-primary/20 text-primary' : 'text-slate-400 hover:bg-white/5 hover:text-primary'}`}
+                        className={`relative p-1.5 sm:p-2 rounded-xl transition-all shrink-0 ${isNotifOpen ? 'bg-primary/20 text-primary' : 'text-slate-400 hover:bg-white/5 hover:text-primary'}`}
                     >
                         <Bell size={18} className="sm:w-5 sm:h-5" />
                         {unreadCount > 0 && (
@@ -199,7 +211,7 @@ const Navbar = ({ onToggleSidebar }) => {
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                 transition={{ duration: 0.2 }}
-                                className="absolute right-0 mt-3 w-80 bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden py-2 z-50 origin-top-right"
+                                className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-1.5rem)] bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden py-2 z-50 origin-top-right"
                             >
                                 <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
                                     <h3 className="text-white font-semibold text-sm">Notifications</h3>
@@ -246,10 +258,10 @@ const Navbar = ({ onToggleSidebar }) => {
                 <div className="h-8 w-px bg-white/5 hidden sm:block"></div>
 
                 {/* Profile Dropdown */}
-                <div className="relative" ref={profileRef}>
+                <div className="relative shrink-0" ref={profileRef}>
                     <div
                         onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        className={`flex items-center space-x-3 cursor-pointer group p-1 sm:p-1.5 rounded-xl transition-all ${isProfileOpen ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                        className={`flex items-center space-x-2 sm:space-x-3 cursor-pointer group p-0.5 sm:p-1.5 rounded-xl transition-all ${isProfileOpen ? 'bg-white/10' : 'hover:bg-white/5'}`}
                     >
                         {userInfo.profileImage ? (
                             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-900 overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all shadow-lg shrink-0">
@@ -279,7 +291,7 @@ const Navbar = ({ onToggleSidebar }) => {
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
                                 transition={{ duration: 0.2 }}
-                                className="absolute right-0 mt-3 w-56 bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden py-2 z-50 origin-top-right"
+                                className="absolute right-0 mt-3 w-56 max-w-[calc(100vw-1.5rem)] bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl overflow-hidden py-2 z-50 origin-top-right"
                             >
                                 <div className="px-4 py-3 border-b border-white/5 md:hidden">
                                     <p className="text-white font-bold text-sm truncate">{userName}</p>

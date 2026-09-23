@@ -308,7 +308,7 @@ const CertificateManagement = () => {
                     <motion.div 
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="bg-[#141418] border border-white/10 w-full max-w-md rounded-2xl p-6 shadow-2xl"
+                        className="bg-[#141418] border border-white/10 w-full max-w-md rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
                     >
                         <div className="flex justify-between items-center pb-4 border-b border-white/10 mb-5">
                             <div>

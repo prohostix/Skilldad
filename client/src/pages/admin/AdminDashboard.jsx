@@ -259,37 +259,37 @@ const AdminDashboard = () => {
                         transition={{ delay: i * 0.04 }}
                         className="h-full"
                     >
-                        <div className="group relative h-full bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col justify-between overflow-hidden">
+                        <div className="group relative h-full bg-white/95 dark:bg-[#0E0B1A]/80 border border-slate-200/80 dark:border-white/10 rounded-xl py-2 px-3 sm:py-2.5 sm:px-3 shadow-xs hover:shadow-md hover:border-primary/40 transition-all duration-200 flex flex-col justify-between overflow-hidden">
                             <div
-                                className="absolute top-0 right-0 w-14 h-14 -mr-7 -mt-7 rounded-full blur-xl pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity"
+                                className="absolute top-0 right-0 w-12 h-12 -mr-6 -mt-6 rounded-full blur-xl pointer-events-none opacity-10 group-hover:opacity-20 transition-opacity"
                                 style={{ backgroundColor: item.color }}
                             />
 
-                            <div className="flex justify-between items-start relative z-10 mb-2">
+                            <div className="flex justify-between items-start relative z-10 mb-1.5">
                                 <div
-                                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105"
+                                    className="w-6 h-6 rounded-md flex items-center justify-center transition-transform group-hover:scale-105"
                                     style={{
                                         backgroundColor: `${item.color}15`,
                                         color: item.color
                                     }}
                                 >
-                                    <item.icon size={15} />
+                                    <item.icon size={13} />
                                 </div>
-                                <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold font-inter ${
+                                <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9.5px] font-semibold font-inter leading-none ${
                                     item.trend.startsWith('+')
                                         ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                                         : 'bg-primary/10 text-primary dark:text-primary-light border border-primary/20'
                                 }`}>
-                                    {item.trend.startsWith('+') && <TrendingUp size={10} />}
+                                    {item.trend.startsWith('+') && <TrendingUp size={9} />}
                                     <span>{item.trend}</span>
                                 </div>
                             </div>
 
                             <div className="text-left relative z-10">
-                                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium font-inter tracking-normal mb-0.5">
+                                <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium font-inter tracking-normal leading-tight mb-0.5">
                                     {item.title}
                                 </p>
-                                <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-inter tracking-tight">
+                                <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-inter tracking-tight leading-tight">
                                     {item.value}
                                 </p>
                             </div>

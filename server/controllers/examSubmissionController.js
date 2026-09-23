@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const { query } = require('../config/postgres');
 const FileUploadService = require('../services/FileUploadService');
 const auditLogService = require('../services/auditLogService');
+const { recordDailyActivity } = require('../utils/activityStreak');
 
 /**
  * @desc    Submit answer for a question during exam (auto-save)
@@ -113,6 +114,8 @@ const submitExam = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('Exam already submitted');
   }
+
+  recordDailyActivity(studentId);
 
   // 2. Fetch all questions for auto-grading
   const qRes = await query('SELECT * FROM questions WHERE exam_id = $1', [submission.exam_id]);

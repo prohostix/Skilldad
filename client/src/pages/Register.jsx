@@ -6,28 +6,30 @@ import {
     User,
     Mail,
     Lock,
-    ChevronRight,
     ArrowLeft,
+    ArrowRight,
     ShieldCheck,
-    Building2,
-    Users,
-    Sparkles,
-    AlertCircle,
     Smartphone,
-    ChevronDown,
     Eye,
     EyeOff,
-    Check,
-    Tag
+    Tag,
+    MonitorPlay,
+    Award,
+    BriefcaseBusiness,
+    Users
 } from 'lucide-react';
-import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
-import Navbar from '../components/ui/Navbar';
+import SkillDadLogo from '../components/ui/SkillDadLogo';
+import loginStudentImg from '../assets/login-student.png';
 import { useUser } from '../context/UserContext';
 import CountrySelector from '../components/ui/CountrySelector';
-import jobIllustration from '../assets/register-hero.jpg';
 
-
+const features = [
+    { icon: MonitorPlay, label: 'Industry-relevant courses' },
+    { icon: Award, label: 'Verified certifications' },
+    { icon: BriefcaseBusiness, label: 'Placement assistance' },
+    { icon: Users, label: 'Trusted by top universities & companies' },
+];
 
 const countryCodes = [
     { code: '+91', name: 'India', flag: '🇮🇳', iso: 'in' },
@@ -259,44 +261,99 @@ const Register = () => {
     const prevStep = () => { setError(''); setStep(step - 1); };
 
     return (
-        <div className="h-screen max-h-screen bg-alyra-gradient flex flex-col lg:flex-row relative overflow-hidden">
-            <Navbar compact />
+        <div className="h-screen max-h-screen w-full flex bg-white overflow-hidden">
+            {/* Left: Branding panel - extends the full height of the page */}
+            <div className="hidden lg:flex lg:w-1/2 h-full relative bg-gradient-to-br from-[#F5F3FF] via-[#F8F7FF] to-white flex-col pl-12 pr-6 py-6 overflow-hidden">
+                <div className="absolute -top-24 -left-24 w-72 h-72 bg-primary/5 rounded-full blur-[100px]" />
+                <div className="absolute bottom-0 -right-16 w-72 h-72 bg-primary-light/10 rounded-full blur-[100px]" />
 
-            {/* Left: Registration Form */}
-            <div className="w-full lg:flex-1 flex items-center justify-center pt-14 pb-2 px-6 h-full relative overflow-hidden">
-                {/* Background Decorative Elements */}
-                <div className="absolute -top-20 -right-20 w-96 h-96 bg-primary/3 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-secondary-purple/3 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+                <Link to="/" className="relative z-10 flex items-center w-fit group">
+                    <SkillDadLogo className="w-8 h-8 mr-3" />
+                    <span className="brand-text font-bold font-space !text-[#4C1D95] uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 text-base">
+                        SkillDad
+                    </span>
+                </Link>
 
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-[21rem] relative z-10 my-auto"
-            >
-                <div className="text-center mb-3">
-                    <h1 className="text-xl md:text-2xl font-black text-primary tracking-tight font-jakarta whitespace-nowrap">Welcome to SkillDad</h1>
-                    <p className="text-xs text-white/60 [.light-mode_&]:!text-slate-500 mt-1 font-inter max-w-sm mx-auto leading-relaxed">
+                <div className="relative z-10 max-w-[320px] mt-4">
+                    <h1 className="!text-2xl xl:!text-[1.75rem] !font-black !text-slate-900 !leading-[1.15] !tracking-tight font-jakarta">
+                        Welcome to SkillDad
+                    </h1>
+                    <p className="mt-3 text-xs text-slate-500 leading-relaxed">
                         Create your account and start your journey toward a job-assured career.
                     </p>
+
+                    <div className="mt-5 space-y-2.5">
+                        {features.map((f, i) => (
+                            <div key={i} className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-[#4C1D95]/10 !text-[#4C1D95] flex items-center justify-center shrink-0">
+                                    <f.icon size={14} />
+                                </div>
+                                <span className="text-xs font-semibold text-slate-700">{f.label}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-16" style={{ transform: 'rotate(-10deg)', transformOrigin: 'left center' }}>
+                        <p className="text-lg font-semibold text-primary/50 leading-tight" style={{ fontFamily: "'Caveat', cursive" }}>
+                            Your Career<br />Our Mission
+                        </p>
+                        <svg width="90" height="10" viewBox="0 0 90 10" fill="none" className="mt-0.5 text-primary/50">
+                            <path d="M2 6C20 2 60 2 88 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                    </div>
                 </div>
 
-                <GlassCard className="!p-4 sm:!p-5 shadow-2xl shadow-indigo-500/10 border-white/40 overflow-hidden">
-                    <form onSubmit={handleSubmit} className="space-y-3">
-                        <AnimatePresence mode="wait">
-                            {step === 1 ? (
-                                <motion.div
-                                    key="step1"
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 20 }}
-                                    className="space-y-3"
-                                >
-                                    <div className="space-y-3">
-                                        <div className="space-y-1.5 text-left">
-                                            <label className="text-sm font-semibold text-slate-600 [.light-mode_&]:!text-gray-700 ml-1 font-inter">Full Name<span className="text-red-500">*</span></label>
+                {/* Illustration - absolutely positioned so it can sit large without clipping the panel edges.
+                    Uses inline styles (not Tailwind classes) to match the same, confirmed-working pattern used
+                    on the Login page's identical branding panel. */}
+                <img
+                    src={loginStudentImg}
+                    alt=""
+                    style={{
+                        position: 'absolute',
+                        right: '16px',
+                        bottom: '40px',
+                        width: 'clamp(180px, 26vw, 320px)',
+                        height: 'auto',
+                        maxHeight: '60%',
+                        objectFit: 'contain',
+                        objectPosition: 'bottom',
+                        pointerEvents: 'none'
+                    }}
+                />
+            </div>
+
+            {/* Right: Registration form */}
+            <div className="w-full lg:w-1/2 h-full flex items-center justify-center px-6 py-8 relative overflow-y-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full max-w-sm"
+                >
+                    <Link to="/" className="lg:hidden flex items-center justify-center gap-3 mb-8 group">
+                        <SkillDadLogo className="w-8 h-8" />
+                        <span className="brand-text font-bold font-space !text-[#4C1D95] uppercase tracking-[0.2em] group-hover:text-primary transition-all duration-300 text-base">
+                            SkillDad
+                        </span>
+                    </Link>
+
+                    <div className="border border-slate-200 rounded-2xl p-6 shadow-sm bg-white">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <AnimatePresence mode="wait">
+                                {step === 1 ? (
+                                    <motion.div
+                                        key="step1"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 20 }}
+                                        className="space-y-4"
+                                    >
+                                        <div className="flex flex-col gap-1.5 text-left">
+                                            <label className="text-[11px] font-bold text-slate-700 ml-0.5">Full Name<span className="text-red-500">*</span></label>
                                             <div className={`relative transition-all duration-300 ${isFocused === 'name' ? 'scale-[1.01]' : ''}`}>
-                                                <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'name' ? 'text-primary' : 'text-slate-400'}`}>
-                                                    <User size={16} />
+                                                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400 z-10">
+                                                    <User size={14} />
                                                 </div>
                                                 <input
                                                     type="text"
@@ -308,16 +365,16 @@ const Register = () => {
                                                     onBlur={() => setIsFocused('')}
                                                     onChange={handleChange}
                                                     value={formData.name}
-                                                    className="w-full pl-11 pr-4 py-2 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white [.light-mode_&]:!text-black placeholder:text-slate-500 [.light-mode_&]:placeholder:!text-gray-400 text-base font-medium placeholder:font-normal"
+                                                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 text-xs font-medium"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="space-y-1.5 text-left">
-                                            <label className="text-sm font-semibold text-slate-600 [.light-mode_&]:!text-gray-700 ml-1 font-inter">Email Matrix<span className="text-red-500">*</span></label>
+                                        <div className="flex flex-col gap-1.5 text-left">
+                                            <label className="text-[11px] font-bold text-slate-700 ml-0.5">Email Address<span className="text-red-500">*</span></label>
                                             <div className={`relative transition-all duration-300 ${isFocused === 'email' ? 'scale-[1.01]' : ''}`}>
-                                                <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'email' ? 'text-primary' : 'text-slate-400'}`}>
-                                                    <Mail size={16} />
+                                                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400 z-10">
+                                                    <Mail size={14} />
                                                 </div>
                                                 <input
                                                     type="email"
@@ -328,13 +385,13 @@ const Register = () => {
                                                     onBlur={() => setIsFocused('')}
                                                     onChange={handleChange}
                                                     value={formData.email}
-                                                    className="w-full pl-11 pr-4 py-2 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white [.light-mode_&]:!text-black placeholder:text-slate-500 [.light-mode_&]:placeholder:!text-gray-400 text-base font-medium placeholder:font-normal"
+                                                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 text-xs font-medium"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="space-y-1.5 text-left">
-                                            <label className="text-sm font-semibold text-slate-600 [.light-mode_&]:!text-gray-700 ml-1 font-inter">WhatsApp Number<span className="text-red-500">*</span></label>
+                                        <div className="flex flex-col gap-1.5 text-left">
+                                            <label className="text-[11px] font-bold text-slate-700 ml-0.5">WhatsApp Number<span className="text-red-500">*</span></label>
                                             <div className={`flex items-center gap-2 transition-all duration-300 ${isFocused === 'phone' ? 'scale-[1.01]' : ''}`}>
                                                 <CountrySelector
                                                     countryCodes={countryCodes}
@@ -342,8 +399,8 @@ const Register = () => {
                                                     onSelect={(code) => setFormData({ ...formData, countryCode: code, phone: '' })}
                                                 />
                                                 <div className="relative flex-1">
-                                                    <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'phone' ? 'text-primary' : 'text-slate-400'}`}>
-                                                        <Smartphone size={16} />
+                                                    <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400 z-10">
+                                                        <Smartphone size={14} />
                                                     </div>
                                                     <input
                                                         type="tel"
@@ -356,194 +413,177 @@ const Register = () => {
                                                         onBlur={() => setIsFocused('')}
                                                         onChange={handlePhoneChange}
                                                         value={formData.phone}
-                                                        className="w-full pl-11 pr-4 py-2 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white [.light-mode_&]:!text-black placeholder:text-slate-500 [.light-mode_&]:placeholder:!text-gray-400 text-base font-medium placeholder:font-normal"
+                                                        className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 text-xs font-medium"
                                                     />
                                                 </div>
                                             </div>
                                             {countryPhoneLengths[formData.countryCode] && (
-                                                <p className="text-[10px] text-slate-500 ml-1 font-inter">
+                                                <p className="text-[10px] text-slate-400 ml-0.5">
                                                     {formData.phone.length}/{countryPhoneLengths[formData.countryCode]} digits
                                                 </p>
                                             )}
                                         </div>
-                                    </div>
-                                    {/* Account Tier selection removed as per requirements */}
 
-                                    {error && <p className="text-xs font-bold text-red-400 text-left bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>}
+                                        {error && <p className="text-[11px] font-bold text-red-600 text-left bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
 
-                                    <ModernButton onClick={nextStep} className="w-full !py-2.5 font-bold group">
-                                        Continue Integration <ChevronRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
-                                    </ModernButton>
-
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex-1 h-px bg-white/10 [.light-mode_&]:!bg-slate-200" />
-                                        <span className="text-xs text-slate-400 font-inter">or</span>
-                                        <div className="flex-1 h-px bg-white/10 [.light-mode_&]:!bg-slate-200" />
-                                    </div>
-
-                                    {/* Google sign-up — visual only for now, no OAuth wired up yet */}
-                                    <button
-                                        type="button"
-                                        title="Coming soon"
-                                        className="w-full flex items-center justify-center gap-3 py-2 rounded-xl bg-white [.light-mode_&]:!bg-white border border-slate-200 text-slate-700 font-semibold text-xs font-inter hover:bg-slate-50 transition-all"
-                                    >
-                                        <GoogleIcon size={16} />
-                                        Sign up with Google
-                                    </button>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="step2"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="space-y-3"
-                                >
-                                    <div className="space-y-1.5 text-left">
-                                        <label className="text-sm font-semibold text-slate-600 [.light-mode_&]:!text-gray-700 ml-1 font-inter">Password<span className="text-red-500">*</span></label>
-                                        <div className={`relative transition-all duration-300 ${isFocused === 'password' ? 'scale-[1.01]' : ''}`}>
-                                            <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'password' ? 'text-primary' : 'text-slate-400'}`}>
-                                                <Lock size={16} />
+                                        <ModernButton
+                                            type="button"
+                                            onClick={nextStep}
+                                            className="w-full !py-2.5 text-xs font-bold group mt-2 overflow-hidden rounded-xl !bg-[#4C1D95] hover:!bg-[#3b1675]"
+                                        >
+                                            <div className="flex items-center justify-center">
+                                                <span>Continue</span>
+                                                <ArrowRight size={16} className="ml-1.5 group-hover:translate-x-1 transition-transform" />
                                             </div>
-                                            <input
-                                                type={showPassword ? "text" : "password"}
-                                                name="password"
-                                                required
-                                                placeholder="••••••••••••"
-                                                onFocus={() => setIsFocused('password')}
-                                                onBlur={() => setIsFocused('')}
-                                                onChange={handleChange}
-                                                value={formData.password}
-                                                className="w-full pl-11 pr-12 py-2 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white [.light-mode_&]:!text-black placeholder:text-text-muted/50 [.light-mode_&]:placeholder:!text-gray-400 text-base font-medium placeholder:font-normal"
-                                            />
-                                            <button
-                                                type="button"
-                                                onMouseDown={(e) => e.preventDefault()}
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute inset-y-0 right-4 flex items-center text-slate-400 hover:text-primary transition-colors"
-                                            >
-                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
+                                        </ModernButton>
+
+                                        <div className="flex items-center gap-3 my-1">
+                                            <div className="flex-1 h-px bg-slate-200" />
+                                            <span className="text-[11px] text-slate-400 font-medium">or continue with</span>
+                                            <div className="flex-1 h-px bg-slate-200" />
                                         </div>
-                                    </div>
 
-                                    <AnimatePresence>
-                                        {isFocused === 'password' && (
-                                            <motion.div
-                                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                                className="overflow-hidden"
-                                            >
-                                                <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl space-y-3">
-                                                    <div className="flex items-center space-x-2 text-primary">
-                                                        <ShieldCheck size={16} />
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider font-inter">Security Protocol</span>
-                                                    </div>
-                                                    <ul className="space-y-1.5">
-                                                        {[
-                                                            'Minimum 8 characters',
-                                                            'Include uppercase & lowercase',
-                                                            'Include at least one number',
-                                                            'Include a special character'
-                                                        ].map((req, i) => (
-                                                            <li key={i} className="flex items-center space-x-2 text-[11px] text-slate-400 font-medium">
-                                                                <div className="w-1 h-1 rounded-full bg-primary/50" />
-                                                                <span>{req}</span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-
-                                    <div className="space-y-1.5 text-left">
-                                        <label className="text-sm font-semibold text-slate-600 [.light-mode_&]:!text-gray-700 ml-1 font-inter">Coupon Code (Optional)</label>
-                                        <div className={`relative transition-all duration-300 ${isFocused === 'coupon' ? 'scale-[1.01]' : ''}`}>
-                                            <div className={`absolute inset-y-0 left-4 flex items-center transition-colors ${isFocused === 'coupon' ? 'text-primary' : 'text-slate-400'}`}>
-                                                <Tag size={16} />
-                                            </div>
-                                            <input
-                                                type="text"
-                                                name="couponCode"
-                                                placeholder="Have a discount code?"
-                                                onFocus={() => setIsFocused('coupon')}
-                                                onBlur={() => setIsFocused('')}
-                                                onChange={(e) => setFormData({ ...formData, couponCode: e.target.value.toUpperCase() })}
-                                                value={formData.couponCode}
-                                                className="w-full pl-11 pr-4 py-2 bg-white/5 [.light-mode_&]:!bg-white border border-white/10 [.light-mode_&]:!border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-inter text-white [.light-mode_&]:!text-black placeholder:text-slate-500 [.light-mode_&]:placeholder:!text-gray-400 text-base font-medium placeholder:font-normal uppercase placeholder:normal-case"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Institutional review alert removed */}
-
-                                    {error && <p className="text-xs font-bold text-red-500 text-left">{error}</p>}
-
-                                    {alreadyExists && (
-                                        <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-left">
-                                            <p className="text-xs font-bold text-amber-400 mb-1">Account already exists</p>
-                                            <p className="text-xs text-white/60">An account with this email already exists. <Link to="/login" className="text-primary font-bold underline">Sign in instead →</Link></p>
-                                        </div>
-                                    )}
-
-                                    <div className="flex gap-4">
+                                        {/* Google sign-up - visual only for now, no OAuth wired up yet */}
                                         <button
                                             type="button"
-                                            onClick={prevStep}
-                                            disabled={isSubmitting}
-                                            className="px-5 py-2.5 rounded-2xl border border-slate-100 bg-slate-50 text-slate-500 font-bold flex items-center hover:bg-slate-100 transition-all disabled:opacity-50"
+                                            title="Coming soon"
+                                            className="w-full flex items-center justify-center gap-3 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-all"
                                         >
-                                            <ArrowLeft size={16} />
+                                            <GoogleIcon size={14} />
+                                            Sign up with Google
                                         </button>
-                                        <ModernButton
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                            className="flex-1 !py-2.5 font-bold shadow-xl shadow-primary/30"
-                                        >
-                                            {isSubmitting ? 'Creating account...' : 'Complete Registration'}
-                                        </ModernButton>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </form>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key="step2"
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        className="space-y-4"
+                                    >
+                                        <div className="flex flex-col gap-1.5 text-left">
+                                            <label className="text-[11px] font-bold text-slate-700 ml-0.5">Password<span className="text-red-500">*</span></label>
+                                            <div className={`relative transition-all duration-300 ${isFocused === 'password' ? 'scale-[1.01]' : ''}`}>
+                                                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400 z-10">
+                                                    <Lock size={14} />
+                                                </div>
+                                                <input
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    name="password"
+                                                    required
+                                                    placeholder="Enter your password"
+                                                    onFocus={() => setIsFocused('password')}
+                                                    onBlur={() => setIsFocused('')}
+                                                    onChange={handleChange}
+                                                    value={formData.password}
+                                                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 text-xs font-medium"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-primary transition-colors focus:outline-none z-10"
+                                                >
+                                                    {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                                                </button>
+                                            </div>
+                                        </div>
 
-                    <div className="mt-2.5 pt-2.5 border-t border-slate-100 text-center">
-                        <p className="text-xs font-inter text-text-secondary">
-                            Already have an account?{' '}
-                            <Link to="/login" className="text-primary font-bold hover:underline">
-                                Sign in <ArrowRight size={13} className="inline ml-1" />
-                            </Link>
-                        </p>
+                                        <AnimatePresence>
+                                            {isFocused === 'password' && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto', marginTop: 0 }}
+                                                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="p-3.5 bg-[#4C1D95]/5 border border-[#4C1D95]/10 rounded-xl space-y-2">
+                                                        <div className="flex items-center space-x-2 !text-[#4C1D95]">
+                                                            <ShieldCheck size={14} />
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider">Security Protocol</span>
+                                                        </div>
+                                                        <ul className="space-y-1">
+                                                            {[
+                                                                'Minimum 8 characters',
+                                                                'Include uppercase & lowercase',
+                                                                'Include at least one number',
+                                                                'Include a special character'
+                                                            ].map((req, i) => (
+                                                                <li key={i} className="flex items-center space-x-2 text-[11px] text-slate-500 font-medium">
+                                                                    <div className="w-1 h-1 rounded-full bg-[#4C1D95]/50" />
+                                                                    <span>{req}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+
+                                        <div className="flex flex-col gap-1.5 text-left">
+                                            <label className="text-[11px] font-bold text-slate-700 ml-0.5">Coupon Code (Optional)</label>
+                                            <div className={`relative transition-all duration-300 ${isFocused === 'coupon' ? 'scale-[1.01]' : ''}`}>
+                                                <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400 z-10">
+                                                    <Tag size={14} />
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    name="couponCode"
+                                                    placeholder="Have a discount code?"
+                                                    onFocus={() => setIsFocused('coupon')}
+                                                    onBlur={() => setIsFocused('')}
+                                                    onChange={(e) => setFormData({ ...formData, couponCode: e.target.value.toUpperCase() })}
+                                                    value={formData.couponCode}
+                                                    className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 text-xs font-medium uppercase placeholder:normal-case"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {error && <p className="text-[11px] font-bold text-red-600 text-left bg-red-50 border border-red-200 rounded-xl px-3 py-2">{error}</p>}
+
+                                        {alreadyExists && (
+                                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-left">
+                                                <p className="text-[11px] font-bold text-amber-700 mb-1">Account already exists</p>
+                                                <p className="text-[11px] text-amber-700/80">An account with this email already exists. <Link to="/login" className="!text-[#4C1D95] font-bold underline">Sign in instead →</Link></p>
+                                            </div>
+                                        )}
+
+                                        <div className="flex gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={prevStep}
+                                                disabled={isSubmitting}
+                                                className="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 font-bold flex items-center justify-center hover:bg-slate-100 transition-all disabled:opacity-50"
+                                            >
+                                                <ArrowLeft size={16} />
+                                            </button>
+                                            <ModernButton
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                className="flex-1 !py-2.5 text-xs font-bold rounded-xl !bg-[#4C1D95] hover:!bg-[#3b1675]"
+                                            >
+                                                {isSubmitting ? 'Creating account...' : 'Complete Registration'}
+                                            </ModernButton>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </form>
+
+                        <div className="mt-6 text-center">
+                            <p className="text-[11px] text-slate-500">
+                                Already have an account?{' '}
+                                <Link to="/login" className="!text-[#4C1D95] font-bold hover:text-primary-light transition-colors inline-flex items-center gap-1">
+                                    Sign in <ArrowRight size={11} />
+                                </Link>
+                            </p>
+                        </div>
                     </div>
-                </GlassCard>
-            </motion.div>
-            </div>
-
-            {/* Right: Career-journey visual touching top and right edge with 100% full height (no bottom cut) */}
-            <div className="hidden lg:flex flex-shrink-0 h-full relative self-stretch overflow-hidden items-start justify-end">
-                <CareerVisualPanel />
+                </motion.div>
             </div>
         </div>
     );
 };
-
-// Right-panel visual for the registration split-screen — full uncropped image showing 100% of top and bottom
-const CareerVisualPanel = () => (
-    <div className="h-full flex items-start justify-end overflow-hidden">
-        <img
-            src={jobIllustration}
-            alt="The key to your bright future — SkillDad"
-            className="h-full w-auto max-h-screen object-contain object-right-top block select-none"
-            style={{ transform: 'scaleX(0.93)', transformOrigin: 'right top' }}
-        />
-    </div>
-);
-
-// Internal utility component for link style matching
-const ArrowRight = ({ size, className }) => <ChevronRight size={size} className={className} />;
 
 // Standard 4-color Google "G" mark, for the (currently visual-only) Google
 // sign-up button - lucide-react has no brand logos of its own.

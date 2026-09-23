@@ -309,7 +309,7 @@ const PlacementsPortal = () => {
             </div>
 
             {/* Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
 
                 {/* --- Vacancy / Internship Cards --- */}
                 {filteredVacancies.map((v, i) => {
@@ -437,7 +437,7 @@ const PlacementsPortal = () => {
                             initial={{ opacity: 0, scale: 0.96, y: 12 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.96, y: 12 }}
-                            className="relative w-full max-w-sm bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-10"
+                            className="relative w-full max-w-sm bg-[#0A0514] border border-white/10 rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] z-10"
                         >
                             <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between gap-4">
                                 <div>

@@ -203,6 +203,8 @@ const UniversityDashboard = () => {
 
     const handleToggleStudentStatus = async (studentId, currentStatus) => {
         try {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const newStatus = currentStatus === false ? true : false;
             await axios.put(`/api/users/${studentId}/status`, { is_active: newStatus }, config);
             alert(`Student ${newStatus ? 'activated' : 'deactivated'} successfully`);
@@ -444,7 +446,7 @@ const UniversityDashboard = () => {
 
             {/* Dashboard Stats Overview */}
             {isMainDashboard && (
-                <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     {[
                         { label: 'Total Students', value: stats.studentCount || 0, icon: Users, color: 'from-blue-500/20 to-blue-600/20', border: 'border-blue-500/30', text: 'text-blue-400' },
                         { label: 'Active Sessions', value: stats.liveSessions || 0, icon: Video, color: 'from-primary/20 to-primary-dark/20', border: 'border-primary/30', text: 'text-primary' },
@@ -650,7 +652,7 @@ const UniversityDashboard = () => {
                                 Create New Course
                             </ModernButton>
                         </div>
-                        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {courses.length > 0 ? courses.map((course) => (
                                 <GlassCard
                                     key={course._id || course}
@@ -968,7 +970,7 @@ const UniversityDashboard = () => {
                                         placeholder="Enter student name"
                                     />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-white/60 mb-1.5">Email</label>
                                         <input
@@ -1069,8 +1071,8 @@ const UniversityDashboard = () => {
             {/* Student Details View Modal */}
             <AnimatePresence>
                 {selectedStudentForView && (
-                    <div 
-                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+                    <div
+                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto"
                         onClick={() => setSelectedStudentForView(null)}
                     >
                         <motion.div
@@ -1078,7 +1080,7 @@ const UniversityDashboard = () => {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 10 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full max-w-lg bg-[#0B0F1A] border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
+                            className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0B0F1A] border border-white/10 rounded-2xl p-6 shadow-2xl relative my-8"
                         >
                             {/* Background Glow */}
                             <div className="absolute -top-12 -right-12 w-36 h-36 bg-primary/20 rounded-full blur-3xl pointer-events-none" />

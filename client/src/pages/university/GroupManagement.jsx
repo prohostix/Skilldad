@@ -358,7 +358,7 @@ const GroupManagement = () => {
                             className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary text-sm"
                         />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <select
                             value={filterCourse}
                             onChange={(e) => setFilterCourse(e.target.value)}
@@ -442,8 +442,8 @@ const GroupManagement = () => {
                 <div className="space-y-3">
                     {filteredStudents.map(student => (
                         <div key={student._id || student.id} className="p-4 bg-white/5 rounded-xl border border-white/10 hover:border-primary/30 transition-colors">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex items-center gap-4 min-w-0">
                                     <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold">
                                         {student.name.split(' ').map(n => n[0]).join('')}
                                     </div>
@@ -491,7 +491,7 @@ const GroupManagement = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-4 justify-between sm:justify-end">
                                     <div className="text-right">
                                         <p className="text-sm font-bold text-white">Progress: {student.progress}%</p>
                                         <div className="w-24 bg-white/10 rounded-full h-2 mt-1">
@@ -835,19 +835,19 @@ const GroupManagement = () => {
                             exit={{ opacity: 0, scale: 0.95, y: 20 }}
                             className="relative w-full max-w-5xl h-[90vh] bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
                         >
-                            <div className="flex justify-between items-center p-4 border-b border-white/10 bg-white/5">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
+                            <div className="flex justify-between items-center gap-3 p-4 border-b border-white/10 bg-white/5">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                                         <FileText className="text-primary" size={20} />
                                     </div>
-                                    <div>
-                                        <h2 className="text-lg font-bold text-white">{previewDoc.title}</h2>
-                                        <p className="text-[10px] text-white/40 uppercase tracking-widest font-black">
+                                    <div className="min-w-0">
+                                        <h2 className="text-lg font-bold text-white truncate">{previewDoc.title}</h2>
+                                        <p className="text-[10px] text-white/40 uppercase tracking-widest font-black truncate">
                                             {previewDoc.type} • {selectedStudent.name}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 shrink-0">
                                     <a 
                                         href={getMediaUrl(previewDoc.file_url || previewDoc.fileUrl)}
                                         target="_blank"
@@ -874,7 +874,7 @@ const GroupManagement = () => {
             </AnimatePresence>
             {/* Assign Batch Modal */}
             {showAssignBatchModal && selectedStudentForBatch && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[500] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[500] flex items-center justify-center p-4 overflow-y-auto">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}

@@ -79,16 +79,16 @@ const LinkRecording = () => {
     return (
         <div className="max-w-6xl mx-auto p-6 space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0">
                     <h1 className="text-2xl font-bold text-white mb-2">Link Session Recording</h1>
-                    <p className="text-white/60">
+                    <p className="text-white/60 break-words">
                         Select a Zoom recording to link to: <span className="text-primary font-semibold">{currentVideo?.title}</span>
                     </p>
                 </div>
                 <button
                     onClick={() => navigate(-1)}
-                    className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+                    className="p-2 hover:bg-white/5 rounded-lg transition-colors shrink-0"
                 >
                     <X className="w-6 h-6 text-white/60" />
                 </button>
@@ -122,9 +122,9 @@ const LinkRecording = () => {
                                 onClick={() => setSelectedRecording(recording)}
                             >
                                 <div className="flex items-start justify-between">
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                                                 selectedRecording?.sessionId === recording.sessionId
                                                     ? 'bg-primary text-white'
                                                     : 'bg-white/5 text-white/60'
@@ -135,9 +135,9 @@ const LinkRecording = () => {
                                                     <Video className="w-5 h-5" />
                                                 )}
                                             </div>
-                                            <div>
-                                                <h3 className="font-bold text-white">{recording.title}</h3>
-                                                <div className="flex items-center gap-4 mt-1 text-xs text-white/60">
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="font-bold text-white break-words">{recording.title}</h3>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-white/60">
                                                     <span className="flex items-center gap-1">
                                                         <Calendar className="w-3 h-3" />
                                                         {new Date(recording.recordedAt).toLocaleDateString()}
@@ -162,11 +162,11 @@ const LinkRecording = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
                 <ModernButton
                     onClick={handleLinkRecording}
                     disabled={!selectedRecording || linking}
-                    className="flex-1"
+                    className="flex-1 justify-center"
                 >
                     {linking ? (
                         <>
@@ -183,7 +183,7 @@ const LinkRecording = () => {
                 <ModernButton
                     variant="secondary"
                     onClick={() => navigate(-1)}
-                    className="px-8"
+                    className="justify-center sm:px-8"
                 >
                     Cancel
                 </ModernButton>

@@ -329,7 +329,7 @@ const ProjectManager = () => {
             ) : (
                 <div className="space-y-6">
                     {/* Submissions View */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                             <div className="p-3 bg-primary/10 rounded-xl">
                                 <Users size={20} className="text-primary" />
@@ -339,9 +339,9 @@ const ProjectManager = () => {
                                 <p className="text-xs text-white/40">Review and grade student project work for selected projects.</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                             <select
-                                className="bg-white/5 border border-white/10 text-white rounded-lg px-2.5 py-1.5 text-xs font-inter focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all cursor-pointer"
+                                className="w-full sm:w-auto bg-white/5 border border-white/10 text-white rounded-lg px-2.5 py-1.5 text-xs font-inter focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all cursor-pointer"
                                 value={selectedProjectForSubmissions || ''}
                                 onChange={(e) => fetchSubmissions(e.target.value)}
                             >

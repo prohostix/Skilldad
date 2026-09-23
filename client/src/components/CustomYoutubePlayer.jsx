@@ -24,7 +24,7 @@ const loadYoutubeApi = () => {
   return apiLoadPromise;
 };
 
-const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded }) => {
+const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded, autoPlay = false }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -33,10 +33,14 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isReady, setIsReady] = useState(false);
-  // The YouTube iframe isn't created until the student presses play. Before that,
-  // we show our own poster image + play button — a plain <img>, not an iframe —
-  // so there's no YouTube "cued" thumbnail/branding to hide in the first place.
-  const [started, setStarted] = useState(false);
+  // The YouTube iframe isn't created until the student presses play or autoPlay is requested.
+  const [started, setStarted] = useState(Boolean(autoPlay));
+
+  useEffect(() => {
+    if (autoPlay) {
+      setStarted(true);
+    }
+  }, [autoPlay]);
 
   const mountRef = useRef(null);
   const playerRef = useRef(null);
@@ -84,6 +88,21 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded }) => {
             if (destroyed) return;
             setIsReady(true);
             setDuration(playerRef.current.getDuration() || 0);
+            if (autoPlay) {
+              try {
+                playerRef.current.seekTo(0, true);
+                const p = playerRef.current.playVideo();
+                if (p && typeof p.catch === 'function') {
+                  p.catch(() => {
+                    try {
+                      playerRef.current.mute();
+                      setIsMuted(true);
+                      playerRef.current.playVideo();
+                    } catch (_) {}
+                  });
+                }
+              } catch (_) {}
+            }
           },
           onStateChange: (event) => {
             if (destroyed) return;
@@ -323,7 +342,7 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded }) => {
           trying to suppress them directly, which fullscreen doesn't allow
           reliably). */}
       <div
-        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 pt-3 pb-2 flex items-center gap-4 text-white transition-all duration-300 z-40 ${showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-2.5 sm:px-4 pt-3 pb-2 flex items-center gap-2 sm:gap-4 text-white transition-all duration-300 z-40 max-w-full overflow-hidden ${showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
           }`}
       >
         {/* Play/Pause Button */}
@@ -335,7 +354,7 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded }) => {
         </button>
 
         {/* Time Indicator */}
-        <span className="text-[11px] font-bold font-inter tracking-wider text-slate-200 shrink-0">
+        <span className="text-[10px] sm:text-[11px] font-bold font-inter tracking-wider text-slate-200 shrink-0">
           {formatTime(currentTime)} <span className="text-white/30">/</span> {formatTime(duration)}
         </span>
 
@@ -346,7 +365,7 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded }) => {
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="flex-1 rounded-full appearance-none cursor-pointer transition-all"
+          className="flex-1 min-w-0 rounded-full appearance-none cursor-pointer transition-all"
           style={{
             minHeight: 'unset',
             height: '10px',

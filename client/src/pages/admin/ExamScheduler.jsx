@@ -119,45 +119,45 @@ const ExamScheduler = () => {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-3 sm:space-y-3.5">
             <div className="flex justify-between items-center">
                 <DashboardHeading title="Exam Schedule Hub" />
             </div>
 
             {/* Statistics Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <GlassCard className="!p-4 hover:border-primary/30 transition-all duration-300">
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
-                            <Trophy size={20} />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+                <GlassCard className="!py-1.5 !px-2.5 sm:!py-2 sm:!px-3 !rounded-xl !border hover:border-primary/30 transition-all duration-300">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-7 h-7 bg-primary/10 text-primary rounded-lg flex items-center justify-center shrink-0">
+                            <Trophy size={14} />
                         </div>
-                        <div>
-                            <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Total Exams</p>
-                            <p className="text-xl font-bold text-white font-inter mt-1">{exams.length}</p>
+                        <div className="min-w-0">
+                            <p className="text-white/50 text-[9.5px] font-semibold uppercase tracking-wider truncate">Total Exams</p>
+                            <p className="text-sm sm:text-base font-bold text-white font-inter mt-0.5 leading-none">{exams.length}</p>
                         </div>
                     </div>
                 </GlassCard>
-                <GlassCard className="!p-4 hover:border-indigo-500/30 transition-all duration-300">
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
-                            <Calendar size={20} />
+                <GlassCard className="!py-1.5 !px-2.5 sm:!py-2 sm:!px-3 !rounded-xl !border hover:border-indigo-500/30 transition-all duration-300">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-7 h-7 bg-indigo-500/10 text-indigo-400 rounded-lg flex items-center justify-center shrink-0">
+                            <Calendar size={14} />
                         </div>
-                        <div>
-                            <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Scheduled</p>
-                            <p className="text-xl font-bold text-white font-inter mt-1">
+                        <div className="min-w-0">
+                            <p className="text-white/50 text-[9.5px] font-semibold uppercase tracking-wider truncate">Scheduled</p>
+                            <p className="text-sm sm:text-base font-bold text-white font-inter mt-0.5 leading-none">
                                 {exams.filter(e => e.status === 'scheduled').length}
                             </p>
                         </div>
                     </div>
                 </GlassCard>
-                <GlassCard className="!p-4 hover:border-red-500/30 transition-all duration-300">
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2.5 bg-red-500/10 text-red-400 rounded-xl">
-                            <Clock size={20} />
+                <GlassCard className="!py-1.5 !px-2.5 sm:!py-2 sm:!px-3 !rounded-xl !border hover:border-red-500/30 transition-all duration-300">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-7 h-7 bg-red-500/10 text-red-400 rounded-lg flex items-center justify-center shrink-0">
+                            <Clock size={14} />
                         </div>
-                        <div>
-                            <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Ongoing</p>
-                            <p className="text-xl font-bold text-white font-inter mt-1">
+                        <div className="min-w-0">
+                            <p className="text-white/50 text-[9.5px] font-semibold uppercase tracking-wider truncate">Ongoing</p>
+                            <p className="text-sm sm:text-base font-bold text-white font-inter mt-0.5 leading-none">
                                 {exams.filter(e => {
                                     const now = new Date();
                                     const start = new Date(e.scheduledStartTime || e.scheduled_start);
@@ -170,14 +170,14 @@ const ExamScheduler = () => {
                         </div>
                     </div>
                 </GlassCard>
-                <GlassCard className="!p-4 hover:border-emerald-500/30 transition-all duration-300">
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl">
-                            <FileText size={20} />
+                <GlassCard className="!py-1.5 !px-2.5 sm:!py-2 sm:!px-3 !rounded-xl !border hover:border-emerald-500/30 transition-all duration-300">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-7 h-7 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center shrink-0">
+                            <FileText size={14} />
                         </div>
-                        <div>
-                            <p className="text-white/50 text-[10px] font-bold uppercase tracking-wider">Published Results</p>
-                            <p className="text-xl font-bold text-white font-inter mt-1">
+                        <div className="min-w-0">
+                            <p className="text-white/50 text-[9.5px] font-semibold uppercase tracking-wider truncate">Published Results</p>
+                            <p className="text-sm sm:text-base font-bold text-white font-inter mt-0.5 leading-none">
                                 {exams.filter(e => e.status === 'published').length}
                             </p>
                         </div>
