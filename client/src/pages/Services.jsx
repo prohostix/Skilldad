@@ -140,6 +140,58 @@ const UniqueJobOpportunitiesIcon = ({ className = "w-5 h-5" }) => (
     </svg>
 );
 
+// ── INNOVATIVE & MODERN CUSTOM ICONS FOR "WHAT WE OFFER" CARDS ──
+
+// 1. Modern Skill Courses: Academic Mortarboard with Faceted Gem Top, Knowledge Star & Golden Tassel
+const ModernSkillCoursesIcon = ({ className = "w-5 h-5" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.5L2 7.5L12 12.5L22 7.5L12 2.5Z" fill="white" fillOpacity="0.95" stroke="white" strokeWidth="0.8" strokeLinejoin="round" />
+        <path d="M12 3.8L3.8 7.5L12 11.2L20.2 7.5L12 3.8Z" fill="#F8FAFC" fillOpacity="0.4" />
+        <path d="M6 10V15C6 15 8.5 17.5 12 17.5C15.5 17.5 18 15 18 15V10" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M20 9.2V15C20 15.6 19.4 16 18.8 16C18.2 16 17.8 15.6 17.8 15V10.2" stroke="#FDE047" strokeWidth="1.3" strokeLinecap="round" />
+        <circle cx="18.8" cy="16.5" r="1.2" fill="#FDE047" />
+        <path d="M12 1L12.4 1.8L13.2 2.2L12.4 2.6L12 3.4L11.6 2.6L10.8 2.2L11.6 1.8L12 1Z" fill="#FDE047" />
+    </svg>
+);
+
+// 2. Modern Diploma Programmes: Parchment Roll with Verified Golden Rosette Stamp & Ribbon Tails
+const ModernDiplomaIcon = ({ className = "w-5 h-5" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3.5" y="3.5" width="17" height="13" rx="2" fill="white" fillOpacity="0.95" stroke="white" strokeWidth="0.8" />
+        <line x1="7" y1="7" x2="14" y2="7" stroke="#047857" strokeWidth="1.3" strokeLinecap="round" />
+        <line x1="7" y1="10" x2="15" y2="10" stroke="#047857" strokeWidth="1.3" strokeLinecap="round" />
+        <line x1="7" y1="13" x2="11" y2="13" stroke="#047857" strokeWidth="1.3" strokeLinecap="round" />
+        <circle cx="17.5" cy="15.5" r="4.2" fill="#FDE047" stroke="white" strokeWidth="1" />
+        <path d="M16 15.5L17.2 16.7L19.2 14.5" stroke="#047857" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16 19.5L15.2 22L17.5 21L19.8 22L19 19.5" fill="#FDE047" stroke="white" strokeWidth="0.6" />
+    </svg>
+);
+
+// 3. Modern WBL: High-Tech Enterprise Briefcase with Growth Arrow Indicator
+const ModernWblIcon = ({ className = "w-5 h-5" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 5.5V3.5C8.5 2.8 9.2 2.2 10 2.2H14C14.8 2.2 15.5 2.8 15.5 3.5V5.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+        <rect x="2.5" y="5.5" width="19" height="14.5" rx="3" fill="white" fillOpacity="0.95" stroke="white" strokeWidth="0.8" />
+        <path d="M2.5 10.5C2.5 10.5 7 12 12 12C17 12 21.5 10.5 21.5 10.5" stroke="#5B21B6" strokeWidth="1.2" strokeOpacity="0.5" />
+        <rect x="10.5" y="10.5" width="3" height="3" rx="0.8" fill="#5B21B6" />
+        <circle cx="18" cy="5.5" r="3.8" fill="#10B981" stroke="white" strokeWidth="1" />
+        <path d="M16.8 6.8L19.2 4.4M19.2 4.4H17.4M19.2 4.4V6.2" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+// 4. Modern Study Abroad: Global Meridian Orbit with Climbing Supersonic Aircraft
+const ModernStudyAbroadIcon = ({ className = "w-5 h-5" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10.5" cy="13.5" r="7.8" fill="white" fillOpacity="0.95" stroke="white" strokeWidth="0.8" />
+        <ellipse cx="10.5" cy="13.5" rx="4" ry="7.8" stroke="#047857" strokeWidth="0.8" strokeOpacity="0.6" />
+        <line x1="2.7" y1="13.5" x2="18.3" y2="13.5" stroke="#047857" strokeWidth="0.8" strokeOpacity="0.6" />
+        <path d="M5 20.5C9 18.5 15 14 19.5 7" stroke="#FDE047" strokeWidth="1.4" strokeDasharray="1.8 1.4" strokeLinecap="round" />
+        <g transform="translate(14, 2) rotate(22)">
+            <path d="M5 0L6.5 3.2L10 4L6.5 4.8L5.8 7.2L4.2 5.6L2.6 6.4L3.4 4L0 3.2L3.4 2.4L4.2 0L5 0Z" fill="#FDE047" stroke="#047857" strokeWidth="0.7" strokeLinejoin="round" />
+        </g>
+    </svg>
+);
+
 const Services = () => {
     const [expandedId, setExpandedId] = useState(null);
     const [selectedServiceId, setSelectedServiceId] = useState(null);
@@ -168,7 +220,7 @@ const Services = () => {
             id: 'skill-courses',
             title: 'Skill Courses',
             description: 'Industry-relevant, job-focused courses to help you build in-demand skills.',
-            icon: GraduationCap,
+            icon: ModernSkillCoursesIcon,
             iconBg: 'bg-cyan-500 text-white shadow-cyan-500/30',
             link: '/courses',
             badge: 'Job Ready'
@@ -177,7 +229,7 @@ const Services = () => {
             id: 'diploma-programmes',
             title: 'Skill Integrated Diploma Programmes',
             description: 'Structured programmes that combine skill learning with certification and career support.',
-            icon: Award,
+            icon: ModernDiplomaIcon,
             iconBg: 'bg-emerald-500 text-white shadow-emerald-500/30',
             link: '/courses',
             badge: 'Certified'
@@ -186,7 +238,7 @@ const Services = () => {
             id: 'wbl-learning',
             title: 'WBL (Work Based Learning)',
             description: 'Gain real-world experience through industry collaborations and live projects.',
-            icon: Briefcase,
+            icon: ModernWblIcon,
             iconBg: 'bg-[#7C3AED] text-white shadow-purple-600/30',
             link: '/wbl',
             badge: 'Industry Live'
@@ -195,7 +247,7 @@ const Services = () => {
             id: 'study-abroad',
             title: 'Study Abroad',
             description: 'Explore global education opportunities with end-to-end guidance and support.',
-            icon: Plane,
+            icon: ModernStudyAbroadIcon,
             iconBg: 'bg-emerald-500 text-white shadow-emerald-500/30',
             link: '/study-abroad',
             badge: 'Global Pathways'
@@ -398,7 +450,7 @@ const Services = () => {
                     </div>
 
                     {/* 4 Cards Responsive Grid matching reference */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 items-stretch">
                         {coreOfferings.map((offering, idx) => {
                             const IconComponent = offering.icon;
                             const isPrimary = idx === 0;
@@ -406,48 +458,48 @@ const Services = () => {
                             return (
                                 <motion.div
                                     key={offering.id}
-                                    initial={{ opacity: 0, y: 20 }}
+                                    initial={{ opacity: 0, y: 15 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.6, delay: idx * 0.1 }}
-                                    whileHover={{ y: -4 }}
+                                    transition={{ duration: 0.5, delay: idx * 0.08 }}
+                                    whileHover={{ y: -3 }}
                                     className="h-full"
                                 >
                                     <div
-                                        className={`h-full rounded-[22px] transition-all duration-300 p-6 flex flex-col justify-between group ${
+                                        className={`h-full rounded-[20px] transition-all duration-300 p-4.5 sm:p-5 flex flex-col justify-between group ${
                                             isPrimary
-                                                ? 'bg-gradient-to-br from-[#4C1D95] via-[#3B1578] to-[#2E0F61] text-white shadow-[0_12px_30px_-6px_rgba(76,29,149,0.35)] border border-purple-800/40'
-                                                : 'bg-white dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-100 dark:border-purple-900/30 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_28px_-6px_rgba(76,29,149,0.12)] hover:border-purple-200 dark:hover:border-purple-700/60'
+                                                ? 'bg-gradient-to-br from-[#4C1D95] via-[#3B1578] to-[#2E0F61] text-white shadow-[0_12px_28px_-6px_rgba(76,29,149,0.3)] border border-purple-800/40'
+                                                : 'bg-white dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-100 dark:border-purple-900/30 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_24px_-6px_rgba(76,29,149,0.1)] hover:border-purple-200 dark:hover:border-purple-700/60'
                                         }`}
                                     >
                                         <div className="text-left">
-                                            {/* Circular Icon Badge */}
-                                            <div className="mb-4">
-                                                <div className={`w-11 h-11 rounded-full ${offering.iconBg} flex items-center justify-center shrink-0 shadow-md group-hover:scale-108 transition-transform`}>
-                                                    <IconComponent size={20} strokeWidth={2.2} />
+                                            {/* Circular Icon Badge with Bespoke Modern Icon */}
+                                            <div className="mb-3">
+                                                <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full ${offering.iconBg} flex items-center justify-center shrink-0 shadow-md group-hover:scale-108 transition-transform`}>
+                                                    <IconComponent className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
                                                 </div>
                                             </div>
 
                                             {/* Title */}
-                                            <h3 className={`text-base sm:text-[17px] font-bold tracking-tight leading-snug mb-2 font-sans ${
+                                            <h3 className={`text-[15px] sm:text-[16px] font-bold tracking-tight leading-snug mb-1.5 font-sans ${
                                                 isPrimary ? 'text-white' : 'text-slate-900 dark:text-white group-hover:text-[#4C1D95] dark:group-hover:text-purple-300 transition-colors'
                                             }`}>
                                                 {offering.title}
                                             </h3>
 
                                             {/* Description */}
-                                            <p className={`text-xs sm:text-[13px] leading-relaxed font-normal ${
+                                            <p className={`text-xs sm:text-[12.5px] leading-relaxed font-normal ${
                                                 isPrimary ? 'text-purple-100/90' : 'text-slate-500 dark:text-slate-400'
                                             }`}>
                                                 {offering.description}
                                             </p>
                                         </div>
 
-                                        {/* Bottom Row: Badge Tag + Action Button */}
-                                        <div className={`pt-6 mt-6 border-t flex items-center justify-between ${
+                                        {/* Bottom Row: Badge Tag + Action Button (Tighter spacing) */}
+                                        <div className={`pt-3.5 mt-4 border-t flex items-center justify-between ${
                                             isPrimary ? 'border-white/10' : 'border-slate-100 dark:border-purple-900/30'
                                         }`}>
-                                            <span className={`text-[11px] font-bold tracking-wider uppercase ${
+                                            <span className={`text-[10.5px] font-bold tracking-wider uppercase ${
                                                 isPrimary ? 'text-purple-200' : 'text-slate-500 dark:text-slate-400'
                                             }`}>
                                                 {offering.badge}
@@ -455,14 +507,14 @@ const Services = () => {
 
                                             <Link
                                                 to={offering.link}
-                                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
+                                                className={`w-7.5 h-7.5 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
                                                     isPrimary
                                                         ? 'bg-white/15 hover:bg-white/25 text-white'
                                                         : 'bg-[#FAF8FF] dark:bg-purple-950/60 border border-purple-100 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 group-hover:bg-[#4C1D95] group-hover:text-white'
                                                 }`}
                                                 aria-label={`Explore ${offering.title}`}
                                             >
-                                                <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                                <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
                                             </Link>
                                         </div>
                                     </div>
