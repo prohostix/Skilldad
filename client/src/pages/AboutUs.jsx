@@ -275,21 +275,21 @@ const careerEngineDescVariants = {
 };
 
 // ── EXECUTIVE LEADERSHIP DIAGONAL LINE-BY-LINE REVEAL ANIMATIONS ──
-// Both cards reveal along crisp diagonal lines sweeping from corner to opposite corner.
+// Both cards reveal along crisp diagonal lines sweeping slowly from corner to opposite corner.
 // (Card 1: Top-Left to Bottom-Right, Card 2: Top-Right to Bottom-Left)
 const executiveDiagonalRevealVariants = {
     hidden: {
         opacity: 0,
         clipPath: 'polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%)'
     },
-    visible: (customDelay = 0.1) => ({
+    visible: (customDelay = 0.2) => ({
         opacity: 1,
         clipPath: 'polygon(0% 0%, 250% 0%, 0% 250%, 0% 0%)',
         transition: {
-            duration: 1.45,
-            ease: [0.25, 1, 0.35, 1],
+            duration: 2.8,
+            ease: [0.16, 1, 0.3, 1],
             delay: customDelay,
-            opacity: { duration: 0.12, delay: customDelay }
+            opacity: { duration: 0.2, delay: customDelay }
         },
         transitionEnd: {
             clipPath: 'none'
@@ -1216,10 +1216,10 @@ const AboutUs = () => {
                 <section className="py-6 sm:py-8 md:py-10 px-4 sm:px-6 lg:px-8 relative border-t border-purple-100/70 dark:border-purple-900/30">
                     <div className="max-w-4xl mx-auto">
                         <motion.div
-                            initial={{ opacity: 0, y: 15 }}
+                            initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5 }}
+                            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                             className="text-center mb-5 sm:mb-6 space-y-1"
                         >
                             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] dark:bg-purple-950/70 dark:border-purple-800/50 dark:text-purple-300 text-[10px] font-bold tracking-wider uppercase shadow-2xs">
@@ -1246,7 +1246,7 @@ const AboutUs = () => {
                                     key={member._id || member.name}
                                     member={member}
                                     direction={idx % 2 === 0 ? 'left-top-to-right-bottom' : 'right-top-to-left-bottom'}
-                                    delay={idx === 0 ? 0.1 : 0.28}
+                                    delay={idx === 0 ? 0.35 : 0.75}
                                 />
                             ))}
                         </div>
