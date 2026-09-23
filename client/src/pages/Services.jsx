@@ -541,10 +541,12 @@ const Services = () => {
                             </p>
                         </div>
 
-                        {/* Interactive Cards Grid with Expandable Sub-Services */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Interactive Cards Grid with Expandable Sub-Services Styled after Reference */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                             {mainServices.map((service, index) => {
                                 const isExpanded = expandedId === service.id;
+                                const isPrimary = index === 0;
+
                                 return (
                                     <motion.div
                                         key={service.id}
@@ -552,48 +554,97 @@ const Services = () => {
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.08 }}
+                                        whileHover={{ y: -4 }}
                                         className="h-full"
                                     >
-                                        <div className={`h-full rounded-2xl border transition-all duration-300 p-6 flex flex-col justify-between bg-white dark:bg-[#0E091D] ${
-                                            isExpanded
-                                                ? 'border-[#4C1D95] dark:border-purple-600 shadow-[0_10px_30px_rgba(76,29,149,0.12)]'
-                                                : 'border-purple-100/90 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700 shadow-xs'
-                                        }`}>
-                                            <div className="space-y-4 text-left">
-                                                {/* Header Icon + Toggle */}
-                                                <div className="flex items-center justify-between">
-                                                    <div className="w-11 h-11 rounded-xl bg-[#4C1D95]/10 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
-                                                        <DynamicIcon name={service.icon_name} size={22} className="text-[#4C1D95] dark:text-purple-300" />
+                                        <div
+                                            className={`h-full rounded-[22px] transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between ${
+                                                isPrimary
+                                                    ? 'bg-gradient-to-br from-[#4C1D95] via-[#431785] to-[#38126E] text-white shadow-[0_12px_30px_-6px_rgba(76,29,149,0.35)] border border-purple-800/40'
+                                                    : 'bg-[#F8F9FA] dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-200/80 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700/60 shadow-xs hover:shadow-[0_10px_25px_-5px_rgba(76,29,149,0.08)]'
+                                            }`}
+                                        >
+                                            <div className="text-left">
+                                                {/* Header: Circular Icon Badge (White on primary, Purple on secondary) + Toggle */}
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div
+                                                        className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
+                                                            isPrimary
+                                                                ? 'bg-white text-[#4C1D95]'
+                                                                : 'bg-[#4C1D95] dark:bg-purple-600 text-white shadow-purple-900/20'
+                                                        }`}
+                                                    >
+                                                        <DynamicIcon
+                                                            name={service.icon_name}
+                                                            size={22}
+                                                            className={isPrimary ? 'text-[#4C1D95]' : 'text-white'}
+                                                        />
                                                     </div>
+
                                                     <button
                                                         onClick={() => setExpandedId(isExpanded ? null : service.id)}
-                                                        className={`p-1.5 rounded-lg border transition-colors ${
-                                                            isExpanded
-                                                                ? 'bg-[#4C1D95]/10 text-[#4C1D95] border-[#4C1D95]/30 dark:bg-purple-900/40 dark:text-purple-300'
-                                                                : 'bg-slate-50 dark:bg-purple-950/30 border-slate-200 dark:border-purple-800/40 text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                                                        className={`p-1.5 rounded-full border transition-colors ${
+                                                            isPrimary
+                                                                ? 'bg-white/15 hover:bg-white/25 text-white border-white/20'
+                                                                : isExpanded
+                                                                    ? 'bg-[#4C1D95]/10 text-[#4C1D95] border-[#4C1D95]/30 dark:bg-purple-900/40 dark:text-purple-300'
+                                                                    : 'bg-white dark:bg-purple-950/40 border-slate-200/90 dark:border-purple-800/40 text-slate-500 hover:text-[#4C1D95] dark:hover:text-white'
                                                         }`}
                                                         aria-label="Toggle service details"
                                                     >
-                                                        <ChevronDown size={16} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                                                        <ChevronDown
+                                                            size={15}
+                                                            className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                                                        />
                                                     </button>
                                                 </div>
 
                                                 {/* Title & Description */}
                                                 <div>
-                                                    <h3 className="text-base font-bold text-slate-900 dark:text-white font-sans mb-1.5">
+                                                    <h3
+                                                        className={`text-base sm:text-[17px] font-bold tracking-tight leading-snug mb-1.5 font-sans ${
+                                                            isPrimary ? 'text-white' : 'text-slate-900 dark:text-white'
+                                                        }`}
+                                                    >
                                                         {service.title}
                                                     </h3>
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
+                                                    <p
+                                                        className={`text-xs sm:text-[13px] leading-relaxed line-clamp-3 font-normal ${
+                                                            isPrimary
+                                                                ? 'text-purple-100/90'
+                                                                : 'text-slate-500 dark:text-slate-400'
+                                                        }`}
+                                                    >
                                                         {service.description}
                                                     </p>
                                                 </div>
 
                                                 {/* Key Highlights Bullet Points */}
                                                 {service.features && service.features.length > 0 && (
-                                                    <div className="space-y-1.5 pt-3 border-t border-slate-100 dark:border-purple-900/30">
+                                                    <div
+                                                        className={`space-y-1.5 pt-3 mt-3 border-t ${
+                                                            isPrimary
+                                                                ? 'border-white/15'
+                                                                : 'border-slate-200/70 dark:border-purple-900/30'
+                                                        }`}
+                                                    >
                                                         {service.features.slice(0, 3).map((feat, fIdx) => (
-                                                            <div key={fIdx} className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300">
-                                                                <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
+                                                            <div
+                                                                key={fIdx}
+                                                                className={`flex items-center gap-2 text-[11px] ${
+                                                                    isPrimary
+                                                                        ? 'text-purple-100/90'
+                                                                        : 'text-slate-600 dark:text-slate-300'
+                                                                }`}
+                                                            >
+                                                                <CheckCircle2
+                                                                    size={13}
+                                                                    className={`shrink-0 ${
+                                                                        isPrimary
+                                                                            ? 'text-purple-200'
+                                                                            : 'text-[#4C1D95] dark:text-purple-400'
+                                                                    }`}
+                                                                />
                                                                 <span className="truncate">{feat}</span>
                                                             </div>
                                                         ))}
@@ -602,10 +653,20 @@ const Services = () => {
                                             </div>
 
                                             {/* Action Link & Expandable Sub-Services */}
-                                            <div className="pt-4 border-t border-slate-100 dark:border-purple-900/30 mt-4 text-left">
+                                            <div
+                                                className={`pt-3.5 mt-3.5 border-t text-left ${
+                                                    isPrimary
+                                                        ? 'border-white/15'
+                                                        : 'border-slate-200/70 dark:border-purple-900/30'
+                                                }`}
+                                            >
                                                 <button
                                                     onClick={() => setExpandedId(isExpanded ? null : service.id)}
-                                                    className="text-xs font-bold text-[#4C1D95] dark:text-purple-300 hover:underline inline-flex items-center gap-1.5"
+                                                    className={`text-xs font-semibold hover:underline inline-flex items-center gap-1.5 ${
+                                                        isPrimary
+                                                            ? 'text-white hover:text-purple-200'
+                                                            : 'text-[#4C1D95] dark:text-purple-300'
+                                                    }`}
                                                 >
                                                     <span>{isExpanded ? 'Close Breakdown' : 'View Full Modules'}</span>
                                                     <ArrowRight size={13} />
@@ -618,20 +679,49 @@ const Services = () => {
                                                             animate={{ opacity: 1, height: 'auto' }}
                                                             exit={{ opacity: 0, height: 0 }}
                                                             transition={{ duration: 0.3 }}
-                                                            className="mt-4 pt-3 border-t border-slate-100 dark:border-purple-900/40 space-y-2.5 overflow-hidden"
+                                                            className={`mt-3 pt-3 border-t space-y-2 overflow-hidden ${
+                                                                isPrimary
+                                                                    ? 'border-white/15'
+                                                                    : 'border-slate-200/70 dark:border-purple-900/30'
+                                                            }`}
                                                         >
                                                             {service.details && (
-                                                                <p className="text-[11px] text-slate-600 dark:text-slate-400 italic bg-purple-50/60 dark:bg-purple-950/30 p-2.5 rounded-lg border-l-2 border-[#4C1D95] dark:border-purple-400">
+                                                                <p
+                                                                    className={`text-[11px] italic p-2.5 rounded-lg border-l-2 ${
+                                                                        isPrimary
+                                                                            ? 'text-purple-100 bg-white/10 border-white/60'
+                                                                            : 'text-slate-600 dark:text-slate-400 bg-purple-50/70 dark:bg-purple-950/30 border-[#4C1D95] dark:border-purple-400'
+                                                                    }`}
+                                                                >
                                                                     "{service.details}"
                                                                 </p>
                                                             )}
                                                             {(service.sub_services || []).map((sub, sIdx) => (
-                                                                <div key={sIdx} className="p-2 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] border border-slate-100 dark:border-purple-900/20 text-xs">
-                                                                    <div className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] flex items-center gap-1.5">
-                                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#4C1D95] dark:bg-purple-400 shrink-0" />
+                                                                <div
+                                                                    key={sIdx}
+                                                                    className={`p-2 rounded-lg text-xs border ${
+                                                                        isPrimary
+                                                                            ? 'bg-white/10 border-white/15 text-white'
+                                                                            : 'bg-white dark:bg-white/[0.02] border-slate-200/80 dark:border-purple-900/20 text-slate-800 dark:text-slate-200'
+                                                                    }`}
+                                                                >
+                                                                    <div className="font-semibold text-[11px] flex items-center gap-1.5">
+                                                                        <span
+                                                                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                                                                isPrimary
+                                                                                    ? 'bg-purple-200'
+                                                                                    : 'bg-[#4C1D95] dark:bg-purple-400'
+                                                                            }`}
+                                                                        />
                                                                         {sub.title}
                                                                     </div>
-                                                                    <p className="text-slate-500 dark:text-slate-400 text-[10px] pl-3 pt-0.5 leading-normal">
+                                                                    <p
+                                                                        className={`text-[10px] pl-3 pt-0.5 leading-normal ${
+                                                                            isPrimary
+                                                                                ? 'text-purple-200/80'
+                                                                                : 'text-slate-500 dark:text-slate-400'
+                                                                        }`}
+                                                                    >
                                                                         {sub.desc}
                                                                     </p>
                                                                 </div>
