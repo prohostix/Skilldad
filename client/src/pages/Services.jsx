@@ -621,51 +621,28 @@ const Services = () => {
                         <div className="absolute -top-24 -left-24 w-80 h-80 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
                         <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
-                        {/* Beautiful Floating SkillDad Logo Emblem with Soft Aura & Trailing Curve */}
-                        <div className="absolute top-4 right-4 sm:top-8 sm:right-10 z-0 pointer-events-none select-none">
+                        {/* Floating Transparent SkillDad Logo with Floating Motion & Trailing Curve */}
+                        <div className="absolute top-5 right-6 sm:top-8 sm:right-14 z-0 pointer-events-none select-none">
                             <motion.div
-                                animate={{ y: [-5, 7, -5], rotate: [-2, 3, -2] }}
-                                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+                                animate={{ y: [-6, 8, -6], rotate: [-3, 3, -3] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                                 className="relative flex items-center justify-center"
                             >
-                                {/* Multi-layered Ambient Glow Aura */}
-                                <div className="absolute -inset-6 bg-gradient-to-tr from-[#6D28D9]/25 via-[#4C1D95]/30 to-[#8B5CF6]/20 rounded-full blur-2xl pointer-events-none animate-pulse" />
-                                
-                                {/* Glassmorphic Floating Shield Badge */}
-                                <div className="relative p-3.5 sm:p-5 rounded-[28px] sm:rounded-[34px] bg-white/85 dark:bg-purple-950/75 backdrop-blur-xl border border-white dark:border-purple-600/40 shadow-[0_20px_45px_-10px_rgba(76,29,149,0.25)] flex items-center justify-center overflow-hidden group">
-                                    {/* Subtle Radial Gradient Inner Highlight */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 via-transparent to-purple-200/20 pointer-events-none" />
+                                {/* Soft ambient purple glow behind the logo */}
+                                <div className="absolute inset-0 bg-[#6D28D9]/20 rounded-full blur-2xl pointer-events-none scale-125" />
 
-                                    {/* Official High-Resolution SkillDad Logo */}
-                                    <motion.img
-                                        src={skilldadLogo}
-                                        alt="SkillDad Logo"
-                                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_8px_16px_rgba(76,29,149,0.28)] relative z-10"
-                                        animate={{ scale: [1, 1.04, 1] }}
-                                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                    />
-
-                                    {/* Shimmering Diagonal Light Ray */}
-                                    <motion.div
-                                        animate={{ x: ['-200%', '200%'] }}
-                                        transition={{
-                                            duration: 4,
-                                            repeat: Infinity,
-                                            ease: 'linear',
-                                            repeatDelay: 2.5
-                                        }}
-                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-25 z-20 pointer-events-none"
-                                    />
-
-                                    {/* Sparkling Accent Star on Corner */}
-                                    <div className="absolute -top-1 -right-1 z-20">
-                                        <Sparkles size={16} className="text-amber-400 drop-shadow-md animate-bounce" />
-                                    </div>
-                                </div>
+                                {/* Transparent SkillDad Logo */}
+                                <motion.img
+                                    src={skilldadLogo}
+                                    alt="SkillDad Logo"
+                                    className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 object-contain drop-shadow-[0_12px_24px_rgba(76,29,149,0.3)] relative z-10"
+                                    animate={{ scale: [1, 1.05, 1] }}
+                                    transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                                />
 
                                 {/* Curving Wavy String trailing down behind cards */}
                                 <svg
-                                    className="absolute top-[85px] right-[24px] sm:right-[36px] w-[260px] sm:w-[380px] h-[340px] pointer-events-none overflow-visible stroke-purple-400/35 dark:stroke-purple-500/25 fill-none"
+                                    className="absolute top-[80px] right-[24px] sm:right-[36px] w-[260px] sm:w-[380px] h-[340px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
                                     viewBox="0 0 300 280"
                                 >
                                     <path
