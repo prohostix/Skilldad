@@ -57,6 +57,89 @@ const DynamicIcon = ({ name, size = 20, className = '' }) => {
     return <Component size={size} className={className} />;
 };
 
+// ── INNOVATIVE & ATTRACTIVE CUSTOM ICONS FOR HERO FLOATING CARDS ──
+
+// 1. Unique Skill Courses Icon: Academic Mortarboard with Gradient Crown, Golden Accent & Knowledge Star
+const UniqueSkillCoursesIcon = ({ className = "w-5 h-5" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="scGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#8B5CF6" />
+                <stop offset="1" stopColor="#4C1D95" />
+            </linearGradient>
+            <linearGradient id="scGold" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#FDE047" />
+                <stop offset="1" stopColor="#EAB308" />
+            </linearGradient>
+        </defs>
+        {/* Cap Diamond Top */}
+        <path d="M12 3.5L2.5 8L12 12.5L21.5 8L12 3.5Z" fill="url(#scGrad)" stroke="#4C1D95" strokeWidth="1.2" strokeLinejoin="round" />
+        {/* Inner Facet Highlighting */}
+        <path d="M12 4.2L4 8L12 11.8L20 8L12 4.2Z" fill="white" fillOpacity="0.25" />
+        {/* Cap Skull Base */}
+        <path d="M6.5 10V14.5C6.5 14.5 8.8 17 12 17C15.2 17 17.5 14.5 17.5 14.5V10" stroke="url(#scGrad)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        {/* Hanging Tassel */}
+        <path d="M19.5 9V14.5C19.5 15.2 19 15.8 18.2 15.8C17.5 15.8 17 15.2 17 14.5V10.5" stroke="#A855F7" strokeWidth="1.4" strokeLinecap="round" />
+        <circle cx="18.2" cy="16.2" r="1.4" fill="url(#scGold)" />
+        {/* Radiant Knowledge Star */}
+        <path d="M12 1L12.6 2.2L13.8 2.8L12.6 3.4L12 4.6L11.4 3.4L10.2 2.8L11.4 2.2L12 1Z" fill="url(#scGold)" />
+    </svg>
+);
+
+// 2. Unique Certifications Icon: Multi-Layered Verified Rosette & Holographic Badge
+const UniqueCertificationsIcon = ({ className = "w-5 h-5" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="certGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#9333EA" />
+                <stop offset="1" stopColor="#581C87" />
+            </linearGradient>
+            <linearGradient id="certGold" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#FBBF24" />
+                <stop offset="1" stopColor="#D97706" />
+            </linearGradient>
+        </defs>
+        {/* Verified Rosette Ribbon Tail with Dual Tone */}
+        <path d="M8 15.5L6.5 22L12 19.2L17.5 22L16 15.5" fill="#E9D5FF" stroke="#4C1D95" strokeWidth="1.2" strokeLinejoin="round" />
+        <path d="M12 19.2L17.5 22L16 15.5" fill="#DDD6FE" />
+        {/* Holographic Circular Shield Seal */}
+        <circle cx="12" cy="10" r="7.8" fill="url(#certGrad)" stroke="#4C1D95" strokeWidth="1.2" />
+        <circle cx="12" cy="10" r="6.2" stroke="white" strokeWidth="0.8" strokeOpacity="0.45" strokeDasharray="2 1.5" />
+        {/* Verified Checkmark in Center */}
+        <path d="M8.8 10.2L10.9 12.3L15.2 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Golden Diamond Seal at Top */}
+        <polygon points="17.5,2 18.2,3.4 19.6,4.1 18.2,4.8 17.5,6.2 16.8,4.8 15.4,4.1 16.8,3.4" fill="url(#certGold)" />
+    </svg>
+);
+
+// 3. Unique Job Opportunities Icon: Modern Executive Career Case with Ascending Growth Spark
+const UniqueJobOpportunitiesIcon = ({ className = "w-5 h-5" }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <linearGradient id="jobGrad" x1="2" y1="4" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#6366F1" />
+                <stop offset="0.5" stopColor="#4C1D95" />
+                <stop offset="1" stopColor="#2E1065" />
+            </linearGradient>
+            <linearGradient id="arrowGlow" x1="12" y1="12" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#10B981" />
+                <stop offset="1" stopColor="#34D399" />
+            </linearGradient>
+        </defs>
+        {/* Handle */}
+        <path d="M8.5 5.5V4C8.5 3.2 9.2 2.5 10 2.5H14C14.8 2.5 15.5 3.2 15.5 4V5.5" stroke="url(#jobGrad)" strokeWidth="1.6" strokeLinecap="round" />
+        {/* Main Briefcase Body */}
+        <rect x="2.5" y="5.5" width="19" height="14" rx="3.2" fill="url(#jobGrad)" stroke="#4C1D95" strokeWidth="1.2" />
+        {/* Top Flap Overlay Accent */}
+        <path d="M2.5 10.5C2.5 10.5 7 12 12 12C17 12 21.5 10.5 21.5 10.5" stroke="white" strokeWidth="1.2" strokeOpacity="0.4" />
+        {/* Magnetic Clasp */}
+        <rect x="10.2" y="10.2" width="3.6" height="3" rx="1" fill="#F8FAFC" stroke="#C084FC" strokeWidth="0.8" />
+        {/* Floating Career Rocket Arrow Indicator */}
+        <circle cx="18.5" cy="5.5" r="4.2" fill="#ECFDF5" stroke="#10B981" strokeWidth="1.2" />
+        <path d="M17 7L20 4M20 4H17.8M20 4V6.2" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 const Services = () => {
     const [expandedId, setExpandedId] = useState(null);
     const [mainServices, setMainServices] = useState([]);
@@ -248,12 +331,12 @@ const Services = () => {
                                 <motion.div
                                     animate={{ y: [-4, 4, -4] }}
                                     transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute -top-3 sm:-top-4 -left-3 sm:-left-6 z-20 bg-white dark:bg-[#0E091D] border border-purple-100 dark:border-purple-900/50 shadow-[0_10px_25px_-5px_rgba(76,29,149,0.15)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md"
+                                    className="absolute -top-3 sm:-top-4 -left-3 sm:-left-6 z-20 bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
                                 >
-                                    <div className="w-7 h-7 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
-                                        <GraduationCap size={15} />
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
+                                        <UniqueSkillCoursesIcon className="w-5 h-5" />
                                     </div>
-                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white">
+                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
                                         Skill Courses
                                     </span>
                                 </motion.div>
@@ -262,12 +345,12 @@ const Services = () => {
                                 <motion.div
                                     animate={{ y: [4, -4, 4] }}
                                     transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                                    className="absolute bottom-8 sm:bottom-12 -left-4 sm:-left-8 z-20 bg-white dark:bg-[#0E091D] border border-purple-100 dark:border-purple-900/50 shadow-[0_10px_25px_-5px_rgba(76,29,149,0.15)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md"
+                                    className="absolute bottom-8 sm:bottom-12 -left-4 sm:-left-8 z-20 bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
                                 >
-                                    <div className="w-7 h-7 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
-                                        <Award size={15} />
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
+                                        <UniqueCertificationsIcon className="w-5 h-5" />
                                     </div>
-                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white">
+                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
                                         Certifications
                                     </span>
                                 </motion.div>
@@ -276,12 +359,12 @@ const Services = () => {
                                 <motion.div
                                     animate={{ y: [-5, 5, -5] }}
                                     transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
-                                    className="absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-8 z-20 bg-white dark:bg-[#0E091D] border border-purple-100 dark:border-purple-900/50 shadow-[0_10px_25px_-5px_rgba(76,29,149,0.15)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md"
+                                    className="absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-8 z-20 bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
                                 >
-                                    <div className="w-7 h-7 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
-                                        <Briefcase size={15} />
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
+                                        <UniqueJobOpportunitiesIcon className="w-5 h-5" />
                                     </div>
-                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white">
+                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
                                         Job Opportunities
                                     </span>
                                 </motion.div>
