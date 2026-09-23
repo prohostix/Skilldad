@@ -400,6 +400,8 @@ const Services = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
                         {coreOfferings.map((offering, idx) => {
                             const IconComponent = offering.icon;
+                            const isPrimary = idx === 0;
+
                             return (
                                 <motion.div
                                     key={offering.id}
@@ -408,35 +410,72 @@ const Services = () => {
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: idx * 0.1 }}
                                     whileHover={{ y: -4 }}
-                                    className="bg-white dark:bg-[#0E091D] rounded-2xl border border-purple-100/80 dark:border-purple-900/40 p-5 sm:p-6 shadow-[0_4px_20px_-4px_rgba(76,29,149,0.06)] hover:shadow-[0_12px_28px_-6px_rgba(76,29,149,0.12)] transition-all duration-300 flex flex-col justify-between group"
+                                    className={`h-full rounded-[22px] transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between group ${
+                                        isPrimary
+                                            ? 'bg-gradient-to-br from-[#4C1D95] via-[#431785] to-[#38126E] text-white shadow-[0_12px_30px_-6px_rgba(76,29,149,0.35)] border border-purple-800/40'
+                                            : 'bg-[#F8F9FA] dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-200/80 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700/60 shadow-xs hover:shadow-[0_10px_25px_-5px_rgba(76,29,149,0.08)]'
+                                    }`}
                                 >
-                                    <div className="space-y-4">
-                                        {/* Icon Header */}
+                                    <div className="space-y-4 text-left">
+                                        {/* Header: Circular Icon Badge (White on primary, Purple on secondary) + Badge */}
                                         <div className="flex items-center justify-between">
-                                            <div className={`w-11 h-11 rounded-xl ${offering.iconBg} flex items-center justify-center shrink-0 group-hover:scale-108 transition-transform`}>
-                                                <IconComponent size={20} strokeWidth={2.2} />
+                                            <div
+                                                className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
+                                                    isPrimary
+                                                        ? 'bg-white text-[#4C1D95]'
+                                                        : 'bg-[#4C1D95] dark:bg-purple-600 text-white shadow-purple-900/20'
+                                                }`}
+                                            >
+                                                <IconComponent
+                                                    size={22}
+                                                    strokeWidth={2.2}
+                                                    className={isPrimary ? 'text-[#4C1D95]' : 'text-white'}
+                                                />
                                             </div>
-                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+
+                                            <span
+                                                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                                                    isPrimary
+                                                        ? 'bg-white/15 text-purple-200 border border-white/20'
+                                                        : 'text-slate-400 dark:text-slate-500'
+                                                }`}
+                                            >
                                                 {offering.badge}
                                             </span>
                                         </div>
 
                                         {/* Title */}
-                                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-snug group-hover:text-[#4C1D95] dark:group-hover:text-purple-300 transition-colors">
+                                        <h3
+                                            className={`text-base sm:text-lg font-bold tracking-tight leading-snug font-sans transition-colors ${
+                                                isPrimary
+                                                    ? 'text-white'
+                                                    : 'text-slate-900 dark:text-white group-hover:text-[#4C1D95] dark:group-hover:text-purple-300'
+                                            }`}
+                                        >
                                             {offering.title}
                                         </h3>
 
                                         {/* Description */}
-                                        <p className="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
+                                        <p
+                                            className={`text-xs sm:text-[13px] leading-relaxed font-normal ${
+                                                isPrimary
+                                                    ? 'text-purple-100/90'
+                                                    : 'text-slate-500 dark:text-slate-400'
+                                            }`}
+                                        >
                                             {offering.description}
                                         </p>
                                     </div>
 
                                     {/* Action Arrow Button */}
-                                    <div className="pt-6 mt-2">
+                                    <div className="pt-6 mt-2 text-left">
                                         <Link
                                             to={offering.link}
-                                            className="w-8 h-8 rounded-full bg-[#FAF8FF] dark:bg-purple-950/60 border border-purple-100 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center group-hover:bg-[#4C1D95] group-hover:text-white dark:group-hover:bg-purple-600 transition-all duration-300 shadow-2xs"
+                                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
+                                                isPrimary
+                                                    ? 'bg-white/20 hover:bg-white text-white hover:text-[#4C1D95] border border-white/25'
+                                                    : 'bg-white dark:bg-purple-950/60 border border-slate-200 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 group-hover:bg-[#4C1D95] group-hover:text-white dark:group-hover:bg-purple-600'
+                                            }`}
                                             aria-label={`Explore ${offering.title}`}
                                         >
                                             <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
