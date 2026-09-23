@@ -142,6 +142,7 @@ const UniqueJobOpportunitiesIcon = ({ className = "w-5 h-5" }) => (
 
 const Services = () => {
     const [expandedId, setExpandedId] = useState(null);
+    const [selectedServiceId, setSelectedServiceId] = useState(null);
     const [mainServices, setMainServices] = useState([]);
     const [additionalFeatures, setAdditionalFeatures] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -568,7 +569,7 @@ const Services = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                             {mainServices.map((service, index) => {
                                 const isExpanded = expandedId === service.id;
-                                const isPrimary = index === 0;
+                                const isSelected = selectedServiceId !== null ? selectedServiceId === service.id : index === 0;
 
                                 return (
                                     <motion.div
@@ -578,11 +579,12 @@ const Services = () => {
                                         viewport={{ once: true }}
                                         transition={{ delay: index * 0.08 }}
                                         whileHover={{ y: -4 }}
-                                        className="h-full"
+                                        onClick={() => setSelectedServiceId(service.id)}
+                                        className="h-full cursor-pointer"
                                     >
                                         <div
                                             className={`h-full rounded-[22px] transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between ${
-                                                isPrimary
+                                                isSelected
                                                     ? 'bg-gradient-to-br from-[#4C1D95] via-[#431785] to-[#38126E] text-white shadow-[0_12px_30px_-6px_rgba(76,29,149,0.35)] border border-purple-800/40'
                                                     : 'bg-[#F8F9FA] dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-200/80 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700/60 shadow-xs hover:shadow-[0_10px_25px_-5px_rgba(76,29,149,0.08)]'
                                             }`}
@@ -592,7 +594,7 @@ const Services = () => {
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div
                                                         className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
-                                                            isPrimary
+                                                            isSelected
                                                                 ? 'bg-white text-[#4C1D95]'
                                                                 : 'bg-[#4C1D95] dark:bg-purple-600 text-white shadow-purple-900/20'
                                                         }`}
@@ -600,14 +602,18 @@ const Services = () => {
                                                         <DynamicIcon
                                                             name={service.icon_name}
                                                             size={22}
-                                                            className={isPrimary ? 'text-[#4C1D95]' : 'text-white'}
+                                                            className={isSelected ? 'text-[#4C1D95]' : 'text-white'}
                                                         />
                                                     </div>
 
                                                     <button
-                                                        onClick={() => setExpandedId(isExpanded ? null : service.id)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedServiceId(service.id);
+                                                            setExpandedId(isExpanded ? null : service.id);
+                                                        }}
                                                         className={`p-1.5 rounded-full border transition-colors ${
-                                                            isPrimary
+                                                            isSelected
                                                                 ? 'bg-white/15 hover:bg-white/25 text-white border-white/20'
                                                                 : isExpanded
                                                                     ? 'bg-[#4C1D95]/10 text-[#4C1D95] border-[#4C1D95]/30 dark:bg-purple-900/40 dark:text-purple-300'
@@ -626,14 +632,14 @@ const Services = () => {
                                                 <div>
                                                     <h3
                                                         className={`text-base sm:text-[17px] font-bold tracking-tight leading-snug mb-1.5 font-sans ${
-                                                            isPrimary ? 'text-white' : 'text-slate-900 dark:text-white'
+                                                            isSelected ? 'text-white' : 'text-slate-900 dark:text-white'
                                                         }`}
                                                     >
                                                         {service.title}
                                                     </h3>
                                                     <p
                                                         className={`text-xs sm:text-[13px] leading-relaxed line-clamp-3 font-normal ${
-                                                            isPrimary
+                                                            isSelected
                                                                 ? 'text-purple-100/90'
                                                                 : 'text-slate-500 dark:text-slate-400'
                                                         }`}
@@ -646,7 +652,7 @@ const Services = () => {
                                                 {service.features && service.features.length > 0 && (
                                                     <div
                                                         className={`space-y-1.5 pt-3 mt-3 border-t ${
-                                                            isPrimary
+                                                            isSelected
                                                                 ? 'border-white/15'
                                                                 : 'border-slate-200/70 dark:border-purple-900/30'
                                                         }`}
@@ -655,7 +661,7 @@ const Services = () => {
                                                             <div
                                                                 key={fIdx}
                                                                 className={`flex items-center gap-2 text-[11px] ${
-                                                                    isPrimary
+                                                                    isSelected
                                                                         ? 'text-purple-100/90'
                                                                         : 'text-slate-600 dark:text-slate-300'
                                                                 }`}
@@ -663,7 +669,7 @@ const Services = () => {
                                                                 <CheckCircle2
                                                                     size={13}
                                                                     className={`shrink-0 ${
-                                                                        isPrimary
+                                                                        isSelected
                                                                             ? 'text-purple-200'
                                                                             : 'text-[#4C1D95] dark:text-purple-400'
                                                                     }`}
@@ -678,15 +684,19 @@ const Services = () => {
                                             {/* Action Link & Expandable Sub-Services */}
                                             <div
                                                 className={`pt-3.5 mt-3.5 border-t text-left ${
-                                                    isPrimary
+                                                    isSelected
                                                         ? 'border-white/15'
                                                         : 'border-slate-200/70 dark:border-purple-900/30'
                                                 }`}
                                             >
                                                 <button
-                                                    onClick={() => setExpandedId(isExpanded ? null : service.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedServiceId(service.id);
+                                                        setExpandedId(isExpanded ? null : service.id);
+                                                    }}
                                                     className={`text-xs font-semibold hover:underline inline-flex items-center gap-1.5 ${
-                                                        isPrimary
+                                                        isSelected
                                                             ? 'text-white hover:text-purple-200'
                                                             : 'text-[#4C1D95] dark:text-purple-300'
                                                     }`}
@@ -703,7 +713,7 @@ const Services = () => {
                                                             exit={{ opacity: 0, height: 0 }}
                                                             transition={{ duration: 0.3 }}
                                                             className={`mt-3 pt-3 border-t space-y-2 overflow-hidden ${
-                                                                isPrimary
+                                                                isSelected
                                                                     ? 'border-white/15'
                                                                     : 'border-slate-200/70 dark:border-purple-900/30'
                                                             }`}
@@ -711,7 +721,7 @@ const Services = () => {
                                                             {service.details && (
                                                                 <p
                                                                     className={`text-[11px] italic p-2.5 rounded-lg border-l-2 ${
-                                                                        isPrimary
+                                                                        isSelected
                                                                             ? 'text-purple-100 bg-white/10 border-white/60'
                                                                             : 'text-slate-600 dark:text-slate-400 bg-purple-50/70 dark:bg-purple-950/30 border-[#4C1D95] dark:border-purple-400'
                                                                     }`}
@@ -723,7 +733,7 @@ const Services = () => {
                                                                 <div
                                                                     key={sIdx}
                                                                     className={`p-2 rounded-lg text-xs border ${
-                                                                        isPrimary
+                                                                        isSelected
                                                                             ? 'bg-white/10 border-white/15 text-white'
                                                                             : 'bg-white dark:bg-white/[0.02] border-slate-200/80 dark:border-purple-900/20 text-slate-800 dark:text-slate-200'
                                                                     }`}
@@ -731,7 +741,7 @@ const Services = () => {
                                                                     <div className="font-semibold text-[11px] flex items-center gap-1.5">
                                                                         <span
                                                                             className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                                                                isPrimary
+                                                                                isSelected
                                                                                     ? 'bg-purple-200'
                                                                                     : 'bg-[#4C1D95] dark:bg-purple-400'
                                                                             }`}
@@ -740,7 +750,7 @@ const Services = () => {
                                                                     </div>
                                                                     <p
                                                                         className={`text-[10px] pl-3 pt-0.5 leading-normal ${
-                                                                            isPrimary
+                                                                            isSelected
                                                                                 ? 'text-purple-200/80'
                                                                                 : 'text-slate-500 dark:text-slate-400'
                                                                         }`}
