@@ -583,7 +583,7 @@ const AboutUs = () => {
             <Navbar />
 
             {/* ── HERO SECTION (REDESIGNED TO MATCH REFERENCE IMAGE) ── */}
-            <section className="relative pt-10 sm:pt-14 md:pt-16 pb-28 sm:pb-32 md:pb-36 lg:pb-44 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-[#FAF8FF] [.dark-mode_&]:!from-[#080512] [.dark-mode_&]:!via-[#0E091D] [.dark-mode_&]:!to-[#150D2B] border-b border-slate-100 [.dark-mode_&]:!border-purple-900/30">
+            <section className="relative pt-8 sm:pt-12 md:pt-14 pb-20 sm:pb-22 md:pb-24 lg:pb-28 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-[#FAF8FF] [.dark-mode_&]:!from-[#080512] [.dark-mode_&]:!via-[#0E091D] [.dark-mode_&]:!to-[#150D2B] border-b border-slate-100 [.dark-mode_&]:!border-purple-900/30">
                 {/* Decorative background subtle wave curves matching reference */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-[#4C1D95]/15 [.dark-mode_&]:stroke-purple-600/10 fill-none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M-100 240 C 150 140, 320 320, 520 240 C 720 160, 880 320, 1250 190" strokeWidth="1.5" />
