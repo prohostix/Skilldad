@@ -214,7 +214,7 @@ const Services = () => {
             title: 'Mobile Learning',
             description: 'Learn anytime, anywhere with a seamless mobile experience.',
             icon: Smartphone,
-            iconBg: 'bg-indigo-100/80 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300',
+            iconBg: 'bg-purple-100/90 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300',
             tag: 'Anytime Access'
         },
         {
@@ -651,45 +651,6 @@ const Services = () => {
                 </section>
             )}
 
-            {/* ── SECTION 5: CALL TO ACTION BANNER ── */}
-            <section className="py-14 sm:py-18 px-4 sm:px-6 lg:px-12 relative z-10">
-                <div className="max-w-5xl mx-auto">
-                    <div className="rounded-3xl bg-gradient-to-r from-[#1E1B4B] via-[#31105C] to-[#4C1D95] text-white p-8 sm:p-12 shadow-[0_20px_50px_-15px_rgba(76,29,149,0.35)] relative overflow-hidden text-center sm:text-left">
-                        {/* Ambient decorative circles */}
-                        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-                        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-purple-400/15 rounded-full blur-2xl pointer-events-none" />
-
-                        <div className="grid sm:grid-cols-12 gap-8 items-center relative z-10">
-                            <div className="sm:col-span-8 space-y-3">
-                                <span className="inline-block px-3 py-1 rounded-full bg-white/10 text-purple-200 text-xs font-semibold tracking-wide border border-white/15">
-                                    Start Your Learning Journey
-                                </span>
-                                <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
-                                    Ready to Build Skills and Accelerate Your Career?
-                                </h3>
-                                <p className="text-xs sm:text-sm text-purple-100/80 max-w-lg leading-relaxed">
-                                    Join thousands of ambitious students mastering industry-grade technology, verified diplomas, and work-based internships.
-                                </p>
-                            </div>
-
-                            <div className="sm:col-span-4 flex flex-col sm:items-end justify-center gap-3">
-                                <Link
-                                    to="/courses"
-                                    className="px-6 py-3 rounded-xl bg-white text-[#4C1D95] hover:bg-purple-50 font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md text-center"
-                                >
-                                    Explore Courses
-                                </Link>
-                                <Link
-                                    to="/support"
-                                    className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs tracking-wider transition-all duration-300 border border-white/20 text-center"
-                                >
-                                    Speak to Advisor
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             <Footer />
         </div>
