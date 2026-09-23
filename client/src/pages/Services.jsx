@@ -305,28 +305,46 @@ const Services = () => {
         }
     ];
 
-    // ── ADVANCED PLATFORM CAPABILITIES (3 CARDS MATCHING REFERENCE) ──
+    // ── ADVANCED PLATFORM CAPABILITIES (3 CARDS MATCHING REFERENCE VIDEO AT 0:00:07) ──
     const platformCapabilities = [
         {
             title: 'AI-Powered Guidance',
-            description: 'Get personalized course and career recommendations with our AI engine.',
+            description: 'Get personalized course and career recommendations with our intelligent AI advisory engine.',
             icon: Brain,
-            iconBg: 'bg-purple-100/90 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300',
-            tag: 'Intelligent Advisory'
+            tag: 'Intelligent Advisory',
+            cardBg: 'bg-[#9EE818] text-slate-900 shadow-[0_20px_40px_-10px_rgba(132,204,22,0.35)] border border-lime-400/60',
+            textColor: 'text-slate-900',
+            descColor: 'text-slate-800/90 font-medium',
+            rotation: 'lg:-rotate-[7.5deg]',
+            entranceDelay: 0.18,
+            tagBg: 'bg-black/10 text-slate-900',
+            btnBg: 'bg-black/10 hover:bg-black/20 text-slate-900'
         },
         {
             title: 'Mobile Learning',
-            description: 'Learn anytime, anywhere with a seamless mobile experience.',
+            description: 'Learn anytime, anywhere with a seamless mobile experience across all your devices.',
             icon: Smartphone,
-            iconBg: 'bg-purple-100/90 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300',
-            tag: 'Anytime Access'
+            tag: 'Anytime Access',
+            cardBg: 'bg-white text-slate-900 shadow-[0_22px_45px_-10px_rgba(76,29,149,0.18)] border border-purple-100/90',
+            textColor: 'text-slate-900',
+            descColor: 'text-slate-600',
+            rotation: 'lg:rotate-0',
+            entranceDelay: 0.05,
+            tagBg: 'bg-purple-100/70 text-[#4C1D95]',
+            btnBg: 'bg-purple-50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
         },
         {
             title: 'Cloud Infrastructure',
-            description: 'Scalable and reliable cloud technology for uninterrupted learning.',
+            description: 'Scalable, high-speed, and reliable cloud technology ensuring 99.9% uninterrupted learning uptime.',
             icon: Cloud,
-            iconBg: 'bg-purple-100/80 dark:bg-purple-900/30 text-[#4C1D95] dark:text-purple-300',
-            tag: '99.9% Uptime'
+            tag: '99.9% Uptime',
+            cardBg: 'bg-[#00C0F9] text-slate-900 shadow-[0_20px_40px_-10px_rgba(0,192,249,0.35)] border border-cyan-400/60',
+            textColor: 'text-slate-900',
+            descColor: 'text-slate-800/90 font-medium',
+            rotation: 'lg:rotate-[7.5deg]',
+            entranceDelay: 0.30,
+            tagBg: 'bg-black/10 text-slate-900',
+            btnBg: 'bg-black/10 hover:bg-black/20 text-slate-900'
         }
     ];
 
@@ -591,74 +609,144 @@ const Services = () => {
                 </div>
             </section>
 
-            {/* ── SECTION 3: ADVANCED PLATFORM CAPABILITIES (MATCHING REFERENCE DESIGN) ── */}
-            <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-12 relative z-10 bg-slate-50/60 dark:bg-[#0A0716]/60 border-y border-purple-50 dark:border-purple-900/20">
-                <div className="max-w-7xl mx-auto space-y-8">
+            {/* ── SECTION 3: ADVANCED PLATFORM CAPABILITIES (MATCHING REFERENCE VIDEO AT 0:00:07) ── */}
+            <section className="py-14 sm:py-20 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
+                <div className="max-w-7xl mx-auto">
                     
-                    {/* Section Header with Left-Line Accent */}
-                    <div className="text-left space-y-2 max-w-2xl">
-                        <div className="flex items-center gap-2.5">
-                            <span className="w-6 h-0.5 bg-[#4C1D95] dark:bg-purple-400 rounded-full" />
-                            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#4C1D95] dark:text-purple-400">
-                                Platform Features
-                            </span>
-                        </div>
-                        <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-snug font-sans">
-                            Advanced Platform{' '}
-                            <span className="text-[#4C1D95] dark:text-purple-300">
-                                Capabilities
-                            </span>
-                        </h2>
-                        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
-                            Our intelligent platform is built to give you a seamless, personalized and efficient learning experience.
-                        </p>
-                    </div>
+                    {/* Light Purple Rounded Container Card Matching Reference Video */}
+                    <div className="relative rounded-[36px] sm:rounded-[48px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 p-7 sm:p-11 lg:p-16 shadow-[0_20px_50px_-15px_rgba(76,29,149,0.12)] overflow-hidden">
+                        
+                        {/* Soft ambient violet background glows */}
+                        <div className="absolute -top-24 -left-24 w-80 h-80 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
-                    {/* 3 Cards Responsive Grid matching reference */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 items-stretch">
-                        {platformCapabilities.map((capability, idx) => {
-                            const IconComponent = capability.icon;
-                            return (
-                                <motion.div
-                                    key={idx}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.6, delay: idx * 0.12 }}
-                                    whileHover={{ y: -4 }}
-                                    className="bg-white dark:bg-[#0E091D] rounded-2xl border border-purple-100/80 dark:border-purple-900/40 p-6 sm:p-7 shadow-[0_4px_20px_-4px_rgba(76,29,149,0.06)] hover:shadow-[0_12px_28px_-6px_rgba(76,29,149,0.12)] transition-all duration-300 flex flex-col justify-between group"
+                        {/* Origami Flying Kite with Trailing Loop String from Video Reference */}
+                        <div className="absolute top-6 right-6 sm:top-10 sm:right-12 z-0 pointer-events-none select-none">
+                            <motion.div
+                                animate={{ y: [-4, 6, -4], rotate: [-2, 2.5, -2] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                                className="relative"
+                            >
+                                {/* 4-Faceted Geometric Origami Kite */}
+                                <svg width="120" height="150" viewBox="0 0 100 130" fill="none" className="w-16 sm:w-24 md:w-28 drop-shadow-xl overflow-visible">
+                                    {/* Top Left Facet - Lime Green */}
+                                    <path d="M50 10 L10 55 L50 75 Z" fill="#84CC16" />
+                                    {/* Top Right Facet - Crisp White */}
+                                    <path d="M50 10 L90 55 L50 75 Z" fill="#FFFFFF" />
+                                    {/* Bottom Left Facet - Royal Purple */}
+                                    <path d="M50 75 L10 55 L50 120 Z" fill="#4F26C6" />
+                                    {/* Bottom Right Facet - Cyan */}
+                                    <path d="M50 75 L90 55 L50 120 Z" fill="#00C0F9" />
+                                    {/* Center crease line */}
+                                    <line x1="50" y1="10" x2="50" y2="120" stroke="white" strokeWidth="1" strokeOpacity="0.4" />
+                                </svg>
+
+                                {/* Curving Wavy String trailing down behind cards */}
+                                <svg
+                                    className="absolute top-[105px] right-[24px] sm:right-[36px] w-[260px] sm:w-[380px] h-[340px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
+                                    viewBox="0 0 300 280"
                                 >
-                                    <div className="space-y-4">
-                                        {/* Icon Header */}
-                                        <div className="flex items-center justify-between">
-                                            <div className={`w-11 h-11 rounded-xl ${capability.iconBg} flex items-center justify-center shrink-0 group-hover:scale-108 transition-transform`}>
-                                                <IconComponent size={20} strokeWidth={2.2} />
+                                    <path
+                                        d="M200 0 C 180 80, 220 160, 160 200 C 100 240, 60 170, 100 130 C 140 90, 170 170, 100 240"
+                                        strokeWidth="3"
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                            </motion.div>
+                        </div>
+
+                        {/* Header: Centered HOW IT WORKS Tag + Title + Subtitle + Pills Row */}
+                        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16 space-y-3.5 relative z-10">
+                            <div>
+                                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[11px] font-bold tracking-widest uppercase shadow-2xs">
+                                    HOW IT WORKS
+                                </span>
+                            </div>
+                            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-[42px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.18] font-sans">
+                                An Intelligent System, <br />
+                                <span className="text-[#4C1D95] dark:text-purple-300">
+                                    Not Just A Course
+                                </span>
+                            </h2>
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-purple-200/80 max-w-xl mx-auto leading-relaxed font-normal">
+                                Our intelligent platform is built to give you a seamless, personalized, and efficient learning journey from day one.
+                            </p>
+
+                            {/* Category Filter Pills Row Matching Video */}
+                            <div className="pt-2 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+                                {['AI Mentorship', 'Mobile Access', 'Cloud Infrastructure', 'Live Collaboration', 'Career Matrix'].map((tag, idx) => (
+                                    <span
+                                        key={idx}
+                                        className="bg-white/80 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 px-3.5 py-1 rounded-full text-xs font-semibold shadow-2xs hover:bg-white dark:hover:bg-purple-900/60 transition-colors cursor-default"
+                                    >
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* 3 Angled Overlapping Cards with Video Staggered Entrance Animation */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-5 items-stretch max-w-5xl mx-auto pt-4 pb-2 relative z-10">
+                            {platformCapabilities.map((capability, idx) => {
+                                const IconComponent = capability.icon;
+
+                                return (
+                                    <motion.div
+                                        key={idx}
+                                        initial={{ y: 90, opacity: 0, scale: 0.92 }}
+                                        whileInView={{ y: 0, opacity: 1, scale: 1 }}
+                                        viewport={{ once: true, amount: 0.25 }}
+                                        transition={{
+                                            duration: 0.75,
+                                            delay: capability.entranceDelay,
+                                            ease: [0.22, 1, 0.36, 1]
+                                        }}
+                                        whileHover={{
+                                            y: -12,
+                                            rotate: 0,
+                                            scale: 1.05,
+                                            zIndex: 30,
+                                            transition: { duration: 0.25, ease: 'easeOut' }
+                                        }}
+                                        className={`h-full relative group cursor-pointer ${capability.rotation} transition-transform`}
+                                    >
+                                        <div
+                                            className={`h-full rounded-[26px] p-6 sm:p-8 flex flex-col justify-between transition-shadow duration-300 ${capability.cardBg}`}
+                                        >
+                                            <div className="space-y-3.5 text-left">
+                                                {/* Top Tag & Icon Row */}
+                                                <div className="flex items-center justify-between">
+                                                    <span className={`text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${capability.tagBg}`}>
+                                                        {capability.tag}
+                                                    </span>
+                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 shrink-0">
+                                                        <IconComponent size={16} strokeWidth={2.4} />
+                                                    </div>
+                                                </div>
+
+                                                {/* Title */}
+                                                <h3 className={`text-xl sm:text-[22px] font-extrabold tracking-tight leading-snug font-sans ${capability.textColor}`}>
+                                                    {capability.title}
+                                                </h3>
+
+                                                {/* Description */}
+                                                <p className={`text-xs sm:text-[13px] leading-relaxed ${capability.descColor}`}>
+                                                    {capability.description}
+                                                </p>
                                             </div>
-                                            <span className="text-[10px] font-semibold text-[#4C1D95] dark:text-purple-300 bg-[#4C1D95]/10 dark:bg-purple-950/70 px-2 py-0.5 rounded-full">
-                                                {capability.tag}
-                                            </span>
+
+                                            {/* Action Arrow Button */}
+                                            <div className="pt-6 mt-4 border-t border-black/10 flex items-center justify-end">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${capability.btnBg}`}>
+                                                    <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                                </div>
+                                            </div>
                                         </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
 
-                                        {/* Title */}
-                                        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight leading-snug group-hover:text-[#4C1D95] dark:group-hover:text-purple-300 transition-colors">
-                                            {capability.title}
-                                        </h3>
-
-                                        {/* Description */}
-                                        <p className="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
-                                            {capability.description}
-                                        </p>
-                                    </div>
-
-                                    {/* Action Arrow Button */}
-                                    <div className="pt-6 mt-2">
-                                        <div className="w-8 h-8 rounded-full bg-[#FAF8FF] dark:bg-purple-950/60 border border-purple-100 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center group-hover:bg-[#4C1D95] group-hover:text-white dark:group-hover:bg-purple-600 transition-all duration-300 shadow-2xs">
-                                            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            );
-                        })}
                     </div>
 
                 </div>
