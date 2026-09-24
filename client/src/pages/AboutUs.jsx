@@ -583,17 +583,17 @@ const AboutUs = () => {
             <Navbar />
 
             {/* ── HERO SECTION (REDESIGNED TO MATCH REFERENCE IMAGE) ── */}
-            <section className="relative pt-8 sm:pt-12 md:pt-14 pb-20 sm:pb-22 md:pb-24 lg:pb-28 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-[#FAF8FF] [.dark-mode_&]:!from-[#080512] [.dark-mode_&]:!via-[#0E091D] [.dark-mode_&]:!to-[#150D2B] border-b border-slate-100 [.dark-mode_&]:!border-purple-900/30">
+            <section className="relative pt-8 sm:pt-12 md:pt-14 pb-20 sm:pb-22 md:pb-24 lg:pb-28 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-br from-white via-slate-50 to-[#FAF8FF] dark:from-[#080512] dark:via-[#0E091D] dark:to-[#150D2B] border-b border-slate-100 dark:border-purple-900/30">
                 {/* Decorative background subtle wave curves matching reference */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-[#4C1D95]/15 [.dark-mode_&]:stroke-purple-600/10 fill-none" xmlns="http://www.w3.org/2000/svg">
+                <svg className="absolute inset-0 w-full h-full pointer-events-none stroke-[#4C1D95]/15 dark:stroke-purple-600/20 fill-none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M-100 240 C 150 140, 320 320, 520 240 C 720 160, 880 320, 1250 190" strokeWidth="1.5" />
                     <path d="M-50 480 C 200 410, 480 570, 780 490 C 1080 410, 1280 530, 1550 460" strokeWidth="1.5" />
                     <path d="M700 -50 C 850 160, 1050 80, 1200 260" strokeWidth="1.5" />
                 </svg>
 
                 {/* Soft ambient blur glows */}
-                <div className="absolute -top-20 -left-20 w-80 h-80 bg-[#4C1D95]/5 [.dark-mode_&]:bg-purple-900/20 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute top-1/3 right-0 w-[450px] h-[450px] bg-[#4C1D95]/5 [.dark-mode_&]:bg-purple-900/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -top-20 -left-20 w-80 h-80 bg-[#4C1D95]/5 dark:bg-purple-900/25 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-1/3 right-0 w-[450px] h-[450px] bg-[#4C1D95]/5 dark:bg-purple-900/20 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
@@ -607,7 +607,7 @@ const AboutUs = () => {
                         >
                             {/* Row 1: "About Us" Pill Badge */}
                             <motion.div variants={heroRowFromTop}>
-                                <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] text-[11px] md:text-xs font-semibold tracking-wide shadow-xs [.dark-mode_&]:!bg-purple-950/60 [.dark-mode_&]:!border-purple-800/50 [.dark-mode_&]:!text-purple-300">
+                                <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] dark:bg-purple-950/70 dark:border-purple-800/60 dark:text-purple-300 text-[11px] md:text-xs font-semibold tracking-wide shadow-xs">
                                     About Us
                                 </div>
                             </motion.div>
@@ -615,10 +615,10 @@ const AboutUs = () => {
                             {/* Row 2: Headline */}
                             <motion.h1
                                 variants={heroRowFromTop}
-                                className="text-3xl sm:text-4xl md:text-5xl lg:text-[44px] xl:text-[48px] font-extrabold tracking-tight leading-[1.18] text-[#1E1B4B] [.dark-mode_&]:!text-white font-sans"
+                                className="text-3xl sm:text-4xl md:text-5xl lg:text-[44px] xl:text-[48px] font-extrabold tracking-tight leading-[1.18] text-[#1E1B4B] dark:text-white font-sans"
                             >
                                 Empowering Students to <br />
-                                <span className="text-[#4C1D95] [.dark-mode_&]:!text-purple-300">
+                                <span className="text-[#4C1D95] dark:text-purple-300">
                                     Learn, Grow &amp; Get Hired
                                 </span>
                             </motion.h1>
@@ -626,50 +626,50 @@ const AboutUs = () => {
                             {/* Row 3: Mission Description */}
                             <motion.p
                                 variants={heroRowFromTop}
-                                className="text-sm md:text-[15px] text-slate-600 [.dark-mode_&]:!text-slate-300 max-w-xl leading-relaxed font-normal"
+                                className="text-sm md:text-[15px] text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-normal"
                             >
                                 We are on a mission to revolutionize the education landscape by bridging the gap between talent, institutions, and industry leaders through high-fidelity digital learning experiences.
                             </motion.p>
 
                             {/* Row 4: 4 Feature Columns with Faint Dividers */}
                             <motion.div variants={heroRowFromTop} className="pt-2 sm:pt-4">
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-0 sm:divide-x divide-slate-200/90 [.dark-mode_&]:divide-white/10">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-0 sm:divide-x divide-slate-200/90 dark:divide-white/10">
                                     {/* Feature 1: Industry-Relevant Courses */}
                                     <div className="flex flex-col items-start sm:items-center text-left sm:text-center sm:px-3">
-                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] flex items-center justify-center mb-2.5 shadow-xs [.dark-mode_&]:!bg-purple-900/40 [.dark-mode_&]:!border-purple-700/50 [.dark-mode_&]:!text-purple-300">
+                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] dark:bg-purple-900/40 dark:border-purple-700/50 dark:text-purple-300 flex items-center justify-center mb-2.5 shadow-xs">
                                             <GraduationCap size={20} />
                                         </div>
-                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 [.dark-mode_&]:!text-slate-200 leading-tight">
+                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight">
                                             Industry-Relevant <br className="hidden sm:inline" />Courses
                                         </span>
                                     </div>
 
                                     {/* Feature 2: Expert Guidance */}
                                     <div className="flex flex-col items-start sm:items-center text-left sm:text-center sm:px-3">
-                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] flex items-center justify-center mb-2.5 shadow-xs [.dark-mode_&]:!bg-purple-900/40 [.dark-mode_&]:!border-purple-700/50 [.dark-mode_&]:!text-purple-300">
+                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] dark:bg-purple-900/40 dark:border-purple-700/50 dark:text-purple-300 flex items-center justify-center mb-2.5 shadow-xs">
                                             <Users size={20} />
                                         </div>
-                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 [.dark-mode_&]:!text-slate-200 leading-tight">
+                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight">
                                             Expert <br className="hidden sm:inline" />Guidance
                                         </span>
                                     </div>
 
                                     {/* Feature 3: Placement Support */}
                                     <div className="flex flex-col items-start sm:items-center text-left sm:text-center sm:px-3">
-                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] flex items-center justify-center mb-2.5 shadow-xs [.dark-mode_&]:!bg-purple-900/40 [.dark-mode_&]:!border-purple-700/50 [.dark-mode_&]:!text-purple-300">
+                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] dark:bg-purple-900/40 dark:border-purple-700/50 dark:text-purple-300 flex items-center justify-center mb-2.5 shadow-xs">
                                             <Briefcase size={20} />
                                         </div>
-                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 [.dark-mode_&]:!text-slate-200 leading-tight">
+                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight">
                                             Placement <br className="hidden sm:inline" />Support
                                         </span>
                                     </div>
 
                                     {/* Feature 4: Career Growth */}
                                     <div className="flex flex-col items-start sm:items-center text-left sm:text-center sm:px-3">
-                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] flex items-center justify-center mb-2.5 shadow-xs [.dark-mode_&]:!bg-purple-900/40 [.dark-mode_&]:!border-purple-700/50 [.dark-mode_&]:!text-purple-300">
+                                        <div className="w-11 h-11 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] dark:bg-purple-900/40 dark:border-purple-700/50 dark:text-purple-300 flex items-center justify-center mb-2.5 shadow-xs">
                                             <TrendingUp size={20} />
                                         </div>
-                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 [.dark-mode_&]:!text-slate-200 leading-tight">
+                                        <span className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-200 leading-tight">
                                             Career <br className="hidden sm:inline" />Growth
                                         </span>
                                     </div>
