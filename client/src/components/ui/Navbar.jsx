@@ -153,22 +153,35 @@ const Navbar = ({ compact = false }) => {
                         </span>
                     </div>
 
-                    {/* Desktop Menu - Standard clean font and spacing, Home identical to others */}
+                    {/* Desktop Menu - Dark purple text and underline on select or hover */}
                     {!isAuthPage && (
                         <div className="hidden lg:flex items-center justify-center space-x-5 xl:space-x-7 shrink-0">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.name}
-                                    to={item.href}
-                                    className={`py-1 font-semibold text-[13px] tracking-tight whitespace-nowrap transition-colors duration-200 ${
-                                        theme === 'light'
-                                            ? 'text-slate-700 hover:text-[#5B21B6]'
-                                            : 'text-[#E9D5FF] hover:text-white'
-                                    }`}
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
+                            {navItems.map((item) => {
+                                const isSelected = item.href === '/' 
+                                    ? location.pathname === '/' 
+                                    : location.pathname.startsWith(item.href);
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        to={item.href}
+                                        className={`relative group py-1.5 font-semibold text-[13px] tracking-tight whitespace-nowrap transition-colors duration-200 ${
+                                            isSelected
+                                                ? 'text-[#4C1D95] dark:text-purple-300'
+                                                : 'text-slate-700 hover:text-[#4C1D95] dark:text-[#E9D5FF] dark:hover:text-purple-200'
+                                        }`}
+                                    >
+                                        <span>{item.name}</span>
+                                        {/* Dark purple underline on select OR hover */}
+                                        <span
+                                            className={`absolute bottom-0 left-0 right-0 h-[2.5px] rounded-full bg-[#4C1D95] dark:bg-purple-400 transition-all duration-200 origin-center ${
+                                                isSelected
+                                                    ? 'opacity-100 scale-x-100'
+                                                    : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'
+                                            }`}
+                                        />
+                                    </Link>
+                                );
+                            })}
                         </div>
                     )}
 
@@ -279,13 +292,13 @@ const Navbar = ({ compact = false }) => {
                                     {/* Login & Sign Up buttons */}
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className="font-medium text-slate-700 dark:text-purple-200 hover:text-[#4C1D95] dark:hover:text-white transition-colors text-sm px-2.5 py-1.5 cursor-pointer"
+                                        className="font-medium text-slate-700 dark:text-purple-200 hover:text-[#4C1D95] dark:hover:text-white transition-colors text-xs px-2 py-1.5 cursor-pointer"
                                     >
                                         Login
                                     </button>
                                     <button
                                         onClick={() => navigate('/register')}
-                                        className="rounded-xl font-semibold text-white px-5 py-2 text-xs sm:text-sm bg-[#4C1D95] hover:bg-[#3B0764] shadow-xs active:scale-95 transition-all cursor-pointer"
+                                        className="rounded-lg font-semibold text-white px-3.5 py-1.5 text-xs bg-[#4C1D95] hover:bg-[#3B0764] shadow-xs active:scale-95 transition-all cursor-pointer"
                                     >
                                         Sign Up
                                     </button>
