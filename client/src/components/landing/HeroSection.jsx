@@ -177,9 +177,9 @@ const HeroSection = () => {
                                 {/* Delicate Central Orbit Track */}
                                 <circle cx="50" cy="50" r="12" fill="none" stroke="rgba(147, 51, 234, 0.4)" strokeWidth="0.22" shapeRendering="geometricPrecision" />
 
-                                {/* 1. SkillDad <-> Students Flower Petal Arcs (Slender & Elegant) */}
+                                {/* 1. SkillDad <-> Students Flower Petal Arcs (Increased Gap) */}
                                 <path
-                                    d="M 41.5 41.5 Q 36.5 31.5 26.5 26.5"
+                                    d="M 41.5 41.5 Q 26 38 26.5 26.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -187,25 +187,7 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 26.5 26.5 Q 31.5 36.5 41.5 41.5"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-
-                                {/* 2. SkillDad <-> Universities Flower Petal Arcs (Slender & Elegant) */}
-                                <path
-                                    d="M 58.5 41.5 Q 63.5 31.5 73.5 26.5"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-                                <path
-                                    d="M 73.5 26.5 Q 68.5 36.5 58.5 41.5"
+                                    d="M 26.5 26.5 Q 38 26 41.5 41.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -213,9 +195,9 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 3. SkillDad <-> Jobs Flower Petal Arcs (Slender & Elegant) */}
+                                {/* 2. SkillDad <-> Universities Flower Petal Arcs (Increased Gap) */}
                                 <path
-                                    d="M 62 50 Q 69.5 46.5 77 50"
+                                    d="M 58.5 41.5 Q 74 38 73.5 26.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -223,25 +205,7 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 77 50 Q 69.5 53.5 62 50"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-
-                                {/* 4. SkillDad <-> Certifications Flower Petal Arcs (Slender & Elegant) */}
-                                <path
-                                    d="M 23 50 Q 30.5 46.5 38 50"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-                                <path
-                                    d="M 38 50 Q 30.5 53.5 23 50"
+                                    d="M 73.5 26.5 Q 62 26 58.5 41.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -249,9 +213,9 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 5. SkillDad <-> Courses Flower Petal Arcs (Slender & Elegant) */}
+                                {/* 3. SkillDad <-> Jobs Flower Petal Arcs (Increased Gap) */}
                                 <path
-                                    d="M 50 62 Q 46.5 69.5 50 77"
+                                    d="M 60 50 Q 69 36 78 50"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -259,7 +223,43 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 50 77 Q 53.5 69.5 50 62"
+                                    d="M 78 50 Q 69 64 60 50"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+
+                                {/* 4. SkillDad <-> Certifications Flower Petal Arcs (Increased Gap) */}
+                                <path
+                                    d="M 22 50 Q 31 36 40 50"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 40 50 Q 31 64 22 50"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+
+                                {/* 5. SkillDad <-> Courses Flower Petal Arcs (Increased Gap) */}
+                                <path
+                                    d="M 50 60 Q 36 69 50 78"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 50 78 Q 64 69 50 60"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -276,34 +276,34 @@ const HeroSection = () => {
 
                                 {/* Very Small Purple Dots Moving Through Flower Petal Lines */}
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 41.5 41.5 Q 36.5 31.5 26.5 26.5" dur="3.4s" repeatCount="indefinite" />
+                                    <animateMotion path="M 41.5 41.5 Q 26 38 26.5 26.5" dur="3.4s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 26.5 26.5 Q 31.5 36.5 41.5 41.5" dur="3.6s" repeatCount="indefinite" />
+                                    <animateMotion path="M 26.5 26.5 Q 38 26 41.5 41.5" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 58.5 41.5 Q 63.5 31.5 73.5 26.5" dur="3.5s" repeatCount="indefinite" />
+                                    <animateMotion path="M 58.5 41.5 Q 74 38 73.5 26.5" dur="3.5s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 73.5 26.5 Q 68.5 36.5 58.5 41.5" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 73.5 26.5 Q 62 26 58.5 41.5" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 62 50 Q 69.5 46.5 77 50" dur="3.3s" repeatCount="indefinite" />
+                                    <animateMotion path="M 60 50 Q 69 36 78 50" dur="3.3s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 77 50 Q 69.5 53.5 62 50" dur="3.6s" repeatCount="indefinite" />
+                                    <animateMotion path="M 78 50 Q 69 64 60 50" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 23 50 Q 30.5 46.5 38 50" dur="3.8s" repeatCount="indefinite" />
+                                    <animateMotion path="M 22 50 Q 31 36 40 50" dur="3.8s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 38 50 Q 30.5 53.5 23 50" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 40 50 Q 31 64 22 50" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 50 62 Q 46.5 69.5 50 77" dur="3.5s" repeatCount="indefinite" />
+                                    <animateMotion path="M 50 60 Q 36 69 50 78" dur="3.5s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 50 77 Q 53.5 69.5 50 62" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 50 78 Q 64 69 50 60" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
 
                                 {/* Moving Very Small Purple Dots around Outer Perimeter - Courses to Job explicit direction */}
@@ -497,17 +497,32 @@ const HeroSection = () => {
                 />
             </div>
 
-            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Using Uploaded Universities) ── */}
-            <div className="w-full relative z-20 py-2 sm:py-2.5 border-t border-purple-100/70 dark:border-purple-900/30 bg-white/40 dark:bg-purple-950/20 backdrop-blur-xs">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Organic Wave Type Background matching Reference) ── */}
+            <div className="w-full relative z-20 bg-[#F6F4FE] dark:bg-[#0D071E] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
+                {/* Organic Wave Boundary at Top */}
+                <div className="absolute -top-7 sm:-top-10 md:-top-12 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+                    <svg
+                        className="relative block w-full h-7 sm:h-10 md:h-12"
+                        viewBox="0 0 1440 70"
+                        preserveAspectRatio="none"
+                    >
+                        <path
+                            d="M 0 32 C 340 76 560 76 840 42 C 1120 12 1320 22 1440 14 L 1440 70 L 0 70 Z"
+                            fill="#F6F4FE"
+                            className="dark:fill-[#0D071E] transition-colors"
+                        />
+                    </svg>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                     
                     {/* Divider Label matching Reference */}
-                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-1.5 sm:mb-2">
-                        <div className="w-12 sm:w-20 h-[1px] bg-purple-200 dark:bg-purple-800" />
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300">
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-2.5">
+                        <div className="w-14 sm:w-24 h-[1px] bg-purple-300/80 dark:bg-purple-800/80" />
+                        <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-12 sm:w-20 h-[1px] bg-purple-200 dark:bg-purple-800" />
+                        <div className="w-14 sm:w-24 h-[1px] bg-purple-300/80 dark:bg-purple-800/80" />
                     </div>
 
                     {/* Universities Single Horizontal Row matching Reference with 2-line stacked lockups */}
