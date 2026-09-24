@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LayoutDashboard, Sun, Moon, Bell, User as UserIcon, ChevronDown, LogOut, Settings, Video, Info } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Sun, Moon, Bell, Search, User as UserIcon, ChevronDown, LogOut, Settings, Video, Info } from 'lucide-react';
 import SkillDadLogo from './SkillDadLogo';
 import { useUser } from '../../context/UserContext';
 import { useSocket } from '../../context/SocketContext';
@@ -18,6 +18,7 @@ const Navbar = ({ compact = false }) => {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const profileRef = useRef(null);
     const notifRef = useRef(null);
 
@@ -128,10 +129,10 @@ const Navbar = ({ compact = false }) => {
     return (
         <>
             <nav
-                className={`fixed top-0 w-full z-50 transition-all duration-500 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-black/5 shadow-md text-gray-900' : 'border-b border-white/5 shadow-md text-white') : 'border-b border-transparent'}`}
+                className={`fixed top-0 w-full z-50 transition-all duration-300 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-slate-200/80 shadow-xs' : 'border-b border-white/5 shadow-md') : 'border-b border-slate-100/60'}`}
                 style={{
-                    backgroundColor: shouldBeTransparent ? 'transparent' : (theme === 'light' ? '#FAF9F6' : 'rgba(0, 0, 0, 0.9)'),
-                    backdropFilter: shouldBeTransparent ? 'none' : 'blur(20px)',
+                    backgroundColor: shouldBeTransparent ? (theme === 'light' ? 'rgba(255, 255, 255, 0.75)' : 'rgba(10, 5, 25, 0.75)') : (theme === 'light' ? '#FAF9F6' : 'rgba(0, 0, 0, 0.9)'),
+                    backdropFilter: 'blur(16px)',
                 }}
             >
                 {/* Gradient Border Bottom Glow - Only visible on scroll */}
@@ -154,42 +155,65 @@ const Navbar = ({ compact = false }) => {
 
                     {/* Desktop Menu - Hide on auth pages */}
                     {!isAuthPage && (
-                        <div className="hidden lg:flex items-center justify-center space-x-7">
-                            {navItems.map((item) => (
-                                <Link
-                                    key={item.name}
-                                    to={item.href}
-                                    className={theme === 'light'
-                                        ? `logo-color-text nav-underline relative font-bold transition-colors duration-300 py-1 ${compact || scrolled ? 'text-xs' : 'text-sm'}`
-                                        : `nav-underline relative font-medium text-[#E9D5FF] hover:text-white transition-colors duration-300 py-1 ${compact || scrolled ? 'text-xs' : 'text-sm'}`
-                                    }
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
+                        <div className="hidden lg:flex items-center justify-center space-x-6 xl:space-x-8">
+                            {navItems.map((item) => {
+                                const isActive = item.href === '/' ? location.pathname === '/' : location.pathname.startsWith(item.href);
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        to={item.href}
+                                        className={`relative py-1 font-medium transition-colors duration-200 ${compact || scrolled ? 'text-xs' : 'text-sm'} ${
+                                            isActive
+                                                ? '!text-[#4C1D95] dark:!text-purple-300 font-bold'
+                                                : (theme === 'light'
+                                                    ? 'text-slate-700 hover:text-[#4C1D95]'
+                                                    : 'text-[#E9D5FF] hover:text-white')
+                                        }`}
+                                    >
+                                        <span>{item.name}</span>
+                                        {isActive && (
+                                            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-6 h-[2.5px] bg-[#5B21B6] dark:bg-purple-400 rounded-full" />
+                                        )}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     )}
 
                     {/* Right Side Actions - Hide on auth pages */}
                     {!isAuthPage && (
-                        <div className="hidden lg:flex items-center space-x-5">
-                            <button
-                                onClick={toggleTheme}
-                                className={`shrink-0 aspect-square rounded-full transition-all duration-300 flex items-center justify-center ${compact ? 'h-8 w-8' : (scrolled ? 'h-8.5 w-8.5' : 'h-9 w-9')} ${theme === 'light' ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/5 hover:border-primary/30'}`}
-                                aria-label="Toggle theme"
+                        <div className="hidden lg:flex items-center space-x-3.5 xl:space-x-4">
+                            {/* Search Bar matching Reference */}
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    if (searchQuery.trim()) {
+                                        navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+                                    }
+                                }}
+                                className="relative hidden xl:flex items-center"
                             >
-                                {theme === 'light' ? <Moon size={scrolled ? 15 : 17} /> : <Sun size={scrolled ? 15 : 17} />}
-                            </button>
+                                <Search size={14} className="absolute left-3 text-slate-400 pointer-events-none" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search courses, universities, skills..."
+                                    className="w-56 2xl:w-64 pl-8.5 pr-3 py-1.5 rounded-full bg-[#F3F4F8] dark:bg-[#1E1435] text-xs text-slate-700 dark:text-purple-200 placeholder-slate-400 dark:placeholder-purple-400/60 border border-slate-200/60 dark:border-purple-800/40 focus:border-purple-500 focus:bg-white dark:focus:bg-[#150D28] focus:outline-none transition-all shadow-2xs"
+                                />
+                            </form>
+
+                            {/* If user logged in, show user notification dropdown & profile chip */}
                             {user ? (
                                 <div className="flex items-center gap-3">
                                     {/* Notification Bell */}
                                     <div className="relative" ref={notifRef}>
                                         <button
                                             onClick={() => setIsNotifOpen(!isNotifOpen)}
-                                            className={`relative p-2 rounded-full transition-all ${isNotifOpen ? 'bg-primary/10 text-primary' : 'bg-white border border-slate-200 text-slate-500 hover:text-primary shadow-xs'}`}
+                                            className={`relative p-2 rounded-full transition-all ${isNotifOpen ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-purple-200 hover:text-[#4C1D95] dark:hover:text-white'}`}
                                             aria-label="Notifications"
                                         >
-                                            <Bell size={17} />
+                                            <Bell size={18} />
                                             {unreadCount > 0 && (
                                                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white animate-pulse"></span>
                                             )}
@@ -311,20 +335,38 @@ const Navbar = ({ compact = false }) => {
                                 </div>
                             ) : (
                                 <>
+                                    {/* Unauthenticated Notification Bell */}
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className={`font-medium ${!shouldBeTransparent && theme === 'light' ? 'text-gray-800 hover:text-primary' : 'text-slate-100 hover:text-primary'} transition-colors ${compact || scrolled ? 'text-xs' : 'text-sm'}`}
+                                        className="relative p-2 rounded-full text-slate-600 dark:text-purple-200 hover:text-[#4C1D95] dark:hover:text-white transition-colors cursor-pointer"
+                                        aria-label="Notifications"
+                                    >
+                                        <Bell size={18} />
+                                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full ring-2 ring-white dark:ring-[#0D071E] animate-pulse"></span>
+                                    </button>
+
+                                    {/* Login & Sign Up buttons */}
+                                    <button
+                                        onClick={() => navigate('/login')}
+                                        className="font-medium text-slate-700 dark:text-purple-200 hover:text-[#4C1D95] dark:hover:text-white transition-colors text-sm px-2.5 py-1.5 cursor-pointer"
                                     >
                                         Login
                                     </button>
                                     <button
                                         onClick={() => navigate('/register')}
-                                        className={`rounded-lg font-bold text-white relative overflow-hidden group transition-all duration-300 bg-[#4C1D95] hover:bg-[#3B0764] shadow-xs active:scale-95 leading-none ${compact ? 'px-3 py-1.5 text-[11px]' : (scrolled ? 'px-3.5 py-1.5 text-xs' : 'px-4 py-2 text-xs')}`}
+                                        className="rounded-xl font-semibold text-white px-5 py-2 text-xs sm:text-sm bg-[#4C1D95] hover:bg-[#3B0764] shadow-xs active:scale-95 transition-all cursor-pointer"
                                     >
-                                        <span className="relative z-10">Sign Up</span>
+                                        Sign Up
                                     </button>
                                 </>
                             )}
+                            <button
+                                onClick={toggleTheme}
+                                className={`shrink-0 aspect-square rounded-full transition-all duration-300 flex items-center justify-center ${compact ? 'h-7 w-7' : 'h-8 w-8'} ${theme === 'light' ? 'bg-purple-50 text-slate-700 hover:bg-purple-100' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/5'}`}
+                                aria-label="Toggle theme"
+                            >
+                                {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+                            </button>
                         </div>
                     )}
 
