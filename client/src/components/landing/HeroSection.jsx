@@ -390,32 +390,51 @@ const HeroSection = () => {
             </div>
 
             {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Using Uploaded Universities) ── */}
-            <div className="w-full relative z-20 py-2.5 sm:py-3.5 border-t border-purple-100/70 dark:border-purple-900/30 bg-white/40 dark:bg-purple-950/20 backdrop-blur-xs">
+            <div className="w-full relative z-20 py-2 sm:py-2.5 border-t border-purple-100/70 dark:border-purple-900/30 bg-white/40 dark:bg-purple-950/20 backdrop-blur-xs">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     
                     {/* Divider Label matching Reference */}
-                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-1.5 sm:mb-2">
                         <div className="w-12 sm:w-20 h-[1px] bg-purple-200 dark:bg-purple-800" />
-                        <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300">
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
                         <div className="w-12 sm:w-20 h-[1px] bg-purple-200 dark:bg-purple-800" />
                     </div>
 
-                    {/* Universities Row displaying uploaded university logos and names */}
-                    <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 md:gap-11 lg:gap-14 opacity-90 hover:opacity-100 transition-opacity">
+                    {/* Universities Single Horizontal Row matching Reference with 2-line stacked lockups */}
+                    <div className="flex items-center justify-start sm:justify-center gap-5 sm:gap-7 md:gap-9 lg:gap-12 xl:gap-14 overflow-x-auto no-scrollbar w-full py-1 opacity-90 hover:opacity-100 transition-opacity">
                         {universityPartners.map((uni, idx) => {
                             const rawLogo = uni.imageUrl || uni.logo;
                             const hasLogo = !!rawLogo;
                             const logoSrc = hasLogo ? (rawLogo.startsWith('http') ? rawLogo : getMediaUrl(rawLogo)) : null;
 
+                            // Format into 2-line stacked lockup like reference design
+                            let line1 = uni.name;
+                            let line2 = '';
+                            if (uni.name.includes('(')) {
+                                const parts = uni.name.split('(');
+                                line1 = parts[0].trim();
+                                line2 = `(${parts[1]}`.trim();
+                            } else {
+                                const words = uni.name.trim().split(' ');
+                                if (words.length === 2) {
+                                    line1 = words[0];
+                                    line2 = words[1];
+                                } else if (words.length > 2) {
+                                    const mid = Math.ceil(words.length / 2);
+                                    line1 = words.slice(0, mid).join(' ');
+                                    line2 = words.slice(mid).join(' ');
+                                }
+                            }
+
                             return (
-                                <div key={uni._id || idx} className="flex items-center gap-2.5 group cursor-default hover:scale-105 transition-transform duration-200 shrink-0">
+                                <div key={uni._id || idx} className="flex items-center gap-2 group cursor-default hover:scale-105 transition-transform duration-200 shrink-0">
                                     {hasLogo ? (
                                         <img
                                             src={logoSrc}
                                             alt={uni.name}
-                                            className="h-6 sm:h-7 max-w-[70px] sm:max-w-[90px] object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
+                                            className="h-6 sm:h-7 max-w-[42px] sm:max-w-[48px] object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
                                             onError={(e) => {
                                                 e.target.style.display = 'none';
                                             }}
@@ -423,9 +442,16 @@ const HeroSection = () => {
                                     ) : (
                                         <GraduationCap size={18} className="text-[#6D28D9] shrink-0" />
                                     )}
-                                    <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#1E293B] dark:text-slate-200 font-sans whitespace-nowrap">
-                                        {uni.name}
-                                    </span>
+                                    <div className="flex flex-col leading-[1.1] text-left">
+                                        <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                                            {line1}
+                                        </span>
+                                        {line2 && (
+                                            <span className="text-[9.5px] sm:text-[10.5px] font-sans font-extrabold uppercase tracking-wider text-[#1E293B] dark:text-slate-100 whitespace-nowrap">
+                                                {line2}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}
