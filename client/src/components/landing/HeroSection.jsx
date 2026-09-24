@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowRight,
-    GraduationCap,
-    Landmark,
-    Briefcase,
-    BookOpen,
-    Award,
     Building2,
     BarChart3,
     Megaphone
@@ -35,185 +30,230 @@ const HeroSection = () => {
         return '/dashboard';
     };
 
-    // 5 Renowned Partner Universities matching Reference Design
+    // 5 Renowned Partner Universities matching Reference Design exactly with stacked typography & authentic crests
     const referencePartners = [
         {
-            name: "THE UNIVERSITY OF MELBOURNE",
-            crest: (
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 2L4 5V11C4 16.5 7.5 21.5 12 22C16.5 21.5 20 16.5 20 11V5L12 2Z" />
-                    <path d="M12 6V18M8 10L12 6L16 10" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+            name: "Melbourne",
+            lockup: (
+                <div className="flex items-center gap-2.5">
+                    {/* Melbourne Heraldic Shield Crest */}
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L6 6V15C6 22 10.5 28 16 30C21.5 28 26 22 26 15V6L16 2Z" fill="#1E293B" className="dark:fill-purple-300" />
+                        <path d="M16 5L8 8V15C8 20.5 11.5 25.5 16 27.2C20.5 25.5 24 20.5 24 15V8L16 5Z" fill="#FAF8FE" className="dark:fill-[#0F0822]" />
+                        <path d="M16 8V22M12 12L16 8L20 12M11 16H21" stroke="#1E293B" className="dark:stroke-purple-300" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <div className="flex flex-col leading-[1.1] text-left">
+                        <span className="text-[10px] sm:text-[11px] font-serif font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">THE UNIVERSITY</span>
+                        <span className="text-[10px] sm:text-[11px] font-serif font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">OF MELBOURNE</span>
+                    </div>
+                </div>
             )
         },
         {
-            name: "UNIVERSITY OF LONDON",
-            crest: (
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="3" y="4" width="18" height="16" rx="2" />
-                    <line x1="12" y1="4" x2="12" y2="20" />
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <circle cx="7.5" cy="8" r="1.5" fill="currentColor" />
-                    <circle cx="16.5" cy="8" r="1.5" fill="currentColor" />
-                </svg>
+            name: "London",
+            lockup: (
+                <div className="flex items-center gap-2.5">
+                    {/* University of London Shield Crest with Cross & Book */}
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L6 5V14C6 21.5 10.5 27.5 16 29.5C21.5 27.5 26 21.5 26 14V5L16 2Z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.1" />
+                        <line x1="16" y1="5" x2="16" y2="26" stroke="currentColor" strokeWidth="2" />
+                        <line x1="7" y1="14" x2="25" y2="14" stroke="currentColor" strokeWidth="2" />
+                        <rect x="13" y="11" width="6" height="6" rx="1" fill="currentColor" />
+                    </svg>
+                    <div className="flex flex-col leading-[1.1] text-left">
+                        <span className="text-[10.5px] sm:text-[11.5px] font-sans font-bold tracking-wider text-[#1E293B] dark:text-slate-100">UNIVERSITY</span>
+                        <span className="text-[10.5px] sm:text-[11.5px] font-sans font-bold tracking-wider text-[#1E293B] dark:text-slate-100">OF LONDON</span>
+                    </div>
+                </div>
             )
         },
         {
-            name: "UNIVERSITY OF SOUTHAMPTON",
-            crest: (
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 3L3 7L12 11L21 7L12 3Z" />
-                    <path d="M5 10V16C5 18.5 8.1 21 12 21C15.9 21 19 18.5 19 16V10" />
-                </svg>
+            name: "Southampton",
+            lockup: (
+                <div className="flex items-center gap-2.5">
+                    {/* Southampton Heraldic Crest with Chevron & Deer */}
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 3L7 7V16C7 22.5 11 27.5 16 29C21 27.5 25 22.5 25 16V7L16 3Z" stroke="currentColor" strokeWidth="1.8" />
+                        <path d="M16 7L9 14H23L16 7Z" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.2" />
+                        <circle cx="16" cy="20" r="2.5" fill="currentColor" />
+                    </svg>
+                    <div className="flex flex-col leading-[1.1] text-left">
+                        <span className="text-[9.5px] sm:text-[10.5px] font-sans font-bold tracking-wider text-slate-600 dark:text-slate-300">UNIVERSITY OF</span>
+                        <span className="text-[10px] sm:text-[11px] font-sans font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">SOUTHAMPTON</span>
+                    </div>
+                </div>
             )
         },
         {
-            name: "BIRMINGHAM CITY UNIVERSITY",
-            crest: (
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M9 12L11 14L15 10" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M12 3V5M12 19V21M3 12H5M19 12H21" strokeLinecap="round" />
-                </svg>
+            name: "Birmingham",
+            lockup: (
+                <div className="flex items-center gap-2.5">
+                    {/* Birmingham City University Rampant Lion Crest */}
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M10 26C10 24 11 22 13 22H18C20 22 21 24 21 26" strokeLinecap="round" />
+                        <path d="M13 22V16C13 14 11 13 9 13M18 22V15C18 13 21 11 23 8" strokeLinecap="round" />
+                        <circle cx="16" cy="10" r="4" fill="currentColor" fillOpacity="0.2" />
+                        <path d="M14 8C14 7 15 6 16 6C17 6 18 7 18 8" />
+                    </svg>
+                    <div className="flex flex-col leading-[1.1] text-left">
+                        <span className="text-[11px] sm:text-[12px] font-sans font-extrabold tracking-tight text-[#1E293B] dark:text-slate-100">BIRMINGHAM</span>
+                        <span className="text-[9px] sm:text-[10px] font-sans font-semibold text-slate-500 dark:text-purple-300/80 tracking-wide">CITY University</span>
+                    </div>
+                </div>
             )
         },
         {
-            name: "UTS UNIVERSITY OF SYDNEY",
-            crest: (
-                <svg className="w-6 h-6 sm:w-7 sm:h-7 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M4 6H20M4 12H20M4 18H20" strokeLinecap="round" />
-                    <path d="M8 3V21M16 3V21" strokeLinecap="round" />
-                </svg>
+            name: "UTS",
+            lockup: (
+                <div className="flex items-center gap-2">
+                    {/* UTS Sydney Bold Emblem */}
+                    <span className="text-base sm:text-lg font-black tracking-tighter text-[#1E293B] dark:text-slate-100 font-sans">UTS</span>
+                    <div className="flex flex-col leading-[1.05] text-left">
+                        <span className="text-[7.5px] sm:text-[8.5px] font-sans font-bold tracking-wider text-slate-600 dark:text-slate-300">UNIVERSITY OF</span>
+                        <span className="text-[9px] sm:text-[10px] font-sans font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">SYDNEY</span>
+                    </div>
+                </div>
             )
         }
     ];
 
-    // 5 Interactive Constellation Nodes around SkillDad Logo matching Reference
+    // 5 Interactive Constellation Nodes with exact reference icons and labels
     const constellationNodes = [
         {
             id: 'students',
             label: 'Students',
-            icon: GraduationCap,
+            // ID Card / Lanyard Clip Badge matching reference
+            icon: (
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="5" y="7" width="14" height="14" rx="2" />
+                    <circle cx="12" cy="12" r="2.5" />
+                    <path d="M8 18c0-1.5 1.8-2.5 4-2.5s4 1 4 2.5" />
+                    <path d="M12 3v4" />
+                    <path d="M9 3h6" />
+                </svg>
+            ),
             image: studentImg,
             posClass: 'left-[10%] top-[4%]',
-            floatAnim: { y: [-6, 6, -6], x: [-2, 2, -2] },
+            floatAnim: { y: [-5, 5, -5], x: [-2, 2, -2] },
             floatDuration: 4.6,
             floatDelay: 0
         },
         {
             id: 'universities',
             label: 'Universities',
-            icon: Landmark,
+            // Mortarboard / Graduation Cap matching reference
+            icon: (
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
+            ),
             image: universityImg,
             posClass: 'right-[12%] top-[4%]',
-            floatAnim: { y: [6, -6, 6], x: [2, -2, 2] },
+            floatAnim: { y: [5, -5, 5], x: [2, -2, 2] },
             floatDuration: 5.2,
             floatDelay: 0.4
         },
         {
             id: 'jobs',
             label: 'Jobs',
-            icon: Briefcase,
+            // Briefcase matching reference
+            icon: (
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" />
+                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                </svg>
+            ),
             image: jobsImg,
             posClass: 'right-[0%] top-[42%]',
-            floatAnim: { y: [-5, 6, -5], x: [2, -2, 2] },
+            floatAnim: { y: [-5, 5, -5], x: [2, -2, 2] },
             floatDuration: 4.2,
             floatDelay: 0.8
         },
         {
             id: 'courses',
             label: 'Courses',
-            icon: BookOpen,
+            // Open Book matching reference
+            icon: (
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+            ),
             image: coursesImg,
             posClass: 'left-[36%] bottom-[0%]',
-            floatAnim: { y: [6, -5, 6], x: [-2, 2, -2] },
+            floatAnim: { y: [5, -5, 5], x: [-2, 2, -2] },
             floatDuration: 4.8,
             floatDelay: 1.2
         },
         {
             id: 'certifications',
             label: 'Certifications',
-            icon: Award,
+            // Award Rosette Medal matching reference
+            icon: (
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="8" r="5" />
+                    <path d="M15.4 12.8L17 22l-5-3-5 3 1.6-9.2" />
+                </svg>
+            ),
             image: certsImg,
             posClass: 'left-[2%] top-[44%]',
-            floatAnim: { y: [-6, 5, -6], x: [-2, 2, -2] },
+            floatAnim: { y: [-5, 5, -5], x: [-2, 2, -2] },
             floatDuration: 4.4,
             floatDelay: 1.6
         }
     ];
 
     return (
-        <section className="relative w-full min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] lg:min-h-[560px] lg:max-h-[780px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#F8F5FD] to-[#F3EDFC] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-1 sm:pt-3">
+        <section className="relative w-full min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] lg:min-h-[660px] lg:max-h-[860px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#F8F5FD] to-[#F3EDFC] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-4 sm:pt-6 pb-2 sm:pb-3">
             
             {/* Ambient Lighting Orbs */}
-            <div className="absolute top-1/4 -left-20 w-[420px] h-[420px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute top-1/3 right-1/4 w-[380px] h-[380px] bg-indigo-200/25 dark:bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/4 -left-20 w-[440px] h-[440px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-200/25 dark:bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Main Hero Container */}
-            <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-1 sm:py-2">
-                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-3 items-center">
+            <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-2 sm:py-4">
+                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center">
 
-                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (5 cols) ── */}
+                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Clean matching reference) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
-                        <div className="w-[310px] xs:w-[350px] sm:w-[390px] md:w-[420px] lg:w-[430px] xl:w-[450px] aspect-square relative flex items-center justify-center shrink-0">
+                        <div className="w-[320px] xs:w-[360px] sm:w-[410px] md:w-[430px] lg:w-[450px] xl:w-[470px] aspect-square relative flex items-center justify-center shrink-0">
                             
-                            {/* Animated SVG Connection Mesh & Rotating Orbit Rings */}
+                            {/* SVG Connection Lines matching reference (No unwanted circles or box lines) */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
                                 <defs>
-                                    <linearGradient id="purpleMeshGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <linearGradient id="refLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                         <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.85" />
-                                        <stop offset="50%" stopColor="#A78BFA" stopOpacity="0.65" />
-                                        <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.85" />
+                                        <stop offset="100%" stopColor="#A78BFA" stopOpacity="0.85" />
                                     </linearGradient>
-                                    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-                                        <feGaussianBlur stdDeviation="0.8" result="blur" />
-                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                                    </filter>
                                 </defs>
 
-                                {/* Rotating Concentric Halo Rings */}
-                                <motion.g
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 70, repeat: Infinity, ease: 'linear' }}
-                                    style={{ transformOrigin: '50px 50px' }}
-                                >
-                                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(216, 180, 254, 0.4)" strokeWidth="0.8" strokeDasharray="3 4" />
-                                    <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(192, 132, 252, 0.35)" strokeWidth="0.7" strokeDasharray="4 3" />
-                                    <circle cx="50" cy="50" r="22" fill="none" stroke="rgba(168, 85, 247, 0.3)" strokeWidth="0.9" strokeDasharray="2 3" />
-                                </motion.g>
+                                {/* Faint Single Orbit Halo Track in background */}
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(216, 180, 254, 0.35)" strokeWidth="0.8" strokeDasharray="3 3" />
 
-                                {/* Inter-node Outer Perimeter Network Mesh */}
-                                <path d="M 23 21 Q 50 10 77 21" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.1" strokeDasharray="3 3" opacity="0.75" />
-                                <path d="M 77 21 Q 90 34 85 52" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.1" strokeDasharray="3 3" opacity="0.75" />
-                                <path d="M 85 52 Q 76 74 48 83" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.1" strokeDasharray="3 3" opacity="0.75" />
-                                <path d="M 48 83 Q 24 74 16 52" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.1" strokeDasharray="3 3" opacity="0.75" />
-                                <path d="M 16 52 Q 10 33 23 21" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.1" strokeDasharray="3 3" opacity="0.75" />
+                                {/* Clean Radiant Spokes from Center to the 5 Nodes */}
+                                <path d="M 50 50 Q 36 34 22 20" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.3" />
+                                <path d="M 50 50 Q 64 34 76 20" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.3" />
+                                <path d="M 50 50 Q 68 50 85 50" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.3" />
+                                <path d="M 50 50 Q 48 66 48 80" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.3" />
+                                <path d="M 50 50 Q 32 50 18 50" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.3" />
 
-                                {/* Radiating Radial Spokes from Center Hub to Nodes */}
-                                <path d="M 50 50 L 23 21" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.3" filter="url(#softGlow)" />
-                                <path d="M 50 50 L 77 21" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.3" filter="url(#softGlow)" />
-                                <path d="M 50 50 L 85 52" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.3" filter="url(#softGlow)" />
-                                <path d="M 50 50 L 48 83" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.3" filter="url(#softGlow)" />
-                                <path d="M 50 50 L 16 52" fill="none" stroke="url(#purpleMeshGrad)" strokeWidth="1.3" filter="url(#softGlow)" />
+                                {/* Secondary connecting network branches matching reference */}
+                                <path d="M 22 20 Q 50 12 76 20" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="2 3" />
+                                <path d="M 18 50 Q 24 72 48 80" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="2 3" />
+                                <path d="M 48 80 Q 74 74 85 50" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="2 3" />
 
-                                {/* Glowing Animated Constellation Dots */}
-                                <circle cx="36" cy="35" r="1.6" fill="#A855F7" className="animate-ping" style={{ animationDuration: '3s' }} />
-                                <circle cx="36" cy="35" r="1.4" fill="#9333EA" />
-                                <circle cx="64" cy="35" r="1.6" fill="#A855F7" className="animate-ping" style={{ animationDuration: '3.5s', animationDelay: '0.8s' }} />
-                                <circle cx="64" cy="35" r="1.4" fill="#9333EA" />
-                                <circle cx="68" cy="51" r="1.6" fill="#A855F7" className="animate-ping" style={{ animationDuration: '4s', animationDelay: '1.2s' }} />
-                                <circle cx="68" cy="51" r="1.4" fill="#9333EA" />
-                                <circle cx="49" cy="67" r="1.6" fill="#A855F7" className="animate-ping" style={{ animationDuration: '3.2s', animationDelay: '0.5s' }} />
-                                <circle cx="49" cy="67" r="1.4" fill="#9333EA" />
-                                <circle cx="33" cy="51" r="1.6" fill="#A855F7" className="animate-ping" style={{ animationDuration: '3.8s', animationDelay: '1.5s' }} />
-                                <circle cx="33" cy="51" r="1.4" fill="#9333EA" />
+                                {/* Glowing Network Dots on the paths */}
+                                <circle cx="34" cy="33" r="1.6" fill="#A855F7" className="animate-pulse" />
+                                <circle cx="65" cy="33" r="1.6" fill="#A855F7" className="animate-pulse" />
+                                <circle cx="68" cy="50" r="1.6" fill="#A855F7" className="animate-pulse" />
+                                <circle cx="48" cy="67" r="1.6" fill="#A855F7" className="animate-pulse" />
+                                <circle cx="32" cy="50" r="1.6" fill="#A855F7" className="animate-pulse" />
 
-                                {/* Perimeter Junction Dots */}
-                                <circle cx="50" cy="14" r="1.2" fill="#C084FC" />
-                                <circle cx="85" cy="35" r="1.2" fill="#C084FC" />
-                                <circle cx="68" cy="71" r="1.2" fill="#C084FC" />
-                                <circle cx="28" cy="71" r="1.2" fill="#C084FC" />
-                                <circle cx="14" cy="35" r="1.2" fill="#C084FC" />
+                                <circle cx="49" cy="15" r="1.3" fill="#C084FC" />
+                                <circle cx="28" cy="67" r="1.3" fill="#C084FC" />
+                                <circle cx="70" cy="67" r="1.3" fill="#C084FC" />
                             </svg>
 
                             {/* Floating 3D Gradient Ambient Spheres matching Reference */}
@@ -233,9 +273,9 @@ const HeroSection = () => {
                                 className="absolute right-[22%] top-[34%] w-3.5 h-3.5 rounded-full bg-gradient-to-br from-[#EDE9FE] via-[#A855F7] to-[#7C3AED] shadow-[0_2px_8px_rgba(124,58,237,0.2)] pointer-events-none"
                             />
 
-                            {/* Center Hub: SkillDad Logo with Radiant Breathing Aura */}
+                            {/* Center Hub: SkillDad Logo with Soft Radiant Aura */}
                             <motion.div
-                                animate={{ scale: [1, 1.04, 1] }}
+                                animate={{ scale: [1, 1.03, 1] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                                 className="w-22 h-22 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-full bg-white dark:bg-[#130B24] shadow-[0_12px_36px_rgba(109,40,217,0.22)] border-[3px] border-purple-100 dark:border-purple-800/60 ring-8 ring-purple-100/50 dark:ring-purple-900/30 flex items-center justify-center p-3.5 sm:p-4 relative z-20"
                             >
@@ -249,7 +289,6 @@ const HeroSection = () => {
 
                             {/* 5 Surrounding Animated Photo Nodes with White Badges */}
                             {constellationNodes.map((node) => {
-                                const IconComponent = node.icon;
                                 return (
                                     <motion.div
                                         key={node.id}
@@ -260,18 +299,18 @@ const HeroSection = () => {
                                             ease: 'easeInOut',
                                             delay: node.floatDelay
                                         }}
-                                        whileHover={{ scale: 1.12, zIndex: 40 }}
+                                        whileHover={{ scale: 1.10, zIndex: 40 }}
                                         className={`absolute ${node.posClass} flex flex-col items-center group cursor-pointer z-10`}
                                     >
-                                        <div className="w-14 h-14 xs:w-16 xs:h-16 sm:w-18 sm:h-18 md:w-[74px] md:h-[74px] rounded-full border-[3px] border-white dark:border-purple-950 shadow-[0_8px_24px_rgba(109,40,217,0.22)] overflow-hidden bg-white dark:bg-purple-950 shrink-0 group-hover:shadow-[0_12px_28px_rgba(109,40,217,0.38)] transition-shadow duration-300">
+                                        <div className="w-14 h-14 xs:w-16 xs:h-16 sm:w-18 sm:h-18 md:w-[74px] md:h-[74px] rounded-full border-[3px] border-white dark:border-purple-950 shadow-[0_8px_24px_rgba(109,40,217,0.20)] overflow-hidden bg-white dark:bg-purple-950 shrink-0 group-hover:shadow-[0_12px_28px_rgba(109,40,217,0.35)] transition-shadow duration-300">
                                             <img
                                                 src={node.image}
                                                 alt={node.label}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                                             />
                                         </div>
                                         <div className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3 py-1 rounded-full shadow-[0_4px_14px_rgba(76,29,149,0.14)] border border-purple-100/90 dark:border-purple-800/50 flex items-center gap-1.5 -mt-3.5 relative z-10 whitespace-nowrap group-hover:border-purple-300 transition-colors">
-                                            <IconComponent size={12} className="text-[#6D28D9] dark:text-purple-400 shrink-0" />
+                                            {node.icon}
                                             <span className="text-[10.5px] sm:text-[11.5px] font-bold text-slate-800 dark:text-purple-100 tracking-tight">
                                                 {node.label}
                                             </span>
@@ -294,7 +333,7 @@ const HeroSection = () => {
                         </div>
 
                         {/* Redesigned Heading: "Confusion to Career" */}
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[44px] xl:text-[52px] font-black tracking-tight leading-[1.08] font-sans">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[54px] font-black tracking-tight leading-[1.08] font-sans">
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
                             </span>
@@ -304,7 +343,7 @@ const HeroSection = () => {
                         </h1>
 
                         {/* Subtitle */}
-                        <p className="text-xs sm:text-sm md:text-[14px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-lg mt-2.5 sm:mt-3 mb-4 sm:mb-5">
+                        <p className="text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-lg mt-3 sm:mt-3.5 mb-5 sm:mb-6">
                             SkillDad connects you with top universities, industry-aligned courses and real job opportunities — so you can learn, upskill and get placed.
                         </p>
 
@@ -330,25 +369,25 @@ const HeroSection = () => {
                     </div>
 
                     {/* ── RIGHT COLUMN: FLOATING COURSE BADGES & SILK WAVE (2.2 cols) ── */}
-                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[340px] select-none">
+                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[360px] select-none">
                         
                         {/* Curved dashed orbit track */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 160 340">
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 160 360">
                             <path
-                                d="M 120 25 C 50 110, 140 210, 60 320"
+                                d="M 120 25 C 50 110, 140 210, 60 330"
                                 fill="none"
                                 stroke="rgba(192, 132, 252, 0.45)"
                                 strokeWidth="1.5"
                                 strokeDasharray="3 3"
                             />
                             {/* Floating decorative purple orb on orbit */}
-                            <circle cx="95" cy="170" r="3.5" fill="#A855F7" className="animate-pulse" />
+                            <circle cx="95" cy="175" r="3.5" fill="#A855F7" className="animate-pulse" />
                             <circle cx="120" cy="25" r="2.5" fill="#8B5CF6" />
-                            <circle cx="60" cy="320" r="2.5" fill="#C4B5FD" />
+                            <circle cx="60" cy="330" r="2.5" fill="#C4B5FD" />
                         </svg>
 
                         {/* 3 Floating Badges matching Reference */}
-                        <div className="space-y-7 relative z-20 flex flex-col items-end pr-2">
+                        <div className="space-y-8 relative z-20 flex flex-col items-end pr-2">
                             
                             {/* 1. Hospital Administration */}
                             <motion.div
@@ -399,7 +438,7 @@ const HeroSection = () => {
             </div>
 
             {/* 3D Violet Wave / Ribbon in Bottom-Right Corner matching Reference */}
-            <div className="absolute bottom-0 right-0 w-[280px] sm:w-[360px] md:w-[440px] lg:w-[480px] pointer-events-none select-none z-0 translate-y-4 opacity-90">
+            <div className="absolute bottom-0 right-0 w-[300px] sm:w-[380px] md:w-[460px] lg:w-[500px] pointer-events-none select-none z-0 translate-y-4 opacity-90">
                 <img
                     src={heroRibbon}
                     alt="Decorative Silk Ribbon"
@@ -407,27 +446,24 @@ const HeroSection = () => {
                 />
             </div>
 
-            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS ── */}
-            <div className="w-full relative z-20 py-2 sm:py-2.5 border-t border-purple-100/70 dark:border-purple-900/30 bg-white/40 dark:bg-purple-950/20 backdrop-blur-xs">
+            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Matching Reference Exactly) ── */}
+            <div className="w-full relative z-20 py-2.5 sm:py-3.5 border-t border-purple-100/70 dark:border-purple-900/30 bg-white/40 dark:bg-purple-950/20 backdrop-blur-xs">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     
-                    {/* Divider Label */}
-                    <div className="flex items-center justify-center gap-3 mb-1.5 sm:mb-2">
-                        <div className="w-8 sm:w-12 h-[1px] bg-purple-200 dark:bg-purple-800" />
-                        <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#6D28D9] dark:text-purple-300">
+                    {/* Divider Label matching Reference */}
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+                        <div className="w-12 sm:w-20 h-[1px] bg-purple-200 dark:bg-purple-800" />
+                        <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-8 sm:w-12 h-[1px] bg-purple-200 dark:bg-purple-800" />
+                        <div className="w-12 sm:w-20 h-[1px] bg-purple-200 dark:bg-purple-800" />
                     </div>
 
-                    {/* Universities Row */}
-                    <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-7 md:gap-10 lg:gap-14 opacity-85 hover:opacity-100 transition-opacity">
+                    {/* 5 Universities with Authentic Lockups and Crests */}
+                    <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-9 md:gap-12 lg:gap-16 opacity-90 hover:opacity-100 transition-opacity">
                         {referencePartners.map((uni, idx) => (
-                            <div key={idx} className="flex items-center gap-2 group cursor-default">
-                                {uni.crest}
-                                <span className="text-[9.5px] sm:text-[10.5px] font-extrabold uppercase tracking-wider text-[#1E293B] dark:text-slate-200 font-sans">
-                                    {uni.name}
-                                </span>
+                            <div key={idx} className="group cursor-default hover:scale-105 transition-transform duration-200">
+                                {uni.lockup}
                             </div>
                         ))}
                     </div>
