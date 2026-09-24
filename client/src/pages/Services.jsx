@@ -287,39 +287,27 @@ const Services = () => {
             description: 'Get personalized course and career recommendations with our intelligent AI advisory engine.',
             icon: Brain,
             tag: 'Intelligent Advisory',
-            cardBg: 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_16px_32px_-8px_rgba(147,51,234,0.26)] border border-purple-300/80',
-            textColor: 'text-[#2E1065]',
-            descColor: 'text-[#3B0764]/90 font-medium',
-            rotation: 'lg:-rotate-[3deg]',
+            rotation: 'lg:-rotate-[8deg]',
             entranceDelay: 0.18,
-            tagBg: 'bg-white/80 text-[#4C1D95] font-bold shadow-2xs',
-            btnBg: 'bg-white/70 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
+            baseZ: 'z-10'
         },
         {
             title: 'Mobile Learning',
             description: 'Learn anytime, anywhere with a seamless mobile experience across all your devices.',
             icon: Smartphone,
             tag: 'Anytime Access',
-            cardBg: 'bg-white text-slate-900 shadow-[0_18px_36px_-8px_rgba(76,29,149,0.14)] border border-purple-100/90',
-            textColor: 'text-slate-900',
-            descColor: 'text-slate-600',
             rotation: 'lg:rotate-0',
             entranceDelay: 0.05,
-            tagBg: 'bg-purple-100/70 text-[#4C1D95]',
-            btnBg: 'bg-purple-50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
+            baseZ: 'z-20'
         },
         {
             title: 'Cloud Infrastructure',
             description: 'Scalable, high-speed, and reliable cloud technology ensuring 99.9% uninterrupted learning uptime.',
             icon: Cloud,
             tag: '99.9% Uptime',
-            cardBg: 'bg-[#00C0F9] text-slate-900 shadow-[0_16px_32px_-8px_rgba(0,192,249,0.30)] border border-cyan-400/60',
-            textColor: 'text-slate-900',
-            descColor: 'text-slate-800/90 font-medium',
-            rotation: 'lg:rotate-[3deg]',
+            rotation: 'lg:rotate-[7deg]',
             entranceDelay: 0.30,
-            tagBg: 'bg-black/10 text-slate-900',
-            btnBg: 'bg-black/10 hover:bg-black/20 text-slate-900'
+            baseZ: 'z-30'
         }
     ];
 
@@ -650,10 +638,11 @@ const Services = () => {
                             </div>
                         </div>
 
-                        {/* 3 Angled Overlapping Cards with Video Staggered Entrance Animation */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5 items-stretch max-w-4xl mx-auto pt-0 pb-0 relative z-10">
+                        {/* 3 Angled Overlapping Cards with Video Staggered Entrance Animation & Dynamic Selection Color */}
+                        <div className="flex flex-col md:flex-row items-center justify-center -space-y-4 md:space-y-0 md:-space-x-7 lg:-space-x-9 pt-1 pb-1 relative z-10 max-w-4xl mx-auto">
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;
+                                const isSelected = selectedCapability === idx;
 
                                 return (
                                     <motion.div
@@ -667,47 +656,74 @@ const Services = () => {
                                             ease: [0.22, 1, 0.36, 1]
                                         }}
                                         whileHover={{
-                                            y: -6,
-                                            rotate: 0,
-                                            scale: 1.025,
-                                            zIndex: 30,
+                                            y: -8,
+                                            scale: 1.04,
+                                            zIndex: 40,
                                             transition: { duration: 0.2, ease: 'easeOut' }
                                         }}
                                         onClick={() => setSelectedCapability(idx)}
-                                        className={`h-full relative group cursor-pointer ${capability.rotation} transition-transform`}
+                                        className={`w-full max-w-[250px] sm:max-w-[260px] md:w-[245px] lg:w-[265px] shrink-0 relative group cursor-pointer ${capability.rotation} ${
+                                            isSelected ? 'z-35' : capability.baseZ
+                                        } transition-all duration-300`}
                                     >
                                         <div
-                                            className={`h-full rounded-[18px] p-4 sm:p-4.5 flex flex-col justify-between transition-all duration-300 ${capability.cardBg} ${
-                                                selectedCapability === idx
-                                                    ? 'ring-2 ring-offset-2 ring-[#4C1D95] dark:ring-purple-400 dark:ring-offset-[#080512] shadow-xl'
-                                                    : 'ring-2 ring-transparent'
+                                            className={`h-full min-h-[185px] sm:min-h-[200px] rounded-[20px] p-4 sm:p-4.5 flex flex-col justify-between transition-all duration-300 ${
+                                                isSelected
+                                                    ? 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_22px_45px_-10px_rgba(147,51,234,0.38)] border-2 border-purple-300'
+                                                    : 'bg-white dark:bg-[#130B24] text-slate-900 dark:text-white shadow-[0_12px_28px_-8px_rgba(76,29,149,0.12)] border border-purple-100/90 dark:border-purple-800/40 hover:border-purple-300'
                                             }`}
                                         >
                                             <div className="space-y-1.5 sm:space-y-2 text-left">
                                                 {/* Top Tag & Icon Row */}
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${capability.tagBg}`}>
+                                                    <span
+                                                        className={`text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
+                                                            isSelected
+                                                                ? 'bg-white/80 text-[#4C1D95] shadow-2xs'
+                                                                : 'bg-purple-100/70 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300'
+                                                        }`}
+                                                    >
                                                         {capability.tag}
                                                     </span>
-                                                    <div className="w-6 h-6 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 shrink-0">
+                                                    <div
+                                                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                                                            isSelected
+                                                                ? 'bg-white/70 text-[#4C1D95]'
+                                                                : 'bg-purple-50 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300'
+                                                        }`}
+                                                    >
                                                         <IconComponent size={13} strokeWidth={2.4} />
                                                     </div>
                                                 </div>
 
                                                 {/* Title */}
-                                                <h3 className={`text-base sm:text-[17px] font-extrabold tracking-tight leading-snug font-sans ${capability.textColor}`}>
+                                                <h3
+                                                    className={`text-base sm:text-[17px] font-extrabold tracking-tight leading-snug font-sans transition-colors ${
+                                                        isSelected ? 'text-[#2E1065]' : 'text-slate-900 dark:text-white'
+                                                    }`}
+                                                >
                                                     {capability.title}
                                                 </h3>
 
                                                 {/* Description */}
-                                                <p className={`text-[11px] sm:text-[11.5px] leading-relaxed line-clamp-3 ${capability.descColor}`}>
+                                                <p
+                                                    className={`text-[11px] sm:text-[11.5px] leading-relaxed line-clamp-3 transition-colors ${
+                                                        isSelected ? 'text-[#3B0764]/90 font-medium' : 'text-slate-600 dark:text-purple-200/70'
+                                                    }`}
+                                                >
                                                     {capability.description}
                                                 </p>
                                             </div>
 
                                             {/* Action Arrow Button */}
-                                            <div className="pt-2.5 mt-2 border-t border-black/10 flex items-center justify-end">
-                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${capability.btnBg}`}>
+                                            <div className="pt-2 mt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-end">
+                                                <div
+                                                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
+                                                        isSelected
+                                                            ? 'bg-white/80 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
+                                                            : 'bg-purple-50 dark:bg-purple-900/50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95] dark:text-purple-300'
+                                                    }`}
+                                                >
                                                     <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                                                 </div>
                                             </div>
