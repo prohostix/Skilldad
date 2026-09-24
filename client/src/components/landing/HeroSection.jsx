@@ -153,8 +153,8 @@ const HeroSection = () => {
                 </svg>
             ),
             image: certsImg,
-            posClass: 'left-[4%] top-[41%]',
-            floatAnim: { y: [-5, 5, -5], x: [-2, 2, -2] },
+            posClass: 'left-[0%] top-[41%]',
+            floatAnim: { y: [-4, 4, -4], x: [-1, 1, -1] },
             floatDuration: 4.4,
             floatDelay: 1.6
         }
@@ -241,7 +241,7 @@ const HeroSection = () => {
 
                                 {/* 4. SkillDad <-> Certifications Flower Petal Arcs (Identical Geometry with Dotted Lines) */}
                                 <path
-                                    d="M 38.0 50.0 Q 29.2 41.5 20.5 50.0"
+                                    d="M 38.0 50.0 Q 31.8 42.5 25.5 50.0"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -250,7 +250,7 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 20.5 50.0 Q 29.2 58.5 38.0 50.0"
+                                    d="M 25.5 50.0 Q 31.8 57.5 38.0 50.0"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -283,8 +283,8 @@ const HeroSection = () => {
                                 <path d="M 29.1 29.1 Q 50 14 70.9 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
                                 <path d="M 70.9 29.1 Q 88 36 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
                                 <path d="M 50.0 79.5 Q 74 74 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
-                                <path d="M 50.0 79.5 Q 26 74 20.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
-                                <path d="M 20.5 50.0 Q 12 36 29.1 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 50.0 79.5 Q 31 73 25.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 25.5 50.0 Q 17 36 29.1 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
 
                                 {/* Small Circle Bubbles / Dots along connection lines (Matching right-side style, kept small) */}
                                 <circle cx="35.3" cy="35.3" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
@@ -296,8 +296,8 @@ const HeroSection = () => {
                                 <circle cx="70.8" cy="50.0" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
                                 <circle cx="75.2" cy="50.0" r="0.45" fill="#A855F7" />
 
-                                <circle cx="29.2" cy="50.0" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
-                                <circle cx="24.8" cy="50.0" r="0.45" fill="#A855F7" />
+                                <circle cx="31.8" cy="50.0" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
+                                <circle cx="27.5" cy="50.0" r="0.45" fill="#A855F7" />
 
                                 <circle cx="50.0" cy="70.8" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
                                 <circle cx="50.0" cy="75.2" r="0.45" fill="#A855F7" />
@@ -307,7 +307,7 @@ const HeroSection = () => {
                                 <circle cx="80.0" cy="40.5" r="0.45" fill="#A855F7" />
                                 <circle cx="65.5" cy="73.5" r="0.45" fill="#A855F7" />
                                 <circle cx="34.5" cy="73.5" r="0.45" fill="#A855F7" />
-                                <circle cx="20.0" cy="40.5" r="0.45" fill="#A855F7" />
+                                <circle cx="23.0" cy="40.5" r="0.45" fill="#A855F7" />
 
                                 {/* Very Small Purple Dots Moving Through Flower Petal Lines */}
                                 <circle r="0.45" fill="#7C3AED">
@@ -329,10 +329,10 @@ const HeroSection = () => {
                                     <animateMotion path="M 79.5 50.0 Q 70.8 41.5 62.0 50.0" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 38.0 50.0 Q 29.2 41.5 20.5 50.0" dur="3.8s" repeatCount="indefinite" />
+                                    <animateMotion path="M 38.0 50.0 Q 31.8 42.5 25.5 50.0" dur="3.8s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 20.5 50.0 Q 29.2 58.5 38.0 50.0" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 25.5 50.0 Q 31.8 57.5 38.0 50.0" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
                                     <animateMotion path="M 50.0 62.0 Q 41.5 70.8 50.0 79.5" dur="3.5s" repeatCount="indefinite" />
