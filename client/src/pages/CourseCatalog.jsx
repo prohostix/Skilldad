@@ -331,7 +331,7 @@ const CourseCatalog = () => {
     const wblCount = useMemo(() => courses.filter(c => (c.programType || c.program_type || '').startsWith('wbl')).length, [courses]);
 
     return (
-        <div className="min-h-screen course-catalog-page bg-[#080512] [.light-mode_&]:!bg-[#F8F9FD] text-white [.light-mode_&]:!text-slate-800 relative font-sans transition-colors duration-300">
+        <div className="min-h-screen course-catalog-page bg-[#090514] [.light-mode_&]:!bg-[#FAF8FE] text-white [.light-mode_&]:!text-slate-800 relative font-sans transition-colors duration-300">
             <Navbar />
 
             <main className="pt-16 pb-20">

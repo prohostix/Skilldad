@@ -159,7 +159,7 @@ const JobAlerts = () => {
     }, [jobs, search, activeType]);
 
     return (
-        <div className="min-h-screen job-alerts-page bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] relative overflow-hidden">
+        <div className="min-h-screen job-alerts-page bg-gradient-to-br from-[#090514] via-[#0D0722] to-[#120A2F] [.light-mode_&]:!bg-[#FAF8FE] relative overflow-hidden">
             <div className="absolute top-[-10%] left-[10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[140px] pointer-events-none" />
             <div className="absolute bottom-[-10%] right-[5%] w-[500px] h-[500px] bg-secondary-purple/10 rounded-full blur-[140px] pointer-events-none" />
 

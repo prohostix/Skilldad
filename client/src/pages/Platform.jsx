@@ -90,7 +90,7 @@ const Platform = () => {
     const allUniversities = [...universities, ...skillDadUniversities];
 
     return (
-        <div className="min-h-screen platform-page bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A]">
+        <div className="min-h-screen platform-page bg-gradient-to-br from-[#090514] via-[#0D0722] to-[#120A2F] [.light-mode_&]:!bg-[#FAF8FE]">
             <Navbar />
 
             {/* Main Content Section */}

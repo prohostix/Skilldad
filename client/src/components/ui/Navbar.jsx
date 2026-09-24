@@ -58,15 +58,16 @@ const Navbar = ({ compact = false }) => {
     useEffect(() => {
         const handleScroll = () => {
             const scrollPos = window.scrollY || document.documentElement.scrollTop;
-            if (scrollPos > 50) {
+            if (scrollPos > 30) {
                 setScrolled(true);
             } else {
                 setScrolled(false);
             }
         };
+        handleScroll();
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+    }, [location.pathname]);
     const [studyAbroadEnabled, setStudyAbroadEnabled] = useState(true);
 
     useEffect(() => {
@@ -129,10 +130,12 @@ const Navbar = ({ compact = false }) => {
     return (
         <>
             <nav
-                className={`fixed top-0 w-full z-50 transition-all duration-300 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-slate-200/80 shadow-xs' : 'border-b border-white/5 shadow-md') : 'border-b border-slate-100/60'}`}
+                className={`fixed top-0 w-full z-50 transition-all duration-300 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-purple-200/50 shadow-xs' : 'border-b border-purple-900/30 shadow-md') : (theme === 'light' ? 'border-b border-purple-100/40' : 'border-b border-purple-950/40')}`}
                 style={{
-                    backgroundColor: shouldBeTransparent ? (theme === 'light' ? '#FAF8FE' : '#090514') : (theme === 'light' ? '#FAF9F6' : 'rgba(0, 0, 0, 0.9)'),
-                    backdropFilter: shouldBeTransparent ? 'none' : 'blur(16px)',
+                    backgroundColor: shouldBeTransparent
+                        ? (theme === 'light' ? '#FAF8FE' : '#090514')
+                        : (theme === 'light' ? 'rgba(250, 248, 254, 0.95)' : 'rgba(9, 5, 20, 0.95)'),
+                    backdropFilter: 'blur(16px)',
                 }}
             >
                 {/* Gradient Border Bottom Glow - Only visible on scroll */}
