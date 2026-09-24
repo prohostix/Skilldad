@@ -177,9 +177,9 @@ const HeroSection = () => {
                                 {/* Delicate Central Orbit Track */}
                                 <circle cx="50" cy="50" r="12" fill="none" stroke="rgba(147, 51, 234, 0.4)" strokeWidth="0.22" shapeRendering="geometricPrecision" />
 
-                                {/* 1. SkillDad <-> Students Flower Petal Arcs (Increased Gap) */}
+                                {/* 1. SkillDad <-> Students Flower Petal Arcs (Identical Geometry) */}
                                 <path
-                                    d="M 41.5 41.5 Q 26 38 26.5 26.5"
+                                    d="M 41.5 41.5 Q 41.3 29.3 29.1 29.1"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -187,25 +187,7 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 26.5 26.5 Q 38 26 41.5 41.5"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-
-                                {/* 2. SkillDad <-> Universities Flower Petal Arcs (Increased Gap) */}
-                                <path
-                                    d="M 58.5 41.5 Q 74 38 73.5 26.5"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-                                <path
-                                    d="M 73.5 26.5 Q 62 26 58.5 41.5"
+                                    d="M 29.1 29.1 Q 29.3 41.3 41.5 41.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -213,9 +195,9 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 3. SkillDad <-> Jobs Flower Petal Arcs (Increased Gap) */}
+                                {/* 2. SkillDad <-> Universities Flower Petal Arcs (Identical Geometry) */}
                                 <path
-                                    d="M 60 50 Q 69 36 78 50"
+                                    d="M 58.5 41.5 Q 70.7 41.3 70.9 29.1"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -223,25 +205,7 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 78 50 Q 69 64 60 50"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-
-                                {/* 4. SkillDad <-> Certifications Flower Petal Arcs (Increased Gap) */}
-                                <path
-                                    d="M 22 50 Q 31 36 40 50"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.22"
-                                    strokeLinecap="round"
-                                    shapeRendering="geometricPrecision"
-                                />
-                                <path
-                                    d="M 40 50 Q 31 64 22 50"
+                                    d="M 70.9 29.1 Q 58.7 29.3 58.5 41.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -249,9 +213,9 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 5. SkillDad <-> Courses Flower Petal Arcs (Increased Gap) */}
+                                {/* 3. SkillDad <-> Jobs Flower Petal Arcs (Identical Geometry) */}
                                 <path
-                                    d="M 50 60 Q 36 69 50 78"
+                                    d="M 62.0 50.0 Q 70.8 58.5 79.5 50.0"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -259,7 +223,43 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 50 78 Q 64 69 50 60"
+                                    d="M 79.5 50.0 Q 70.8 41.5 62.0 50.0"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+
+                                {/* 4. SkillDad <-> Certifications Flower Petal Arcs (Identical Geometry) */}
+                                <path
+                                    d="M 38.0 50.0 Q 29.2 41.5 20.5 50.0"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 20.5 50.0 Q 29.2 58.5 38.0 50.0"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+
+                                {/* 5. SkillDad <-> Courses Flower Petal Arcs (Identical Geometry) */}
+                                <path
+                                    d="M 50.0 62.0 Q 41.5 70.8 50.0 79.5"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 50.0 79.5 Q 58.5 70.8 50.0 62.0"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -268,60 +268,60 @@ const HeroSection = () => {
                                 />
 
                                 {/* Outer Perimeter Arcs connecting adjacent nodes */}
-                                <path d="M 28 17 Q 50 8 72 17" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
-                                <path d="M 78 24 Q 88 34 83 45" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
-                                <path d="M 53 80 Q 73 74 82 56" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
-                                <path d="M 41 80 Q 23 74 18 56" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
-                                <path d="M 17 45 Q 12 30 22 22" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 29.1 29.1 Q 50 14 70.9 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 70.9 29.1 Q 88 36 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 50.0 79.5 Q 74 74 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 50.0 79.5 Q 26 74 20.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 20.5 50.0 Q 12 36 29.1 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
 
                                 {/* Very Small Purple Dots Moving Through Flower Petal Lines */}
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 41.5 41.5 Q 26 38 26.5 26.5" dur="3.4s" repeatCount="indefinite" />
+                                    <animateMotion path="M 41.5 41.5 Q 41.3 29.3 29.1 29.1" dur="3.4s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 26.5 26.5 Q 38 26 41.5 41.5" dur="3.6s" repeatCount="indefinite" />
+                                    <animateMotion path="M 29.1 29.1 Q 29.3 41.3 41.5 41.5" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 58.5 41.5 Q 74 38 73.5 26.5" dur="3.5s" repeatCount="indefinite" />
+                                    <animateMotion path="M 58.5 41.5 Q 70.7 41.3 70.9 29.1" dur="3.5s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 73.5 26.5 Q 62 26 58.5 41.5" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 70.9 29.1 Q 58.7 29.3 58.5 41.5" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 60 50 Q 69 36 78 50" dur="3.3s" repeatCount="indefinite" />
+                                    <animateMotion path="M 62.0 50.0 Q 70.8 58.5 79.5 50.0" dur="3.3s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 78 50 Q 69 64 60 50" dur="3.6s" repeatCount="indefinite" />
+                                    <animateMotion path="M 79.5 50.0 Q 70.8 41.5 62.0 50.0" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 22 50 Q 31 36 40 50" dur="3.8s" repeatCount="indefinite" />
+                                    <animateMotion path="M 38.0 50.0 Q 29.2 41.5 20.5 50.0" dur="3.8s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 40 50 Q 31 64 22 50" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 20.5 50.0 Q 29.2 58.5 38.0 50.0" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 50 60 Q 36 69 50 78" dur="3.5s" repeatCount="indefinite" />
+                                    <animateMotion path="M 50.0 62.0 Q 41.5 70.8 50.0 79.5" dur="3.5s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 50 78 Q 64 69 50 60" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 50.0 79.5 Q 58.5 70.8 50.0 62.0" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
 
                                 {/* Moving Very Small Purple Dots around Outer Perimeter - Courses to Job explicit direction */}
                                 <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 28 17 Q 50 8 72 17" dur="5.5s" repeatCount="indefinite" />
+                                    <animateMotion path="M 29.1 29.1 Q 50 14 70.9 29.1" dur="5.5s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 78 24 Q 88 34 83 45" dur="4.8s" repeatCount="indefinite" />
+                                    <animateMotion path="M 70.9 29.1 Q 88 36 79.5 50.0" dur="4.8s" repeatCount="indefinite" />
                                 </circle>
                                 {/* Moving Small Ball From Courses to Job */}
                                 <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 53 80 Q 73 74 82 56" dur="4.6s" repeatCount="indefinite" />
+                                    <animateMotion path="M 50.0 79.5 Q 74 74 79.5 50.0" dur="4.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 41 80 Q 23 74 18 56" dur="5s" repeatCount="indefinite" />
+                                    <animateMotion path="M 50.0 79.5 Q 26 74 20.5 50.0" dur="5s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 17 45 Q 12 30 22 22" dur="5.4s" repeatCount="indefinite" />
+                                    <animateMotion path="M 20.5 50.0 Q 12 36 29.1 29.1" dur="5.4s" repeatCount="indefinite" />
                                 </circle>
                             </svg>
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
