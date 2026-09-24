@@ -385,7 +385,7 @@ const HeroSection = () => {
 
                         {/* Subtitle */}
                         <p className="text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-lg mt-3 sm:mt-3.5 mb-5 sm:mb-6">
-                            SkillDad connects you with top universities, industry-aligned courses and real job opportunities — so you can learn, upskill and get placed.
+                            A collaborative venture initiated by IITians and leading job providers in India, in partnership with reputed universities across the world.
                         </p>
 
                         {/* Action Buttons */}
@@ -409,65 +409,166 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* ── RIGHT COLUMN: FLOATING COURSE BADGES & SILK WAVE (2.2 cols) ── */}
-                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[360px] select-none">
+                    {/* ── RIGHT COLUMN: CONSTELLATION NETWORK, 3D SPHERES & FLOATING BADGES (matching Reference) ── */}
+                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[380px] select-none">
                         
-                        {/* Curved dashed orbit track */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 160 360">
+                        {/* Constellation Network SVG Layer with 3D Spheres & Moving Purple Dots */}
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 240 380">
+                            <defs>
+                                {/* Realistic 3D purple sphere gradient */}
+                                <radialGradient id="sphere3DGrad" cx="32%" cy="28%" r="72%">
+                                    <stop offset="0%" stopColor="#FFFFFF" />
+                                    <stop offset="18%" stopColor="#E9D5FF" />
+                                    <stop offset="48%" stopColor="#A855F7" />
+                                    <stop offset="80%" stopColor="#6D28D9" />
+                                    <stop offset="100%" stopColor="#3B0764" />
+                                </radialGradient>
+                                {/* Soft drop shadow for 3D spheres */}
+                                <filter id="sphere3DShadow" x="-40%" y="-40%" width="180%" height="180%">
+                                    <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#581C87" floodOpacity="0.28" />
+                                </filter>
+                            </defs>
+
+                            {/* Thin, sharp purple constellation tracks matching reference */}
                             <path
-                                d="M 120 25 C 50 110, 140 210, 60 330"
+                                d="M 98 65 L 95 125"
                                 fill="none"
-                                stroke="rgba(192, 132, 252, 0.45)"
-                                strokeWidth="1.5"
-                                strokeDasharray="3 3"
+                                stroke="rgba(147, 51, 234, 0.4)"
+                                strokeWidth="0.8"
+                                strokeDasharray="2.5 3"
                             />
-                            {/* Floating decorative purple orb on orbit */}
-                            <circle cx="95" cy="175" r="3.5" fill="#A855F7" className="animate-pulse" />
-                            <circle cx="120" cy="25" r="2.5" fill="#8B5CF6" />
-                            <circle cx="60" cy="330" r="2.5" fill="#C4B5FD" />
+                            <path
+                                d="M 95 125 Q 155 148 215 132"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.4)"
+                                strokeWidth="0.8"
+                                strokeDasharray="2.5 3"
+                            />
+                            <path
+                                d="M 95 125 C 92 180 108 245 120 300"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.45)"
+                                strokeWidth="0.8"
+                                strokeDasharray="2.5 3"
+                            />
+                            <path
+                                d="M 120 300 C 123 330 126 350 128 368"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.4)"
+                                strokeWidth="0.8"
+                                strokeDasharray="2.5 3"
+                            />
+                            <path
+                                d="M 120 300 Q 160 330 195 352"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.35)"
+                                strokeWidth="0.8"
+                                strokeDasharray="2.5 3"
+                            />
+
+                            {/* Static Purple Dot Nodes along tracks */}
+                            <circle cx="98" cy="65" r="2.0" fill="#8B5CF6" />
+                            <circle cx="96" cy="95" r="1.8" fill="#A855F7" />
+                            <circle cx="106" cy="205" r="2.0" fill="#8B5CF6" />
+                            <circle cx="160" cy="330" r="1.8" fill="#A855F7" />
+                            <circle cx="195" cy="352" r="2.2" fill="#8B5CF6" />
+
+                            {/* 3D Purple Spheres */}
+                            {/* Medium Sphere 1 (Top Left) */}
+                            <g filter="url(#sphere3DShadow)">
+                                <circle cx="95" cy="125" r="6.5" fill="url(#sphere3DGrad)" />
+                            </g>
+
+                            {/* Medium Sphere 2 (Top Right) */}
+                            <g filter="url(#sphere3DShadow)">
+                                <circle cx="215" cy="132" r="5.5" fill="url(#sphere3DGrad)" />
+                            </g>
+
+                            {/* Large Central 3D Purple Sphere below Digital Marketing */}
+                            <g filter="url(#sphere3DShadow)">
+                                <circle cx="120" cy="300" r="13" fill="url(#sphere3DGrad)" />
+                            </g>
+
+                            {/* Lower Sphere */}
+                            <g filter="url(#sphere3DShadow)">
+                                <circle cx="128" cy="368" r="4.5" fill="url(#sphere3DGrad)" />
+                            </g>
+
+                            {/* Moving Purple Glowing Dots through lines (matching Reference animation) */}
+                            <circle r="2.2" fill="#7C3AED" className="filter drop-shadow-[0_0_2.5px_#A855F7]">
+                                <animateMotion
+                                    dur="4.5s"
+                                    repeatCount="indefinite"
+                                    path="M 95 125 C 92 180 108 245 120 300"
+                                />
+                            </circle>
+
+                            <circle r="1.9" fill="#8B5CF6" className="filter drop-shadow-[0_0_2.5px_#A855F7]">
+                                <animateMotion
+                                    dur="4.2s"
+                                    repeatCount="indefinite"
+                                    path="M 95 125 Q 155 148 215 132"
+                                />
+                            </circle>
+
+                            <circle r="1.8" fill="#9333EA" className="filter drop-shadow-[0_0_2.5px_#A855F7]">
+                                <animateMotion
+                                    dur="3.4s"
+                                    repeatCount="indefinite"
+                                    path="M 120 300 C 123 330 126 350 128 368"
+                                />
+                            </circle>
+
+                            <circle r="1.8" fill="#8B5CF6" className="filter drop-shadow-[0_0_2.5px_#A855F7]">
+                                <animateMotion
+                                    dur="4.0s"
+                                    repeatCount="indefinite"
+                                    path="M 120 300 Q 160 330 195 352"
+                                />
+                            </circle>
                         </svg>
 
                         {/* 3 Floating Badges matching Reference */}
-                        <div className="space-y-8 relative z-20 flex flex-col items-end pr-2">
+                        <div className="space-y-7 relative z-20 flex flex-col items-end pr-2">
                             
                             {/* 1. Hospital Administration */}
                             <motion.div
-                                animate={{ y: [-4, 5, -4] }}
-                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_20px_rgba(124,58,237,0.12)] border border-purple-100 dark:border-purple-800/40 flex items-center gap-2 cursor-default hover:scale-105 transition-transform"
+                                animate={{ y: [-4, 4, -4] }}
+                                transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
+                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-1"
                             >
-                                <div className="w-5 h-5 rounded-full bg-purple-50 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                                    <Building2 size={12} className="text-[#7C3AED] dark:text-purple-300" />
+                                <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
+                                    <Building2 size={13} className="text-[#6D28D9] dark:text-purple-300" />
                                 </div>
-                                <span className="text-[11px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
+                                <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
                                     Hospital Administration
                                 </span>
                             </motion.div>
 
                             {/* 2. Data Analyst */}
                             <motion.div
-                                animate={{ y: [4, -5, 4] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_20px_rgba(124,58,237,0.12)] border border-purple-100 dark:border-purple-800/40 flex items-center gap-2 cursor-default hover:scale-105 transition-transform -mr-2"
+                                animate={{ y: [4, -4, 4] }}
+                                transition={{ duration: 5.4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform -mr-1"
                             >
-                                <div className="w-5 h-5 rounded-full bg-cyan-50 dark:bg-cyan-900/40 flex items-center justify-center shrink-0">
-                                    <BarChart3 size={12} className="text-[#06B6D4] dark:text-cyan-300" />
+                                <div className="w-6 h-6 rounded-lg bg-[#E0F2FE] dark:bg-cyan-950/50 flex items-center justify-center shrink-0">
+                                    <BarChart3 size={13} className="text-[#0284C7] dark:text-cyan-300" />
                                 </div>
-                                <span className="text-[11px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
+                                <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
                                     Data Analyst
                                 </span>
                             </motion.div>
 
                             {/* 3. Digital Marketing */}
                             <motion.div
-                                animate={{ y: [-3, 5, -3] }}
-                                transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_20px_rgba(124,58,237,0.12)] border border-purple-100 dark:border-purple-800/40 flex items-center gap-2 cursor-default hover:scale-105 transition-transform"
+                                animate={{ y: [-3, 4, -3] }}
+                                transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-2"
                             >
-                                <div className="w-5 h-5 rounded-full bg-purple-50 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                                    <Megaphone size={12} className="text-[#8B5CF6] dark:text-purple-300" />
+                                <div className="w-6 h-6 rounded-lg bg-purple-100/70 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
+                                    <Megaphone size={13} className="text-[#7C3AED] dark:text-purple-300" />
                                 </div>
-                                <span className="text-[11px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
+                                <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
                                     Digital Marketing
                                 </span>
                             </motion.div>
@@ -479,12 +580,65 @@ const HeroSection = () => {
             </div>
 
             {/* 3D Violet Wave / Ribbon in Bottom-Right Corner matching Reference */}
-            <div className="absolute bottom-0 right-0 w-[300px] sm:w-[380px] md:w-[460px] lg:w-[500px] pointer-events-none select-none z-0 translate-y-4 opacity-90">
-                <img
-                    src={heroRibbon}
-                    alt="Decorative Silk Ribbon"
-                    className="w-full h-auto object-contain drop-shadow-[0_12px_28px_rgba(109,40,217,0.22)]"
-                />
+            <div className="absolute bottom-6 sm:bottom-8 md:bottom-10 right-0 w-[320px] sm:w-[420px] md:w-[480px] lg:w-[520px] pointer-events-none select-none z-10 overflow-visible opacity-95">
+                <svg
+                    viewBox="0 0 540 280"
+                    fill="none"
+                    className="w-full h-auto drop-shadow-[0_12px_28px_rgba(109,40,217,0.18)]"
+                >
+                    <defs>
+                        <linearGradient id="satinGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#7C3AED" stopOpacity="0.95" />
+                            <stop offset="28%" stopColor="#8B5CF6" stopOpacity="1" />
+                            <stop offset="65%" stopColor="#704CE1" stopOpacity="1" />
+                            <stop offset="90%" stopColor="#5B21B6" stopOpacity="0.98" />
+                            <stop offset="100%" stopColor="#4C1D95" stopOpacity="1" />
+                        </linearGradient>
+                        <linearGradient id="sheerGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.55" />
+                            <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.4" />
+                            <stop offset="75%" stopColor="#C084FC" stopOpacity="0.22" />
+                            <stop offset="100%" stopColor="#A855F7" stopOpacity="0.05" />
+                        </linearGradient>
+                        <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+                            <feGaussianBlur stdDeviation="16" result="blur" />
+                        </filter>
+                        <filter id="sheerBlur" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3.5" result="blur" />
+                        </filter>
+                    </defs>
+
+                    {/* Ambient background glow behind ribbon */}
+                    <path
+                        d="M 120 250 C 260 220 420 150 540 30 L 540 280 L 120 280 Z"
+                        fill="url(#sheerGrad)"
+                        filter="url(#softGlow)"
+                        opacity="0.7"
+                    />
+
+                    {/* Translucent sheer wave layer (sweeps up behind badges) */}
+                    <path
+                        d="M 100 240 C 210 210 330 130 430 60 C 480 25 510 -5 540 -30 L 540 80 C 490 130 410 190 310 230 C 220 265 150 260 100 240 Z"
+                        fill="url(#sheerGrad)"
+                        filter="url(#sheerBlur)"
+                        opacity="0.8"
+                    />
+
+                    {/* Solid Satin 3D Ribbon (Layer 1) */}
+                    <path
+                        d="M 65 242 C 175 238 310 208 425 150 C 470 126 505 95 540 75 L 540 152 C 495 188 430 228 335 262 C 235 298 130 275 65 242 Z"
+                        fill="url(#satinGrad)"
+                    />
+
+                    {/* Highlight sheen along top edge of solid ribbon */}
+                    <path
+                        d="M 75 241 C 180 236 312 206 425 150 C 470 126 505 95 540 75"
+                        stroke="rgba(255, 255, 255, 0.45)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        filter="url(#sheerBlur)"
+                    />
+                </svg>
             </div>
 
             {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Organic Wave Background matching Reference #F3F4FD) ── */}
