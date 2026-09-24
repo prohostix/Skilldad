@@ -196,6 +196,7 @@ const ModernStudyAbroadIcon = ({ className = "w-5 h-5" }) => (
 const Services = () => {
     const [expandedId, setExpandedId] = useState(null);
     const [selectedServiceId, setSelectedServiceId] = useState(null);
+    const [selectedCapability, setSelectedCapability] = useState(0);
     const [mainServices, setMainServices] = useState([]);
     const [additionalFeatures, setAdditionalFeatures] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -579,11 +580,11 @@ const Services = () => {
             </section>
 
             {/* ── SECTION 3: ADVANCED PLATFORM CAPABILITIES (MATCHING REFERENCE VIDEO AT 0:00:07) ── */}
-            <section className="py-4 sm:py-6 md:py-7 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
+            <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
                 <div className="max-w-7xl mx-auto">
-                    
+
                     {/* Light Purple Rounded Container Card Matching Reference Video */}
-                    <div className="relative rounded-[24px] sm:rounded-[32px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-4 py-4 sm:px-8 sm:py-5 lg:px-10 lg:py-6 shadow-[0_16px_40px_-15px_rgba(76,29,149,0.10)] overflow-hidden">
+                    <div className="relative rounded-[24px] sm:rounded-[32px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 shadow-[0_16px_40px_-15px_rgba(76,29,149,0.10)] overflow-hidden">
                         
                         {/* Soft ambient violet background glows */}
                         <div className="absolute -top-24 -left-24 w-60 h-60 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -610,11 +611,11 @@ const Services = () => {
 
                                 {/* Curving Wavy String trailing down behind cards */}
                                 <svg
-                                    className="absolute top-[38px] right-[12px] sm:right-[18px] w-[140px] sm:w-[190px] h-[150px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
-                                    viewBox="0 0 300 280"
+                                    className="absolute top-[38px] right-[12px] sm:right-[18px] w-[160px] sm:w-[210px] h-[220px] sm:h-[260px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
+                                    viewBox="0 0 300 350"
                                 >
                                     <path
-                                        d="M200 0 C 180 80, 220 160, 160 200 C 100 240, 60 170, 100 130 C 140 90, 170 170, 100 240"
+                                        d="M200 0 C 180 80, 220 160, 160 200 C 100 240, 60 170, 100 130 C 140 90, 170 170, 100 240 C 65 275, 55 310, 80 345"
                                         strokeWidth="2"
                                         strokeLinecap="round"
                                         strokeDasharray="4 2"
@@ -624,7 +625,7 @@ const Services = () => {
                         </div>
 
                         {/* Header: Centered HOW IT WORKS Tag + Title + Subtitle + Pills Row */}
-                        <div className="text-center max-w-xl mx-auto mb-3.5 sm:mb-4 space-y-1 sm:space-y-1.5 relative z-10">
+                        <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8 space-y-1 sm:space-y-1.5 relative z-10">
                             <div>
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[10px] font-bold tracking-widest uppercase shadow-2xs">
                                     HOW IT WORKS
@@ -636,10 +637,6 @@ const Services = () => {
                                     Not Just A Course
                                 </span>
                             </h2>
-                            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-purple-200/80 max-w-md mx-auto leading-relaxed font-normal">
-                                Our intelligent platform is built to give you a seamless, personalized, and efficient learning journey from day one.
-                            </p>
-
                             {/* Category Filter Pills Row Matching Video */}
                             <div className="pt-0.5 flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                                 {['AI Mentorship', 'Mobile Access', 'Cloud Infrastructure', 'Live Collaboration', 'Career Matrix'].map((tag, idx) => (
@@ -676,10 +673,15 @@ const Services = () => {
                                             zIndex: 30,
                                             transition: { duration: 0.2, ease: 'easeOut' }
                                         }}
+                                        onClick={() => setSelectedCapability(idx)}
                                         className={`h-full relative group cursor-pointer ${capability.rotation} transition-transform`}
                                     >
                                         <div
-                                            className={`h-full rounded-[18px] p-4 sm:p-4.5 flex flex-col justify-between transition-shadow duration-300 ${capability.cardBg}`}
+                                            className={`h-full rounded-[18px] p-4 sm:p-4.5 flex flex-col justify-between transition-all duration-300 ${capability.cardBg} ${
+                                                selectedCapability === idx
+                                                    ? 'ring-2 ring-offset-2 ring-[#4C1D95] dark:ring-purple-400 dark:ring-offset-[#080512] shadow-xl'
+                                                    : 'ring-2 ring-transparent'
+                                            }`}
                                         >
                                             <div className="space-y-1.5 sm:space-y-2 text-left">
                                                 {/* Top Tag & Icon Row */}
