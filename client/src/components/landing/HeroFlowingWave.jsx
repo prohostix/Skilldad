@@ -4,11 +4,11 @@ import { motion, useReducedMotion } from 'framer-motion';
 /**
  * HeroFlowingWave
  * Premium, modern, elegant flowing purple ribbon/wave for the right side of the Hero section.
- * - Perfectly mirrors the curves, bends, and silk layers from the reference image.
- * - Bold, sweeping 3D satin purple ribbon (#581C87 to #8B5CF6) with sharp left tip dipping above the wave.
- * - Upper translucent lavender silk sheet sweeping high up along the right edge behind the badges.
- * - Soft diffuse ambient glow.
- * - Calm, continuous organic motion (9-12s cycle, easeInOut, infinite, respects prefers-reduced-motion).
+ * - Perfectly mirrors the fluid curves, bends, and silk layers from the reference image.
+ * - Smooth horizontal launch with concave S-curve scoop dipping right above the bottom wave.
+ * - Bold 3D satin purple ribbon (#4C1D95 to #9333EA) with specular sheen crest highlight.
+ * - Billowing upper translucent lavender silk veil sweeping high behind floating badges.
+ * - Gentle, continuous organic floating animation (10s cycle, easeInOut, infinite).
  */
 const HeroFlowingWave = () => {
     const shouldReduceMotion = useReducedMotion();
@@ -17,12 +17,12 @@ const HeroFlowingWave = () => {
         ? {}
         : {
             animate: {
-                y: [0, -6, 3, 0],
-                x: [0, -4, 2, 0],
-                opacity: [0.92, 1, 0.95, 0.92]
+                y: [0, -5, 2, 0],
+                x: [0, -3, 1, 0],
+                rotate: [0, 0.4, -0.3, 0]
             },
             transition: {
-                duration: 11,
+                duration: 10,
                 repeat: Infinity,
                 ease: 'easeInOut'
             }
@@ -30,7 +30,7 @@ const HeroFlowingWave = () => {
 
     return (
         <div
-            className="absolute right-0 bottom-0 w-[380px] sm:w-[480px] md:w-[560px] lg:w-[660px] xl:w-[720px] h-[340px] sm:h-[400px] md:h-[460px] lg:h-[500px] pointer-events-none select-none z-0 overflow-visible flex items-end justify-end"
+            className="absolute right-0 bottom-[68px] sm:bottom-[76px] md:bottom-[82px] lg:bottom-[88px] w-[360px] sm:w-[460px] md:w-[540px] lg:w-[620px] xl:w-[680px] h-[300px] sm:h-[350px] md:h-[390px] lg:h-[420px] pointer-events-none select-none z-10 overflow-visible flex items-end justify-end"
             aria-hidden="true"
         >
             <motion.div
@@ -38,33 +38,33 @@ const HeroFlowingWave = () => {
                 {...waveMotion}
             >
                 <svg
-                    viewBox="0 0 600 440"
+                    viewBox="0 0 600 380"
                     fill="none"
                     preserveAspectRatio="xMaxYMax meet"
                     className="w-full h-full object-contain overflow-visible"
                     shapeRendering="geometricPrecision"
                 >
                     <defs>
-                        {/* Deep Vibrant Purple Ribbon Gradient (#581C87 -> #6D28D9 -> #8B5CF6 -> #9333EA) */}
-                        <linearGradient id="refRibbonGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#4C1D95" stopOpacity="0.95" />
-                            <stop offset="25%" stopColor="#5B21B6" stopOpacity="1" />
-                            <stop offset="55%" stopColor="#6D28D9" stopOpacity="1" />
+                        {/* Deep Vibrant Satin Purple Ribbon Gradient (#4C1D95 -> #6D28D9 -> #8B5CF6 -> #9333EA) */}
+                        <linearGradient id="refRibbonGrad" x1="0%" y1="90%" x2="100%" y2="10%">
+                            <stop offset="0%" stopColor="#4C1D95" stopOpacity="0.96" />
+                            <stop offset="28%" stopColor="#5B21B6" stopOpacity="1" />
+                            <stop offset="58%" stopColor="#6D28D9" stopOpacity="1" />
                             <stop offset="85%" stopColor="#8B5CF6" stopOpacity="0.98" />
                             <stop offset="100%" stopColor="#9333EA" stopOpacity="0.95" />
                         </linearGradient>
 
-                        {/* Translucent Lavender Sheet Gradient */}
-                        <linearGradient id="refLavenderSheet" x1="0%" y1="100%" x2="90%" y2="10%">
-                            <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.6" />
-                            <stop offset="35%" stopColor="#DDD6FE" stopOpacity="0.45" />
-                            <stop offset="70%" stopColor="#C084FC" stopOpacity="0.25" />
-                            <stop offset="100%" stopColor="#A855F7" stopOpacity="0.05" />
+                        {/* Translucent Lavender Silk Veil Gradient */}
+                        <linearGradient id="refLavenderVeil" x1="10%" y1="100%" x2="90%" y2="0%">
+                            <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.55" />
+                            <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.38" />
+                            <stop offset="75%" stopColor="#C084FC" stopOpacity="0.20" />
+                            <stop offset="100%" stopColor="#A855F7" stopOpacity="0.04" />
                         </linearGradient>
 
-                        {/* Soft Ambient Glow Filter */}
+                        {/* Ambient Glow Filter */}
                         <filter id="refAmbientGlow" x="-30%" y="-30%" width="160%" height="160%">
-                            <feGaussianBlur stdDeviation="22" result="blur" />
+                            <feGaussianBlur stdDeviation="20" result="blur" />
                         </filter>
 
                         {/* Sheer Soft Filter */}
@@ -72,50 +72,50 @@ const HeroFlowingWave = () => {
                             <feGaussianBlur stdDeviation="3.5" result="blur" />
                         </filter>
 
-                        {/* Gentle Ribbon Edge Shadow */}
+                        {/* 3D Ribbon Drop Shadow */}
                         <filter id="refRibbonShadow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feDropShadow dx="0" dy="6" stdDeviation="10" floodColor="#3B1578" floodOpacity="0.25" />
+                            <feDropShadow dx="-2" dy="8" stdDeviation="12" floodColor="#3B1578" floodOpacity="0.28" />
                         </filter>
                     </defs>
 
-                    {/* 1. Ambient diffused purple glow behind the ribbon */}
+                    {/* 1. Ambient diffuse glow behind the wave */}
                     <path
-                        d="M 80 360 C 220 320 380 220 480 120 C 540 60 580 20 600 0 L 600 440 L 80 440 Z"
-                        fill="url(#refLavenderSheet)"
+                        d="M 60 290 C 180 270 330 180 440 90 C 500 40 550 10 600 0 L 600 240 C 480 280 320 330 160 330 Z"
+                        fill="url(#refLavenderVeil)"
                         filter="url(#refAmbientGlow)"
-                        opacity="0.65"
+                        opacity="0.6"
                     />
 
-                    {/* 2. Translucent Lavender Silk Sheet (Layer 2 - sweeping high up along right edge) */}
+                    {/* 2. Translucent Upper Lavender Silk Veil (Billowing high behind badges) */}
                     <path
-                        d="M 70 350 C 200 310 350 200 450 100 C 510 40 560 10 600 0 L 600 120 C 540 190 440 280 320 350 C 210 395 130 380 70 350 Z"
-                        fill="url(#refLavenderSheet)"
+                        d="M 75 285 C 160 265 270 175 390 85 C 460 35 530 8 600 0 L 600 115 C 520 165 410 225 300 275 C 210 315 140 315 75 285 Z"
+                        fill="url(#refLavenderVeil)"
                         filter="url(#refSheerBlur)"
                         opacity="0.85"
                     />
 
-                    {/* 3. Solid Vibrant Purple Ribbon (Layer 1 - bold sweeping ribbon with sharp tip on left) */}
+                    {/* 3. Primary 3D Satin Purple Ribbon (Curving concave S-curve scoop, no straight slope) */}
                     <g filter="url(#refRibbonShadow)">
                         <path
-                            d="M 30 365 C 160 360 310 315 440 235 C 500 195 550 150 600 110 L 600 200 C 540 245 470 295 370 350 C 260 405 140 395 30 365 Z"
+                            d="M 35 292 C 115 295 225 262 345 208 C 425 172 505 132 600 88 L 600 172 C 515 212 425 252 340 282 C 250 312 135 312 35 292 Z"
                             fill="url(#refRibbonGrad)"
                         />
                     </g>
 
-                    {/* 4. Subtle Inner Highlight Crest along upper curve of solid ribbon */}
+                    {/* 4. Specular Sheen Highlight Ridge along ribbon crest (Liquid silk gleam) */}
                     <path
-                        d="M 45 364 C 165 358 312 313 440 235 C 500 195 550 150 600 110"
-                        stroke="rgba(255, 255, 255, 0.45)"
-                        strokeWidth="2"
+                        d="M 50 291 C 125 293 230 261 345 208 C 425 172 505 132 600 88"
+                        stroke="rgba(255, 255, 255, 0.48)"
+                        strokeWidth="2.5"
                         strokeLinecap="round"
                         filter="url(#refSheerBlur)"
                     />
 
-                    {/* 5. Delicate accent ribbon filament */}
+                    {/* 5. Delicate accent filament tendril */}
                     <path
-                        d="M 95 330 C 220 270 340 160 420 60 C 450 20 480 5 510 0"
-                        stroke="rgba(196, 181, 253, 0.5)"
-                        strokeWidth="2"
+                        d="M 90 270 C 190 220 310 130 420 50 C 470 15 510 5 550 0"
+                        stroke="rgba(196, 181, 253, 0.55)"
+                        strokeWidth="1.8"
                         strokeLinecap="round"
                         fill="none"
                         filter="url(#refSheerBlur)"

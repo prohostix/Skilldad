@@ -149,19 +149,19 @@ const HeroSection = () => {
     ];
 
     return (
-        <section className="relative w-full min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] lg:min-h-[660px] lg:max-h-[860px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-4 sm:pt-6 pb-0">
+        <section className="relative w-full min-h-[580px] lg:h-[calc(100vh-64px)] lg:max-h-[750px] xl:max-h-[780px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-1 sm:pt-2 pb-0">
             
             {/* Ambient Lighting Orbs */}
             <div className="absolute top-1/4 -left-20 w-[440px] h-[440px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
             <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-200/25 dark:bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Main Hero Container */}
-            <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-2 sm:py-4">
+            <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-0 sm:py-1">
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center">
 
                     {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
-                        <div className="w-[300px] xs:w-[335px] sm:w-[370px] md:w-[400px] lg:w-[415px] xl:w-[425px] aspect-square relative flex items-center justify-center shrink-0">
+                        <div className="w-[280px] xs:w-[310px] sm:w-[340px] md:w-[365px] lg:w-[380px] xl:w-[395px] aspect-square relative flex items-center justify-center shrink-0">
                             {/* Very Thin, Standard Purple Connection Arc Lines & Moving Purple Dots */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
                                 {/* Delicate Central Orbit Track */}
@@ -407,7 +407,7 @@ const HeroSection = () => {
                         </div>
 
                         {/* Redesigned Heading: "Confusion to Career" */}
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[54px] font-black tracking-tight leading-[1.08] font-sans">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[40px] xl:text-[48px] font-black tracking-tight leading-[1.08] font-sans">
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
                             </span>
@@ -417,7 +417,7 @@ const HeroSection = () => {
                         </h1>
 
                         {/* Subtitle */}
-                        <p className="text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-lg mt-3 sm:mt-3.5 mb-5 sm:mb-6">
+                        <p className="text-xs sm:text-sm md:text-[13.5px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-lg mt-2 sm:mt-2.5 mb-3.5 sm:mb-4">
                             A collaborative venture initiated by IITians and leading job providers in India, in partnership with reputed universities across the world.
                         </p>
 
@@ -425,7 +425,7 @@ const HeroSection = () => {
                         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#6D28D9] hover:from-[#3B1578] hover:to-[#5B21B6] text-white text-xs sm:text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(109,40,217,0.45)] hover:shadow-[0_16px_32px_-5px_rgba(109,40,217,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group cursor-pointer"
+                                className="px-5 sm:px-6 py-2.5 sm:py-2.5 rounded-full bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#6D28D9] hover:from-[#3B1578] hover:to-[#5B21B6] text-white text-xs sm:text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(109,40,217,0.45)] hover:shadow-[0_16px_32px_-5px_rgba(109,40,217,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group cursor-pointer"
                             >
                                 <span>{user ? 'Go to Dashboard' : 'Start Learning Today'}</span>
                                 <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
@@ -434,7 +434,7 @@ const HeroSection = () => {
                             {!user && (
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="px-6 sm:px-7 py-2.5 sm:py-3 rounded-full bg-white/90 dark:bg-purple-950/60 hover:bg-purple-50/90 dark:hover:bg-purple-900/60 text-[#4C1D95] dark:text-purple-300 border border-purple-200/90 dark:border-purple-800/60 text-xs sm:text-sm font-semibold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                    className="px-5 sm:px-6 py-2.5 sm:py-2.5 rounded-full bg-white/90 dark:bg-purple-950/60 hover:bg-purple-50/90 dark:hover:bg-purple-900/60 text-[#4C1D95] dark:text-purple-300 border border-purple-200/90 dark:border-purple-800/60 text-xs sm:text-sm font-semibold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
                                 >
                                     Login Now
                                 </button>
@@ -443,7 +443,7 @@ const HeroSection = () => {
                     </div>
 
                     {/* ── RIGHT COLUMN: CONSTELLATION NETWORK & FLOATING BADGES (matching Reference) ── */}
-                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[380px] select-none z-10">
+                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[340px] sm:h-[350px] select-none z-10">
                         
                         {/* Constellation Network SVG Layer with 3D Spheres & Moving Purple Dots */}
                         <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 240 380">
@@ -606,19 +606,19 @@ const HeroSection = () => {
             {/* Decorative Flowing Purple Ribbon / Wave on Right Side (Custom SVG matching Reference) */}
             <HeroFlowingWave />
 
-            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Rich Purple Background matching Reference #ECE7FD) ── */}
-            <div className="w-full relative z-20 bg-[#ECE7FD] dark:bg-[#120B26] pt-3 sm:pt-4 pb-3 sm:pb-4 transition-colors">
+            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Rich Purple Background #E2D9FA) ── */}
+            <div className="w-full relative z-20 bg-[#E2D9FA] dark:bg-[#140B28] pt-2 sm:pt-2.5 pb-2.5 sm:pb-3 transition-colors">
                 {/* Organic Wave Boundary at Top matching Reference Curve */}
-                <div className="absolute -top-7 sm:-top-10 md:-top-12 lg:-top-14 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+                <div className="absolute -top-5 sm:-top-7 md:-top-8 lg:-top-9 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
                     <svg
-                        className="relative block w-full h-7 sm:h-10 md:h-12 lg:h-14"
-                        viewBox="0 0 1440 70"
+                        className="relative block w-full h-5 sm:h-7 md:h-8 lg:h-9"
+                        viewBox="0 0 1440 60"
                         preserveAspectRatio="none"
                     >
                         <path
-                            d="M 0 24 C 180 12 300 48 480 50 C 660 52 740 34 880 36 C 1020 38 1100 64 1260 56 C 1360 50 1410 26 1440 16 L 1440 70 L 0 70 Z"
-                            fill="#ECE7FD"
-                            className="dark:fill-[#120B26] transition-colors"
+                            d="M 0 18 C 160 12 280 38 460 40 C 640 42 760 28 920 30 C 1060 32 1160 50 1280 44 C 1360 38 1410 24 1440 16 L 1440 60 L 0 60 Z"
+                            fill="#E2D9FA"
+                            className="dark:fill-[#140B28] transition-colors"
                         />
                     </svg>
                 </div>
@@ -626,16 +626,16 @@ const HeroSection = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                     
                     {/* Divider Label matching Reference */}
-                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-2 sm:mb-2.5">
-                        <div className="w-14 sm:w-24 h-[1px] bg-purple-300/80 dark:bg-purple-800/80" />
-                        <span className="text-[9.5px] sm:text-[10.5px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300">
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-1.5 sm:mb-2">
+                        <div className="w-12 sm:w-20 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] text-[#5B21B6] dark:text-purple-300">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-14 sm:w-24 h-[1px] bg-purple-300/80 dark:bg-purple-800/80" />
+                        <div className="w-12 sm:w-20 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                     </div>
 
                     {/* Universities Single Horizontal Row matching Reference with 2-line stacked lockups */}
-                    <div className="flex items-center justify-start sm:justify-center gap-5 sm:gap-7 md:gap-9 lg:gap-12 xl:gap-14 overflow-x-auto no-scrollbar w-full py-1 opacity-90 hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-start sm:justify-center gap-5 sm:gap-7 md:gap-9 lg:gap-11 xl:gap-13 overflow-x-auto no-scrollbar w-full py-0.5 opacity-90 hover:opacity-100 transition-opacity">
                         {universityPartners.map((uni, idx) => {
                             const rawLogo = uni.imageUrl || uni.logo;
                             const hasLogo = !!rawLogo;
@@ -661,25 +661,25 @@ const HeroSection = () => {
                             }
 
                             return (
-                                <div key={uni._id || idx} className="flex items-center gap-2 group cursor-default hover:scale-105 transition-transform duration-200 shrink-0">
+                                <div key={uni._id || idx} className="flex items-center gap-2 group cursor-default hover:scale-105 transition-transform duration-200 shrink-0 bg-transparent">
                                     {hasLogo ? (
                                         <img
                                             src={logoSrc}
                                             alt={uni.name}
-                                            className="h-6 sm:h-7 max-w-[42px] sm:max-w-[48px] object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
+                                            className="h-5 sm:h-6 max-w-[38px] sm:max-w-[44px] object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0 mix-blend-multiply dark:mix-blend-screen bg-transparent"
                                             onError={(e) => {
                                                 e.target.style.display = 'none';
                                             }}
                                         />
                                     ) : (
-                                        <GraduationCap size={18} className="text-[#6D28D9] shrink-0" />
+                                        <GraduationCap size={16} className="text-[#6D28D9] shrink-0" />
                                     )}
                                     <div className="flex flex-col leading-[1.1] text-left">
-                                        <span className="text-[9px] sm:text-[10px] font-sans font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                                        <span className="text-[8.5px] sm:text-[9.5px] font-sans font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 whitespace-nowrap">
                                             {line1}
                                         </span>
                                         {line2 && (
-                                            <span className="text-[9.5px] sm:text-[10.5px] font-sans font-extrabold uppercase tracking-wider text-[#1E293B] dark:text-slate-100 whitespace-nowrap">
+                                            <span className="text-[9px] sm:text-[10px] font-sans font-extrabold uppercase tracking-wider text-[#0F172A] dark:text-slate-100 whitespace-nowrap">
                                                 {line2}
                                             </span>
                                         )}
