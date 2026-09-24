@@ -898,23 +898,6 @@ const HeroSection = () => {
                         </AnimatePresence>
                     </div>
 
-                    {/* Subtle 3-Second Cycle Indicator Dots */}
-                    <div className="flex items-center justify-center gap-1.5 mt-1 sm:mt-1.5">
-                        {partnerBatches.map((_, i) => (
-                            <button
-                                key={i}
-                                type="button"
-                                onClick={() => setPartnerBatchIndex(i)}
-                                aria-label={`View partner batch ${i + 1}`}
-                                className={`transition-all duration-300 rounded-full cursor-pointer p-0 border-0 ${
-                                    i === partnerBatchIndex
-                                        ? 'w-4.5 h-1 bg-[#6D28D9] dark:bg-purple-400'
-                                        : 'w-1.5 h-1 bg-purple-300/60 dark:bg-purple-800/60 hover:bg-purple-400'
-                                }`}
-                            />
-                        ))}
-                    </div>
-
                 </div>
             </div>
 
