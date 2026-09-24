@@ -60,19 +60,20 @@ const HeroSection = () => {
         fetchPartners();
     }, []);
 
-    // 5 Interactive Constellation Nodes with exact reference icons and labels
+    // 5 Interactive Constellation Nodes with exact reference icons and labels (no icon background)
     const constellationNodes = [
         {
             id: 'students',
             label: 'Students',
-            // User / Student Icon matching reference
+            // Student / ID Card Icon matching reference
             icon: (
-                <div className="w-4.5 h-4.5 rounded-full bg-[#6D28D9] flex items-center justify-center shrink-0">
-                    <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                        <circle cx="12" cy="7" r="4" />
-                    </svg>
-                </div>
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="5" y="7" width="14" height="14" rx="2" />
+                    <circle cx="12" cy="12" r="2.5" />
+                    <path d="M8 18c0-1.5 1.8-2.5 4-2.5s4 1 4 2.5" />
+                    <path d="M12 3v4" />
+                    <path d="M9 3h6" />
+                </svg>
             ),
             image: studentImg,
             posClass: 'left-[14%] top-[7%]',
@@ -83,18 +84,12 @@ const HeroSection = () => {
         {
             id: 'universities',
             label: 'Universities',
-            // University / Campus Building with Columns Icon matching reference
+            // Classical Mortarboard / University Cap matching reference
             icon: (
-                <div className="w-4.5 h-4.5 rounded-full bg-[#6D28D9] flex items-center justify-center shrink-0">
-                    <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M3 21h18" />
-                        <path d="M5 21V10" />
-                        <path d="M19 21V10" />
-                        <path d="M9 21V10" />
-                        <path d="M15 21V10" />
-                        <path d="M2 10l10-7 10 7" />
-                    </svg>
-                </div>
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
             ),
             image: universityImg,
             posClass: 'right-[13%] top-[7%]',
@@ -105,14 +100,13 @@ const HeroSection = () => {
         {
             id: 'jobs',
             label: 'Jobs',
-            // Executive Briefcase Icon matching reference
+            // Executive Briefcase matching reference
             icon: (
-                <div className="w-4.5 h-4.5 rounded-full bg-[#6D28D9] flex items-center justify-center shrink-0">
-                    <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="7" width="20" height="14" rx="2" />
-                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-                    </svg>
-                </div>
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" />
+                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                </svg>
             ),
             image: jobsImg,
             posClass: 'right-[3%] top-[41%]',
@@ -123,14 +117,12 @@ const HeroSection = () => {
         {
             id: 'courses',
             label: 'Courses',
-            // Open Book Icon matching reference
+            // Open Book matching reference
             icon: (
-                <div className="w-4.5 h-4.5 rounded-full bg-[#6D28D9] flex items-center justify-center shrink-0">
-                    <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                    </svg>
-                </div>
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
             ),
             image: coursesImg,
             posClass: 'left-[37%] bottom-[3%]',
@@ -141,14 +133,12 @@ const HeroSection = () => {
         {
             id: 'certifications',
             label: 'Certifications',
-            // Ribbon Rosette Award Medal Icon matching reference
+            // Ribbon Rosette Medal matching reference
             icon: (
-                <div className="w-4.5 h-4.5 rounded-full bg-[#6D28D9] flex items-center justify-center shrink-0">
-                    <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="8" r="5" />
-                        <path d="M15.4 12.8L17 22l-5-3-5 3 1.6-9.2" />
-                    </svg>
-                </div>
+                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="8" r="5" />
+                    <path d="M15.4 12.8L17 22l-5-3-5 3 1.6-9.2" />
+                </svg>
             ),
             image: certsImg,
             posClass: 'left-[4%] top-[41%]',
@@ -159,7 +149,7 @@ const HeroSection = () => {
     ];
 
     return (
-        <section className="relative w-full min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] lg:min-h-[660px] lg:max-h-[860px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#F8F5FD] to-[#F3EDFC] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-4 sm:pt-6 pb-2 sm:pb-3">
+        <section className="relative w-full min-h-[calc(100vh-64px)] lg:h-[calc(100vh-64px)] lg:min-h-[660px] lg:max-h-[860px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-4 sm:pt-6 pb-0">
             
             {/* Ambient Lighting Orbs */}
             <div className="absolute top-1/4 -left-20 w-[440px] h-[440px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
@@ -497,8 +487,8 @@ const HeroSection = () => {
                 />
             </div>
 
-            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Organic Wave Type Background matching Reference) ── */}
-            <div className="w-full relative z-20 bg-[#F6F4FE] dark:bg-[#0D071E] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
+            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Organic Wave Background matching Reference #F3F4FD) ── */}
+            <div className="w-full relative z-20 bg-[#F3F4FD] dark:bg-[#0B081A] pt-3 sm:pt-4 pb-3 sm:pb-4 transition-colors">
                 {/* Organic Wave Boundary at Top */}
                 <div className="absolute -top-7 sm:-top-10 md:-top-12 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
                     <svg
@@ -508,8 +498,8 @@ const HeroSection = () => {
                     >
                         <path
                             d="M 0 32 C 340 76 560 76 840 42 C 1120 12 1320 22 1440 14 L 1440 70 L 0 70 Z"
-                            fill="#F6F4FE"
-                            className="dark:fill-[#0D071E] transition-colors"
+                            fill="#F3F4FD"
+                            className="dark:fill-[#0B081A] transition-colors"
                         />
                     </svg>
                 </div>
