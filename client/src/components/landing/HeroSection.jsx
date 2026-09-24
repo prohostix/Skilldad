@@ -3,9 +3,6 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowRight,
-    Building2,
-    BarChart3,
-    Megaphone,
     GraduationCap
 } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
@@ -18,7 +15,6 @@ import jobsImg from '../../assets/hero/jobs.jpg';
 import coursesImg from '../../assets/hero/courses.jpg';
 import certsImg from '../../assets/hero/certifications.jpg';
 import skilldadLogoDeepPurple from '../../assets/logo_deep_purple.png';
-import HeroFlowingWave from './HeroFlowingWave';
 
 // Prestigious Monochrome Deep-Purple University Partner Logos matching Reference
 import melbourneLogo from '../../assets/hero/partners/melbourne.png';
@@ -407,8 +403,8 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* ── CENTER COLUMN: EDITORIAL HEADING & ACTIONS (4.8 cols) ── */}
-                    <div className="lg:col-span-5 flex flex-col items-start text-left pl-0 lg:pl-2 xl:pl-4 z-20">
+                    {/* ── CENTER COLUMN: EDITORIAL HEADING & ACTIONS (7 cols, clean & blank right side) ── */}
+                    <div className="lg:col-span-7 flex flex-col items-start text-left pl-0 lg:pl-4 xl:pl-8 z-20">
                         
                         {/* Eyebrow matching Reference */}
                         <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
@@ -418,7 +414,7 @@ const HeroSection = () => {
                             </span>
                         </div>
 
-                        {/* Redesigned Heading: "Confusion to Career" */}
+                        {/* Heading: "Confusion to Career" */}
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[40px] xl:text-[48px] font-black tracking-tight leading-[1.08] font-sans">
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
@@ -454,169 +450,8 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* ── RIGHT COLUMN: CONSTELLATION NETWORK & FLOATING BADGES (matching Reference) ── */}
-                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[340px] sm:h-[350px] select-none z-10">
-                        
-                        {/* Constellation Network SVG Layer with 3D Spheres & Moving Purple Dots */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 240 380">
-                            <defs>
-                                {/* Realistic 3D purple sphere gradient matching reference */}
-                                <radialGradient id="sphere3DGrad" cx="30%" cy="28%" r="72%">
-                                    <stop offset="0%" stopColor="#FFFFFF" />
-                                    <stop offset="18%" stopColor="#E9D5FF" />
-                                    <stop offset="48%" stopColor="#A855F7" />
-                                    <stop offset="80%" stopColor="#6D28D9" />
-                                    <stop offset="100%" stopColor="#3B0764" />
-                                </radialGradient>
-                                <filter id="sphere3DShadow" x="-40%" y="-40%" width="180%" height="180%">
-                                    <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#4C1D95" floodOpacity="0.3" />
-                                </filter>
-                            </defs>
-
-                            {/* Thin, sharp purple constellation tracks matching reference */}
-                            <path
-                                d="M 98 65 L 95 125"
-                                fill="none"
-                                stroke="rgba(147, 51, 234, 0.4)"
-                                strokeWidth="0.7"
-                                strokeDasharray="2 2.5"
-                            />
-                            <path
-                                d="M 95 125 Q 155 148 215 132"
-                                fill="none"
-                                stroke="rgba(147, 51, 234, 0.4)"
-                                strokeWidth="0.7"
-                                strokeDasharray="2 2.5"
-                            />
-                            <path
-                                d="M 95 125 C 92 180 108 245 120 295"
-                                fill="none"
-                                stroke="rgba(147, 51, 234, 0.45)"
-                                strokeWidth="0.7"
-                                strokeDasharray="2 2.5"
-                            />
-                            <path
-                                d="M 120 295 C 123 330 126 350 128 368"
-                                fill="none"
-                                stroke="rgba(147, 51, 234, 0.4)"
-                                strokeWidth="0.7"
-                                strokeDasharray="2 2.5"
-                            />
-                            <path
-                                d="M 120 295 Q 160 330 195 352"
-                                fill="none"
-                                stroke="rgba(147, 51, 234, 0.35)"
-                                strokeWidth="0.7"
-                                strokeDasharray="2 2.5"
-                            />
-
-                            {/* Static Small Purple Dot Nodes along tracks */}
-                            <circle cx="98" cy="65" r="1.8" fill="#8B5CF6" />
-                            <circle cx="96" cy="95" r="1.6" fill="#A855F7" />
-                            <circle cx="106" cy="205" r="1.8" fill="#8B5CF6" />
-                            <circle cx="160" cy="330" r="1.6" fill="#A855F7" />
-                            <circle cx="195" cy="352" r="2.0" fill="#8B5CF6" />
-
-                            {/* 3D Purple Spheres / Orbs matching reference */}
-                            {/* Medium Sphere 1 (Top Left) */}
-                            <circle cx="95" cy="125" r="5.5" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-
-                            {/* Medium Sphere 2 (Top Right) */}
-                            <circle cx="215" cy="132" r="5.0" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-
-                            {/* Large Central 3D Purple Orb below Digital Marketing */}
-                            <circle cx="120" cy="295" r="12" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-
-                            {/* Lower Orb */}
-                            <circle cx="128" cy="368" r="4.2" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-
-                            {/* Moving Purple Glowing Dots through lines (matching Reference animation) */}
-                            <circle r="1.8" fill="#7C3AED" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                                <animateMotion
-                                    dur="4.5s"
-                                    repeatCount="indefinite"
-                                    path="M 95 125 C 92 180 108 245 120 295"
-                                />
-                            </circle>
-
-                            <circle r="1.6" fill="#8B5CF6" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                                <animateMotion
-                                    dur="4.2s"
-                                    repeatCount="indefinite"
-                                    path="M 95 125 Q 155 148 215 132"
-                                />
-                            </circle>
-
-                            <circle r="1.6" fill="#9333EA" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                                <animateMotion
-                                    dur="3.4s"
-                                    repeatCount="indefinite"
-                                    path="M 120 295 C 123 330 126 350 128 368"
-                                />
-                            </circle>
-
-                            <circle r="1.6" fill="#8B5CF6" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                                <animateMotion
-                                    dur="4.0s"
-                                    repeatCount="indefinite"
-                                    path="M 120 295 Q 160 330 195 352"
-                                />
-                            </circle>
-                        </svg>
-
-                        {/* 3 Floating Badges matching Reference */}
-                        <div className="space-y-7 relative z-20 flex flex-col items-end pr-2">
-                            
-                            {/* 1. Hospital Administration */}
-                            <motion.div
-                                animate={{ y: [-4, 4, -4] }}
-                                transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
-                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-1"
-                            >
-                                <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                                    <Building2 size={13} className="text-[#6D28D9] dark:text-purple-300" />
-                                </div>
-                                <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
-                                    Hospital Administration
-                                </span>
-                            </motion.div>
-
-                            {/* 2. Data Analyst */}
-                            <motion.div
-                                animate={{ y: [4, -4, 4] }}
-                                transition={{ duration: 5.4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform -mr-1"
-                            >
-                                <div className="w-6 h-6 rounded-lg bg-[#E0F2FE] dark:bg-cyan-950/50 flex items-center justify-center shrink-0">
-                                    <BarChart3 size={13} className="text-[#0284C7] dark:text-cyan-300" />
-                                </div>
-                                <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
-                                    Data Analyst
-                                </span>
-                            </motion.div>
-
-                            {/* 3. Digital Marketing */}
-                            <motion.div
-                                animate={{ y: [-3, 4, -3] }}
-                                transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-2"
-                            >
-                                <div className="w-6 h-6 rounded-lg bg-purple-100/70 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
-                                    <Megaphone size={13} className="text-[#7C3AED] dark:text-purple-300" />
-                                </div>
-                                <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
-                                    Digital Marketing
-                                </span>
-                            </motion.div>
-
-                        </div>
-                    </div>
-
                 </div>
             </div>
-
-            {/* Decorative Flowing Purple Ribbon / Wave on Right Side (Custom SVG matching Reference) */}
-            <HeroFlowingWave />
 
             {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP ── */}
             <div className="w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
