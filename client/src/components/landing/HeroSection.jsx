@@ -343,22 +343,22 @@ const HeroSection = () => {
     ];
 
     return (
-        <section className="relative w-full min-h-[100dvh] lg:min-h-0 lg:h-[calc(100vh-64px)] lg:min-h-[630px] lg:max-h-[780px] xl:max-h-[810px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-16 sm:pt-20 lg:pt-2.5 pb-0">
+        <section className="relative w-full max-w-full overflow-hidden h-[100dvh] max-h-[100dvh] lg:h-[calc(100vh-64px)] lg:min-h-[630px] lg:max-h-[780px] xl:max-h-[810px] flex flex-col justify-between bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-14 sm:pt-16 lg:pt-2.5 pb-0">
             {/* Keyframe styles for hero bubbles */}
             <style dangerouslySetInnerHTML={{ __html: HERO_BUBBLE_CSS }} />
 
             {/* Kinetic Energy Ribbon System (Right Edge Background) */}
-            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
                 <AlyraOrb />
             </div>
             
             {/* Ambient Lighting Orbs */}
-            <div className="absolute top-1/4 -left-20 w-[440px] h-[440px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-200/25 dark:bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/4 -left-20 w-[260px] sm:w-[440px] h-[260px] sm:h-[440px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[70px] sm:blur-[100px] pointer-events-none" />
+            <div className="absolute top-1/3 -right-20 sm:right-1/4 w-[240px] sm:w-[400px] h-[240px] sm:h-[400px] bg-indigo-200/25 dark:bg-indigo-600/10 rounded-full blur-[70px] sm:blur-[100px] pointer-events-none" />
 
             {/* Main Hero Container */}
-            <div className="flex-1 flex items-center justify-start lg:justify-between max-w-7xl mx-auto px-5 sm:px-8 lg:px-8 w-full relative z-20 py-4 sm:py-6 lg:py-2">
-                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center">
+            <div className="flex-1 flex flex-col justify-center items-start lg:items-center lg:justify-between max-w-7xl mx-auto px-5 sm:px-8 lg:px-8 w-full relative z-20 min-h-0 overflow-hidden py-1 sm:py-2 lg:py-2">
+                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center my-auto">
 
                     {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Hidden on mobile responsive, visible on desktop) ── */}
                     <div className="hidden lg:flex lg:col-span-5 items-center justify-center relative select-none">
@@ -597,10 +597,10 @@ const HeroSection = () => {
                     </div>
 
                     {/* ── CENTER-LEFT COLUMN: EDITORIAL HEADING & ACTIONS (Placed center-left on mobile) ── */}
-                    <div className="w-full lg:col-span-7 flex flex-col items-start text-left pl-1 sm:pl-2 lg:pl-2 xl:pl-4 z-20 my-auto py-8 sm:py-12 lg:py-0 max-w-xl lg:max-w-none">
+                    <div className="w-full lg:col-span-7 flex flex-col items-start text-left pl-0 sm:pl-2 lg:pl-2 xl:pl-4 z-20 my-auto py-0 max-w-xl lg:max-w-none">
                         
                         {/* Eyebrow matching Reference */}
-                        <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
+                        <div className="flex items-center gap-2 mb-1.5 sm:mb-2.5">
                             <span className="w-5 h-[2px] bg-[#6D28D9] rounded-full inline-block" />
                             <span className="text-[10px] sm:text-[11.5px] font-bold uppercase tracking-[0.2em] text-[#6D28D9] dark:text-purple-400">
                                 YOUR GATEWAY TO A BRIGHTER FUTURE
@@ -608,7 +608,7 @@ const HeroSection = () => {
                         </div>
 
                         {/* Heading: "Confusion to Career" */}
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[40px] xl:text-[48px] font-black tracking-tight leading-[1.08] font-sans">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[40px] xl:text-[48px] font-black tracking-tight leading-[1.1] font-sans">
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
                             </span>
@@ -618,24 +618,24 @@ const HeroSection = () => {
                         </h1>
 
                         {/* Subtitle */}
-                        <p className="text-xs sm:text-sm md:text-[13.5px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-lg mt-2 sm:mt-2.5 mb-3.5 sm:mb-4">
+                        <p className="text-xs sm:text-sm md:text-[13.5px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-sm sm:max-w-lg mt-1.5 sm:mt-2.5 mb-3 sm:mb-4">
                             A collaborative venture initiated by IITians and leading job providers in India, in partnership with reputed universities across the world.
                         </p>
 
                         {/* Action Buttons */}
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                        <div className="flex flex-wrap items-center gap-2.5 sm:gap-4">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="px-5 sm:px-6 py-2.5 sm:py-2.5 rounded-full bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#6D28D9] hover:from-[#3B1578] hover:to-[#5B21B6] text-white text-xs sm:text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(109,40,217,0.45)] hover:shadow-[0_16px_32px_-5px_rgba(109,40,217,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 group cursor-pointer"
+                                className="px-4.5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#6D28D9] hover:from-[#3B1578] hover:to-[#5B21B6] text-white text-xs sm:text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(109,40,217,0.45)] hover:shadow-[0_16px_32px_-5px_rgba(109,40,217,0.6)] hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 sm:gap-2 group cursor-pointer shrink-0"
                             >
                                 <span>{user ? 'Go to Dashboard' : 'Start Learning Today'}</span>
-                                <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                             </button>
 
                             {!user && (
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className="px-5 sm:px-6 py-2.5 sm:py-2.5 rounded-full bg-white/90 dark:bg-purple-950/60 hover:bg-purple-50/90 dark:hover:bg-purple-900/60 text-[#4C1D95] dark:text-purple-300 border border-purple-200/90 dark:border-purple-800/60 text-xs sm:text-sm font-semibold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                                    className="px-4.5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-white/90 dark:bg-purple-950/60 hover:bg-purple-50/90 dark:hover:bg-purple-900/60 text-[#4C1D95] dark:text-purple-300 border border-purple-200/90 dark:border-purple-800/60 text-xs sm:text-sm font-semibold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0"
                                 >
                                     Login Now
                                 </button>
@@ -650,12 +650,12 @@ const HeroSection = () => {
             <CourseBubbles texts={bubbleTexts} />
 
             {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP ── */}
-            <div className="w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
+            <div className="w-full max-w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-1.5 sm:pt-3 pb-2 sm:pb-3.5 transition-colors shrink-0">
                 
-                {/* Soft Lavender Curved Wave Background Transition from Hero (with subtle defining stroke) */}
-                <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-10 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+                {/* Soft Lavender Curved Wave Background Transition from Hero */}
+                <div className="absolute -top-4 sm:-top-6 md:-top-9 lg:-top-10 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
                     <svg
-                        className="relative block w-full h-6 sm:h-8 md:h-9 lg:h-10 overflow-visible"
+                        className="relative block w-full h-4 sm:h-6 md:h-9 lg:h-10"
                         viewBox="0 0 1440 60"
                         preserveAspectRatio="none"
                     >
@@ -669,26 +669,19 @@ const HeroSection = () => {
                     </svg>
                 </div>
 
-                {/* Subtle Fade / Slide-in Animation when entering viewport */}
-                <motion.div
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                    className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20"
-                >
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                     
                     {/* Centered Small Uppercase Label with Thin Purple Dividers */}
-                    <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-5 mb-2.5 sm:mb-3">
-                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
-                        <span className="text-[9.5px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.22em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-2.5 sm:gap-4 md:gap-5 mb-1.5 sm:mb-2.5">
+                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <span className="text-[9px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                     </div>
 
-                    {/* 5-6 University / Partner Logos Evenly Spaced in One Horizontal Row (Monochrome Deep-Purple with Consistent Sizing & Generous Spacing) */}
-                    <div className="flex items-center justify-start sm:justify-center gap-8 sm:gap-11 md:gap-14 lg:gap-18 xl:gap-22 overflow-x-auto no-scrollbar w-full py-1">
+                    {/* 5-6 University / Partner Logos Evenly Spaced in One Horizontal Row */}
+                    <div className="flex items-center justify-start sm:justify-center gap-6 sm:gap-11 md:gap-14 lg:gap-18 xl:gap-22 overflow-x-auto no-scrollbar w-full py-0.5 sm:py-1">
                         {universityPartners.map((uni, idx) => (
                             <div
                                 key={idx}
@@ -697,13 +690,13 @@ const HeroSection = () => {
                                 <img
                                     src={uni.logo}
                                     alt={uni.alt || uni.name}
-                                    className="h-5 sm:h-6 md:h-6.5 w-auto max-w-[120px] sm:max-w-[135px] md:max-w-[150px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                    className="h-4.5 sm:h-6 md:h-6.5 w-auto max-w-[100px] sm:max-w-[135px] md:max-w-[150px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                 />
                             </div>
                         ))}
                     </div>
 
-                </motion.div>
+                </div>
             </div>
 
         </section>

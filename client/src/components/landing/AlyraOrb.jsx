@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 /**
  * AlyraOrb - High-Performance Cinematic Energy Ribbons
  * Elegant, dimmed, translucent ribbons positioned strictly within the right 10-15% of the page.
+ * Responsive across mobile, tablet, and desktop without clipping or horizontal overflow.
  */
 const AlyraOrb = () => {
     const canvasRef = useRef(null);
@@ -22,19 +23,21 @@ const AlyraOrb = () => {
         const resize = () => {
             isMobile = window.innerWidth < 768;
             const dpr = 1.0;
-            const w = canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
-            const h = canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
+            const parent = canvas.parentElement;
+            const w = parent && parent.clientWidth > 0 ? parent.clientWidth : window.innerWidth;
+            const h = parent && parent.clientHeight > 0 ? parent.clientHeight : window.innerHeight;
 
             canvas.width = w * dpr;
             canvas.height = h * dpr;
             ctx.scale(dpr, dpr);
-            canvas.style.width = `${w}px`;
-            canvas.style.height = `${h}px`;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
         };
 
         const handleMouseMove = (e) => {
-            mouseRef.current.targetX = (e.clientX / window.innerWidth - 0.5) * 25;
-            mouseRef.current.targetY = (e.clientY / window.innerHeight - 0.5) * 25;
+            const maxShift = isMobile ? 10 : 25;
+            mouseRef.current.targetX = (e.clientX / window.innerWidth - 0.5) * maxShift;
+            mouseRef.current.targetY = (e.clientY / window.innerHeight - 0.5) * maxShift;
         };
 
         const generateRibbonPath = (xBase, slant, amp, globalTime, direction, phaseOffset = 0) => {
@@ -43,10 +46,10 @@ const AlyraOrb = () => {
             const phaseShift = (loopT * Math.PI * 2) + phaseOffset;
 
             const points = [];
-            const step = isMobile ? 40 : 25;
+            const step = isMobile ? 35 : 25;
             const h = canvas.height || window.innerHeight;
 
-            for (let y = -150; y < h + 150; y += step) {
+            for (let y = -100; y < h + 100; y += step) {
                 const yNorm = y / h;
 
                 // Gentle S-curve
@@ -99,15 +102,29 @@ const AlyraOrb = () => {
             ctx.save();
 
             // Subtle camera oscillation
-            const camOsc = Math.sin(currentTime * 0.0006) * 8;
+            const camOsc = Math.sin(currentTime * 0.0006) * (isMobile ? 4 : 8);
             ctx.translate(camOsc, 0);
 
-            // Confine to right 10-15% space of the page
-            const areaWidth = Math.max(140, w * 0.12);
+            // Confine strictly to right 10-15% of the page
+            const areaWidth = isMobile ? Math.min(65, w * 0.14) : Math.max(140, w * 0.12);
 
             const configs = [
-                { x: w - areaWidth * 0.65, slant: 38, amp: areaWidth * 0.38, color: '#e000ff', dir: 1, phase: 0 },
-                { x: w - areaWidth * 0.28, slant: -32, amp: areaWidth * 0.30, color: '#0084ff', dir: -1, phase: Math.PI }
+                {
+                    x: w - areaWidth * 0.65,
+                    slant: isMobile ? 18 : 38,
+                    amp: areaWidth * (isMobile ? 0.32 : 0.38),
+                    color: '#e000ff',
+                    dir: 1,
+                    phase: 0
+                },
+                {
+                    x: w - areaWidth * 0.28,
+                    slant: isMobile ? -16 : -32,
+                    amp: areaWidth * (isMobile ? 0.28 : 0.30),
+                    color: '#0084ff',
+                    dir: -1,
+                    phase: Math.PI
+                }
             ];
 
             ctx.lineCap = 'round';
@@ -126,13 +143,13 @@ const AlyraOrb = () => {
                 bodyGrad.addColorStop(0.5, `${cfg.color}30`);
                 bodyGrad.addColorStop(1, `${cfg.color}06`);
 
-                const edgeSeparation = isMobile ? 6 : 14;
+                const edgeSeparation = isMobile ? 5 : 14;
 
                 [-1, 1].forEach(side => {
                     ctx.save();
                     ctx.translate(side * (edgeSeparation / 2), 0);
                     ctx.strokeStyle = bodyGrad;
-                    ctx.lineWidth = isMobile ? 2 : 3.5;
+                    ctx.lineWidth = isMobile ? 1.8 : 3.5;
                     ctx.globalAlpha = 0.28;
                     if (!isMobile) ctx.filter = 'blur(1px)';
                     ctx.stroke(mainPath);
@@ -140,7 +157,7 @@ const AlyraOrb = () => {
                 });
 
                 // 2. REFLECTIVE SPECULAR HIGHLIGHTS (Dimmed, gentle shimmer)
-                const separation = isMobile ? 18 : 45;
+                const separation = isMobile ? 12 : 45;
                 const individualTiming = currentTime + (cfg.phase * 500);
                 const streakT = (individualTiming % 5000) / 5000;
                 const streakPos = (streakT * 5000 * cfg.dir) + (cfg.dir === -1 ? 2500 : -2500);
@@ -160,14 +177,14 @@ const AlyraOrb = () => {
 
                     // Deeper atmospheric glow base
                     ctx.strokeStyle = cfg.color;
-                    ctx.lineWidth = isMobile ? 10 : 18;
+                    ctx.lineWidth = isMobile ? 8 : 18;
                     ctx.globalAlpha = 0.08;
                     if (!isMobile) ctx.filter = 'blur(6px)';
                     ctx.stroke(mainPath);
 
                     // Subtle core streak (dimmed)
                     ctx.strokeStyle = specularGrad;
-                    ctx.lineWidth = isMobile ? 2 : 3;
+                    ctx.lineWidth = isMobile ? 1.8 : 3;
                     ctx.globalAlpha = 0.42;
                     ctx.stroke(mainPath);
 
@@ -187,8 +204,8 @@ const AlyraOrb = () => {
                 const purpleHighlight = '#ffb0ff';
 
                 const extraPurpleStreaks = cfg.color === '#0084ff'
-                    ? [{ offset: 800, speed: 3800, width: 2.5, alpha: 0.26, blur: 1.5, xShift: 10 }]
-                    : [{ offset: 1800, speed: 4800, width: 3, alpha: 0.22, blur: 2, xShift: -8 }];
+                    ? [{ offset: 800, speed: 3800, width: 2.2, alpha: 0.26, blur: 1.5, xShift: 8 }]
+                    : [{ offset: 1800, speed: 4800, width: 2.5, alpha: 0.22, blur: 2, xShift: -6 }];
 
                 extraPurpleStreaks.forEach(s => {
                     const pTiming = currentTime + s.offset + (cfg.phase * 1500);
@@ -216,7 +233,7 @@ const AlyraOrb = () => {
 
                 // 4. ATMOSPHERIC SHIMMER
                 ctx.strokeStyle = cfg.color;
-                ctx.lineWidth = isMobile ? 80 : 160;
+                ctx.lineWidth = isMobile ? 50 : 160;
                 ctx.globalAlpha = 0.02;
                 if (!isMobile) ctx.filter = 'blur(45px)';
                 ctx.stroke(mainPath);
@@ -257,7 +274,13 @@ const AlyraOrb = () => {
         };
     }, []);
 
-    return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />;
+    return (
+        <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full pointer-events-none z-0"
+            style={{ width: '100%', height: '100%', display: 'block' }}
+        />
+    );
 };
 
 export default AlyraOrb;
