@@ -2,12 +2,8 @@ import React, { useEffect, useRef } from 'react';
 
 /**
  * AlyraOrb - High-Performance Cinematic Energy Ribbons
- * 
- * Optimization Log:
- * 1. Capped DPR to 1.5 (1.0 on mobile) to reduce fill rate pressure.
- * 2. Increased point step size (10 -> 20) to halve the geometry calculation.
- * 3. Reduced blur passes on mobile devices.
- * 4. Used 'screen' blending for better performance than 'lighter' where possible.
+ * Renders dual kinetic glowing S-curve ribbons (magenta and cyan)
+ * on the right edge of the screen, matching original SkillDad production aesthetic.
  */
 const AlyraOrb = () => {
     const canvasRef = useRef(null);
@@ -26,14 +22,15 @@ const AlyraOrb = () => {
 
         const resize = () => {
             isMobile = window.innerWidth < 768;
-            // Cap DPR to 1.0 to significantly reduce pixel processing load
             const dpr = 1.0;
+            const w = canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
+            const h = canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
 
-            canvas.width = window.innerWidth * dpr;
-            canvas.height = window.innerHeight * dpr;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
             ctx.scale(dpr, dpr);
-            canvas.style.width = `${window.innerWidth}px`;
-            canvas.style.height = `${window.innerHeight}px`;
+            canvas.style.width = `${w}px`;
+            canvas.style.height = `${h}px`;
         };
 
         const handleMouseMove = (e) => {
@@ -47,11 +44,11 @@ const AlyraOrb = () => {
             const phaseShift = (loopT * Math.PI * 2) + phaseOffset;
 
             const points = [];
-            // Optimization: Increased step size to reduce point count (45 mobile, 30 desktop)
-            const step = isMobile ? 45 : 30;
+            const step = isMobile ? 45 : 25;
+            const h = canvas.height || window.innerHeight;
 
-            for (let y = -200; y < window.innerHeight + 200; y += step) {
-                const yNorm = y / window.innerHeight;
+            for (let y = -200; y < h + 200; y += step) {
+                const yNorm = y / h;
 
                 // Pure majestic S-curve
                 const waveX = Math.sin(yNorm * 1.4 * Math.PI - (phaseShift * 0.4 * direction)) * amp;
@@ -77,8 +74,7 @@ const AlyraOrb = () => {
 
         let isVisible = true;
         let lastFrameTime = 0;
-        // Target ~45fps (22ms) on desktop, ~30fps (33ms) on mobile to reduce CPU pressure
-        const FRAME_BUDGET = isMobile ? 33 : 22;
+        const FRAME_BUDGET = isMobile ? 33 : 20;
 
         const render = (timestamp = 0) => {
             if (!isVisible) {
@@ -86,7 +82,6 @@ const AlyraOrb = () => {
                 return;
             }
 
-            // Frame throttle - skip frame if budget not elapsed
             if (timestamp - lastFrameTime < FRAME_BUDGET) {
                 animationFrameId = requestAnimationFrame(render);
                 return;
@@ -97,24 +92,27 @@ const AlyraOrb = () => {
             mouseRef.current.currentX += (mouseRef.current.targetX - mouseRef.current.currentX) * 0.04;
             mouseRef.current.currentY += (mouseRef.current.targetY - mouseRef.current.currentY) * 0.04;
 
-            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            const w = canvas.width || window.innerWidth;
+            const h = canvas.height || window.innerHeight;
+
+            ctx.clearRect(0, 0, w, h);
 
             ctx.save();
 
-            // Subtle camera movement
+            // Subtle camera oscillation
             const camOsc = Math.sin(currentTime * 0.0006) * 12;
             ctx.translate(camOsc, 0);
 
-            const areaWidth = window.innerWidth * 0.15;
+            const areaWidth = Math.max(220, w * 0.18);
 
             const configs = [
-                { x: window.innerWidth - areaWidth * 0.7, slant: 60, amp: areaWidth * 0.6, color: '#e000ff', dir: 1, phase: 0 },
-                { x: window.innerWidth - areaWidth * 0.3, slant: -60, amp: areaWidth * 0.5, color: '#0084ff', dir: -1, phase: Math.PI }
+                { x: w - areaWidth * 0.75, slant: 65, amp: areaWidth * 0.58, color: '#e000ff', dir: 1, phase: 0 },
+                { x: w - areaWidth * 0.32, slant: -60, amp: areaWidth * 0.48, color: '#0084ff', dir: -1, phase: Math.PI }
             ];
 
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            const isLightMode = document.documentElement.classList.contains('light-mode');
+            const isLightMode = !document.documentElement.classList.contains('dark') || document.documentElement.classList.contains('light-mode');
             ctx.globalCompositeOperation = isLightMode ? 'source-over' : 'lighter';
 
             configs.forEach(cfg => {
@@ -122,29 +120,29 @@ const AlyraOrb = () => {
 
                 ctx.save();
 
-                // 1. LIQUID-GLASS HOLLOW BODY
-                // Simplified gradient creation
-                const bodyGrad = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
-                bodyGrad.addColorStop(0, `${cfg.color}10`);
-                bodyGrad.addColorStop(0.5, `${cfg.color}40`);
-                bodyGrad.addColorStop(1, `${cfg.color}10`);
+                // 1. ATMOSPHERIC AURA HALO
+                ctx.save();
+                ctx.strokeStyle = cfg.color;
+                ctx.lineWidth = isMobile ? 35 : 75;
+                ctx.globalAlpha = isLightMode ? 0.14 : 0.08;
+                if (!isMobile) ctx.filter = 'blur(22px)';
+                ctx.stroke(mainPath);
+                ctx.restore();
 
+                // 2. VIBRANT CONTINUOUS RIBBON STRANDS
                 const edgeSeparation = isMobile ? 8 : 18;
-
-                // Draw edges
                 [-1, 1].forEach(side => {
                     ctx.save();
                     ctx.translate(side * (edgeSeparation / 2), 0);
-                    ctx.strokeStyle = bodyGrad;
-                    ctx.lineWidth = isMobile ? 3 : 8;
-                    ctx.globalAlpha = 0.3;
-                    // Disable blur on mobile/mid-range for performance
-                    if (!isMobile && window.innerWidth > 1024) ctx.filter = 'blur(1px)';
+                    ctx.strokeStyle = cfg.color;
+                    ctx.lineWidth = isMobile ? 2.5 : 4.5;
+                    ctx.globalAlpha = isLightMode ? 0.75 : 0.45;
+                    if (!isMobile && window.innerWidth > 1024) ctx.filter = 'blur(1.5px)';
                     ctx.stroke(mainPath);
                     ctx.restore();
                 });
 
-                // 2. REFLECTIVE SPECULAR HIGHLIGHTS
+                // 3. REFLECTIVE SPECULAR HIGHLIGHTS (Moving white glint)
                 const separation = isMobile ? 25 : 65;
                 const individualTiming = currentTime + (cfg.phase * 500);
                 const streakT = (individualTiming % 5000) / 5000;
@@ -152,55 +150,50 @@ const AlyraOrb = () => {
 
                 const specularGrad = ctx.createLinearGradient(0, streakPos - 600, 0, streakPos + 600);
                 specularGrad.addColorStop(0, 'transparent');
-                specularGrad.addColorStop(0.4, cfg.color);
+                specularGrad.addColorStop(0.35, cfg.color);
                 specularGrad.addColorStop(0.48, '#ffffff');
                 specularGrad.addColorStop(0.5, '#ffffff');
                 specularGrad.addColorStop(0.52, '#ffffff');
-                specularGrad.addColorStop(0.6, cfg.color);
+                specularGrad.addColorStop(0.65, cfg.color);
                 specularGrad.addColorStop(1, 'transparent');
 
                 [-1, 1].forEach(side => {
                     ctx.save();
                     ctx.translate(side * (separation / 2), 0);
 
-                    // Deeper atmospheric base - Reduced complexity
+                    // Deeper atmospheric glow base
                     ctx.strokeStyle = cfg.color;
-                    ctx.lineWidth = 20;
-                    ctx.globalAlpha = 0.15;
-                    if (!isMobile && window.innerWidth > 1024) ctx.filter = 'blur(8px)'; // Reduce heavy blur radius
+                    ctx.lineWidth = isMobile ? 14 : 26;
+                    ctx.globalAlpha = isLightMode ? 0.25 : 0.2;
+                    if (!isMobile && window.innerWidth > 1024) ctx.filter = 'blur(8px)';
                     ctx.stroke(mainPath);
 
                     // High-intensity white-hot core streak
                     ctx.strokeStyle = specularGrad;
-                    // Thinner line needs less processing
-                    ctx.lineWidth = 4;
+                    ctx.lineWidth = isMobile ? 3.5 : 5;
                     ctx.globalAlpha = 1.0;
-                    // ctx.filter = 'blur(0.5px)'; // Removed sub-pixel blur for perf
                     ctx.stroke(mainPath);
 
-                    // Reduced bloom layers on mobile
+                    // Bloom layer
                     if (!isMobile) {
-                        ctx.globalAlpha = 0.4;
-                        ctx.lineWidth = side === 1 ? 12 : 6;
-                        ctx.filter = 'blur(2px)';
+                        ctx.globalAlpha = isLightMode ? 0.5 : 0.4;
+                        ctx.lineWidth = side === 1 ? 12 : 7;
+                        ctx.filter = 'blur(2.5px)';
                         ctx.stroke(mainPath);
                     }
 
                     ctx.restore();
                 });
 
-                // 2.5 PURPLE ENERGY STREAKS
-                // Reduced count of streaks for performance
+                // 4. PURPLE ENERGY STREAKS
                 const purpleMain = '#e000ff';
                 const purpleHighlight = '#ffb0ff';
 
-                // Simplied streaks array
                 const extraPurpleStreaks = cfg.color === '#0084ff'
                     ? [{ offset: 800, speed: 3500, width: 3.5, alpha: 0.95, blur: 1.2, xShift: 15 }]
                     : [{ offset: 1800, speed: 4800, width: 4.5, alpha: 0.7, blur: 3, xShift: -12 }];
 
                 if (!isMobile) {
-                    // Add secondary streaks only on desktop
                     if (cfg.color === '#0084ff') extraPurpleStreaks.push({ offset: 3200, speed: 5200, width: 2.5, alpha: 0.75, blur: 2.5, xShift: -10 });
                 }
 
@@ -219,7 +212,6 @@ const AlyraOrb = () => {
                     ctx.save();
                     ctx.translate(s.xShift, 0);
 
-                    // Single pass for streak instead of double pass
                     ctx.strokeStyle = pGrad;
                     ctx.lineWidth = s.width;
                     ctx.globalAlpha = s.alpha;
@@ -229,12 +221,11 @@ const AlyraOrb = () => {
                     ctx.restore();
                 });
 
-                // 3. ATMOSPHERIC SHIMMER
-                // Simplified for performance
+                // 5. ATMOSPHERIC SHIMMER
                 ctx.strokeStyle = cfg.color;
-                ctx.lineWidth = isMobile ? 150 : 300;
-                ctx.globalAlpha = 0.03;
-                if (!isMobile) ctx.filter = 'blur(60px)';
+                ctx.lineWidth = isMobile ? 120 : 250;
+                ctx.globalAlpha = isLightMode ? 0.08 : 0.04;
+                if (!isMobile) ctx.filter = 'blur(55px)';
                 ctx.stroke(mainPath);
 
                 ctx.restore();
@@ -255,8 +246,6 @@ const AlyraOrb = () => {
                     animationFrameId = null;
                 }
             });
-            // Optimization: Unobserve if not needed or managing visibility manually better? 
-            // IntersectionObserver is good.
         }, { threshold: 0 });
 
         observer.observe(canvas);
