@@ -445,8 +445,22 @@ const HeroSection = () => {
                     {/* ── RIGHT COLUMN: CONSTELLATION NETWORK & FLOATING BADGES (matching Reference) ── */}
                     <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[380px] select-none z-10">
                         
-                        {/* Constellation Network SVG Layer with Small Circle Bubbles & Moving Purple Dots */}
+                        {/* Constellation Network SVG Layer with 3D Spheres & Moving Purple Dots */}
                         <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 240 380">
+                            <defs>
+                                {/* Realistic 3D purple sphere gradient matching reference */}
+                                <radialGradient id="sphere3DGrad" cx="30%" cy="28%" r="72%">
+                                    <stop offset="0%" stopColor="#FFFFFF" />
+                                    <stop offset="18%" stopColor="#E9D5FF" />
+                                    <stop offset="48%" stopColor="#A855F7" />
+                                    <stop offset="80%" stopColor="#6D28D9" />
+                                    <stop offset="100%" stopColor="#3B0764" />
+                                </radialGradient>
+                                <filter id="sphere3DShadow" x="-40%" y="-40%" width="180%" height="180%">
+                                    <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#4C1D95" floodOpacity="0.3" />
+                                </filter>
+                            </defs>
+
                             {/* Thin, sharp purple constellation tracks matching reference */}
                             <path
                                 d="M 98 65 L 95 125"
@@ -463,21 +477,21 @@ const HeroSection = () => {
                                 strokeDasharray="2 2.5"
                             />
                             <path
-                                d="M 95 125 C 92 180 108 245 120 300"
+                                d="M 95 125 C 92 180 108 245 120 295"
                                 fill="none"
                                 stroke="rgba(147, 51, 234, 0.45)"
                                 strokeWidth="0.7"
                                 strokeDasharray="2 2.5"
                             />
                             <path
-                                d="M 120 300 C 123 330 126 350 128 368"
+                                d="M 120 295 C 123 330 126 350 128 368"
                                 fill="none"
                                 stroke="rgba(147, 51, 234, 0.4)"
                                 strokeWidth="0.7"
                                 strokeDasharray="2 2.5"
                             />
                             <path
-                                d="M 120 300 Q 160 330 195 352"
+                                d="M 120 295 Q 160 330 195 352"
                                 fill="none"
                                 stroke="rgba(147, 51, 234, 0.35)"
                                 strokeWidth="0.7"
@@ -491,25 +505,25 @@ const HeroSection = () => {
                             <circle cx="160" cy="330" r="1.6" fill="#A855F7" />
                             <circle cx="195" cy="352" r="2.0" fill="#8B5CF6" />
 
-                            {/* Small Purple Circle Bubbles (Clean, refined, small - not bulky 3D spheres) */}
-                            {/* Bubble 1 (Top Left) */}
-                            <circle cx="95" cy="125" r="3.2" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.85)" strokeWidth="0.6" />
+                            {/* 3D Purple Spheres / Orbs matching reference */}
+                            {/* Medium Sphere 1 (Top Left) */}
+                            <circle cx="95" cy="125" r="5.5" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
 
-                            {/* Bubble 2 (Top Right) */}
-                            <circle cx="215" cy="132" r="2.8" fill="#A855F7" stroke="rgba(255, 255, 255, 0.85)" strokeWidth="0.6" />
+                            {/* Medium Sphere 2 (Top Right) */}
+                            <circle cx="215" cy="132" r="5.0" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
 
-                            {/* Bubble 3 below Digital Marketing (Refined circle bubble) */}
-                            <circle cx="120" cy="300" r="4.8" fill="#7C3AED" stroke="rgba(255, 255, 255, 0.9)" strokeWidth="0.8" />
+                            {/* Large Central 3D Purple Orb below Digital Marketing */}
+                            <circle cx="120" cy="295" r="12" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
 
-                            {/* Bubble 4 Lower */}
-                            <circle cx="128" cy="368" r="2.5" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.5" />
+                            {/* Lower Orb */}
+                            <circle cx="128" cy="368" r="4.2" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
 
                             {/* Moving Purple Glowing Dots through lines (matching Reference animation) */}
                             <circle r="1.8" fill="#7C3AED" className="filter drop-shadow-[0_0_2px_#A855F7]">
                                 <animateMotion
                                     dur="4.5s"
                                     repeatCount="indefinite"
-                                    path="M 95 125 C 92 180 108 245 120 300"
+                                    path="M 95 125 C 92 180 108 245 120 295"
                                 />
                             </circle>
 
@@ -525,7 +539,7 @@ const HeroSection = () => {
                                 <animateMotion
                                     dur="3.4s"
                                     repeatCount="indefinite"
-                                    path="M 120 300 C 123 330 126 350 128 368"
+                                    path="M 120 295 C 123 330 126 350 128 368"
                                 />
                             </circle>
 
@@ -533,7 +547,7 @@ const HeroSection = () => {
                                 <animateMotion
                                     dur="4.0s"
                                     repeatCount="indefinite"
-                                    path="M 120 300 Q 160 330 195 352"
+                                    path="M 120 295 Q 160 330 195 352"
                                 />
                             </circle>
                         </svg>
@@ -592,19 +606,19 @@ const HeroSection = () => {
             {/* Decorative Flowing Purple Ribbon / Wave on Right Side (Custom SVG matching Reference) */}
             <HeroFlowingWave />
 
-            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Organic Wave Background matching Reference #F3F4FD) ── */}
-            <div className="w-full relative z-20 bg-[#F3F4FD] dark:bg-[#0B081A] pt-3 sm:pt-4 pb-3 sm:pb-4 transition-colors">
-                {/* Organic Wave Boundary at Top */}
-                <div className="absolute -top-7 sm:-top-10 md:-top-12 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Rich Purple Background matching Reference #ECE7FD) ── */}
+            <div className="w-full relative z-20 bg-[#ECE7FD] dark:bg-[#120B26] pt-3 sm:pt-4 pb-3 sm:pb-4 transition-colors">
+                {/* Organic Wave Boundary at Top matching Reference Curve */}
+                <div className="absolute -top-7 sm:-top-10 md:-top-12 lg:-top-14 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
                     <svg
-                        className="relative block w-full h-7 sm:h-10 md:h-12"
+                        className="relative block w-full h-7 sm:h-10 md:h-12 lg:h-14"
                         viewBox="0 0 1440 70"
                         preserveAspectRatio="none"
                     >
                         <path
-                            d="M 0 32 C 340 76 560 76 840 42 C 1120 12 1320 22 1440 14 L 1440 70 L 0 70 Z"
-                            fill="#F3F4FD"
-                            className="dark:fill-[#0B081A] transition-colors"
+                            d="M 0 24 C 180 12 300 48 480 50 C 660 52 740 34 880 36 C 1020 38 1100 64 1260 56 C 1360 50 1410 26 1440 16 L 1440 70 L 0 70 Z"
+                            fill="#ECE7FD"
+                            className="dark:fill-[#120B26] transition-colors"
                         />
                     </svg>
                 </div>
