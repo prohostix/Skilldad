@@ -8,7 +8,6 @@ import {
     Megaphone,
     GraduationCap
 } from 'lucide-react';
-import AlyraOrb from './AlyraOrb';
 import { useUser } from '../../context/UserContext';
 import { getMediaUrl } from '../../utils/media';
 
@@ -26,172 +25,6 @@ import londonLogo from '../../assets/hero/partners/london.png';
 import southamptonLogo from '../../assets/hero/partners/southampton.png';
 import birminghamLogo from '../../assets/hero/partners/birmingham.png';
 import utsLogo from '../../assets/hero/partners/uts.png';
-
-/* ─── Hero Bubble Floating Physics & Pop Keyframes ─────────────── */
-const HERO_BUBBLE_CSS = `
-@keyframes hero-bubble-float {
-    0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-    8% { opacity: 1; }
-    20% { transform: translate(calc(var(--drift-x) * 0.4), -115px) scale(0.82); }
-    40% { transform: translate(calc(var(--drift-x) * 0.85), -270px) scale(0.95); }
-    60% { transform: translate(calc(var(--drift-x) * 0.55), -410px) scale(1); }
-    80% { transform: translate(calc(var(--drift-x) * 0.9), -545px) scale(1.02); }
-    94% { opacity: 1; transform: translate(calc(var(--drift-x) * 0.65), -625px) scale(1.05); }
-    100% { transform: translate(calc(var(--drift-x) * 0.75), -660px) scale(1.05); opacity: 0; }
-}
-@keyframes hero-bubble-visual-mid {
-    0%, 41% { opacity: 1; transform: scale(1); }
-    43% { opacity: 0; transform: scale(1.2); }
-    100% { opacity: 0; transform: scale(1.2); }
-}
-@keyframes hero-bubble-text-mid {
-    0%, 54% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-    68% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-@keyframes hero-shard-mid {
-    0%, 39% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) scale(0.5) rotate(0deg); }
-    44% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg); }
-    66% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-    100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-}
-@keyframes hero-bubble-visual-high {
-    0%, 61% { opacity: 1; transform: scale(1); }
-    63% { opacity: 0; transform: scale(1.2); }
-    100% { opacity: 0; transform: scale(1.2); }
-}
-@keyframes hero-bubble-text-high {
-    0%, 74% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-    88% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-@keyframes hero-shard-high {
-    0%, 59% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) scale(0.5) rotate(0deg); }
-    64% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg); }
-    86% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-    100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-}
-`;
-
-/* ─── Floating Course & Stat Bubbles (Right Side) ──────────────── */
-const bubbleVisualStyle = {
-    background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.92), rgba(192,38,255,0.42) 55%, rgba(76,29,149,0.28) 100%)',
-    border: '1px solid rgba(255,255,255,0.65)',
-    boxShadow: '0 0 16px rgba(192,38,255,0.38)'
-};
-
-const PLAIN_BUBBLES = [
-    { id: 'p1', left: 12, size: 18, duration: 9, delay: 0.8, drift: 45 },
-    { id: 'p2', left: 62, size: 14, duration: 10.5, delay: 4.5, drift: 55 },
-    { id: 'p3', left: 38, size: 20, duration: 11, delay: 2.5, drift: 35 },
-    { id: 'p4', left: 82, size: 16, duration: 9.5, delay: 6.0, drift: 40 },
-];
-
-const CONVERT_BUBBLES = [
-    { id: 'c1', left: 16, size: 28, duration: 9, delay: 0, pop: 'mid', drift: 50 },
-    { id: 'c2', left: 52, size: 24, duration: 10, delay: 4.5, pop: 'high', drift: 40 },
-    { id: 'c3', left: 76, size: 22, duration: 8.5, delay: 8, pop: 'mid', drift: 45 },
-];
-
-const SHARD_ANGLES = [0, 60, 120, 180, 240, 300];
-const getShards = (bubble) => {
-    const dist = bubble.size * 2.3;
-    const offset = (bubble.id.charCodeAt(1) * 17) % 60;
-    return SHARD_ANGLES.map((deg) => {
-        const rad = ((deg + offset) * Math.PI) / 180;
-        return {
-            dx: Math.round(Math.cos(rad) * dist),
-            dy: Math.round(Math.sin(rad) * dist),
-            rot: Math.round(90 + deg)
-        };
-    });
-};
-
-const CourseBubbles = ({ texts }) => {
-    const defaultTexts = ['196547+Openings', '215676+Hiring Partners'];
-    const activeTexts = (Array.isArray(texts) && texts.length > 0) ? texts : defaultTexts;
-
-    return (
-        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[46%] lg:w-[40%] xl:w-[38%] z-[16] pointer-events-none select-none overflow-hidden">
-            {/* Plain bubbles - rise and drift off the top */}
-            {PLAIN_BUBBLES.map((b) => (
-                <div
-                    key={b.id}
-                    className="absolute bottom-0 rounded-full"
-                    style={{
-                        left: `${b.left}%`,
-                        width: b.size,
-                        height: b.size,
-                        ...bubbleVisualStyle,
-                        '--drift-x': `${b.drift}px`,
-                        animation: `hero-bubble-float ${b.duration}s ease-in-out infinite`,
-                        animationDelay: `${b.delay}s`,
-                        animationFillMode: 'backwards'
-                    }}
-                />
-            ))}
-
-            {/* Convert bubbles - rise and pop into badge text pills */}
-            {CONVERT_BUBBLES.map((b, i) => {
-                const label = activeTexts[i % activeTexts.length];
-                return (
-                    <div
-                        key={b.id}
-                        className="absolute bottom-0"
-                        style={{
-                            left: `${b.left}%`,
-                            width: b.size,
-                            height: b.size,
-                            '--drift-x': `${b.drift}px`,
-                            animation: `hero-bubble-float ${b.duration}s ease-in-out infinite`,
-                            animationDelay: `${b.delay}s`,
-                            animationFillMode: 'backwards'
-                        }}
-                    >
-                        <div className="relative w-full h-full">
-                            <div
-                                className="absolute inset-0 rounded-full"
-                                style={{
-                                    ...bubbleVisualStyle,
-                                    animation: `hero-bubble-visual-${b.pop} ${b.duration}s ease-in-out infinite`,
-                                    animationDelay: `${b.delay}s`,
-                                    animationFillMode: 'backwards'
-                                }}
-                            />
-                            {getShards(b).map((s, si) => (
-                                <div
-                                    key={si}
-                                    className="absolute top-1/2 left-1/2 rounded-full"
-                                    style={{
-                                        width: Math.max(4, b.size * 0.22),
-                                        height: Math.max(4, b.size * 0.22),
-                                        ...bubbleVisualStyle,
-                                        '--dx': `${s.dx}px`,
-                                        '--dy': `${s.dy}px`,
-                                        '--rot': `${s.rot}deg`,
-                                        animation: `hero-shard-${b.pop} ${b.duration}s ease-out infinite`,
-                                        animationDelay: `${b.delay}s`,
-                                        animationFillMode: 'backwards'
-                                    }}
-                                />
-                            ))}
-                            <div
-                                className="absolute top-1/2 left-1/2 whitespace-nowrap px-3 py-1 text-[11.5px] sm:text-xs font-bold tracking-tight text-slate-900 dark:text-purple-100 bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md rounded-full shadow-[0_4px_16px_rgba(109,40,217,0.18)] border border-purple-200/90 dark:border-purple-700/50"
-                                style={{
-                                    animation: `hero-bubble-text-${b.pop} ${b.duration}s ease-in-out infinite`,
-                                    animationDelay: `${b.delay}s`,
-                                    animationFillMode: 'backwards'
-                                }}
-                            >
-                                {label}
-                            </div>
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
-    );
-};
 
 const HeroSection = () => {
     const navigate = useNavigate();
@@ -215,27 +48,6 @@ const HeroSection = () => {
     ];
 
     const [universityPartners, setUniversityPartners] = useState(defaultUniversityPartners);
-
-    // Floating Bubble Pop Texts (defaults to reference counts: 196547+Openings, 215676+Hiring Partners)
-    const defaultBubbleTexts = ['196547+Openings', '215676+Hiring Partners'];
-    const [bubbleTexts, setBubbleTexts] = useState(defaultBubbleTexts);
-
-    useEffect(() => {
-        const fetchLandingCms = async () => {
-            try {
-                const res = await fetch('/api/public/cms/landing_page');
-                const data = await res.json();
-                const items = data?.hero_bubbles?.items;
-                if (Array.isArray(items) && items.length > 0) {
-                    const parsed = items.map(i => i.text).filter(Boolean);
-                    if (parsed.length > 0) setBubbleTexts(parsed);
-                }
-            } catch (e) {
-                // Keep default reference counts
-            }
-        };
-        fetchLandingCms();
-    }, []);
 
     useEffect(() => {
         const fetchPartners = async () => {
@@ -349,23 +161,17 @@ const HeroSection = () => {
 
     return (
         <section className="relative w-full min-h-[600px] lg:h-[calc(100vh-64px)] lg:min-h-[630px] lg:max-h-[780px] xl:max-h-[810px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-2 sm:pt-2.5 pb-0">
-            <style dangerouslySetInnerHTML={{ __html: HERO_BUBBLE_CSS }} />
-
-            {/* Kinetic Energy Ribbon System (Right Edge Background) */}
-            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                <AlyraOrb />
-            </div>
             
             {/* Ambient Lighting Orbs */}
             <div className="absolute top-1/4 -left-20 w-[440px] h-[440px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
             <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-200/25 dark:bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Main Hero Container */}
-            <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-1 sm:py-2">
+            <div className="flex-1 flex items-center justify-start lg:justify-between max-w-7xl mx-auto px-5 sm:px-8 lg:px-8 w-full relative z-20 py-4 sm:py-6 lg:py-2">
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center">
 
-                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
-                    <div className="lg:col-span-5 flex items-center justify-center relative select-none">
+                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Hidden on mobile responsive, visible on desktop) ── */}
+                    <div className="hidden lg:flex lg:col-span-5 items-center justify-center relative select-none">
                         <div className="w-[290px] sm:w-[355px] md:w-[380px] lg:w-[395px] xl:w-[410px] aspect-square relative flex items-center justify-center shrink-0">
                             {/* Very Thin, Standard Purple Connection Arc Lines & Moving Purple Dots */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
@@ -600,8 +406,8 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* ── CENTER COLUMN: EDITORIAL HEADING & ACTIONS (7 cols, clean spacing) ── */}
-                    <div className="lg:col-span-7 flex flex-col items-start text-left pl-0 lg:pl-2 xl:pl-4 z-20">
+                    {/* ── CENTER-LEFT COLUMN: EDITORIAL HEADING & ACTIONS (Placed center-left on mobile) ── */}
+                    <div className="w-full lg:col-span-7 flex flex-col items-start text-left pl-1 sm:pl-2 lg:pl-2 xl:pl-4 z-20 my-auto py-8 sm:py-12 lg:py-0 max-w-xl lg:max-w-none">
                         
                         {/* Eyebrow matching Reference */}
                         <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
@@ -650,8 +456,152 @@ const HeroSection = () => {
                 </div>
             </div>
 
-            {/* ── RIGHT EDGE: FLOATING COURSE POP BUBBLES ── */}
-            <CourseBubbles texts={bubbleTexts} />
+            {/* ── RIGHT EDGE: CONSTELLATION NETWORK, 3D SPHERES & EXACT FLOWING SILK WAVES (Flush with page edge, no gap) ── */}
+            <div className="absolute right-0 top-[10%] sm:top-[12%] lg:top-[14%] bottom-[50px] sm:bottom-[60px] lg:bottom-[70px] w-[320px] sm:w-[350px] md:w-[380px] lg:w-[410px] xl:w-[450px] hidden lg:flex flex-col items-end justify-center select-none z-10 pointer-events-auto pr-0 overflow-visible">
+                
+                {/* SVG Layer: Exact flowing silk ribbon waves + constellation network tracks + 3D spheres + moving glowing particles */}
+                <svg
+                    className="absolute -right-2 -bottom-6 w-[340px] sm:w-[380px] h-[520px] pointer-events-none overflow-visible z-0"
+                    viewBox="0 0 353 595"
+                    fill="none"
+                >
+                    <defs>
+                        {/* Main Bold Silk Ribbon Gradient (Rich vibrant royal purple to violet) */}
+                        <linearGradient id="mainSilkGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#9333EA" stopOpacity="0.92" />
+                            <stop offset="28%" stopColor="#7C3AED" stopOpacity="0.98" />
+                            <stop offset="65%" stopColor="#6D28D9" stopOpacity="0.98" />
+                            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.88" />
+                        </linearGradient>
+
+                        {/* Mid-layer Translucent Violet Ribbon Gradient */}
+                        <linearGradient id="midVioletGrad" x1="10%" y1="90%" x2="90%" y2="10%">
+                            <stop offset="0%" stopColor="#DDD6FE" stopOpacity="0.25" />
+                            <stop offset="30%" stopColor="#C4B5FD" stopOpacity="0.65" />
+                            <stop offset="70%" stopColor="#A855F7" stopOpacity="0.75" />
+                            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.45" />
+                        </linearGradient>
+
+                        {/* Upper Sheer Lavender Aura Wave */}
+                        <linearGradient id="sheerAuraGrad" x1="100%" y1="10%" x2="20%" y2="90%">
+                            <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.55" />
+                            <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.45" />
+                            <stop offset="75%" stopColor="#C4B5FD" stopOpacity="0.30" />
+                            <stop offset="100%" stopColor="#9333EA" stopOpacity="0.08" />
+                        </linearGradient>
+
+                        {/* Filters */}
+                        <filter id="silkBlur" x="-30%" y="-30%" width="160%" height="160%">
+                            <feGaussianBlur stdDeviation="9" />
+                        </filter>
+                        <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="4" />
+                        </filter>
+                        <filter id="ribbonDropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="-2" dy="6" stdDeviation="9" floodColor="#4C1D95" floodOpacity="0.26" />
+                        </filter>
+                    </defs>
+
+                    {/* ── 1. UPPER SHEER CHIFFON AURA (Flowing down from top right) ── */}
+                    <motion.path
+                        animate={{ y: [0, -4, 0], x: [0, -2, 0] }}
+                        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+                        d="M 353 90
+                           C 330 180, 305 270, 268 350
+                           C 225 435, 160 485, 90 520
+                           C 145 480, 230 430, 280 355
+                           C 320 280, 342 185, 353 105 Z"
+                        fill="url(#sheerAuraGrad)"
+                        filter="url(#silkBlur)"
+                    />
+
+                    {/* ── 2. MID-LAYER TRANSLUCENT VIOLET RIBBON ── */}
+                    <motion.path
+                        animate={{ y: [0, -5, 0], x: [0, -3, 0] }}
+                        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+                        d="M 60 535
+                           C 115 505, 185 455, 255 400
+                           C 290 370, 325 340, 353 305
+                           L 353 375
+                           C 320 405, 280 438, 235 470
+                           C 175 512, 120 535, 60 545 Z"
+                        fill="url(#midVioletGrad)"
+                        filter="url(#softGlow)"
+                    />
+
+                    {/* ── 3. MAIN BOLD PURPLE SILK RIBBON (Exact needle tip & swooping arc) ── */}
+                    <motion.path
+                        animate={{ y: [0, -6, 0], x: [0, -2, 0] }}
+                        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                        d="M -2 546
+                           C 40 552, 95 545, 160 515
+                           C 225 485, 290 438, 353 372
+                           L 353 438
+                           C 290 488, 225 532, 155 555
+                           C 85 578, 30 565, -2 546 Z"
+                        fill="url(#mainSilkGrad)"
+                        filter="url(#ribbonDropShadow)"
+                    />
+
+                    {/* Satin Crest Specular Line */}
+                    <motion.path
+                        animate={{ y: [0, -6, 0], x: [0, -2, 0] }}
+                        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                        d="M -2 546
+                           C 40 552, 95 545, 160 515
+                           C 225 485, 290 438, 353 372"
+                        stroke="rgba(255, 255, 255, 0.48)"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        fill="none"
+                    />
+                </svg>
+
+                {/* 3 Floating Badges matching Reference */}
+                <div className="space-y-6 sm:space-y-7 relative z-20 flex flex-col items-end pr-2 pt-2">
+                    {/* 1. Hospital Administration */}
+                    <motion.div
+                        animate={{ y: [-4, 4, -4] }}
+                        transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
+                        className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-1"
+                    >
+                        <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
+                            <Building2 size={13} className="text-[#6D28D9] dark:text-purple-300" />
+                        </div>
+                        <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
+                            Hospital Administration
+                        </span>
+                    </motion.div>
+
+                    {/* 2. Data Analyst */}
+                    <motion.div
+                        animate={{ y: [4, -4, 4] }}
+                        transition={{ duration: 5.4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+                        className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform -mr-1"
+                    >
+                        <div className="w-6 h-6 rounded-lg bg-[#E0F2FE] dark:bg-cyan-950/50 flex items-center justify-center shrink-0">
+                            <BarChart3 size={13} className="text-[#0284C7] dark:text-cyan-300" />
+                        </div>
+                        <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
+                            Data Analyst
+                        </span>
+                    </motion.div>
+
+                    {/* 3. Digital Marketing */}
+                    <motion.div
+                        animate={{ y: [-3, 4, -3] }}
+                        transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                        className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-2"
+                    >
+                        <div className="w-6 h-6 rounded-lg bg-purple-100/70 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
+                            <Megaphone size={13} className="text-[#7C3AED] dark:text-purple-300" />
+                        </div>
+                        <span className="text-[11.5px] font-semibold text-slate-800 dark:text-purple-100 whitespace-nowrap">
+                            Digital Marketing
+                        </span>
+                    </motion.div>
+                </div>
+            </div>
 
             {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP ── */}
             <div className="w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
