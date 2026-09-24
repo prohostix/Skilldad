@@ -287,7 +287,8 @@ const Services = () => {
             description: 'Get personalized course and career recommendations with our intelligent AI advisory engine.',
             icon: Brain,
             tag: 'Intelligent Advisory',
-            rotation: 'lg:-rotate-[8deg]',
+            rotation: 'lg:-rotate-[12deg]',
+            verticalOffset: 'md:translate-y-5 lg:translate-y-6',
             entranceDelay: 0.18,
             baseZ: 'z-10'
         },
@@ -297,6 +298,7 @@ const Services = () => {
             icon: Smartphone,
             tag: 'Anytime Access',
             rotation: 'lg:rotate-0',
+            verticalOffset: 'md:-translate-y-1 lg:-translate-y-2',
             entranceDelay: 0.05,
             baseZ: 'z-20'
         },
@@ -305,9 +307,10 @@ const Services = () => {
             description: 'Scalable, high-speed, and reliable cloud technology ensuring 99.9% uninterrupted learning uptime.',
             icon: Cloud,
             tag: '99.9% Uptime',
-            rotation: 'lg:rotate-[7deg]',
+            rotation: 'lg:rotate-[11deg]',
+            verticalOffset: 'md:translate-y-5 lg:translate-y-6',
             entranceDelay: 0.30,
-            baseZ: 'z-30'
+            baseZ: 'z-15'
         }
     ];
 
@@ -569,7 +572,7 @@ const Services = () => {
 
             {/* ── SECTION 3: ADVANCED PLATFORM CAPABILITIES (MATCHING REFERENCE VIDEO AT 0:00:07) ── */}
             <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
-                <div className="max-w-7xl mx-auto">
+                <div className="max-w-6xl mx-auto">
 
                     {/* Light Purple Rounded Container Card Matching Reference Video */}
                     <div className="relative rounded-[24px] sm:rounded-[32px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 shadow-[0_16px_40px_-15px_rgba(76,29,149,0.10)] overflow-hidden">
@@ -639,7 +642,7 @@ const Services = () => {
                         </div>
 
                         {/* 3 Angled Overlapping Cards with Video Staggered Entrance Animation & Dynamic Selection Color */}
-                        <div className="flex flex-col md:flex-row items-center justify-center -space-y-4 md:space-y-0 md:-space-x-7 lg:-space-x-9 pt-1 pb-1 relative z-10 max-w-4xl mx-auto">
+                        <div className="flex flex-col md:flex-row items-center justify-center -space-y-3 md:space-y-0 md:-space-x-3 lg:-space-x-4 pt-1 pb-3 relative z-10 max-w-4xl mx-auto">
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;
                                 const isSelected = selectedCapability === idx;
@@ -662,8 +665,8 @@ const Services = () => {
                                             transition: { duration: 0.2, ease: 'easeOut' }
                                         }}
                                         onClick={() => setSelectedCapability(idx)}
-                                        className={`w-full max-w-[250px] sm:max-w-[260px] md:w-[245px] lg:w-[265px] shrink-0 relative group cursor-pointer ${capability.rotation} ${
-                                            isSelected ? 'z-35' : capability.baseZ
+                                        className={`w-full max-w-[245px] sm:max-w-[250px] md:w-[240px] lg:w-[255px] shrink-0 relative group cursor-pointer ${capability.rotation} ${capability.verticalOffset} ${
+                                            isSelected ? 'z-30' : capability.baseZ
                                         } transition-all duration-300`}
                                     >
                                         <div
