@@ -2,8 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 /**
  * AlyraOrb - High-Performance Cinematic Energy Ribbons
- * Renders dual kinetic glowing S-curve ribbons (magenta and cyan)
- * on the right edge of the screen, matching original SkillDad production aesthetic.
+ * Elegant, dimmed, translucent ribbons positioned strictly within the right 10-15% of the page.
  */
 const AlyraOrb = () => {
     const canvasRef = useRef(null);
@@ -34,8 +33,8 @@ const AlyraOrb = () => {
         };
 
         const handleMouseMove = (e) => {
-            mouseRef.current.targetX = (e.clientX / window.innerWidth - 0.5) * 40;
-            mouseRef.current.targetY = (e.clientY / window.innerHeight - 0.5) * 40;
+            mouseRef.current.targetX = (e.clientX / window.innerWidth - 0.5) * 25;
+            mouseRef.current.targetY = (e.clientY / window.innerHeight - 0.5) * 25;
         };
 
         const generateRibbonPath = (xBase, slant, amp, globalTime, direction, phaseOffset = 0) => {
@@ -44,19 +43,19 @@ const AlyraOrb = () => {
             const phaseShift = (loopT * Math.PI * 2) + phaseOffset;
 
             const points = [];
-            const step = isMobile ? 45 : 25;
+            const step = isMobile ? 40 : 25;
             const h = canvas.height || window.innerHeight;
 
-            for (let y = -200; y < h + 200; y += step) {
+            for (let y = -150; y < h + 150; y += step) {
                 const yNorm = y / h;
 
-                // Pure majestic S-curve
-                const waveX = Math.sin(yNorm * 1.4 * Math.PI - (phaseShift * 0.4 * direction)) * amp;
+                // Gentle S-curve
+                const waveX = Math.sin(yNorm * 1.3 * Math.PI - (phaseShift * 0.4 * direction)) * amp;
 
                 // Organic slant
                 const slantOffset = slant * (yNorm - 0.5);
 
-                const mouseShift = mouseRef.current.currentX * (0.12 + (1 - yNorm) * 0.18);
+                const mouseShift = mouseRef.current.currentX * (0.08 + (1 - yNorm) * 0.12);
                 const x = xBase + slantOffset + waveX + mouseShift;
                 points.push({ x, y });
             }
@@ -100,14 +99,15 @@ const AlyraOrb = () => {
             ctx.save();
 
             // Subtle camera oscillation
-            const camOsc = Math.sin(currentTime * 0.0006) * 12;
+            const camOsc = Math.sin(currentTime * 0.0006) * 8;
             ctx.translate(camOsc, 0);
 
-            const areaWidth = Math.max(220, w * 0.18);
+            // Confine to right 10-15% space of the page
+            const areaWidth = Math.max(140, w * 0.12);
 
             const configs = [
-                { x: w - areaWidth * 0.75, slant: 65, amp: areaWidth * 0.58, color: '#e000ff', dir: 1, phase: 0 },
-                { x: w - areaWidth * 0.32, slant: -60, amp: areaWidth * 0.48, color: '#0084ff', dir: -1, phase: Math.PI }
+                { x: w - areaWidth * 0.65, slant: 38, amp: areaWidth * 0.38, color: '#e000ff', dir: 1, phase: 0 },
+                { x: w - areaWidth * 0.28, slant: -32, amp: areaWidth * 0.30, color: '#0084ff', dir: -1, phase: Math.PI }
             ];
 
             ctx.lineCap = 'round';
@@ -120,41 +120,38 @@ const AlyraOrb = () => {
 
                 ctx.save();
 
-                // 1. ATMOSPHERIC AURA HALO
-                ctx.save();
-                ctx.strokeStyle = cfg.color;
-                ctx.lineWidth = isMobile ? 35 : 75;
-                ctx.globalAlpha = isLightMode ? 0.14 : 0.08;
-                if (!isMobile) ctx.filter = 'blur(22px)';
-                ctx.stroke(mainPath);
-                ctx.restore();
+                // 1. LIQUID-GLASS HOLLOW BODY (Dim, soft gradient)
+                const bodyGrad = ctx.createLinearGradient(0, 0, 0, h);
+                bodyGrad.addColorStop(0, `${cfg.color}06`);
+                bodyGrad.addColorStop(0.5, `${cfg.color}30`);
+                bodyGrad.addColorStop(1, `${cfg.color}06`);
 
-                // 2. VIBRANT CONTINUOUS RIBBON STRANDS
-                const edgeSeparation = isMobile ? 8 : 18;
+                const edgeSeparation = isMobile ? 6 : 14;
+
                 [-1, 1].forEach(side => {
                     ctx.save();
                     ctx.translate(side * (edgeSeparation / 2), 0);
-                    ctx.strokeStyle = cfg.color;
-                    ctx.lineWidth = isMobile ? 2.5 : 4.5;
-                    ctx.globalAlpha = isLightMode ? 0.75 : 0.45;
-                    if (!isMobile && window.innerWidth > 1024) ctx.filter = 'blur(1.5px)';
+                    ctx.strokeStyle = bodyGrad;
+                    ctx.lineWidth = isMobile ? 2 : 3.5;
+                    ctx.globalAlpha = 0.28;
+                    if (!isMobile) ctx.filter = 'blur(1px)';
                     ctx.stroke(mainPath);
                     ctx.restore();
                 });
 
-                // 3. REFLECTIVE SPECULAR HIGHLIGHTS (Moving white glint)
-                const separation = isMobile ? 25 : 65;
+                // 2. REFLECTIVE SPECULAR HIGHLIGHTS (Dimmed, gentle shimmer)
+                const separation = isMobile ? 18 : 45;
                 const individualTiming = currentTime + (cfg.phase * 500);
                 const streakT = (individualTiming % 5000) / 5000;
-                const streakPos = (streakT * 6000 * cfg.dir) + (cfg.dir === -1 ? 3000 : -3000);
+                const streakPos = (streakT * 5000 * cfg.dir) + (cfg.dir === -1 ? 2500 : -2500);
 
-                const specularGrad = ctx.createLinearGradient(0, streakPos - 600, 0, streakPos + 600);
+                const specularGrad = ctx.createLinearGradient(0, streakPos - 450, 0, streakPos + 450);
                 specularGrad.addColorStop(0, 'transparent');
-                specularGrad.addColorStop(0.35, cfg.color);
-                specularGrad.addColorStop(0.48, '#ffffff');
-                specularGrad.addColorStop(0.5, '#ffffff');
-                specularGrad.addColorStop(0.52, '#ffffff');
-                specularGrad.addColorStop(0.65, cfg.color);
+                specularGrad.addColorStop(0.38, cfg.color);
+                specularGrad.addColorStop(0.48, 'rgba(255, 255, 255, 0.7)');
+                specularGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.85)');
+                specularGrad.addColorStop(0.52, 'rgba(255, 255, 255, 0.7)');
+                specularGrad.addColorStop(0.62, cfg.color);
                 specularGrad.addColorStop(1, 'transparent');
 
                 [-1, 1].forEach(side => {
@@ -163,46 +160,42 @@ const AlyraOrb = () => {
 
                     // Deeper atmospheric glow base
                     ctx.strokeStyle = cfg.color;
-                    ctx.lineWidth = isMobile ? 14 : 26;
-                    ctx.globalAlpha = isLightMode ? 0.25 : 0.2;
-                    if (!isMobile && window.innerWidth > 1024) ctx.filter = 'blur(8px)';
+                    ctx.lineWidth = isMobile ? 10 : 18;
+                    ctx.globalAlpha = 0.08;
+                    if (!isMobile) ctx.filter = 'blur(6px)';
                     ctx.stroke(mainPath);
 
-                    // High-intensity white-hot core streak
+                    // Subtle core streak (dimmed)
                     ctx.strokeStyle = specularGrad;
-                    ctx.lineWidth = isMobile ? 3.5 : 5;
-                    ctx.globalAlpha = 1.0;
+                    ctx.lineWidth = isMobile ? 2 : 3;
+                    ctx.globalAlpha = 0.42;
                     ctx.stroke(mainPath);
 
                     // Bloom layer
                     if (!isMobile) {
-                        ctx.globalAlpha = isLightMode ? 0.5 : 0.4;
-                        ctx.lineWidth = side === 1 ? 12 : 7;
-                        ctx.filter = 'blur(2.5px)';
+                        ctx.globalAlpha = 0.16;
+                        ctx.lineWidth = side === 1 ? 8 : 4;
+                        ctx.filter = 'blur(2px)';
                         ctx.stroke(mainPath);
                     }
 
                     ctx.restore();
                 });
 
-                // 4. PURPLE ENERGY STREAKS
+                // 3. PURPLE ENERGY STREAKS (Dimmed)
                 const purpleMain = '#e000ff';
                 const purpleHighlight = '#ffb0ff';
 
                 const extraPurpleStreaks = cfg.color === '#0084ff'
-                    ? [{ offset: 800, speed: 3500, width: 3.5, alpha: 0.95, blur: 1.2, xShift: 15 }]
-                    : [{ offset: 1800, speed: 4800, width: 4.5, alpha: 0.7, blur: 3, xShift: -12 }];
-
-                if (!isMobile) {
-                    if (cfg.color === '#0084ff') extraPurpleStreaks.push({ offset: 3200, speed: 5200, width: 2.5, alpha: 0.75, blur: 2.5, xShift: -10 });
-                }
+                    ? [{ offset: 800, speed: 3800, width: 2.5, alpha: 0.26, blur: 1.5, xShift: 10 }]
+                    : [{ offset: 1800, speed: 4800, width: 3, alpha: 0.22, blur: 2, xShift: -8 }];
 
                 extraPurpleStreaks.forEach(s => {
                     const pTiming = currentTime + s.offset + (cfg.phase * 1500);
                     const pT = (pTiming % s.speed) / s.speed;
-                    const pPos = (pT * 10000 * cfg.dir) + (cfg.dir === -1 ? 5000 : -5000);
+                    const pPos = (pT * 8000 * cfg.dir) + (cfg.dir === -1 ? 4000 : -4000);
 
-                    const pGrad = ctx.createLinearGradient(0, pPos - 1200, 0, pPos + 1200);
+                    const pGrad = ctx.createLinearGradient(0, pPos - 800, 0, pPos + 800);
                     pGrad.addColorStop(0, 'transparent');
                     pGrad.addColorStop(0.4, purpleMain);
                     pGrad.addColorStop(0.5, '#ffffff');
@@ -221,11 +214,11 @@ const AlyraOrb = () => {
                     ctx.restore();
                 });
 
-                // 5. ATMOSPHERIC SHIMMER
+                // 4. ATMOSPHERIC SHIMMER
                 ctx.strokeStyle = cfg.color;
-                ctx.lineWidth = isMobile ? 120 : 250;
-                ctx.globalAlpha = isLightMode ? 0.08 : 0.04;
-                if (!isMobile) ctx.filter = 'blur(55px)';
+                ctx.lineWidth = isMobile ? 80 : 160;
+                ctx.globalAlpha = 0.02;
+                if (!isMobile) ctx.filter = 'blur(45px)';
                 ctx.stroke(mainPath);
 
                 ctx.restore();

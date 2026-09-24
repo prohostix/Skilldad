@@ -63,16 +63,16 @@ const bubbleVisualStyle = {
 };
 
 const PLAIN_BUBBLES = [
-    { id: 'p1', left: 12, size: 18, duration: 9, delay: 0.8, drift: 45 },
-    { id: 'p2', left: 62, size: 14, duration: 10.5, delay: 4.5, drift: 55 },
-    { id: 'p3', left: 38, size: 20, duration: 11, delay: 2.5, drift: 35 },
-    { id: 'p4', left: 82, size: 16, duration: 9.5, delay: 6.0, drift: 40 },
+    { id: 'p1', left: 15, size: 16, duration: 9, delay: 0.8, drift: 20 },
+    { id: 'p2', left: 60, size: 13, duration: 10.5, delay: 4.5, drift: 25 },
+    { id: 'p3', left: 35, size: 18, duration: 11, delay: 2.5, drift: 18 },
+    { id: 'p4', left: 75, size: 14, duration: 9.5, delay: 6.0, drift: 22 },
 ];
 
 const CONVERT_BUBBLES = [
-    { id: 'c1', left: 16, size: 28, duration: 9, delay: 0, pop: 'mid', drift: 50 },
-    { id: 'c2', left: 52, size: 24, duration: 10, delay: 4.5, pop: 'high', drift: 40 },
-    { id: 'c3', left: 76, size: 22, duration: 8.5, delay: 8, pop: 'mid', drift: 45 },
+    { id: 'c1', left: 20, size: 24, duration: 9, delay: 0, pop: 'mid', drift: 20 },
+    { id: 'c2', left: 50, size: 22, duration: 10, delay: 4.5, pop: 'high', drift: 18 },
+    { id: 'c3', left: 70, size: 20, duration: 8.5, delay: 8, pop: 'mid', drift: 22 },
 ];
 
 const SHARD_ANGLES = [0, 60, 120, 180, 240, 300];
@@ -94,7 +94,7 @@ const CourseBubbles = ({ texts }) => {
     const activeTexts = (Array.isArray(texts) && texts.length > 0) ? texts : defaultTexts;
 
     return (
-        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[46%] lg:w-[40%] xl:w-[38%] z-[16] pointer-events-none select-none overflow-hidden">
+        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[22%] lg:w-[18%] xl:w-[16%] z-[16] pointer-events-none select-none overflow-hidden">
             {/* Plain bubbles - rise and drift off the top */}
             {PLAIN_BUBBLES.map((b) => (
                 <div
