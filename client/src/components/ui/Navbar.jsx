@@ -195,69 +195,18 @@ const Navbar = ({ compact = false }) => {
                                 />
                             </form>
 
-                            {/* If user logged in, show user notification dropdown & profile chip */}
+                            {/* Dark / Light mode toggle placed right after Search Bar */}
+                            <button
+                                onClick={toggleTheme}
+                                className={`shrink-0 aspect-square rounded-full transition-all duration-300 flex items-center justify-center ${compact ? 'h-7 w-7' : 'h-8.5 w-8.5'} ${theme === 'light' ? 'bg-[#F3F4F8] text-slate-700 hover:bg-purple-100 hover:text-[#5B21B6]' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/10'}`}
+                                aria-label="Toggle theme"
+                            >
+                                {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                            </button>
+
+                            {/* If user logged in, show profile chip */}
                             {user ? (
                                 <div className="flex items-center gap-3">
-                                    {/* Notification Bell */}
-                                    <div className="relative" ref={notifRef}>
-                                        <button
-                                            onClick={() => setIsNotifOpen(!isNotifOpen)}
-                                            className={`relative p-2 rounded-full transition-all ${isNotifOpen ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-purple-200 hover:text-[#4C1D95] dark:hover:text-white'}`}
-                                            aria-label="Notifications"
-                                        >
-                                            <Bell size={18} />
-                                            {unreadCount > 0 && (
-                                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-white animate-pulse"></span>
-                                            )}
-                                        </button>
-                                        <AnimatePresence>
-                                            {isNotifOpen && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                                                    transition={{ duration: 0.15 }}
-                                                    className="absolute right-0 mt-3 w-80 max-w-[calc(100vw-1.5rem)] bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden py-2 z-50 origin-top-right"
-                                                >
-                                                    <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                                                        <h3 className="text-slate-900 font-bold text-sm">Notifications</h3>
-                                                        {unreadCount > 0 && (
-                                                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">{unreadCount} New</span>
-                                                        )}
-                                                    </div>
-                                                    <div className="max-h-[300px] overflow-y-auto">
-                                                        {notifications.length > 0 ? (
-                                                            notifications.map((notif, index) => (
-                                                                <div key={index} className="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors flex items-start gap-3 border-b border-slate-50 last:border-0">
-                                                                    <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'live_session' ? 'bg-purple-100 text-purple-600' : 'bg-primary/10 text-primary'}`}>
-                                                                        {notif.type === 'live_session' ? <Video size={14} /> : <Info size={14} />}
-                                                                    </div>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <p className="text-slate-900 text-sm font-medium truncate">{notif.title}</p>
-                                                                        <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">{notif.message}</p>
-                                                                    </div>
-                                                                    {!notif.read && <div className="w-1.5 h-1.5 bg-primary rounded-full shrink-0 my-auto"></div>}
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <div className="px-4 py-8 text-center">
-                                                                <p className="text-slate-400 text-xs font-medium">No new notifications</p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    {notifications.length > 0 && (
-                                                        <div
-                                                            className="px-4 py-2 mt-1 flex justify-center border-t border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
-                                                            onClick={() => { markAllRead(); setIsNotifOpen(false); }}
-                                                        >
-                                                            <p className="text-primary text-xs font-semibold">Mark all as read</p>
-                                                        </div>
-                                                    )}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-
                                     {/* Profile Chip */}
                                     <div className="relative" ref={profileRef}>
                                         <div
@@ -327,16 +276,6 @@ const Navbar = ({ compact = false }) => {
                                 </div>
                             ) : (
                                 <>
-                                    {/* Unauthenticated Notification Bell */}
-                                    <button
-                                        onClick={() => navigate('/login')}
-                                        className="relative p-2 rounded-full text-slate-600 dark:text-purple-200 hover:text-[#4C1D95] dark:hover:text-white transition-colors cursor-pointer"
-                                        aria-label="Notifications"
-                                    >
-                                        <Bell size={18} />
-                                        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#EF4444] rounded-full ring-2 ring-white dark:ring-[#0D071E] animate-pulse"></span>
-                                    </button>
-
                                     {/* Login & Sign Up buttons */}
                                     <button
                                         onClick={() => navigate('/login')}
@@ -352,13 +291,6 @@ const Navbar = ({ compact = false }) => {
                                     </button>
                                 </>
                             )}
-                            <button
-                                onClick={toggleTheme}
-                                className={`shrink-0 aspect-square rounded-full transition-all duration-300 flex items-center justify-center ${compact ? 'h-7 w-7' : 'h-8 w-8'} ${theme === 'light' ? 'bg-purple-50 text-slate-700 hover:bg-purple-100' : 'bg-[#1a1a2e] text-[#E9D5FF] hover:text-white border border-white/5'}`}
-                                aria-label="Toggle theme"
-                            >
-                                {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
-                            </button>
                         </div>
                     )}
 
