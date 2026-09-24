@@ -226,7 +226,7 @@ const HeroSection = () => {
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
                             </span>
-                            <span className="text-[#6D28D9] dark:text-[#A855F7] block">
+                            <span className="text-[#6644C1] dark:text-purple-400 block">
                                 Career
                             </span>
                         </h1>
