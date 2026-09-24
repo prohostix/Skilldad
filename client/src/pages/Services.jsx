@@ -237,7 +237,7 @@ const Services = () => {
             title: 'Skill Integrated Diploma Programmes',
             description: 'Structured programmes that combine skill learning with certification and career support.',
             icon: ModernDiplomaIcon,
-            badgeBg: 'bg-[#84CC16]',
+            badgeBg: 'bg-[#4C1D95]',
             cardBg: 'bg-white text-slate-900 shadow-[0_20px_45px_-12px_rgba(76,29,149,0.12)] border border-purple-100/90',
             textColor: 'text-slate-900',
             descColor: 'text-slate-600',
@@ -252,22 +252,22 @@ const Services = () => {
             title: 'WBL (Work Based Learning)',
             description: 'Gain real-world experience through industry collaborations and live projects.',
             icon: ModernWblIcon,
-            badgeBg: 'bg-[#7C3AED]',
-            cardBg: 'bg-gradient-to-br from-[#7C3AED] via-[#6D28D9] to-[#4F46E5] text-white shadow-[0_20px_45px_-12px_rgba(124,58,237,0.38)] border border-purple-400/40',
+            badgeBg: 'bg-[#4C1D95]',
+            cardBg: 'bg-gradient-to-br from-[#4C1D95] via-[#3B1578] to-[#2E0F61] text-white shadow-[0_20px_45px_-12px_rgba(76,29,149,0.38)] border border-purple-700/50',
             textColor: 'text-white',
             descColor: 'text-purple-100/90',
             rotation: 'lg:-rotate-[2.2deg]',
             link: '/wbl',
             badge: 'Industry Live',
             tagColor: 'text-purple-200 font-bold',
-            btnBg: 'bg-white/20 hover:bg-white/30 text-white'
+            btnBg: 'bg-white/15 hover:bg-white/25 text-white'
         },
         {
             id: 'study-abroad',
             title: 'Study Abroad',
             description: 'Explore global education opportunities with end-to-end guidance and support.',
             icon: ModernStudyAbroadIcon,
-            badgeBg: 'bg-[#84CC16]',
+            badgeBg: 'bg-[#4C1D95]',
             cardBg: 'bg-white text-slate-900 shadow-[0_20px_45px_-12px_rgba(76,29,149,0.12)] border border-purple-100/90',
             textColor: 'text-slate-900',
             descColor: 'text-slate-600',
@@ -286,13 +286,13 @@ const Services = () => {
             description: 'Get personalized course and career recommendations with our intelligent AI advisory engine.',
             icon: Brain,
             tag: 'Intelligent Advisory',
-            cardBg: 'bg-[#9EE818] text-slate-900 shadow-[0_20px_40px_-10px_rgba(132,204,22,0.35)] border border-lime-400/60',
-            textColor: 'text-slate-900',
-            descColor: 'text-slate-800/90 font-medium',
+            cardBg: 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_20px_40px_-10px_rgba(147,51,234,0.30)] border border-purple-300/80',
+            textColor: 'text-[#2E1065]',
+            descColor: 'text-[#3B0764]/90 font-medium',
             rotation: 'lg:-rotate-[7.5deg]',
             entranceDelay: 0.18,
-            tagBg: 'bg-black/10 text-slate-900',
-            btnBg: 'bg-black/10 hover:bg-black/20 text-slate-900'
+            tagBg: 'bg-white/80 text-[#4C1D95] font-bold shadow-2xs',
+            btnBg: 'bg-white/70 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
         },
         {
             title: 'Mobile Learning',
@@ -473,11 +473,11 @@ const Services = () => {
             </section>
 
             {/* ── SECTION 2: WHAT WE OFFER / SERVICE OUTCOMES (LIGHT PURPLE THEME WITH SKILLDAD GRADIENTS) ── */}
-            <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512]">
-                <div className="max-w-7xl mx-auto">
-                    
+            <section className="py-8 sm:py-10 md:py-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512]">
+                <div className="w-full">
+
                     {/* Light Purple Gradient Rounded Container Card with SkillDad Theme */}
-                    <div className="relative rounded-[36px] sm:rounded-[48px] bg-gradient-to-br from-[#FAF5FF] via-[#F3E8FF] to-[#E9D5FF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/90 dark:border-purple-800/50 p-6 sm:p-10 lg:p-14 text-slate-900 dark:text-white shadow-[0_20px_50px_-15px_rgba(76,29,149,0.12)] overflow-hidden">
+                    <div className="relative rounded-[36px] sm:rounded-[48px] bg-gradient-to-br from-[#FAF5FF] via-[#F3E8FF] to-[#E9D5FF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/90 dark:border-purple-800/50 p-5 sm:p-6 lg:p-8 text-slate-900 dark:text-white shadow-[0_20px_50px_-15px_rgba(76,29,149,0.12)] overflow-hidden">
                         
                         {/* Background glow accents in shades of purple */}
                         <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-300/30 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
@@ -489,7 +489,7 @@ const Services = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6 }}
-                            className="text-left space-y-3 max-w-2xl mb-12 sm:mb-16 relative z-10"
+                            className="text-left space-y-3 max-w-2xl mb-8 sm:mb-10 relative z-10"
                         >
                             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[11px] font-bold tracking-widest uppercase shadow-2xs">
                                 WHAT AND WHY
@@ -506,7 +506,7 @@ const Services = () => {
                         </motion.div>
 
                         {/* 4 Angled, Overlapping Cards with Top Badges & Video Entrance Animation */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 sm:gap-6 lg:gap-4 items-stretch pt-4 pb-2 relative z-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 sm:gap-6 lg:gap-4 items-stretch pt-3 pb-1 relative z-10">
                             {coreOfferings.map((offering, idx) => {
                                 const IconComponent = offering.icon;
 
@@ -539,11 +539,11 @@ const Services = () => {
 
                                         {/* Main Card Body */}
                                         <div
-                                            className={`h-full rounded-[24px] pt-9 pb-6 px-6 flex flex-col justify-between transition-shadow duration-300 ${offering.cardBg}`}
+                                            className={`h-full rounded-[24px] pt-8 pb-4 px-5 flex flex-col justify-between transition-shadow duration-300 ${offering.cardBg}`}
                                         >
                                             <div className="text-left">
                                                 {/* Title */}
-                                                <h3 className={`text-[17px] sm:text-[18px] font-extrabold tracking-tight leading-snug mb-2 font-sans ${offering.textColor}`}>
+                                                <h3 className={`text-[17px] sm:text-[18px] font-extrabold tracking-tight leading-snug mb-1.5 font-sans ${offering.textColor}`}>
                                                     {offering.title}
                                                 </h3>
 
@@ -554,7 +554,7 @@ const Services = () => {
                                             </div>
 
                                             {/* Bottom Row: Badge Tag + Action Button */}
-                                            <div className="pt-4 mt-5 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
+                                            <div className="pt-3 mt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
                                                 <span className={`text-[11px] font-bold tracking-wider uppercase ${offering.tagColor}`}>
                                                     {offering.badge}
                                                 </span>
