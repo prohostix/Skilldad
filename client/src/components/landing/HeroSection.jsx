@@ -176,127 +176,126 @@ const HeroSection = () => {
                     {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
                         <div className="w-[300px] xs:w-[335px] sm:w-[370px] md:w-[400px] lg:w-[415px] xl:w-[425px] aspect-square relative flex items-center justify-center shrink-0">
-                            {/* Animated Flower-Type Connection Arc Lines */}
+                            {/* Very Thin, Standard Purple Connection Arc Lines & Moving Purple Dots */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
-                                <defs>
-                                    <linearGradient id="flowerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.95" />
-                                        <stop offset="50%" stopColor="#A855F7" stopOpacity="0.85" />
-                                        <stop offset="100%" stopColor="#818CF8" stopOpacity="0.95" />
-                                    </linearGradient>
-                                </defs>
-
                                 {/* Delicate Central Orbit Track */}
-                                <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" />
-                                <motion.circle
-                                    cx="50"
-                                    cy="50"
-                                    r="16.5"
-                                    fill="none"
-                                    stroke="rgba(168, 85, 247, 0.28)"
-                                    strokeWidth="0.8"
-                                    strokeDasharray="3 4"
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
-                                    style={{ transformOrigin: '50px 50px' }}
-                                />
+                                <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.65" />
 
                                 {/* 1. Arc line from Students to Logo Hub */}
-                                <motion.path
-                                    d="M 27 24 Q 28 42 42 46"
+                                <path
+                                    d="M 27 24 Q 29 41 42 46"
                                     fill="none"
-                                    stroke="url(#flowerGrad)"
-                                    strokeWidth="1.2"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
                                     strokeLinecap="round"
-                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
                                 />
 
                                 {/* 2. Arc line from Logo Hub to Universities */}
-                                <motion.path
-                                    d="M 58 46 Q 72 42 73 24"
+                                <path
+                                    d="M 58 46 Q 71 41 73 24"
                                     fill="none"
-                                    stroke="url(#flowerGrad)"
-                                    strokeWidth="1.2"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
                                     strokeLinecap="round"
-                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
                                 />
 
                                 {/* 3. Logo to Jobs AND Job to Logo flower arc lines (Loop) */}
-                                <motion.path
-                                    d="M 59 47 Q 72 41 81 48"
+                                <path
+                                    d="M 59 47 Q 72 42 81 48"
                                     fill="none"
-                                    stroke="url(#flowerGrad)"
-                                    strokeWidth="1.2"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
                                     strokeLinecap="round"
-                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
                                 />
-                                <motion.path
-                                    d="M 81 54 Q 72 61 59 53"
+                                <path
+                                    d="M 81 54 Q 72 60 59 53"
                                     fill="none"
-                                    stroke="url(#flowerGrad)"
-                                    strokeWidth="1.2"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
                                     strokeLinecap="round"
-                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
                                 />
 
                                 {/* 4. Logo to Certifications arc lines */}
-                                <motion.path
-                                    d="M 19 48 Q 27 41 41 48"
+                                <path
+                                    d="M 19 48 Q 28 42 41 48"
                                     fill="none"
-                                    stroke="url(#flowerGrad)"
-                                    strokeWidth="1.2"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
                                     strokeLinecap="round"
-                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
                                 />
-                                <motion.path
-                                    d="M 41 52 Q 27 59 19 54"
+                                <path
+                                    d="M 41 52 Q 28 60 19 54"
                                     fill="none"
-                                    stroke="url(#flowerGrad)"
-                                    strokeWidth="1.2"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
                                     strokeLinecap="round"
-                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
                                 />
 
                                 {/* 5. Logo to Courses arc lines */}
-                                <motion.path
+                                <path
                                     d="M 48 59 Q 43 70 47 78"
                                     fill="none"
-                                    stroke="url(#flowerGrad)"
-                                    strokeWidth="1.2"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
                                     strokeLinecap="round"
-                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
-                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                                />
+                                <path
+                                    d="M 52 59 Q 57 70 47 78"
+                                    fill="none"
+                                    stroke="rgba(168, 85, 247, 0.45)"
+                                    strokeWidth="0.65"
+                                    strokeLinecap="round"
                                 />
 
                                 {/* Outer Perimeter Petal Arcs connecting adjacent nodes */}
-                                <path d="M 28 17 Q 50 6 72 17" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
-                                <path d="M 78 24 Q 89 34 85 45" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
-                                <path d="M 84 57 Q 75 76 53 82" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
-                                <path d="M 41 82 Q 22 76 17 57" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
-                                <path d="M 15 45 Q 11 29 20 22" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                                <path d="M 28 17 Q 50 7 72 17" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
+                                <path d="M 78 24 Q 89 34 85 45" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
+                                <path d="M 84 57 Q 75 76 53 82" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
+                                <path d="M 41 82 Q 22 76 17 57" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
+                                <path d="M 15 45 Q 11 29 20 22" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
 
-                                {/* Animated Flower Petal Network Dots */}
-                                <motion.circle cx="31" cy="37" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }} />
-                                <motion.circle cx="69" cy="37" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} />
-                                <motion.circle cx="72" cy="43.5" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
-                                <motion.circle cx="72" cy="58.5" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }} />
-                                <motion.circle cx="27" cy="44" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 2 }} />
-                                <motion.circle cx="27" cy="57" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }} />
-                                <motion.circle cx="45" cy="71" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }} />
+                                {/* Very Small Purple Dots Moving Through Lines */}
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 27 24 Q 29 41 42 46" dur="3.6s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 58 46 Q 71 41 73 24" dur="3.8s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 59 47 Q 72 42 81 48" dur="3.4s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 81 54 Q 72 60 59 53" dur="3.7s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 19 48 Q 28 42 41 48" dur="4s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 41 52 Q 28 60 19 54" dur="3.9s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 48 59 Q 43 70 47 78" dur="3.5s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.9" fill="#9333EA">
+                                    <animateMotion path="M 47 78 Q 57 70 52 59" dur="3.7s" repeatCount="indefinite" />
+                                </circle>
 
-                                {/* Outer Perimeter Dots */}
-                                <circle cx="38" cy="10" r="1.3" fill="#A855F7" />
-                                <circle cx="62" cy="10" r="1.3" fill="#A855F7" />
-                                <circle cx="84" cy="34" r="1.3" fill="#A855F7" />
-                                <circle cx="71" cy="71" r="1.3" fill="#A855F7" />
-                                <circle cx="27" cy="73" r="1.3" fill="#A855F7" />
-                                <circle cx="12" cy="33" r="1.3" fill="#A855F7" />
+                                {/* Moving Small Purple Dots around Outer Perimeter */}
+                                <circle r="0.85" fill="#A855F7">
+                                    <animateMotion path="M 28 17 Q 50 7 72 17" dur="5.5s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.85" fill="#A855F7">
+                                    <animateMotion path="M 78 24 Q 89 34 85 45" dur="4.8s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.85" fill="#A855F7">
+                                    <animateMotion path="M 84 57 Q 75 76 53 82" dur="5.2s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.85" fill="#A855F7">
+                                    <animateMotion path="M 41 82 Q 22 76 17 57" dur="5s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.85" fill="#A855F7">
+                                    <animateMotion path="M 15 45 Q 11 29 20 22" dur="5.4s" repeatCount="indefinite" />
+                                </circle>
                             </svg>
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
                             <motion.div
