@@ -789,7 +789,7 @@ const HeroSection = () => {
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
                             </span>
-                            <span className="text-[#6644C1] dark:text-purple-400 block">
+                            <span className="text-[#4C1D95] dark:text-purple-300 block">
                                 Career
                             </span>
                         </h1>
@@ -803,7 +803,7 @@ const HeroSection = () => {
                         <div className="flex flex-wrap items-center gap-2.5 sm:gap-4">
                             <button
                                 onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="px-4.5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#581C87] via-[#7C3AED] to-[#A855F7] hover:from-[#4C1D95] hover:via-[#6D28D9] hover:to-[#9333EA] border border-purple-300/30 text-white text-xs sm:text-sm font-semibold shadow-[0_10px_28px_-4px_rgba(124,58,237,0.55)] hover:shadow-[0_16px_36px_-4px_rgba(147,51,234,0.7)] hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 sm:gap-2 group cursor-pointer shrink-0"
+                                className="px-4.5 sm:px-6 py-2 sm:py-2.5 rounded-full bg-[#4C1D95] hover:bg-[#3B1578] text-white text-xs sm:text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(76,29,149,0.5)] hover:shadow-[0_16px_32px_-5px_rgba(76,29,149,0.7)] hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 sm:gap-2 group cursor-pointer shrink-0"
                             >
                                 <span>{user ? 'Go to Dashboard' : 'Start Learning Today'}</span>
                                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
