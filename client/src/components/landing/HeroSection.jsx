@@ -1,584 +1,139 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Landmark, Sparkles, BookOpen, Handshake, Bot, Award, Briefcase, GraduationCap } from 'lucide-react';
-import AlyraOrb from './AlyraOrb';
+import {
+    ChevronRight,
+    ArrowRight,
+    GraduationCap,
+    BookOpen,
+    Briefcase,
+    Award,
+    UserCheck,
+    Building2,
+    BarChart3,
+    Megaphone,
+    Landmark
+} from 'lucide-react';
 import { useUser } from '../../context/UserContext';
 import { getMediaUrl } from '../../utils/media';
 import skilldadLogo from '../../assets/logo.png';
-import { getMergedDiagramNodes, DIAGRAM_ICON_MAP } from '../../utils/networkDiagramConfig';
+import studentImg from '../../assets/hero/student.jpg';
+import universityImg from '../../assets/hero/university.jpg';
+import jobsImg from '../../assets/hero/jobs.jpg';
+import coursesImg from '../../assets/hero/courses.jpg';
+import certsImg from '../../assets/hero/certifications.jpg';
 
-
-
-/* ─── Performance CSS ─── */
-const HERO_CSS = `
-@keyframes hero-node-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.15; }
-    50% { transform: scale(1.3); opacity: 0.45; }
-}
-@keyframes hero-node-core-glow {
-    0%, 100% { filter: drop-shadow(0 0 4px rgba(192,38,255,0.4)); }
-    50% { filter: drop-shadow(0 0 12px rgba(192,38,255,0.7)); }
-}
-@keyframes hero-node-white-pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.9; }
-}
-@keyframes hero-dot-travel {
-    0% { offset-distance: 0%; opacity: 0; }
-    5% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { offset-distance: 100%; opacity: 0; }
-}
-@keyframes hero-text-gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-@keyframes hero-diagram-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-18px); }
-}
-@keyframes hero-brand-blink {
-    0%, 100% { 
-        filter: drop-shadow(0 0 15px rgba(192, 38, 255, 0.8));
+/* ─── Prestigious University Partners (Matching Reference) ─── */
+const DEFAULT_UNIVERSITY_PARTNERS = [
+    {
+        name: 'The University of Melbourne',
+        sub: 'EST. 1853',
+        crest: (
+            <svg className="w-8 h-8 shrink-0 text-[#1E1B4B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12 2L4 5v6.5C4 16.5 7.5 21 12 22c4.5-1 8-5.5 8-10.5V5L12 2z" />
+                <path d="M12 6v12M8 10h8" />
+            </svg>
+        )
+    },
+    {
+        name: 'University of London',
+        sub: 'EST. 1836',
+        crest: (
+            <svg className="w-8 h-8 shrink-0 text-[#1E1B4B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M12 3v18M3 12h18M7 7l10 10M17 7L7 17" />
+            </svg>
+        )
+    },
+    {
+        name: 'University of Southampton',
+        sub: 'RUSSELL GROUP',
+        crest: (
+            <svg className="w-8 h-8 shrink-0 text-[#1E1B4B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12 2L3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z" />
+                <path d="M12 7l4 4-4 4-4-4 4-4z" />
+            </svg>
+        )
+    },
+    {
+        name: 'Birmingham City University',
+        sub: 'UNITED KINGDOM',
+        crest: (
+            <svg className="w-8 h-8 shrink-0 text-[#1E1B4B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v10M8 9h8M9 15h6" />
+            </svg>
+        )
+    },
+    {
+        name: 'UTS University of Technology Sydney',
+        sub: 'AUSTRALIA',
+        crest: (
+            <svg className="w-8 h-8 shrink-0 text-[#1E1B4B] dark:text-purple-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M4 6h16M12 6v14M8 12h8" />
+            </svg>
+        )
     }
-    50% { 
-        filter: drop-shadow(0 0 30px rgba(37, 99, 235, 0.9));
+];
+
+/* ─── Hero Ecosystem Nodes ─── */
+const ECOSYSTEM_NODES = [
+    {
+        id: 'students',
+        title: 'Students',
+        icon: UserCheck,
+        image: studentImg,
+        left: '14%',
+        top: '12%',
+        anchorX: 70,
+        anchorY: 60
+    },
+    {
+        id: 'universities',
+        title: 'Universities',
+        icon: GraduationCap,
+        image: universityImg,
+        left: '74%',
+        top: '16%',
+        anchorX: 370,
+        anchorY: 80
+    },
+    {
+        id: 'jobs',
+        title: 'Jobs',
+        icon: Briefcase,
+        image: jobsImg,
+        left: '78%',
+        top: '52%',
+        anchorX: 390,
+        anchorY: 260
+    },
+    {
+        id: 'courses',
+        title: 'Courses',
+        icon: BookOpen,
+        image: coursesImg,
+        left: '42%',
+        top: '80%',
+        anchorX: 210,
+        anchorY: 400
+    },
+    {
+        id: 'certifications',
+        title: 'Certifications',
+        icon: Award,
+        image: certsImg,
+        left: '10%',
+        top: '50%',
+        anchorX: 50,
+        anchorY: 250
     }
-}
-@keyframes hero-brand-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-/* Rises with a gentle sideways wobble rather than a straight line -
-   --drift-x (positive, set per-bubble) controls how wide the sway is.
-   All multipliers stay positive so the bubble only ever sways further
-   right (deeper into its own right-side lane) and never swings back
-   toward the page's center. */
-@keyframes hero-bubble-float {
-    0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
-    8% { opacity: 1; }
-    20% { transform: translate(calc(var(--drift-x) * 0.4), -115px) scale(0.82); }
-    40% { transform: translate(calc(var(--drift-x) * 0.85), -270px) scale(0.95); }
-    60% { transform: translate(calc(var(--drift-x) * 0.55), -410px) scale(1); }
-    80% { transform: translate(calc(var(--drift-x) * 0.9), -545px) scale(1.02); }
-    94% { opacity: 1; transform: translate(calc(var(--drift-x) * 0.65), -625px) scale(1.05); }
-    100% { transform: translate(calc(var(--drift-x) * 0.75), -660px) scale(1.05); opacity: 0; }
-}
-/* The shell itself vanishes right at the pop point - it's the droplets
-   (hero-shard-*) that linger and drift slowly afterward, not the bubble. */
-@keyframes hero-bubble-visual-mid {
-    0%, 41% { opacity: 1; transform: scale(1); }
-    43% { opacity: 0; transform: scale(1.2); }
-    100% { opacity: 0; transform: scale(1.2); }
-}
-@keyframes hero-bubble-text-mid {
-    0%, 54% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-    68% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-@keyframes hero-shard-mid {
-    0%, 39% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) scale(0.5) rotate(0deg); }
-    44% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg); }
-    66% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-    100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-}
-@keyframes hero-bubble-visual-high {
-    0%, 61% { opacity: 1; transform: scale(1); }
-    63% { opacity: 0; transform: scale(1.2); }
-    100% { opacity: 0; transform: scale(1.2); }
-}
-@keyframes hero-bubble-text-high {
-    0%, 74% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
-    88% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-@keyframes hero-shard-high {
-    0%, 59% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) scale(0.5) rotate(0deg); }
-    64% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg); }
-    86% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-    100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-}
-/* Network diagram node labels: crisp glow in dark mode, high contrast deep purple in light mode */
-.hero-diagram-node-label {
-    fill: #e9d5ff;
-    font-weight: 700;
-    filter: drop-shadow(0 0 6px rgba(192, 38, 255, 0.7));
-    transition: fill 0.25s ease, filter 0.25s ease;
-    user-select: none;
-}
-
-html.light-mode .hero-diagram-node-label,
-.light-mode .hero-diagram-node-label,
-.light .hero-diagram-node-label,
-[data-theme="light"] .hero-diagram-node-label {
-    fill: #3b0764 !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.08em !important;
-    filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 2px #ffffff) !important;
-}
-
-/* Diagram images: always 100% solid opacity, perfectly crisp, zero fog or wash-out in both light and dark modes */
-.hero-diagram-foreign-object.hero-diagram-has-image {
-    animation: none !important;
-    opacity: 1 !important;
-}
-
-.hero-diagram-node-img {
-    opacity: 1 !important;
-    filter: none !important;
-}
-
-/* Dark mode: the node illustrations are hand-drawn deep-purple line art on
-   transparent PNGs, which nearly disappears against the dark background.
-   Recolor them to the same light tone as the diagram labels (fill: #e9d5ff
-   above) so the icons stay legible - light mode overrides this back below. */
-.hero-diagram-node-img.hero-diagram-img-cover {
-    filter: brightness(0) invert(1) drop-shadow(0 0 4px rgba(192, 38, 255, 0.5)) !important;
-}
-
-/* Dark mode: the SkillDad logo node has a solid white circle behind it
-   (needed for contrast in light mode) that shows up as a stark white disc
-   against the dark hero background - drop it to transparent, dark mode only. */
-.hero-diagram-root-circle {
-    fill: transparent !important;
-}
-
-/* Eliminate the right fade gradient overlay entirely so it never casts smoke or fog across right-side nodes like Jobs */
-.hero-diagram-fade-edge {
-    display: none !important;
-}
-
-html.light-mode .hero-diagram-foreign-object.hero-diagram-has-image,
-.light-mode .hero-diagram-foreign-object.hero-diagram-has-image,
-.light .hero-diagram-foreign-object.hero-diagram-has-image,
-[data-theme="light"] .hero-diagram-foreign-object.hero-diagram-has-image {
-    animation: none !important;
-    opacity: 1 !important;
-}
-
-html.light-mode .hero-diagram-node-img,
-.light-mode .hero-diagram-node-img,
-.light .hero-diagram-node-img,
-[data-theme="light"] .hero-diagram-node-img {
-    opacity: 1 !important;
-    filter: none !important;
-}
-
-html.light-mode .hero-diagram-node-img.hero-diagram-img-cover,
-.light-mode .hero-diagram-node-img.hero-diagram-img-cover,
-.light .hero-diagram-node-img.hero-diagram-img-cover,
-[data-theme="light"] .hero-diagram-node-img.hero-diagram-img-cover {
-    filter: none !important;
-}
-
-html.light-mode .hero-diagram-core-circle,
-.light-mode .hero-diagram-core-circle,
-.light .hero-diagram-core-circle,
-[data-theme="light"] .hero-diagram-core-circle {
-    animation: none !important;
-    filter: drop-shadow(0 2px 6px rgba(88, 28, 135, 0.22)) !important;
-}
-
-html.light-mode .hero-diagram-root-circle,
-.light-mode .hero-diagram-root-circle,
-.light .hero-diagram-root-circle,
-[data-theme="light"] .hero-diagram-root-circle {
-    fill: #ffffff !important;
-}
-
-html.light-mode .hero-diagram-pulse-ring,
-.light-mode .hero-diagram-pulse-ring,
-.light .hero-diagram-pulse-ring,
-[data-theme="light"] .hero-diagram-pulse-ring {
-    stroke: rgba(168, 85, 247, 0.45) !important;
-}
-`;
-
-/* ─── Floating course bubbles (right side) ───────────────────────
-   Two kinds: "convert" bubbles rise then morph in place into a
-   course-name pill (crossfading with the bubble at a per-item pop
-   height - 'mid' or 'high' - so labels don't all stack at one spot);
-   "plain" bubbles never convert, they just keep rising off the top. */
-const bubbleVisualStyle = {
-    background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.85), rgba(192,38,255,0.35) 55%, rgba(76,29,149,0.25) 100%)',
-    border: '1px solid rgba(255,255,255,0.5)',
-    boxShadow: '0 0 16px rgba(192,38,255,0.35)'
-};
-
-const PLAIN_BUBBLES = [
-    { id: 'p1', left: 10, size: 18, duration: 9, delay: 0.8, drift: 45 },
-    { id: 'p2', left: 60, size: 14, duration: 10.5, delay: 4.5, drift: 55 },
 ];
 
-// No hardcoded label here - what each bubble displays when it pops comes
-// from the admin-configured list (Admin > Site Content > Landing Page
-// Controls > Hero Bubble Pop-up Text), cycled across these slots below.
-const CONVERT_BUBBLES = [
-    { id: 'c1', left: 20, size: 28, duration: 9, delay: 0, pop: 'mid', drift: 50 },
-    { id: 'c2', left: 55, size: 24, duration: 10, delay: 4.5, pop: 'high', drift: 40 },
-    { id: 'c3', left: 78, size: 22, duration: 8.5, delay: 8, pop: 'mid', drift: 45 },
-];
-
-// 6 droplets bursting outward in a ring when a bubble cracks, angle offset
-// per-bubble so they don't all shatter in the exact same pattern.
-const SHARD_ANGLES = [0, 60, 120, 180, 240, 300];
-const getShards = (bubble) => {
-    const dist = bubble.size * 2.3;
-    const offset = (bubble.id.charCodeAt(1) * 17) % 60;
-    return SHARD_ANGLES.map((deg) => {
-        const rad = ((deg + offset) * Math.PI) / 180;
-        return {
-            dx: Math.round(Math.cos(rad) * dist),
-            dy: Math.round(Math.sin(rad) * dist),
-            rot: Math.round(90 + deg)
-        };
-    });
-};
-
-const CourseBubbles = ({ texts }) => {
-    const hasTexts = Array.isArray(texts) && texts.length > 0;
-
-    return (
-        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[42%] lg:w-[38%] z-[16] pointer-events-none select-none overflow-hidden">
-            {/* Plain bubbles - rise and drift off the top, never convert */}
-            {PLAIN_BUBBLES.map((b) => (
-                <div
-                    key={b.id}
-                    className="absolute bottom-0 rounded-full"
-                    style={{
-                        left: `${b.left}%`,
-                        width: b.size, height: b.size,
-                        ...bubbleVisualStyle,
-                        '--drift-x': `${b.drift}px`,
-                        animation: `hero-bubble-float ${b.duration}s ease-in-out infinite`,
-                        animationDelay: `${b.delay}s`,
-                        animationFillMode: 'backwards'
-                    }}
-                />
-            ))}
-
-            {/* Convert bubbles - rise, then morph into admin-configured text.
-                Until an admin adds any text (Site Content > Landing Page
-                Controls), these just behave as plain rising bubbles too. */}
-            {CONVERT_BUBBLES.map((b, i) => {
-                if (!hasTexts) {
-                    return (
-                        <div
-                            key={b.id}
-                            className="absolute bottom-0 rounded-full"
-                            style={{
-                                left: `${b.left}%`,
-                                width: b.size, height: b.size,
-                                ...bubbleVisualStyle,
-                                '--drift-x': `${b.drift}px`,
-                                animation: `hero-bubble-float ${b.duration}s ease-in-out infinite`,
-                                animationDelay: `${b.delay}s`,
-                                animationFillMode: 'backwards'
-                            }}
-                        />
-                    );
-                }
-
-                const label = texts[i % texts.length];
-                return (
-                    <div
-                        key={b.id}
-                        className="absolute bottom-0"
-                        style={{
-                            left: `${b.left}%`,
-                            width: b.size, height: b.size,
-                            '--drift-x': `${b.drift}px`,
-                            animation: `hero-bubble-float ${b.duration}s ease-in-out infinite`,
-                            animationDelay: `${b.delay}s`,
-                            animationFillMode: 'backwards'
-                        }}
-                    >
-                        <div className="relative w-full h-full">
-                            <div
-                                className="absolute inset-0 rounded-full"
-                                style={{
-                                    ...bubbleVisualStyle,
-                                    animation: `hero-bubble-visual-${b.pop} ${b.duration}s ease-in-out infinite`,
-                                    animationDelay: `${b.delay}s`,
-                                    animationFillMode: 'backwards'
-                                }}
-                            />
-                            {getShards(b).map((s, si) => (
-                                <div
-                                    key={si}
-                                    className="absolute top-1/2 left-1/2 rounded-full"
-                                    style={{
-                                        width: Math.max(4, b.size * 0.22), height: Math.max(4, b.size * 0.22),
-                                        ...bubbleVisualStyle,
-                                        '--dx': `${s.dx}px`, '--dy': `${s.dy}px`, '--rot': `${s.rot}deg`,
-                                        animation: `hero-shard-${b.pop} ${b.duration}s ease-out infinite`,
-                                        animationDelay: `${b.delay}s`,
-                                        animationFillMode: 'backwards'
-                                    }}
-                                />
-                            ))}
-                            <div
-                                className="absolute top-1/2 left-1/2 whitespace-nowrap px-2 py-1 text-[11px] sm:text-xs font-extrabold tracking-wide text-white bg-transparent"
-                                style={{
-                                    textShadow: '0 2px 10px rgba(0,0,0,0.5), 0 0 18px rgba(192,38,255,0.65)',
-                                    animation: `hero-bubble-text-${b.pop} ${b.duration}s ease-in-out infinite`,
-                                    animationDelay: `${b.delay}s`,
-                                    animationFillMode: 'backwards'
-                                }}
-                            >
-                                {label}
-                            </div>
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
-    );
-};
-
-/* ─── Node / Edge data ───────────────────────────────────────── */
-const edges = [
-    ['root', 'courses'],
-    ['root', 'university'],
-    ['root', 'partner'],
-    ['root', 'ai'],
-    ['courses', 'cert'],
-    ['university', 'cert'],
-    ['partner', 'job'],
-    ['ai', 'student'],
-    ['cert', 'student'],
-    ['job', 'student'],
-];
-
-/* ─── SVG sub-components (Optimised with CSS) ───────────────── */
-const DiagramEdge = ({ from, to, index, nodeMap }) => {
-    const a = nodeMap[from];
-    const b = nodeMap[to];
-    if (!a || !b) return null;
-    return (
-        <motion.line
-            id={`edge-${from}-${to}`}
-            initial={{ opacity: 0, pathLength: 0 }}
-            animate={{ opacity: 0.4, pathLength: 1 }}
-            transition={{ duration: 3, delay: 1 + index * 0.2, ease: "easeInOut" }}
-            x1={a.x} y1={a.y} x2={b.x} y2={b.y}
-            stroke="#C026FF"
-            strokeWidth="0.8"
-            strokeDasharray="4 4"
-            style={{ willChange: 'opacity' }}
-        />
-    );
-};
-
-const DiagramNode = ({ node, index }) => {
-    const [imgError, setImgError] = useState(false);
-
-    useEffect(() => {
-        setImgError(false);
-    }, [node.image, node.defaultImage]);
-
-    // If current image fails, gracefully fallback to default diagram image
-    const rawImage = !imgError
-        ? (node.image || node.defaultImage)
-        : (node.image !== node.defaultImage ? node.defaultImage : null);
-
-    const resolvedImage = rawImage
-        ? (typeof rawImage === 'string' && (rawImage.startsWith('http') || rawImage.startsWith('data:') || rawImage.startsWith('/assets'))
-            ? rawImage
-            : (typeof rawImage === 'string' && rawImage.startsWith('/src') ? skilldadLogo : getMediaUrl(rawImage)))
-        : null;
-
-    const IconComponent = node.icon || Sparkles;
-    const isCover = node.imageFit === 'cover';
-
-    // When an image is present, make it reach the outer pulse circle radius (r + 9)
-    const coreR = node.isRoot
-        ? 24
-        : (resolvedImage ? (node.r + 9) : node.r);
-
-    // Cover fills the entire circle right up to the stroke border; contain adds slight breathing room
-    const imgScale = resolvedImage ? (isCover ? 0.98 : 0.78) : 0.62;
-    const defaultBg = isCover ? '#2E1065' : '#ffffff';
-
-    return (
-        <motion.g
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-                duration: 2.5,
-                delay: node.delay * 1.5,
-                ease: [0.34, 1.56, 0.64, 1] // Slight overshoot for elegant "pop"
-            }}
-            style={{ willChange: 'transform, opacity' }}
-        >
-            {/* Highlight ring - only root/highlighted node gets wider pulse ring */}
-            {node.highlight && (
-                <circle
-                    cx={node.x} cy={node.y} r={coreR + 15}
-                    fill="none" stroke="#C026FF" strokeWidth="0.8"
-                    style={{
-                        transformOrigin: `${node.x}px ${node.y}px`,
-                        animation: `hero-node-pulse ${3.2}s ease-in-out infinite`,
-                        animationDelay: `${node.delay + 0.4}s`
-                    }}
-                />
-            )}
-            {/* Outer pulse ring - only for icon-only fallback nodes; image nodes read cleaner without it */}
-            {!resolvedImage && (
-                <circle
-                    cx={node.x} cy={node.y} r={coreR + 9}
-                    fill="none" stroke="#C026FF" strokeWidth="0.6"
-                    className="hero-diagram-pulse-ring"
-                    style={{
-                        transformOrigin: `${node.x}px ${node.y}px`,
-                        animation: `hero-node-pulse ${2.5 + index * 0.3}s ease-in-out infinite`,
-                        animationDelay: `${node.delay + 0.8}s`
-                    }}
-                />
-            )}
-            {/* Core Circle */}
-            <circle
-                cx={node.x} cy={node.y} r={coreR}
-                fill={resolvedImage ? (node.imageBg || defaultBg) : 'url(#nGrad)'}
-                stroke={resolvedImage ? 'none' : '#9333EA'}
-                strokeWidth={resolvedImage ? 0 : (node.highlight ? 2.25 : 1.75)}
-                className={`hero-diagram-core-circle${node.isRoot ? ' hero-diagram-root-circle' : ''}`}
-                style={{
-                    animation: `hero-node-core-glow 3s ease-in-out infinite ${node.delay}s`,
-                    filter: node.highlight ? 'drop-shadow(0 0 10px rgba(192,38,255,0.55))' : (resolvedImage ? 'drop-shadow(0 0 8px rgba(147,51,234,0.4))' : undefined)
-                }}
-            />
-            {/* Real image when available, otherwise the lucide icon fallback */}
-            <foreignObject
-                x={node.x - coreR * imgScale} y={node.y - coreR * imgScale}
-                width={coreR * imgScale * 2} height={coreR * imgScale * 2}
-                className={`hero-diagram-foreign-object ${resolvedImage ? 'hero-diagram-has-image' : ''}`}
-                style={{
-                    animation: resolvedImage ? 'none' : `hero-node-white-pulse 2s ease-in-out infinite ${node.delay}s`,
-                    opacity: 1
-                }}
-            >
-                <div
-                    xmlns="http://www.w3.org/1999/xhtml"
-                    style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderRadius: '50%' }}
-                >
-                    {resolvedImage ? (
-                        <img
-                            src={resolvedImage}
-                            alt={node.label}
-                            onError={() => setImgError(true)}
-                            className={`hero-diagram-node-img ${isCover ? 'hero-diagram-img-cover' : 'hero-diagram-img-contain'}`}
-                            style={{ width: '100%', height: '100%', objectFit: node.imageFit || 'cover', borderRadius: '50%' }}
-                        />
-                    ) : (
-                        <IconComponent size={coreR * 1.15} color="#fff" strokeWidth={2.25} />
-                    )}
-                </div>
-            </foreignObject>
-            {/* Label - visible in both light mode and dark mode */}
-            <text
-                x={node.x} y={node.y + coreR + 14}
-                textAnchor="middle"
-                className="hero-diagram-node-label"
-                fontSize="9.5"
-                fontFamily="Inter, sans-serif"
-                fontWeight="700"
-                letterSpacing="0.06em"
-            >
-                {node.label}
-            </text>
-        </motion.g>
-    );
-};
-
-const TravelDot = ({ from, to, delay, nodeMap }) => {
-    const a = nodeMap[from];
-    const b = nodeMap[to];
-    if (!a || !b) return null;
-    // Create a path for the dot to follow - browsers support motion-path/offset-path now
-    const path = `M ${a.x} ${a.y} L ${b.x} ${b.y}`;
-    return (
-        <circle
-            r={2.5}
-            fill="#C026FF"
-            style={{
-                filter: 'drop-shadow(0 0 4px #C026FF)',
-                offsetPath: `path('${path}')`,
-                animation: `hero-dot-travel 2s infinite linear`,
-                animationDelay: `${delay}s`,
-                willChange: 'offset-distance, opacity'
-            }}
-        />
-    );
-};
-
-const NetworkDiagram = ({ customNodesConfig }) => {
-    const currentNodes = React.useMemo(() => {
-        return getMergedDiagramNodes(customNodesConfig);
-    }, [customNodesConfig]);
-
-    const activeNodeMap = React.useMemo(() => {
-        return Object.fromEntries(currentNodes.map(n => [n.id, n]));
-    }, [currentNodes]);
-
-    return (
-        <div
-            className="absolute -left-16 sm:-left-10 lg:left-0 top-[40%] sm:top-[36%] md:top-[34%] -translate-y-1/2 z-[15] pointer-events-none select-none scale-55 sm:scale-65 md:scale-75 xl:scale-100 origin-left opacity-35 sm:opacity-50 md:opacity-80 lg:opacity-100"
-            style={{ width: 420, height: 500 }}
-        >
-            <div
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    animation: 'hero-diagram-float 20s ease-in-out infinite'
-                }}
-            >
-                <svg viewBox="-10 40 420 480" width="420" height="480" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <radialGradient id="nGrad" cx="38%" cy="32%" r="65%">
-                            <stop offset="0%" stopColor="#C026FF" />
-                            <stop offset="100%" stopColor="#4C1D95" />
-                        </radialGradient>
-                    </defs>
-
-                    {/* Edges */}
-                    {edges.map(([from, to], i) => (
-                        <DiagramEdge key={`${from}-${to}`} from={from} to={to} index={i} nodeMap={activeNodeMap} />
-                    ))}
-
-                    {/* Travel dots */}
-                    {[
-                        { from: 'root', to: 'courses', delay: 0.8 },
-                        { from: 'root', to: 'university', delay: 1.4 },
-                        { from: 'root', to: 'partner', delay: 2.0 },
-                        { from: 'root', to: 'ai', delay: 1.2 },
-                        { from: 'courses', to: 'cert', delay: 2.6 },
-                        { from: 'university', to: 'cert', delay: 3.2 },
-                        { from: 'partner', to: 'job', delay: 3.8 },
-                        { from: 'ai', to: 'student', delay: 4.2 },
-                        { from: 'cert', to: 'student', delay: 4.6 },
-                        { from: 'student', to: 'job', delay: 5.0 },
-                    ].map((t, i) => (
-                        <TravelDot key={i} {...t} nodeMap={activeNodeMap} />
-                    ))}
-
-                    {/* Nodes on top */}
-                    {currentNodes.map((node, i) => (
-                        <DiagramNode key={node.id} node={node} index={i} />
-                    ))}
-                </svg>
-            </div>
-        </div>
-    );
-};
-
-/* ─── HeroSection ────────────────────────────────────────────── */
 const HeroSection = () => {
     const navigate = useNavigate();
     const { user } = useUser();
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [dynamicPartners, setDynamicPartners] = useState([]);
 
     const getDashboardLink = () => {
         if (!user) return '/login';
@@ -589,190 +144,348 @@ const HeroSection = () => {
     };
 
     useEffect(() => {
-        const observer = new MutationObserver(() => {
-            setTheme(document.documentElement.classList.contains('light-mode') ? 'light' : 'dark');
-        });
-        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-        return () => observer.disconnect();
-    }, []);
-
-    // Universities and companies together in one ticker (previously two
-    // separate lists/sections) - each entry keeps its type so the fallback
-    // icon (when there's no logo image) matches university vs company.
-    const [partners, setPartners] = React.useState([
-        { name: "Oxford Digital", type: 'university', logo: null },
-        { name: "MIT Horizon", type: 'university', logo: null },
-        { name: "Stanford Online", type: 'university', logo: null },
-        { name: "ETH Zurich", type: 'university', logo: null },
-        { name: "Google", type: 'corporate', logo: null },
-        { name: "Microsoft", type: 'corporate', logo: null },
-        { name: "Amazon", type: 'corporate', logo: null },
-        { name: "IBM", type: 'corporate', logo: null }
-    ]);
-
-    React.useEffect(() => {
         const fetchPartners = async () => {
             try {
                 const response = await fetch('/api/public/partner-logos');
                 const data = await response.json();
-                if (data && data.length > 0) {
-                    const combined = data
-                        .filter(logo => logo.type === 'university' || logo.type === 'corporate')
-                        .map(logo => ({ name: logo.name, type: logo.type, logo: logo.logo || logo.imageUrl || null }));
-                    if (combined.length > 0) {
-                        setPartners(combined);
-                    }
+                if (Array.isArray(data) && data.length > 0) {
+                    setDynamicPartners(data);
                 }
-            } catch (error) {
-                console.error('Failed to fetch partner logos:', error);
+            } catch (err) {
+                console.error('Failed to fetch partner logos:', err);
             }
         };
         fetchPartners();
     }, []);
 
-    // Admin-configured text shown when a hero bubble pops (Admin > Site
-    // Content > Landing Page Controls > Hero Bubble Pop-up Text). Empty
-    // until an admin adds entries - bubbles just rise as plain bubbles then.
-    // Admin-configured CMS data for landing page: hero bubble pop-ups and network diagram nodes
-    const [bubbleTexts, setBubbleTexts] = useState([]);
-    const [networkDiagramNodes, setNetworkDiagramNodes] = useState(null);
-
-    useEffect(() => {
-        const fetchLandingCms = async () => {
-            try {
-                const response = await fetch('/api/public/cms/landing_page');
-                const data = await response.json();
-                const items = data?.hero_bubbles?.items;
-                if (Array.isArray(items) && items.length > 0) {
-                    setBubbleTexts(items.map(i => i.text).filter(Boolean));
-                }
-                if (data?.network_diagram?.nodes) {
-                    setNetworkDiagramNodes(data.network_diagram.nodes);
-                }
-            } catch (error) {
-                console.error('Failed to fetch landing CMS data:', error);
-            }
-        };
-        fetchLandingCms();
-    }, []);
-
     return (
-        <section className="relative min-h-[100dvh] md:min-h-[100vh] flex flex-col md:flex-row justify-center md:items-center overflow-hidden bg-transparent">
-            <style dangerouslySetInnerHTML={{ __html: HERO_CSS }} />
+        <section className="relative min-h-[92vh] lg:min-h-[96vh] flex flex-col justify-between pt-24 sm:pt-28 md:pt-32 pb-8 sm:pb-12 px-4 sm:px-6 lg:px-12 bg-gradient-to-br from-[#FAF8FF] via-[#F6F0FF] to-[#ECE1FF] dark:from-[#080512] dark:via-[#0F0824] dark:to-[#170E35] overflow-hidden select-none">
+            
+            {/* Ambient subtle violet background gradients */}
+            <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute top-1/4 -right-32 w-[480px] h-[480px] bg-purple-300/30 dark:bg-purple-800/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 left-1/3 w-80 h-80 bg-violet-200/30 dark:bg-violet-950/20 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="absolute inset-0 z-0 gpu-accelerated">
-                <AlyraOrb />
+            {/* Smooth 3D Silk Purple Ribbon sweeping across bottom-right (Exact match to reference) */}
+            <div className="absolute right-0 top-1/4 bottom-0 w-[360px] sm:w-[480px] md:w-[600px] lg:w-[680px] pointer-events-none overflow-hidden z-0">
+                <svg
+                    viewBox="0 0 700 800"
+                    className="w-full h-full object-cover opacity-90 dark:opacity-80"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <defs>
+                        <linearGradient id="silkGrad1" x1="100%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#C084FC" stopOpacity="0.8" />
+                            <stop offset="40%" stopColor="#8B5CF6" stopOpacity="0.9" />
+                            <stop offset="70%" stopColor="#6D28D9" stopOpacity="0.95" />
+                            <stop offset="100%" stopColor="#4C1D95" stopOpacity="0.98" />
+                        </linearGradient>
+                        <linearGradient id="silkGrad2" x1="90%" y1="10%" x2="10%" y2="90%">
+                            <stop offset="0%" stopColor="#E9D5FF" stopOpacity="0.6" />
+                            <stop offset="50%" stopColor="#A855F7" stopOpacity="0.75" />
+                            <stop offset="100%" stopColor="#581C87" stopOpacity="0.9" />
+                        </linearGradient>
+                        <linearGradient id="silkShine" x1="0%" y1="50%" x2="100%" y2="50%">
+                            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0" />
+                            <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+                        </linearGradient>
+                        <radialGradient id="sphereGrad" cx="35%" cy="35%" r="65%">
+                            <stop offset="0%" stopColor="#F3E8FF" />
+                            <stop offset="35%" stopColor="#C084FC" />
+                            <stop offset="75%" stopColor="#7C3AED" />
+                            <stop offset="100%" stopColor="#4C1D95" />
+                        </radialGradient>
+                    </defs>
+
+                    {/* Sweeping silk ribbon wave shape 1 */}
+                    <path
+                        d="M 650 300 C 580 420, 420 540, 480 680 C 540 820, 720 780, 760 850 L 760 900 L 350 900 C 420 780, 480 660, 400 580 C 320 500, 440 380, 650 300 Z"
+                        fill="url(#silkGrad1)"
+                    />
+                    {/* Sweeping silk ribbon wave shape 2 with highlight */}
+                    <path
+                        d="M 700 240 C 620 380, 460 480, 520 620 C 580 760, 750 720, 800 800 L 750 820 C 700 740, 540 760, 480 620 C 420 480, 580 380, 660 260 Z"
+                        fill="url(#silkGrad2)"
+                    />
+                    {/* Silk highlight crest line */}
+                    <path
+                        d="M 680 270 C 600 400, 440 510, 500 650 C 560 790, 740 750, 780 820"
+                        stroke="url(#silkShine)"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                    />
+
+                    {/* Dotted Orbit Arc connecting to badges on right */}
+                    <path
+                        d="M 450 150 C 580 260, 600 420, 480 560"
+                        stroke="#A855F7"
+                        strokeWidth="1.5"
+                        strokeDasharray="4 4"
+                        strokeOpacity="0.45"
+                    />
+                    <circle cx="575" cy="270" r="3" fill="#A855F7" />
+                    <circle cx="585" cy="380" r="3" fill="#A855F7" />
+                    <circle cx="510" cy="510" r="3" fill="#A855F7" />
+                </svg>
             </div>
 
-            {/* Purple Network Diagram - left (hidden on mobile, visible on desktop) */}
-            <div className="hidden md:block gpu-accelerated">
-                <NetworkDiagram customNodesConfig={networkDiagramNodes} />
-            </div>
+            {/* ── MAIN HERO GRID (BALANCED 2-COLUMN MATCHING REFERENCE) ── */}
+            <div className="max-w-7xl mx-auto w-full relative z-10 my-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
+                    
+                    {/* ── LEFT COLUMN: 5-NODE ECOSYSTEM NETWORK (MATCHING REFERENCE) ── */}
+                    <div className="lg:col-span-6 relative flex items-center justify-center">
+                        <div className="relative w-[340px] h-[340px] xs:w-[380px] xs:h-[380px] sm:w-[440px] sm:h-[440px] md:w-[480px] md:h-[480px]">
+                            
+                            {/* SVG Connection Lines & Animated Travel Pulses */}
+                            <svg
+                                viewBox="0 0 500 500"
+                                className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible"
+                            >
+                                <defs>
+                                    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#C084FC" stopOpacity="0.6" />
+                                        <stop offset="100%" stopColor="#A855F7" stopOpacity="0.8" />
+                                    </linearGradient>
+                                </defs>
 
-            {/* Floating course bubbles - right */}
-            <CourseBubbles texts={bubbleTexts} />
+                                {/* Connections from Center Hub (250, 250) to Nodes */}
+                                {/* To Students (90, 85) */}
+                                <path d="M 250 250 C 200 180, 140 125, 90 85" stroke="url(#lineGrad)" strokeWidth="1.8" fill="none" />
+                                {/* To Universities (390, 95) */}
+                                <path d="M 250 250 C 300 180, 350 135, 390 95" stroke="url(#lineGrad)" strokeWidth="1.8" fill="none" />
+                                {/* To Jobs (405, 275) */}
+                                <path d="M 250 250 C 310 255, 355 265, 405 275" stroke="url(#lineGrad)" strokeWidth="1.8" fill="none" />
+                                {/* To Courses (230, 415) */}
+                                <path d="M 250 250 C 245 310, 240 365, 230 415" stroke="url(#lineGrad)" strokeWidth="1.8" fill="none" />
+                                {/* To Certifications (70, 270) */}
+                                <path d="M 250 250 C 180 255, 125 265, 70 270" stroke="url(#lineGrad)" strokeWidth="1.8" fill="none" />
 
-            {/* Hero Content */}
-            <div className="max-w-[1400px] pb-14 sm:pb-16 h-auto md:h-full mx-auto px-0 sm:px-6 lg:px-12 w-full relative z-[20]">
-                <div className="max-w-[900px] h-auto md:h-full pt-[80px] xs:pt-[95px] sm:pt-[110px] md:pb-[100px] md:pt-[120px] md:py-28 text-left md:text-center mx-auto flex flex-col items-start md:items-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.9, ease: 'easeOut' }}
-                        className="w-full h-auto md:h-full flex flex-col items-start md:items-center"
-                    >
-                        {/* Main Heading */}
-                        <div
-                            role="heading"
-                            aria-level="1"
-                            className="text-[30px] xs:text-[36px] sm:text-[46px] md:text-[58px] lg:text-[70px] font-black leading-[1.1] tracking-tight mb-3 sm:mb-4 font-jakarta px-4 sm:px-0 text-left md:text-center"
-                        >
-                            <span className="text-text-primary">
-                                <span
-                                    className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-[#C026FF] to-primary"
-                                    style={{
-                                        backgroundSize: '200% auto',
-                                        animation: 'hero-text-gradient 5s linear infinite'
-                                    }}
+                                {/* Inter-node connection loops matching reference */}
+                                <path d="M 90 85 C 55 160, 50 210, 70 270" stroke="#DDD6FE" strokeWidth="1.4" strokeDasharray="3 3" fill="none" />
+                                <path d="M 70 270 C 95 365, 150 405, 230 415" stroke="#DDD6FE" strokeWidth="1.4" strokeDasharray="3 3" fill="none" />
+                                <path d="M 390 95 C 415 165, 420 215, 405 275" stroke="#DDD6FE" strokeWidth="1.4" strokeDasharray="3 3" fill="none" />
+
+                                {/* Glowing Junction Dots */}
+                                <circle cx="160" cy="160" r="3.5" fill="#A855F7" className="animate-ping" style={{ animationDuration: '3s' }} />
+                                <circle cx="330" cy="180" r="3" fill="#9333EA" />
+                                <circle cx="335" cy="260" r="3" fill="#A855F7" />
+                                <circle cx="238" cy="340" r="3.5" fill="#7C3AED" className="animate-ping" style={{ animationDuration: '4s' }} />
+                                <circle cx="150" cy="260" r="3" fill="#9333EA" />
+                            </svg>
+
+                            {/* ── CENTER HUB: SKILLDAD LOGO (EXACT USER REQUIREMENT) ── */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center pointer-events-none">
+                                {/* Outer Subtle Concentric Purple Glow Ring */}
+                                <div className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full border border-purple-300/60 dark:border-purple-700/40 animate-pulse pointer-events-none" />
+                                <div className="absolute w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-purple-400/15 dark:bg-purple-600/15 blur-xl pointer-events-none" />
+
+                                {/* Central Circular Card with SkillDad Logo */}
+                                <motion.div
+                                    animate={{ scale: [1, 1.04, 1], y: [-2, 3, -2] }}
+                                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-white dark:bg-[#1A1035] shadow-[0_12px_36px_rgba(109,40,217,0.22)] border-2 border-purple-200/90 dark:border-purple-600/50 flex items-center justify-center p-3 relative z-20 pointer-events-auto cursor-pointer hover:shadow-[0_16px_45px_rgba(109,40,217,0.32)] transition-shadow"
+                                    onClick={() => navigate('/')}
                                 >
-                                    Placement-Assured Courses
-                                </span>
+                                    <img
+                                        src={skilldadLogo}
+                                        alt="SkillDad"
+                                        className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_4px_10px_rgba(76,29,149,0.25)]"
+                                    />
+                                </motion.div>
+                            </div>
+
+                            {/* ── 5 CIRCULAR PHOTO NODES WITH ATTACHED PILL BADGES ── */}
+                            {ECOSYSTEM_NODES.map((node, i) => {
+                                const IconComp = node.icon;
+                                return (
+                                    <motion.div
+                                        key={node.id}
+                                        initial={{ opacity: 0, scale: 0.6 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.7, delay: i * 0.12, ease: 'easeOut' }}
+                                        whileHover={{ scale: 1.08, zIndex: 30 }}
+                                        className="absolute -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center cursor-pointer group"
+                                        style={{ left: node.left, top: node.top }}
+                                    >
+                                        {/* Circular Realistic Photo Node Frame */}
+                                        <div className="w-16 h-16 xs:w-18 xs:h-18 sm:w-20 sm:h-20 md:w-22 md:h-22 rounded-full p-1 bg-white dark:bg-[#1A1035] shadow-[0_8px_24px_rgba(76,29,149,0.18)] border-2 border-white dark:border-purple-600/50 overflow-hidden relative transition-transform duration-300 group-hover:shadow-[0_12px_28px_rgba(76,29,149,0.28)]">
+                                            <img
+                                                src={node.image}
+                                                alt={node.title}
+                                                className="w-full h-full rounded-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                            />
+                                        </div>
+
+                                        {/* Pill Badge Attached Directly Beneath Photo */}
+                                        <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/95 dark:bg-[#1A1035]/95 backdrop-blur-md border border-purple-200/90 dark:border-purple-700/60 shadow-[0_4px_12px_rgba(76,29,149,0.10)] text-[11px] sm:text-xs font-bold text-[#4C1D95] dark:text-purple-300 whitespace-nowrap group-hover:bg-purple-50 dark:group-hover:bg-purple-900/40 transition-colors">
+                                            <IconComp size={13} className="text-[#6D28D9] dark:text-purple-400 shrink-0" strokeWidth={2.4} />
+                                            <span>{node.title}</span>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+
+                        </div>
+                    </div>
+
+                    {/* ── RIGHT COLUMN: HERO TEXT & 3 FLOATING CATEGORY BADGES ── */}
+                    <div className="lg:col-span-6 relative z-10 flex flex-col items-start text-left lg:pl-4">
+                        
+                        {/* Eyebrow: YOUR GATEWAY TO A BRIGHTER FUTURE */}
+                        <div className="flex items-center gap-2.5 mb-3.5">
+                            <span className="w-7 h-[2px] bg-[#6D28D9] rounded-full"></span>
+                            <span className="text-[11px] sm:text-xs md:text-[12.5px] font-extrabold uppercase tracking-widest text-[#6D28D9] dark:text-purple-400 font-sans">
+                                YOUR GATEWAY TO A BRIGHTER FUTURE
                             </span>
                         </div>
 
-                        {/* Subtitle */}
-                        <p className="text-[13px] xs:text-[14px] sm:text-base md:text-lg text-text-secondary mb-6 sm:mb-8 max-w-[275px] xs:max-w-[315px] sm:max-w-2xl font-inter leading-[1.5] sm:leading-[1.6] px-4 sm:px-0 text-left md:text-center mx-0 md:mx-auto">
-                            A collaborative venture initiated by <span className="text-primary font-semibold">IITians</span> and leading job providers in India, in partnership with reputed universities across the world.
+                        {/* Main Headline: "Confusion to Career" (Exact User Requirement) */}
+                        <h1 className="text-4xl sm:text-5xl md:text-[54px] lg:text-[58px] xl:text-[64px] font-black tracking-tight leading-[1.08] mb-4 font-sans text-[#1E1B4B] dark:text-white">
+                            Confusion to <br />
+                            <span className="text-[#4C1D95] dark:text-[#A855F7]">
+                                Career
+                            </span>
+                        </h1>
+
+                        {/* Subtitle Matching Reference Exactly */}
+                        <p className="text-sm sm:text-base md:text-[16px] lg:text-[17px] text-slate-600 dark:text-purple-200/80 max-w-xl leading-relaxed mb-8 font-normal font-sans">
+                            SkillDad connects you with top universities, industry-aligned courses and real job opportunities — so you can learn, upskill and get placed.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start md:justify-center gap-3 w-full sm:max-w-none mb-10 md:mb-0 px-4 sm:px-0">
+                        {/* Action Buttons Row */}
+                        <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 mb-6">
                             <button
-                                onClick={() => navigate(user ? getDashboardLink() : '/register')}
-                                className="relative w-[80%] max-w-[260px] sm:max-w-none sm:w-auto px-6 md:px-10 py-3 md:py-4 rounded-full bg-primary text-white font-inter font-normal text-[14px] transition-all flex items-center justify-center gap-2 group hover:shadow-glow-purple active:scale-95 shadow-xl before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white/.5)_50%,transparent_75%,transparent_100%)] dark:before:bg-[linear-gradient(45deg,transparent_25%,theme(colors.white)_50%,transparent_75%,transparent_100%)] before:bg-[length:250%_250%,100%_100%] before:bg-[position:200%_0,0_0] before:bg-no-repeat before:[transition:background-position_0s_ease] hover:before:bg-[position:-100%_0,0_0] hover:before:duration-[1500ms]"
+                                onClick={() => navigate(user ? getDashboardLink() : '/courses')}
+                                className="rounded-full bg-[#4C1D95] hover:bg-[#3B1578] text-white px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-[15px] font-bold shadow-[0_12px_28px_-6px_rgba(76,29,149,0.45)] flex items-center gap-2.5 transition-all duration-300 hover:scale-[1.02] active:scale-95 cursor-pointer"
                             >
-                                <span className="relative z-10 flex items-center gap-2">
-                                    {user ? 'Go to Dashboard' : 'Start Learning Today'}
-                                    <ChevronRight
-                                        className="group-hover:translate-x-2 transition-transform duration-[800ms] ease-in-out"
-                                        size={18}
-                                    />
-                                </span>
+                                <span>{user ? 'Go to Dashboard' : 'Start Learning Today'}</span>
+                                <ArrowRight size={17} className="stroke-[2.5]" />
                             </button>
 
                             {!user && (
                                 <button
                                     onClick={() => navigate('/login')}
-                                    className={theme === 'dark'
-                                        ? "w-[80%] max-w-[260px] sm:max-w-none sm:w-auto px-6 md:px-10 py-3 md:py-4 rounded-full border border-white/20 bg-transparent text-white font-inter font-normal text-[14px] transition-colors hover:border-white/40 hover:bg-white/5 active:scale-95"
-                                        : "w-[80%] max-w-[260px] sm:max-w-none sm:w-auto px-6 md:px-10 py-3 md:py-4 rounded-full border border-primary/30 bg-linear-to-r from-primary/20 via-blue-500/20 to-primary/20 backdrop-blur-md text-black font-inter font-normal text-[14px] transition-colors hover:from-primary/40 hover:via-blue-500/40 hover:to-primary/40 hover:border-primary/50 shadow-[0_0_20px_rgba(110,40,255,0.3)] active:scale-95"
-                                    }
+                                    className="rounded-full bg-white/90 hover:bg-white dark:bg-[#1A1035] dark:hover:bg-[#25174B] border border-purple-200/90 dark:border-purple-700/60 text-[#4C1D95] dark:text-purple-300 px-7 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-[15px] font-bold shadow-sm transition-all duration-300 hover:scale-[1.02] active:scale-95 cursor-pointer"
                                 >
                                     Login Now
                                 </button>
                             )}
                         </div>
-                    </motion.div>
+
+                        {/* ── 3 FLOATING CATEGORY BADGES ALONG THE ORBIT (MATCHING REFERENCE) ── */}
+                        <div className="hidden sm:flex flex-col gap-3.5 absolute -right-6 lg:-right-12 xl:-right-16 top-6 pointer-events-auto">
+                            {/* Badge 1: Hospital Administration */}
+                            <motion.div
+                                animate={{ y: [-4, 5, -4] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                                className="px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#1A1035]/90 backdrop-blur-md shadow-[0_8px_20px_rgba(76,29,149,0.12)] border border-purple-200/80 dark:border-purple-700/60 flex items-center gap-2.5 text-xs font-bold text-[#1E1B4B] dark:text-purple-200 hover:scale-105 transition-transform cursor-pointer"
+                                onClick={() => navigate('/courses?search=Hospital')}
+                            >
+                                <div className="w-6 h-6 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-[#6D28D9] dark:text-purple-300">
+                                    <Building2 size={13} strokeWidth={2.4} />
+                                </div>
+                                <span>Hospital Administration</span>
+                            </motion.div>
+
+                            {/* Badge 2: Data Analyst */}
+                            <motion.div
+                                animate={{ y: [4, -5, 4] }}
+                                transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                                className="px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#1A1035]/90 backdrop-blur-md shadow-[0_8px_20px_rgba(76,29,149,0.12)] border border-purple-200/80 dark:border-purple-700/60 flex items-center gap-2.5 text-xs font-bold text-[#1E1B4B] dark:text-purple-200 hover:scale-105 transition-transform cursor-pointer ml-6"
+                                onClick={() => navigate('/courses?search=Data')}
+                            >
+                                <div className="w-6 h-6 rounded-lg bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center text-cyan-700 dark:text-cyan-300">
+                                    <BarChart3 size={13} strokeWidth={2.4} />
+                                </div>
+                                <span>Data Analyst</span>
+                            </motion.div>
+
+                            {/* Badge 3: Digital Marketing */}
+                            <motion.div
+                                animate={{ y: [-3, 4, -3] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                                className="px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#1A1035]/90 backdrop-blur-md shadow-[0_8px_20px_rgba(76,29,149,0.12)] border border-purple-200/80 dark:border-purple-700/60 flex items-center gap-2.5 text-xs font-bold text-[#1E1B4B] dark:text-purple-200 hover:scale-105 transition-transform cursor-pointer"
+                                onClick={() => navigate('/courses?search=Marketing')}
+                            >
+                                <div className="w-6 h-6 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center text-[#6D28D9] dark:text-purple-300">
+                                    <Megaphone size={13} strokeWidth={2.4} />
+                                </div>
+                                <span>Digital Marketing</span>
+                            </motion.div>
+
+                            {/* Floating 3D Purple Orb Sphere */}
+                            <motion.div
+                                animate={{ y: [-6, 8, -6], scale: [1, 1.05, 1] }}
+                                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                                className="w-9 h-9 rounded-full shadow-[0_10px_20px_rgba(109,40,217,0.35)] ml-14 mt-2"
+                                style={{ background: 'radial-gradient(circle at 35% 35%, #F3E8FF 0%, #C084FC 35%, #7C3AED 75%, #4C1D95 100%)' }}
+                            />
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
 
-            {/* University & Partner Ticker */}
-            <div className="absolute bottom-0 w-full md:left-0 md:right-0 md:bottom-2 py-2 sm:py-5 overflow-hidden whitespace-nowrap z-[20] pointer-events-none sm:pointer-events-auto">
-                <div className="md:hidden z-12 px-4 sm:px-6 mb-2.5 flex flex-col items-start">
-                    <div className="w-10 h-[2px] bg-primary mb-2 opacity-70"></div>
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.15em] font-inter">Trusted by learners from</span>
-                </div>
-                <div className="relative">
-                    <div className="flex animate-scroll hover:pause-on-desktop will-change-transform" style={{ animationDuration: '200s' }}>
-                        {[...partners, ...partners, ...partners].map((partner, i) => {
-                            const hasRealLogo = !!partner.logo;
-                            const avatarLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(partner.name)}&size=64&background=6D28D9&color=fff&bold=true`;
-                            const logoUrl = hasRealLogo
-                                ? (partner.logo.startsWith('http') ? partner.logo : getMediaUrl(partner.logo))
-                                : avatarLogo;
-                            return (
-                                <div key={i} className="mx-4 sm:mx-6 md:mx-8 flex items-center gap-2 sm:gap-2.5 transition-all hover:scale-105 cursor-default shrink-0">
-                                    {hasRealLogo ? (
-                                        <img
-                                            src={logoUrl}
-                                            alt={partner.name}
-                                            className="h-5 sm:h-7 max-w-[80px] sm:max-w-[110px] object-contain opacity-85 hover:opacity-100 transition-opacity shrink-0"
-                                            onError={(e) => { e.target.onerror = null; e.target.src = avatarLogo; e.target.className = 'w-5 h-5 rounded-full object-cover shrink-0'; }}
-                                        />
-                                    ) : (
-                                        <Landmark className="text-primary shrink-0" size={16} />
-                                    )}
-                                    <span className={`text-[11px] xs:text-xs md:text-sm font-bold uppercase tracking-[0.12em] sm:tracking-[0.15em] whitespace-nowrap transition-colors font-inter ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'}`}>
+            {/* ── BOTTOM: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (MATCHING REFERENCE) ── */}
+            <div className="w-full relative z-10 pt-10 sm:pt-14 pb-2">
+                <div className="max-w-6xl mx-auto">
+                    
+                    {/* Header line: — TRUSTED BY LEADING UNIVERSITIES & PARTNERS — */}
+                    <div className="flex items-center justify-center gap-3 mb-6">
+                        <span className="w-8 sm:w-16 h-[1.5px] bg-purple-300/50 dark:bg-purple-800/40"></span>
+                        <span className="text-[10px] sm:text-[11.5px] font-extrabold uppercase tracking-[0.2em] text-[#6D28D9] dark:text-purple-400">
+                            TRUSTED BY LEADING UNIVERSITIES & PARTNERS
+                        </span>
+                        <span className="w-8 sm:w-16 h-[1.5px] bg-purple-300/50 dark:bg-purple-800/40"></span>
+                    </div>
+
+                    {/* Logos Strip Matching Reference Style */}
+                    <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 lg:gap-14 px-4 opacity-85 hover:opacity-100 transition-opacity">
+                        {/* Standard Prestigious Academic Logos */}
+                        {DEFAULT_UNIVERSITY_PARTNERS.map((partner, idx) => (
+                            <div
+                                key={idx}
+                                className="flex items-center gap-2.5 transition-transform hover:scale-105 cursor-default shrink-0 group"
+                            >
+                                <div className="opacity-90 group-hover:opacity-100 transition-opacity">
+                                    {partner.crest}
+                                </div>
+                                <div className="flex flex-col text-left">
+                                    <span className="text-xs sm:text-[13px] font-extrabold tracking-tight text-[#1E1B4B] dark:text-purple-200 leading-tight">
                                         {partner.name}
                                     </span>
+                                    <span className="text-[9px] font-bold text-slate-400 dark:text-purple-400/60 tracking-wider">
+                                        {partner.sub}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Any dynamically configured CMS logos */}
+                        {dynamicPartners.slice(0, 3).map((partner, idx) => {
+                            const logoUrl = partner.logo || partner.imageUrl;
+                            if (!logoUrl) return null;
+
+                            return (
+                                <div key={`dyn-${idx}`} className="flex items-center gap-2 shrink-0">
+                                    <img
+                                        src={logoUrl.startsWith('http') ? logoUrl : getMediaUrl(logoUrl)}
+                                        alt={partner.name}
+                                        className="h-6 sm:h-7 max-w-[100px] object-contain opacity-80 hover:opacity-100 transition-opacity"
+                                        onError={(e) => { e.target.style.display = 'none'; }}
+                                    />
                                 </div>
                             );
                         })}
                     </div>
+
                 </div>
             </div>
 
-            {/* Bottom transition gradient */}
-            <div className="hidden md:block absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
         </section>
     );
 };

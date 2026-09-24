@@ -628,6 +628,10 @@ const Services = () => {
                                     Not Just A Course
                                 </span>
                             </h2>
+                            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-purple-200/80 max-w-md mx-auto leading-relaxed font-normal">
+                                Our intelligent platform is built to give you a seamless, personalized, and efficient learning journey from day one.
+                            </p>
+
                             {/* Category Filter Pills Row Matching Video */}
                             <div className="pt-0.5 flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                                 {['AI Mentorship', 'Mobile Access', 'Cloud Infrastructure', 'Live Collaboration', 'Career Matrix'].map((tag, idx) => (
