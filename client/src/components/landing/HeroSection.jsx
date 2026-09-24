@@ -161,19 +161,19 @@ const HeroSection = () => {
     ];
 
     return (
-        <section className="relative w-full min-h-[580px] lg:h-[calc(100vh-64px)] lg:max-h-[750px] xl:max-h-[780px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-1 sm:pt-2 pb-0">
+        <section className="relative w-full min-h-[630px] lg:h-[calc(100vh-64px)] lg:min-h-[660px] lg:max-h-[820px] xl:max-h-[860px] flex flex-col justify-between overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-3 sm:pt-4 pb-0">
             
             {/* Ambient Lighting Orbs */}
             <div className="absolute top-1/4 -left-20 w-[440px] h-[440px] bg-purple-300/25 dark:bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
             <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-200/25 dark:bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
 
             {/* Main Hero Container */}
-            <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-0 sm:py-1">
+            <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-2 sm:py-3.5">
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center">
 
                     {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
-                        <div className="w-[280px] xs:w-[310px] sm:w-[340px] md:w-[365px] lg:w-[380px] xl:w-[395px] aspect-square relative flex items-center justify-center shrink-0">
+                        <div className="w-[290px] xs:w-[325px] sm:w-[355px] md:w-[380px] lg:w-[395px] xl:w-[410px] aspect-square relative flex items-center justify-center shrink-0">
                             {/* Very Thin, Standard Purple Connection Arc Lines & Moving Purple Dots */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
                                 {/* Delicate Central Orbit Track */}
@@ -619,19 +619,21 @@ const HeroSection = () => {
             <HeroFlowingWave />
 
             {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP ── */}
-            <div className="w-full relative z-20 bg-gradient-to-b from-[#F7F4FE] via-[#EFEAFC] to-[#E9E2FB] dark:from-[#0E061D] dark:via-[#130B29] dark:to-[#170E30] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
+            <div className="w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
                 
-                {/* Soft White-to-Lavender Curved Wave Background Transition from Hero */}
+                {/* Soft Lavender Curved Wave Background Transition from Hero (with subtle defining stroke) */}
                 <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-10 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
                     <svg
-                        className="relative block w-full h-6 sm:h-8 md:h-9 lg:h-10"
+                        className="relative block w-full h-6 sm:h-8 md:h-9 lg:h-10 overflow-visible"
                         viewBox="0 0 1440 60"
                         preserveAspectRatio="none"
                     >
                         <path
                             d="M 0 28 C 220 10 440 45 720 40 C 1000 35 1220 10 1440 26 L 1440 60 L 0 60 Z"
-                            fill="#F7F4FE"
-                            className="dark:fill-[#0E061D] transition-colors"
+                            fill="#ECE4FA"
+                            stroke="rgba(147, 51, 234, 0.22)"
+                            strokeWidth="1"
+                            className="dark:fill-[#140A26] dark:stroke-purple-800/40 transition-colors"
                         />
                     </svg>
                 </div>
@@ -647,14 +649,14 @@ const HeroSection = () => {
                     
                     {/* Centered Small Uppercase Label with Thin Purple Dividers */}
                     <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-5 mb-2.5 sm:mb-3">
-                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-300/80 dark:bg-purple-700/80" />
-                        <span className="text-[9.5px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300 select-none whitespace-nowrap">
+                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <span className="text-[9.5px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.22em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-300/80 dark:bg-purple-700/80" />
+                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                     </div>
 
-                    {/* 5 University / Partner Logos Evenly Spaced in One Horizontal Row (Monochrome Deep-Purple with Consistent Sizing & Generous Spacing) */}
+                    {/* 5-6 University / Partner Logos Evenly Spaced in One Horizontal Row (Monochrome Deep-Purple with Consistent Sizing & Generous Spacing) */}
                     <div className="flex items-center justify-start sm:justify-center gap-8 sm:gap-11 md:gap-14 lg:gap-18 xl:gap-22 overflow-x-auto no-scrollbar w-full py-1">
                         {universityPartners.map((uni, idx) => (
                             <div
