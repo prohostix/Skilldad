@@ -193,33 +193,6 @@ const ModernStudyAbroadIcon = ({ className = "w-5 h-5" }) => (
     </svg>
 );
 
-// Partner / Tech Leaders Row from Reference Video
-const PartnerLogosRow = () => (
-    <div className="w-full flex items-center justify-between gap-6 sm:gap-10 overflow-x-auto no-scrollbar py-2 opacity-65 hover:opacity-95 transition-opacity select-none text-slate-700 dark:text-slate-300">
-        <span className="font-extrabold tracking-wider text-sm sm:text-base flex items-center gap-1.5 shrink-0">
-            <span className="text-emerald-600 dark:text-emerald-400 font-black">nVIDIA</span>
-        </span>
-        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 lowercase text-slate-800 dark:text-slate-200">
-            amazon
-        </span>
-        <span className="font-medium tracking-tight text-sm sm:text-base flex items-center gap-1.5 shrink-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" /> Google Domains
-        </span>
-        <span className="font-semibold tracking-tight text-sm sm:text-base shrink-0 flex items-center gap-1 text-slate-800 dark:text-slate-200">
-            Robinhood <span className="text-xs text-amber-500">✦</span>
-        </span>
-        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 flex items-center gap-1.5 text-slate-800 dark:text-slate-200">
-            <span className="text-blue-600 dark:text-blue-400 text-lg leading-none">∞</span> Meta
-        </span>
-        <span className="font-black tracking-widest text-sm sm:text-base text-red-600 dark:text-red-500 shrink-0">
-            NETFLIX
-        </span>
-        <span className="font-bold tracking-tight text-sm sm:text-base shrink-0 text-[#4C1D95] dark:text-purple-300">
-            Fanatics
-        </span>
-    </div>
-);
-
 const Services = () => {
     const [expandedId, setExpandedId] = useState(null);
     const [selectedServiceId, setSelectedServiceId] = useState(null);
@@ -510,11 +483,6 @@ const Services = () => {
                         <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-300/30 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
                         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-violet-300/25 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
-                        {/* Top: Partner / Tech Leaders Wordmarks Row */}
-                        <div className="border-b border-purple-200/80 dark:border-purple-900/40 pb-6 mb-8 sm:mb-12">
-                            <PartnerLogosRow />
-                        </div>
-
                         {/* Header: WHAT AND WHY tag + Title + Subtitle */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -611,43 +579,43 @@ const Services = () => {
             </section>
 
             {/* ── SECTION 3: ADVANCED PLATFORM CAPABILITIES (MATCHING REFERENCE VIDEO AT 0:00:07) ── */}
-            <section className="py-14 sm:py-20 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
+            <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
                 <div className="max-w-7xl mx-auto">
                     
                     {/* Light Purple Rounded Container Card Matching Reference Video */}
-                    <div className="relative rounded-[36px] sm:rounded-[48px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 p-7 sm:p-11 lg:p-16 shadow-[0_20px_50px_-15px_rgba(76,29,149,0.12)] overflow-hidden">
+                    <div className="relative rounded-[28px] sm:rounded-[36px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-5 py-7 sm:px-9 sm:py-9 lg:px-12 lg:py-10 shadow-[0_20px_50px_-15px_rgba(76,29,149,0.12)] overflow-hidden">
                         
                         {/* Soft ambient violet background glows */}
-                        <div className="absolute -top-24 -left-24 w-80 h-80 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute -bottom-24 -right-24 w-80 h-80 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -top-24 -left-24 w-72 h-72 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
                         {/* Floating Transparent SkillDad Logo with Floating Motion & Trailing Curve */}
-                        <div className="absolute top-5 right-6 sm:top-8 sm:right-14 z-0 pointer-events-none select-none">
+                        <div className="absolute top-3 right-4 sm:top-5 sm:right-8 z-0 pointer-events-none select-none">
                             <motion.div
-                                animate={{ y: [-6, 8, -6], rotate: [-3, 3, -3] }}
+                                animate={{ y: [-4, 6, -4], rotate: [-2, 2, -2] }}
                                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                                 className="relative flex items-center justify-center"
                             >
                                 {/* Soft ambient purple glow behind the logo */}
-                                <div className="absolute inset-0 bg-[#6D28D9]/20 rounded-full blur-2xl pointer-events-none scale-125" />
+                                <div className="absolute inset-0 bg-[#6D28D9]/20 rounded-full blur-xl pointer-events-none scale-110" />
 
                                 {/* Transparent SkillDad Logo */}
                                 <motion.img
                                     src={skilldadLogo}
                                     alt="SkillDad Logo"
-                                    className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 object-contain drop-shadow-[0_12px_24px_rgba(76,29,149,0.3)] relative z-10"
-                                    animate={{ scale: [1, 1.05, 1] }}
+                                    className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_8px_18px_rgba(76,29,149,0.25)] relative z-10"
+                                    animate={{ scale: [1, 1.04, 1] }}
                                     transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                                 />
 
                                 {/* Curving Wavy String trailing down behind cards */}
                                 <svg
-                                    className="absolute top-[80px] right-[24px] sm:right-[36px] w-[260px] sm:w-[380px] h-[340px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
+                                    className="absolute top-[55px] right-[18px] sm:right-[28px] w-[180px] sm:w-[260px] h-[220px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
                                     viewBox="0 0 300 280"
                                 >
                                     <path
                                         d="M200 0 C 180 80, 220 160, 160 200 C 100 240, 60 170, 100 130 C 140 90, 170 170, 100 240"
-                                        strokeWidth="2.5"
+                                        strokeWidth="2"
                                         strokeLinecap="round"
                                         strokeDasharray="4 2"
                                     />
@@ -656,28 +624,28 @@ const Services = () => {
                         </div>
 
                         {/* Header: Centered HOW IT WORKS Tag + Title + Subtitle + Pills Row */}
-                        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16 space-y-3.5 relative z-10">
+                        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8 space-y-2 relative z-10">
                             <div>
-                                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[11px] font-bold tracking-widest uppercase shadow-2xs">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[10.5px] font-bold tracking-widest uppercase shadow-2xs">
                                     HOW IT WORKS
                                 </span>
                             </div>
-                            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-[42px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.18] font-sans">
+                            <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.18] font-sans">
                                 An Intelligent System, <br />
                                 <span className="text-[#4C1D95] dark:text-purple-300">
                                     Not Just A Course
                                 </span>
                             </h2>
-                            <p className="text-xs sm:text-sm text-slate-600 dark:text-purple-200/80 max-w-xl mx-auto leading-relaxed font-normal">
+                            <p className="text-xs sm:text-[13px] text-slate-600 dark:text-purple-200/80 max-w-xl mx-auto leading-relaxed font-normal">
                                 Our intelligent platform is built to give you a seamless, personalized, and efficient learning journey from day one.
                             </p>
 
                             {/* Category Filter Pills Row Matching Video */}
-                            <div className="pt-2 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+                            <div className="pt-1.5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                                 {['AI Mentorship', 'Mobile Access', 'Cloud Infrastructure', 'Live Collaboration', 'Career Matrix'].map((tag, idx) => (
                                     <span
                                         key={idx}
-                                        className="bg-white/80 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 px-3.5 py-1 rounded-full text-xs font-semibold shadow-2xs hover:bg-white dark:hover:bg-purple-900/60 transition-colors cursor-default"
+                                        className="bg-white/80 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold shadow-2xs hover:bg-white dark:hover:bg-purple-900/60 transition-colors cursor-default"
                                     >
                                         {tag}
                                     </span>
@@ -686,7 +654,7 @@ const Services = () => {
                         </div>
 
                         {/* 3 Angled Overlapping Cards with Video Staggered Entrance Animation */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-5 items-stretch max-w-5xl mx-auto pt-4 pb-2 relative z-10">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-4 items-stretch max-w-5xl mx-auto pt-1 pb-1 relative z-10">
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;
 
@@ -702,43 +670,43 @@ const Services = () => {
                                             ease: [0.22, 1, 0.36, 1]
                                         }}
                                         whileHover={{
-                                            y: -12,
+                                            y: -8,
                                             rotate: 0,
-                                            scale: 1.05,
+                                            scale: 1.03,
                                             zIndex: 30,
                                             transition: { duration: 0.25, ease: 'easeOut' }
                                         }}
                                         className={`h-full relative group cursor-pointer ${capability.rotation} transition-transform`}
                                     >
                                         <div
-                                            className={`h-full rounded-[26px] p-6 sm:p-8 flex flex-col justify-between transition-shadow duration-300 ${capability.cardBg}`}
+                                            className={`h-full rounded-[22px] p-5 sm:p-6 flex flex-col justify-between transition-shadow duration-300 ${capability.cardBg}`}
                                         >
-                                            <div className="space-y-3.5 text-left">
+                                            <div className="space-y-2.5 text-left">
                                                 {/* Top Tag & Icon Row */}
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${capability.tagBg}`}>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${capability.tagBg}`}>
                                                         {capability.tag}
                                                     </span>
-                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 shrink-0">
-                                                        <IconComponent size={16} strokeWidth={2.4} />
+                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 shrink-0">
+                                                        <IconComponent size={14} strokeWidth={2.4} />
                                                     </div>
                                                 </div>
 
                                                 {/* Title */}
-                                                <h3 className={`text-xl sm:text-[22px] font-extrabold tracking-tight leading-snug font-sans ${capability.textColor}`}>
+                                                <h3 className={`text-lg sm:text-xl font-extrabold tracking-tight leading-snug font-sans ${capability.textColor}`}>
                                                     {capability.title}
                                                 </h3>
 
                                                 {/* Description */}
-                                                <p className={`text-xs sm:text-[13px] leading-relaxed ${capability.descColor}`}>
+                                                <p className={`text-xs sm:text-[12.5px] leading-relaxed ${capability.descColor}`}>
                                                     {capability.description}
                                                 </p>
                                             </div>
 
                                             {/* Action Arrow Button */}
-                                            <div className="pt-6 mt-4 border-t border-black/10 flex items-center justify-end">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${capability.btnBg}`}>
-                                                    <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                            <div className="pt-4 mt-3 border-t border-black/10 flex items-center justify-end">
+                                                <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${capability.btnBg}`}>
+                                                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
                                                 </div>
                                             </div>
                                         </div>
