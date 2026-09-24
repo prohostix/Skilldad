@@ -20,6 +20,13 @@ import certsImg from '../../assets/hero/certifications.jpg';
 import skilldadLogoDeepPurple from '../../assets/logo_deep_purple.png';
 import HeroFlowingWave from './HeroFlowingWave';
 
+// Prestigious Monochrome Deep-Purple University Partner Logos matching Reference
+import melbourneLogo from '../../assets/hero/partners/melbourne.png';
+import londonLogo from '../../assets/hero/partners/london.png';
+import southamptonLogo from '../../assets/hero/partners/southampton.png';
+import birminghamLogo from '../../assets/hero/partners/birmingham.png';
+import utsLogo from '../../assets/hero/partners/uts.png';
+
 const HeroSection = () => {
     const navigate = useNavigate();
     const { user } = useUser();
@@ -32,15 +39,16 @@ const HeroSection = () => {
         return '/dashboard';
     };
 
-    // Uploaded partner universities from database with real images & names
-    const [universityPartners, setUniversityPartners] = useState([
-        { name: "Amritha Vishwa Vidyapeedam", imageUrl: "/uploads/logo-1788941958199.webp" },
-        { name: "Canadian Institute Of Technology (CIT)", imageUrl: "/uploads/logo-1788942025448.jpg" },
-        { name: "Mediterranean University (MU)", imageUrl: "/uploads/logo-1788942072427.png" },
-        { name: "JAIN UNIVERSITY", imageUrl: "/uploads/logo-1788942119589.png" },
-        { name: "GLA UNIVERSITY", imageUrl: "/uploads/logo-1788942159826.png" },
-        { name: "MANIPAL UNIVERSITY", imageUrl: "/uploads/logo-1788942206138.png" }
-    ]);
+    // 5 Prestigious University Partners in Monochrome Deep Purple matching Reference
+    const defaultUniversityPartners = [
+        { name: "The University of Melbourne", logo: melbourneLogo, alt: "The University of Melbourne" },
+        { name: "University of London", logo: londonLogo, alt: "University of London" },
+        { name: "University of Southampton", logo: southamptonLogo, alt: "University of Southampton" },
+        { name: "Birmingham City University", logo: birminghamLogo, alt: "Birmingham City University" },
+        { name: "UTS University of Sydney", logo: utsLogo, alt: "UTS University of Sydney" }
+    ];
+
+    const [universityPartners, setUniversityPartners] = useState(defaultUniversityPartners);
 
     useEffect(() => {
         const fetchPartners = async () => {
@@ -49,12 +57,16 @@ const HeroSection = () => {
                 const data = await res.json();
                 if (data && data.length > 0) {
                     const unis = data.filter(item => item.type === 'university' && item.isActive !== false);
-                    if (unis.length > 0) {
-                        setUniversityPartners(unis);
+                    if (unis.length >= 4) {
+                        setUniversityPartners(unis.map(u => ({
+                            name: u.name,
+                            logo: u.imageUrl || u.logo ? (u.imageUrl?.startsWith('http') ? u.imageUrl : getMediaUrl(u.imageUrl || u.logo)) : null,
+                            alt: u.name
+                        })));
                     }
                 }
             } catch (e) {
-                // Keep default uploaded universities
+                // Keep default prestigious reference universities
             }
         };
         fetchPartners();
@@ -606,90 +618,59 @@ const HeroSection = () => {
             {/* Decorative Flowing Purple Ribbon / Wave on Right Side (Custom SVG matching Reference) */}
             <HeroFlowingWave />
 
-            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Rich Purple Background #E2D9FA) ── */}
-            <div className="w-full relative z-20 bg-[#E2D9FA] dark:bg-[#140B28] pt-2 sm:pt-2.5 pb-2.5 sm:pb-3 transition-colors">
-                {/* Organic Wave Boundary at Top matching Reference Curve */}
-                <div className="absolute -top-5 sm:-top-7 md:-top-8 lg:-top-9 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+            {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP ── */}
+            <div className="w-full relative z-20 bg-gradient-to-b from-[#F7F4FE] via-[#EFEAFC] to-[#E9E2FB] dark:from-[#0E061D] dark:via-[#130B29] dark:to-[#170E30] pt-2 sm:pt-3 pb-3 sm:pb-4 transition-colors">
+                
+                {/* Soft White-to-Lavender Curved Wave Background Transition from Hero */}
+                <div className="absolute -top-6 sm:-top-8 md:-top-9 lg:-top-10 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
                     <svg
-                        className="relative block w-full h-5 sm:h-7 md:h-8 lg:h-9"
+                        className="relative block w-full h-6 sm:h-8 md:h-9 lg:h-10"
                         viewBox="0 0 1440 60"
                         preserveAspectRatio="none"
                     >
                         <path
-                            d="M 0 18 C 160 12 280 38 460 40 C 640 42 760 28 920 30 C 1060 32 1160 50 1280 44 C 1360 38 1410 24 1440 16 L 1440 60 L 0 60 Z"
-                            fill="#E2D9FA"
-                            className="dark:fill-[#140B28] transition-colors"
+                            d="M 0 28 C 220 10 440 45 720 40 C 1000 35 1220 10 1440 26 L 1440 60 L 0 60 Z"
+                            fill="#F7F4FE"
+                            className="dark:fill-[#0E061D] transition-colors"
                         />
                     </svg>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+                {/* Subtle Fade / Slide-in Animation when entering viewport */}
+                <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20"
+                >
                     
-                    {/* Divider Label matching Reference */}
-                    <div className="flex items-center justify-center gap-3 sm:gap-4 mb-1.5 sm:mb-2">
-                        <div className="w-12 sm:w-20 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
-                        <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.22em] text-[#5B21B6] dark:text-purple-300">
+                    {/* Centered Small Uppercase Label with Thin Purple Dividers */}
+                    <div className="flex items-center justify-center gap-3 sm:gap-4 md:gap-5 mb-2.5 sm:mb-3">
+                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-300/80 dark:bg-purple-700/80" />
+                        <span className="text-[9.5px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.22em] text-[#6D28D9] dark:text-purple-300 select-none whitespace-nowrap">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-12 sm:w-20 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <div className="w-12 sm:w-20 md:w-28 h-[1px] bg-purple-300/80 dark:bg-purple-700/80" />
                     </div>
 
-                    {/* Universities Single Horizontal Row matching Reference with 2-line stacked lockups */}
-                    <div className="flex items-center justify-start sm:justify-center gap-5 sm:gap-7 md:gap-9 lg:gap-11 xl:gap-13 overflow-x-auto no-scrollbar w-full py-0.5 opacity-90 hover:opacity-100 transition-opacity">
-                        {universityPartners.map((uni, idx) => {
-                            const rawLogo = uni.imageUrl || uni.logo;
-                            const hasLogo = !!rawLogo;
-                            const logoSrc = hasLogo ? (rawLogo.startsWith('http') ? rawLogo : getMediaUrl(rawLogo)) : null;
-
-                            // Format into 2-line stacked lockup like reference design
-                            let line1 = uni.name;
-                            let line2 = '';
-                            if (uni.name.includes('(')) {
-                                const parts = uni.name.split('(');
-                                line1 = parts[0].trim();
-                                line2 = `(${parts[1]}`.trim();
-                            } else {
-                                const words = uni.name.trim().split(' ');
-                                if (words.length === 2) {
-                                    line1 = words[0];
-                                    line2 = words[1];
-                                } else if (words.length > 2) {
-                                    const mid = Math.ceil(words.length / 2);
-                                    line1 = words.slice(0, mid).join(' ');
-                                    line2 = words.slice(mid).join(' ');
-                                }
-                            }
-
-                            return (
-                                <div key={uni._id || idx} className="flex items-center gap-2 group cursor-default hover:scale-105 transition-transform duration-200 shrink-0 bg-transparent">
-                                    {hasLogo ? (
-                                        <img
-                                            src={logoSrc}
-                                            alt={uni.name}
-                                            className="h-5 sm:h-6 max-w-[38px] sm:max-w-[44px] object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0 mix-blend-multiply dark:mix-blend-screen bg-transparent"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                            }}
-                                        />
-                                    ) : (
-                                        <GraduationCap size={16} className="text-[#6D28D9] shrink-0" />
-                                    )}
-                                    <div className="flex flex-col leading-[1.1] text-left">
-                                        <span className="text-[8.5px] sm:text-[9.5px] font-sans font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                                            {line1}
-                                        </span>
-                                        {line2 && (
-                                            <span className="text-[9px] sm:text-[10px] font-sans font-extrabold uppercase tracking-wider text-[#0F172A] dark:text-slate-100 whitespace-nowrap">
-                                                {line2}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })}
+                    {/* 5 University / Partner Logos Evenly Spaced in One Horizontal Row (Monochrome Deep-Purple with Consistent Sizing & Generous Spacing) */}
+                    <div className="flex items-center justify-start sm:justify-center gap-8 sm:gap-11 md:gap-14 lg:gap-18 xl:gap-22 overflow-x-auto no-scrollbar w-full py-1">
+                        {universityPartners.map((uni, idx) => (
+                            <div
+                                key={idx}
+                                className="group flex items-center justify-center cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
+                            >
+                                <img
+                                    src={uni.logo}
+                                    alt={uni.alt || uni.name}
+                                    className="h-5 sm:h-6 md:h-6.5 w-auto max-w-[120px] sm:max-w-[135px] md:max-w-[150px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                />
+                            </div>
+                        ))}
                     </div>
 
-                </div>
+                </motion.div>
             </div>
 
         </section>
