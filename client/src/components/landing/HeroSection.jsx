@@ -153,7 +153,7 @@ const HeroSection = () => {
                 </svg>
             ),
             image: certsImg,
-            posClass: 'left-[0%] top-[41%]',
+            posClass: '-left-[3.5%] sm:-left-[4.5%] md:-left-[5%] top-[41%]',
             floatAnim: { y: [-4, 4, -4], x: [-1, 1, -1] },
             floatDuration: 4.4,
             floatDelay: 1.6
@@ -241,7 +241,7 @@ const HeroSection = () => {
 
                                 {/* 4. SkillDad <-> Certifications Flower Petal Arcs (Identical Geometry with Dotted Lines) */}
                                 <path
-                                    d="M 38.0 50.0 Q 31.8 42.5 25.5 50.0"
+                                    d="M 38.0 50.0 Q 30.5 42.0 23.0 50.0"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -250,7 +250,7 @@ const HeroSection = () => {
                                     shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 25.5 50.0 Q 31.8 57.5 38.0 50.0"
+                                    d="M 23.0 50.0 Q 30.5 58.0 38.0 50.0"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
                                     strokeWidth="0.22"
@@ -283,8 +283,8 @@ const HeroSection = () => {
                                 <path d="M 29.1 29.1 Q 50 14 70.9 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
                                 <path d="M 70.9 29.1 Q 88 36 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
                                 <path d="M 50.0 79.5 Q 74 74 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
-                                <path d="M 50.0 79.5 Q 31 73 25.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
-                                <path d="M 25.5 50.0 Q 17 36 29.1 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 50.0 79.5 Q 31 73 23.0 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 23.0 50.0 Q 15 36 29.1 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
 
                                 {/* Small Circle Bubbles / Dots along connection lines (Matching right-side style, kept small) */}
                                 <circle cx="35.3" cy="35.3" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
@@ -329,10 +329,10 @@ const HeroSection = () => {
                                     <animateMotion path="M 79.5 50.0 Q 70.8 41.5 62.0 50.0" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 38.0 50.0 Q 31.8 42.5 25.5 50.0" dur="3.8s" repeatCount="indefinite" />
+                                    <animateMotion path="M 38.0 50.0 Q 30.5 42.0 23.0 50.0" dur="3.8s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 25.5 50.0 Q 31.8 57.5 38.0 50.0" dur="3.7s" repeatCount="indefinite" />
+                                    <animateMotion path="M 23.0 50.0 Q 30.5 58.0 38.0 50.0" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.45" fill="#7C3AED">
                                     <animateMotion path="M 50.0 62.0 Q 41.5 70.8 50.0 79.5" dur="3.5s" repeatCount="indefinite" />
@@ -353,10 +353,10 @@ const HeroSection = () => {
                                     <animateMotion path="M 50.0 79.5 Q 74 74 79.5 50.0" dur="4.6s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 50.0 79.5 Q 26 74 20.5 50.0" dur="5s" repeatCount="indefinite" />
+                                    <animateMotion path="M 50.0 79.5 Q 26 74 23.0 50.0" dur="5s" repeatCount="indefinite" />
                                 </circle>
                                 <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 20.5 50.0 Q 12 36 29.1 29.1" dur="5.4s" repeatCount="indefinite" />
+                                    <animateMotion path="M 23.0 50.0 Q 14 36 29.1 29.1" dur="5.4s" repeatCount="indefinite" />
                                 </circle>
                             </svg>
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
