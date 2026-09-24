@@ -65,15 +65,16 @@ const HeroSection = () => {
         {
             id: 'students',
             label: 'Students',
-            // ID Card / Lanyard Clip Badge matching reference
+            // Innovative Smart Student Beacon Icon
             icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="5" y="7" width="14" height="14" rx="2" />
-                    <circle cx="12" cy="12" r="2.5" />
-                    <path d="M8 18c0-1.5 1.8-2.5 4-2.5s4 1 4 2.5" />
-                    <path d="M12 3v4" />
-                    <path d="M9 3h6" />
-                </svg>
+                <div className="w-4.5 h-4.5 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#A855F7] p-1 flex items-center justify-center shadow-xs shrink-0 group-hover:rotate-6 transition-transform">
+                    <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                </div>
             ),
             image: studentImg,
             posClass: 'left-[14%] top-[7%]',
@@ -84,12 +85,15 @@ const HeroSection = () => {
         {
             id: 'universities',
             label: 'Universities',
-            // Mortarboard / Graduation Cap matching reference
+            // Innovative Academy Crest Icon
             icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                </svg>
+                <div className="w-4.5 h-4.5 rounded-full bg-gradient-to-tr from-[#6D28D9] to-[#9333EA] p-1 flex items-center justify-center shadow-xs shrink-0 group-hover:rotate-6 transition-transform">
+                    <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                    </svg>
+                </div>
             ),
             image: universityImg,
             posClass: 'right-[13%] top-[7%]',
@@ -100,13 +104,16 @@ const HeroSection = () => {
         {
             id: 'jobs',
             label: 'Jobs',
-            // Briefcase matching reference
+            // Innovative Modern Executive Portfolio Icon
             icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" />
-                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                </svg>
+                <div className="w-4.5 h-4.5 rounded-full bg-gradient-to-tr from-[#5B21B6] to-[#7C3AED] p-1 flex items-center justify-center shadow-xs shrink-0 group-hover:rotate-6 transition-transform">
+                    <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="3" />
+                        <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                        <circle cx="12" cy="14" r="2" />
+                        <path d="M12 16v2" />
+                    </svg>
+                </div>
             ),
             image: jobsImg,
             posClass: 'right-[3%] top-[41%]',
@@ -117,12 +124,16 @@ const HeroSection = () => {
         {
             id: 'courses',
             label: 'Courses',
-            // Open Book matching reference
+            // Innovative Holographic Learning Book Icon
             icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                </svg>
+                <div className="w-4.5 h-4.5 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#C084FC] p-1 flex items-center justify-center shadow-xs shrink-0 group-hover:rotate-6 transition-transform">
+                    <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        <path d="M9 7h6" />
+                        <path d="M9 11h4" />
+                    </svg>
+                </div>
             ),
             image: coursesImg,
             posClass: 'left-[37%] bottom-[3%]',
@@ -133,12 +144,15 @@ const HeroSection = () => {
         {
             id: 'certifications',
             label: 'Certifications',
-            // Award Rosette Medal matching reference
+            // Innovative Star Rosette Seal Icon
             icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="8" r="5" />
-                    <path d="M15.4 12.8L17 22l-5-3-5 3 1.6-9.2" />
-                </svg>
+                <div className="w-4.5 h-4.5 rounded-full bg-gradient-to-tr from-[#6D28D9] to-[#EC4899] p-1 flex items-center justify-center shadow-xs shrink-0 group-hover:rotate-6 transition-transform">
+                    <svg className="w-full h-full text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="9" r="6" />
+                        <path d="M8.21 13.89L7 22l5-3 5 3-1.21-8.11" />
+                        <polygon points="12 6 13.1 8.2 15.5 8.5 13.8 10.2 14.2 12.5 12 11.3 9.8 12.5 10.2 10.2 8.5 8.5 10.9 8.2 12 6" fill="currentColor" stroke="none" />
+                    </svg>
+                </div>
             ),
             image: certsImg,
             posClass: 'left-[4%] top-[41%]',
@@ -162,6 +176,128 @@ const HeroSection = () => {
                     {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
                         <div className="w-[300px] xs:w-[335px] sm:w-[370px] md:w-[400px] lg:w-[415px] xl:w-[425px] aspect-square relative flex items-center justify-center shrink-0">
+                            {/* Animated Flower-Type Connection Arc Lines */}
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
+                                <defs>
+                                    <linearGradient id="flowerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.95" />
+                                        <stop offset="50%" stopColor="#A855F7" stopOpacity="0.85" />
+                                        <stop offset="100%" stopColor="#818CF8" stopOpacity="0.95" />
+                                    </linearGradient>
+                                </defs>
+
+                                {/* Delicate Central Orbit Track */}
+                                <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" />
+                                <motion.circle
+                                    cx="50"
+                                    cy="50"
+                                    r="16.5"
+                                    fill="none"
+                                    stroke="rgba(168, 85, 247, 0.28)"
+                                    strokeWidth="0.8"
+                                    strokeDasharray="3 4"
+                                    animate={{ rotate: 360 }}
+                                    transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                                    style={{ transformOrigin: '50px 50px' }}
+                                />
+
+                                {/* 1. Arc line from Students to Logo Hub */}
+                                <motion.path
+                                    d="M 27 24 Q 28 42 42 46"
+                                    fill="none"
+                                    stroke="url(#flowerGrad)"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                                />
+
+                                {/* 2. Arc line from Logo Hub to Universities */}
+                                <motion.path
+                                    d="M 58 46 Q 72 42 73 24"
+                                    fill="none"
+                                    stroke="url(#flowerGrad)"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                                />
+
+                                {/* 3. Logo to Jobs AND Job to Logo flower arc lines (Loop) */}
+                                <motion.path
+                                    d="M 59 47 Q 72 41 81 48"
+                                    fill="none"
+                                    stroke="url(#flowerGrad)"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                                />
+                                <motion.path
+                                    d="M 81 54 Q 72 61 59 53"
+                                    fill="none"
+                                    stroke="url(#flowerGrad)"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+                                />
+
+                                {/* 4. Logo to Certifications arc lines */}
+                                <motion.path
+                                    d="M 19 48 Q 27 41 41 48"
+                                    fill="none"
+                                    stroke="url(#flowerGrad)"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                                />
+                                <motion.path
+                                    d="M 41 52 Q 27 59 19 54"
+                                    fill="none"
+                                    stroke="url(#flowerGrad)"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }}
+                                />
+
+                                {/* 5. Logo to Courses arc lines */}
+                                <motion.path
+                                    d="M 48 59 Q 43 70 47 78"
+                                    fill="none"
+                                    stroke="url(#flowerGrad)"
+                                    strokeWidth="1.2"
+                                    strokeLinecap="round"
+                                    animate={{ opacity: [0.65, 0.95, 0.65] }}
+                                    transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+                                />
+
+                                {/* Outer Perimeter Petal Arcs connecting adjacent nodes */}
+                                <path d="M 28 17 Q 50 6 72 17" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                                <path d="M 78 24 Q 89 34 85 45" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                                <path d="M 84 57 Q 75 76 53 82" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                                <path d="M 41 82 Q 22 76 17 57" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+                                <path d="M 15 45 Q 11 29 20 22" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" strokeDasharray="3 3" />
+
+                                {/* Animated Flower Petal Network Dots */}
+                                <motion.circle cx="31" cy="37" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }} />
+                                <motion.circle cx="69" cy="37" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }} />
+                                <motion.circle cx="72" cy="43.5" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }} />
+                                <motion.circle cx="72" cy="58.5" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }} />
+                                <motion.circle cx="27" cy="44" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 2 }} />
+                                <motion.circle cx="27" cy="57" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 2.5 }} />
+                                <motion.circle cx="45" cy="71" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" animate={{ scale: [0.85, 1.3, 0.85], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }} />
+
+                                {/* Outer Perimeter Dots */}
+                                <circle cx="38" cy="10" r="1.3" fill="#A855F7" />
+                                <circle cx="62" cy="10" r="1.3" fill="#A855F7" />
+                                <circle cx="84" cy="34" r="1.3" fill="#A855F7" />
+                                <circle cx="71" cy="71" r="1.3" fill="#A855F7" />
+                                <circle cx="27" cy="73" r="1.3" fill="#A855F7" />
+                                <circle cx="12" cy="33" r="1.3" fill="#A855F7" />
+                            </svg>
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
                             <motion.div
                                 animate={{ scale: [1, 1.03, 1] }}
