@@ -8,6 +8,7 @@ import {
     Megaphone,
     GraduationCap
 } from 'lucide-react';
+import HeroFlowingWave from './HeroFlowingWave';
 import { useUser } from '../../context/UserContext';
 import { getMediaUrl } from '../../utils/media';
 
@@ -456,107 +457,10 @@ const HeroSection = () => {
                 </div>
             </div>
 
-            {/* ── RIGHT EDGE: CONSTELLATION NETWORK, 3D SPHERES & EXACT FLOWING SILK WAVES (Flush with page edge, no gap) ── */}
+            {/* ── RIGHT EDGE: FLOWING SILK RIBBONS & 3 FLOATING BADGES ── */}
+            <HeroFlowingWave />
+
             <div className="absolute right-0 top-[10%] sm:top-[12%] lg:top-[14%] bottom-[50px] sm:bottom-[60px] lg:bottom-[70px] w-[320px] sm:w-[350px] md:w-[380px] lg:w-[410px] xl:w-[450px] hidden lg:flex flex-col items-end justify-center select-none z-10 pointer-events-auto pr-0 overflow-visible">
-                
-                {/* SVG Layer: Exact flowing silk ribbon waves + constellation network tracks + 3D spheres + moving glowing particles */}
-                <svg
-                    className="absolute -right-2 -bottom-6 w-[340px] sm:w-[380px] h-[520px] pointer-events-none overflow-visible z-0"
-                    viewBox="0 0 353 595"
-                    fill="none"
-                >
-                    <defs>
-                        {/* Main Bold Silk Ribbon Gradient (Rich vibrant royal purple to violet) */}
-                        <linearGradient id="mainSilkGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#9333EA" stopOpacity="0.92" />
-                            <stop offset="28%" stopColor="#7C3AED" stopOpacity="0.98" />
-                            <stop offset="65%" stopColor="#6D28D9" stopOpacity="0.98" />
-                            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.88" />
-                        </linearGradient>
-
-                        {/* Mid-layer Translucent Violet Ribbon Gradient */}
-                        <linearGradient id="midVioletGrad" x1="10%" y1="90%" x2="90%" y2="10%">
-                            <stop offset="0%" stopColor="#DDD6FE" stopOpacity="0.25" />
-                            <stop offset="30%" stopColor="#C4B5FD" stopOpacity="0.65" />
-                            <stop offset="70%" stopColor="#A855F7" stopOpacity="0.75" />
-                            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0.45" />
-                        </linearGradient>
-
-                        {/* Upper Sheer Lavender Aura Wave */}
-                        <linearGradient id="sheerAuraGrad" x1="100%" y1="10%" x2="20%" y2="90%">
-                            <stop offset="0%" stopColor="#EDE9FE" stopOpacity="0.55" />
-                            <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.45" />
-                            <stop offset="75%" stopColor="#C4B5FD" stopOpacity="0.30" />
-                            <stop offset="100%" stopColor="#9333EA" stopOpacity="0.08" />
-                        </linearGradient>
-
-                        {/* Filters */}
-                        <filter id="silkBlur" x="-30%" y="-30%" width="160%" height="160%">
-                            <feGaussianBlur stdDeviation="9" />
-                        </filter>
-                        <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur stdDeviation="4" />
-                        </filter>
-                        <filter id="ribbonDropShadow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feDropShadow dx="-2" dy="6" stdDeviation="9" floodColor="#4C1D95" floodOpacity="0.26" />
-                        </filter>
-                    </defs>
-
-                    {/* ── 1. UPPER SHEER CHIFFON AURA (Flowing down from top right) ── */}
-                    <motion.path
-                        animate={{ y: [0, -4, 0], x: [0, -2, 0] }}
-                        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-                        d="M 353 90
-                           C 330 180, 305 270, 268 350
-                           C 225 435, 160 485, 90 520
-                           C 145 480, 230 430, 280 355
-                           C 320 280, 342 185, 353 105 Z"
-                        fill="url(#sheerAuraGrad)"
-                        filter="url(#silkBlur)"
-                    />
-
-                    {/* ── 2. MID-LAYER TRANSLUCENT VIOLET RIBBON ── */}
-                    <motion.path
-                        animate={{ y: [0, -5, 0], x: [0, -3, 0] }}
-                        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-                        d="M 60 535
-                           C 115 505, 185 455, 255 400
-                           C 290 370, 325 340, 353 305
-                           L 353 375
-                           C 320 405, 280 438, 235 470
-                           C 175 512, 120 535, 60 545 Z"
-                        fill="url(#midVioletGrad)"
-                        filter="url(#softGlow)"
-                    />
-
-                    {/* ── 3. MAIN BOLD PURPLE SILK RIBBON (Exact needle tip & swooping arc) ── */}
-                    <motion.path
-                        animate={{ y: [0, -6, 0], x: [0, -2, 0] }}
-                        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-                        d="M -2 546
-                           C 40 552, 95 545, 160 515
-                           C 225 485, 290 438, 353 372
-                           L 353 438
-                           C 290 488, 225 532, 155 555
-                           C 85 578, 30 565, -2 546 Z"
-                        fill="url(#mainSilkGrad)"
-                        filter="url(#ribbonDropShadow)"
-                    />
-
-                    {/* Satin Crest Specular Line */}
-                    <motion.path
-                        animate={{ y: [0, -6, 0], x: [0, -2, 0] }}
-                        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-                        d="M -2 546
-                           C 40 552, 95 545, 160 515
-                           C 225 485, 290 438, 353 372"
-                        stroke="rgba(255, 255, 255, 0.48)"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        fill="none"
-                    />
-                </svg>
-
                 {/* 3 Floating Badges matching Reference */}
                 <div className="space-y-6 sm:space-y-7 relative z-20 flex flex-col items-end pr-2 pt-2">
                     {/* 1. Hospital Administration */}
