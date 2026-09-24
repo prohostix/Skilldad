@@ -141,7 +141,7 @@ const Navbar = ({ compact = false }) => {
 
                 <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-all duration-500 ${compact ? 'h-12' : (scrolled ? 'h-14' : 'h-16')}`}>
                     {/* Logo - Image based */}
-                    <div className="flex items-center group cursor-pointer" onClick={() => navigate('/')}>
+                    <div className="flex items-center group cursor-pointer mr-6 xl:mr-10 shrink-0" onClick={() => navigate('/')}>
                         <div className="relative flex items-center justify-center mr-2.5">
                             <SkillDadLogo
                                 className={`transition-all duration-500 ${compact ? 'w-7 h-7' : (scrolled ? 'w-8 h-8' : 'w-9 h-9')} relative z-20`}
@@ -153,30 +153,22 @@ const Navbar = ({ compact = false }) => {
                         </span>
                     </div>
 
-                    {/* Desktop Menu - Hide on auth pages */}
+                    {/* Desktop Menu - Standard clean font and spacing, Home identical to others */}
                     {!isAuthPage && (
-                        <div className="hidden lg:flex items-center justify-center space-x-6 xl:space-x-8">
-                            {navItems.map((item) => {
-                                const isActive = item.href === '/' ? location.pathname === '/' : location.pathname.startsWith(item.href);
-                                return (
-                                    <Link
-                                        key={item.name}
-                                        to={item.href}
-                                        className={`relative py-1 font-medium transition-colors duration-200 ${compact || scrolled ? 'text-xs' : 'text-sm'} ${
-                                            isActive
-                                                ? '!text-[#4C1D95] dark:!text-purple-300 font-bold'
-                                                : (theme === 'light'
-                                                    ? 'text-slate-700 hover:text-[#4C1D95]'
-                                                    : 'text-[#E9D5FF] hover:text-white')
-                                        }`}
-                                    >
-                                        <span>{item.name}</span>
-                                        {isActive && (
-                                            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-6 h-[2.5px] bg-[#5B21B6] dark:bg-purple-400 rounded-full" />
-                                        )}
-                                    </Link>
-                                );
-                            })}
+                        <div className="hidden lg:flex items-center justify-center space-x-5 xl:space-x-7 shrink-0">
+                            {navItems.map((item) => (
+                                <Link
+                                    key={item.name}
+                                    to={item.href}
+                                    className={`py-1 font-semibold text-[13px] tracking-tight whitespace-nowrap transition-colors duration-200 ${
+                                        theme === 'light'
+                                            ? 'text-slate-700 hover:text-[#5B21B6]'
+                                            : 'text-[#E9D5FF] hover:text-white'
+                                    }`}
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
                         </div>
                     )}
 

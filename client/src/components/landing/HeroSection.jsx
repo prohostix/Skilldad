@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowRight,
     Building2,
     BarChart3,
-    Megaphone
+    Megaphone,
+    GraduationCap
 } from 'lucide-react';
 import { useUser } from '../../context/UserContext';
+import { getMediaUrl } from '../../utils/media';
 
 // Hero Assets exactly matching reference
 import studentImg from '../../assets/hero/student.jpg';
@@ -30,92 +32,33 @@ const HeroSection = () => {
         return '/dashboard';
     };
 
-    // 5 Renowned Partner Universities matching Reference Design exactly with stacked typography & authentic crests
-    const referencePartners = [
-        {
-            name: "Melbourne",
-            lockup: (
-                <div className="flex items-center gap-2.5">
-                    {/* Melbourne Heraldic Shield Crest */}
-                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none">
-                        <path d="M16 2L6 6V15C6 22 10.5 28 16 30C21.5 28 26 22 26 15V6L16 2Z" fill="#1E293B" className="dark:fill-purple-300" />
-                        <path d="M16 5L8 8V15C8 20.5 11.5 25.5 16 27.2C20.5 25.5 24 20.5 24 15V8L16 5Z" fill="#FAF8FE" className="dark:fill-[#0F0822]" />
-                        <path d="M16 8V22M12 12L16 8L20 12M11 16H21" stroke="#1E293B" className="dark:stroke-purple-300" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <div className="flex flex-col leading-[1.1] text-left">
-                        <span className="text-[10px] sm:text-[11px] font-serif font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">THE UNIVERSITY</span>
-                        <span className="text-[10px] sm:text-[11px] font-serif font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">OF MELBOURNE</span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "London",
-            lockup: (
-                <div className="flex items-center gap-2.5">
-                    {/* University of London Shield Crest with Cross & Book */}
-                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none">
-                        <path d="M16 2L6 5V14C6 21.5 10.5 27.5 16 29.5C21.5 27.5 26 21.5 26 14V5L16 2Z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.1" />
-                        <line x1="16" y1="5" x2="16" y2="26" stroke="currentColor" strokeWidth="2" />
-                        <line x1="7" y1="14" x2="25" y2="14" stroke="currentColor" strokeWidth="2" />
-                        <rect x="13" y="11" width="6" height="6" rx="1" fill="currentColor" />
-                    </svg>
-                    <div className="flex flex-col leading-[1.1] text-left">
-                        <span className="text-[10.5px] sm:text-[11.5px] font-sans font-bold tracking-wider text-[#1E293B] dark:text-slate-100">UNIVERSITY</span>
-                        <span className="text-[10.5px] sm:text-[11.5px] font-sans font-bold tracking-wider text-[#1E293B] dark:text-slate-100">OF LONDON</span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Southampton",
-            lockup: (
-                <div className="flex items-center gap-2.5">
-                    {/* Southampton Heraldic Crest with Chevron & Deer */}
-                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none">
-                        <path d="M16 3L7 7V16C7 22.5 11 27.5 16 29C21 27.5 25 22.5 25 16V7L16 3Z" stroke="currentColor" strokeWidth="1.8" />
-                        <path d="M16 7L9 14H23L16 7Z" fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="1.2" />
-                        <circle cx="16" cy="20" r="2.5" fill="currentColor" />
-                    </svg>
-                    <div className="flex flex-col leading-[1.1] text-left">
-                        <span className="text-[9.5px] sm:text-[10.5px] font-sans font-bold tracking-wider text-slate-600 dark:text-slate-300">UNIVERSITY OF</span>
-                        <span className="text-[10px] sm:text-[11px] font-sans font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">SOUTHAMPTON</span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "Birmingham",
-            lockup: (
-                <div className="flex items-center gap-2.5">
-                    {/* Birmingham City University Rampant Lion Crest */}
-                    <svg className="w-7 h-7 sm:w-8 sm:h-8 shrink-0 text-[#1E293B] dark:text-purple-200" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M10 26C10 24 11 22 13 22H18C20 22 21 24 21 26" strokeLinecap="round" />
-                        <path d="M13 22V16C13 14 11 13 9 13M18 22V15C18 13 21 11 23 8" strokeLinecap="round" />
-                        <circle cx="16" cy="10" r="4" fill="currentColor" fillOpacity="0.2" />
-                        <path d="M14 8C14 7 15 6 16 6C17 6 18 7 18 8" />
-                    </svg>
-                    <div className="flex flex-col leading-[1.1] text-left">
-                        <span className="text-[11px] sm:text-[12px] font-sans font-extrabold tracking-tight text-[#1E293B] dark:text-slate-100">BIRMINGHAM</span>
-                        <span className="text-[9px] sm:text-[10px] font-sans font-semibold text-slate-500 dark:text-purple-300/80 tracking-wide">CITY University</span>
-                    </div>
-                </div>
-            )
-        },
-        {
-            name: "UTS",
-            lockup: (
-                <div className="flex items-center gap-2">
-                    {/* UTS Sydney Bold Emblem */}
-                    <span className="text-base sm:text-lg font-black tracking-tighter text-[#1E293B] dark:text-slate-100 font-sans">UTS</span>
-                    <div className="flex flex-col leading-[1.05] text-left">
-                        <span className="text-[7.5px] sm:text-[8.5px] font-sans font-bold tracking-wider text-slate-600 dark:text-slate-300">UNIVERSITY OF</span>
-                        <span className="text-[9px] sm:text-[10px] font-sans font-extrabold tracking-wider text-[#1E293B] dark:text-slate-100">SYDNEY</span>
-                    </div>
-                </div>
-            )
-        }
-    ];
+    // Uploaded partner universities from database with real images & names
+    const [universityPartners, setUniversityPartners] = useState([
+        { name: "Amritha Vishwa Vidyapeedam", imageUrl: "/uploads/logo-1788941958199.webp" },
+        { name: "Canadian Institute Of Technology (CIT)", imageUrl: "/uploads/logo-1788942025448.jpg" },
+        { name: "Mediterranean University (MU)", imageUrl: "/uploads/logo-1788942072427.png" },
+        { name: "JAIN UNIVERSITY", imageUrl: "/uploads/logo-1788942119589.png" },
+        { name: "GLA UNIVERSITY", imageUrl: "/uploads/logo-1788942159826.png" },
+        { name: "MANIPAL UNIVERSITY", imageUrl: "/uploads/logo-1788942206138.png" }
+    ]);
+
+    useEffect(() => {
+        const fetchPartners = async () => {
+            try {
+                const res = await fetch('/api/public/partner-logos');
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const unis = data.filter(item => item.type === 'university' && item.isActive !== false);
+                    if (unis.length > 0) {
+                        setUniversityPartners(unis);
+                    }
+                }
+            } catch (e) {
+                // Keep default uploaded universities
+            }
+        };
+        fetchPartners();
+    }, []);
 
     // 5 Interactive Constellation Nodes with exact reference icons and labels
     const constellationNodes = [
@@ -216,11 +159,11 @@ const HeroSection = () => {
             <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-2 sm:py-4">
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center">
 
-                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Clean matching reference) ── */}
+                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
-                        <div className="w-[320px] xs:w-[360px] sm:w-[410px] md:w-[430px] lg:w-[450px] xl:w-[470px] aspect-square relative flex items-center justify-center shrink-0">
+                        <div className="w-[280px] xs:w-[320px] sm:w-[360px] md:w-[380px] lg:w-[400px] xl:w-[420px] aspect-square relative flex items-center justify-center shrink-0">
                             
-                            {/* SVG Connection Lines matching reference (No unwanted circles or box lines) */}
+                            {/* SVG Connection Lines matching reference (Clean & uncluttered) */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
                                 <defs>
                                     <linearGradient id="refLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -277,7 +220,7 @@ const HeroSection = () => {
                             <motion.div
                                 animate={{ scale: [1, 1.03, 1] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                                className="w-22 h-22 sm:w-26 sm:h-26 md:w-28 md:h-28 rounded-full bg-white dark:bg-[#130B24] shadow-[0_12px_36px_rgba(109,40,217,0.22)] border-[3px] border-purple-100 dark:border-purple-800/60 ring-8 ring-purple-100/50 dark:ring-purple-900/30 flex items-center justify-center p-3.5 sm:p-4 relative z-20"
+                                className="w-20 h-20 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-full bg-white dark:bg-[#130B24] shadow-[0_12px_36px_rgba(109,40,217,0.22)] border-[3px] border-purple-100 dark:border-purple-800/60 ring-8 ring-purple-100/50 dark:ring-purple-900/30 flex items-center justify-center p-3 sm:p-3.5 relative z-20"
                             >
                                 <div className="absolute inset-0 bg-purple-400/20 rounded-full blur-md pointer-events-none animate-pulse" />
                                 <img
@@ -302,16 +245,16 @@ const HeroSection = () => {
                                         whileHover={{ scale: 1.10, zIndex: 40 }}
                                         className={`absolute ${node.posClass} flex flex-col items-center group cursor-pointer z-10`}
                                     >
-                                        <div className="w-14 h-14 xs:w-16 xs:h-16 sm:w-18 sm:h-18 md:w-[74px] md:h-[74px] rounded-full border-[3px] border-white dark:border-purple-950 shadow-[0_8px_24px_rgba(109,40,217,0.20)] overflow-hidden bg-white dark:bg-purple-950 shrink-0 group-hover:shadow-[0_12px_28px_rgba(109,40,217,0.35)] transition-shadow duration-300">
+                                        <div className="w-13 h-13 xs:w-15 xs:h-15 sm:w-17 sm:h-17 md:w-[68px] md:h-[68px] rounded-full border-[3px] border-white dark:border-purple-950 shadow-[0_8px_22px_rgba(109,40,217,0.20)] overflow-hidden bg-white dark:bg-purple-950 shrink-0 group-hover:shadow-[0_12px_28px_rgba(109,40,217,0.35)] transition-shadow duration-300">
                                             <img
                                                 src={node.image}
                                                 alt={node.label}
                                                 className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                                             />
                                         </div>
-                                        <div className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3 py-1 rounded-full shadow-[0_4px_14px_rgba(76,29,149,0.14)] border border-purple-100/90 dark:border-purple-800/50 flex items-center gap-1.5 -mt-3.5 relative z-10 whitespace-nowrap group-hover:border-purple-300 transition-colors">
+                                        <div className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-[0_4px_14px_rgba(76,29,149,0.14)] border border-purple-100/90 dark:border-purple-800/50 flex items-center gap-1.5 -mt-3 relative z-10 whitespace-nowrap group-hover:border-purple-300 transition-colors">
                                             {node.icon}
-                                            <span className="text-[10.5px] sm:text-[11.5px] font-bold text-slate-800 dark:text-purple-100 tracking-tight">
+                                            <span className="text-[10px] sm:text-[11px] font-bold text-slate-800 dark:text-purple-100 tracking-tight">
                                                 {node.label}
                                             </span>
                                         </div>
@@ -446,7 +389,7 @@ const HeroSection = () => {
                 />
             </div>
 
-            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Matching Reference Exactly) ── */}
+            {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Using Uploaded Universities) ── */}
             <div className="w-full relative z-20 py-2.5 sm:py-3.5 border-t border-purple-100/70 dark:border-purple-900/30 bg-white/40 dark:bg-purple-950/20 backdrop-blur-xs">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     
@@ -459,13 +402,33 @@ const HeroSection = () => {
                         <div className="w-12 sm:w-20 h-[1px] bg-purple-200 dark:bg-purple-800" />
                     </div>
 
-                    {/* 5 Universities with Authentic Lockups and Crests */}
-                    <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-9 md:gap-12 lg:gap-16 opacity-90 hover:opacity-100 transition-opacity">
-                        {referencePartners.map((uni, idx) => (
-                            <div key={idx} className="group cursor-default hover:scale-105 transition-transform duration-200">
-                                {uni.lockup}
-                            </div>
-                        ))}
+                    {/* Universities Row displaying uploaded university logos and names */}
+                    <div className="flex flex-wrap items-center justify-center gap-5 sm:gap-8 md:gap-11 lg:gap-14 opacity-90 hover:opacity-100 transition-opacity">
+                        {universityPartners.map((uni, idx) => {
+                            const rawLogo = uni.imageUrl || uni.logo;
+                            const hasLogo = !!rawLogo;
+                            const logoSrc = hasLogo ? (rawLogo.startsWith('http') ? rawLogo : getMediaUrl(rawLogo)) : null;
+
+                            return (
+                                <div key={uni._id || idx} className="flex items-center gap-2.5 group cursor-default hover:scale-105 transition-transform duration-200 shrink-0">
+                                    {hasLogo ? (
+                                        <img
+                                            src={logoSrc}
+                                            alt={uni.name}
+                                            className="h-6 sm:h-7 max-w-[70px] sm:max-w-[90px] object-contain opacity-90 group-hover:opacity-100 transition-opacity shrink-0"
+                                            onError={(e) => {
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : (
+                                        <GraduationCap size={18} className="text-[#6D28D9] shrink-0" />
+                                    )}
+                                    <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-[#1E293B] dark:text-slate-200 font-sans whitespace-nowrap">
+                                        {uni.name}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
 
                 </div>
