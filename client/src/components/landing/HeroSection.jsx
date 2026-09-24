@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
     ArrowRight,
@@ -191,6 +191,171 @@ import southamptonLogo from '../../assets/hero/partners/southampton.png';
 import birminghamLogo from '../../assets/hero/partners/birmingham.png';
 import utsLogo from '../../assets/hero/partners/uts.png';
 
+/* ─── Vector Company & University Logo Components (Crisp SVG) ───── */
+const GoogleLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 85 28" fill="currentColor">
+        <path d="M12.2 12.8v3.1h7.3c-.3 1.9-2.2 5.5-7.3 5.5-4.4 0-8-3.7-8-8.2s3.6-8.2 8-8.2c2.5 0 4.2 1.1 5.2 2l2.4-2.3C18.3 3.3 15.5 2 12.2 2 5.5 2 0 7.5 0 14.2s5.5 12.2 12.2 12.2c7 0 11.6-4.9 11.6-11.8 0-.8-.1-1.4-.2-1.8H12.2z"/>
+        <path d="M30 10.2c-3.9 0-7 3.1-7 7s3.1 7 7 7 7-3.1 7-7-3.1-7-7-7zm0 11.2c-2.2 0-4.1-1.8-4.1-4.2s1.9-4.2 4.1-4.2c2.2 0 4.1 1.8 4.1 4.2s-1.9 4.2-4.1 4.2z"/>
+        <path d="M45.5 10.2c-3.9 0-7 3.1-7 7s3.1 7 7 7 7-3.1 7-7-3.1-7-7-7zm0 11.2c-2.2 0-4.1-1.8-4.1-4.2s1.9-4.2 4.1-4.2c2.2 0 4.1 1.8 4.1 4.2s-1.9 4.2-4.1 4.2z"/>
+        <path d="M60.2 10.2c-3.8 0-6.9 3.1-6.9 7s3.1 7 6.9 7c2.1 0 3.7-1 4.4-1.9v1.6c0 2.6-1.4 4-3.7 4-1.9 0-3-1.3-3.5-2.4l-2.6 1.1c.8 1.8 2.8 4.2 6.1 4.2 3.6 0 6.6-2.1 6.6-7.3V10.6h-2.9v1.4c-.9-.8-2.3-1.8-4.4-1.8zm.3 11.2c-2.1 0-3.7-1.8-3.7-4.2s1.6-4.2 3.7-4.2c2.1 0 3.7 1.8 3.7 4.3 0 2.4-1.6 4.1-3.7 4.1z"/>
+        <path d="M69.8 2.8h3.1v21.4h-3.1z"/>
+        <path d="M80.7 10.2c-3.2 0-5.8 2.5-5.8 7 0 4.2 2.9 7 6.7 7 3.1 0 4.8-1.7 5.9-3.1l-2.4-1.6c-.7 1-1.7 1.9-3.5 1.9-1.9 0-3.2-1-3.7-2.5L88 16.8l-.5-1.2c-.8-2-3.1-5.4-6.8-5.4zm-.2 2.8c1.5 0 2.7.8 3.1 1.8l-7.3 3c-.1-1.6 1.4-4.8 4.2-4.8z"/>
+    </svg>
+);
+
+const MicrosoftLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 112 24" fill="currentColor">
+        <rect x="0" y="2" width="9.5" height="9.5" />
+        <rect x="11.5" y="2" width="9.5" height="9.5" />
+        <rect x="0" y="13.5" width="9.5" height="9.5" />
+        <rect x="11.5" y="13.5" width="9.5" height="9.5" />
+        <text x="27" y="18" fontFamily="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" fontSize="15.5" fontWeight="600" letterSpacing="-0.2px">
+            Microsoft
+        </text>
+    </svg>
+);
+
+const AmazonLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 96 26" fill="currentColor">
+        <text x="0" y="17" fontFamily="system-ui, -apple-system, sans-serif" fontSize="18" fontWeight="700" letterSpacing="-0.5px">
+            amazon
+        </text>
+        <path d="M4 21 C 24 28, 58 28, 76 21 C 71 23, 62 24.5, 52 24.5 C 34 24.5, 17 22.8, 4 21 Z" />
+        <polygon points="74,18 80,21 75,23.5" />
+    </svg>
+);
+
+const AccentureLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 115 26" fill="currentColor">
+        <text x="0" y="19" fontFamily="system-ui, -apple-system, sans-serif" fontSize="17.5" fontWeight="700" letterSpacing="-0.4px">
+            accenture
+        </text>
+        <path d="M60 2 L66 5.5 L60 9 L62 5.5 Z" />
+    </svg>
+);
+
+const CapgeminiLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 130 26" fill="currentColor">
+        <g transform="translate(0, 2) scale(0.72)">
+            <path d="M14 0 C10 7 2 11 2 17 C2 22 6 25 11 25 C13 25 14 23.5 14 23.5 C14 23.5 15 25 17 25 C22 25 26 22 26 17 C26 11 18 7 14 0 Z" />
+            <path d="M12 23 L8 27 L20 27 L16 23 Z" />
+        </g>
+        <text x="26" y="18.5" fontFamily="system-ui, -apple-system, sans-serif" fontSize="16" fontWeight="600" letterSpacing="-0.3px">
+            Capgemini
+        </text>
+    </svg>
+);
+
+const IBMLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 68 26" fill="currentColor">
+        <rect x="0" y="1" width="15" height="1.8" />
+        <rect x="0" y="4.2" width="15" height="1.8" />
+        <rect x="5.2" y="7.4" width="4.6" height="1.8" />
+        <rect x="5.2" y="10.6" width="4.6" height="1.8" />
+        <rect x="5.2" y="13.8" width="4.6" height="1.8" />
+        <rect x="5.2" y="17" width="4.6" height="1.8" />
+        <rect x="0" y="20.2" width="15" height="1.8" />
+        <rect x="0" y="23.4" width="15" height="1.8" />
+        <rect x="19" y="1" width="18" height="1.8" rx="0.5" />
+        <rect x="19" y="4.2" width="19.5" height="1.8" rx="0.5" />
+        <rect x="19" y="7.4" width="6.5" height="1.8" /> <rect x="32" y="7.4" width="6.5" height="1.8" rx="0.5" />
+        <rect x="19" y="10.6" width="17.5" height="1.8" />
+        <rect x="19" y="13.8" width="17.5" height="1.8" />
+        <rect x="19" y="17" width="6.5" height="1.8" /> <rect x="32.5" y="17" width="6.5" height="1.8" rx="0.5" />
+        <rect x="19" y="20.2" width="20" height="1.8" rx="0.5" />
+        <rect x="19" y="23.4" width="18.5" height="1.8" rx="0.5" />
+        <rect x="44" y="1" width="5.5" height="1.8" /> <rect x="51.5" y="1" width="5" height="1.8" /> <rect x="58.5" y="1" width="5.5" height="1.8" />
+        <rect x="44" y="4.2" width="5.5" height="1.8" /> <rect x="51.5" y="4.2" width="5" height="1.8" /> <rect x="58.5" y="4.2" width="5.5" height="1.8" />
+        <rect x="44" y="7.4" width="7" height="1.8" /> <rect x="57" y="7.4" width="7" height="1.8" />
+        <rect x="44" y="10.6" width="8.5" height="1.8" /> <rect x="55.5" y="10.6" width="8.5" height="1.8" />
+        <rect x="44" y="13.8" width="5" height="1.8" /> <rect x="51.5" y="13.8" width="5" height="1.8" /> <rect x="59" y="13.8" width="5" height="1.8" />
+        <rect x="44" y="17" width="5" height="1.8" /> <rect x="59" y="17" width="5" height="1.8" />
+        <rect x="44" y="20.2" width="5" height="1.8" /> <rect x="59" y="20.2" width="5" height="1.8" />
+        <rect x="43.5" y="23.4" width="6" height="1.8" /> <rect x="58.5" y="23.4" width="6" height="1.8" />
+    </svg>
+);
+
+const TCSLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 105 26" fill="currentColor">
+        <text x="0" y="13.5" fontFamily="system-ui, -apple-system, sans-serif" fontSize="13" fontWeight="800" letterSpacing="2.5px">
+            TATA
+        </text>
+        <text x="0" y="23" fontFamily="system-ui, -apple-system, sans-serif" fontSize="7.5" fontWeight="600" letterSpacing="0.6px">
+            CONSULTANCY SERVICES
+        </text>
+    </svg>
+);
+
+const CognizantLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 110 26" fill="currentColor">
+        <g transform="translate(0, 2)">
+            <path d="M12 2 A7.5 7.5 0 1 0 12 17 L12 13.5 A4 4 0 1 1 12 5.5 Z" />
+            <circle cx="12" cy="9.5" r="2.2" />
+        </g>
+        <text x="23" y="18" fontFamily="system-ui, -apple-system, sans-serif" fontSize="15" fontWeight="600" letterSpacing="-0.2px">
+            Cognizant
+        </text>
+    </svg>
+);
+
+const JainLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 120 26" fill="currentColor">
+        <g transform="translate(0, 1)">
+            <path d="M9 0 L18 4.5 L18 13.5 C18 18 9 22 9 22 C9 22 0 18 0 13.5 L0 4.5 Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
+            <text x="9" y="15" fontFamily="serif" fontSize="11" fontWeight="bold" textAnchor="middle">J</text>
+        </g>
+        <text x="24" y="13" fontFamily="serif" fontSize="12" fontWeight="bold" letterSpacing="1px">
+            JAIN
+        </text>
+        <text x="24" y="21.5" fontFamily="sans-serif" fontSize="6.8" fontWeight="600" letterSpacing="1px">
+            DEEMED-TO-BE UNIVERSITY
+        </text>
+    </svg>
+);
+
+const MediterraneanLogo = ({ className = "h-5 sm:h-6 w-auto" }) => (
+    <svg className={className} viewBox="0 0 130 26" fill="currentColor">
+        <g transform="translate(0, 1.5)">
+            <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" strokeWidth="1.4" />
+            <path d="M10 2.5 L12.5 7.5 L18 8.5 L14 12 L15.5 17.5 L10 14.5 L4.5 17.5 L6 12 L2 8.5 L7.5 7.5 Z" />
+        </g>
+        <text x="25" y="12" fontFamily="serif" fontSize="10" fontWeight="bold" letterSpacing="0.4px">
+            MEDITERRANEAN
+        </text>
+        <text x="25" y="21" fontFamily="sans-serif" fontSize="7" fontWeight="600" letterSpacing="1.2px">
+            UNIVERSITY
+        </text>
+    </svg>
+);
+
+// 3 Rotating Partner Batches: Prestigious Universities + Global Companies (Changes every 3s)
+const defaultPartnerBatches = [
+    // Batch 1: Prestigious Global Universities & World-Leading Tech
+    [
+        { id: 'melbourne', name: "The University of Melbourne", logo: melbourneLogo, alt: "The University of Melbourne", type: 'university' },
+        { id: 'google', name: "Google", component: GoogleLogo, alt: "Google", type: 'company' },
+        { id: 'london', name: "University of London", logo: londonLogo, alt: "University of London", type: 'university' },
+        { id: 'microsoft', name: "Microsoft", component: MicrosoftLogo, alt: "Microsoft", type: 'company' },
+        { id: 'uts', name: "UTS University of Sydney", logo: utsLogo, alt: "UTS University of Sydney", type: 'university' }
+    ],
+    // Batch 2: Top Global Tech & Enterprise Leaders + Renowned Universities
+    [
+        { id: 'amazon', name: "Amazon", component: AmazonLogo, alt: "Amazon", type: 'company' },
+        { id: 'southampton', name: "University of Southampton", logo: southamptonLogo, alt: "University of Southampton", type: 'university' },
+        { id: 'accenture', name: "Accenture", component: AccentureLogo, alt: "Accenture", type: 'company' },
+        { id: 'birmingham', name: "Birmingham City University", logo: birminghamLogo, alt: "Birmingham City University", type: 'university' },
+        { id: 'ibm', name: "IBM", component: IBMLogo, alt: "IBM", type: 'company' }
+    ],
+    // Batch 3: Leading Consulting, Innovation Giants & Global Institutions
+    [
+        { id: 'capgemini', name: "Capgemini", component: CapgeminiLogo, alt: "Capgemini", type: 'company' },
+        { id: 'jain', name: "Jain University", component: JainLogo, alt: "Jain University", type: 'university' },
+        { id: 'tcs', name: "Tata Consultancy Services", component: TCSLogo, alt: "Tata Consultancy Services", type: 'company' },
+        { id: 'mediterranean', name: "Mediterranean University", component: MediterraneanLogo, alt: "Mediterranean University", type: 'university' },
+        { id: 'cognizant', name: "Cognizant", component: CognizantLogo, alt: "Cognizant", type: 'company' }
+    ]
+];
+
 const HeroSection = () => {
     const navigate = useNavigate();
     const { user } = useUser();
@@ -203,17 +368,19 @@ const HeroSection = () => {
         return '/dashboard';
     };
 
-    // 5 Prestigious University Partners in Monochrome Deep Purple matching Reference
-    const defaultUniversityPartners = [
-        { name: "The University of Melbourne", logo: melbourneLogo, alt: "The University of Melbourne" },
-        { name: "University of London", logo: londonLogo, alt: "University of London" },
-        { name: "University of Southampton", logo: southamptonLogo, alt: "University of Southampton" },
-        { name: "Birmingham City University", logo: birminghamLogo, alt: "Birmingham City University" },
-        { name: "UTS University of Sydney", logo: utsLogo, alt: "UTS University of Sydney" }
-    ];
-
-    const [universityPartners, setUniversityPartners] = useState(defaultUniversityPartners);
+    const [partnerBatches, setPartnerBatches] = useState(defaultPartnerBatches);
+    const [partnerBatchIndex, setPartnerBatchIndex] = useState(0);
+    const [isPartnerHovered, setIsPartnerHovered] = useState(false);
     const [bubbleTexts, setBubbleTexts] = useState(['196547+Openings', '215676+Hiring Partners']);
+
+    // Rotate university and company partner logos every 3 seconds (pauses on hover)
+    useEffect(() => {
+        if (!partnerBatches || partnerBatches.length <= 1 || isPartnerHovered) return;
+        const interval = setInterval(() => {
+            setPartnerBatchIndex((prev) => (prev + 1) % partnerBatches.length);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [partnerBatches, isPartnerHovered]);
 
     useEffect(() => {
         const fetchCmsData = async () => {
@@ -237,18 +404,28 @@ const HeroSection = () => {
             try {
                 const res = await fetch('/api/public/partner-logos');
                 const data = await res.json();
-                if (data && data.length > 0) {
-                    const unis = data.filter(item => item.type === 'university' && item.isActive !== false);
-                    if (unis.length >= 4) {
-                        setUniversityPartners(unis.map(u => ({
-                            name: u.name,
-                            logo: u.imageUrl || u.logo ? (u.imageUrl?.startsWith('http') ? u.imageUrl : getMediaUrl(u.imageUrl || u.logo)) : null,
-                            alt: u.name
-                        })));
+                if (Array.isArray(data) && data.length > 0) {
+                    const activePartners = data.filter(item => item.isActive !== false);
+                    if (activePartners.length >= 4) {
+                        const chunks = [];
+                        for (let i = 0; i < activePartners.length; i += 5) {
+                            chunks.push(
+                                activePartners.slice(i, i + 5).map(u => ({
+                                    id: u._id || u.name,
+                                    name: u.name,
+                                    logo: u.imageUrl || u.logo ? (u.imageUrl?.startsWith('http') ? u.imageUrl : getMediaUrl(u.imageUrl || u.logo)) : null,
+                                    alt: u.name,
+                                    type: u.type || 'partner'
+                                }))
+                            );
+                        }
+                        if (chunks.length > 0) {
+                            setPartnerBatches(chunks);
+                        }
                     }
                 }
             } catch (e) {
-                // Keep default prestigious reference universities
+                // Keep default prestigious reference batches
             }
         };
         fetchPartners();
@@ -672,7 +849,7 @@ const HeroSection = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                     
                     {/* Centered Small Uppercase Label with Thin Purple Dividers */}
-                    <div className="flex items-center justify-center gap-2.5 sm:gap-4 md:gap-5 mb-1.5 sm:mb-2.5">
+                    <div className="flex items-center justify-center gap-2.5 sm:gap-4 md:gap-5 mb-1.5 sm:mb-2">
                         <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                         <span className="text-[9px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
@@ -680,19 +857,61 @@ const HeroSection = () => {
                         <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                     </div>
 
-                    {/* 5-6 University / Partner Logos Evenly Spaced in One Horizontal Row */}
-                    <div className="flex items-center justify-start sm:justify-center gap-6 sm:gap-11 md:gap-14 lg:gap-18 xl:gap-22 overflow-x-auto no-scrollbar w-full py-0.5 sm:py-1">
-                        {universityPartners.map((uni, idx) => (
-                            <div
-                                key={idx}
-                                className="group flex items-center justify-center cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
+                    {/* Rotating University and Company Logos (Changes Every 3 Seconds) */}
+                    <div
+                        className="relative min-h-[26px] sm:min-h-[32px] md:min-h-[36px] flex items-center justify-center w-full"
+                        onMouseEnter={() => setIsPartnerHovered(true)}
+                        onMouseLeave={() => setIsPartnerHovered(false)}
+                    >
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={partnerBatchIndex}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -5 }}
+                                transition={{ duration: 0.35, ease: "easeInOut" }}
+                                className="flex items-center justify-start sm:justify-center gap-6 sm:gap-10 md:gap-14 lg:gap-18 xl:gap-22 overflow-x-auto no-scrollbar w-full py-0.5 sm:py-1"
                             >
-                                <img
-                                    src={uni.logo}
-                                    alt={uni.alt || uni.name}
-                                    className="h-4.5 sm:h-6 md:h-6.5 w-auto max-w-[100px] sm:max-w-[135px] md:max-w-[150px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
-                                />
-                            </div>
+                                {partnerBatches[partnerBatchIndex]?.map((partner, idx) => {
+                                    const LogoComponent = partner.component;
+                                    return (
+                                        <div
+                                            key={partner.id || partner.name || idx}
+                                            className="group flex items-center justify-center cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
+                                            title={partner.name}
+                                        >
+                                            {LogoComponent ? (
+                                                <div className="h-4.5 sm:h-6 md:h-6.5 flex items-center justify-center text-[#4C1D95] dark:text-purple-200 transition-colors">
+                                                    <LogoComponent className="h-4 sm:h-5.5 md:h-6 w-auto max-w-[95px] sm:max-w-[130px] md:max-w-[145px] object-contain select-none fill-current" />
+                                                </div>
+                                            ) : (
+                                                <img
+                                                    src={partner.logo}
+                                                    alt={partner.alt || partner.name}
+                                                    className="h-4.5 sm:h-6 md:h-6.5 w-auto max-w-[95px] sm:max-w-[130px] md:max-w-[145px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Subtle 3-Second Cycle Indicator Dots */}
+                    <div className="flex items-center justify-center gap-1.5 mt-1 sm:mt-1.5">
+                        {partnerBatches.map((_, i) => (
+                            <button
+                                key={i}
+                                type="button"
+                                onClick={() => setPartnerBatchIndex(i)}
+                                aria-label={`View partner batch ${i + 1}`}
+                                className={`transition-all duration-300 rounded-full cursor-pointer p-0 border-0 ${
+                                    i === partnerBatchIndex
+                                        ? 'w-4.5 h-1 bg-[#6D28D9] dark:bg-purple-400'
+                                        : 'w-1.5 h-1 bg-purple-300/60 dark:bg-purple-800/60 hover:bg-purple-400'
+                                }`}
+                            />
                         ))}
                     </div>
 
