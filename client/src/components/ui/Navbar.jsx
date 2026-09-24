@@ -187,7 +187,7 @@ const Navbar = ({ compact = false }) => {
 
                     {/* Right Side Actions - Hide on auth pages */}
                     {!isAuthPage && (
-                        <div className="hidden lg:flex items-center space-x-3.5 xl:space-x-4">
+                        <div className="hidden lg:flex items-center space-x-3.5 xl:space-x-4 ml-8 xl:ml-14 shrink-0">
                             {/* Search Bar matching Reference */}
                             <form
                                 onSubmit={(e) => {

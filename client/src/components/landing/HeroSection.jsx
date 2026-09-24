@@ -76,7 +76,7 @@ const HeroSection = () => {
                 </svg>
             ),
             image: studentImg,
-            posClass: 'left-[10%] top-[4%]',
+            posClass: 'left-[14%] top-[7%]',
             floatAnim: { y: [-5, 5, -5], x: [-2, 2, -2] },
             floatDuration: 4.6,
             floatDelay: 0
@@ -92,7 +92,7 @@ const HeroSection = () => {
                 </svg>
             ),
             image: universityImg,
-            posClass: 'right-[12%] top-[4%]',
+            posClass: 'right-[13%] top-[7%]',
             floatAnim: { y: [5, -5, 5], x: [2, -2, 2] },
             floatDuration: 5.2,
             floatDelay: 0.4
@@ -109,7 +109,7 @@ const HeroSection = () => {
                 </svg>
             ),
             image: jobsImg,
-            posClass: 'right-[0%] top-[42%]',
+            posClass: 'right-[3%] top-[41%]',
             floatAnim: { y: [-5, 5, -5], x: [2, -2, 2] },
             floatDuration: 4.2,
             floatDelay: 0.8
@@ -125,7 +125,7 @@ const HeroSection = () => {
                 </svg>
             ),
             image: coursesImg,
-            posClass: 'left-[36%] bottom-[0%]',
+            posClass: 'left-[37%] bottom-[3%]',
             floatAnim: { y: [5, -5, 5], x: [-2, 2, -2] },
             floatDuration: 4.8,
             floatDelay: 1.2
@@ -141,7 +141,7 @@ const HeroSection = () => {
                 </svg>
             ),
             image: certsImg,
-            posClass: 'left-[2%] top-[44%]',
+            posClass: 'left-[4%] top-[41%]',
             floatAnim: { y: [-5, 5, -5], x: [-2, 2, -2] },
             floatDuration: 4.4,
             floatDelay: 1.6
@@ -161,7 +161,7 @@ const HeroSection = () => {
 
                     {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
-                        <div className="w-[300px] xs:w-[340px] sm:w-[380px] md:w-[410px] lg:w-[425px] xl:w-[440px] aspect-square relative flex items-center justify-center shrink-0">
+                        <div className="w-[300px] xs:w-[335px] sm:w-[370px] md:w-[400px] lg:w-[415px] xl:w-[425px] aspect-square relative flex items-center justify-center shrink-0">
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
                             <motion.div
                                 animate={{ scale: [1, 1.03, 1] }}
@@ -176,7 +176,7 @@ const HeroSection = () => {
                                 />
                             </motion.div>
 
-                            {/* 5 Surrounding Animated Photo Nodes with White Badges (Increased a little) */}
+                            {/* 5 Surrounding Animated Photo Nodes with White Badges (Increased a little more) */}
                             {constellationNodes.map((node) => {
                                 return (
                                     <motion.div
@@ -191,16 +191,16 @@ const HeroSection = () => {
                                         whileHover={{ scale: 1.08, zIndex: 40 }}
                                         className={`absolute ${node.posClass} flex flex-col items-center group cursor-pointer z-10`}
                                     >
-                                        <div className="w-15 h-15 xs:w-17 xs:h-17 sm:w-19 sm:h-19 md:w-[78px] md:h-[78px] rounded-full border-[3px] border-white dark:border-purple-950 shadow-[0_8px_22px_rgba(109,40,217,0.20)] overflow-hidden bg-white dark:bg-purple-950 shrink-0 group-hover:shadow-[0_12px_28px_rgba(109,40,217,0.35)] transition-shadow duration-300">
+                                        <div className="w-17 h-17 xs:w-19 xs:h-19 sm:w-21 sm:h-21 md:w-[86px] md:h-[86px] rounded-full border-[3.5px] border-white dark:border-purple-950 shadow-[0_8px_24px_rgba(109,40,217,0.22)] overflow-hidden bg-white dark:bg-purple-950 shrink-0 group-hover:shadow-[0_12px_28px_rgba(109,40,217,0.35)] transition-shadow duration-300">
                                             <img
                                                 src={node.image}
                                                 alt={node.label}
                                                 className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                                             />
                                         </div>
-                                        <div className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-[0_4px_14px_rgba(76,29,149,0.14)] border border-purple-100/90 dark:border-purple-800/50 flex items-center gap-1.5 -mt-3.5 relative z-10 whitespace-nowrap group-hover:border-purple-300 transition-colors">
+                                        <div className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3 py-0.5 sm:px-3.5 sm:py-1 rounded-full shadow-[0_4px_14px_rgba(76,29,149,0.14)] border border-purple-100/90 dark:border-purple-800/50 flex items-center gap-1.5 -mt-3.5 sm:-mt-4 relative z-10 whitespace-nowrap group-hover:border-purple-300 transition-colors">
                                             {node.icon}
-                                            <span className="text-[10px] sm:text-[11px] font-bold text-slate-800 dark:text-purple-100 tracking-tight">
+                                            <span className="text-[10px] sm:text-xs font-bold text-slate-800 dark:text-purple-100 tracking-tight">
                                                 {node.label}
                                             </span>
                                         </div>
