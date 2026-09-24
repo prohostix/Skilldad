@@ -466,18 +466,6 @@ const HeroSection = () => {
                     fill="none"
                 >
                     <defs>
-                        {/* 3D Realistic Sphere Gradient */}
-                        <radialGradient id="sphere3DGrad" cx="30%" cy="28%" r="72%">
-                            <stop offset="0%" stopColor="#FFFFFF" />
-                            <stop offset="18%" stopColor="#E9D5FF" />
-                            <stop offset="48%" stopColor="#A855F7" />
-                            <stop offset="80%" stopColor="#6D28D9" />
-                            <stop offset="100%" stopColor="#3B0764" />
-                        </radialGradient>
-                        <filter id="sphere3DShadow" x="-50%" y="-50%" width="200%" height="200%">
-                            <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#4C1D95" floodOpacity="0.32" />
-                        </filter>
-
                         {/* Main Bold Silk Ribbon Gradient (Rich vibrant royal purple to violet) */}
                         <linearGradient id="mainSilkGrad" x1="0%" y1="100%" x2="100%" y2="0%">
                             <stop offset="0%" stopColor="#9333EA" stopOpacity="0.92" />
@@ -567,59 +555,6 @@ const HeroSection = () => {
                         strokeLinecap="round"
                         fill="none"
                     />
-
-                    {/* ── 4. CONSTELLATION NETWORK TRACKS ── */}
-                    <g stroke="rgba(147, 51, 234, 0.45)" strokeWidth="0.8" strokeDasharray="2.5 3" fill="none">
-                        <path d="M 115 70 L 140 120" />
-                        <path d="M 140 120 Q 210 145, 280 90" />
-                        <path d="M 140 120 C 135 180, 145 250, 153 355" />
-                        <path d="M 153 355 C 148 410, 130 450, 113 485" />
-                        <path d="M 153 355 Q 195 390, 225 410" />
-                        <path d="M 153 355 Q 165 420, 168 460" />
-                    </g>
-
-                    {/* Static Nodes */}
-                    <circle cx="140" cy="120" r="2.0" fill="#8B5CF6" />
-                    <circle cx="138" cy="190" r="1.8" fill="#A855F7" />
-                    <circle cx="160" cy="425" r="1.6" fill="#8B5CF6" />
-                    <circle cx="225" cy="410" r="2.0" fill="#8B5CF6" />
-                    <circle cx="168" cy="460" r="1.8" fill="#A855F7" />
-
-                    {/* 3D Purple Spheres / Orbs */}
-                    <circle cx="115" cy="70" r="6" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-                    <circle cx="280" cy="90" r="7" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-                    <circle cx="153" cy="355" r="14" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-                    <circle cx="113" cy="485" r="5" fill="url(#sphere3DGrad)" filter="url(#sphere3DShadow)" />
-
-                    {/* Animated Moving Glowing Purple Dots through tracks */}
-                    <circle r="1.8" fill="#7C3AED" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                        <animateMotion
-                            dur="4.5s"
-                            repeatCount="indefinite"
-                            path="M 140 120 C 135 180, 145 250, 153 355"
-                        />
-                    </circle>
-                    <circle r="1.6" fill="#8B5CF6" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                        <animateMotion
-                            dur="4.0s"
-                            repeatCount="indefinite"
-                            path="M 140 120 Q 210 145, 280 90"
-                        />
-                    </circle>
-                    <circle r="1.6" fill="#9333EA" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                        <animateMotion
-                            dur="3.6s"
-                            repeatCount="indefinite"
-                            path="M 153 355 C 148 410, 130 450, 113 485"
-                        />
-                    </circle>
-                    <circle r="1.6" fill="#8B5CF6" className="filter drop-shadow-[0_0_2px_#A855F7]">
-                        <animateMotion
-                            dur="4.2s"
-                            repeatCount="indefinite"
-                            path="M 153 355 Q 195 390, 225 410"
-                        />
-                    </circle>
                 </svg>
 
                 {/* 3 Floating Badges matching Reference */}
