@@ -286,10 +286,10 @@ const Services = () => {
             description: 'Get personalized course and career recommendations with our intelligent AI advisory engine.',
             icon: Brain,
             tag: 'Intelligent Advisory',
-            cardBg: 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_20px_40px_-10px_rgba(147,51,234,0.30)] border border-purple-300/80',
+            cardBg: 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_16px_32px_-8px_rgba(147,51,234,0.26)] border border-purple-300/80',
             textColor: 'text-[#2E1065]',
             descColor: 'text-[#3B0764]/90 font-medium',
-            rotation: 'lg:-rotate-[7.5deg]',
+            rotation: 'lg:-rotate-[3deg]',
             entranceDelay: 0.18,
             tagBg: 'bg-white/80 text-[#4C1D95] font-bold shadow-2xs',
             btnBg: 'bg-white/70 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
@@ -299,7 +299,7 @@ const Services = () => {
             description: 'Learn anytime, anywhere with a seamless mobile experience across all your devices.',
             icon: Smartphone,
             tag: 'Anytime Access',
-            cardBg: 'bg-white text-slate-900 shadow-[0_22px_45px_-10px_rgba(76,29,149,0.18)] border border-purple-100/90',
+            cardBg: 'bg-white text-slate-900 shadow-[0_18px_36px_-8px_rgba(76,29,149,0.14)] border border-purple-100/90',
             textColor: 'text-slate-900',
             descColor: 'text-slate-600',
             rotation: 'lg:rotate-0',
@@ -312,10 +312,10 @@ const Services = () => {
             description: 'Scalable, high-speed, and reliable cloud technology ensuring 99.9% uninterrupted learning uptime.',
             icon: Cloud,
             tag: '99.9% Uptime',
-            cardBg: 'bg-[#00C0F9] text-slate-900 shadow-[0_20px_40px_-10px_rgba(0,192,249,0.35)] border border-cyan-400/60',
+            cardBg: 'bg-[#00C0F9] text-slate-900 shadow-[0_16px_32px_-8px_rgba(0,192,249,0.30)] border border-cyan-400/60',
             textColor: 'text-slate-900',
             descColor: 'text-slate-800/90 font-medium',
-            rotation: 'lg:rotate-[7.5deg]',
+            rotation: 'lg:rotate-[3deg]',
             entranceDelay: 0.30,
             tagBg: 'bg-black/10 text-slate-900',
             btnBg: 'bg-black/10 hover:bg-black/20 text-slate-900'
@@ -579,38 +579,38 @@ const Services = () => {
             </section>
 
             {/* ── SECTION 3: ADVANCED PLATFORM CAPABILITIES (MATCHING REFERENCE VIDEO AT 0:00:07) ── */}
-            <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
+            <section className="py-4 sm:py-6 md:py-7 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
                 <div className="max-w-7xl mx-auto">
                     
                     {/* Light Purple Rounded Container Card Matching Reference Video */}
-                    <div className="relative rounded-[28px] sm:rounded-[36px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-5 py-7 sm:px-9 sm:py-9 lg:px-12 lg:py-10 shadow-[0_20px_50px_-15px_rgba(76,29,149,0.12)] overflow-hidden">
+                    <div className="relative rounded-[24px] sm:rounded-[32px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-4 py-4 sm:px-8 sm:py-5 lg:px-10 lg:py-6 shadow-[0_16px_40px_-15px_rgba(76,29,149,0.10)] overflow-hidden">
                         
                         {/* Soft ambient violet background glows */}
-                        <div className="absolute -top-24 -left-24 w-72 h-72 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -top-24 -left-24 w-60 h-60 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
                         {/* Floating Transparent SkillDad Logo with Floating Motion & Trailing Curve */}
-                        <div className="absolute top-3 right-4 sm:top-5 sm:right-8 z-0 pointer-events-none select-none">
+                        <div className="absolute top-2 right-3 sm:top-3 sm:right-6 z-0 pointer-events-none select-none">
                             <motion.div
-                                animate={{ y: [-4, 6, -4], rotate: [-2, 2, -2] }}
+                                animate={{ y: [-3, 4, -3], rotate: [-2, 2, -2] }}
                                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                                 className="relative flex items-center justify-center"
                             >
                                 {/* Soft ambient purple glow behind the logo */}
-                                <div className="absolute inset-0 bg-[#6D28D9]/20 rounded-full blur-xl pointer-events-none scale-110" />
+                                <div className="absolute inset-0 bg-[#6D28D9]/20 rounded-full blur-lg pointer-events-none scale-110" />
 
                                 {/* Transparent SkillDad Logo */}
                                 <motion.img
                                     src={skilldadLogo}
                                     alt="SkillDad Logo"
-                                    className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_8px_18px_rgba(76,29,149,0.25)] relative z-10"
+                                    className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain drop-shadow-[0_6px_14px_rgba(76,29,149,0.22)] relative z-10"
                                     animate={{ scale: [1, 1.04, 1] }}
                                     transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                                 />
 
                                 {/* Curving Wavy String trailing down behind cards */}
                                 <svg
-                                    className="absolute top-[55px] right-[18px] sm:right-[28px] w-[180px] sm:w-[260px] h-[220px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
+                                    className="absolute top-[38px] right-[12px] sm:right-[18px] w-[140px] sm:w-[190px] h-[150px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
                                     viewBox="0 0 300 280"
                                 >
                                     <path
@@ -624,28 +624,28 @@ const Services = () => {
                         </div>
 
                         {/* Header: Centered HOW IT WORKS Tag + Title + Subtitle + Pills Row */}
-                        <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8 space-y-2 relative z-10">
+                        <div className="text-center max-w-xl mx-auto mb-3.5 sm:mb-4 space-y-1 sm:space-y-1.5 relative z-10">
                             <div>
-                                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[10.5px] font-bold tracking-widest uppercase shadow-2xs">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[10px] font-bold tracking-widest uppercase shadow-2xs">
                                     HOW IT WORKS
                                 </span>
                             </div>
-                            <h2 className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.18] font-sans">
-                                An Intelligent System, <br />
-                                <span className="text-[#4C1D95] dark:text-purple-300">
+                            <h2 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.16] font-sans">
+                                An Intelligent System, <br className="hidden sm:inline" />
+                                <span className="text-[#4C1D95] dark:text-purple-300 sm:ml-1.5">
                                     Not Just A Course
                                 </span>
                             </h2>
-                            <p className="text-xs sm:text-[13px] text-slate-600 dark:text-purple-200/80 max-w-xl mx-auto leading-relaxed font-normal">
+                            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-purple-200/80 max-w-md mx-auto leading-relaxed font-normal">
                                 Our intelligent platform is built to give you a seamless, personalized, and efficient learning journey from day one.
                             </p>
 
                             {/* Category Filter Pills Row Matching Video */}
-                            <div className="pt-1.5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                            <div className="pt-0.5 flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                                 {['AI Mentorship', 'Mobile Access', 'Cloud Infrastructure', 'Live Collaboration', 'Career Matrix'].map((tag, idx) => (
                                     <span
                                         key={idx}
-                                        className="bg-white/80 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 px-3 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold shadow-2xs hover:bg-white dark:hover:bg-purple-900/60 transition-colors cursor-default"
+                                        className="bg-white/80 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[10.5px] font-semibold shadow-2xs hover:bg-white dark:hover:bg-purple-900/60 transition-colors cursor-default"
                                     >
                                         {tag}
                                     </span>
@@ -654,59 +654,59 @@ const Services = () => {
                         </div>
 
                         {/* 3 Angled Overlapping Cards with Video Staggered Entrance Animation */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-4 items-stretch max-w-5xl mx-auto pt-1 pb-1 relative z-10">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5 items-stretch max-w-4xl mx-auto pt-0 pb-0 relative z-10">
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;
 
                                 return (
                                     <motion.div
                                         key={idx}
-                                        initial={{ y: 90, opacity: 0, scale: 0.92 }}
+                                        initial={{ y: 60, opacity: 0, scale: 0.94 }}
                                         whileInView={{ y: 0, opacity: 1, scale: 1 }}
                                         viewport={{ once: true, amount: 0.25 }}
                                         transition={{
-                                            duration: 0.75,
+                                            duration: 0.65,
                                             delay: capability.entranceDelay,
                                             ease: [0.22, 1, 0.36, 1]
                                         }}
                                         whileHover={{
-                                            y: -8,
+                                            y: -6,
                                             rotate: 0,
-                                            scale: 1.03,
+                                            scale: 1.025,
                                             zIndex: 30,
-                                            transition: { duration: 0.25, ease: 'easeOut' }
+                                            transition: { duration: 0.2, ease: 'easeOut' }
                                         }}
                                         className={`h-full relative group cursor-pointer ${capability.rotation} transition-transform`}
                                     >
                                         <div
-                                            className={`h-full rounded-[22px] p-5 sm:p-6 flex flex-col justify-between transition-shadow duration-300 ${capability.cardBg}`}
+                                            className={`h-full rounded-[18px] p-4 sm:p-4.5 flex flex-col justify-between transition-shadow duration-300 ${capability.cardBg}`}
                                         >
-                                            <div className="space-y-2.5 text-left">
+                                            <div className="space-y-1.5 sm:space-y-2 text-left">
                                                 {/* Top Tag & Icon Row */}
                                                 <div className="flex items-center justify-between">
-                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${capability.tagBg}`}>
+                                                    <span className={`text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${capability.tagBg}`}>
                                                         {capability.tag}
                                                     </span>
-                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 shrink-0">
-                                                        <IconComponent size={14} strokeWidth={2.4} />
+                                                    <div className="w-6 h-6 rounded-full flex items-center justify-center bg-black/5 dark:bg-white/10 shrink-0">
+                                                        <IconComponent size={13} strokeWidth={2.4} />
                                                     </div>
                                                 </div>
 
                                                 {/* Title */}
-                                                <h3 className={`text-lg sm:text-xl font-extrabold tracking-tight leading-snug font-sans ${capability.textColor}`}>
+                                                <h3 className={`text-base sm:text-[17px] font-extrabold tracking-tight leading-snug font-sans ${capability.textColor}`}>
                                                     {capability.title}
                                                 </h3>
 
                                                 {/* Description */}
-                                                <p className={`text-xs sm:text-[12.5px] leading-relaxed ${capability.descColor}`}>
+                                                <p className={`text-[11px] sm:text-[11.5px] leading-relaxed line-clamp-3 ${capability.descColor}`}>
                                                     {capability.description}
                                                 </p>
                                             </div>
 
                                             {/* Action Arrow Button */}
-                                            <div className="pt-4 mt-3 border-t border-black/10 flex items-center justify-end">
-                                                <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${capability.btnBg}`}>
-                                                    <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
+                                            <div className="pt-2.5 mt-2 border-t border-black/10 flex items-center justify-end">
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${capability.btnBg}`}>
+                                                    <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                                                 </div>
                                             </div>
                                         </div>
