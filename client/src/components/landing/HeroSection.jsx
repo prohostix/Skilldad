@@ -17,8 +17,8 @@ import universityImg from '../../assets/hero/university.jpg';
 import jobsImg from '../../assets/hero/jobs.jpg';
 import coursesImg from '../../assets/hero/courses.jpg';
 import certsImg from '../../assets/hero/certifications.jpg';
-import heroRibbon from '../../assets/hero-ribbon.png';
 import skilldadLogoDeepPurple from '../../assets/logo_deep_purple.png';
+import HeroFlowingWave from './HeroFlowingWave';
 
 const HeroSection = () => {
     const navigate = useNavigate();
@@ -159,179 +159,195 @@ const HeroSection = () => {
             <div className="flex-1 flex items-center justify-between max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-20 py-2 sm:py-4">
                 <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-4 items-center">
 
-                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Matching Reference Design) ── */}
+                    {/* ── LEFT COLUMN: CONSTELLATION NETWORK DIAGRAM (Moderately sized) ── */}
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
                         <div className="w-[300px] xs:w-[335px] sm:w-[370px] md:w-[400px] lg:w-[415px] xl:w-[425px] aspect-square relative flex items-center justify-center shrink-0">
-                            {/* SVG Connection Lines, 3D Circle Bubbles & Moving Glowing Dots */}
+                            {/* Very Thin, Standard Purple Connection Arc Lines & Moving Purple Dots */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
-                                <defs>
-                                    {/* 3D Spherical Purple Gradient for Circle Bubbles */}
-                                    <radialGradient id="bubble3DGrad" cx="32%" cy="28%" r="72%">
-                                        <stop offset="0%" stopColor="#FFFFFF" />
-                                        <stop offset="20%" stopColor="#E9D5FF" />
-                                        <stop offset="50%" stopColor="#A855F7" />
-                                        <stop offset="82%" stopColor="#6D28D9" />
-                                        <stop offset="100%" stopColor="#3B0764" />
-                                    </radialGradient>
-                                    {/* Soft drop shadow for Circle Bubbles */}
-                                    <filter id="bubbleShadow" x="-50%" y="-50%" width="200%" height="200%">
-                                        <feDropShadow dx="0" dy="0.8" stdDeviation="0.8" floodColor="#581C87" floodOpacity="0.35" />
-                                    </filter>
-                                </defs>
+                                {/* Delicate Central Orbit Track */}
+                                <circle cx="50" cy="50" r="12" fill="none" stroke="rgba(147, 51, 234, 0.4)" strokeWidth="0.22" strokeDasharray="1.0 1.2" shapeRendering="geometricPrecision" />
 
-                                {/* Concentric Faint Halo Orbits around Center Hub */}
-                                <circle cx="50" cy="50" r="17.5" fill="none" stroke="rgba(147, 51, 234, 0.22)" strokeWidth="0.25" />
-                                <circle cx="50" cy="50" r="22" fill="none" stroke="rgba(147, 51, 234, 0.12)" strokeWidth="0.2" strokeDasharray="1.2 2" />
-
-                                {/* 1. RADIAL CONNECTION LINES (Center Hub -> 5 Nodes) */}
-                                {/* Center -> Students */}
+                                {/* 1. SkillDad <-> Students Flower Petal Arcs (Identical Geometry with Dotted Lines) */}
                                 <path
-                                    d="M 40.5 40.5 Q 33 31 27 24"
+                                    d="M 41.5 41.5 Q 41.3 29.3 29.1 29.1"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.32"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
-                                {/* Center -> Universities */}
                                 <path
-                                    d="M 59.5 40.5 Q 67 31 73 24"
+                                    d="M 29.1 29.1 Q 29.3 41.3 41.5 41.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.32"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
-                                {/* Center -> Jobs */}
+
+                                {/* 2. SkillDad <-> Universities Flower Petal Arcs (Identical Geometry with Dotted Lines) */}
                                 <path
-                                    d="M 63 50 Q 70 48.5 76 50"
+                                    d="M 58.5 41.5 Q 70.7 41.3 70.9 29.1"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.32"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
-                                {/* Center -> Courses */}
                                 <path
-                                    d="M 50 63 Q 48.5 69 50 74"
+                                    d="M 70.9 29.1 Q 58.7 29.3 58.5 41.5"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.32"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
-                                {/* Center -> Certifications */}
+
+                                {/* 3. SkillDad <-> Jobs Flower Petal Arcs (Identical Geometry with Dotted Lines) */}
                                 <path
-                                    d="M 37 50 Q 30 51.5 24 50"
+                                    d="M 62.0 50.0 Q 70.8 58.5 79.5 50.0"
                                     fill="none"
                                     stroke="rgba(147, 51, 234, 0.55)"
-                                    strokeWidth="0.32"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 79.5 50.0 Q 70.8 41.5 62.0 50.0"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 2. OUTER PERIMETER ARCS CONNECTING ADJACENT NODES */}
-                                {/* Students <-> Universities */}
+                                {/* 4. SkillDad <-> Certifications Flower Petal Arcs (Identical Geometry with Dotted Lines) */}
                                 <path
-                                    d="M 28 17 Q 50 10 72 17"
+                                    d="M 38.0 50.0 Q 29.2 41.5 20.5 50.0"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.3"
-                                    strokeDasharray="1.5 2"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
-                                {/* Universities <-> Jobs */}
                                 <path
-                                    d="M 77 25 Q 86 36 82 46"
+                                    d="M 20.5 50.0 Q 29.2 58.5 38.0 50.0"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.3"
-                                    strokeDasharray="1.5 2"
-                                />
-                                {/* Jobs <-> Courses */}
-                                <path
-                                    d="M 80 54 Q 76 72 56 78"
-                                    fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.3"
-                                    strokeDasharray="1.5 2"
-                                />
-                                {/* Courses <-> Certifications */}
-                                <path
-                                    d="M 44 78 Q 24 72 20 54"
-                                    fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.3"
-                                    strokeDasharray="1.5 2"
-                                />
-                                {/* Certifications <-> Students */}
-                                <path
-                                    d="M 18 46 Q 14 36 24 25"
-                                    fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.3"
-                                    strokeDasharray="1.5 2"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 3. 3D CIRCLE BUBBLES ON RADIAL LINES (Matching Right Side Style) */}
-                                <g filter="url(#bubbleShadow)">
-                                    {/* Bubble on Center-Students Line */}
-                                    <circle cx="33.5" cy="32" r="1.5" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble on Center-Universities Line */}
-                                    <circle cx="66.5" cy="32" r="1.5" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble on Center-Jobs Line */}
-                                    <circle cx="69.5" cy="49.3" r="1.5" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble on Center-Courses Line */}
-                                    <circle cx="49.3" cy="68.5" r="1.5" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble on Center-Certifications Line */}
-                                    <circle cx="30.5" cy="50.7" r="1.5" fill="url(#bubble3DGrad)" />
+                                {/* 5. SkillDad <-> Courses Flower Petal Arcs (Identical Geometry with Dotted Lines) */}
+                                <path
+                                    d="M 50.0 62.0 Q 41.5 70.8 50.0 79.5"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 50.0 79.5 Q 58.5 70.8 50.0 62.0"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeDasharray="1.0 1.2"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
 
-                                    {/* 3D CIRCLE BUBBLES ON PERIMETER ARCS */}
-                                    {/* Bubble between Students & Universities */}
-                                    <circle cx="50" cy="13.5" r="1.6" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble between Universities & Jobs */}
-                                    <circle cx="82" cy="36" r="1.5" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble between Jobs & Courses */}
-                                    <circle cx="70" cy="68" r="1.6" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble between Courses & Certifications */}
-                                    <circle cx="30" cy="68" r="1.6" fill="url(#bubble3DGrad)" />
-                                    {/* Bubble between Certifications & Students */}
-                                    <circle cx="18" cy="36" r="1.5" fill="url(#bubble3DGrad)" />
-                                </g>
+                                {/* Outer Perimeter Arcs connecting adjacent nodes */}
+                                <path d="M 29.1 29.1 Q 50 14 70.9 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 70.9 29.1 Q 88 36 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 50.0 79.5 Q 74 74 79.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 50.0 79.5 Q 26 74 20.5 50.0" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
+                                <path d="M 20.5 50.0 Q 12 36 29.1 29.1" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
 
-                                {/* Static Small Purple Dots along tracks */}
-                                <circle cx="36" cy="13" r="0.6" fill="#8B5CF6" />
-                                <circle cx="64" cy="13" r="0.6" fill="#8B5CF6" />
-                                <circle cx="61" cy="76" r="0.6" fill="#8B5CF6" />
-                                <circle cx="39" cy="76" r="0.6" fill="#8B5CF6" />
+                                {/* Small Circle Bubbles / Dots along connection lines (Matching right-side style, kept small) */}
+                                <circle cx="35.3" cy="35.3" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
+                                <circle cx="32.0" cy="32.0" r="0.45" fill="#A855F7" />
 
-                                {/* 4. MOVING PURPLE GLOWING DOTS (Continuous Flow) */}
-                                {/* Moving Ball from Courses to Jobs (Per User Requirement) */}
-                                <circle r="0.6" fill="#9333EA" className="filter drop-shadow-[0_0_1.5px_#9333EA]">
-                                    <animateMotion path="M 50 80 Q 76 72 82 50" dur="4.6s" repeatCount="indefinite" />
+                                <circle cx="64.7" cy="35.3" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
+                                <circle cx="68.0" cy="32.0" r="0.45" fill="#A855F7" />
+
+                                <circle cx="70.8" cy="50.0" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
+                                <circle cx="75.2" cy="50.0" r="0.45" fill="#A855F7" />
+
+                                <circle cx="29.2" cy="50.0" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
+                                <circle cx="24.8" cy="50.0" r="0.45" fill="#A855F7" />
+
+                                <circle cx="50.0" cy="70.8" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
+                                <circle cx="50.0" cy="75.2" r="0.45" fill="#A855F7" />
+
+                                {/* Perimeter subtle dots */}
+                                <circle cx="50.0" cy="20.0" r="0.45" fill="#A855F7" />
+                                <circle cx="80.0" cy="40.5" r="0.45" fill="#A855F7" />
+                                <circle cx="65.5" cy="73.5" r="0.45" fill="#A855F7" />
+                                <circle cx="34.5" cy="73.5" r="0.45" fill="#A855F7" />
+                                <circle cx="20.0" cy="40.5" r="0.45" fill="#A855F7" />
+
+                                {/* Very Small Purple Dots Moving Through Flower Petal Lines */}
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 41.5 41.5 Q 41.3 29.3 29.1 29.1" dur="3.4s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 29.1 29.1 Q 29.3 41.3 41.5 41.5" dur="3.6s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 58.5 41.5 Q 70.7 41.3 70.9 29.1" dur="3.5s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 70.9 29.1 Q 58.7 29.3 58.5 41.5" dur="3.7s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 62.0 50.0 Q 70.8 58.5 79.5 50.0" dur="3.3s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 79.5 50.0 Q 70.8 41.5 62.0 50.0" dur="3.6s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 38.0 50.0 Q 29.2 41.5 20.5 50.0" dur="3.8s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 20.5 50.0 Q 29.2 58.5 38.0 50.0" dur="3.7s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 50.0 62.0 Q 41.5 70.8 50.0 79.5" dur="3.5s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 50.0 79.5 Q 58.5 70.8 50.0 62.0" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
 
-                                {/* Moving Ball from Students to Universities */}
-                                <circle r="0.55" fill="#8B5CF6" className="filter drop-shadow-[0_0_1.5px_#8B5CF6]">
-                                    <animateMotion path="M 28 17 Q 50 10 72 17" dur="5.0s" repeatCount="indefinite" />
+                                {/* Moving Very Small Purple Dots around Outer Perimeter - Courses to Job explicit direction */}
+                                <circle r="0.4" fill="#9333EA">
+                                    <animateMotion path="M 29.1 29.1 Q 50 14 70.9 29.1" dur="5.5s" repeatCount="indefinite" />
                                 </circle>
-
-                                {/* Moving Ball from Certifications to Students */}
-                                <circle r="0.55" fill="#8B5CF6" className="filter drop-shadow-[0_0_1.5px_#8B5CF6]">
-                                    <animateMotion path="M 18 46 Q 14 36 24 25" dur="4.8s" repeatCount="indefinite" />
+                                <circle r="0.4" fill="#9333EA">
+                                    <animateMotion path="M 70.9 29.1 Q 88 36 79.5 50.0" dur="4.8s" repeatCount="indefinite" />
                                 </circle>
-
-                                {/* Moving Ball from Center to Students */}
-                                <circle r="0.5" fill="#7C3AED" className="filter drop-shadow-[0_0_1.5px_#7C3AED]">
-                                    <animateMotion path="M 40.5 40.5 Q 33 31 27 24" dur="3.6s" repeatCount="indefinite" />
+                                {/* Moving Small Ball From Courses to Job */}
+                                <circle r="0.4" fill="#9333EA">
+                                    <animateMotion path="M 50.0 79.5 Q 74 74 79.5 50.0" dur="4.6s" repeatCount="indefinite" />
                                 </circle>
-
-                                {/* Moving Ball from Center to Universities */}
-                                <circle r="0.5" fill="#7C3AED" className="filter drop-shadow-[0_0_1.5px_#7C3AED]">
-                                    <animateMotion path="M 59.5 40.5 Q 67 31 73 24" dur="3.8s" repeatCount="indefinite" />
+                                <circle r="0.4" fill="#9333EA">
+                                    <animateMotion path="M 50.0 79.5 Q 26 74 20.5 50.0" dur="5s" repeatCount="indefinite" />
                                 </circle>
-
-                                {/* Moving Ball from Center to Jobs */}
-                                <circle r="0.5" fill="#7C3AED" className="filter drop-shadow-[0_0_1.5px_#7C3AED]">
-                                    <animateMotion path="M 63 50 Q 70 48.5 76 50" dur="3.4s" repeatCount="indefinite" />
+                                <circle r="0.4" fill="#9333EA">
+                                    <animateMotion path="M 20.5 50.0 Q 12 36 29.1 29.1" dur="5.4s" repeatCount="indefinite" />
                                 </circle>
                             </svg>
-
-                            {/* Center Hub: SkillDad Logo with Radiant Aura */}
+                            {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
                             <motion.div
                                 animate={{ scale: [1, 1.03, 1] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -345,7 +361,7 @@ const HeroSection = () => {
                                 />
                             </motion.div>
 
-                            {/* 5 Surrounding Animated Photo Nodes with Badges (No Icon Background) */}
+                            {/* 5 Surrounding Animated Photo Nodes with White Badges (Increased a little more) */}
                             {constellationNodes.map((node) => {
                                 return (
                                     <motion.div
@@ -379,8 +395,8 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* ── CENTER COLUMN: EDITORIAL HEADING & ACTIONS (4 cols) ── */}
-                    <div className="lg:col-span-4 xl:col-span-4 flex flex-col items-start text-left pl-0 lg:pl-1 xl:pl-2 z-20">
+                    {/* ── CENTER COLUMN: EDITORIAL HEADING & ACTIONS (4.8 cols) ── */}
+                    <div className="lg:col-span-5 flex flex-col items-start text-left pl-0 lg:pl-2 xl:pl-4 z-20">
                         
                         {/* Eyebrow matching Reference */}
                         <div className="flex items-center gap-2 mb-2 sm:mb-2.5">
@@ -390,8 +406,8 @@ const HeroSection = () => {
                             </span>
                         </div>
 
-                        {/* Heading: Confusion to Career */}
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[44px] xl:text-[52px] font-black tracking-tight leading-[1.08] font-sans">
+                        {/* Redesigned Heading: "Confusion to Career" */}
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[54px] font-black tracking-tight leading-[1.08] font-sans">
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
                             </span>
@@ -401,7 +417,7 @@ const HeroSection = () => {
                         </h1>
 
                         {/* Subtitle */}
-                        <p className="text-xs sm:text-sm md:text-[14px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-md mt-3 sm:mt-3.5 mb-5 sm:mb-6">
+                        <p className="text-xs sm:text-sm md:text-[14.5px] text-slate-600 dark:text-purple-200/80 leading-relaxed font-normal max-w-lg mt-3 sm:mt-3.5 mb-5 sm:mb-6">
                             A collaborative venture initiated by IITians and leading job providers in India, in partnership with reputed universities across the world.
                         </p>
 
@@ -426,138 +442,110 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* ── RIGHT COLUMN: CONSTELLATION NETWORK, 3D CIRCLE BUBBLES & FLOATING BADGES (3 cols) ── */}
-                    <div className="lg:col-span-3 xl:col-span-3 hidden lg:flex items-center justify-center relative select-none">
-                        <div className="relative w-full max-w-[320px] h-[390px]">
+                    {/* ── RIGHT COLUMN: CONSTELLATION NETWORK & FLOATING BADGES (matching Reference) ── */}
+                    <div className="lg:col-span-2 hidden lg:flex flex-col items-end justify-center relative h-[380px] select-none z-10">
+                        
+                        {/* Constellation Network SVG Layer with Small Circle Bubbles & Moving Purple Dots */}
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 240 380">
+                            {/* Thin, sharp purple constellation tracks matching reference */}
+                            <path
+                                d="M 98 65 L 95 125"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.4)"
+                                strokeWidth="0.7"
+                                strokeDasharray="2 2.5"
+                            />
+                            <path
+                                d="M 95 125 Q 155 148 215 132"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.4)"
+                                strokeWidth="0.7"
+                                strokeDasharray="2 2.5"
+                            />
+                            <path
+                                d="M 95 125 C 92 180 108 245 120 300"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.45)"
+                                strokeWidth="0.7"
+                                strokeDasharray="2 2.5"
+                            />
+                            <path
+                                d="M 120 300 C 123 330 126 350 128 368"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.4)"
+                                strokeWidth="0.7"
+                                strokeDasharray="2 2.5"
+                            />
+                            <path
+                                d="M 120 300 Q 160 330 195 352"
+                                fill="none"
+                                stroke="rgba(147, 51, 234, 0.35)"
+                                strokeWidth="0.7"
+                                strokeDasharray="2 2.5"
+                            />
+
+                            {/* Static Small Purple Dot Nodes along tracks */}
+                            <circle cx="98" cy="65" r="1.8" fill="#8B5CF6" />
+                            <circle cx="96" cy="95" r="1.6" fill="#A855F7" />
+                            <circle cx="106" cy="205" r="1.8" fill="#8B5CF6" />
+                            <circle cx="160" cy="330" r="1.6" fill="#A855F7" />
+                            <circle cx="195" cy="352" r="2.0" fill="#8B5CF6" />
+
+                            {/* Small Purple Circle Bubbles (Clean, refined, small - not bulky 3D spheres) */}
+                            {/* Bubble 1 (Top Left) */}
+                            <circle cx="95" cy="125" r="3.2" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.85)" strokeWidth="0.6" />
+
+                            {/* Bubble 2 (Top Right) */}
+                            <circle cx="215" cy="132" r="2.8" fill="#A855F7" stroke="rgba(255, 255, 255, 0.85)" strokeWidth="0.6" />
+
+                            {/* Bubble 3 below Digital Marketing (Refined circle bubble) */}
+                            <circle cx="120" cy="300" r="4.8" fill="#7C3AED" stroke="rgba(255, 255, 255, 0.9)" strokeWidth="0.8" />
+
+                            {/* Bubble 4 Lower */}
+                            <circle cx="128" cy="368" r="2.5" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.5" />
+
+                            {/* Moving Purple Glowing Dots through lines (matching Reference animation) */}
+                            <circle r="1.8" fill="#7C3AED" className="filter drop-shadow-[0_0_2px_#A855F7]">
+                                <animateMotion
+                                    dur="4.5s"
+                                    repeatCount="indefinite"
+                                    path="M 95 125 C 92 180 108 245 120 300"
+                                />
+                            </circle>
+
+                            <circle r="1.6" fill="#8B5CF6" className="filter drop-shadow-[0_0_2px_#A855F7]">
+                                <animateMotion
+                                    dur="4.2s"
+                                    repeatCount="indefinite"
+                                    path="M 95 125 Q 155 148 215 132"
+                                />
+                            </circle>
+
+                            <circle r="1.6" fill="#9333EA" className="filter drop-shadow-[0_0_2px_#A855F7]">
+                                <animateMotion
+                                    dur="3.4s"
+                                    repeatCount="indefinite"
+                                    path="M 120 300 C 123 330 126 350 128 368"
+                                />
+                            </circle>
+
+                            <circle r="1.6" fill="#8B5CF6" className="filter drop-shadow-[0_0_2px_#A855F7]">
+                                <animateMotion
+                                    dur="4.0s"
+                                    repeatCount="indefinite"
+                                    path="M 120 300 Q 160 330 195 352"
+                                />
+                            </circle>
+                        </svg>
+
+                        {/* 3 Floating Badges matching Reference */}
+                        <div className="space-y-7 relative z-20 flex flex-col items-end pr-2">
                             
-                            {/* Constellation Network SVG Layer with 3D Spheres & Moving Purple Dots */}
-                            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 300 390">
-                                <defs>
-                                    {/* 3D Purple Sphere Gradient */}
-                                    <radialGradient id="rightSphere3D" cx="32%" cy="28%" r="72%">
-                                        <stop offset="0%" stopColor="#FFFFFF" />
-                                        <stop offset="18%" stopColor="#E9D5FF" />
-                                        <stop offset="48%" stopColor="#A855F7" />
-                                        <stop offset="80%" stopColor="#6D28D9" />
-                                        <stop offset="100%" stopColor="#3B0764" />
-                                    </radialGradient>
-                                    <filter id="rightSphereShadow" x="-50%" y="-50%" width="200%" height="200%">
-                                        <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#581C87" floodOpacity="0.28" />
-                                    </filter>
-                                </defs>
-
-                                {/* Thin, sharp purple constellation tracks matching reference */}
-                                <path
-                                    d="M 130 20 L 125 75"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.42)"
-                                    strokeWidth="0.9"
-                                    strokeDasharray="2.5 3"
-                                />
-                                <path
-                                    d="M 125 75 Q 115 110 100 155"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.42)"
-                                    strokeWidth="0.9"
-                                    strokeDasharray="2.5 3"
-                                />
-                                <path
-                                    d="M 100 155 Q 170 178 245 155"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.42)"
-                                    strokeWidth="0.9"
-                                    strokeDasharray="2.5 3"
-                                />
-                                <path
-                                    d="M 100 155 C 95 210 115 265 135 315"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.45)"
-                                    strokeWidth="0.9"
-                                    strokeDasharray="2.5 3"
-                                />
-                                <path
-                                    d="M 135 315 C 138 342 142 360 145 375"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.42)"
-                                    strokeWidth="0.9"
-                                    strokeDasharray="2.5 3"
-                                />
-                                <path
-                                    d="M 135 315 Q 185 340 225 358"
-                                    fill="none"
-                                    stroke="rgba(147, 51, 234, 0.35)"
-                                    strokeWidth="0.9"
-                                    strokeDasharray="2.5 3"
-                                />
-
-                                {/* Static Purple Dot Nodes along tracks */}
-                                <circle cx="130" cy="20" r="2.2" fill="#8B5CF6" />
-                                <circle cx="125" cy="75" r="2.0" fill="#A855F7" />
-                                <circle cx="112" cy="225" r="2.0" fill="#8B5CF6" />
-                                <circle cx="180" cy="342" r="2.0" fill="#A855F7" />
-                                <circle cx="225" cy="358" r="2.4" fill="#8B5CF6" />
-
-                                {/* 3D Purple Spheres / Circle Bubbles */}
-                                {/* Medium Bubble 1 (Left of Data Analyst) */}
-                                <g filter="url(#rightSphereShadow)">
-                                    <circle cx="100" cy="155" r="7.5" fill="url(#rightSphere3D)" />
-                                </g>
-
-                                {/* Medium Bubble 2 (Right of Data Analyst) */}
-                                <g filter="url(#rightSphereShadow)">
-                                    <circle cx="245" cy="155" r="6.5" fill="url(#rightSphere3D)" />
-                                </g>
-
-                                {/* Large Central 3D Bubble (Beneath Digital Marketing) */}
-                                <g filter="url(#rightSphereShadow)">
-                                    <circle cx="135" cy="315" r="14.5" fill="url(#rightSphere3D)" />
-                                </g>
-
-                                {/* Lower Small Bubble */}
-                                <g filter="url(#rightSphereShadow)">
-                                    <circle cx="145" cy="375" r="5" fill="url(#rightSphere3D)" />
-                                </g>
-
-                                {/* Moving Purple Glowing Dots through tracks */}
-                                <circle r="2.4" fill="#7C3AED" className="filter drop-shadow-[0_0_3px_#A855F7]">
-                                    <animateMotion
-                                        dur="4.4s"
-                                        repeatCount="indefinite"
-                                        path="M 100 155 C 95 210 115 265 135 315"
-                                    />
-                                </circle>
-
-                                <circle r="2.0" fill="#8B5CF6" className="filter drop-shadow-[0_0_2.5px_#A855F7]">
-                                    <animateMotion
-                                        dur="4.0s"
-                                        repeatCount="indefinite"
-                                        path="M 100 155 Q 170 178 245 155"
-                                    />
-                                </circle>
-
-                                <circle r="2.0" fill="#9333EA" className="filter drop-shadow-[0_0_2.5px_#A855F7]">
-                                    <animateMotion
-                                        dur="3.2s"
-                                        repeatCount="indefinite"
-                                        path="M 135 315 C 138 342 142 360 145 375"
-                                    />
-                                </circle>
-
-                                <circle r="2.0" fill="#8B5CF6" className="filter drop-shadow-[0_0_2.5px_#A855F7]">
-                                    <animateMotion
-                                        dur="3.8s"
-                                        repeatCount="indefinite"
-                                        path="M 135 315 Q 185 340 225 358"
-                                    />
-                                </circle>
-                            </svg>
-
-                            {/* 3 Floating Badges (Positioned cleanly relative to network) */}
                             {/* 1. Hospital Administration */}
                             <motion.div
                                 animate={{ y: [-4, 4, -4] }}
                                 transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
-                                className="absolute top-[28px] right-[10px] z-20 bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform"
+                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-1"
                             >
                                 <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
                                     <Building2 size={13} className="text-[#6D28D9] dark:text-purple-300" />
@@ -571,7 +559,7 @@ const HeroSection = () => {
                             <motion.div
                                 animate={{ y: [4, -4, 4] }}
                                 transition={{ duration: 5.4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-                                className="absolute top-[138px] right-[24px] z-20 bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform"
+                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform -mr-1"
                             >
                                 <div className="w-6 h-6 rounded-lg bg-[#E0F2FE] dark:bg-cyan-950/50 flex items-center justify-center shrink-0">
                                     <BarChart3 size={13} className="text-[#0284C7] dark:text-cyan-300" />
@@ -585,7 +573,7 @@ const HeroSection = () => {
                             <motion.div
                                 animate={{ y: [-3, 4, -3] }}
                                 transition={{ duration: 5.0, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-                                className="absolute top-[244px] right-[8px] z-20 bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform"
+                                className="bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-[0_8px_22px_rgba(124,58,237,0.10)] border border-purple-100/90 dark:border-purple-800/40 flex items-center gap-2.5 cursor-default hover:scale-105 transition-transform mr-2"
                             >
                                 <div className="w-6 h-6 rounded-lg bg-purple-100/70 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
                                     <Megaphone size={13} className="text-[#7C3AED] dark:text-purple-300" />
@@ -601,67 +589,8 @@ const HeroSection = () => {
                 </div>
             </div>
 
-            {/* 3D Violet Wave / Ribbon in Bottom-Right Corner matching Reference */}
-            <div className="absolute bottom-0 right-0 w-[380px] sm:w-[460px] md:w-[540px] lg:w-[620px] pointer-events-none select-none z-0 overflow-visible opacity-95">
-                <svg
-                    viewBox="0 0 600 300"
-                    fill="none"
-                    className="w-full h-auto drop-shadow-[0_16px_36px_rgba(109,40,217,0.22)]"
-                >
-                    <defs>
-                        <linearGradient id="satinGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#7C3AED" stopOpacity="0.95" />
-                            <stop offset="25%" stopColor="#8B5CF6" stopOpacity="1" />
-                            <stop offset="60%" stopColor="#704CE1" stopOpacity="1" />
-                            <stop offset="85%" stopColor="#5B21B6" stopOpacity="0.98" />
-                            <stop offset="100%" stopColor="#4C1D95" stopOpacity="1" />
-                        </linearGradient>
-                        <linearGradient id="sheerGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.55" />
-                            <stop offset="40%" stopColor="#DDD6FE" stopOpacity="0.4" />
-                            <stop offset="75%" stopColor="#C084FC" stopOpacity="0.22" />
-                            <stop offset="100%" stopColor="#A855F7" stopOpacity="0.05" />
-                        </linearGradient>
-                        <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-                            <feGaussianBlur stdDeviation="16" result="blur" />
-                        </filter>
-                        <filter id="sheerBlur" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur stdDeviation="3.5" result="blur" />
-                        </filter>
-                    </defs>
-
-                    {/* Ambient background glow behind ribbon */}
-                    <path
-                        d="M 120 280 C 280 240 450 160 600 20 L 600 300 L 120 300 Z"
-                        fill="url(#sheerGrad)"
-                        filter="url(#softGlow)"
-                        opacity="0.75"
-                    />
-
-                    {/* Translucent sheer wave layer (sweeps up behind badges) */}
-                    <path
-                        d="M 110 270 C 240 230 380 140 480 60 C 530 20 570 -10 600 -30 L 600 90 C 540 150 450 210 330 250 C 230 285 160 280 110 270 Z"
-                        fill="url(#sheerGrad)"
-                        filter="url(#sheerBlur)"
-                        opacity="0.85"
-                    />
-
-                    {/* Solid Satin 3D Ribbon (Layer 1) */}
-                    <path
-                        d="M 75 272 C 200 268 350 232 475 165 C 525 138 565 105 600 80 L 600 165 C 550 205 470 250 365 285 C 255 320 145 295 75 272 Z"
-                        fill="url(#satinGrad)"
-                    />
-
-                    {/* Highlight sheen along top edge of solid ribbon */}
-                    <path
-                        d="M 85 271 C 205 266 352 230 475 165 C 525 138 565 105 600 80"
-                        stroke="rgba(255, 255, 255, 0.45)"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        filter="url(#sheerBlur)"
-                    />
-                </svg>
-            </div>
+            {/* Decorative Flowing Purple Ribbon / Wave on Right Side (Custom SVG matching Reference) */}
+            <HeroFlowingWave />
 
             {/* ── BOTTOM ROW: TRUSTED BY LEADING UNIVERSITIES & PARTNERS (Organic Wave Background matching Reference #F3F4FD) ── */}
             <div className="w-full relative z-20 bg-[#F3F4FD] dark:bg-[#0B081A] pt-3 sm:pt-4 pb-3 sm:pb-4 transition-colors">
