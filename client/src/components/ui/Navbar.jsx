@@ -155,7 +155,7 @@ const Navbar = ({ compact = false }) => {
 
                     {/* Desktop Menu - Dark purple text and underline on select or hover */}
                     {!isAuthPage && (
-                        <div className="hidden lg:flex items-center justify-center space-x-5 xl:space-x-7 shrink-0">
+                        <div className="hidden lg:flex items-center justify-center space-x-3 xl:space-x-4.5 shrink-0">
                             {navItems.map((item) => {
                                 const isSelected = item.href === '/' 
                                     ? location.pathname === '/' 

@@ -163,60 +163,7 @@ const HeroSection = () => {
                     <div className="lg:col-span-5 flex items-center justify-center relative select-none">
                         <div className="w-[280px] xs:w-[320px] sm:w-[360px] md:w-[380px] lg:w-[400px] xl:w-[420px] aspect-square relative flex items-center justify-center shrink-0">
                             
-                            {/* SVG Connection Lines matching reference (Clean, delicate spoke & perimeter network) */}
-                            <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
-                                <defs>
-                                    <linearGradient id="refLineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stopColor="#C4B5FD" stopOpacity="0.9" />
-                                        <stop offset="100%" stopColor="#A78BFA" stopOpacity="0.9" />
-                                    </linearGradient>
-                                </defs>
 
-                                {/* Delicate Central Ring around SkillDad Logo Hub */}
-                                <circle cx="50" cy="50" r="17.5" fill="none" stroke="rgba(196, 181, 253, 0.45)" strokeWidth="1" />
-
-                                {/* Radial Spokes connecting Center Hub to each of the 5 Nodes */}
-                                <path d="M 37 37 L 23 20" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                <path d="M 63 37 L 77 20" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                <path d="M 68 50 L 83 50" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                <path d="M 48 68 L 46 76" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                <path d="M 32 50 L 17 50" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-
-                                {/* Outer Perimeter Curved Connection Lines between Nodes */}
-                                {/* Students to Universities */}
-                                <path d="M 22 16 Q 49 6 78 16" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                {/* Universities to Jobs */}
-                                <path d="M 81 20 Q 90 32 87 45" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                {/* Jobs to Courses */}
-                                <path d="M 85 55 Q 77 75 51 81" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                {/* Courses to Certifications */}
-                                <path d="M 39 81 Q 20 75 14 56" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-                                {/* Certifications to Students */}
-                                <path d="M 12 45 Q 8 28 17 18" fill="none" stroke="url(#refLineGrad)" strokeWidth="1.2" />
-
-                                {/* Background subtle constellation cluster on left matching reference */}
-                                <path d="M 5 48 L 8 40 L 5 32" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.8" />
-                                <circle cx="5" cy="48" r="1.1" fill="#C4B5FD" />
-                                <circle cx="8" cy="40" r="1.2" fill="#A855F7" />
-                                <circle cx="5" cy="32" r="1.1" fill="#C4B5FD" />
-
-                                {/* Delicate Small Lavender Network Dots on Radial Spokes */}
-                                <circle cx="30" cy="28.5" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="70" cy="28.5" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="75.5" cy="50" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="47" cy="72" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="24.5" cy="50" r="1.5" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-
-                                {/* Delicate Small Lavender Network Dots on Outer Arcs */}
-                                <circle cx="37" cy="9.5" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="63" cy="9.5" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="86.5" cy="32" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="74" cy="70" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="61" cy="78" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="27" cy="76" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="17" cy="65" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                                <circle cx="10.5" cy="31" r="1.4" fill="#8B5CF6" stroke="#EDE9FE" strokeWidth="0.5" />
-                            </svg>
 
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura */}
                             <motion.div
