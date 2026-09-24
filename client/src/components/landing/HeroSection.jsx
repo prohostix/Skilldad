@@ -179,121 +179,151 @@ const HeroSection = () => {
                             {/* Very Thin, Standard Purple Connection Arc Lines & Moving Purple Dots */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible" viewBox="0 0 100 100">
                                 {/* Delicate Central Orbit Track */}
-                                <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.65" />
+                                <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(147, 51, 234, 0.45)" strokeWidth="0.22" shapeRendering="geometricPrecision" />
 
-                                {/* 1. Arc line from Students to Logo Hub */}
+                                {/* 1. SkillDad <-> Students Double Connection Lines */}
                                 <path
-                                    d="M 27 24 Q 29 41 42 46"
+                                    d="M 26 27 Q 29 40 43 45"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
                                     strokeLinecap="round"
-                                />
-
-                                {/* 2. Arc line from Logo Hub to Universities */}
-                                <path
-                                    d="M 58 46 Q 71 41 73 24"
-                                    fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
-                                    strokeLinecap="round"
-                                />
-
-                                {/* 3. Logo to Jobs AND Job to Logo flower arc lines (Loop) */}
-                                <path
-                                    d="M 59 47 Q 72 42 81 48"
-                                    fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
-                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 81 54 Q 72 60 59 53"
+                                    d="M 45 42 Q 38 31 27 25"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 4. Logo to Certifications arc lines */}
+                                {/* 2. SkillDad <-> Universities Double Connection Lines */}
                                 <path
-                                    d="M 19 48 Q 28 42 41 48"
+                                    d="M 74 27 Q 71 40 57 45"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 41 52 Q 28 60 19 54"
+                                    d="M 55 42 Q 62 31 73 25"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
 
-                                {/* 5. Logo to Courses arc lines */}
+                                {/* 3. SkillDad <-> Jobs Double Connection Lines */}
                                 <path
-                                    d="M 48 59 Q 43 70 47 78"
+                                    d="M 58 48 Q 69 42 78 48"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
                                 <path
-                                    d="M 52 59 Q 57 70 47 78"
+                                    d="M 78 54 Q 69 60 58 52"
                                     fill="none"
-                                    stroke="rgba(168, 85, 247, 0.45)"
-                                    strokeWidth="0.65"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
                                     strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+
+                                {/* 4. SkillDad <-> Certifications Double Connection Lines */}
+                                <path
+                                    d="M 22 48 Q 31 42 42 48"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 42 52 Q 31 60 22 54"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+
+                                {/* 5. SkillDad <-> Courses Double Connection Lines */}
+                                <path
+                                    d="M 48 58 Q 42 68 46 76"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
+                                />
+                                <path
+                                    d="M 48 76 Q 58 68 52 58"
+                                    fill="none"
+                                    stroke="rgba(147, 51, 234, 0.55)"
+                                    strokeWidth="0.22"
+                                    strokeLinecap="round"
+                                    shapeRendering="geometricPrecision"
                                 />
 
                                 {/* Outer Perimeter Petal Arcs connecting adjacent nodes */}
-                                <path d="M 28 17 Q 50 7 72 17" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
-                                <path d="M 78 24 Q 89 34 85 45" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
-                                <path d="M 84 57 Q 75 76 53 82" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
-                                <path d="M 41 82 Q 22 76 17 57" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
-                                <path d="M 15 45 Q 11 29 20 22" fill="none" stroke="rgba(196, 181, 253, 0.35)" strokeWidth="0.65" strokeDasharray="2 3" />
+                                <path d="M 28 17 Q 50 7 72 17" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 78 24 Q 89 34 85 45" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 84 57 Q 75 76 53 82" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 41 82 Q 22 76 17 57" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
+                                <path d="M 15 45 Q 11 29 20 22" fill="none" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.5 2" shapeRendering="geometricPrecision" />
 
-                                {/* Very Small Purple Dots Moving Through Lines */}
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 27 24 Q 29 41 42 46" dur="3.6s" repeatCount="indefinite" />
+                                {/* Very Small Purple Dots Moving Through Flower Lines */}
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 26 27 Q 29 40 43 45" dur="3.4s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 58 46 Q 71 41 73 24" dur="3.8s" repeatCount="indefinite" />
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 45 42 Q 38 31 27 25" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 59 47 Q 72 42 81 48" dur="3.4s" repeatCount="indefinite" />
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 74 27 Q 71 40 57 45" dur="3.5s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 81 54 Q 72 60 59 53" dur="3.7s" repeatCount="indefinite" />
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 55 42 Q 62 31 73 25" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 19 48 Q 28 42 41 48" dur="4s" repeatCount="indefinite" />
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 58 48 Q 69 42 78 48" dur="3.3s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 41 52 Q 28 60 19 54" dur="3.9s" repeatCount="indefinite" />
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 78 54 Q 69 60 58 52" dur="3.6s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 48 59 Q 43 70 47 78" dur="3.5s" repeatCount="indefinite" />
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 22 48 Q 31 42 42 48" dur="3.8s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.9" fill="#9333EA">
-                                    <animateMotion path="M 47 78 Q 57 70 52 59" dur="3.7s" repeatCount="indefinite" />
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 42 52 Q 31 60 22 54" dur="3.7s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 48 58 Q 42 68 46 76" dur="3.5s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.45" fill="#7C3AED">
+                                    <animateMotion path="M 48 76 Q 58 68 52 58" dur="3.7s" repeatCount="indefinite" />
                                 </circle>
 
-                                {/* Moving Small Purple Dots around Outer Perimeter */}
-                                <circle r="0.85" fill="#A855F7">
+                                {/* Moving Very Small Purple Dots around Outer Perimeter */}
+                                <circle r="0.4" fill="#9333EA">
                                     <animateMotion path="M 28 17 Q 50 7 72 17" dur="5.5s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.85" fill="#A855F7">
+                                <circle r="0.4" fill="#9333EA">
                                     <animateMotion path="M 78 24 Q 89 34 85 45" dur="4.8s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.85" fill="#A855F7">
+                                <circle r="0.4" fill="#9333EA">
                                     <animateMotion path="M 84 57 Q 75 76 53 82" dur="5.2s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.85" fill="#A855F7">
+                                <circle r="0.4" fill="#9333EA">
                                     <animateMotion path="M 41 82 Q 22 76 17 57" dur="5s" repeatCount="indefinite" />
                                 </circle>
-                                <circle r="0.85" fill="#A855F7">
+                                <circle r="0.4" fill="#9333EA">
                                     <animateMotion path="M 15 45 Q 11 29 20 22" dur="5.4s" repeatCount="indefinite" />
                                 </circle>
                             </svg>
