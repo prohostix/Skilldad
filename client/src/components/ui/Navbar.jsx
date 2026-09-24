@@ -131,8 +131,8 @@ const Navbar = ({ compact = false }) => {
             <nav
                 className={`fixed top-0 w-full z-50 transition-all duration-300 ${!shouldBeTransparent ? (theme === 'light' ? 'border-b border-slate-200/80 shadow-xs' : 'border-b border-white/5 shadow-md') : 'border-b border-slate-100/60'}`}
                 style={{
-                    backgroundColor: shouldBeTransparent ? (theme === 'light' ? 'rgba(255, 255, 255, 0.75)' : 'rgba(10, 5, 25, 0.75)') : (theme === 'light' ? '#FAF9F6' : 'rgba(0, 0, 0, 0.9)'),
-                    backdropFilter: 'blur(16px)',
+                    backgroundColor: shouldBeTransparent ? (theme === 'light' ? '#FAF8FE' : '#090514') : (theme === 'light' ? '#FAF9F6' : 'rgba(0, 0, 0, 0.9)'),
+                    backdropFilter: shouldBeTransparent ? 'none' : 'blur(16px)',
                 }}
             >
                 {/* Gradient Border Bottom Glow - Only visible on scroll */}

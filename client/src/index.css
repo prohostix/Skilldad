@@ -620,10 +620,6 @@ html.light-mode [class*="bg-background/"] {
   background-color: #FFFFFF !important;
 }
 
-html.light-mode nav {
-  background-color: #FFFFFF !important;
-}
-
 html.light-mode .text-white,
 html.light-mode .text-\[\#FFFFFF\],
 html.light-mode .text-gray-100,
@@ -855,18 +851,6 @@ html.light-mode [class*="bg-slate-9"],
 html.light-mode [class*="bg-slate-8"] {
   background-color: #FFFFFF !important;
   border-color: #e2e8f0 !important;
-}
-
-html.light-mode nav[style] {
-  background-color: #FFFFFF !important;
-  border-bottom: none !important;
-  backdrop-filter: none !important;
-}
-
-html.light-mode nav[style*="background-color: transparent"] {
-  background-color: transparent !important;
-  border-bottom-color: transparent !important;
-  backdrop-filter: none !important;
 }
 
 /* Force nav text and brand logo to be white on the new purple background */

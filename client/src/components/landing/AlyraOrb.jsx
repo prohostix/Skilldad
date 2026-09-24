@@ -15,13 +15,13 @@ const AlyraOrb = () => {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d', { alpha: false }); // Optimization: Disable alpha channel if opaque background
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { alpha: true });
         let animationFrameId;
 
         const LOOP_DURATION = 8000;
         const startTime = Date.now();
 
-        let cachedBgGrad = null;
         let isMobile = window.innerWidth < 768;
 
         const resize = () => {
@@ -34,11 +34,6 @@ const AlyraOrb = () => {
             ctx.scale(dpr, dpr);
             canvas.style.width = `${window.innerWidth}px`;
             canvas.style.height = `${window.innerHeight}px`;
-
-            // Deep satin black background foundation
-            cachedBgGrad = ctx.createLinearGradient(0, 0, 0, window.innerHeight);
-            cachedBgGrad.addColorStop(0, 'rgba(4, 2, 10, 1)');
-            cachedBgGrad.addColorStop(1, 'rgba(0, 0, 0, 1)');
         };
 
         const handleMouseMove = (e) => {
@@ -102,8 +97,7 @@ const AlyraOrb = () => {
             mouseRef.current.currentX += (mouseRef.current.targetX - mouseRef.current.currentX) * 0.04;
             mouseRef.current.currentY += (mouseRef.current.targetY - mouseRef.current.currentY) * 0.04;
 
-            ctx.fillStyle = cachedBgGrad || '#000';
-            ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
             ctx.save();
 
@@ -120,8 +114,8 @@ const AlyraOrb = () => {
 
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-            // 'lighter' is expensive, consider reducing usage or switching to screen if possible, but lighter looks best for glowing energy
-            ctx.globalCompositeOperation = 'lighter';
+            const isLightMode = document.documentElement.classList.contains('light-mode');
+            ctx.globalCompositeOperation = isLightMode ? 'source-over' : 'lighter';
 
             configs.forEach(cfg => {
                 const mainPath = generateRibbonPath(cfg.x, cfg.slant, cfg.amp, currentTime, cfg.dir, cfg.phase);
