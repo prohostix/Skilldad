@@ -427,12 +427,12 @@ const Platform = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
                                 className="lg:col-span-7 space-y-2.5 sm:space-y-3"
                             >
-                                {/* Small Label Badge */}
-                                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/70 dark:bg-purple-950/60 border border-purple-200/60 dark:border-purple-800/40">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#4C1D95] dark:bg-purple-400" />
-                                    <span className="text-[10px] font-bold tracking-wider text-[#4C1D95] dark:text-purple-300 uppercase">
+                                {/* Small Label Badge matching reference image */}
+                                <div className="inline-flex items-center gap-2">
+                                    <span className="text-[11px] font-bold tracking-wider text-[#4C1D95] dark:text-purple-300 uppercase">
                                         EXPLORE TOP UNIVERSITIES
                                     </span>
+                                    <span className="w-8 h-[2px] bg-[#4C1D95]/40 dark:bg-purple-400/40 rounded-full" />
                                 </div>
 
                                 {/* Main Heading matching Courses Page Typography */}
@@ -516,58 +516,19 @@ const Platform = () => {
 
                             </motion.div>
 
-                            {/* Right Hero Visual with Student & Callouts matching Courses page scale */}
+                            {/* Right Hero Illustration matching reference image exactly */}
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.94 }}
+                                initial={{ opacity: 0, scale: 0.96 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-                                className="lg:col-span-5 relative flex items-center justify-center lg:justify-end mt-4 lg:mt-0"
+                                className="lg:col-span-5 relative flex items-center justify-center lg:justify-end mt-2 lg:mt-0 select-none"
                             >
-                                <div className="relative">
-                                    
-                                    {/* Stylized Handwritten Accent: "Global Opportunities Await" */}
-                                    <div className="absolute -top-7 -left-5 sm:-top-8 sm:-left-7 z-20 pointer-events-none select-none">
-                                        <div className="flex flex-col items-center rotate-[-10deg]">
-                                            <span className="font-handwriting text-xl sm:text-2xl font-bold leading-[0.9] text-[#6D28D9] dark:text-purple-300 drop-shadow-xs text-center">
-                                                Global<br />Opportunities<br />Await
-                                            </span>
-                                            {/* Curved doodle arrow pointing down-right toward student */}
-                                            <svg className="w-8 h-6 text-[#7C3AED] dark:text-purple-400 mt-0.5 ml-4" viewBox="0 0 42 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M4 4C14 2 26 8 32 18M32 18L24 18M32 18L30 10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    {/* Image Container matching Courses page proportions */}
-                                    <div className="relative w-[210px] sm:w-[240px] md:w-[260px] aspect-[4/3.2] rounded-2xl md:rounded-3xl overflow-hidden shadow-lg border-2 border-white/60 dark:border-white/20 bg-purple-100 dark:bg-purple-950/40">
-                                        <img
-                                            src="/university_hero_student.jpg"
-                                            alt="SkillDad University Student"
-                                            className="w-full h-full object-cover object-center"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src = CAMPUS_FALLBACKS[0];
-                                            }}
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-
-                                        {/* Floating Accredited Degrees Verified Badge */}
-                                        <div className="absolute bottom-2 left-2 right-2 bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md rounded-xl p-2 border border-purple-100/80 dark:border-purple-800/40 shadow-xs flex items-center justify-between">
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="w-5.5 h-5.5 rounded-md bg-[#4C1D95] text-white flex items-center justify-center shrink-0">
-                                                    <Award size={12} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[8.5px] text-slate-500 dark:text-purple-300 font-semibold uppercase tracking-wider leading-none">Accredited</p>
-                                                    <p className="text-[10px] font-bold text-slate-900 dark:text-white leading-tight">Global Degrees</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-[8.5px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30">
-                                                Verified
-                                            </span>
-                                        </div>
-                                    </div>
-
+                                <div className="relative w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[490px] flex items-center justify-center lg:justify-end">
+                                    <img
+                                        src="/university_hero_reference_illustration.png"
+                                        alt="SkillDad Universities - Global Opportunities Await"
+                                        className="w-full h-auto object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)]"
+                                    />
                                 </div>
                             </motion.div>
 
