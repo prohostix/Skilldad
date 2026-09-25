@@ -431,21 +431,149 @@ const HeroSection = () => {
         fetchPartners();
     }, []);
 
+    // ── 5 INNOVATIVE & ATTRACTIVE CUSTOM ICONS FOR CONSTELLATION NODES ──
+    const InnovativeStudentsIcon = ({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="istudGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#8B5CF6" />
+                    <stop offset="1" stopColor="#581C87" />
+                </linearGradient>
+                <linearGradient id="istudGold" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#FDE047" />
+                    <stop offset="1" stopColor="#EAB308" />
+                </linearGradient>
+            </defs>
+            {/* Student Torso with Sleek V-Collar */}
+            <path d="M4 21C4 17.5 7.5 15 12 15C16.5 15 20 17.5 20 21" stroke="url(#istudGrad)" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M9 20.5L12 17L15 20.5" stroke="#A855F7" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            {/* Head Circle */}
+            <circle cx="12" cy="10" r="3.6" fill="url(#istudGrad)" />
+            {/* Sleek Diamond Graduation Cap on Head */}
+            <path d="M12 3L5.5 6.2L12 9.4L18.5 6.2L12 3Z" fill="url(#istudGrad)" stroke="#4C1D95" strokeWidth="0.8" strokeLinejoin="round" />
+            <path d="M18.5 6.5V9.5C18.5 9.5 17.8 10.2 17 10.2" stroke="url(#istudGold)" strokeWidth="1.2" strokeLinecap="round" />
+            <circle cx="17" cy="10.8" r="0.9" fill="url(#istudGold)" />
+            {/* Ambition Sparkle Star */}
+            <path d="M19 1.5L19.4 2.4L20.3 2.8L19.4 3.2L19 4.1L18.6 3.2L17.7 2.8L18.6 2.4L19 1.5Z" fill="url(#istudGold)" />
+        </svg>
+    );
+
+    const InnovativeUniversitiesIcon = ({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="iunivGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#7C3AED" />
+                    <stop offset="1" stopColor="#4C1D95" />
+                </linearGradient>
+                <linearGradient id="iunivGold" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#FCD34D" />
+                    <stop offset="1" stopColor="#F59E0B" />
+                </linearGradient>
+            </defs>
+            {/* Neoclassical Pediment (Triangular Temple Roof) */}
+            <path d="M12 2.5L2 7.5H22L12 2.5Z" fill="url(#iunivGrad)" stroke="#3B0764" strokeWidth="0.6" strokeLinejoin="round" />
+            <path d="M12 4.2L5 7.5H19L12 4.2Z" fill="white" fillOpacity="0.25" />
+            {/* Dome Spire / University Torch */}
+            <line x1="12" y1="1" x2="12" y2="2.5" stroke="url(#iunivGold)" strokeWidth="1.4" strokeLinecap="round" />
+            <circle cx="12" cy="1" r="1.1" fill="url(#iunivGold)" />
+            {/* Entablature Header Bar */}
+            <rect x="3" y="7.5" width="18" height="2" rx="0.5" fill="#6D28D9" />
+            {/* 4 Classical Columns */}
+            <rect x="4.5" y="9.5" width="2" height="7" rx="0.4" fill="url(#iunivGrad)" />
+            <rect x="9" y="9.5" width="2" height="7" rx="0.4" fill="url(#iunivGrad)" />
+            <rect x="13" y="9.5" width="2" height="7" rx="0.4" fill="url(#iunivGrad)" />
+            <rect x="17.5" y="9.5" width="2" height="7" rx="0.4" fill="url(#iunivGrad)" />
+            {/* Central Entrance Gateway Arch */}
+            <path d="M10 16.5V13.5C10 12.4 10.9 11.5 12 11.5C13.1 11.5 14 12.4 14 13.5V16.5" stroke="url(#iunivGold)" strokeWidth="1.2" strokeLinecap="round" />
+            {/* Foundation Stepped Base */}
+            <rect x="2" y="16.5" width="20" height="2.2" rx="0.6" fill="#581C87" />
+            <rect x="1" y="18.7" width="22" height="2.2" rx="0.6" fill="url(#iunivGrad)" />
+        </svg>
+    );
+
+    const InnovativeJobsIcon = ({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="ijobGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#6366F1" />
+                    <stop offset="0.5" stopColor="#4C1D95" />
+                    <stop offset="1" stopColor="#2E1065" />
+                </linearGradient>
+                <linearGradient id="ijobGreen" x1="14" y1="2" x2="22" y2="10" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#10B981" />
+                    <stop offset="1" stopColor="#059669" />
+                </linearGradient>
+            </defs>
+            {/* Sleek Briefcase Handle */}
+            <path d="M8.5 5.5V3.5C8.5 2.7 9.2 2 10 2H14C14.8 2 15.5 2.7 15.5 3.5V5.5" stroke="url(#ijobGrad)" strokeWidth="1.5" strokeLinecap="round" />
+            {/* Main Briefcase Body with Curved Corners */}
+            <rect x="2.5" y="5.5" width="19" height="14.5" rx="3.2" fill="url(#ijobGrad)" stroke="#3B0764" strokeWidth="0.8" />
+            {/* Stylized Leather Contrast Flap */}
+            <path d="M2.5 11C2.5 11 7 12.8 12 12.8C17 12.8 21.5 11 21.5 11" stroke="white" strokeWidth="1.1" strokeOpacity="0.35" />
+            {/* Metallic Clasp */}
+            <rect x="10.2" y="10.8" width="3.6" height="2.8" rx="0.8" fill="#F8FAFC" stroke="#C084FC" strokeWidth="0.6" />
+            {/* Career Surge Growth Badge with Rising Arrow */}
+            <circle cx="18.5" cy="5.5" r="4.2" fill="url(#ijobGreen)" stroke="white" strokeWidth="1.2" />
+            <path d="M16.8 7.2L20.2 3.8M20.2 3.8H17.8M20.2 3.8V6.2" stroke="white" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+    );
+
+    const InnovativeCoursesIcon = ({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="icourseGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#8B5CF6" />
+                    <stop offset="1" stopColor="#4C1D95" />
+                </linearGradient>
+                <linearGradient id="icourseGold" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#FDE047" />
+                    <stop offset="1" stopColor="#F59E0B" />
+                </linearGradient>
+            </defs>
+            {/* Open Digital Knowledge Book / Interactive Wings */}
+            <path d="M12 6.5C10 5.2 6.5 5 2.5 5.5V18.5C6.5 18 10 18.2 12 19.5C14 18.2 17.5 18 21.5 18.5V5.5C17.5 5 14 5.2 12 6.5Z" fill="url(#icourseGrad)" stroke="#3B0764" strokeWidth="0.8" strokeLinejoin="round" />
+            {/* Translucent Pages Effect */}
+            <path d="M12 6.5C10 5.2 6.5 5 2.5 5.5V16C6.5 15.5 10 15.8 12 17" fill="white" fillOpacity="0.25" />
+            <path d="M12 6.5C14 5.2 17.5 5 21.5 5.5V16C17.5 15.5 14 15.8 12 17" fill="white" fillOpacity="0.18" />
+            {/* Spine Divider Line */}
+            <line x1="12" y1="6.5" x2="12" y2="19.5" stroke="#DDD6FE" strokeWidth="1.2" strokeLinecap="round" />
+            {/* Rising Interactive Learning Play / Discovery Chevron */}
+            <circle cx="12" cy="3.5" r="2.8" fill="url(#icourseGold)" stroke="white" strokeWidth="0.8" />
+            <path d="M11.2 2.2L13.4 3.5L11.2 4.8Z" fill="#7C2D12" />
+        </svg>
+    );
+
+    const InnovativeCertificationsIcon = ({ className = "w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" }) => (
+        <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="icertGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#9333EA" />
+                    <stop offset="1" stopColor="#581C87" />
+                </linearGradient>
+                <linearGradient id="icertGold" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#FBBF24" />
+                    <stop offset="1" stopColor="#D97706" />
+                </linearGradient>
+            </defs>
+            {/* Dual Flowing Purple Ribbon Tails */}
+            <path d="M8 15L6.5 22L12 19.2L17.5 22L16 15" fill="#E9D5FF" stroke="#4C1D95" strokeWidth="1" strokeLinejoin="round" />
+            <path d="M12 19.2L17.5 22L16 15" fill="#DDD6FE" />
+            {/* Verified Rosette Outer Scalloped Badge */}
+            <circle cx="12" cy="9.5" r="7.6" fill="url(#icertGrad)" stroke="#4C1D95" strokeWidth="0.8" />
+            <circle cx="12" cy="9.5" r="6" stroke="white" strokeWidth="0.7" strokeOpacity="0.4" strokeDasharray="2 1.2" />
+            {/* Verified Bold Checkmark */}
+            <path d="M9 9.8L11.1 11.9L15.2 7.8" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            {/* Top Golden Crown Sparkle */}
+            <path d="M12 0.8L12.5 1.8L13.5 2.3L12.5 2.8L12 3.8L11.5 2.8L10.5 2.3L11.5 1.8L12 0.8Z" fill="url(#icertGold)" />
+        </svg>
+    );
+
     // 5 Interactive Constellation Nodes with exact reference icons and labels (no icon background)
     const constellationNodes = [
         {
             id: 'students',
             label: 'Students',
-            // Student / ID Card Icon matching reference
-            icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="5" y="7" width="14" height="14" rx="2" />
-                    <circle cx="12" cy="12" r="2.5" />
-                    <path d="M8 18c0-1.5 1.8-2.5 4-2.5s4 1 4 2.5" />
-                    <path d="M12 3v4" />
-                    <path d="M9 3h6" />
-                </svg>
-            ),
+            icon: <InnovativeStudentsIcon />,
             image: studentImg,
             posClass: 'left-[14%] top-[7%]',
             floatAnim: { y: [-5, 5, -5], x: [-2, 2, -2] },
@@ -455,13 +583,7 @@ const HeroSection = () => {
         {
             id: 'universities',
             label: 'Universities',
-            // Classical Mortarboard / University Cap matching reference
-            icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
-                </svg>
-            ),
+            icon: <InnovativeUniversitiesIcon />,
             image: universityImg,
             posClass: 'right-[13%] top-[7%]',
             floatAnim: { y: [5, -5, 5], x: [2, -2, 2] },
@@ -471,14 +593,7 @@ const HeroSection = () => {
         {
             id: 'jobs',
             label: 'Jobs',
-            // Executive Briefcase matching reference
-            icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" />
-                    <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                </svg>
-            ),
+            icon: <InnovativeJobsIcon />,
             image: jobsImg,
             posClass: 'right-[3%] top-[41%]',
             floatAnim: { y: [-5, 5, -5], x: [2, -2, 2] },
@@ -488,13 +603,7 @@ const HeroSection = () => {
         {
             id: 'courses',
             label: 'Courses',
-            // Open Book matching reference
-            icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-                </svg>
-            ),
+            icon: <InnovativeCoursesIcon />,
             image: coursesImg,
             posClass: 'left-[37%] bottom-[3%]',
             floatAnim: { y: [5, -5, 5], x: [-2, 2, -2] },
@@ -504,13 +613,7 @@ const HeroSection = () => {
         {
             id: 'certifications',
             label: 'Certifications',
-            // Ribbon Rosette Medal matching reference
-            icon: (
-                <svg className="w-3.5 h-3.5 text-[#6D28D9] dark:text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="8" r="5" />
-                    <path d="M15.4 12.8L17 22l-5-3-5 3 1.6-9.2" />
-                </svg>
-            ),
+            icon: <InnovativeCertificationsIcon />,
             image: certsImg,
             posClass: '-left-[3.5%] sm:-left-[4.5%] md:-left-[5%] top-[41%]',
             floatAnim: { y: [-4, 4, -4], x: [-1, 1, -1] },
