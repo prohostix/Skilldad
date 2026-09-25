@@ -17,8 +17,6 @@ import {
     Zap,
     Layers,
     ChevronDown,
-    ChevronLeft,
-    ChevronRight,
     Sparkles,
     Building2,
     Video,
@@ -201,6 +199,10 @@ const Services = () => {
     const [selectedCapability, setSelectedCapability] = useState(0);
     const [activeSlide, setActiveSlide] = useState(0);
     const capabilitySliderRef = useRef(null);
+    const isDraggingRef = useRef(false);
+    const startXRef = useRef(0);
+    const scrollLeftRef = useRef(0);
+    const hasMovedRef = useRef(false);
     const [mainServices, setMainServices] = useState([]);
     const [additionalFeatures, setAdditionalFeatures] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -254,6 +256,49 @@ const Services = () => {
             }
         }
     };
+
+    const handleMouseDown = (e) => {
+        if (isDesktop || !capabilitySliderRef.current) return;
+        if (e.button !== 0) return;
+        isDraggingRef.current = true;
+        hasMovedRef.current = false;
+        startXRef.current = e.pageX;
+        scrollLeftRef.current = capabilitySliderRef.current.scrollLeft;
+
+        capabilitySliderRef.current.style.scrollBehavior = 'auto';
+        capabilitySliderRef.current.style.scrollSnapType = 'none';
+    };
+
+    useEffect(() => {
+        const handleGlobalMouseMove = (e) => {
+            if (!isDraggingRef.current || !capabilitySliderRef.current) return;
+            const deltaX = e.pageX - startXRef.current;
+            if (Math.abs(deltaX) > 4) {
+                hasMovedRef.current = true;
+            }
+            capabilitySliderRef.current.scrollLeft = scrollLeftRef.current - deltaX;
+        };
+
+        const handleGlobalMouseUp = () => {
+            if (isDraggingRef.current) {
+                isDraggingRef.current = false;
+                if (capabilitySliderRef.current) {
+                    capabilitySliderRef.current.style.scrollBehavior = '';
+                    capabilitySliderRef.current.style.scrollSnapType = '';
+                }
+                setTimeout(() => {
+                    hasMovedRef.current = false;
+                }, 50);
+            }
+        };
+
+        window.addEventListener('mousemove', handleGlobalMouseMove);
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => {
+            window.removeEventListener('mousemove', handleGlobalMouseMove);
+            window.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -806,11 +851,12 @@ const Services = () => {
                             </div>
                         </div>
 
-                        {/* 3 Cards: Horizontally Slideable on Mobile / Responsive; Angled Overlapping on Desktop */}
+                        {/* 3 Cards: Horizontally Slideable on Mobile / Responsive (Touch or Mouse Drag); Angled Overlapping on Desktop */}
                         <div
                             ref={capabilitySliderRef}
                             onScroll={handleSliderScroll}
-                            className="flex flex-row md:flex-row items-stretch md:items-center justify-start md:justify-center overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none scroll-smooth no-scrollbar px-6 sm:px-8 md:px-0 py-3 md:py-0 md:space-y-0 gap-4 md:gap-0 md:-space-x-4 lg:-space-x-5 pt-2 pb-3 md:pb-5 relative z-10 max-w-full md:max-w-4xl mx-auto"
+                            onMouseDown={handleMouseDown}
+                            className="flex flex-row md:flex-row items-stretch md:items-center justify-start md:justify-center overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none scroll-smooth no-scrollbar px-6 sm:px-8 md:px-0 py-3 md:py-0 md:space-y-0 gap-4 md:gap-0 md:-space-x-4 lg:-space-x-5 pt-2 pb-5 md:pb-5 relative z-10 max-w-full md:max-w-4xl mx-auto cursor-grab active:cursor-grabbing md:cursor-default select-none touch-pan-x"
                         >
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;
@@ -852,6 +898,7 @@ const Services = () => {
                                             transition: { duration: 0.25, ease: 'easeOut' }
                                         } : undefined}
                                         onClick={() => {
+                                            if (hasMovedRef.current) return;
                                             setSelectedCapability(idx);
                                             if (!isDesktop) scrollToSlide(idx);
                                         }}
@@ -940,44 +987,7 @@ const Services = () => {
                             })}
                         </div>
 
-                        {/* Responsive Slider Pagination Dots & Arrows (Mobile / Responsive Only) */}
-                        <div className="flex md:hidden items-center justify-center gap-3 pt-2 pb-2 relative z-10">
-                            <button
-                                type="button"
-                                onClick={() => scrollToSlide(Math.max(0, activeSlide - 1))}
-                                disabled={activeSlide === 0}
-                                className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/50 text-[#4C1D95] dark:text-purple-300 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition-opacity"
-                                aria-label="Previous slide"
-                            >
-                                <ChevronLeft size={14} />
-                            </button>
 
-                            <div className="flex items-center gap-1.5">
-                                {platformCapabilities.map((_, dotIdx) => (
-                                    <button
-                                        key={dotIdx}
-                                        type="button"
-                                        onClick={() => scrollToSlide(dotIdx)}
-                                        aria-label={`Go to slide ${dotIdx + 1}`}
-                                        className={`transition-all duration-300 rounded-full h-2 ${
-                                            activeSlide === dotIdx
-                                                ? 'w-6 bg-[#4C1D95] dark:bg-purple-400 shadow-2xs'
-                                                : 'w-2 bg-purple-200 dark:bg-purple-900/50 hover:bg-purple-300'
-                                        }`}
-                                    />
-                                ))}
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() => scrollToSlide(Math.min(platformCapabilities.length - 1, activeSlide + 1))}
-                                disabled={activeSlide === platformCapabilities.length - 1}
-                                className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/50 text-[#4C1D95] dark:text-purple-300 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition-opacity"
-                                aria-label="Next slide"
-                            >
-                                <ChevronRight size={14} />
-                            </button>
-                        </div>
 
                     </motion.div>
 
