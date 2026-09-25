@@ -182,25 +182,51 @@ const deriveProgramLevels = (programTypes) => {
     return labels.join(' | ') || null;
 };
 
-// Derive popular fields filter tags from course categories
+// Popular fields — matched ONLY against course titles and categories.
+// Keywords are multi-word phrases to avoid false positives (e.g. 'ai' in 'JAIN').
+// Never match against the university name itself.
 const FIELD_MAP = [
-    { label: 'Computer Science & IT', keywords: ['ai', 'programming', 'data', 'computer', 'it ', 'it&', 'digital marketing', 'virtual reality', 'machine learning', 'software', 'technology'] },
-    { label: 'Business & Management', keywords: ['business', 'management', 'mba', 'mcom', 'bba', 'bcom', 'commerce', 'finance', 'marketing', 'economics'] },
-    { label: 'Engineering', keywords: ['engineering', 'logistics', 'supply chain', 'bca', 'mca'] },
-    { label: 'Health & Hospital Admin', keywords: ['hospital', 'health', 'medical', 'clinical', 'nursing', 'pharma', 'msw', 'social work', 'msw'] },
-    { label: 'Hospitality & Culinary', keywords: ['hospitality', 'culinary', 'hotel', 'tourism', 'chef'] },
-    { label: 'Data Science & AI', keywords: ['data science', 'data analytics', 'artificial intelligence', 'machine learning', 'business intelligence', 'ai '] },
+    {
+        label: 'Business & Management',
+        // course titles containing these phrases indicate business/management
+        titlePhrases: ['mba', 'bba', 'bcom', 'mcom', 'ma economics', 'management', 'commerce', 'marketing', 'finance', 'economics', 'business administration', 'business analytics']
+    },
+    {
+        label: 'Health & Hospital Admin',
+        titlePhrases: ['hospital administration', 'hospital admin', 'health administrator', 'social work', 'msw', 'nursing', 'clinical', 'medical', 'pharmacy', 'healthcare']
+    },
+    {
+        label: 'Computer Science & IT',
+        titlePhrases: ['digital marketing', 'virtual reality', 'machine learning', 'artificial intelligence', 'programming', 'software engineering', 'information technology', 'computer science', 'bca', 'mca', 'data analytics', 'data science', 'cybersecurity', 'cloud computing']
+    },
+    {
+        label: 'Data Science & AI',
+        titlePhrases: ['data science', 'data analytics', 'machine learning', 'artificial intelligence', 'business intelligence', 'data engineering', 'applied data']
+    },
+    {
+        label: 'Engineering',
+        titlePhrases: ['logistics', 'supply chain', 'engineering', 'bca', 'mca', 'civil', 'mechanical', 'electrical']
+    },
+    {
+        label: 'Hospitality & Culinary',
+        titlePhrases: ['hotel management', 'hospitality', 'culinary', 'chef', 'tourism', 'diploma in hotel', 'diploma in professional chef']
+    },
 ];
 
-// Determine which broad fields a university covers based on its course categories and course titles
-const deriveFieldTags = (programTypes, courseCategories, name) => {
+// Derive field tags by matching ONLY against course titles and course categories.
+// University name is intentionally excluded to prevent false positives.
+const deriveFieldTags = (courseTitles, courseCategories) => {
+    // Build a single searchable text blob from titles + categories only
     const blob = [
-        ...(courseCategories || []),
-        ...(programTypes || []),
-        name || ''
+        ...(courseTitles || []),
+        ...(courseCategories || [])
     ].join(' ').toLowerCase();
 
-    return FIELD_MAP.filter(f => f.keywords.some(kw => blob.includes(kw))).map(f => f.label);
+    if (!blob.trim()) return [];
+
+    return FIELD_MAP.filter(f =>
+        f.titlePhrases.some(phrase => blob.includes(phrase))
+    ).map(f => f.label);
 };
 
 const ITEMS_PER_PAGE = 9;
@@ -261,7 +287,7 @@ const Platform = () => {
             const popularCourses = getPopularCourses({ ...u, courseCategories: u.courseCategories || [] });
             const universityType = getUniversityType(u);
             const programLevels = deriveProgramLevels(u.programTypes);
-            const fieldTags = deriveFieldTags(u.programTypes, u.courseCategories, u.name);
+            const fieldTags = deriveFieldTags(u.courseTitles || [], u.courseCategories || []);
 
             return {
                 id: u._id || u.id,
@@ -297,7 +323,7 @@ const Platform = () => {
             const popularCourses = getPopularCourses({ ...u, courseCategories: u.courseCategories || [] });
             const universityType = getUniversityType(u);
             const programLevels = deriveProgramLevels(u.programTypes);
-            const fieldTags = deriveFieldTags(u.programTypes, u.courseCategories, u.name);
+            const fieldTags = deriveFieldTags(u.courseTitles || [], u.courseCategories || []);
 
             // Parse achievements safely
             let achievements = [];

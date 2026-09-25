@@ -61,7 +61,8 @@ router.get('/universities', async (req, res) => {
                 )) as "studentCount",
                 (SELECT COUNT(*) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true) as "courseCount",
                 COALESCE((SELECT array_agg(DISTINCT c.program_type) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true AND c.program_type IS NOT NULL AND c.program_type != ''), ARRAY[]::text[]) as "programTypes",
-                COALESCE((SELECT array_agg(DISTINCT c.category) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true AND c.category IS NOT NULL AND c.category != ''), ARRAY[]::text[]) as "courseCategories"
+                COALESCE((SELECT array_agg(DISTINCT c.category) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true AND c.category IS NOT NULL AND c.category != ''), ARRAY[]::text[]) as "courseCategories",
+                COALESCE((SELECT array_agg(LOWER(c.title)) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true AND c.title IS NOT NULL AND c.title != ''), ARRAY[]::text[]) as "courseTitles"
             FROM users u
             WHERE LOWER(u.role) = 'university' AND u.is_verified = true
             ORDER BY u.name ASC
@@ -74,7 +75,8 @@ router.get('/universities', async (req, res) => {
             profile: typeof uni.profile === 'string' ? JSON.parse(uni.profile) : uni.profile,
             profileImage: uni.profile_image,
             programTypes: uni.programTypes || [],
-            courseCategories: uni.courseCategories || []
+            courseCategories: uni.courseCategories || [],
+            courseTitles: uni.courseTitles || []
         }));
 
         res.json(enrichedUnis || []);
@@ -121,36 +123,40 @@ router.get('/skilldad-universities', async (req, res) => {
 
             let programTypes = [];
             let courseCategories = [];
+            let courseTitles = [];
             if (assigned.length > 0) {
                 try {
                     const courseRes = await query(
-                        `SELECT DISTINCT program_type, category FROM courses WHERE id = ANY($1::text[]) AND is_published = true`,
+                        `SELECT program_type, category, LOWER(title) as title FROM courses WHERE id = ANY($1::text[]) AND is_published = true`,
                         [assigned]
                     );
                     programTypes = [...new Set(courseRes.rows.map(c => c.program_type).filter(Boolean))];
                     courseCategories = [...new Set(courseRes.rows.map(c => c.category).filter(Boolean))];
+                    courseTitles = [...new Set(courseRes.rows.map(c => c.title).filter(Boolean))];
                 } catch (e) {
                     // ignore
                 }
             }
 
-            // Also check by university_name match
+            // Also check by university_name match (catches uni courses not in assigned_courses)
             try {
                 const nameMatchRes = await query(
-                    `SELECT DISTINCT program_type, category FROM courses WHERE LOWER(university_name) = LOWER($1) AND is_published = true`,
+                    `SELECT program_type, category, LOWER(title) as title FROM courses WHERE LOWER(university_name) = LOWER($1) AND is_published = true`,
                     [su.name]
                 );
                 nameMatchRes.rows.forEach(c => {
                     if (c.program_type) programTypes.push(c.program_type);
                     if (c.category) courseCategories.push(c.category);
+                    if (c.title) courseTitles.push(c.title);
                 });
                 programTypes = [...new Set(programTypes)];
                 courseCategories = [...new Set(courseCategories)];
+                courseTitles = [...new Set(courseTitles)];
             } catch (e) {
                 // ignore
             }
 
-            return { ...su, programTypes, courseCategories };
+            return { ...su, programTypes, courseCategories, courseTitles };
         }));
 
         res.json(enrichedRows || []);
