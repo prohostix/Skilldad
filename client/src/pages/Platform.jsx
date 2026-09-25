@@ -502,7 +502,7 @@ const Platform = () => {
                                 {/* Main Heading - Standardized Typography & Balanced Size */}
                                 <h1 className="text-base sm:text-lg lg:text-[22px] font-bold font-space text-slate-900 dark:text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-snug">
                                     Your Global Education <br className="hidden sm:inline" />
-                                    <span className="text-[#6D28FF] dark:text-[#C026FF]">
+                                    <span className="text-[#4C1D95] dark:text-purple-300 font-extrabold">
                                         Starts Here
                                     </span>
                                 </h1>
@@ -901,11 +901,6 @@ const Platform = () => {
                                                         }}
                                                     />
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
-
-                                                    {/* Top Right Status Badge */}
-                                                    <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9.5px] font-bold tracking-wide border shadow-2xs backdrop-blur-xs ${uni.badge.bg}`}>
-                                                        {uni.badge.label}
-                                                    </span>
                                                 </div>
 
                                                 {/* University Body */}
