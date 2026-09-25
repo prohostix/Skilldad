@@ -403,9 +403,9 @@ const CourseCatalog = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
                                 className="lg:col-span-7 relative flex items-end justify-end select-none self-end -mr-4 sm:-mr-6 lg:-mr-10 pb-0"
                             >
-                                <div className="relative w-full max-w-[500px] sm:max-w-[600px] lg:max-w-[720px] xl:max-w-[800px] flex items-end justify-end leading-none">
+                                <div className="relative w-full max-w-[460px] sm:max-w-[540px] lg:max-w-[620px] xl:max-w-[680px] flex items-end justify-end leading-none">
                                     <img
-                                        src="/course_hero_reference_illustration.png"
+                                        src="/course_hero_crystal_clear.png"
                                         alt="SkillDad Courses - Build Skills for a Brighter Future"
                                         className="w-full h-auto block object-contain object-bottom object-right pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)]"
                                     />
