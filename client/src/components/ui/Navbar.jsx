@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, LayoutDashboard, Sun, Moon, Bell, Search, User as UserIcon, ChevronDown, LogOut, Settings, Video, Info } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Sun, Moon, Bell, Search, User as UserIcon, ChevronDown, LogOut, Settings, Video, Info, ArrowRight, BookOpen } from 'lucide-react';
 import SkillDadLogo from './SkillDadLogo';
 import { useUser } from '../../context/UserContext';
 import { useSocket } from '../../context/SocketContext';
@@ -19,8 +20,74 @@ const Navbar = ({ compact = false }) => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [allCourses, setAllCourses] = useState([]);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
     const profileRef = useRef(null);
     const notifRef = useRef(null);
+    const searchContainerRef = useRef(null);
+
+    // Fetch public courses for live search lookup
+    useEffect(() => {
+        const fetchCourses = async () => {
+            try {
+                const { data } = await axios.get('/api/courses');
+                if (Array.isArray(data)) {
+                    setAllCourses(data);
+                }
+            } catch (err) {
+                // Ignore silent fetch failures
+            }
+        };
+        fetchCourses();
+    }, []);
+
+    // Filter courses live as user types
+    useEffect(() => {
+        const q = searchQuery.trim().toLowerCase();
+        if (!q) {
+            setSearchResults([]);
+            return;
+        }
+        if (allCourses.length > 0) {
+            const matches = allCourses.filter(c => {
+                const title = (c.title || '').toLowerCase();
+                const category = (c.category || '').toLowerCase();
+                const desc = (c.description || '').replace(/<[^>]*>?/gm, '').toLowerCase();
+                const programType = (c.programType || c.program_type || '').toLowerCase();
+                return title.includes(q) || category.includes(q) || desc.includes(q) || programType.includes(q);
+            });
+            setSearchResults(matches.slice(0, 6));
+        }
+    }, [searchQuery, allCourses]);
+
+    // Enhanced Search Handler: Direct to Course Details or Course Cards Catalog
+    const handleSearchSubmit = (e) => {
+        if (e) e.preventDefault();
+        const q = searchQuery.trim();
+        if (!q) return;
+
+        setIsSearchFocused(false);
+
+        // 1. Check for exact title match (case insensitive)
+        const exactMatch = allCourses.find(c => (c.title || '').trim().toLowerCase() === q.toLowerCase());
+        if (exactMatch) {
+            navigate(`/course/${exactMatch._id}`);
+            setSearchQuery('');
+            return;
+        }
+
+        // 2. If exactly one matching course found, go directly to that course details page!
+        if (searchResults.length === 1) {
+            navigate(`/course/${searchResults[0]._id}`);
+            setSearchQuery('');
+            return;
+        }
+
+        // 3. Otherwise, go to course catalog filtered cards
+        navigate(`/courses?search=${encodeURIComponent(q)}`);
+        setSearchQuery('');
+    };
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -29,6 +96,9 @@ const Navbar = ({ compact = false }) => {
             }
             if (notifRef.current && !notifRef.current.contains(event.target)) {
                 setIsNotifOpen(false);
+            }
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+                setIsSearchFocused(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -193,25 +263,132 @@ const Navbar = ({ compact = false }) => {
                     {/* Right Side Actions - Hide on auth pages */}
                     {!isAuthPage && (
                         <div className="hidden lg:flex items-center space-x-3.5 xl:space-x-4 ml-8 xl:ml-14 shrink-0">
-                            {/* Search Bar matching Reference */}
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    if (searchQuery.trim()) {
-                                        navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
-                                    }
-                                }}
-                                className="relative hidden xl:flex items-center"
-                            >
-                                <Search size={14} className="absolute left-3 text-slate-400 pointer-events-none" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search courses, universities, skills..."
-                                    className="w-56 2xl:w-64 pl-8.5 pr-3 py-1.5 rounded-full bg-[#F3F4F8] dark:bg-[#1E1435] text-xs text-slate-700 dark:text-purple-200 placeholder-slate-400 dark:placeholder-purple-400/60 border border-slate-200/60 dark:border-purple-800/40 focus:border-purple-500 focus:bg-white dark:focus:bg-[#150D28] focus:outline-none transition-all shadow-2xs"
-                                />
-                            </form>
+                            {/* Powerful Interactive Search Bar with Search Button & Live Course Preview Dropdown */}
+                            <div ref={searchContainerRef} className="relative hidden xl:flex items-center">
+                                <form
+                                    onSubmit={handleSearchSubmit}
+                                    className="relative flex items-center"
+                                >
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onFocus={() => setIsSearchFocused(true)}
+                                        onChange={(e) => {
+                                            setSearchQuery(e.target.value);
+                                            setIsSearchFocused(true);
+                                        }}
+                                        placeholder="Search courses, universities, skills..."
+                                        className="w-60 2xl:w-72 pl-3.5 pr-20 py-1.5 rounded-full bg-[#F3F4F8] dark:bg-[#1E1435] text-xs text-slate-700 dark:text-purple-200 placeholder-slate-400 dark:placeholder-purple-400/60 border border-slate-200/80 dark:border-purple-800/40 focus:border-[#4C1D95] dark:focus:border-purple-400 focus:bg-white dark:focus:bg-[#150D28] focus:outline-none transition-all shadow-2xs"
+                                    />
+
+                                    {/* Action Buttons: Clear (X) + Active Search Button */}
+                                    <div className="absolute right-1 flex items-center gap-1">
+                                        {searchQuery && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setSearchQuery(''); setSearchResults([]); }}
+                                                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-purple-200 rounded-full transition-colors cursor-pointer"
+                                                aria-label="Clear search"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        )}
+                                        <button
+                                            type="submit"
+                                            aria-label="Execute search"
+                                            className="h-6 px-2.5 rounded-full bg-[#4C1D95] hover:bg-[#3B0764] dark:bg-purple-600 dark:hover:bg-purple-500 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition-transform active:scale-95 cursor-pointer"
+                                        >
+                                            <Search size={11} strokeWidth={2.4} />
+                                            <span>Search</span>
+                                        </button>
+                                    </div>
+                                </form>
+
+                                {/* Live Instant Results Floating Dropdown (Goes to Course Details or Catalog Cards) */}
+                                <AnimatePresence>
+                                    {isSearchFocused && searchQuery.trim() && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                                            transition={{ duration: 0.15 }}
+                                            className="absolute top-full right-0 mt-2.5 w-[340px] 2xl:w-[380px] bg-white/98 dark:bg-[#120B24]/98 backdrop-blur-xl border border-purple-100 dark:border-purple-900/60 rounded-2xl shadow-[0_20px_45px_-12px_rgba(76,29,149,0.25)] overflow-hidden z-50 py-1.5"
+                                        >
+                                            {/* Header */}
+                                            <div className="px-3.5 py-1.5 border-b border-slate-100 dark:border-purple-900/30 flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-purple-300 uppercase tracking-wider">
+                                                <span>Matching Courses</span>
+                                                <span className="text-[10px] font-semibold text-[#4C1D95] dark:text-purple-400">
+                                                    {searchResults.length} found
+                                                </span>
+                                            </div>
+
+                                            {/* Results List with Course Card / Details Navigation */}
+                                            <div className="max-h-72 overflow-y-auto divide-y divide-slate-100/80 dark:divide-purple-950/50">
+                                                {searchResults.length > 0 ? (
+                                                    searchResults.map((course) => (
+                                                        <div
+                                                            key={course._id}
+                                                            onClick={() => {
+                                                                navigate(`/course/${course._id}`);
+                                                                setIsSearchFocused(false);
+                                                                setSearchQuery('');
+                                                            }}
+                                                            className="px-3.5 py-2.5 hover:bg-purple-50/80 dark:hover:bg-purple-950/60 flex items-center gap-3 cursor-pointer transition-colors group"
+                                                        >
+                                                            <img
+                                                                src={course.thumbnail ? getMediaUrl(course.thumbnail) : "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=200"}
+                                                                alt={course.title}
+                                                                className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-200 dark:border-purple-900/40"
+                                                                onError={(e) => {
+                                                                    e.target.onerror = null;
+                                                                    e.target.src = "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=200";
+                                                                }}
+                                                            />
+                                                            <div className="flex-1 min-w-0 text-left">
+                                                                <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-[#4C1D95] dark:group-hover:text-purple-300 transition-colors">
+                                                                    {course.title}
+                                                                </h4>
+                                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                                    <span className="text-[10px] font-medium text-slate-500 dark:text-purple-300/80 capitalize truncate">
+                                                                        {course.category || 'Skill Course'}
+                                                                    </span>
+                                                                    {course.level && (
+                                                                        <>
+                                                                            <span className="text-[10px] text-slate-300 dark:text-purple-700">•</span>
+                                                                            <span className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">
+                                                                                {course.level}
+                                                                            </span>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <span className="text-[10px] font-semibold text-[#4C1D95] dark:text-purple-300 flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                                                                Details <ArrowRight size={10} />
+                                                            </span>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="px-4 py-5 text-center text-xs text-slate-500 dark:text-purple-300/70">
+                                                        No courses directly match "{searchQuery}"
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Footer Action: View All Matching Cards in Catalog */}
+                                            <div className="p-2 border-t border-slate-100 dark:border-purple-900/30 bg-slate-50/60 dark:bg-purple-950/30">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSearchSubmit}
+                                                    className="w-full py-1.5 px-3 rounded-lg text-xs font-bold text-center text-[#4C1D95] dark:text-purple-300 hover:bg-purple-100/70 dark:hover:bg-purple-900/40 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                                                >
+                                                    <span>View all matching cards in Catalog</span>
+                                                    <ArrowRight size={12} />
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
 
                             {/* Dark / Light mode toggle placed right after Search Bar */}
                             <button
@@ -346,7 +523,30 @@ const Navbar = ({ compact = false }) => {
                         </button>
                     </div>
 
-                    <div className="flex flex-col space-y-6">
+                    <div className="flex flex-col space-y-5">
+                        {/* Mobile Search Bar with Active Search Button */}
+                        <form
+                            onSubmit={(e) => {
+                                handleSearchSubmit(e);
+                                setMobileMenuOpen(false);
+                            }}
+                            className="relative flex items-center w-full"
+                        >
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search courses, universities..."
+                                className="w-full pl-3.5 pr-22 py-2 rounded-xl bg-white dark:bg-[#1E1435] text-xs text-slate-800 dark:text-purple-200 border border-slate-200 dark:border-purple-800/50 focus:outline-none focus:border-[#4C1D95] shadow-xs"
+                            />
+                            <button
+                                type="submit"
+                                className="absolute right-1.5 px-3 py-1.5 rounded-lg bg-[#4C1D95] hover:bg-[#3B0764] text-white text-xs font-bold flex items-center gap-1 shadow-xs cursor-pointer"
+                            >
+                                <Search size={12} />
+                                <span>Search</span>
+                            </button>
+                        </form>
                         {navItems.map((item) => {
                             const isSelected = item.href === '/' 
                                 ? location.pathname === '/' 
