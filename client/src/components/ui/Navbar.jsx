@@ -263,12 +263,15 @@ const Navbar = ({ compact = false }) => {
                     {/* Right Side Actions - Hide on auth pages */}
                     {!isAuthPage && (
                         <div className="hidden lg:flex items-center space-x-3.5 xl:space-x-4 ml-8 xl:ml-14 shrink-0">
-                            {/* Powerful Interactive Search Bar with Search Button & Live Course Preview Dropdown */}
+                            {/* Interactive Search Bar with Live Course Preview Dropdown */}
                             <div ref={searchContainerRef} className="relative hidden xl:flex items-center">
                                 <form
                                     onSubmit={handleSearchSubmit}
                                     className="relative flex items-center"
                                 >
+                                    <div className="absolute left-3 pointer-events-none text-slate-400 dark:text-purple-400/70 flex items-center">
+                                        <Search size={13} strokeWidth={2.2} />
+                                    </div>
                                     <input
                                         type="text"
                                         value={searchQuery}
@@ -278,30 +281,18 @@ const Navbar = ({ compact = false }) => {
                                             setIsSearchFocused(true);
                                         }}
                                         placeholder="Search courses, universities, skills..."
-                                        className="w-60 2xl:w-72 pl-3.5 pr-20 py-1.5 rounded-full bg-[#F3F4F8] dark:bg-[#1E1435] text-xs text-slate-700 dark:text-purple-200 placeholder-slate-400 dark:placeholder-purple-400/60 border border-slate-200/80 dark:border-purple-800/40 focus:border-[#4C1D95] dark:focus:border-purple-400 focus:bg-white dark:focus:bg-[#150D28] focus:outline-none transition-all shadow-2xs"
+                                        className="w-56 2xl:w-68 pl-8 pr-7 py-1.5 rounded-full bg-[#F3F4F8] dark:bg-[#1E1435] text-xs text-slate-700 dark:text-purple-200 placeholder-slate-400 dark:placeholder-purple-400/60 border border-slate-200/80 dark:border-purple-800/40 focus:border-[#4C1D95] dark:focus:border-purple-400 focus:bg-white dark:focus:bg-[#150D28] focus:outline-none transition-all shadow-2xs"
                                     />
-
-                                    {/* Action Buttons: Clear (X) + Active Search Button */}
-                                    <div className="absolute right-1 flex items-center gap-1">
-                                        {searchQuery && (
-                                            <button
-                                                type="button"
-                                                onClick={() => { setSearchQuery(''); setSearchResults([]); }}
-                                                className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-purple-200 rounded-full transition-colors cursor-pointer"
-                                                aria-label="Clear search"
-                                            >
-                                                <X size={12} />
-                                            </button>
-                                        )}
+                                    {searchQuery && (
                                         <button
-                                            type="submit"
-                                            aria-label="Execute search"
-                                            className="h-6 px-2.5 rounded-full bg-[#4C1D95] hover:bg-[#3B0764] dark:bg-purple-600 dark:hover:bg-purple-500 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition-transform active:scale-95 cursor-pointer"
+                                            type="button"
+                                            onClick={() => { setSearchQuery(''); setSearchResults([]); }}
+                                            className="absolute right-2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-purple-200 rounded-full transition-colors cursor-pointer"
+                                            aria-label="Clear search"
                                         >
-                                            <Search size={11} strokeWidth={2.4} />
-                                            <span>Search</span>
+                                            <X size={12} />
                                         </button>
-                                    </div>
+                                    )}
                                 </form>
 
                                 {/* Live Instant Results Floating Dropdown (Goes to Course Details or Catalog Cards) */}
@@ -524,7 +515,7 @@ const Navbar = ({ compact = false }) => {
                     </div>
 
                     <div className="flex flex-col space-y-5">
-                        {/* Mobile Search Bar with Active Search Button */}
+                        {/* Mobile Search Bar */}
                         <form
                             onSubmit={(e) => {
                                 handleSearchSubmit(e);
@@ -532,20 +523,26 @@ const Navbar = ({ compact = false }) => {
                             }}
                             className="relative flex items-center w-full"
                         >
+                            <div className="absolute left-3 pointer-events-none text-slate-400 dark:text-purple-400/70 flex items-center">
+                                <Search size={14} />
+                            </div>
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search courses, universities..."
-                                className="w-full pl-3.5 pr-22 py-2 rounded-xl bg-white dark:bg-[#1E1435] text-xs text-slate-800 dark:text-purple-200 border border-slate-200 dark:border-purple-800/50 focus:outline-none focus:border-[#4C1D95] shadow-xs"
+                                className="w-full pl-8 pr-8 py-2 rounded-xl bg-white dark:bg-[#1E1435] text-xs text-slate-800 dark:text-purple-200 border border-slate-200 dark:border-purple-800/50 focus:outline-none focus:border-[#4C1D95] shadow-xs"
                             />
-                            <button
-                                type="submit"
-                                className="absolute right-1.5 px-3 py-1.5 rounded-lg bg-[#4C1D95] hover:bg-[#3B0764] text-white text-xs font-bold flex items-center gap-1 shadow-xs cursor-pointer"
-                            >
-                                <Search size={12} />
-                                <span>Search</span>
-                            </button>
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-2.5 p-1 text-slate-400 hover:text-slate-600 rounded-full transition-colors"
+                                    aria-label="Clear search"
+                                >
+                                    <X size={14} />
+                                </button>
+                            )}
                         </form>
                         {navItems.map((item) => {
                             const isSelected = item.href === '/' 
