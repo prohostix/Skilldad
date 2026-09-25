@@ -591,7 +591,7 @@ const Platform = () => {
                                     <img
                                         src="/university_hero_reference_illustration.png"
                                         alt="SkillDad Universities - Explore Top Global Universities"
-                                        className="w-full h-auto block object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)] align-bottom"
+                                        className="w-full h-auto max-h-[190px] sm:max-h-[235px] lg:max-h-[255px] block object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)] align-bottom"
                                     />
                                 </div>
                             </motion.div>

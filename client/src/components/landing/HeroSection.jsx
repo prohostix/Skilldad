@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -51,7 +51,15 @@ const HERO_BUBBLE_CSS = `
     0%, 59% { opacity: 0; transform: translate(-50%, -50%) translate(0, 0) scale(0.5) rotate(0deg); }
     64% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1) rotate(0deg); }
     86% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
-    100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
+@keyframes hero-marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+.animate-hero-marquee {
+    animation: hero-marquee-scroll 24s linear infinite;
+}
+.animate-hero-marquee:active {
+    animation-play-state: paused;
 }
 `;
 
@@ -373,6 +381,22 @@ const HeroSection = () => {
     const [isPartnerHovered, setIsPartnerHovered] = useState(false);
     const [bubbleTexts, setBubbleTexts] = useState(['196547+Openings', '215676+Hiring Partners']);
 
+    // Flatten all unique university and corporate partners for continuous mobile marquee
+    const allPartners = useMemo(() => {
+        const list = [];
+        const seen = new Set();
+        (partnerBatches || []).forEach(batch => {
+            (batch || []).forEach(p => {
+                const key = p.name || p.id;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    list.push(p);
+                }
+            });
+        });
+        return list.length > 0 ? list : defaultPartnerBatches.flat();
+    }, [partnerBatches]);
+
     // Rotate university and company partner logos every 3 seconds (pauses on hover)
     useEffect(() => {
         if (!partnerBatches || partnerBatches.length <= 1 || isPartnerHovered) return;
@@ -623,7 +647,7 @@ const HeroSection = () => {
     ];
 
     return (
-        <section className="relative w-full max-w-full overflow-hidden h-[100dvh] max-h-[100dvh] lg:h-[calc(100vh-64px)] lg:min-h-[630px] lg:max-h-[780px] xl:max-h-[810px] flex flex-col justify-between bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-14 sm:pt-16 lg:pt-2.5 pb-0">
+        <section className="relative w-full max-w-full overflow-hidden min-h-[100dvh] h-auto lg:h-[calc(100vh-64px)] lg:min-h-[630px] lg:max-h-[780px] xl:max-h-[810px] flex flex-col justify-between bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#140B2D] pt-14 sm:pt-16 lg:pt-2.5 pb-0">
             {/* Keyframe styles for hero bubbles */}
             <style dangerouslySetInnerHTML={{ __html: HERO_BUBBLE_CSS }} />
 
@@ -841,7 +865,7 @@ const HeroSection = () => {
             <CourseBubbles texts={bubbleTexts} />
 
             {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP ── */}
-            <div className="w-full max-w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-1.5 sm:pt-3 pb-2 sm:pb-3.5 transition-colors shrink-0">
+            <div className="w-full max-w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-2 sm:pt-3 pb-2.5 sm:pb-3.5 transition-colors shrink-0">
                 
                 {/* Soft Lavender Curved Wave Background Transition from Hero */}
                 <div className="absolute -top-4 sm:-top-6 md:-top-9 lg:-top-10 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
@@ -861,17 +885,45 @@ const HeroSection = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                     
                     {/* Centered Small Uppercase Label with Thin Purple Dividers */}
-                    <div className="flex items-center justify-center gap-2.5 sm:gap-4 md:gap-5 mb-1.5 sm:mb-2">
-                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
-                        <span className="text-[9px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-5 mb-1.5 sm:mb-2 px-2">
+                        <div className="w-6 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <span className="text-[8.5px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <div className="w-6 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                     </div>
 
-                    {/* Rotating University and Company Logos (Changes Every 3 Seconds) */}
+                    {/* Mobile Marquee: Infinite Continuous Smooth Scrolling Ticker so All Universities Flow Fluidly Without Being Cut Off */}
+                    <div className="sm:hidden relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] py-1">
+                        <div className="flex w-max items-center gap-7 animate-hero-marquee will-change-transform">
+                            {[...allPartners, ...allPartners].map((partner, idx) => {
+                                const LogoComponent = partner.component;
+                                return (
+                                    <div
+                                        key={`m-${partner.id || partner.name}-${idx}`}
+                                        className="group flex items-center justify-center shrink-0 opacity-90"
+                                        title={partner.name}
+                                    >
+                                        {LogoComponent ? (
+                                            <div className="h-5 flex items-center justify-center text-[#4C1D95] dark:text-purple-200">
+                                                <LogoComponent className="h-4.5 w-auto max-w-[90px] object-contain select-none fill-current" />
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={partner.logo}
+                                                alt={partner.alt || partner.name}
+                                                className="h-4.5 w-auto max-w-[90px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Desktop / Tablet: Centered 5-Partner Batch Rotation */}
                     <div
-                        className="relative min-h-[26px] sm:min-h-[32px] md:min-h-[36px] flex items-center justify-center w-full"
+                        className="hidden sm:flex relative min-h-[30px] md:min-h-[36px] items-center justify-center w-full"
                         onMouseEnter={() => setIsPartnerHovered(true)}
                         onMouseLeave={() => setIsPartnerHovered(false)}
                     >
@@ -882,7 +934,7 @@ const HeroSection = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -5 }}
                                 transition={{ duration: 0.35, ease: "easeInOut" }}
-                                className="flex items-center justify-start sm:justify-center gap-6 sm:gap-10 md:gap-14 lg:gap-18 xl:gap-22 overflow-x-auto no-scrollbar w-full py-0.5 sm:py-1"
+                                className="flex items-center justify-center gap-8 md:gap-14 lg:gap-18 xl:gap-22 w-full py-1"
                             >
                                 {partnerBatches[partnerBatchIndex]?.map((partner, idx) => {
                                     const LogoComponent = partner.component;
@@ -893,14 +945,14 @@ const HeroSection = () => {
                                             title={partner.name}
                                         >
                                             {LogoComponent ? (
-                                                <div className="h-4.5 sm:h-6 md:h-6.5 flex items-center justify-center text-[#4C1D95] dark:text-purple-200 transition-colors">
-                                                    <LogoComponent className="h-4 sm:h-5.5 md:h-6 w-auto max-w-[95px] sm:max-w-[130px] md:max-w-[145px] object-contain select-none fill-current" />
+                                                <div className="h-5.5 md:h-6.5 flex items-center justify-center text-[#4C1D95] dark:text-purple-200 transition-colors">
+                                                    <LogoComponent className="h-5 md:h-6 w-auto max-w-[125px] md:max-w-[145px] object-contain select-none fill-current" />
                                                 </div>
                                             ) : (
                                                 <img
                                                     src={partner.logo}
                                                     alt={partner.alt || partner.name}
-                                                    className="h-4.5 sm:h-6 md:h-6.5 w-auto max-w-[95px] sm:max-w-[130px] md:max-w-[145px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                                    className="h-5 md:h-6.5 w-auto max-w-[125px] md:max-w-[145px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                                 />
                                             )}
                                         </div>
