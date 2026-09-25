@@ -337,14 +337,14 @@ const CourseCatalog = () => {
             <main className="pt-16 pb-20">
                 {/* Hero Banner Container */}
                 <div className="w-full mb-4 sm:mb-5">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] py-3 sm:py-3.5 md:py-4 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
-                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-center relative z-10">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-3 sm:pt-3.5 md:pt-4 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
+                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-end relative z-10">
                             {/* Left Content */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-7 space-y-2 sm:space-y-2.5"
+                                className="lg:col-span-7 space-y-2 sm:space-y-2.5 pb-3.5 sm:pb-4"
                             >
 
                                 <h1 className="text-xl sm:text-2xl lg:text-[31px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.16]">
@@ -396,24 +396,19 @@ const CourseCatalog = () => {
                                 </div>
                             </motion.div>
 
-                            {/* Right Hero Visual with Student & Callouts */}
+                            {/* Right Hero Illustration matching reference image exactly (bottom touching banner bottom) */}
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.94 }}
+                                initial={{ opacity: 0, scale: 0.96 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-                                className="lg:col-span-5 relative flex items-center justify-center lg:justify-end"
+                                className="lg:col-span-5 relative flex items-end justify-center lg:justify-end select-none self-end"
                             >
-                                <div className="relative w-[180px] sm:w-[210px] md:w-[230px] aspect-[4/3] rounded-2xl md:rounded-3xl overflow-hidden shadow-lg border-2 border-white/20 [.light-mode_&]:!border-white/80 bg-purple-950/40 [.light-mode_&]:!bg-purple-100">
+                                <div className="relative w-full max-w-[340px] sm:max-w-[420px] lg:max-w-[500px] flex items-end justify-center lg:justify-end leading-none">
                                     <img
-                                        src="/course_hero_student.jpg"
-                                        alt="SkillDad Student"
-                                        className="w-full h-full object-cover object-center"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = "/career_hero_student.jpg";
-                                        }}
+                                        src="/course_hero_reference_illustration.png"
+                                        alt="SkillDad Courses - Build Skills for a Brighter Future"
+                                        className="w-full h-auto block object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)] align-bottom"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                                 </div>
                             </motion.div>
                         </div>
