@@ -598,17 +598,23 @@ const Services = () => {
                         <div className="absolute -top-24 -left-24 w-60 h-60 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
                         <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
-                        {/* Top Right Kite / Logo with Gentle Sway Motion */}
+                        {/* Top Right Kite / Logo - Appears only AFTER the line has completely drawn */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.6, rotate: -25 }}
-                            whileInView={{ opacity: 1, scale: 1, rotate: -10 }}
+                            initial={{ scale: 0, opacity: 0, rotate: -25 }}
+                            whileInView={{ scale: 1, opacity: 1, rotate: -10 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.85, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                            transition={{
+                                duration: 0.5,
+                                delay: 1.38,
+                                type: "spring",
+                                stiffness: 260,
+                                damping: 18
+                            }}
                             className="absolute top-3 right-4 sm:top-5 sm:right-8 z-10 pointer-events-none select-none"
                         >
                             <motion.div
                                 animate={{ y: [-4, 5, -4], rotate: [-12, -6, -12] }}
-                                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+                                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1.88 }}
                                 className="relative flex items-center justify-center"
                             >
                                 <div className="absolute inset-0 bg-[#6D28D9]/25 rounded-full blur-lg pointer-events-none scale-125" />
@@ -622,26 +628,21 @@ const Services = () => {
                             </motion.div>
                         </motion.div>
 
-                        {/* Curving Wavy Ribbon String Trailing Down Behind Cards (Animated Path Drawing) */}
+                        {/* Thin Deep Purple Ribbon String (Draws from BOTTOM behind cards UP to the top-right logo) */}
                         <svg
                             className="absolute top-0 right-0 w-full max-w-[480px] sm:max-w-[540px] h-[360px] sm:h-[420px] pointer-events-none overflow-visible z-0"
                             viewBox="0 0 540 420"
                             fill="none"
                         >
                             <defs>
-                                <linearGradient id="howItWorksRibbonGrad" x1="100%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" stopColor="#C084FC" stopOpacity="0.85" />
-                                    <stop offset="50%" stopColor="#A855F7" stopOpacity="0.70" />
-                                    <stop offset="100%" stopColor="#818CF8" stopOpacity="0.45" />
-                                </linearGradient>
                                 <filter id="ribbonGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
-                                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#9333EA" floodOpacity="0.25" />
+                                    <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#4C1D95" floodOpacity="0.25" />
                                 </filter>
                             </defs>
                             <motion.path
-                                d="M 480 40 C 470 120, 500 200, 450 260 C 400 320, 320 330, 290 270 C 265 210, 330 175, 370 215 C 400 250, 390 320, 350 370 C 325 400, 280 425, 230 435"
-                                stroke="url(#howItWorksRibbonGrad)"
-                                strokeWidth="3.2"
+                                d="M 230 435 C 280 425, 325 400, 350 370 C 390 320, 400 250, 370 215 C 330 175, 265 210, 290 270 C 320 330, 400 320, 450 260 C 500 200, 470 120, 480 40"
+                                className="stroke-[#4C1D95] dark:stroke-purple-400"
+                                strokeWidth="1.6"
                                 strokeLinecap="round"
                                 fill="none"
                                 filter="url(#ribbonGlowFilter)"
@@ -649,8 +650,8 @@ const Services = () => {
                                 whileInView={{ pathLength: 1, opacity: 1 }}
                                 viewport={{ once: true, amount: 0.2 }}
                                 transition={{
-                                    duration: 1.4,
-                                    delay: 0.22,
+                                    duration: 1.25,
+                                    delay: 0.12,
                                     ease: [0.25, 0.1, 0.25, 1]
                                 }}
                             />

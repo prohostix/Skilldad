@@ -748,11 +748,9 @@ const HeroSection = () => {
                         preserveAspectRatio="none"
                     >
                         <path
-                            d="M 0 28 C 220 10 440 45 720 40 C 1000 35 1220 10 1440 26 L 1440 60 L 0 60 Z"
+                            d="M 0 28 C 220 10 440 45 720 40 C 1000 35 1220 10 1440 26 L 1440 62 L 0 62 Z"
                             fill="#ECE4FA"
-                            stroke="rgba(147, 51, 234, 0.22)"
-                            strokeWidth="1"
-                            className="dark:fill-[#140A26] dark:stroke-purple-800/40 transition-colors"
+                            className="dark:fill-[#140A26] transition-colors"
                         />
                     </svg>
                 </div>
