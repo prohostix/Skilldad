@@ -416,16 +416,16 @@ const Platform = () => {
             <main className="pt-16 pb-16">
                 
                 <div className="w-full mb-6">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] py-4 sm:py-5 md:py-6 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-4 sm:pt-5 md:pt-6 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
                         
-                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-center relative z-10">
+                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-end relative z-10">
                             
                             {/* Left Side: Content, Search Bar, and 3 Feature Badges */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-7 space-y-2.5 sm:space-y-3"
+                                className="lg:col-span-7 space-y-2.5 sm:space-y-3 pb-5 sm:pb-6"
                             >
                                 {/* Small Label Badge matching reference image */}
                                 <div className="inline-flex items-center gap-2">
@@ -516,18 +516,18 @@ const Platform = () => {
 
                             </motion.div>
 
-                            {/* Right Hero Illustration matching reference image exactly */}
+                            {/* Right Hero Illustration matching reference image exactly (bottom touching banner bottom) */}
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.96 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-                                className="lg:col-span-5 relative flex items-center justify-center lg:justify-end mt-2 lg:mt-0 select-none"
+                                className="lg:col-span-5 relative flex items-end justify-center lg:justify-end select-none self-end"
                             >
-                                <div className="relative w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[490px] flex items-center justify-center lg:justify-end">
+                                <div className="relative w-full max-w-[380px] sm:max-w-[440px] lg:max-w-[500px] flex items-end justify-center lg:justify-end leading-none">
                                     <img
                                         src="/university_hero_reference_illustration.png"
                                         alt="SkillDad Universities - Global Opportunities Await"
-                                        className="w-full h-auto object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)]"
+                                        className="w-full h-auto block object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)] align-bottom"
                                     />
                                 </div>
                             </motion.div>
