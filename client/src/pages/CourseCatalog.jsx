@@ -337,17 +337,17 @@ const CourseCatalog = () => {
             <main className="pt-16 pb-20">
                 {/* Hero Banner Container */}
                 <div className="w-full mb-4 sm:mb-5">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-6 sm:pt-7 md:pt-8 lg:pt-10 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-3.5 sm:pt-4 md:pt-4.5 lg:pt-5 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
                         <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-end relative z-10">
                             {/* Left Content */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-5 space-y-3 sm:space-y-3.5 pb-6 sm:pb-7 md:pb-9"
+                                className="lg:col-span-5 space-y-2 sm:space-y-2.5 pb-3.5 sm:pb-4 md:pb-5"
                             >
 
-                                <h1 className="text-xl sm:text-2xl lg:text-[31px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.16]">
+                                <h1 className="text-xl sm:text-2xl lg:text-[29px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.16]">
                                     {universityName ? (
                                         <>Courses by <span className="text-[#C026FF] [.light-mode_&]:!text-[#5E0289]">{universityName}</span></>
                                     ) : (
@@ -403,11 +403,11 @@ const CourseCatalog = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
                                 className="lg:col-span-7 relative flex items-end justify-end select-none self-end -mr-4 sm:-mr-6 lg:-mr-10 pb-0"
                             >
-                                <div className="relative w-full max-w-[460px] sm:max-w-[540px] lg:max-w-[620px] xl:max-w-[680px] flex items-end justify-end leading-none">
+                                <div className="relative w-full max-w-[380px] sm:max-w-[450px] lg:max-w-[500px] xl:max-w-[540px] flex items-end justify-end leading-none">
                                     <img
                                         src="/course_hero_crystal_clear.png"
                                         alt="SkillDad Courses - Build Skills for a Brighter Future"
-                                        className="w-full h-auto block object-contain object-bottom object-right pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)]"
+                                        className="w-full h-auto max-h-[210px] sm:max-h-[235px] lg:max-h-[255px] block object-contain object-bottom object-right pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)]"
                                     />
                                 </div>
                             </motion.div>
