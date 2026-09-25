@@ -526,7 +526,7 @@ const Platform = () => {
                                 <div className="relative w-full max-w-[320px] sm:max-w-[370px] lg:max-w-[430px] flex items-end justify-center lg:justify-end leading-none">
                                     <img
                                         src="/university_hero_reference_illustration.png"
-                                        alt="SkillDad Universities - Global Opportunities Await"
+                                        alt="SkillDad Universities - Explore Top Global Universities"
                                         className="w-full h-auto block object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)] align-bottom"
                                     />
                                 </div>
