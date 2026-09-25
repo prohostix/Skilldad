@@ -337,14 +337,14 @@ const CourseCatalog = () => {
             <main className="pt-16 pb-20">
                 {/* Hero Banner Container */}
                 <div className="w-full mb-4 sm:mb-5">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-5 sm:pt-6 md:pt-7 lg:pt-8 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
-                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-end relative z-10">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-5 sm:pt-6 md:pt-7 lg:pt-8 pb-0 pl-4 sm:pl-6 lg:pl-10 pr-0 relative overflow-hidden shadow-xs">
+                        <div className="w-full flex flex-col lg:flex-row items-end justify-between relative z-10">
                             {/* Left Content */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-6 space-y-2.5 sm:space-y-3 pb-5 sm:pb-6 md:pb-7"
+                                className="w-full lg:max-w-xl xl:max-w-2xl shrink-0 space-y-2.5 sm:space-y-3 pb-5 sm:pb-6 md:pb-7 pr-4"
                             >
 
                                 <h1 className="text-xl sm:text-2xl lg:text-[31px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.16]">
@@ -396,18 +396,18 @@ const CourseCatalog = () => {
                                 </div>
                             </motion.div>
 
-                            {/* Right Hero Illustration matching reference image exactly (bottom touching banner bottom) */}
+                            {/* Right Hero Illustration: placed at tip of right and touching bottom */}
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.96 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
-                                className="lg:col-span-6 relative flex items-end justify-center lg:justify-end select-none self-end"
+                                className="w-full lg:flex-1 relative flex items-end justify-end select-none self-end leading-none mr-0 pr-0"
                             >
-                                <div className="relative w-full max-w-[420px] sm:max-w-[500px] lg:max-w-[620px] xl:max-w-[660px] flex items-end justify-center lg:justify-end leading-none">
+                                <div className="relative w-full flex items-end justify-end leading-none mr-0 pr-0">
                                     <img
                                         src="/course_hero_reference_illustration.png"
                                         alt="SkillDad Courses - Build Skills for a Brighter Future"
-                                        className="w-auto h-[175px] sm:h-[205px] md:h-[230px] lg:h-[255px] max-w-full block object-contain pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)] align-bottom"
+                                        className="w-auto h-[210px] sm:h-[240px] md:h-[265px] lg:h-[290px] xl:h-[315px] max-w-full block object-contain object-right-bottom [object-position:right_bottom] pointer-events-none drop-shadow-sm dark:drop-shadow-[0_4px_24px_rgba(192,38,255,0.18)] align-bottom"
                                     />
                                 </div>
                             </motion.div>
