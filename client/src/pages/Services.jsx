@@ -200,6 +200,14 @@ const Services = () => {
     const [mainServices, setMainServices] = useState([]);
     const [additionalFeatures, setAdditionalFeatures] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' ? window.innerWidth >= 768 : true);
+
+    useEffect(() => {
+        const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
+        checkDesktop();
+        window.addEventListener('resize', checkDesktop);
+        return () => window.removeEventListener('resize', checkDesktop);
+    }, []);
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -287,9 +295,10 @@ const Services = () => {
             description: 'Get personalized course and career recommendations with our intelligent AI advisory engine.',
             icon: Brain,
             tag: 'Intelligent Advisory',
-            rotation: 'lg:-rotate-[12deg]',
-            verticalOffset: 'md:translate-y-5 lg:translate-y-6',
-            entranceDelay: 0.18,
+            targetRotate: -8.5,
+            entranceDelay: 0.28,
+            entranceX: -24,
+            verticalOffset: 'md:translate-y-4 lg:translate-y-5',
             baseZ: 'z-10'
         },
         {
@@ -297,9 +306,10 @@ const Services = () => {
             description: 'Learn anytime, anywhere with a seamless mobile experience across all your devices.',
             icon: Smartphone,
             tag: 'Anytime Access',
-            rotation: 'lg:rotate-0',
-            verticalOffset: 'md:-translate-y-1 lg:-translate-y-2',
-            entranceDelay: 0.05,
+            targetRotate: 0,
+            entranceDelay: 0.12,
+            entranceX: 0,
+            verticalOffset: 'md:-translate-y-2 lg:-translate-y-3',
             baseZ: 'z-20'
         },
         {
@@ -307,9 +317,10 @@ const Services = () => {
             description: 'Scalable, high-speed, and reliable cloud technology ensuring 99.9% uninterrupted learning uptime.',
             icon: Cloud,
             tag: '99.9% Uptime',
-            rotation: 'lg:rotate-[11deg]',
-            verticalOffset: 'md:translate-y-5 lg:translate-y-6',
-            entranceDelay: 0.30,
+            targetRotate: 8.5,
+            entranceDelay: 0.42,
+            entranceX: 24,
+            verticalOffset: 'md:translate-y-4 lg:translate-y-5',
             baseZ: 'z-15'
         }
     ];
@@ -571,176 +582,274 @@ const Services = () => {
             </section>
 
             {/* ── SECTION 3: ADVANCED PLATFORM CAPABILITIES (MATCHING REFERENCE VIDEO AT 0:00:07) ── */}
-            <section className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
+            <section id="how-it-works" className="py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-12 relative z-10 bg-[#FAF8FF] dark:bg-[#080512] border-t border-purple-100/60 dark:border-purple-900/30">
                 <div className="max-w-6xl mx-auto">
 
                     {/* Light Purple Rounded Container Card Matching Reference Video */}
-                    <div className="relative rounded-[24px] sm:rounded-[32px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 shadow-[0_16px_40px_-15px_rgba(76,29,149,0.10)] overflow-hidden">
+                    <motion.div
+                        initial={{ opacity: 0, y: 35 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative rounded-[24px] sm:rounded-[32px] bg-gradient-to-br from-[#F8F4FF] via-[#F1E8FF] to-[#E9DBFF] dark:from-[#170E33] dark:via-[#110A26] dark:to-[#0C061B] border border-purple-200/80 dark:border-purple-800/40 px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10 shadow-[0_16px_40px_-15px_rgba(76,29,149,0.10)] overflow-hidden"
+                    >
                         
                         {/* Soft ambient violet background glows */}
                         <div className="absolute -top-24 -left-24 w-60 h-60 bg-purple-300/20 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
                         <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-cyan-300/20 dark:bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
-                        {/* Floating Transparent SkillDad Logo with Floating Motion & Trailing Curve */}
-                        <div className="absolute top-2 right-3 sm:top-3 sm:right-6 z-0 pointer-events-none select-none">
+                        {/* Top Right Kite / Logo with Gentle Sway Motion */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.6, rotate: -25 }}
+                            whileInView={{ opacity: 1, scale: 1, rotate: -10 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.85, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                            className="absolute top-3 right-4 sm:top-5 sm:right-8 z-10 pointer-events-none select-none"
+                        >
                             <motion.div
-                                animate={{ y: [-3, 4, -3], rotate: [-2, 2, -2] }}
-                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                                animate={{ y: [-4, 5, -4], rotate: [-12, -6, -12] }}
+                                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
                                 className="relative flex items-center justify-center"
                             >
-                                {/* Soft ambient purple glow behind the logo */}
-                                <div className="absolute inset-0 bg-[#6D28D9]/20 rounded-full blur-lg pointer-events-none scale-110" />
-
-                                {/* Transparent SkillDad Logo */}
+                                <div className="absolute inset-0 bg-[#6D28D9]/25 rounded-full blur-lg pointer-events-none scale-125" />
                                 <motion.img
                                     src={skilldadLogo}
                                     alt="SkillDad Logo"
-                                    className="w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain drop-shadow-[0_6px_14px_rgba(76,29,149,0.22)] relative z-10"
-                                    animate={{ scale: [1, 1.04, 1] }}
+                                    className="w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 object-contain drop-shadow-[0_8px_18px_rgba(76,29,149,0.25)] relative z-10"
+                                    animate={{ scale: [1, 1.05, 1] }}
                                     transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                                 />
-
-                                {/* Curving Wavy String trailing down behind cards */}
-                                <svg
-                                    className="absolute top-[38px] right-[12px] sm:right-[18px] w-[160px] sm:w-[210px] h-[220px] sm:h-[260px] pointer-events-none overflow-visible stroke-purple-400/40 dark:stroke-purple-500/30 fill-none"
-                                    viewBox="0 0 300 350"
-                                >
-                                    <path
-                                        d="M200 0 C 180 80, 220 160, 160 200 C 100 240, 60 170, 100 130 C 140 90, 170 170, 100 240 C 65 275, 55 310, 80 345"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeDasharray="4 2"
-                                    />
-                                </svg>
                             </motion.div>
-                        </div>
+                        </motion.div>
 
-                        {/* Header: Centered HOW IT WORKS Tag + Title + Subtitle + Pills Row */}
+                        {/* Curving Wavy Ribbon String Trailing Down Behind Cards (Animated Path Drawing) */}
+                        <svg
+                            className="absolute top-0 right-0 w-full max-w-[480px] sm:max-w-[540px] h-[360px] sm:h-[420px] pointer-events-none overflow-visible z-0"
+                            viewBox="0 0 540 420"
+                            fill="none"
+                        >
+                            <defs>
+                                <linearGradient id="howItWorksRibbonGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stopColor="#C084FC" stopOpacity="0.85" />
+                                    <stop offset="50%" stopColor="#A855F7" stopOpacity="0.70" />
+                                    <stop offset="100%" stopColor="#818CF8" stopOpacity="0.45" />
+                                </linearGradient>
+                                <filter id="ribbonGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#9333EA" floodOpacity="0.25" />
+                                </filter>
+                            </defs>
+                            <motion.path
+                                d="M 480 40 C 470 120, 500 200, 450 260 C 400 320, 320 330, 290 270 C 265 210, 330 175, 370 215 C 400 250, 390 320, 350 370 C 325 400, 280 425, 230 435"
+                                stroke="url(#howItWorksRibbonGrad)"
+                                strokeWidth="3.2"
+                                strokeLinecap="round"
+                                fill="none"
+                                filter="url(#ribbonGlowFilter)"
+                                initial={{ pathLength: 0, opacity: 0 }}
+                                whileInView={{ pathLength: 1, opacity: 1 }}
+                                viewport={{ once: true, amount: 0.2 }}
+                                transition={{
+                                    duration: 1.4,
+                                    delay: 0.22,
+                                    ease: [0.25, 0.1, 0.25, 1]
+                                }}
+                            />
+                        </svg>
+
+                        {/* Header: Centered HOW IT WORKS Tag + Blur-Reveal Title + Subtitle + Staggered Pills Row */}
                         <div className="text-center max-w-xl mx-auto mb-6 sm:mb-8 space-y-1 sm:space-y-1.5 relative z-10">
-                            <div>
+                            <motion.div
+                                initial={{ opacity: 0, y: -8, scale: 0.9 }}
+                                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
+                            >
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[10px] font-bold tracking-widest uppercase shadow-2xs">
                                     HOW IT WORKS
                                 </span>
-                            </div>
-                            <h2 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.16] font-sans">
-                                An Intelligent System, <br className="hidden sm:inline" />
-                                <span className="text-[#4C1D95] dark:text-purple-300 sm:ml-1.5">
-                                    Not Just A Course
-                                </span>
-                            </h2>
-                            <p className="text-[11px] sm:text-xs text-slate-600 dark:text-purple-200/80 max-w-md mx-auto leading-relaxed font-normal">
-                                Our intelligent platform is built to give you a seamless, personalized, and efficient learning journey from day one.
-                            </p>
+                            </motion.div>
 
-                            {/* Category Filter Pills Row Matching Video */}
+                            <h2 className="text-xl sm:text-2xl lg:text-[26px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-[1.16] font-sans">
+                                <motion.span
+                                    initial={{ filter: "blur(14px)", opacity: 0, y: 15 }}
+                                    whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.75, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                                    className="inline-block"
+                                >
+                                    An Intelligent System, <br className="hidden sm:inline" />
+                                </motion.span>
+                                <motion.span
+                                    initial={{ filter: "blur(14px)", opacity: 0, y: 15 }}
+                                    whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.75, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                                    className="text-[#4C1D95] dark:text-purple-300 sm:ml-1.5 inline-block"
+                                >
+                                    Not Just A Course
+                                </motion.span>
+                            </h2>
+
+                            <motion.p
+                                initial={{ filter: "blur(10px)", opacity: 0, y: 12 }}
+                                whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
+                                className="text-[11px] sm:text-xs text-slate-600 dark:text-purple-200/80 max-w-md mx-auto leading-relaxed font-normal"
+                            >
+                                Our intelligent platform is built to give you a seamless, personalized, and efficient learning journey from day one.
+                            </motion.p>
+
+                            {/* Category Filter Pills Row Matching Video (Staggered Spring Entrance) */}
                             <div className="pt-0.5 flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                                 {['AI Mentorship', 'Mobile Access', 'Cloud Infrastructure', 'Live Collaboration', 'Career Matrix'].map((tag, idx) => (
-                                    <span
+                                    <motion.span
                                         key={idx}
+                                        initial={{ opacity: 0, scale: 0.72, y: 10 }}
+                                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 340,
+                                            damping: 20,
+                                            delay: 0.40 + idx * 0.07
+                                        }}
+                                        whileHover={{ scale: 1.05, y: -2 }}
                                         className="bg-white/80 dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[10.5px] font-semibold shadow-2xs hover:bg-white dark:hover:bg-purple-900/60 transition-colors cursor-default"
                                     >
                                         {tag}
-                                    </span>
+                                    </motion.span>
                                 ))}
                             </div>
                         </div>
 
-                        {/* 3 Angled Overlapping Cards with Video Staggered Entrance Animation & Dynamic Selection Color */}
-                        <div className="flex flex-col md:flex-row items-center justify-center -space-y-3 md:space-y-0 md:-space-x-3 lg:-space-x-4 pt-1 pb-3 relative z-10 max-w-4xl mx-auto">
+                        {/* 3 Angled Overlapping Cards with Video Staggered Spring Entrance, Ambient Float & Selection */}
+                        <div className="flex flex-col md:flex-row items-center justify-center -space-y-4 md:space-y-0 md:-space-x-4 lg:-space-x-5 pt-2 pb-5 relative z-10 max-w-4xl mx-auto">
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;
                                 const isSelected = selectedCapability === idx;
+                                const currentRotate = isDesktop ? capability.targetRotate : (idx === 0 ? -2 : idx === 2 ? 2 : 0);
+                                const currentX = isDesktop ? capability.entranceX : 0;
 
                                 return (
                                     <motion.div
                                         key={idx}
-                                        initial={{ y: 60, opacity: 0, scale: 0.94 }}
-                                        whileInView={{ y: 0, opacity: 1, scale: 1 }}
-                                        viewport={{ once: true, amount: 0.25 }}
+                                        initial={{
+                                            y: 130,
+                                            opacity: 0,
+                                            scale: 0.90,
+                                            rotate: 0,
+                                            x: currentX
+                                        }}
+                                        whileInView={{
+                                            y: 0,
+                                            opacity: 1,
+                                            scale: 1,
+                                            rotate: currentRotate,
+                                            x: 0
+                                        }}
+                                        viewport={{ once: true, amount: 0.2 }}
                                         transition={{
-                                            duration: 0.65,
-                                            delay: capability.entranceDelay,
-                                            ease: [0.22, 1, 0.36, 1]
+                                            type: "spring",
+                                            stiffness: idx === 1 ? 105 : 92,
+                                            damping: 14,
+                                            mass: 0.9,
+                                            delay: capability.entranceDelay
                                         }}
                                         whileHover={{
-                                            y: -8,
-                                            scale: 1.04,
+                                            y: idx === 1 ? -16 : -10,
+                                            scale: 1.05,
+                                            rotate: currentRotate * 0.4,
                                             zIndex: 40,
-                                            transition: { duration: 0.2, ease: 'easeOut' }
+                                            transition: { duration: 0.25, ease: 'easeOut' }
                                         }}
                                         onClick={() => setSelectedCapability(idx)}
-                                        className={`w-full max-w-[245px] sm:max-w-[250px] md:w-[240px] lg:w-[255px] shrink-0 relative group cursor-pointer ${capability.rotation} ${capability.verticalOffset} ${
-                                            isSelected ? 'z-30' : capability.baseZ
-                                        } transition-all duration-300`}
+                                        className={`w-full max-w-[250px] sm:max-w-[260px] md:w-[245px] lg:w-[260px] shrink-0 relative group cursor-pointer ${
+                                            capability.verticalOffset
+                                        } ${isSelected ? 'z-30' : capability.baseZ} transition-all duration-300`}
                                     >
-                                        <div
-                                            className={`h-full min-h-[185px] sm:min-h-[200px] rounded-[20px] p-4 sm:p-4.5 flex flex-col justify-between transition-all duration-300 ${
-                                                isSelected
-                                                    ? 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_22px_45px_-10px_rgba(147,51,234,0.38)] border-2 border-purple-300'
-                                                    : 'bg-white dark:bg-[#130B24] text-slate-900 dark:text-white shadow-[0_12px_28px_-8px_rgba(76,29,149,0.12)] border border-purple-100/90 dark:border-purple-800/40 hover:border-purple-300'
-                                            }`}
+                                        {/* Ambient Idle Floating Bobbing Motion */}
+                                        <motion.div
+                                            animate={{
+                                                y: idx === 1 ? [-3, 4, -3] : idx === 0 ? [3, -3, 3] : [-2, 3, -2]
+                                            }}
+                                            transition={{
+                                                duration: idx === 1 ? 4.8 : idx === 0 ? 5.4 : 5.1,
+                                                repeat: Infinity,
+                                                ease: "easeInOut",
+                                                delay: 1.1
+                                            }}
+                                            className="h-full"
                                         >
-                                            <div className="space-y-1.5 sm:space-y-2 text-left">
-                                                {/* Top Tag & Icon Row */}
-                                                <div className="flex items-center justify-between">
-                                                    <span
-                                                        className={`text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
-                                                            isSelected
-                                                                ? 'bg-white/80 text-[#4C1D95] shadow-2xs'
-                                                                : 'bg-purple-100/70 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300'
+                                            <div
+                                                className={`h-full min-h-[190px] sm:min-h-[205px] rounded-[22px] p-4.5 sm:p-5 flex flex-col justify-between transition-all duration-300 ${
+                                                    isSelected
+                                                        ? 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_24px_48px_-10px_rgba(147,51,234,0.38)] border-2 border-purple-300'
+                                                        : 'bg-white dark:bg-[#130B24] text-slate-900 dark:text-white shadow-[0_14px_30px_-8px_rgba(76,29,149,0.12)] border border-purple-100/90 dark:border-purple-800/40 hover:border-purple-300'
+                                                }`}
+                                            >
+                                                <div className="space-y-1.5 sm:space-y-2 text-left">
+                                                    {/* Top Tag & Icon Row */}
+                                                    <div className="flex items-center justify-between">
+                                                        <span
+                                                            className={`text-[9.5px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full transition-colors ${
+                                                                isSelected
+                                                                    ? 'bg-white/80 text-[#4C1D95] shadow-2xs'
+                                                                    : 'bg-purple-100/70 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300'
+                                                            }`}
+                                                        >
+                                                            {capability.tag}
+                                                        </span>
+                                                        <div
+                                                            className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                                                                isSelected
+                                                                    ? 'bg-white/70 text-[#4C1D95]'
+                                                                    : 'bg-purple-50 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300'
+                                                            }`}
+                                                        >
+                                                            <IconComponent size={13} strokeWidth={2.4} />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Title */}
+                                                    <h3
+                                                        className={`text-base sm:text-[17px] font-extrabold tracking-tight leading-snug font-sans transition-colors ${
+                                                            isSelected ? 'text-[#2E1065]' : 'text-slate-900 dark:text-white'
                                                         }`}
                                                     >
-                                                        {capability.tag}
-                                                    </span>
+                                                        {capability.title}
+                                                    </h3>
+
+                                                    {/* Description */}
+                                                    <p
+                                                        className={`text-[11px] sm:text-[11.5px] leading-relaxed line-clamp-3 transition-colors ${
+                                                            isSelected ? 'text-[#3B0764]/90 font-medium' : 'text-slate-600 dark:text-purple-200/70'
+                                                        }`}
+                                                    >
+                                                        {capability.description}
+                                                    </p>
+                                                </div>
+
+                                                {/* Action Arrow Button */}
+                                                <div className="pt-2 mt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-end">
                                                     <div
-                                                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                                                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
                                                             isSelected
-                                                                ? 'bg-white/70 text-[#4C1D95]'
-                                                                : 'bg-purple-50 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-300'
+                                                                ? 'bg-white/80 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
+                                                                : 'bg-purple-50 dark:bg-purple-900/50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95] dark:text-purple-300'
                                                         }`}
                                                     >
-                                                        <IconComponent size={13} strokeWidth={2.4} />
+                                                        <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                                                     </div>
                                                 </div>
-
-                                                {/* Title */}
-                                                <h3
-                                                    className={`text-base sm:text-[17px] font-extrabold tracking-tight leading-snug font-sans transition-colors ${
-                                                        isSelected ? 'text-[#2E1065]' : 'text-slate-900 dark:text-white'
-                                                    }`}
-                                                >
-                                                    {capability.title}
-                                                </h3>
-
-                                                {/* Description */}
-                                                <p
-                                                    className={`text-[11px] sm:text-[11.5px] leading-relaxed line-clamp-3 transition-colors ${
-                                                        isSelected ? 'text-[#3B0764]/90 font-medium' : 'text-slate-600 dark:text-purple-200/70'
-                                                    }`}
-                                                >
-                                                    {capability.description}
-                                                </p>
                                             </div>
-
-                                            {/* Action Arrow Button */}
-                                            <div className="pt-2 mt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-end">
-                                                <div
-                                                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
-                                                        isSelected
-                                                            ? 'bg-white/80 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
-                                                            : 'bg-purple-50 dark:bg-purple-900/50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95] dark:text-purple-300'
-                                                    }`}
-                                                >
-                                                    <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                                                </div>
-                                            </div>
-                                        </div>
+                                        </motion.div>
                                     </motion.div>
                                 );
                             })}
                         </div>
 
-                    </div>
+                    </motion.div>
 
                 </div>
             </section>
