@@ -602,77 +602,7 @@ const HeroSection = () => {
                                 <line x1="50.0" y1="79.5" x2="23.0" y2="50.0" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
                                 <line x1="23.0" y1="50.0" x2="29.1" y2="29.1" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
 
-                                {/* Small Circle Bubbles / Dots along connection lines */}
-                                <circle cx="35.3" cy="35.3" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
-                                <circle cx="32.0" cy="32.0" r="0.45" fill="#A855F7" />
 
-                                <circle cx="64.7" cy="35.3" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
-                                <circle cx="68.0" cy="32.0" r="0.45" fill="#A855F7" />
-
-                                <circle cx="70.8" cy="50.0" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
-                                <circle cx="75.2" cy="50.0" r="0.45" fill="#A855F7" />
-
-                                <circle cx="31.8" cy="50.0" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
-                                <circle cx="27.5" cy="50.0" r="0.45" fill="#A855F7" />
-
-                                <circle cx="50.0" cy="70.8" r="0.55" fill="#8B5CF6" stroke="rgba(255, 255, 255, 0.8)" strokeWidth="0.1" />
-                                <circle cx="50.0" cy="75.2" r="0.45" fill="#A855F7" />
-
-                                {/* Perimeter subtle dots */}
-                                <circle cx="50.0" cy="29.1" r="0.45" fill="#A855F7" />
-                                <circle cx="75.2" cy="39.5" r="0.45" fill="#A855F7" />
-                                <circle cx="64.7" cy="64.7" r="0.45" fill="#A855F7" />
-                                <circle cx="36.5" cy="64.7" r="0.45" fill="#A855F7" />
-                                <circle cx="26.0" cy="39.5" r="0.45" fill="#A855F7" />
-
-                                {/* Very Small Purple Dots Moving Through Straight Lines */}
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 41.5 41.5 L 29.1 29.1" dur="3.4s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 29.1 29.1 L 41.5 41.5" dur="3.6s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 58.5 41.5 L 70.9 29.1" dur="3.5s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 70.9 29.1 L 58.5 41.5" dur="3.7s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 62.0 50.0 L 79.5 50.0" dur="3.3s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 79.5 50.0 L 62.0 50.0" dur="3.6s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 38.0 50.0 L 23.0 50.0" dur="3.8s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 23.0 50.0 L 38.0 50.0" dur="3.7s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 50.0 62.0 L 50.0 79.5" dur="3.5s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.45" fill="#7C3AED">
-                                    <animateMotion path="M 50.0 79.5 L 50.0 62.0" dur="3.7s" repeatCount="indefinite" />
-                                </circle>
-
-                                {/* Moving Very Small Purple Dots around Outer Perimeter */}
-                                <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 29.1 29.1 L 70.9 29.1" dur="5.5s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 70.9 29.1 L 79.5 50.0" dur="4.8s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 79.5 50.0 L 50.0 79.5" dur="4.6s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 50.0 79.5 L 23.0 50.0" dur="5s" repeatCount="indefinite" />
-                                </circle>
-                                <circle r="0.4" fill="#9333EA">
-                                    <animateMotion path="M 23.0 50.0 L 29.1 29.1" dur="5.4s" repeatCount="indefinite" />
-                                </circle>
                             </svg>
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
                             <motion.div
