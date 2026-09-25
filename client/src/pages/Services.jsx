@@ -857,23 +857,47 @@ const Services = () => {
 
             {/* ── SECTION 4: DETAILED SERVICES & SPECIALIZED MODULES (PRESERVING CMS DATA) ── */}
             {mainServices.length > 0 && (
-                <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-12 relative z-10">
-                    <div className="max-w-7xl mx-auto space-y-10">
+                <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-12 relative z-10 overflow-hidden">
+                    {/* Soft background ambient glow */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[380px] bg-purple-300/15 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+
+                    <div className="max-w-7xl mx-auto space-y-10 relative z-10">
                         
-                        {/* Section Header */}
+                        {/* Section Header with Blur Reveal & Badge Animation */}
                         <div className="text-center max-w-2xl mx-auto space-y-2">
-                            <span className="text-[11px] font-bold uppercase tracking-widest text-[#4C1D95] dark:text-purple-400">
-                                Specialized Offerings
-                            </span>
-                            <h2 className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-snug font-sans">
+                            <motion.div
+                                initial={{ opacity: 0, y: -8, scale: 0.9 }}
+                                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                            >
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4C1D95]/10 dark:bg-purple-900/40 border border-[#4C1D95]/20 dark:border-purple-800/40 text-[#4C1D95] dark:text-purple-300 text-[10.5px] font-bold tracking-widest uppercase shadow-2xs">
+                                    Specialized Offerings
+                                </span>
+                            </motion.div>
+
+                            <motion.h2
+                                initial={{ filter: "blur(14px)", opacity: 0, y: 18 }}
+                                whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.75, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                                className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-[#1E1B4B] dark:text-white tracking-tight leading-snug font-sans"
+                            >
                                 Complete Ecosystem Breakdown
-                            </h2>
-                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                            </motion.h2>
+
+                            <motion.p
+                                initial={{ filter: "blur(10px)", opacity: 0, y: 14 }}
+                                whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                                className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl mx-auto"
+                            >
                                 Detailed curriculum engineering, placement guarantees, and industry-grade infrastructure power each student's career outcome.
-                            </p>
+                            </motion.p>
                         </div>
 
-                        {/* Interactive Cards Grid with Expandable Sub-Services Styled after Reference */}
+                        {/* Interactive Cards Grid with Staggered Spring Entrance & Rich Hover Effects */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                             {mainServices.map((service, index) => {
                                 const isExpanded = expandedId === service.id;
@@ -882,28 +906,37 @@ const Services = () => {
                                 return (
                                     <motion.div
                                         key={service.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: index * 0.08 }}
-                                        whileHover={{ y: -4 }}
+                                        initial={{ opacity: 0, y: 55, scale: 0.93 }}
+                                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                                        viewport={{ once: true, amount: 0.15 }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 105,
+                                            damping: 15,
+                                            delay: (index % 3) * 0.12 + Math.floor(index / 3) * 0.16
+                                        }}
+                                        whileHover={{
+                                            y: -8,
+                                            scale: 1.02,
+                                            transition: { duration: 0.25, ease: "easeOut" }
+                                        }}
                                         onClick={() => setSelectedServiceId(service.id)}
-                                        className="h-full cursor-pointer"
+                                        className="h-full cursor-pointer group"
                                     >
                                         <div
                                             className={`h-full rounded-[22px] transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between ${
                                                 isSelected
-                                                    ? 'bg-gradient-to-br from-[#4C1D95] via-[#431785] to-[#38126E] text-white shadow-[0_12px_30px_-6px_rgba(76,29,149,0.35)] border border-purple-800/40'
-                                                    : 'bg-[#F8F9FA] dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-200/80 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700/60 shadow-xs hover:shadow-[0_10px_25px_-5px_rgba(76,29,149,0.08)]'
+                                                    ? 'bg-gradient-to-br from-[#4C1D95] via-[#431785] to-[#38126E] text-white shadow-[0_16px_36px_-6px_rgba(76,29,149,0.40)] border border-purple-800/40'
+                                                    : 'bg-[#F8F9FA] dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-200/80 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700/60 shadow-xs hover:shadow-[0_18px_36px_-6px_rgba(76,29,149,0.14)]'
                                             }`}
                                         >
                                             <div className="text-left">
                                                 {/* Header: Circular Icon Badge (White on primary, Purple on secondary) + Toggle */}
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div
-                                                        className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
+                                                        className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 ${
                                                             isSelected
-                                                                ? 'bg-white text-[#4C1D95]'
+                                                                 ? 'bg-white text-[#4C1D95]'
                                                                 : 'bg-[#4C1D95] dark:bg-purple-600 text-white shadow-purple-900/20'
                                                         }`}
                                                     >
@@ -920,7 +953,7 @@ const Services = () => {
                                                             setSelectedServiceId(service.id);
                                                             setExpandedId(isExpanded ? null : service.id);
                                                         }}
-                                                        className={`p-1.5 rounded-full border transition-colors ${
+                                                        className={`p-1.5 rounded-full border transition-all duration-200 hover:scale-108 active:scale-95 cursor-pointer ${
                                                             isSelected
                                                                 ? 'bg-white/15 hover:bg-white/25 text-white border-white/20'
                                                                 : isExpanded
