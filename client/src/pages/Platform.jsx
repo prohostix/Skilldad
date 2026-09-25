@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import {
     GraduationCap,
@@ -16,11 +16,8 @@ import {
     ChevronRight,
     RotateCcw,
     Layers,
-    Sparkles,
-    Check,
     Filter,
     Compass,
-    Building2,
     X
 } from 'lucide-react';
 import Navbar from '../components/ui/Navbar';
@@ -69,7 +66,6 @@ const extractCountry = (location = '') => {
     if (locLower.includes('australia')) return 'Australia';
     if (locLower.includes('germany')) return 'Germany';
 
-    // Fallback: take last part of comma-separated string
     const parts = location.split(',').map(s => s.trim().replace(/^[^\w]+/, ''));
     if (parts.length > 1) return parts[parts.length - 1];
     return parts[0] || 'Global';
@@ -98,7 +94,6 @@ const getRankingText = (u, index) => {
         return 'Institutionally Accredited';
     }
 
-    // Default tiered rankings for clean discovery
     const sampleRankings = [
         '#14 (World)',
         '#21 (World)',
@@ -123,7 +118,7 @@ const getPopularCourses = (u) => {
     }
     const nameLower = (u.name || '').toLowerCase();
     if (nameLower.includes('technology') || nameLower.includes('tech')) {
-        return 'CS, AI, Cloud Engineering';
+        return 'CS, AI, Engineering';
     }
     if (nameLower.includes('business') || nameLower.includes('management') || nameLower.includes('commercial')) {
         return 'MBA, Finance, Marketing';
@@ -132,7 +127,7 @@ const getPopularCourses = (u) => {
         return 'English, IELTS, Linguistics';
     }
     if (nameLower.includes('culinary') || nameLower.includes('hospitality')) {
-        return 'Culinary Arts, Hotel Management';
+        return 'Culinary Arts, Hotel Mgt';
     }
     return 'CS, Business, Engineering';
 };
@@ -417,47 +412,47 @@ const Platform = () => {
         <div className="min-h-screen platform-page bg-[#FAF8FE] dark:bg-[#080512] font-sans text-slate-800 dark:text-slate-100 transition-colors duration-300">
             <Navbar />
 
-            {/* ── 1. HERO SECTION ── */}
-            <section className="relative pt-24 sm:pt-28 md:pt-32 pb-14 sm:pb-20 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#080512] border-b border-purple-100/50 dark:border-purple-900/20">
+            {/* ── 1. HERO SECTION (COMPACT & BALANCED) ── */}
+            <section className="relative pt-20 sm:pt-24 md:pt-26 pb-8 sm:pb-10 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-b from-[#FAF8FE] via-[#FFFFFF] to-[#FFFFFF] dark:from-[#090514] dark:via-[#0F0822] dark:to-[#080512] border-b border-purple-100/50 dark:border-purple-900/20">
                 
                 {/* Soft ambient background radial glows */}
-                <div className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-200/40 dark:bg-purple-900/20 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute top-10 right-10 w-[500px] h-[500px] bg-purple-100/50 dark:bg-purple-900/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-1/4 -left-20 w-80 h-80 bg-purple-200/30 dark:bg-purple-900/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute top-10 right-10 w-96 h-96 bg-purple-100/40 dark:bg-purple-900/10 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="max-w-7xl mx-auto relative z-10">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
                         
                         {/* Left Side: Content & Search */}
-                        <div className="lg:col-span-7 space-y-6 sm:space-y-7">
+                        <div className="lg:col-span-7 space-y-4 sm:space-y-4.5">
                             
                             {/* Small Label */}
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100/60 dark:bg-purple-950/60 border border-purple-200/60 dark:border-purple-800/40">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-100/60 dark:bg-purple-950/60 border border-purple-200/60 dark:border-purple-800/40">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#4C1D95] dark:bg-purple-400" />
-                                <span className="text-[11px] font-bold tracking-widest text-[#4C1D95] dark:text-purple-300 uppercase">
+                                <span className="text-[10px] font-bold tracking-wider text-[#4C1D95] dark:text-purple-300 uppercase">
                                     EXPLORE TOP UNIVERSITIES
                                 </span>
                             </div>
 
-                            {/* Large Heading */}
-                            <h1 className="text-3xl sm:text-5xl lg:text-[56px] font-black tracking-tight text-slate-900 dark:text-white leading-[1.12]">
+                            {/* Main Heading - reduced font size */}
+                            <h1 className="text-2xl sm:text-3xl lg:text-[38px] font-black tracking-tight text-slate-900 dark:text-white leading-[1.18]">
                                 Your Global Education <br className="hidden sm:inline" />
                                 <span className="text-[#4C1D95] dark:text-purple-400 bg-gradient-to-r from-[#4C1D95] via-[#6D28D9] to-[#7C3AED] bg-clip-text text-transparent">
                                     Starts Here
                                 </span>
                             </h1>
 
-                            {/* Supporting Text */}
-                            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed">
+                            {/* Supporting Text - reduced font size */}
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-lg leading-relaxed">
                                 Discover top universities, explore world-class programs, and take the next step towards your dream career.
                             </p>
 
-                            {/* Rounded Search Bar */}
+                            {/* Rounded Search Bar - compact padding and height */}
                             <form
                                 onSubmit={handleSearchSubmit}
-                                className="relative max-w-xl flex items-center bg-white dark:bg-[#130C26] rounded-full border border-purple-200/80 dark:border-purple-800/40 p-1.5 shadow-lg shadow-purple-500/5 focus-within:ring-2 focus-within:ring-[#4C1D95]/30 focus-within:border-[#4C1D95] transition-all"
+                                className="relative max-w-lg flex items-center bg-white dark:bg-[#130C26] rounded-full border border-purple-200/80 dark:border-purple-800/40 p-1 shadow-md shadow-purple-500/5 focus-within:ring-2 focus-within:ring-[#4C1D95]/30 focus-within:border-[#4C1D95] transition-all"
                             >
-                                <div className="pl-4 pr-2 text-slate-400 dark:text-purple-300">
-                                    <Search size={20} />
+                                <div className="pl-3.5 pr-1.5 text-slate-400 dark:text-purple-300">
+                                    <Search size={16} />
                                 </div>
                                 <input
                                     type="text"
@@ -467,64 +462,64 @@ const Platform = () => {
                                         setCurrentPage(1);
                                     }}
                                     placeholder="Search universities by name, location, or course..."
-                                    className="w-full py-2.5 bg-transparent text-sm sm:text-base text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none"
+                                    className="w-full py-1.5 text-xs sm:text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none bg-transparent"
                                 />
                                 {searchQuery && (
                                     <button
                                         type="button"
                                         onClick={() => setSearchQuery('')}
-                                        className="p-1 mr-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                                        className="p-1 mr-1 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
                                     >
-                                        <X size={16} />
+                                        <X size={14} />
                                     </button>
                                 )}
                                 <button
                                     type="submit"
-                                    className="px-6 sm:px-8 py-3 rounded-full bg-[#4C1D95] hover:bg-[#3B0764] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md active:scale-95 transition-all shrink-0 cursor-pointer"
+                                    className="px-5 sm:px-6 py-2 rounded-full bg-[#4C1D95] hover:bg-[#3B0764] text-white font-bold text-xs tracking-wide shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer"
                                 >
                                     Search
                                 </button>
                             </form>
 
-                            {/* Stats Row Underneath */}
-                            <div className="pt-2 grid grid-cols-3 gap-3 sm:gap-6 max-w-lg">
-                                <div className="flex items-center gap-2.5 sm:gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-purple-100/70 dark:bg-purple-900/30 flex items-center justify-center text-[#4C1D95] dark:text-purple-300 shrink-0">
-                                        <GraduationCap size={20} />
+                            {/* Stats Row Underneath - compact icons and text */}
+                            <div className="pt-1 grid grid-cols-3 gap-2 sm:gap-4 max-w-md">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-purple-100/70 dark:bg-purple-900/30 flex items-center justify-center text-[#4C1D95] dark:text-purple-300 shrink-0">
+                                        <GraduationCap size={16} />
                                     </div>
                                     <div>
-                                        <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                                        <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
                                             {allUniversities.length > 0 ? `${allUniversities.length}+` : '100+'}
                                         </div>
-                                        <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                        <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none mt-0.5">
                                             Partner Universities
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2.5 sm:gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-indigo-100/70 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 shrink-0">
-                                        <Globe size={20} />
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-100/70 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 shrink-0">
+                                        <Globe size={16} />
                                     </div>
                                     <div>
-                                        <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                                        <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
                                             {countryCounts.length > 0 ? `${countryCounts.length}+` : '50+'}
                                         </div>
-                                        <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                        <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none mt-0.5">
                                             Countries
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2.5 sm:gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-violet-100/70 dark:bg-violet-900/30 flex items-center justify-center text-violet-700 dark:text-violet-300 shrink-0">
-                                        <Users size={20} />
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg bg-violet-100/70 dark:bg-violet-900/30 flex items-center justify-center text-violet-700 dark:text-violet-300 shrink-0">
+                                        <Users size={16} />
                                     </div>
                                     <div>
-                                        <div className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
+                                        <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight">
                                             10K+
                                         </div>
-                                        <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                        <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium leading-none mt-0.5">
                                             Students Placed
                                         </div>
                                     </div>
@@ -534,26 +529,26 @@ const Platform = () => {
                         </div>
 
                         {/* Right Side: Hero Visual with Student & Campus */}
-                        <div className="lg:col-span-5 relative flex items-center justify-center mt-4 lg:mt-0">
+                        <div className="lg:col-span-5 relative flex items-center justify-center mt-2 lg:mt-0">
                             
-                            {/* Decorative Handwritten Accent */}
-                            <div className="absolute -top-6 -left-6 sm:top-2 sm:-left-8 z-30 pointer-events-none select-none">
-                                <div className="flex flex-col items-center rotate-[-10deg]">
-                                    <span className="font-serif italic font-bold text-xs sm:text-sm tracking-wide text-[#4C1D95] dark:text-purple-300 drop-shadow-xs">
-                                        Global Opportunities Await
+                            {/* Stylized Handwritten Accent: "Global Opportunities Await" */}
+                            <div className="absolute -top-7 -left-4 sm:-top-8 sm:-left-6 z-30 pointer-events-none select-none">
+                                <div className="flex flex-col items-center rotate-[-9deg]">
+                                    <span className="font-handwriting text-xl sm:text-2xl font-bold leading-[0.95] text-[#6D28D9] dark:text-purple-300 drop-shadow-xs text-center">
+                                        Global<br />Opportunities<br />Await
                                     </span>
-                                    {/* Curved Arrow Vector */}
-                                    <svg className="w-10 h-8 text-[#4C1D95] dark:text-purple-400 -mt-1 ml-4" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M5 5C15 2 28 8 32 20M32 20L25 18M32 20L31 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    {/* Curved playful doodle arrow pointing towards student */}
+                                    <svg className="w-9 h-7 text-[#7C3AED] dark:text-purple-400 mt-1 ml-5" viewBox="0 0 42 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4 4C14 2 26 8 32 18M32 18L24 18M32 18L30 10" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                 </div>
                             </div>
 
-                            {/* Large Soft Organic Purple Background Card Shape */}
-                            <div className="relative w-full max-w-[420px] aspect-[4/4.6] rounded-[44px] overflow-hidden bg-gradient-to-tr from-purple-200/70 via-purple-100/40 to-white/60 dark:from-purple-950/60 dark:via-purple-900/30 dark:to-transparent border border-purple-200/50 dark:border-purple-800/30 shadow-2xl shadow-purple-500/10 p-2 sm:p-2.5">
+                            {/* Soft Organic Background Card Shape - reduced dimensions */}
+                            <div className="relative w-full max-w-[320px] sm:max-w-[350px] aspect-[4/4.2] rounded-[32px] overflow-hidden bg-gradient-to-tr from-purple-200/70 via-purple-100/40 to-white/60 dark:from-purple-950/60 dark:via-purple-900/30 dark:to-transparent border border-purple-200/50 dark:border-purple-800/30 shadow-xl shadow-purple-500/10 p-2">
                                 
-                                {/* Background Campus Architectural Image */}
-                                <div className="absolute inset-0 rounded-[40px] overflow-hidden">
+                                {/* Background Campus & Student Photo */}
+                                <div className="absolute inset-0 rounded-[28px] overflow-hidden">
                                     <img
                                         src="/university_hero_student.jpg"
                                         alt="University student and campus"
@@ -563,22 +558,22 @@ const Platform = () => {
                                             e.target.src = CAMPUS_FALLBACKS[0];
                                         }}
                                     />
-                                    {/* Subtle gradient overlay to blend gently with page */}
+                                    {/* Subtle gradient overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-purple-950/40 via-transparent to-transparent pointer-events-none" />
                                 </div>
 
-                                {/* Floating Stat Badge on bottom-left */}
-                                <div className="absolute bottom-4 left-4 right-4 z-20 bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md rounded-2xl p-3 border border-purple-100/80 dark:border-purple-800/40 shadow-lg flex items-center justify-between">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-8 h-8 rounded-lg bg-[#4C1D95] text-white flex items-center justify-center shrink-0">
-                                            <Award size={16} />
+                                {/* Floating Stat Badge on bottom */}
+                                <div className="absolute bottom-3 left-3 right-3 z-20 bg-white/95 dark:bg-[#150D2B]/95 backdrop-blur-md rounded-xl p-2.5 border border-purple-100/80 dark:border-purple-800/40 shadow-md flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-7 h-7 rounded-lg bg-[#4C1D95] text-white flex items-center justify-center shrink-0">
+                                            <Award size={14} />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-slate-500 dark:text-purple-300 font-semibold uppercase tracking-wider">Accredited Degrees</p>
-                                            <p className="text-xs font-bold text-slate-900 dark:text-white">World-Class Global Standards</p>
+                                            <p className="text-[9px] text-slate-500 dark:text-purple-300 font-semibold uppercase tracking-wider leading-none">Accredited Degrees</p>
+                                            <p className="text-[11px] font-bold text-slate-900 dark:text-white leading-tight mt-0.5">World-Class Global Standards</p>
                                         </div>
                                     </div>
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30">
+                                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/30">
                                         Verified
                                     </span>
                                 </div>
@@ -591,16 +586,16 @@ const Platform = () => {
                 </div>
             </section>
 
-            {/* ── 2. MAIN LISTING SECTION (TWO-COLUMN) ── */}
-            <main ref={listingsRef} id="university-listings" className="scroll-mt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12 sm:py-16">
+            {/* ── 2. MAIN LISTING SECTION (TWO-COLUMN - COMPACT SIZING) ── */}
+            <main ref={listingsRef} id="university-listings" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10">
                 
                 {/* Mobile Filter Toggle Button */}
-                <div className="lg:hidden mb-6 flex items-center justify-between">
+                <div className="lg:hidden mb-4 flex items-center justify-between">
                     <button
                         onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-[#130C28] border border-purple-200 dark:border-purple-800/40 text-sm font-bold text-slate-800 dark:text-white shadow-xs"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white dark:bg-[#130C28] border border-purple-200 dark:border-purple-800/40 text-xs font-bold text-slate-800 dark:text-white shadow-xs"
                     >
-                        <Filter size={16} className="text-[#4C1D95]" />
+                        <Filter size={14} className="text-[#4C1D95]" />
                         <span>Filters {activeFilterCount > 0 && `(${activeFilterCount})`}</span>
                     </button>
 
@@ -614,25 +609,25 @@ const Platform = () => {
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-7 items-start">
                     
-                    {/* LEFT SIDEBAR: FILTERS */}
+                    {/* LEFT SIDEBAR: FILTERS (COMPACT) */}
                     <aside
-                        className={`lg:col-span-3 bg-white dark:bg-[#120B24] rounded-2xl border border-slate-200/80 dark:border-purple-900/40 p-5 sm:p-6 shadow-xs sticky top-24 ${
+                        className={`lg:col-span-3 bg-white dark:bg-[#120B24] rounded-xl border border-slate-200/80 dark:border-purple-900/40 p-4 shadow-xs sticky top-20 ${
                             mobileFilterOpen ? 'block' : 'hidden lg:block'
                         }`}
                     >
-                        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-purple-900/30 mb-5">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-purple-900/30 mb-4">
                             <div className="flex items-center gap-2">
-                                <Filter size={18} className="text-[#4C1D95] dark:text-purple-400" />
-                                <h2 className="text-base font-bold text-slate-900 dark:text-white font-space">
+                                <Filter size={15} className="text-[#4C1D95] dark:text-purple-400" />
+                                <h2 className="text-sm font-bold text-slate-900 dark:text-white font-space">
                                     Filters
                                 </h2>
                             </div>
                             {activeFilterCount > 0 && (
                                 <button
                                     onClick={handleResetFilters}
-                                    className="text-xs text-[#4C1D95] dark:text-purple-300 hover:text-[#3B0764] font-medium transition-colors"
+                                    className="text-[11px] text-[#4C1D95] dark:text-purple-300 hover:text-[#3B0764] font-medium transition-colors"
                                 >
                                     Clear
                                 </button>
@@ -640,31 +635,31 @@ const Platform = () => {
                         </div>
 
                         {/* Filter 1: Country */}
-                        <div className="mb-6 pb-6 border-b border-slate-100 dark:border-purple-900/30">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-3 flex items-center justify-between">
+                        <div className="mb-4 pb-4 border-b border-slate-100 dark:border-purple-900/30">
+                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2.5 flex items-center justify-between">
                                 <span>Country</span>
                                 <span className="text-[10px] font-normal text-slate-400">{countryCounts.length}</span>
                             </h3>
-                            <div className="space-y-2.5">
+                            <div className="space-y-1.5">
                                 {(showMoreCountries ? countryCounts : countryCounts.slice(0, 6)).map(([country, count]) => {
                                     const isChecked = selectedCountries.includes(country);
                                     return (
                                         <label
                                             key={country}
-                                            className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
+                                            className="flex items-center justify-between text-[11.5px] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
                                         >
-                                            <div className="flex items-center gap-2.5">
+                                            <div className="flex items-center gap-2">
                                                 <input
                                                     type="checkbox"
                                                     checked={isChecked}
                                                     onChange={() => toggleFilter(selectedCountries, setSelectedCountries, country)}
-                                                    className="w-4 h-4 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
+                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
                                                 />
                                                 <span className={`${isChecked ? 'font-semibold text-slate-900 dark:text-white' : ''}`}>
                                                     {country}
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
+                                            <span className="text-[9.5px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
                                                 {count}
                                             </span>
                                         </label>
@@ -674,7 +669,7 @@ const Platform = () => {
                             {countryCounts.length > 6 && (
                                 <button
                                     onClick={() => setShowMoreCountries(!showMoreCountries)}
-                                    className="mt-3 text-[11px] font-semibold text-[#4C1D95] dark:text-purple-400 hover:underline cursor-pointer"
+                                    className="mt-2 text-[10.5px] font-semibold text-[#4C1D95] dark:text-purple-400 hover:underline cursor-pointer"
                                 >
                                     {showMoreCountries ? '− View less' : `+ View more (${countryCounts.length - 6})`}
                                 </button>
@@ -682,30 +677,30 @@ const Platform = () => {
                         </div>
 
                         {/* Filter 2: University Type */}
-                        <div className="mb-6 pb-6 border-b border-slate-100 dark:border-purple-900/30">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-3">
+                        <div className="mb-4 pb-4 border-b border-slate-100 dark:border-purple-900/30">
+                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2.5">
                                 University Type
                             </h3>
-                            <div className="space-y-2.5">
+                            <div className="space-y-1.5">
                                 {typeCounts.map(([type, count]) => {
                                     const isChecked = selectedTypes.includes(type);
                                     return (
                                         <label
                                             key={type}
-                                            className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
+                                            className="flex items-center justify-between text-[11.5px] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
                                         >
-                                            <div className="flex items-center gap-2.5">
+                                            <div className="flex items-center gap-2">
                                                 <input
                                                     type="checkbox"
                                                     checked={isChecked}
                                                     onChange={() => toggleFilter(selectedTypes, setSelectedTypes, type)}
-                                                    className="w-4 h-4 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
+                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
                                                 />
                                                 <span className={`${isChecked ? 'font-semibold text-slate-900 dark:text-white' : ''}`}>
                                                     {type}
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
+                                            <span className="text-[9.5px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
                                                 {count}
                                             </span>
                                         </label>
@@ -715,30 +710,30 @@ const Platform = () => {
                         </div>
 
                         {/* Filter 3: Program Level */}
-                        <div className="mb-6 pb-6 border-b border-slate-100 dark:border-purple-900/30">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-3">
+                        <div className="mb-4 pb-4 border-b border-slate-100 dark:border-purple-900/30">
+                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2.5">
                                 Program Level
                             </h3>
-                            <div className="space-y-2.5">
+                            <div className="space-y-1.5">
                                 {levelCounts.map(([level, count]) => {
                                     const isChecked = selectedLevels.includes(level);
                                     return (
                                         <label
                                             key={level}
-                                            className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
+                                            className="flex items-center justify-between text-[11.5px] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
                                         >
-                                            <div className="flex items-center gap-2.5">
+                                            <div className="flex items-center gap-2">
                                                 <input
                                                     type="checkbox"
                                                     checked={isChecked}
                                                     onChange={() => toggleFilter(selectedLevels, setSelectedLevels, level)}
-                                                    className="w-4 h-4 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
+                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
                                                 />
                                                 <span className={`${isChecked ? 'font-semibold text-slate-900 dark:text-white' : ''}`}>
                                                     {level}
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
+                                            <span className="text-[9.5px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
                                                 {count}
                                             </span>
                                         </label>
@@ -748,30 +743,30 @@ const Platform = () => {
                         </div>
 
                         {/* Filter 4: Popular Fields */}
-                        <div className="mb-6 pb-6 border-b border-slate-100 dark:border-purple-900/30">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-3">
+                        <div className="mb-4 pb-4 border-b border-slate-100 dark:border-purple-900/30">
+                            <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2.5">
                                 Popular Fields
                             </h3>
-                            <div className="space-y-2.5">
+                            <div className="space-y-1.5">
                                 {(showMoreFields ? fieldCounts : fieldCounts.slice(0, 4)).map(([field, count]) => {
                                     const isChecked = selectedFields.includes(field);
                                     return (
                                         <label
                                             key={field}
-                                            className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
+                                            className="flex items-center justify-between text-[11.5px] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
                                         >
-                                            <div className="flex items-center gap-2.5">
+                                            <div className="flex items-center gap-2">
                                                 <input
                                                     type="checkbox"
                                                     checked={isChecked}
                                                     onChange={() => toggleFilter(selectedFields, setSelectedFields, field)}
-                                                    className="w-4 h-4 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
+                                                    className="w-3.5 h-3.5 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
                                                 />
                                                 <span className={`${isChecked ? 'font-semibold text-slate-900 dark:text-white' : ''}`}>
                                                     {field}
                                                 </span>
                                             </div>
-                                            <span className="text-[10px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
+                                            <span className="text-[9.5px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
                                                 {count}
                                             </span>
                                         </label>
@@ -781,7 +776,7 @@ const Platform = () => {
                             {fieldCounts.length > 4 && (
                                 <button
                                     onClick={() => setShowMoreFields(!showMoreFields)}
-                                    className="mt-3 text-[11px] font-semibold text-[#4C1D95] dark:text-purple-400 hover:underline cursor-pointer"
+                                    className="mt-2 text-[10.5px] font-semibold text-[#4C1D95] dark:text-purple-400 hover:underline cursor-pointer"
                                 >
                                     {showMoreFields ? '− View less' : `+ View more (${fieldCounts.length - 4})`}
                                 </button>
@@ -791,36 +786,36 @@ const Platform = () => {
                         {/* Reset Filters Button */}
                         <button
                             onClick={handleResetFilters}
-                            className="w-full py-2.5 px-4 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/50 dark:hover:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 text-xs font-bold flex items-center justify-center gap-2 border border-purple-200/60 dark:border-purple-800/40 transition-all cursor-pointer"
+                            className="w-full py-2 px-3 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/50 dark:hover:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 text-[11px] font-bold flex items-center justify-center gap-1.5 border border-purple-200/60 dark:border-purple-800/40 transition-all cursor-pointer"
                         >
-                            <RotateCcw size={14} />
+                            <RotateCcw size={13} />
                             <span>Reset Filters</span>
                         </button>
                     </aside>
 
                     {/* RIGHT COLUMN: RESULTS & CARDS */}
-                    <div className="lg:col-span-9 space-y-6">
+                    <div className="lg:col-span-9 space-y-5">
                         
                         {/* Section Header with Sort Dropdown */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
                             <div>
-                                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-space tracking-tight">
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-space tracking-tight">
                                     Featured Universities
                                 </h2>
-                                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                     Explore some of our top partner universities offering world-class education and global career opportunities.
                                 </p>
                             </div>
 
-                            {/* Sort Dropdown */}
-                            <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Sort by:</span>
+                            {/* Sort Dropdown - compact */}
+                            <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
+                                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Sort by:</span>
                                 <div className="relative">
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value)}
                                         aria-label="Sort universities by"
-                                        className="appearance-none bg-white dark:bg-[#130C28] text-xs font-semibold text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-purple-900/40 rounded-xl pl-3 pr-8 py-2 outline-none focus:border-[#4C1D95] cursor-pointer shadow-2xs"
+                                        className="appearance-none bg-white dark:bg-[#130C28] text-[11px] font-semibold text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-purple-900/40 rounded-lg pl-2.5 pr-7 py-1.5 outline-none focus:border-[#4C1D95] cursor-pointer shadow-2xs"
                                     >
                                         <option value="popularity">Popularity</option>
                                         <option value="name_asc">Name (A-Z)</option>
@@ -828,36 +823,36 @@ const Platform = () => {
                                         <option value="programs">Programs Count</option>
                                         <option value="ranking">Accreditation / Rank</option>
                                     </select>
-                                    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                    <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                                 </div>
                             </div>
                         </div>
 
                         {/* Active Filter Chips */}
                         {activeFilterCount > 0 && (
-                            <div className="flex flex-wrap items-center gap-2 pt-1 pb-2">
-                                <span className="text-xs text-slate-400 font-medium">Active Filters:</span>
+                            <div className="flex flex-wrap items-center gap-1.5 py-1">
+                                <span className="text-[11px] text-slate-400 font-medium">Active Filters:</span>
                                 {searchQuery && (
-                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-xs font-medium">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-[11px] font-medium">
                                         Search: "{searchQuery}"
-                                        <X size={12} className="cursor-pointer" onClick={() => setSearchQuery('')} />
+                                        <X size={11} className="cursor-pointer" onClick={() => setSearchQuery('')} />
                                     </span>
                                 )}
                                 {selectedCountries.map(c => (
-                                    <span key={c} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-xs font-medium">
+                                    <span key={c} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-[11px] font-medium">
                                         {c}
-                                        <X size={12} className="cursor-pointer" onClick={() => toggleFilter(selectedCountries, setSelectedCountries, c)} />
+                                        <X size={11} className="cursor-pointer" onClick={() => toggleFilter(selectedCountries, setSelectedCountries, c)} />
                                     </span>
                                 ))}
                                 {selectedTypes.map(t => (
-                                    <span key={t} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-xs font-medium">
+                                    <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-[11px] font-medium">
                                         {t}
-                                        <X size={12} className="cursor-pointer" onClick={() => toggleFilter(selectedTypes, setSelectedTypes, t)} />
+                                        <X size={11} className="cursor-pointer" onClick={() => toggleFilter(selectedTypes, setSelectedTypes, t)} />
                                     </span>
                                 ))}
                                 <button
                                     onClick={handleResetFilters}
-                                    className="text-xs text-[#4C1D95] dark:text-purple-300 hover:underline font-semibold ml-2 cursor-pointer"
+                                    className="text-[11px] text-[#4C1D95] dark:text-purple-300 hover:underline font-semibold ml-1 cursor-pointer"
                                 >
                                     Clear All
                                 </button>
@@ -866,71 +861,71 @@ const Platform = () => {
 
                         {/* Loading State */}
                         {loading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
                                 {[1, 2, 3, 4, 5, 6].map(i => (
-                                    <div key={i} className="h-96 rounded-2xl bg-slate-200/60 dark:bg-purple-950/30 animate-pulse" />
+                                    <div key={i} className="h-80 rounded-xl bg-slate-200/60 dark:bg-purple-950/30 animate-pulse" />
                                 ))}
                             </div>
                         ) : paginatedUniversities.length === 0 ? (
                             /* No Results State */
-                            <div className="bg-white dark:bg-[#120B24] rounded-2xl border border-slate-200/80 dark:border-purple-900/40 p-12 text-center">
-                                <div className="w-16 h-16 rounded-full bg-purple-100/60 dark:bg-purple-950/60 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center mx-auto mb-4">
-                                    <Search size={28} />
+                            <div className="bg-white dark:bg-[#120B24] rounded-xl border border-slate-200/80 dark:border-purple-900/40 p-10 text-center">
+                                <div className="w-12 h-12 rounded-full bg-purple-100/60 dark:bg-purple-950/60 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center mx-auto mb-3">
+                                    <Search size={22} />
                                 </div>
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                                <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1.5">
                                     No universities matched your filters
                                 </h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-6">
+                                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-4">
                                     Try clearing some of your search filters or browse our full university catalog.
                                 </p>
                                 <button
                                     onClick={handleResetFilters}
-                                    className="px-6 py-2.5 rounded-xl bg-[#4C1D95] text-white text-xs font-bold hover:bg-[#3B0764] transition-colors"
+                                    className="px-5 py-2 rounded-lg bg-[#4C1D95] text-white text-xs font-bold hover:bg-[#3B0764] transition-colors"
                                 >
                                     Reset Filters
                                 </button>
                             </div>
                         ) : (
-                            /* 3-Column Responsive University Card Grid */
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            /* 3-Column Responsive University Card Grid - COMPACT CARDS */
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5">
                                 {paginatedUniversities.map((uni, idx) => {
                                     return (
                                         <motion.div
                                             key={uni.id}
-                                            initial={{ opacity: 0, y: 15 }}
+                                            initial={{ opacity: 0, y: 12 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.35, delay: idx * 0.05 }}
+                                            transition={{ duration: 0.3, delay: idx * 0.04 }}
                                             onClick={() => {
                                                 navigate(`/university-profile/${encodeURIComponent(uni.name)}`, { state: { university: uni.raw } });
                                             }}
-                                            className="group cursor-pointer bg-white dark:bg-[#120B24] rounded-2xl border border-slate-200/80 dark:border-purple-900/40 overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
+                                            className="group cursor-pointer bg-white dark:bg-[#120B24] rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-purple-900/40 overflow-hidden shadow-xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
                                         >
-                                            {/* Large Campus Image with Status Badge */}
-                                            <div className="relative h-44 sm:h-48 overflow-hidden bg-slate-100 dark:bg-purple-950/40 shrink-0">
+                                            {/* Campus Image - reduced height */}
+                                            <div className="relative h-36 sm:h-38 overflow-hidden bg-slate-100 dark:bg-purple-950/40 shrink-0">
                                                 <img
                                                     src={uni.image}
                                                     alt={uni.name}
-                                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106"
                                                     onError={(e) => {
                                                         e.target.onerror = null;
                                                         e.target.src = uni.fallbackImage;
                                                     }}
                                                 />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
 
-                                                {/* Top Right Status Badge */}
-                                                <span className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide border shadow-xs backdrop-blur-xs ${uni.badge.bg}`}>
+                                                {/* Top Right Status Badge - compact */}
+                                                <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9.5px] font-bold tracking-wide border shadow-2xs backdrop-blur-xs ${uni.badge.bg}`}>
                                                     {uni.badge.label}
                                                 </span>
                                             </div>
 
-                                            {/* University Body */}
-                                            <div className="p-4 sm:p-5 flex flex-col flex-grow">
+                                            {/* University Body - compact padding */}
+                                            <div className="p-3.5 sm:p-4 flex flex-col flex-grow">
                                                 
                                                 {/* Header: Logo + Name & Location */}
-                                                <div className="flex items-start gap-3 mb-4">
-                                                    {/* University Logo / Shield */}
-                                                    <div className="w-11 h-11 rounded-xl border border-slate-200/80 dark:border-purple-800/40 bg-white dark:bg-[#1A1232] p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                                                <div className="flex items-start gap-2.5 mb-3">
+                                                    {/* University Logo / Shield - compact */}
+                                                    <div className="w-9 h-9 rounded-lg border border-slate-200/80 dark:border-purple-800/40 bg-white dark:bg-[#1A1232] p-0.5 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
                                                         {uni.logo ? (
                                                             <img
                                                                 src={uni.logo}
@@ -943,7 +938,7 @@ const Platform = () => {
                                                             />
                                                         ) : null}
                                                         <div
-                                                            className="w-full h-full rounded-lg bg-gradient-to-br from-[#4C1D95] to-[#7C3AED] text-white font-bold text-sm flex items-center justify-center"
+                                                            className="w-full h-full rounded-md bg-gradient-to-br from-[#4C1D95] to-[#7C3AED] text-white font-bold text-xs flex items-center justify-center"
                                                             style={{ display: uni.logo ? 'none' : 'flex' }}
                                                         >
                                                             {uni.name.charAt(0)}
@@ -952,23 +947,23 @@ const Platform = () => {
 
                                                     {/* Title & Location */}
                                                     <div className="min-w-0 flex-1">
-                                                        <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-[#4C1D95] dark:group-hover:text-purple-300 transition-colors">
+                                                        <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug line-clamp-1 group-hover:text-[#4C1D95] dark:group-hover:text-purple-300 transition-colors">
                                                             {uni.name}
                                                         </h3>
-                                                        <div className="flex items-center text-slate-500 dark:text-slate-400 text-xs mt-0.5">
-                                                            <MapPin size={12} className="mr-1 shrink-0 text-slate-400" />
+                                                        <div className="flex items-center text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">
+                                                            <MapPin size={11} className="mr-1 shrink-0 text-slate-400" />
                                                             <span className="truncate">{uni.location}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Meta Information Rows */}
-                                                <div className="space-y-2 py-3 border-y border-slate-100 dark:border-purple-900/30 text-xs mb-4">
+                                                {/* Meta Information Rows - compact spacing */}
+                                                <div className="space-y-1.5 py-2 border-y border-slate-100 dark:border-purple-900/30 text-[11px] mb-3">
                                                     
                                                     {/* Row 1: QS Ranking / Accreditation */}
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                                                            <Award size={13} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                                                            <Award size={12} className="text-purple-600 dark:text-purple-400 shrink-0" />
                                                             <span>QS Ranking:</span>
                                                         </div>
                                                         <span className="font-semibold text-slate-800 dark:text-slate-200">
@@ -979,7 +974,7 @@ const Platform = () => {
                                                     {/* Row 2: Popular Courses */}
                                                     <div className="flex items-center justify-between gap-2">
                                                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 shrink-0">
-                                                            <BookOpen size={13} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
+                                                            <BookOpen size={12} className="text-indigo-600 dark:text-indigo-400 shrink-0" />
                                                             <span>Popular Courses:</span>
                                                         </div>
                                                         <span className="font-semibold text-slate-800 dark:text-slate-200 truncate text-right">
@@ -990,7 +985,7 @@ const Platform = () => {
                                                     {/* Row 3: Program Levels */}
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                                                            <Layers size={13} className="text-violet-600 dark:text-violet-400 shrink-0" />
+                                                            <Layers size={12} className="text-violet-600 dark:text-violet-400 shrink-0" />
                                                             <span>Program Levels:</span>
                                                         </div>
                                                         <span className="font-semibold text-slate-800 dark:text-slate-200">
@@ -1000,14 +995,14 @@ const Platform = () => {
 
                                                 </div>
 
-                                                {/* View Details Button */}
+                                                {/* View Details Button - compact */}
                                                 <div className="mt-auto">
                                                     <button
                                                         type="button"
-                                                        className="w-full py-2.5 rounded-xl bg-purple-50 hover:bg-[#4C1D95] text-[#4C1D95] hover:text-white dark:bg-purple-950/50 dark:hover:bg-[#4C1D95] dark:text-purple-300 dark:hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 border border-purple-200/50 dark:border-purple-800/30 transition-all duration-300"
+                                                        className="w-full py-1.5 sm:py-2 rounded-lg bg-purple-50 hover:bg-[#4C1D95] text-[#4C1D95] hover:text-white dark:bg-purple-950/50 dark:hover:bg-[#4C1D95] dark:text-purple-300 dark:hover:text-white text-[11px] font-bold flex items-center justify-center gap-1.5 border border-purple-200/50 dark:border-purple-800/30 transition-all duration-300"
                                                     >
                                                         <span>View Details</span>
-                                                        <ArrowRight size={14} className="transform group-hover:translate-x-1 transition-transform" />
+                                                        <ArrowRight size={13} className="transform group-hover:translate-x-1 transition-transform" />
                                                     </button>
                                                 </div>
 
@@ -1018,17 +1013,17 @@ const Platform = () => {
                             </div>
                         )}
 
-                        {/* ── 3. PAGINATION ── */}
+                        {/* ── 3. PAGINATION (COMPACT) ── */}
                         {totalPages > 1 && (
-                            <div className="pt-8 flex items-center justify-center gap-2">
+                            <div className="pt-6 flex items-center justify-center gap-1.5">
                                 {/* Previous Page Button */}
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
                                     aria-label="Previous Page"
-                                    className="w-9 h-9 rounded-xl border border-slate-200/80 dark:border-purple-800/40 bg-white dark:bg-[#120B24] text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-purple-50 dark:hover:bg-purple-950/60 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer shadow-2xs"
+                                    className="w-8 h-8 rounded-lg border border-slate-200/80 dark:border-purple-800/40 bg-white dark:bg-[#120B24] text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-purple-50 dark:hover:bg-purple-950/60 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer shadow-2xs"
                                 >
-                                    <ChevronLeft size={16} />
+                                    <ChevronLeft size={14} />
                                 </button>
 
                                 {/* Page Numbers */}
@@ -1039,9 +1034,9 @@ const Platform = () => {
                                             key={page}
                                             onClick={() => handlePageChange(page)}
                                             aria-label={`Go to page ${page}`}
-                                            className={`w-9 h-9 rounded-xl font-bold text-xs flex items-center justify-center transition-all cursor-pointer ${
+                                            className={`w-8 h-8 rounded-lg font-bold text-xs flex items-center justify-center transition-all cursor-pointer ${
                                                 isActive
-                                                    ? 'bg-[#4C1D95] text-white shadow-md shadow-purple-900/20'
+                                                    ? 'bg-[#4C1D95] text-white shadow-sm shadow-purple-900/20'
                                                     : 'bg-white dark:bg-[#120B24] border border-slate-200/80 dark:border-purple-800/40 text-slate-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-purple-950/60 shadow-2xs'
                                             }`}
                                         >
@@ -1055,9 +1050,9 @@ const Platform = () => {
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
                                     aria-label="Next Page"
-                                    className="w-9 h-9 rounded-xl border border-slate-200/80 dark:border-purple-800/40 bg-white dark:bg-[#120B24] text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-purple-50 dark:hover:bg-purple-950/60 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer shadow-2xs"
+                                    className="w-8 h-8 rounded-lg border border-slate-200/80 dark:border-purple-800/40 bg-white dark:bg-[#120B24] text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-purple-50 dark:hover:bg-purple-950/60 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer shadow-2xs"
                                 >
-                                    <ChevronRight size={16} />
+                                    <ChevronRight size={14} />
                                 </button>
                             </div>
                         )}
@@ -1066,21 +1061,21 @@ const Platform = () => {
 
                 </div>
 
-                {/* ── 4. CAREER GUIDANCE CTA BANNER ── */}
-                <div className="mt-16 sm:mt-20">
-                    <div className="bg-[#F4EEFE] dark:bg-[#180E30] border border-purple-200/80 dark:border-purple-800/50 rounded-3xl p-6 sm:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md shadow-purple-500/5">
+                {/* ── 4. CAREER GUIDANCE CTA BANNER (COMPACT) ── */}
+                <div className="mt-10 sm:mt-12">
+                    <div className="bg-[#F4EEFE] dark:bg-[#180E30] border border-purple-200/80 dark:border-purple-800/50 rounded-2xl p-5 sm:p-6 lg:p-7 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-5 shadow-xs">
                         
                         {/* Left: Icon + Text */}
-                        <div className="flex items-center gap-4 sm:gap-5 text-center md:text-left flex-col md:flex-row">
-                            <div className="w-14 h-14 rounded-2xl bg-white dark:bg-[#231545] border border-purple-200/80 dark:border-purple-700/40 flex items-center justify-center text-[#4C1D95] dark:text-purple-300 shadow-sm shrink-0">
-                                <Compass size={28} />
+                        <div className="flex items-center gap-3.5 sm:gap-4 text-center md:text-left flex-col md:flex-row">
+                            <div className="w-11 h-11 rounded-xl bg-white dark:bg-[#231545] border border-purple-200/80 dark:border-purple-700/40 flex items-center justify-center text-[#4C1D95] dark:text-purple-300 shadow-2xs shrink-0">
+                                <Compass size={22} />
                             </div>
                             <div>
-                                <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-space leading-tight">
+                                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-space leading-tight">
                                     Not sure which university is right for you?
                                 </h3>
-                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-xl">
-                                    Take our quick admissions guidance quiz and get personalized university recommendations matching your background and career goals.
+                                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 max-w-xl">
+                                    Take our quick admissions guidance quiz and get personalized recommendations.
                                 </p>
                             </div>
                         </div>
@@ -1088,10 +1083,10 @@ const Platform = () => {
                         {/* Right: Action Button */}
                         <button
                             onClick={() => navigate('/dashboard/course-finder')}
-                            className="px-7 py-3.5 rounded-full bg-[#4C1D95] hover:bg-[#3B0764] text-white font-bold text-xs sm:text-sm tracking-wide shadow-md hover:shadow-lg active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-2"
+                            className="px-5 py-2.5 rounded-full bg-[#4C1D95] hover:bg-[#3B0764] text-white font-bold text-xs tracking-wide shadow-xs hover:shadow-md active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
                         >
                             <span>Take the Quiz</span>
-                            <ArrowRight size={16} />
+                            <ArrowRight size={14} />
                         </button>
 
                     </div>

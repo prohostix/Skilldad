@@ -1118,6 +1118,10 @@ html:not(.dark) .modern-sidebar nav {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
+.font-handwriting {
+  font-family: 'Caveat', cursive, sans-serif !important;
+}
+
 .cb-page-title,
 html.light-mode .cb-page-title,
 html.light-mode h1 .cb-page-title,
