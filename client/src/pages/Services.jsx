@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,6 +17,8 @@ import {
     Zap,
     Layers,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     Sparkles,
     Building2,
     Video,
@@ -197,6 +199,8 @@ const Services = () => {
     const [expandedId, setExpandedId] = useState(null);
     const [selectedServiceId, setSelectedServiceId] = useState(null);
     const [selectedCapability, setSelectedCapability] = useState(0);
+    const [activeSlide, setActiveSlide] = useState(0);
+    const capabilitySliderRef = useRef(null);
     const [mainServices, setMainServices] = useState([]);
     const [additionalFeatures, setAdditionalFeatures] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -208,6 +212,48 @@ const Services = () => {
         window.addEventListener('resize', checkDesktop);
         return () => window.removeEventListener('resize', checkDesktop);
     }, []);
+
+    const handleSliderScroll = () => {
+        if (isDesktop || !capabilitySliderRef.current) return;
+        const container = capabilitySliderRef.current;
+        const scrollLeft = container.scrollLeft;
+        const children = Array.from(container.children).filter(child => child.getAttribute('data-card') === 'true');
+        if (children.length === 0) return;
+
+        const containerCenter = scrollLeft + container.offsetWidth / 2;
+        let closestIdx = 0;
+        let minDistance = Infinity;
+
+        children.forEach((child, index) => {
+            const childCenter = child.offsetLeft + child.offsetWidth / 2;
+            const distance = Math.abs(containerCenter - childCenter);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestIdx = index;
+            }
+        });
+
+        if (closestIdx !== activeSlide) {
+            setActiveSlide(closestIdx);
+            setSelectedCapability(closestIdx);
+        }
+    };
+
+    const scrollToSlide = (idx) => {
+        setActiveSlide(idx);
+        setSelectedCapability(idx);
+        if (capabilitySliderRef.current) {
+            const container = capabilitySliderRef.current;
+            const cards = Array.from(container.children).filter(child => child.getAttribute('data-card') === 'true');
+            if (cards[idx]) {
+                cards[idx].scrollIntoView({
+                    behavior: 'smooth',
+                    inline: 'center',
+                    block: 'nearest'
+                });
+            }
+        }
+    };
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -760,21 +806,26 @@ const Services = () => {
                             </div>
                         </div>
 
-                        {/* 3 Angled Overlapping Cards with Video Staggered Spring Entrance, Ambient Float & Selection */}
-                        <div className="flex flex-col md:flex-row items-center justify-center -space-y-4 md:space-y-0 md:-space-x-4 lg:-space-x-5 pt-2 pb-5 relative z-10 max-w-4xl mx-auto">
+                        {/* 3 Cards: Horizontally Slideable on Mobile / Responsive; Angled Overlapping on Desktop */}
+                        <div
+                            ref={capabilitySliderRef}
+                            onScroll={handleSliderScroll}
+                            className="flex flex-row md:flex-row items-stretch md:items-center justify-start md:justify-center overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none scroll-smooth no-scrollbar px-6 sm:px-8 md:px-0 py-3 md:py-0 md:space-y-0 gap-4 md:gap-0 md:-space-x-4 lg:-space-x-5 pt-2 pb-3 md:pb-5 relative z-10 max-w-full md:max-w-4xl mx-auto"
+                        >
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;
                                 const isSelected = selectedCapability === idx;
-                                const currentRotate = isDesktop ? capability.targetRotate : (idx === 0 ? -2 : idx === 2 ? 2 : 0);
+                                const currentRotate = isDesktop ? capability.targetRotate : 0;
                                 const currentX = isDesktop ? capability.entranceX : 0;
 
                                 return (
                                     <motion.div
                                         key={idx}
+                                        data-card="true"
                                         initial={{
-                                            y: 130,
+                                            y: isDesktop ? 130 : 40,
                                             opacity: 0,
-                                            scale: 0.90,
+                                            scale: isDesktop ? 0.90 : 0.96,
                                             rotate: 0,
                                             x: currentX
                                         }}
@@ -791,25 +842,28 @@ const Services = () => {
                                             stiffness: idx === 1 ? 105 : 92,
                                             damping: 14,
                                             mass: 0.9,
-                                            delay: capability.entranceDelay
+                                            delay: isDesktop ? capability.entranceDelay : idx * 0.1
                                         }}
-                                        whileHover={{
+                                        whileHover={isDesktop ? {
                                             y: idx === 1 ? -16 : -10,
                                             scale: 1.05,
                                             rotate: currentRotate * 0.4,
                                             zIndex: 40,
                                             transition: { duration: 0.25, ease: 'easeOut' }
+                                        } : undefined}
+                                        onClick={() => {
+                                            setSelectedCapability(idx);
+                                            if (!isDesktop) scrollToSlide(idx);
                                         }}
-                                        onClick={() => setSelectedCapability(idx)}
-                                        className={`w-full max-w-[250px] sm:max-w-[260px] md:w-[245px] lg:w-[260px] shrink-0 relative group cursor-pointer ${
-                                            capability.verticalOffset
+                                        className={`w-[80vw] sm:w-[290px] max-w-[320px] md:w-[245px] lg:w-[260px] shrink-0 snap-center relative group cursor-pointer ${
+                                            isDesktop ? capability.verticalOffset : ''
                                         } ${isSelected ? 'z-30' : capability.baseZ} transition-all duration-300`}
                                     >
-                                        {/* Ambient Idle Floating Bobbing Motion */}
+                                        {/* Ambient Idle Floating Bobbing Motion (Desktop only for smooth mobile sliding) */}
                                         <motion.div
-                                            animate={{
+                                            animate={isDesktop ? {
                                                 y: idx === 1 ? [-3, 4, -3] : idx === 0 ? [3, -3, 3] : [-2, 3, -2]
-                                            }}
+                                            } : {}}
                                             transition={{
                                                 duration: idx === 1 ? 4.8 : idx === 0 ? 5.4 : 5.1,
                                                 repeat: Infinity,
@@ -884,6 +938,45 @@ const Services = () => {
                                     </motion.div>
                                 );
                             })}
+                        </div>
+
+                        {/* Responsive Slider Pagination Dots & Arrows (Mobile / Responsive Only) */}
+                        <div className="flex md:hidden items-center justify-center gap-3 pt-2 pb-2 relative z-10">
+                            <button
+                                type="button"
+                                onClick={() => scrollToSlide(Math.max(0, activeSlide - 1))}
+                                disabled={activeSlide === 0}
+                                className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/50 text-[#4C1D95] dark:text-purple-300 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition-opacity"
+                                aria-label="Previous slide"
+                            >
+                                <ChevronLeft size={14} />
+                            </button>
+
+                            <div className="flex items-center gap-1.5">
+                                {platformCapabilities.map((_, dotIdx) => (
+                                    <button
+                                        key={dotIdx}
+                                        type="button"
+                                        onClick={() => scrollToSlide(dotIdx)}
+                                        aria-label={`Go to slide ${dotIdx + 1}`}
+                                        className={`transition-all duration-300 rounded-full h-2 ${
+                                            activeSlide === dotIdx
+                                                ? 'w-6 bg-[#4C1D95] dark:bg-purple-400 shadow-2xs'
+                                                : 'w-2 bg-purple-200 dark:bg-purple-900/50 hover:bg-purple-300'
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => scrollToSlide(Math.min(platformCapabilities.length - 1, activeSlide + 1))}
+                                disabled={activeSlide === platformCapabilities.length - 1}
+                                className="w-7 h-7 rounded-full flex items-center justify-center bg-white dark:bg-purple-950/60 border border-purple-200/80 dark:border-purple-800/50 text-[#4C1D95] dark:text-purple-300 disabled:opacity-30 disabled:cursor-not-allowed shadow-2xs transition-opacity"
+                                aria-label="Next slide"
+                            >
+                                <ChevronRight size={14} />
+                            </button>
                         </div>
 
                     </motion.div>
