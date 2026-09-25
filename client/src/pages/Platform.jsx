@@ -152,21 +152,6 @@ const getPopularCourses = (u) => {
     return 'Business, Engineering, IT';
 };
 
-// Helper for university type
-const getUniversityType = (u) => {
-    const nameLower = (u.name || '').toLowerCase();
-    if (nameLower.includes('institute') || nameLower.includes('college') || nameLower.includes('school')) {
-        return 'Specialized / College';
-    }
-    if (nameLower.includes('international') || nameLower.includes('global') || nameLower.includes('european')) {
-        return 'International';
-    }
-    if (nameLower.includes('university')) {
-        return 'University';
-    }
-    return 'Private';
-};
-
 // Map raw API program_type values to user-readable program level labels
 const PROGRAM_TYPE_TO_LEVEL = {
     'degree_programme': 'Undergraduate / Postgraduate',
@@ -240,7 +225,6 @@ const Platform = () => {
     // Filter states
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCountries, setSelectedCountries] = useState([]);
-    const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedLevels, setSelectedLevels] = useState([]);
     const [selectedFields, setSelectedFields] = useState([]);
     const [sortBy, setSortBy] = useState('popularity');
@@ -285,7 +269,6 @@ const Platform = () => {
             const badge = getBadge(u, false);
             const accreditation = getAccreditationText(u);
             const popularCourses = getPopularCourses({ ...u, courseCategories: u.courseCategories || [] });
-            const universityType = getUniversityType(u);
             const programLevels = deriveProgramLevels(u.programTypes);
             const fieldTags = deriveFieldTags(u.courseTitles || [], u.courseCategories || []);
 
@@ -307,7 +290,6 @@ const Platform = () => {
                 popularCourses,
                 programLevels,
                 fieldTags,
-                universityType,
                 isSkillDadOwned: false,
                 raw: u
             };
@@ -321,7 +303,6 @@ const Platform = () => {
             const badge = getBadge(u, true);
             const accreditation = getAccreditationText(u);
             const popularCourses = getPopularCourses({ ...u, courseCategories: u.courseCategories || [] });
-            const universityType = getUniversityType(u);
             const programLevels = deriveProgramLevels(u.programTypes);
             const fieldTags = deriveFieldTags(u.courseTitles || [], u.courseCategories || []);
 
@@ -349,7 +330,6 @@ const Platform = () => {
                 popularCourses,
                 programLevels,
                 fieldTags,
-                universityType,
                 isSkillDadOwned: true,
                 raw: { ...u, achievements }
             };
@@ -365,22 +345,6 @@ const Platform = () => {
             counts[u.country] = (counts[u.country] || 0) + 1;
         });
         return Object.entries(counts).sort((a, b) => b[1] - a[1]);
-    }, [allUniversities]);
-
-    // Available University Types
-    const typeCounts = useMemo(() => {
-        const counts = {
-            'Public': 0,
-            'Private': 0,
-            'International': 0,
-            'Specialized / College': 0
-        };
-        allUniversities.forEach(u => {
-            const t = u.universityType;
-            if (counts[t] !== undefined) counts[t]++;
-            else counts['Private']++;
-        });
-        return Object.entries(counts);
     }, [allUniversities]);
 
     // Available Program Levels — computed from real programLevels strings
@@ -421,7 +385,6 @@ const Platform = () => {
     // Reset all filters
     const handleResetFilters = () => {
         setSelectedCountries([]);
-        setSelectedTypes([]);
         setSelectedLevels([]);
         setSelectedFields([]);
         setSearchQuery('');
@@ -447,11 +410,6 @@ const Platform = () => {
         // Country filter
         if (selectedCountries.length > 0) {
             results = results.filter(u => selectedCountries.includes(u.country));
-        }
-
-        // Type filter
-        if (selectedTypes.length > 0) {
-            results = results.filter(u => selectedTypes.includes(u.universityType));
         }
 
         // Program Level filter — uses real programLevels derived from DB
@@ -491,7 +449,7 @@ const Platform = () => {
         }
 
         return results;
-    }, [allUniversities, searchQuery, selectedCountries, selectedTypes, selectedLevels, selectedFields, sortBy]);
+    }, [allUniversities, searchQuery, selectedCountries, selectedLevels, selectedFields, sortBy]);
 
     // Pagination calculations
     const totalPages = Math.ceil(filteredUniversities.length / ITEMS_PER_PAGE) || 1;
@@ -518,7 +476,6 @@ const Platform = () => {
 
     const activeFilterCount =
         selectedCountries.length +
-        selectedTypes.length +
         selectedLevels.length +
         selectedFields.length +
         (searchQuery.trim() ? 1 : 0);
@@ -742,40 +699,7 @@ const Platform = () => {
                                 )}
                             </div>
 
-                            {/* Filter 2: University Type */}
-                            <div className="mb-4 pb-4 border-b border-slate-100 dark:border-purple-900/30">
-                                <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2.5">
-                                    University Type
-                                </h3>
-                                <div className="space-y-1.5">
-                                    {typeCounts.map(([type, count]) => {
-                                        const isChecked = selectedTypes.includes(type);
-                                        return (
-                                            <label
-                                                key={type}
-                                                className="flex items-center justify-between text-[11.5px] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white cursor-pointer select-none group"
-                                            >
-                                                <div className="flex items-center gap-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isChecked}
-                                                        onChange={() => toggleFilter(selectedTypes, setSelectedTypes, type)}
-                                                        className="w-3.5 h-3.5 rounded border-slate-300 text-[#4C1D95] focus:ring-[#4C1D95]/40 accent-[#4C1D95] cursor-pointer"
-                                                    />
-                                                    <span className={`${isChecked ? 'font-semibold text-slate-900 dark:text-white' : ''}`}>
-                                                        {type}
-                                                    </span>
-                                                </div>
-                                                <span className="text-[9.5px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200">
-                                                    {count}
-                                                </span>
-                                            </label>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Filter 3: Program Level */}
+                            {/* Filter 2: Program Level */}
                             <div className="mb-4 pb-4 border-b border-slate-100 dark:border-purple-900/30">
                                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-2.5">
                                     Program Level
@@ -908,12 +832,6 @@ const Platform = () => {
                                         <span key={c} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-[11px] font-medium">
                                             {c}
                                             <X size={11} className="cursor-pointer" onClick={() => toggleFilter(selectedCountries, setSelectedCountries, c)} />
-                                        </span>
-                                    ))}
-                                    {selectedTypes.map(t => (
-                                        <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-100/70 text-[#4C1D95] dark:bg-purple-950 dark:text-purple-300 text-[11px] font-medium">
-                                            {t}
-                                            <X size={11} className="cursor-pointer" onClick={() => toggleFilter(selectedTypes, setSelectedTypes, t)} />
                                         </span>
                                     ))}
                                     {selectedLevels.map(l => (
