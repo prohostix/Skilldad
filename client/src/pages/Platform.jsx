@@ -415,28 +415,28 @@ const Platform = () => {
             {/* ── 1. HERO BANNER CONTAINER (STYLE & SIZE EXACTLY LIKE COURSES PAGE) ── */}
             <main className="pt-16 pb-16">
                 
-                <div className="w-full mb-6">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-4 sm:pt-5 md:pt-6 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
+                <div className="w-full mb-4 sm:mb-5">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-3 sm:pt-3.5 md:pt-4 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
                         
-                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-end relative z-10">
+                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-end relative z-10">
                             
                             {/* Left Side: Content, Search Bar, and 3 Feature Badges */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-7 space-y-2.5 sm:space-y-3 pb-5 sm:pb-6"
+                                className="lg:col-span-7 space-y-2 sm:space-y-2.5 pb-3.5 sm:pb-4"
                             >
                                 {/* Small Label Badge matching reference image */}
                                 <div className="inline-flex items-center gap-2">
-                                    <span className="text-[11px] font-bold tracking-wider text-[#4C1D95] dark:text-purple-300 uppercase">
+                                    <span className="text-[10.5px] font-bold tracking-wider text-[#4C1D95] dark:text-purple-300 uppercase">
                                         EXPLORE TOP UNIVERSITIES
                                     </span>
-                                    <span className="w-8 h-[2px] bg-[#4C1D95]/40 dark:bg-purple-400/40 rounded-full" />
+                                    <span className="w-7 h-[1.5px] bg-[#4C1D95]/40 dark:bg-purple-400/40 rounded-full" />
                                 </div>
 
                                 {/* Main Heading matching Courses Page Typography */}
-                                <h1 className="text-2xl sm:text-3xl lg:text-[36px] font-extrabold text-[#1E0E4E] dark:text-white tracking-tight leading-[1.18]">
+                                <h1 className="text-xl sm:text-2xl lg:text-[31px] font-extrabold text-[#1E0E4E] dark:text-white tracking-tight leading-[1.16]">
                                     Your Global Education <br className="hidden sm:inline" />
                                     <span className="text-[#5E0289] dark:text-[#C026FF]">
                                         Starts Here
@@ -444,14 +444,14 @@ const Platform = () => {
                                 </h1>
 
                                 {/* Supporting Text */}
-                                <p className="text-slate-600 dark:text-purple-200/70 text-xs sm:text-sm max-w-xl leading-relaxed">
+                                <p className="text-slate-600 dark:text-purple-200/70 text-xs sm:text-[13px] max-w-lg leading-relaxed">
                                     Discover top universities, explore world-class programs, and take the next step towards your dream career.
                                 </p>
 
                                 {/* Standard, High-Quality Search Bar */}
                                 <form onSubmit={handleSearchSubmit} className="relative max-w-xl flex items-center gap-2 pt-0.5">
                                     <div className="relative flex-1 flex items-center">
-                                        <Search size={16} className="absolute left-3.5 text-slate-400 dark:text-purple-300 pointer-events-none" />
+                                        <Search size={15} className="absolute left-3.5 text-slate-400 dark:text-purple-300 pointer-events-none" />
                                         <input
                                             type="text"
                                             value={searchQuery}
@@ -460,7 +460,7 @@ const Platform = () => {
                                                 setCurrentPage(1);
                                             }}
                                             placeholder="Search universities by name, location, or course..."
-                                            className="w-full pl-10 pr-9 py-2.5 bg-white dark:bg-[#130E26] border border-purple-200/80 dark:border-purple-800/50 rounded-xl text-xs sm:text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-[#4C1D95] focus:ring-2 focus:ring-[#4C1D95]/20 shadow-xs transition-all"
+                                            className="w-full pl-9 pr-8 py-2 bg-white dark:bg-[#130E26] border border-purple-200/80 dark:border-purple-800/50 rounded-xl text-xs sm:text-sm text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none focus:border-[#4C1D95] focus:ring-2 focus:ring-[#4C1D95]/20 shadow-xs transition-all"
                                         />
                                         {searchQuery && (
                                             <button
@@ -474,41 +474,41 @@ const Platform = () => {
                                     </div>
                                     <button
                                         type="submit"
-                                        className="px-5 py-2.5 rounded-xl bg-[#4C1D95] hover:bg-[#3B0764] text-white font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
+                                        className="px-4.5 py-2 rounded-xl bg-[#4C1D95] hover:bg-[#3B0764] text-white font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
                                     >
-                                        <Search size={14} />
+                                        <Search size={13} />
                                         <span>Search</span>
                                     </button>
                                 </form>
 
                                 {/* 3 Feature / Stat Badges matching CourseCatalog structure */}
-                                <div className="pt-1 flex flex-wrap gap-2 sm:gap-2.5">
-                                    <div className="bg-white/80 dark:bg-white/5 backdrop-blur border border-purple-200/60 dark:border-white/10 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-2xs">
-                                        <div className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
-                                            <GraduationCap size={15} />
+                                <div className="pt-0.5 flex flex-wrap gap-2">
+                                    <div className="bg-white/80 dark:bg-white/5 backdrop-blur border border-purple-200/60 dark:border-white/10 rounded-xl px-2.5 py-1 flex items-center gap-2 shadow-2xs">
+                                        <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
+                                            <GraduationCap size={13} />
                                         </div>
-                                        <div className="text-[10.5px] leading-tight text-slate-700 dark:text-white/70">
-                                            <span className="text-slate-500 dark:text-white/40 block text-[9.5px]">Partner Universities</span>
+                                        <div className="text-[10px] leading-tight text-slate-700 dark:text-white/70">
+                                            <span className="text-slate-500 dark:text-white/40 block text-[9px]">Partner Universities</span>
                                             <div className="font-bold text-slate-900 dark:text-white">{allUniversities.length > 0 ? `${allUniversities.length}+` : '28+'} Institutions</div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/80 dark:bg-white/5 backdrop-blur border border-purple-200/60 dark:border-white/10 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-2xs">
-                                        <div className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
-                                            <Globe size={15} />
+                                    <div className="bg-white/80 dark:bg-white/5 backdrop-blur border border-purple-200/60 dark:border-white/10 rounded-xl px-2.5 py-1 flex items-center gap-2 shadow-2xs">
+                                        <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
+                                            <Globe size={13} />
                                         </div>
-                                        <div className="text-[10.5px] leading-tight text-slate-700 dark:text-white/70">
-                                            <span className="text-slate-500 dark:text-white/40 block text-[9.5px]">Global Reach</span>
+                                        <div className="text-[10px] leading-tight text-slate-700 dark:text-white/70">
+                                            <span className="text-slate-500 dark:text-white/40 block text-[9px]">Global Reach</span>
                                             <div className="font-bold text-slate-900 dark:text-white">{countryCounts.length > 0 ? `${countryCounts.length}+` : '9+'} Countries</div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/80 dark:bg-white/5 backdrop-blur border border-purple-200/60 dark:border-white/10 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-2xs">
-                                        <div className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
-                                            <Users size={15} />
+                                    <div className="bg-white/80 dark:bg-white/5 backdrop-blur border border-purple-200/60 dark:border-white/10 rounded-xl px-2.5 py-1 flex items-center gap-2 shadow-2xs">
+                                        <div className="w-6 h-6 rounded-lg bg-purple-50 dark:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 flex items-center justify-center shrink-0">
+                                            <Users size={13} />
                                         </div>
-                                        <div className="text-[10.5px] leading-tight text-slate-700 dark:text-white/70">
-                                            <span className="text-slate-500 dark:text-white/40 block text-[9.5px]">Alumni Network</span>
+                                        <div className="text-[10px] leading-tight text-slate-700 dark:text-white/70">
+                                            <span className="text-slate-500 dark:text-white/40 block text-[9px]">Alumni Network</span>
                                             <div className="font-bold text-slate-900 dark:text-white">10K+ Students Placed</div>
                                         </div>
                                     </div>
@@ -523,7 +523,7 @@ const Platform = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
                                 className="lg:col-span-5 relative flex items-end justify-center lg:justify-end select-none self-end"
                             >
-                                <div className="relative w-full max-w-[380px] sm:max-w-[440px] lg:max-w-[500px] flex items-end justify-center lg:justify-end leading-none">
+                                <div className="relative w-full max-w-[320px] sm:max-w-[370px] lg:max-w-[430px] flex items-end justify-center lg:justify-end leading-none">
                                     <img
                                         src="/university_hero_reference_illustration.png"
                                         alt="SkillDad Universities - Global Opportunities Await"
