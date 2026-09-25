@@ -337,14 +337,14 @@ const CourseCatalog = () => {
             <main className="pt-16 pb-20">
                 {/* Hero Banner Container */}
                 <div className="w-full mb-4 sm:mb-5">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-5 sm:pt-6 md:pt-7 lg:pt-8 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-6 sm:pt-7 md:pt-8 lg:pt-10 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
                         <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-end relative z-10">
                             {/* Left Content */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-5 space-y-2.5 sm:space-y-3 pb-5 sm:pb-6 md:pb-7"
+                                className="lg:col-span-5 space-y-3 sm:space-y-3.5 pb-6 sm:pb-7 md:pb-9"
                             >
 
                                 <h1 className="text-xl sm:text-2xl lg:text-[31px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.16]">
@@ -403,7 +403,7 @@ const CourseCatalog = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
                                 className="lg:col-span-7 relative flex items-end justify-end select-none self-end -mr-4 sm:-mr-6 lg:-mr-10 pb-0"
                             >
-                                <div className="relative w-full max-w-[480px] sm:max-w-[580px] lg:max-w-[680px] xl:max-w-[760px] flex items-end justify-end leading-none">
+                                <div className="relative w-full max-w-[500px] sm:max-w-[600px] lg:max-w-[720px] xl:max-w-[800px] flex items-end justify-end leading-none">
                                     <img
                                         src="/course_hero_reference_illustration.png"
                                         alt="SkillDad Courses - Build Skills for a Brighter Future"
