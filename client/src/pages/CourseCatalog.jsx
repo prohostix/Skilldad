@@ -336,18 +336,18 @@ const CourseCatalog = () => {
 
             <main className="pt-16 pb-20">
                 {/* Hero Banner Container */}
-                <div className="w-full mb-8">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] py-4 sm:py-5 md:py-6 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center relative z-10">
+                <div className="w-full mb-4 sm:mb-5">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] py-3 sm:py-3.5 md:py-4 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
+                        <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-center relative z-10">
                             {/* Left Content */}
                             <motion.div
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-7 space-y-2 md:space-y-3"
+                                className="lg:col-span-7 space-y-2 sm:space-y-2.5"
                             >
 
-                                <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.15]">
+                                <h1 className="text-xl sm:text-2xl lg:text-[31px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.16]">
                                     {universityName ? (
                                         <>Courses by <span className="text-[#C026FF] [.light-mode_&]:!text-[#5E0289]">{universityName}</span></>
                                     ) : (
@@ -358,38 +358,38 @@ const CourseCatalog = () => {
                                     )}
                                 </h1>
 
-                                <p className="text-purple-200/70 [.light-mode_&]:!text-slate-600 text-sm md:text-[15px] max-w-xl leading-relaxed">
+                                <p className="text-purple-200/70 [.light-mode_&]:!text-slate-600 text-xs sm:text-[13px] max-w-xl leading-relaxed">
                                     Choose from a wide range of industry-focused courses, certified programs and flexible learning options — designed to help you get job ready.
                                 </p>
 
                                 {/* 3 Feature Badges */}
-                                <div className="pt-1 flex flex-wrap gap-2.5 sm:gap-3">
-                                    <div className="bg-white/5 backdrop-blur border border-white/10 [.light-mode_&]:!bg-white/90 [.light-mode_&]:!border-purple-150 rounded-xl px-3.5 py-2 flex items-center gap-2.5 shadow-xs">
-                                        <div className="w-8 h-8 rounded-lg bg-purple-900/50 text-[#4C1D95] [.light-mode_&]:!bg-purple-50 [.light-mode_&]:!text-[#4C1D95] flex items-center justify-center shrink-0">
-                                            <Layers3 size={16} />
+                                <div className="pt-0.5 flex flex-wrap gap-2">
+                                    <div className="bg-white/5 backdrop-blur border border-white/10 [.light-mode_&]:!bg-white/90 [.light-mode_&]:!border-purple-150 rounded-xl px-2.5 py-1 flex items-center gap-2 shadow-2xs">
+                                        <div className="w-6.5 h-6.5 rounded-lg bg-purple-900/50 text-[#4C1D95] [.light-mode_&]:!bg-purple-50 [.light-mode_&]:!text-[#4C1D95] flex items-center justify-center shrink-0">
+                                            <Layers3 size={14} />
                                         </div>
-                                        <div className="text-[11px] leading-tight text-white/70 [.light-mode_&]:!text-slate-700">
-                                            <span className="text-white/40 [.light-mode_&]:!text-slate-500">Industry-Relevant</span>
+                                        <div className="text-[10px] leading-tight text-white/70 [.light-mode_&]:!text-slate-700">
+                                            <span className="text-white/40 [.light-mode_&]:!text-slate-500 block text-[9px]">Industry-Relevant</span>
                                             <div className="font-bold text-white [.light-mode_&]:!text-slate-900">Curriculum</div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/5 backdrop-blur border border-white/10 [.light-mode_&]:!bg-white/90 [.light-mode_&]:!border-purple-150 rounded-xl px-3.5 py-2 flex items-center gap-2.5 shadow-xs">
-                                        <div className="w-8 h-8 rounded-lg bg-purple-900/50 text-[#4C1D95] [.light-mode_&]:!bg-purple-50 [.light-mode_&]:!text-[#4C1D95] flex items-center justify-center shrink-0">
-                                            <UserRoundCheck size={16} />
+                                    <div className="bg-white/5 backdrop-blur border border-white/10 [.light-mode_&]:!bg-white/90 [.light-mode_&]:!border-purple-150 rounded-xl px-2.5 py-1 flex items-center gap-2 shadow-2xs">
+                                        <div className="w-6.5 h-6.5 rounded-lg bg-purple-900/50 text-[#4C1D95] [.light-mode_&]:!bg-purple-50 [.light-mode_&]:!text-[#4C1D95] flex items-center justify-center shrink-0">
+                                            <UserRoundCheck size={14} />
                                         </div>
-                                        <div className="text-[11px] leading-tight text-white/70 [.light-mode_&]:!text-slate-700">
-                                            <span className="text-white/40 [.light-mode_&]:!text-slate-500">Expert Mentors</span>
+                                        <div className="text-[10px] leading-tight text-white/70 [.light-mode_&]:!text-slate-700">
+                                            <span className="text-white/40 [.light-mode_&]:!text-slate-500 block text-[9px]">Expert Mentors</span>
                                             <div className="font-bold text-white [.light-mode_&]:!text-slate-900">& Guidance</div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/5 backdrop-blur border border-white/10 [.light-mode_&]:!bg-white/90 [.light-mode_&]:!border-purple-150 rounded-xl px-3.5 py-2 flex items-center gap-2.5 shadow-xs">
-                                        <div className="w-8 h-8 rounded-lg bg-purple-900/50 text-[#4C1D95] [.light-mode_&]:!bg-purple-50 [.light-mode_&]:!text-[#4C1D95] flex items-center justify-center shrink-0">
-                                            <TrendingUp size={16} />
+                                    <div className="bg-white/5 backdrop-blur border border-white/10 [.light-mode_&]:!bg-white/90 [.light-mode_&]:!border-purple-150 rounded-xl px-2.5 py-1 flex items-center gap-2 shadow-2xs">
+                                        <div className="w-6.5 h-6.5 rounded-lg bg-purple-900/50 text-[#4C1D95] [.light-mode_&]:!bg-purple-50 [.light-mode_&]:!text-[#4C1D95] flex items-center justify-center shrink-0">
+                                            <TrendingUp size={14} />
                                         </div>
-                                        <div className="text-[11px] leading-tight text-white/70 [.light-mode_&]:!text-slate-700">
-                                            <span className="text-white/40 [.light-mode_&]:!text-slate-500">Placement Support</span>
+                                        <div className="text-[10px] leading-tight text-white/70 [.light-mode_&]:!text-slate-700">
+                                            <span className="text-white/40 [.light-mode_&]:!text-slate-500 block text-[9px]">Placement Support</span>
                                             <div className="font-bold text-white [.light-mode_&]:!text-slate-900">& Career Services</div>
                                         </div>
                                     </div>
@@ -403,7 +403,7 @@ const CourseCatalog = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
                                 className="lg:col-span-5 relative flex items-center justify-center lg:justify-end"
                             >
-                                <div className="relative w-[200px] sm:w-[230px] md:w-[250px] aspect-[4/3] rounded-2xl md:rounded-3xl overflow-hidden shadow-lg border-2 border-white/20 [.light-mode_&]:!border-white/80 bg-purple-950/40 [.light-mode_&]:!bg-purple-100">
+                                <div className="relative w-[180px] sm:w-[210px] md:w-[230px] aspect-[4/3] rounded-2xl md:rounded-3xl overflow-hidden shadow-lg border-2 border-white/20 [.light-mode_&]:!border-white/80 bg-purple-950/40 [.light-mode_&]:!bg-purple-100">
                                     <img
                                         src="/course_hero_student.jpg"
                                         alt="SkillDad Student"
