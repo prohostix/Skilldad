@@ -346,62 +346,89 @@ const Services = () => {
                     <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
                         
                         {/* LEFT COLUMN: Headings & Description */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 25 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                            className="lg:col-span-7 space-y-6 text-left"
-                        >
+                        <div className="lg:col-span-7 space-y-6 text-left">
                             {/* Pill Badge */}
-                            <div>
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+                            >
                                 <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#4C1D95]/10 border border-[#4C1D95]/20 text-[#4C1D95] dark:bg-purple-950/70 dark:border-purple-800/50 dark:text-purple-300 text-[11px] md:text-xs font-semibold tracking-wide shadow-xs">
                                     Our Services
                                 </div>
-                            </div>
+                            </motion.div>
 
                             {/* Main Title */}
-                            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[50px] font-extrabold tracking-tight leading-[1.16] text-[#1E1B4B] dark:text-white font-sans">
+                            <motion.h1
+                                initial={{ opacity: 0, y: 22, filter: "blur(8px)" }}
+                                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                transition={{ duration: 1.0, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                                className="text-3xl sm:text-4xl md:text-5xl lg:text-[46px] xl:text-[50px] font-extrabold tracking-tight leading-[1.16] text-[#1E1B4B] dark:text-white font-sans"
+                            >
                                 Comprehensive Learning <br />
                                 <span className="text-[#4C1D95] dark:text-purple-300">
                                     &amp; Career Support
                                 </span>
-                            </h1>
+                            </motion.h1>
 
                             {/* Subtitle Description */}
-                            <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-normal">
+                            <motion.p
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.9, delay: 0.35, ease: "easeOut" }}
+                                className="text-sm md:text-base text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-normal"
+                            >
                                 We offer a range of services designed to help you build skills, earn recognized certifications, and achieve your career goals — all in one place.
-                            </p>
+                            </motion.p>
 
                             {/* Quick Highlights Row */}
                             <div className="pt-2 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600 dark:text-slate-400">
-                                <span className="inline-flex items-center gap-1.5 bg-white dark:bg-purple-950/40 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-900/40 shadow-xs">
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
+                                    className="inline-flex items-center gap-1.5 bg-white dark:bg-purple-950/40 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-900/40 shadow-xs"
+                                >
                                     <ShieldCheck size={14} className="text-[#4C1D95] dark:text-purple-300" />
                                     100% Placement Assurance
-                                </span>
-                                <span className="inline-flex items-center gap-1.5 bg-white dark:bg-purple-950/40 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-900/40 shadow-xs">
+                                </motion.span>
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.8, delay: 0.55, ease: "easeOut" }}
+                                    className="inline-flex items-center gap-1.5 bg-white dark:bg-purple-950/40 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-900/40 shadow-xs"
+                                >
                                     <Award size={14} className="text-[#4C1D95] dark:text-purple-300" />
                                     Global University Matrix
-                                </span>
-                                <span className="inline-flex items-center gap-1.5 bg-white dark:bg-purple-950/40 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-900/40 shadow-xs">
+                                </motion.span>
+                                <motion.span
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.8, delay: 0.65, ease: "easeOut" }}
+                                    className="inline-flex items-center gap-1.5 bg-white dark:bg-purple-950/40 px-3 py-1.5 rounded-full border border-purple-100 dark:border-purple-900/40 shadow-xs"
+                                >
                                     <Zap size={14} className="text-amber-500" />
                                     Outcome-Driven
-                                </span>
+                                </motion.span>
                             </div>
-                        </motion.div>
+                        </div>
 
                         {/* RIGHT COLUMN: Hero Visual with Student & 3 Floating Badges matching Reference */}
                         <div className="lg:col-span-5 flex items-center justify-center relative select-none">
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                initial={{ opacity: 0, scale: 0.94, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                                transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+                                transition={{ duration: 1.1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
                                 className="relative w-full max-w-[420px] sm:max-w-[460px]"
                             >
                                 {/* Organic curved soft lavender petal background */}
                                 <div className="absolute inset-0 bg-[#EDE7F6]/80 dark:bg-purple-950/40 rounded-[48px] sm:rounded-[60px] transform -rotate-2 scale-98 pointer-events-none" />
 
                                 {/* Subtle purple ray accents pointing out from top-right */}
-                                <svg
+                                <motion.svg
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
                                     className="absolute -top-4 -right-2 sm:-top-6 sm:-right-4 w-14 h-14 sm:w-16 sm:h-16 text-[#4C1D95] dark:text-purple-400 pointer-events-none stroke-current"
                                     viewBox="0 0 40 40"
                                     fill="none"
@@ -411,7 +438,7 @@ const Services = () => {
                                     <line x1="22" y1="12" x2="32" y2="4" />
                                     <line x1="28" y1="20" x2="38" y2="20" />
                                     <line x1="24" y1="28" x2="34" y2="34" />
-                                </svg>
+                                </motion.svg>
 
                                 {/* Student Photo Card */}
                                 <div className="relative rounded-[40px] sm:rounded-[52px] overflow-hidden shadow-[0_20px_45px_-12px_rgba(76,29,149,0.18)] dark:shadow-[0_20px_45px_-12px_rgba(0,0,0,0.6)] border-4 border-white dark:border-purple-900/40 bg-white dark:bg-[#0E091D]">
@@ -426,47 +453,56 @@ const Services = () => {
                                     />
                                 </div>
 
-                                {/* Floating Pill Badge 1: Top-Left "Skill Courses" */}
-                                <motion.div
-                                    animate={{ y: [-4, 4, -4] }}
-                                    transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
-                                    className="absolute -top-3 sm:-top-4 -left-3 sm:-left-6 z-20 bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
-                                        <UniqueSkillCoursesIcon className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
-                                        Skill Courses
-                                    </span>
-                                </motion.div>
+                                {/* Pill Badge 1: Top-Left "Skill Courses" (moves slowly from right to left, no continuous movement) */}
+                                <div className="absolute -top-3 sm:-top-4 -left-3 sm:-left-6 z-20">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 45 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 1.2, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                                        className="bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
+                                            <UniqueSkillCoursesIcon className="w-5 h-5" />
+                                        </div>
+                                        <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
+                                            Skill Courses
+                                        </span>
+                                    </motion.div>
+                                </div>
 
-                                {/* Floating Pill Badge 2: Bottom-Left "Certifications" */}
-                                <motion.div
-                                    animate={{ y: [4, -4, 4] }}
-                                    transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                                    className="absolute bottom-8 sm:bottom-12 -left-4 sm:-left-8 z-20 bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
-                                        <UniqueCertificationsIcon className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
-                                        Certifications
-                                    </span>
-                                </motion.div>
+                                {/* Pill Badge 2: Bottom-Left "Certifications" (moves slowly from right to left, no continuous movement) */}
+                                <div className="absolute bottom-8 sm:bottom-12 -left-4 sm:-left-8 z-20">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 45 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 1.2, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                                        className="bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
+                                            <UniqueCertificationsIcon className="w-5 h-5" />
+                                        </div>
+                                        <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
+                                            Certifications
+                                        </span>
+                                    </motion.div>
+                                </div>
 
-                                {/* Floating Pill Badge 3: Right "Job Opportunities" */}
-                                <motion.div
-                                    animate={{ y: [-5, 5, -5] }}
-                                    transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
-                                    className="absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-8 z-20 bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
-                                        <UniqueJobOpportunitiesIcon className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
-                                        Job Opportunities
-                                    </span>
-                                </motion.div>
+                                {/* Pill Badge 3: Right "Job Opportunities" (moves slowly from left to right, no continuous movement) */}
+                                <div className="absolute top-1/2 -translate-y-1/2 -right-4 sm:-right-8 z-20">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -45 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 1.2, delay: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                                        className="bg-white dark:bg-[#0E091D] border border-purple-100/90 dark:border-purple-900/50 shadow-[0_12px_28px_-6px_rgba(76,29,149,0.18)] rounded-full px-3.5 sm:px-4 py-2 flex items-center gap-2.5 backdrop-blur-md hover:scale-104 transition-transform select-none"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-100 to-purple-50 dark:from-purple-950/80 dark:to-purple-900/40 border border-purple-200/80 dark:border-purple-700/50 flex items-center justify-center shrink-0 shadow-xs">
+                                            <UniqueJobOpportunitiesIcon className="w-5 h-5" />
+                                        </div>
+                                        <span className="text-xs sm:text-[13px] font-bold text-slate-800 dark:text-white tracking-tight">
+                                            Job Opportunities
+                                        </span>
+                                    </motion.div>
+                                </div>
 
                             </motion.div>
                         </div>
