@@ -488,7 +488,7 @@ const Platform = () => {
             <main className="pt-16 pb-16">
                 
                 <div className="w-full mb-4 sm:mb-5">
-                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-2 sm:pt-2.5 md:pt-3 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
+                    <div className="bg-gradient-to-r from-[#170C30] via-[#1F1040] to-[#2B1454] border-y border-purple-900/40 [.light-mode_&]:!bg-gradient-to-r [.light-mode_&]:!from-[#F4EEFE] [.light-mode_&]:!via-[#EDE4FD] [.light-mode_&]:!to-[#E5D7FA] [.light-mode_&]:!border-[#E2D4F7] pt-3 sm:pt-3.5 md:pt-4 pb-0 px-4 sm:px-6 lg:px-10 relative overflow-hidden shadow-xs">
                         
                         <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-end relative z-10">
                             
@@ -497,12 +497,12 @@ const Platform = () => {
                                 initial={{ opacity: 0, y: 16 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                                className="lg:col-span-7 space-y-1.5 sm:space-y-2 pb-2.5 sm:pb-3"
+                                className="lg:col-span-7 space-y-2 sm:space-y-2.5 pb-3 sm:pb-3.5 md:pb-4"
                             >
-                                {/* Main Heading matching Courses Page Typography */}
-                                <h1 className="text-xl sm:text-2xl lg:text-[28px] font-extrabold text-[#1E0E4E] dark:text-white tracking-tight leading-[1.15]">
+                                {/* Main Heading - Standardized Typography & Balanced Size */}
+                                <h1 className="text-base sm:text-lg lg:text-[22px] font-bold font-space text-slate-900 dark:text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-snug">
                                     Your Global Education <br className="hidden sm:inline" />
-                                    <span className="text-[#5E0289] dark:text-[#C026FF]">
+                                    <span className="text-[#6D28FF] dark:text-[#C026FF]">
                                         Starts Here
                                     </span>
                                 </h1>
@@ -587,7 +587,7 @@ const Platform = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
                                 className="lg:col-span-5 relative flex items-end justify-center lg:justify-end select-none self-end"
                             >
-                                <div className="relative w-full max-w-[290px] sm:max-w-[340px] lg:max-w-[390px] flex items-end justify-center lg:justify-end leading-none">
+                                <div className="relative w-full max-w-[305px] sm:max-w-[355px] lg:max-w-[405px] flex items-end justify-center lg:justify-end leading-none">
                                     <img
                                         src="/university_hero_reference_illustration.png"
                                         alt="SkillDad Universities - Explore Top Global Universities"
