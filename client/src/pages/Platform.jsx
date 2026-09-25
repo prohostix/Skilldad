@@ -38,15 +38,28 @@ const CAMPUS_FALLBACKS = [
     'https://images.unsplash.com/photo-1525921429624-479b6a26d84d?auto=format&fit=crop&q=80&w=800'
 ];
 
-// Curated badge styles matching the reference design
-const BADGE_STYLES = [
-    { label: 'Top Ranked', bg: 'bg-blue-50 text-blue-700 border-blue-200/60 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/40' },
-    { label: 'Popular', bg: 'bg-sky-50 text-sky-700 border-sky-200/60 dark:bg-sky-950/70 dark:text-sky-300 dark:border-sky-800/40' },
-    { label: 'Partner University', bg: 'bg-purple-50 text-purple-700 border-purple-200/60 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-800/40' },
-    { label: 'Top Choice', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200/60 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/40' },
-    { label: 'Global', bg: 'bg-violet-50 text-violet-700 border-violet-200/60 dark:bg-violet-950/70 dark:text-violet-300 dark:border-violet-800/40' },
-    { label: 'In Demand', bg: 'bg-amber-50 text-amber-700 border-amber-200/60 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800/40' }
-];
+// Badge styles by type
+const BADGE_BY_TYPE = {
+    partner: { label: 'Partner University', bg: 'bg-purple-50 text-purple-700 border-purple-200/60 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-800/40' },
+    accredited: { label: 'Accredited', bg: 'bg-blue-50 text-blue-700 border-blue-200/60 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800/40' },
+    global: { label: 'Global University', bg: 'bg-violet-50 text-violet-700 border-violet-200/60 dark:bg-violet-950/70 dark:text-violet-300 dark:border-violet-800/40' },
+    skilldad: { label: 'SkillDad Partner', bg: 'bg-indigo-50 text-indigo-700 border-indigo-200/60 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/40' },
+};
+
+// Derive badge from real university data
+const getBadge = (u, isSkillDadOwned) => {
+    if (!isSkillDadOwned) return BADGE_BY_TYPE.partner;
+    const achievements = u.achievements || [];
+    const achParsed = Array.isArray(achievements) ? achievements : [];
+    const textBlob = achParsed.map(a => `${a.title || ''} ${a.desc || ''}`).join(' ').toLowerCase();
+    if (textBlob.includes('naac') || textBlob.includes('ascal') || textBlob.includes('accredit') || textBlob.includes('mfhea') || textBlob.includes('mqa')) {
+        return BADGE_BY_TYPE.accredited;
+    }
+    if (textBlob.includes('global') || textBlob.includes('international') || textBlob.includes('bologna') || textBlob.includes('erasmus')) {
+        return BADGE_BY_TYPE.global;
+    }
+    return BADGE_BY_TYPE.skilldad;
+};
 
 // Helper to reliably extract country from location string
 const extractCountry = (location = '') => {
@@ -71,10 +84,11 @@ const extractCountry = (location = '') => {
     return parts[0] || 'Global';
 };
 
-// Helper to determine ranking / accreditation text based on university data
-const getRankingText = (u, index) => {
+// Helper to determine accreditation text from real achievement data
+const getAccreditationText = (u) => {
     const achievements = u.achievements || u.profile?.achievements || [];
-    const textBlob = achievements.map(a => `${a.title || ''} ${a.desc || ''}`).join(' ').toLowerCase();
+    const achArr = Array.isArray(achievements) ? achievements : [];
+    const textBlob = achArr.map(a => `${a.title || ''} ${a.desc || ''}`).join(' ').toLowerCase();
 
     if (textBlob.includes('naac')) {
         return textBlob.includes('a+') ? 'NAAC A+ Accredited' : 'NAAC A Grade';
@@ -85,51 +99,57 @@ const getRankingText = (u, index) => {
     if (textBlob.includes('uniadrion')) {
         return 'UNIADRION Member';
     }
-    if (textBlob.includes('ranking')) {
-        const match = textBlob.match(/(\d+)(st|nd|rd|th)\s+in/);
-        if (match) return `#${match[1]} National Rank`;
-        return 'Top 10 Nationally';
+    if (textBlob.includes('mfhea')) {
+        return 'MFHEA Accredited';
+    }
+    if (textBlob.includes('mqa')) {
+        return 'MQA Recognised';
+    }
+    if (textBlob.includes('7th') || textBlob.includes('h-index')) {
+        const match = textBlob.match(/(\d+)(st|nd|rd|th)\s+in\s+albanian/);
+        if (match) return `#${match[1]} in Albania`;
+        return '7th in National H-Index';
+    }
+    if (textBlob.includes('cisco')) {
+        return 'Cisco Academy Partner';
+    }
+    if (textBlob.includes('erasmus')) {
+        return 'Erasmus+ Member';
     }
     if (textBlob.includes('accredit')) {
         return 'Institutionally Accredited';
     }
-
-    const sampleRankings = [
-        '#14 (World)',
-        '#21 (World)',
-        '#3 (World)',
-        '#34 (World)',
-        '#15 (World)',
-        '#19 (World)',
-        '#29 (World)',
-        '#43 (World)',
-        '#37 (World)',
-        'Top 1% Global',
-        'QS 5-Star Rated',
-        'Tier-1 Accredited'
-    ];
-    return sampleRankings[index % sampleRankings.length];
+    if (textBlob.includes('ranking') || textBlob.includes('ranked')) {
+        return 'Nationally Ranked';
+    }
+    if (textBlob.includes('times higher')) {
+        return 'THE World Ranked';
+    }
+    // Return null if no real accreditation data
+    return null;
 };
 
-// Helper for popular courses
+// Helper to derive popular courses / fields from API course data
 const getPopularCourses = (u) => {
-    if (u.specialties && Array.isArray(u.specialties) && u.specialties.length > 0) {
-        return u.specialties.slice(0, 3).join(', ');
+    // Use real course categories from API if available
+    const cats = u.courseCategories || [];
+    if (cats.length > 0) {
+        // Clean up blank or generic categories
+        const cleaned = cats.filter(c => c && c.trim() && c.trim().toLowerCase() !== 'skill course');
+        if (cleaned.length > 0) return cleaned.slice(0, 3).join(', ');
     }
+    // Fall back to profile specialties
+    if (u.profile?.specialties && Array.isArray(u.profile.specialties) && u.profile.specialties.length > 0) {
+        return u.profile.specialties.slice(0, 3).join(', ');
+    }
+    // Fall back to name-based heuristic
     const nameLower = (u.name || '').toLowerCase();
-    if (nameLower.includes('technology') || nameLower.includes('tech')) {
-        return 'CS, AI, Engineering';
-    }
-    if (nameLower.includes('business') || nameLower.includes('management') || nameLower.includes('commercial')) {
-        return 'MBA, Finance, Marketing';
-    }
-    if (nameLower.includes('language')) {
-        return 'English, IELTS, Linguistics';
-    }
-    if (nameLower.includes('culinary') || nameLower.includes('hospitality')) {
-        return 'Culinary Arts, Hotel Mgt';
-    }
-    return 'CS, Business, Engineering';
+    if (nameLower.includes('technology') || nameLower.includes('tech')) return 'CS, AI, Engineering';
+    if (nameLower.includes('business') || nameLower.includes('management')) return 'MBA, Finance, Marketing';
+    if (nameLower.includes('language') || nameLower.includes('linguistic')) return 'English, IELTS, Linguistics';
+    if (nameLower.includes('culinary') || nameLower.includes('hospitality')) return 'Culinary Arts, Hotel Mgt';
+    if (nameLower.includes('arts') || nameLower.includes('science')) return 'Arts, Science, Technology';
+    return 'Business, Engineering, IT';
 };
 
 // Helper for university type
@@ -145,6 +165,42 @@ const getUniversityType = (u) => {
         return 'University';
     }
     return 'Private';
+};
+
+// Map raw API program_type values to user-readable program level labels
+const PROGRAM_TYPE_TO_LEVEL = {
+    'degree_programme': 'Undergraduate / Postgraduate',
+    'wbl_domestic': 'Work-Based Learning',
+    'wbl_abroad': 'Study Abroad',
+    'course': 'Short Courses & Diplomas',
+};
+
+// Derive readable program levels from real programTypes array
+const deriveProgramLevels = (programTypes) => {
+    if (!programTypes || programTypes.length === 0) return null;
+    const labels = [...new Set(programTypes.map(t => PROGRAM_TYPE_TO_LEVEL[t] || t).filter(Boolean))];
+    return labels.join(' | ') || null;
+};
+
+// Derive popular fields filter tags from course categories
+const FIELD_MAP = [
+    { label: 'Computer Science & IT', keywords: ['ai', 'programming', 'data', 'computer', 'it ', 'it&', 'digital marketing', 'virtual reality', 'machine learning', 'software', 'technology'] },
+    { label: 'Business & Management', keywords: ['business', 'management', 'mba', 'mcom', 'bba', 'bcom', 'commerce', 'finance', 'marketing', 'economics'] },
+    { label: 'Engineering', keywords: ['engineering', 'logistics', 'supply chain', 'bca', 'mca'] },
+    { label: 'Health & Hospital Admin', keywords: ['hospital', 'health', 'medical', 'clinical', 'nursing', 'pharma', 'msw', 'social work', 'msw'] },
+    { label: 'Hospitality & Culinary', keywords: ['hospitality', 'culinary', 'hotel', 'tourism', 'chef'] },
+    { label: 'Data Science & AI', keywords: ['data science', 'data analytics', 'artificial intelligence', 'machine learning', 'business intelligence', 'ai '] },
+];
+
+// Determine which broad fields a university covers based on its course categories and course titles
+const deriveFieldTags = (programTypes, courseCategories, name) => {
+    const blob = [
+        ...(courseCategories || []),
+        ...(programTypes || []),
+        name || ''
+    ].join(' ').toLowerCase();
+
+    return FIELD_MAP.filter(f => f.keywords.some(kw => blob.includes(kw))).map(f => f.label);
 };
 
 const ITEMS_PER_PAGE = 9;
@@ -189,7 +245,7 @@ const Platform = () => {
         fetchUnis();
     }, []);
 
-    // Process and enrich universities
+    // Process and enrich universities with real data only
     const allUniversities = useMemo(() => {
         let globalIndex = 0;
 
@@ -200,10 +256,12 @@ const Platform = () => {
             const logoImg = u.profile?.profileImage || u.profileImage || u.profile_image;
             const stats = getBelievableUniversityStats(u);
             const country = extractCountry(u.profile?.location);
-            const badge = BADGE_STYLES[index % BADGE_STYLES.length];
-            const ranking = getRankingText(u, index);
-            const popularCourses = getPopularCourses(u);
+            const badge = getBadge(u, false);
+            const accreditation = getAccreditationText(u);
+            const popularCourses = getPopularCourses({ ...u, courseCategories: u.courseCategories || [] });
             const universityType = getUniversityType(u);
+            const programLevels = deriveProgramLevels(u.programTypes);
+            const fieldTags = deriveFieldTags(u.programTypes, u.courseCategories, u.name);
 
             return {
                 id: u._id || u.id,
@@ -212,17 +270,17 @@ const Platform = () => {
                 country,
                 students: stats.scholars,
                 programs: stats.modules,
-                established: u.profile?.foundedYear || u.profile?.established || '2005',
-                rating: 4.8,
+                established: u.profile?.foundedYear || u.profile?.established || null,
                 image: coverImg ? getMediaUrl(coverImg) : fallbackImg,
                 fallbackImage: fallbackImg,
                 logo: logoImg ? getMediaUrl(logoImg) : null,
-                specialties: u.profile?.specialties || ["Computer Science", "Business", "Engineering"],
-                description: u.bio || "Leading institutional partner providing accredited degrees, innovative diplomas, and global student placement.",
+                specialties: u.profile?.specialties || [],
+                description: u.bio || null,
                 badge,
-                ranking,
+                accreditation,
                 popularCourses,
-                programLevels: 'UG | PG | Diploma',
+                programLevels,
+                fieldTags,
                 universityType,
                 isSkillDadOwned: false,
                 raw: u
@@ -234,10 +292,18 @@ const Platform = () => {
             const fallbackImg = CAMPUS_FALLBACKS[index % CAMPUS_FALLBACKS.length];
             const stats = getBelievableUniversityStats(u);
             const country = extractCountry(u.location);
-            const badge = BADGE_STYLES[index % BADGE_STYLES.length];
-            const ranking = getRankingText(u, index);
-            const popularCourses = getPopularCourses(u);
+            const badge = getBadge(u, true);
+            const accreditation = getAccreditationText(u);
+            const popularCourses = getPopularCourses({ ...u, courseCategories: u.courseCategories || [] });
             const universityType = getUniversityType(u);
+            const programLevels = deriveProgramLevels(u.programTypes);
+            const fieldTags = deriveFieldTags(u.programTypes, u.courseCategories, u.name);
+
+            // Parse achievements safely
+            let achievements = [];
+            try {
+                achievements = typeof u.achievements === 'string' ? JSON.parse(u.achievements) : (u.achievements || []);
+            } catch (e) { achievements = []; }
 
             return {
                 id: `sd-${u.id}`,
@@ -246,20 +312,20 @@ const Platform = () => {
                 country,
                 students: stats.scholars,
                 programs: stats.modules,
-                established: '2012',
-                rating: 4.9,
+                established: null,
                 image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackImg),
                 fallbackImage: fallbackImg,
                 logo: u.profile_image ? getMediaUrl(u.profile_image) : null,
-                specialties: ["Computer Science", "Business Management", "Engineering"],
-                description: u.description || "Leading institutional partner providing accredited degrees, innovative diplomas, and global student placement.",
+                specialties: [],
+                description: u.description || null,
                 badge,
-                ranking,
+                accreditation,
                 popularCourses,
-                programLevels: 'UG | PG | Diploma',
+                programLevels,
+                fieldTags,
                 universityType,
                 isSkillDadOwned: true,
-                raw: u
+                raw: { ...u, achievements }
             };
         });
 
@@ -291,25 +357,29 @@ const Platform = () => {
         return Object.entries(counts);
     }, [allUniversities]);
 
-    // Available Program Levels
+    // Available Program Levels — computed from real programLevels strings
     const levelCounts = useMemo(() => {
-        return [
-            ['Undergraduate', allUniversities.length],
-            ['Postgraduate', Math.max(1, Math.round(allUniversities.length * 0.85))],
-            ['Diploma & Certificate', Math.max(1, Math.round(allUniversities.length * 0.65))]
+        const LEVEL_OPTIONS = [
+            'Undergraduate / Postgraduate',
+            'Work-Based Learning',
+            'Study Abroad',
+            'Short Courses & Diplomas',
         ];
+        return LEVEL_OPTIONS.map(level => [
+            level,
+            allUniversities.filter(u => u.programLevels && u.programLevels.includes(level)).length
+        ]).filter(([, count]) => count > 0);
     }, [allUniversities]);
 
-    // Available Popular Fields
+    // Available Popular Fields — computed from real fieldTags derived from course categories
     const fieldCounts = useMemo(() => {
-        return [
-            ['Computer Science & IT', Math.max(1, Math.round(allUniversities.length * 0.9))],
-            ['Business & Management', Math.max(1, Math.round(allUniversities.length * 0.8))],
-            ['Engineering & Tech', Math.max(1, Math.round(allUniversities.length * 0.7))],
-            ['Health Sciences & Care', Math.max(1, Math.round(allUniversities.length * 0.4))],
-            ['Hospitality & Culinary', Math.max(1, Math.round(allUniversities.length * 0.35))],
-            ['Data Science & AI', Math.max(1, Math.round(allUniversities.length * 0.55))]
-        ];
+        const counts = {};
+        allUniversities.forEach(u => {
+            (u.fieldTags || []).forEach(tag => {
+                counts[tag] = (counts[tag] || 0) + 1;
+            });
+        });
+        return Object.entries(counts).sort((a, b) => b[1] - a[1]);
     }, [allUniversities]);
 
     // Toggle filter helper
@@ -358,6 +428,20 @@ const Platform = () => {
             results = results.filter(u => selectedTypes.includes(u.universityType));
         }
 
+        // Program Level filter — uses real programLevels derived from DB
+        if (selectedLevels.length > 0) {
+            results = results.filter(u =>
+                u.programLevels && selectedLevels.some(level => u.programLevels.includes(level))
+            );
+        }
+
+        // Popular Fields filter — uses real fieldTags derived from course categories
+        if (selectedFields.length > 0) {
+            results = results.filter(u =>
+                u.fieldTags && selectedFields.some(field => u.fieldTags.includes(field))
+            );
+        }
+
         // Sorting
         if (sortBy === 'name_asc') {
             results.sort((a, b) => a.name.localeCompare(b.name));
@@ -366,9 +450,14 @@ const Platform = () => {
         } else if (sortBy === 'programs') {
             results.sort((a, b) => parseInt(b.programs) - parseInt(a.programs));
         } else if (sortBy === 'ranking') {
-            results.sort((a, b) => a.ranking.localeCompare(b.ranking));
+            // Sort those with accreditation first
+            results.sort((a, b) => {
+                if (a.accreditation && !b.accreditation) return -1;
+                if (!a.accreditation && b.accreditation) return 1;
+                return a.name.localeCompare(b.name);
+            });
         } else {
-            // Default: popularity
+            // Default: popularity — partner unis first, then by course count desc
             results.sort((a, b) => {
                 if (a.isSkillDadOwned !== b.isSkillDadOwned) return a.isSkillDadOwned ? 1 : -1;
                 return b.name.localeCompare(a.name);
@@ -376,7 +465,7 @@ const Platform = () => {
         }
 
         return results;
-    }, [allUniversities, searchQuery, selectedCountries, selectedTypes, sortBy]);
+    }, [allUniversities, searchQuery, selectedCountries, selectedTypes, selectedLevels, selectedFields, sortBy]);
 
     // Pagination calculations
     const totalPages = Math.ceil(filteredUniversities.length / ITEMS_PER_PAGE) || 1;
@@ -801,6 +890,18 @@ const Platform = () => {
                                             <X size={11} className="cursor-pointer" onClick={() => toggleFilter(selectedTypes, setSelectedTypes, t)} />
                                         </span>
                                     ))}
+                                    {selectedLevels.map(l => (
+                                        <span key={l} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100/70 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-[11px] font-medium">
+                                            {l}
+                                            <X size={11} className="cursor-pointer" onClick={() => toggleFilter(selectedLevels, setSelectedLevels, l)} />
+                                        </span>
+                                    ))}
+                                    {selectedFields.map(f => (
+                                        <span key={f} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-100/70 text-violet-700 dark:bg-violet-950 dark:text-violet-300 text-[11px] font-medium">
+                                            {f}
+                                            <X size={11} className="cursor-pointer" onClick={() => toggleFilter(selectedFields, setSelectedFields, f)} />
+                                        </span>
+                                    ))}
                                     <button
                                         onClick={handleResetFilters}
                                         className="text-[11px] text-[#4C1D95] dark:text-purple-300 hover:underline font-semibold ml-1 cursor-pointer"
@@ -809,6 +910,7 @@ const Platform = () => {
                                     </button>
                                 </div>
                             )}
+
 
                             {/* Loading State */}
                             {loading ? (
@@ -911,16 +1013,28 @@ const Platform = () => {
                                                     {/* Meta Information Rows */}
                                                     <div className="space-y-1.5 py-2 border-y border-slate-100 dark:border-purple-900/30 text-[11px] mb-3">
                                                         
-                                                        {/* Row 1: QS Ranking / Accreditation */}
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                                                                <Award size={12} className="text-purple-600 dark:text-purple-400 shrink-0" />
-                                                                <span>QS Ranking:</span>
+                                                        {/* Row 1: Accreditation (only if real data exists) */}
+                                                        {uni.accreditation ? (
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                                                    <Award size={12} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                                                                    <span>Accreditation:</span>
+                                                                </div>
+                                                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-right">
+                                                                    {uni.accreditation}
+                                                                </span>
                                                             </div>
-                                                            <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                                                {uni.ranking}
-                                                            </span>
-                                                        </div>
+                                                        ) : (
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                                                    <Award size={12} className="text-purple-600 dark:text-purple-400 shrink-0" />
+                                                                    <span>Status:</span>
+                                                                </div>
+                                                                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                                                    Verified Institution
+                                                                </span>
+                                                            </div>
+                                                        )}
 
                                                         {/* Row 2: Popular Courses */}
                                                         <div className="flex items-center justify-between gap-2">
@@ -933,16 +1047,18 @@ const Platform = () => {
                                                             </span>
                                                         </div>
 
-                                                        {/* Row 3: Program Levels */}
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                                                                <Layers size={12} className="text-violet-600 dark:text-violet-400 shrink-0" />
-                                                                <span>Program Levels:</span>
+                                                        {/* Row 3: Program Levels (only if real data exists) */}
+                                                        {uni.programLevels && (
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                                                    <Layers size={12} className="text-violet-600 dark:text-violet-400 shrink-0" />
+                                                                    <span>Programs:</span>
+                                                                </div>
+                                                                <span className="font-semibold text-slate-800 dark:text-slate-200 text-right truncate max-w-[55%]">
+                                                                    {uni.programLevels}
+                                                                </span>
                                                             </div>
-                                                            <span className="font-semibold text-slate-800 dark:text-slate-200">
-                                                                {uni.programLevels}
-                                                            </span>
-                                                        </div>
+                                                        )}
 
                                                     </div>
 

@@ -59,7 +59,9 @@ router.get('/universities', async (req, res) => {
                 (SELECT COUNT(*) FROM enrollments e WHERE e.student_id IN (
                     SELECT s.id FROM users s WHERE s.university_id = u.id OR s.registered_by = u.id
                 )) as "studentCount",
-                (SELECT COUNT(*) FROM courses c WHERE c.instructor_id = u.id) as "courseCount"
+                (SELECT COUNT(*) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true) as "courseCount",
+                COALESCE((SELECT array_agg(DISTINCT c.program_type) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true AND c.program_type IS NOT NULL AND c.program_type != ''), ARRAY[]::text[]) as "programTypes",
+                COALESCE((SELECT array_agg(DISTINCT c.category) FROM courses c WHERE c.instructor_id = u.id AND c.is_published = true AND c.category IS NOT NULL AND c.category != ''), ARRAY[]::text[]) as "courseCategories"
             FROM users u
             WHERE LOWER(u.role) = 'university' AND u.is_verified = true
             ORDER BY u.name ASC
@@ -70,7 +72,9 @@ router.get('/universities', async (req, res) => {
             ...uni,
             _id: uni.id,
             profile: typeof uni.profile === 'string' ? JSON.parse(uni.profile) : uni.profile,
-            profileImage: uni.profile_image
+            profileImage: uni.profile_image,
+            programTypes: uni.programTypes || [],
+            courseCategories: uni.courseCategories || []
         }));
 
         res.json(enrichedUnis || []);
@@ -101,7 +105,55 @@ router.get('/skilldad-universities', async (req, res) => {
             WHERE su.is_active = true
             ORDER BY su.created_at ASC
         `);
-        res.json(result.rows || []);
+
+        // Enrich with real course program_types and categories from assigned_courses
+        const enrichedRows = await Promise.all(result.rows.map(async (su) => {
+            let assigned = [];
+            try {
+                const raw = su.assigned_courses;
+                if (raw) {
+                    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+                    assigned = Array.isArray(parsed) ? parsed : [];
+                }
+            } catch (e) {
+                assigned = [];
+            }
+
+            let programTypes = [];
+            let courseCategories = [];
+            if (assigned.length > 0) {
+                try {
+                    const courseRes = await query(
+                        `SELECT DISTINCT program_type, category FROM courses WHERE id = ANY($1::text[]) AND is_published = true`,
+                        [assigned]
+                    );
+                    programTypes = [...new Set(courseRes.rows.map(c => c.program_type).filter(Boolean))];
+                    courseCategories = [...new Set(courseRes.rows.map(c => c.category).filter(Boolean))];
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            // Also check by university_name match
+            try {
+                const nameMatchRes = await query(
+                    `SELECT DISTINCT program_type, category FROM courses WHERE LOWER(university_name) = LOWER($1) AND is_published = true`,
+                    [su.name]
+                );
+                nameMatchRes.rows.forEach(c => {
+                    if (c.program_type) programTypes.push(c.program_type);
+                    if (c.category) courseCategories.push(c.category);
+                });
+                programTypes = [...new Set(programTypes)];
+                courseCategories = [...new Set(courseCategories)];
+            } catch (e) {
+                // ignore
+            }
+
+            return { ...su, programTypes, courseCategories };
+        }));
+
+        res.json(enrichedRows || []);
     } catch (error) {
         console.error('Error fetching SkillDad universities:', error.message);
         res.status(500).json({ message: error.message });
