@@ -156,7 +156,7 @@ const Navbar = ({ compact = false }) => {
                         </span>
                     </div>
 
-                    {/* Desktop Menu - Dark purple text and underline on select or hover */}
+                    {/* Desktop Menu - Deep purple text and underline on select, hover, or click */}
                     {!isAuthPage && (
                         <div className="hidden lg:flex items-center justify-center space-x-3 xl:space-x-4.5 shrink-0">
                             {navItems.map((item) => {
@@ -167,16 +167,18 @@ const Navbar = ({ compact = false }) => {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        className={`relative group py-1.5 font-semibold text-[13px] tracking-tight whitespace-nowrap transition-colors duration-200 ${
+                                        className={`relative group py-1.5 text-[13.5px] tracking-tight whitespace-nowrap transition-colors duration-200 ${
                                             isSelected
-                                                ? 'text-[#4C1D95] dark:text-purple-300'
-                                                : 'text-slate-700 hover:text-[#4C1D95] dark:text-[#E9D5FF] dark:hover:text-purple-200'
+                                                ? '!text-[#6D28D9] [.light-mode_&]:!text-[#6D28D9] font-bold dark:!text-purple-300'
+                                                : 'text-slate-600 [.light-mode_&]:text-slate-600 font-semibold hover:!text-[#6D28D9] [.light-mode_&]:hover:!text-[#6D28D9] active:!text-[#6D28D9] [.light-mode_&]:active:!text-[#6D28D9] dark:text-[#E9D5FF] dark:hover:text-purple-200'
                                         }`}
                                     >
-                                        <span>{item.name}</span>
-                                        {/* Dark purple underline on select OR hover */}
+                                        <span className={`transition-colors duration-200 ${isSelected ? '!text-[#6D28D9] [.light-mode_&]:!text-[#6D28D9] dark:!text-purple-300' : 'group-hover:!text-[#6D28D9] [.light-mode_&]:group-hover:!text-[#6D28D9] group-active:!text-[#6D28D9] [.light-mode_&]:group-active:!text-[#6D28D9]'}`}>
+                                            {item.name}
+                                        </span>
+                                        {/* Deep purple underline on select OR hover */}
                                         <span
-                                            className={`absolute bottom-0 left-0 right-0 h-[2.5px] rounded-full bg-[#4C1D95] dark:bg-purple-400 transition-all duration-200 origin-center ${
+                                            className={`absolute bottom-0 left-0 right-0 h-[2.5px] rounded-full bg-[#6D28D9] dark:bg-purple-400 transition-all duration-200 origin-center ${
                                                 isSelected
                                                     ? 'opacity-100 scale-x-100'
                                                     : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'
@@ -345,16 +347,25 @@ const Navbar = ({ compact = false }) => {
                     </div>
 
                     <div className="flex flex-col space-y-6">
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.name}
-                                to={item.href}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="text-lg font-medium text-slate-100 hover:text-primary transition-colors"
-                            >
-                                {item.name}
-                            </Link>
-                        ))}
+                        {navItems.map((item) => {
+                            const isSelected = item.href === '/' 
+                                ? location.pathname === '/' 
+                                : location.pathname.startsWith(item.href);
+                            return (
+                                <Link
+                                    key={item.name}
+                                    to={item.href}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className={`text-lg font-medium transition-colors ${
+                                        isSelected
+                                            ? '!text-[#6D28D9] dark:!text-purple-300 font-bold'
+                                            : 'text-slate-800 dark:text-slate-100 hover:!text-[#6D28D9] active:!text-[#6D28D9] dark:hover:text-purple-200'
+                                    }`}
+                                >
+                                    {item.name}
+                                </Link>
+                            );
+                        })}
                         <div className={`h-[1px] w-full my-4 ${theme === 'light' ? 'bg-black/10' : 'bg-white/10'}`}></div>
                         {user ? (
                             <button

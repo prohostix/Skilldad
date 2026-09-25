@@ -602,7 +602,39 @@ const HeroSection = () => {
                                 <line x1="50.0" y1="79.5" x2="23.0" y2="50.0" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
                                 <line x1="23.0" y1="50.0" x2="29.1" y2="29.1" stroke="rgba(168, 85, 247, 0.35)" strokeWidth="0.2" strokeDasharray="1.2 1.5" shapeRendering="geometricPrecision" />
 
+                                {/* One Moving Dot on Every Spoke Connection Line */}
+                                <circle r="0.55" fill="#7C3AED">
+                                    <animateMotion path="M 41.5 41.5 L 29.1 29.1" dur="3.2s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.55" fill="#7C3AED">
+                                    <animateMotion path="M 58.5 41.5 L 70.9 29.1" dur="3.4s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.55" fill="#7C3AED">
+                                    <animateMotion path="M 62.0 50.0 L 79.5 50.0" dur="3.1s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.55" fill="#7C3AED">
+                                    <animateMotion path="M 38.0 50.0 L 23.0 50.0" dur="3.3s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.55" fill="#7C3AED">
+                                    <animateMotion path="M 50.0 62.0 L 50.0 79.5" dur="3.2s" repeatCount="indefinite" />
+                                </circle>
 
+                                {/* One Moving Dot on Every Perimeter Connection Line */}
+                                <circle r="0.48" fill="#9333EA">
+                                    <animateMotion path="M 29.1 29.1 L 70.9 29.1" dur="5.0s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.48" fill="#9333EA">
+                                    <animateMotion path="M 70.9 29.1 L 79.5 50.0" dur="4.6s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.48" fill="#9333EA">
+                                    <animateMotion path="M 79.5 50.0 L 50.0 79.5" dur="4.8s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.48" fill="#9333EA">
+                                    <animateMotion path="M 50.0 79.5 L 23.0 50.0" dur="5.1s" repeatCount="indefinite" />
+                                </circle>
+                                <circle r="0.48" fill="#9333EA">
+                                    <animateMotion path="M 23.0 50.0 L 29.1 29.1" dur="4.7s" repeatCount="indefinite" />
+                                </circle>
                             </svg>
                             {/* Center Hub: SkillDad Logo with Soft Radiant Aura (Reduced a little) */}
                             <motion.div
