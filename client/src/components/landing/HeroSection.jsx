@@ -723,17 +723,17 @@ const HeroSection = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                     
                     {/* Centered Small Uppercase Label with Thin Purple Dividers */}
-                    <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-5 mb-2 sm:mb-2.5 px-2">
-                        <div className="w-6 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
-                        <span className="text-[8.5px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-2.5 sm:gap-4 md:gap-5 mb-2.5 sm:mb-3 px-2">
+                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <span className="text-[9.5px] sm:text-[11.5px] md:text-[12.5px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-6 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                     </div>
 
                     {/* Mobile Marquee: Infinite Continuous Smooth Scrolling Ticker so All Real Partners Flow Fluidly */}
-                    <div className="sm:hidden relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] py-1">
-                        <div className="flex w-max items-center gap-6 animate-hero-marquee will-change-transform">
+                    <div className="sm:hidden relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] py-1.5">
+                        <div className="flex w-max items-center gap-7 animate-hero-marquee will-change-transform">
                             {[...partnersList, ...partnersList].map((partner, idx) => {
                                 const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
                                 return (
@@ -745,7 +745,7 @@ const HeroSection = () => {
                                         <img
                                             src={logoSrc}
                                             alt={partner.name}
-                                            className="h-5 sm:h-5.5 w-auto max-w-[100px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                            className="h-7 sm:h-8 w-auto max-w-[110px] sm:max-w-[130px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                         />
                                     </div>
                                 );
@@ -755,7 +755,7 @@ const HeroSection = () => {
 
                     {/* Desktop / Tablet: Centered Real Partner Batch Rotation with smooth AnimatePresence */}
                     <div
-                        className="hidden sm:flex relative min-h-[34px] md:min-h-[40px] items-center justify-center w-full px-4"
+                        className="hidden sm:flex relative min-h-[44px] md:min-h-[52px] items-center justify-center w-full px-4"
                         onMouseEnter={() => setIsPartnerHovered(true)}
                         onMouseLeave={() => setIsPartnerHovered(false)}
                     >
@@ -766,7 +766,7 @@ const HeroSection = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
                                 transition={{ duration: 0.35, ease: "easeInOut" }}
-                                className="flex items-center justify-center gap-8 md:gap-12 lg:gap-16 xl:gap-20 w-full py-1"
+                                className="flex items-center justify-center gap-7 md:gap-11 lg:gap-14 xl:gap-18 w-full py-1"
                             >
                                 {partnerBatches[partnerBatchIndex]?.map((partner, idx) => {
                                     const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
@@ -779,7 +779,7 @@ const HeroSection = () => {
                                             <img
                                                 src={logoSrc}
                                                 alt={partner.name}
-                                                className="h-6 md:h-7.5 w-auto max-w-[125px] md:max-w-[150px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                                className="h-8.5 sm:h-9.5 md:h-11 lg:h-12 w-auto max-w-[140px] md:max-w-[165px] lg:max-w-[185px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                             />
                                         </div>
                                     );
