@@ -778,36 +778,14 @@ const Platform = () => {
                         {/* RIGHT COLUMN: RESULTS & CARDS */}
                         <div className="lg:col-span-9 space-y-5">
                             
-                            {/* Section Header with Sort Dropdown */}
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-                                <div>
-                                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-space tracking-tight">
-                                        Featured Universities
-                                    </h2>
-                                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                        Explore some of our top partner universities offering world-class education and global career opportunities.
-                                    </p>
-                                </div>
-
-                                {/* Sort Dropdown - compact */}
-                                <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
-                                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Sort by:</span>
-                                    <div className="relative">
-                                        <select
-                                            value={sortBy}
-                                            onChange={(e) => setSortBy(e.target.value)}
-                                            aria-label="Sort universities by"
-                                            className="appearance-none bg-white dark:bg-[#130C28] text-[11px] font-semibold text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-purple-900/40 rounded-lg pl-2.5 pr-7 py-1.5 outline-none focus:border-[#4C1D95] cursor-pointer shadow-2xs"
-                                        >
-                                            <option value="popularity">Popularity</option>
-                                            <option value="name_asc">Name (A-Z)</option>
-                                            <option value="name_desc">Name (Z-A)</option>
-                                            <option value="programs">Programs Count</option>
-                                            <option value="ranking">Accreditation / Rank</option>
-                                        </select>
-                                        <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
+                            {/* Section Header */}
+                            <div className="pb-1">
+                                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-space tracking-tight">
+                                    Featured Universities
+                                </h2>
+                                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                    Explore some of our top partner universities offering world-class education and global career opportunities.
+                                </p>
                             </div>
 
                             {/* Active Filter Chips */}
