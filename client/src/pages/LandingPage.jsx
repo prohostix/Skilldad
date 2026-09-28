@@ -226,6 +226,34 @@ const LandingPage = () => {
             };
         }) : [];
 
+    // SkillDad-owned universities are display-only (no login/dashboard) - always shown after partner universities
+    const skillDadUniversityCards = dynamicSkillDadUniversities.map(u => {
+        const stats = getBelievableUniversityStats(u);
+        const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`;
+        return {
+            _id: `sd-${u.id}`,
+            name: u.name,
+            location: u.location || 'Global',
+            students: stats.scholars,
+            programs: stats.modules,
+            logo: u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo,
+            image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo),
+            description: u.description || 'World-class institution providing excellence in global education through SkillDad.',
+            established: '2023',
+            rating: (4.8 + (Math.random() * 0.15)).toFixed(1),
+            specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
+        };
+    });
+
+    // Merge partner universities and SkillDad universities, deduplicating by lowercase name to prevent duplicates
+    const seenNames = new Set();
+    const allUniversities = [...universities, ...skillDadUniversityCards].filter(u => {
+        const key = u.name?.trim().toLowerCase();
+        if (!key || seenNames.has(key)) return false;
+        seenNames.add(key);
+        return true;
+    });
+
     const visibleUnis = allUniversities.length > 0
         ? [0, 1, 2, 3].map(offset => allUniversities[(uniStartIndex + offset) % allUniversities.length])
         : [];
