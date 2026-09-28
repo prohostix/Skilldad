@@ -54,11 +54,11 @@ const Footer = ({ forceVisible = false, className = '' }) => {
                         {/* Right: button */}
                         <div className="relative shrink-0">
                             {user ? (
-                                <button onClick={() => navigate(getDashboardLink())} className="px-5 py-2 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-bold font-inter text-xs shadow-glow-purple hover:scale-105 transition-transform duration-300 whitespace-nowrap">
+                                <button onClick={() => navigate(getDashboardLink())} className="px-5 py-2 bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#6D28D9] text-white rounded-xl font-bold font-inter text-xs shadow-[0_0_18px_rgba(91,33,182,0.55)] hover:shadow-[0_0_24px_rgba(91,33,182,0.75)] hover:scale-105 transition-all duration-300 whitespace-nowrap border border-[#7C3AED]/30">
                                     Go to Dashboard →
                                 </button>
                             ) : (
-                                <button onClick={() => navigate('/register')} className="px-5 py-2 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-bold font-inter text-xs shadow-glow-purple hover:scale-105 transition-transform duration-300 whitespace-nowrap">
+                                <button onClick={() => navigate('/register')} className="px-5 py-2 bg-gradient-to-r from-[#4C1D95] via-[#5B21B6] to-[#6D28D9] text-white rounded-xl font-bold font-inter text-xs shadow-[0_0_18px_rgba(91,33,182,0.55)] hover:shadow-[0_0_24px_rgba(91,33,182,0.75)] hover:scale-105 transition-all duration-300 whitespace-nowrap border border-[#7C3AED]/30">
                                     Get Started →
                                 </button>
                             )}
