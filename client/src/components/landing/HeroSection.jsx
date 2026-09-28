@@ -739,13 +739,13 @@ const HeroSection = () => {
                                 return (
                                     <div
                                         key={`m-${partner.id || partner.name}-${idx}`}
-                                        className="group flex items-center justify-center h-6 shrink-0 opacity-90 px-1"
+                                        className="group flex items-center justify-center h-5 shrink-0 opacity-90 px-1"
                                         title={partner.name}
                                     >
                                         <img
                                             src={logoSrc}
                                             alt={partner.name}
-                                            className="h-[18px] max-h-[18px] w-auto max-w-[110px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                            className="h-[14px] max-h-[14px] w-auto max-w-[90px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                         />
                                     </div>
                                 );
@@ -755,7 +755,7 @@ const HeroSection = () => {
 
                     {/* Desktop / Tablet: Centered Real Partner Batch Rotation with smooth AnimatePresence */}
                     <div
-                        className="hidden sm:flex relative min-h-[32px] md:min-h-[36px] lg:min-h-[40px] items-center justify-center w-full px-4"
+                        className="hidden sm:flex relative min-h-[26px] md:min-h-[28px] lg:min-h-[30px] items-center justify-center w-full px-4"
                         onMouseEnter={() => setIsPartnerHovered(true)}
                         onMouseLeave={() => setIsPartnerHovered(false)}
                     >
@@ -773,13 +773,13 @@ const HeroSection = () => {
                                     return (
                                         <div
                                             key={partner.id || partner.name || idx}
-                                            className="group flex items-center justify-center h-7 md:h-8 lg:h-9 cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
+                                            className="group flex items-center justify-center h-6 md:h-7 cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
                                             title={partner.name}
                                         >
                                             <img
                                                 src={logoSrc}
                                                 alt={partner.name}
-                                                className="h-[22px] sm:h-[26px] md:h-[28px] max-h-[22px] sm:max-h-[26px] md:max-h-[28px] w-auto max-w-[140px] md:max-w-[160px] lg:max-w-[180px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                                className="h-[15px] sm:h-[17px] md:h-[19px] max-h-[15px] sm:max-h-[17px] md:max-h-[19px] w-auto max-w-[110px] md:max-w-[130px] lg:max-w-[150px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                             />
                                         </div>
                                     );
