@@ -732,21 +732,20 @@ const HeroSection = () => {
                     </div>
 
                     {/* Mobile Marquee: Infinite Continuous Smooth Scrolling Ticker so All Real Partners Flow Fluidly */}
-                    {/* Mobile Marquee: Infinite Continuous Smooth Scrolling Ticker with Uniform Logo Slots */}
                     <div className="sm:hidden relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] py-0.5">
-                        <div className="flex w-max items-center gap-4 animate-hero-marquee will-change-transform">
+                        <div className="flex w-max items-center gap-6 animate-hero-marquee will-change-transform">
                             {[...partnersList, ...partnersList].map((partner, idx) => {
                                 const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
                                 return (
                                     <div
                                         key={`m-${partner.id || partner.name}-${idx}`}
-                                        className="w-24 h-8 flex items-center justify-center shrink-0 opacity-90 px-1"
+                                        className="group flex items-center justify-center h-8 shrink-0 opacity-90 px-1"
                                         title={partner.name}
                                     >
                                         <img
                                             src={logoSrc}
                                             alt={partner.name}
-                                            className="max-h-6.5 max-w-[85%] w-auto h-auto object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                            className="h-[28px] max-h-[28px] w-auto max-w-[140px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                         />
                                     </div>
                                 );
@@ -754,9 +753,9 @@ const HeroSection = () => {
                         </div>
                     </div>
 
-                    {/* Desktop / Tablet: Centered Real Partner Batch Rotation with Uniform Equal-Sized Logo Slots */}
+                    {/* Desktop / Tablet: Centered Real Partner Batch Rotation with smooth AnimatePresence */}
                     <div
-                        className="hidden sm:flex relative min-h-[44px] md:min-h-[48px] items-center justify-center w-full px-2"
+                        className="hidden sm:flex relative min-h-[46px] md:min-h-[50px] lg:min-h-[54px] items-center justify-center w-full px-4"
                         onMouseEnter={() => setIsPartnerHovered(true)}
                         onMouseLeave={() => setIsPartnerHovered(false)}
                     >
@@ -767,20 +766,20 @@ const HeroSection = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -4 }}
                                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                                className="flex items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12 w-full py-0.5"
+                                className="flex items-center justify-center gap-7 md:gap-11 lg:gap-14 xl:gap-18 w-full py-0.5"
                             >
                                 {partnerBatches[partnerBatchIndex]?.map((partner, idx) => {
                                     const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
                                     return (
                                         <div
                                             key={partner.id || partner.name || idx}
-                                            className="w-28 sm:w-32 md:w-36 lg:w-40 h-10 sm:h-11 md:h-12 flex items-center justify-center cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
+                                            className="group flex items-center justify-center h-10 md:h-11 lg:h-12 cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
                                             title={partner.name}
                                         >
                                             <img
                                                 src={logoSrc}
                                                 alt={partner.name}
-                                                className="max-h-7.5 sm:max-h-8.5 md:max-h-9 max-w-[85%] w-auto h-auto object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                                className="h-[34px] sm:h-[38px] md:h-[42px] max-h-[34px] sm:max-h-[38px] md:max-h-[42px] w-auto max-w-[190px] md:max-w-[210px] lg:max-w-[230px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                             />
                                         </div>
                                     );
