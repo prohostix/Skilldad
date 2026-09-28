@@ -40,11 +40,6 @@ import { getBelievableUniversityStats } from '../utils/universityStats';
 
 const LandingPage = () => {
     const navigate = useNavigate();
-    // Hiring-partner logos are hotlinked from Wikimedia Commons, which
-    // occasionally renames/moves files (e.g. TCS's logo 404ing) - track any
-    // that fail to load so those entries gracefully fall back to a text
-    // badge, the same treatment already used for partners with no logo URL.
-    const [brokenLogos, setBrokenLogos] = useState(() => new Set());
     const [dynamicDirectors, setDynamicDirectors] = useState([]);
     const [dynamicLogos, setDynamicLogos] = useState([]);
     const [featuredCourses, setFeaturedCourses] = useState([]);
@@ -200,39 +195,6 @@ const LandingPage = () => {
     const corporateLogos = dynamicLogos.filter(l => l.type === 'corporate');
     const universityPartners = dynamicLogos.filter(l => l.type === 'university');
 
-    // Prepare partner rows - using final verified SVG URLs
-    const row1Static = [
-        { name: 'TCS', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/9b/TATA_Consultancy_Services_Logo.svg' },
-        { name: 'Infosys', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/95/Infosys_logo.svg' },
-        { name: 'Wipro', logo: null },
-        { name: 'Accenture', logo: 'https://upload.wikimedia.org/wikipedia/commons/c/cd/Accenture.svg' },
-        { name: 'IBM', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg' },
-        { name: 'HCL Technologies', logo: null },
-        { name: 'Capgemini', logo: null },
-        { name: 'Cognizant', logo: null },
-        { name: 'Tech Mahindra', logo: null },
-        { name: 'Deloitte', logo: null }
-    ];
-    const row2Static = [
-        { name: 'Google', logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg' },
-        { name: 'Microsoft', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg' },
-        { name: 'Amazon', logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg' },
-        { name: 'Meta', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg' },
-        { name: 'Oracle', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg' },
-        { name: 'SAP', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg' },
-        { name: 'Adobe', logo: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Adobe_Systems_logo_and_wordmark.svg' },
-        { name: 'Intel', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Intel_logo_%282020%2C_light_blue%29.svg' },
-        { name: 'Goldman Sachs', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Goldman_Sachs.svg' },
-        { name: 'Salesforce', logo: 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg' }
-    ];
-
-    const staticUnis = [
-        { name: 'Oxford Digital', location: 'United Kingdom', students: '12K+', programs: '45+' },
-        { name: 'MIT Horizon', location: 'United States', students: '18K+', programs: '60+' },
-        { name: 'Stanford Online', location: 'United States', students: '15K+', programs: '52+' },
-        { name: 'ETH Zurich', location: 'Switzerland', students: '10K+', programs: '38+' }
-    ];
-
     const universities = dynamicUniversities.length > 0
         ? dynamicUniversities.map(u => {
             const stats = getBelievableUniversityStats(u);
@@ -262,55 +224,7 @@ const LandingPage = () => {
                 rating: 4.9,
                 specialties: ['Digital Transformation', 'Enterprise Learning']
             };
-        }) : staticUnis;
-
-    // SkillDad-owned universities are display-only (no login/dashboard) - always shown after partner universities
-    const skillDadUniversityCards = dynamicSkillDadUniversities.map(u => {
-        const stats = getBelievableUniversityStats(u);
-        const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=128&background=5B5CFF&color=fff&bold=true`;
-        return {
-            _id: `sd-${u.id}`,
-            name: u.name,
-            location: u.location || 'Global',
-            students: stats.scholars,
-            programs: stats.modules,
-            logo: u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo,
-            image: u.cover_image ? getMediaUrl(u.cover_image) : (u.profile_image ? getMediaUrl(u.profile_image) : fallbackLogo),
-            description: u.description || 'World-class institution providing excellence in global education through SkillDad.',
-            established: '2023',
-            rating: (4.8 + (Math.random() * 0.15)).toFixed(1),
-            specialties: ['Innovation', 'Technology', 'Global Research', 'Leadership']
-        };
-    });
-
-    // Merge partner universities and SkillDad universities, deduplicating by lowercase name to prevent duplicates
-    const seenNames = new Set();
-    const allUniversities = [...universities, ...skillDadUniversityCards].filter(u => {
-        const key = u.name?.trim().toLowerCase();
-        if (!key || seenNames.has(key)) return false;
-        seenNames.add(key);
-        return true;
-    });
-
-
-    let marqueeRow1 = [];
-    let marqueeRow2 = [];
-
-    if (corporateLogos.length > 0) {
-        // Split dynamic logos into two rows
-        const mid = Math.ceil(corporateLogos.length / 2);
-        marqueeRow1 = corporateLogos.slice(0, mid);
-        marqueeRow2 = corporateLogos.slice(mid);
-
-        // Ensure minimum length for smooth scrolling
-        while (marqueeRow1.length < 10) marqueeRow1 = [...marqueeRow1, ...marqueeRow1];
-        while (marqueeRow2.length < 10) marqueeRow2 = [...marqueeRow2, ...marqueeRow2];
-    } else {
-        marqueeRow1 = row1Static;
-        marqueeRow2 = row2Static;
-    }
-
-    // No need to enrich logos - they're already complete in the static arrays
+        }) : [];
 
     const visibleUnis = allUniversities.length > 0
         ? [0, 1, 2, 3].map(offset => allUniversities[(uniStartIndex + offset) % allUniversities.length])
@@ -459,113 +373,6 @@ const LandingPage = () => {
 
             <CapabilitiesSection />
             <AnimatedLogoSection />
-
-            {/* Hiring Partners Marquee Banner */}
-            <section className="relative py-16 md:py-20 overflow-hidden bg-transparent z-10 section-optimize">
-                {/* Label */}
-                <div className="text-center mb-6 sm:mb-8 px-4">
-                    <motion.h2
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        className="text-base md:text-xl font-black text-white font-jakarta tracking-tight uppercase break-words"
-                    >
-                        Companies That <span className="text-primary block sm:inline mt-1 sm:mt-0">Trust SkillDad</span>
-                    </motion.h2>
-                    <div className="w-12 h-0.5 bg-primary/20 mx-auto mt-3 rounded-full" />
-                </div>
-
-                {/* Row 1 - Scrolls Left */}
-                <div className="relative overflow-hidden whitespace-nowrap mb-6 pointer-events-none sm:pointer-events-auto">
-                    <div className="flex animate-scroll will-change-transform" style={{ animationDuration: '120s' }}>
-                        {[...marqueeRow1, ...marqueeRow1].map((company, i) => (
-                            <div key={i} className="ml-2 flex items-center space-x-3 group cursor-default">
-                                <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="px-4 py-2.5 sm:py-3 flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                                    {(company.logo || company.imageUrl) && !brokenLogos.has(company.name) ? (
-                                        <div className="relative w-24 sm:w-32 h-8 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                                            {/* Invisible spacer to set correct dimensions */}
-                                            <img
-                                                src={company.logo || getMediaUrl(company.imageUrl)}
-                                                alt={company.name}
-                                                onError={() => setBrokenLogos((prev) => new Set(prev).add(company.name))}
-                                                className="h-full w-full object-contain invisible"
-                                            />
-                                            {/* Solid Purple Silhouette */}
-                                            <div
-                                                className="absolute inset-0 bg-primary transition-opacity duration-500 group-hover:opacity-0"
-                                                style={{
-                                                    WebkitMaskImage: `url('${company.logo || getMediaUrl(company.imageUrl)}')`,
-                                                    WebkitMaskSize: 'contain',
-                                                    WebkitMaskRepeat: 'no-repeat',
-                                                    WebkitMaskPosition: 'center'
-                                                }}
-                                            />
-                                            {/* Original Colored Logo */}
-                                            <img
-                                                src={company.logo || getMediaUrl(company.imageUrl)}
-                                                alt={company.name}
-                                                className="absolute inset-0 h-full w-full object-contain opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    {/* Edge fades */}
-                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-                </div>
-
-                {/* Row 2 - Scrolls Right */}
-                <div className="relative overflow-hidden whitespace-nowrap pointer-events-none sm:pointer-events-auto">
-                    <div className="flex animate-scroll-reverse will-change-transform" style={{ animationDuration: '130s' }}>
-                        {[...marqueeRow2, ...marqueeRow2].map((company, i) => (
-                            <div key={i} className="ml-2 flex items-center space-x-3 group cursor-default">
-                                <div className="w-1.5 h-1.5 rounded-full bg-primary/50 group-hover:bg-primary transition-colors" />
-                                <div className="px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-center min-w-[120px] sm:min-w-[140px]">
-                                    {(company.logo || company.imageUrl) && !brokenLogos.has(company.name) ? (
-                                        <div className="relative w-24 sm:w-32 h-8 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                                            {/* Invisible spacer to set correct dimensions */}
-                                            <img
-                                                src={company.logo || getMediaUrl(company.imageUrl)}
-                                                alt={company.name}
-                                                onError={() => setBrokenLogos((prev) => new Set(prev).add(company.name))}
-                                                className="h-full w-full object-contain invisible"
-                                            />
-                                            {/* Solid Purple Silhouette */}
-                                            <div
-                                                className="absolute inset-0 bg-primary transition-opacity duration-500 group-hover:opacity-0"
-                                                style={{
-                                                    WebkitMaskImage: `url('${company.logo || getMediaUrl(company.imageUrl)}')`,
-                                                    WebkitMaskSize: 'contain',
-                                                    WebkitMaskRepeat: 'no-repeat',
-                                                    WebkitMaskPosition: 'center'
-                                                }}
-                                            />
-                                            {/* Original Colored Logo */}
-                                            <img
-                                                src={company.logo || getMediaUrl(company.imageUrl)}
-                                                alt={company.name}
-                                                className="absolute inset-0 h-full w-full object-contain opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <span className="text-white/70 font-bold text-xs sm:text-sm tracking-wide whitespace-nowrap group-hover:text-white transition-colors">{company.name}</span>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    {/* Edge fades */}
-                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
-                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
-                </div>
-            </section>
-
-
 
             {/* Service Synergy - Feature Grid */}
             <section id="features" className="py-2 md:py-4 bg-transparent relative overflow-hidden px-6 section-optimize">
