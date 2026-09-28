@@ -661,7 +661,7 @@ const HeroSection = () => {
                         </div>
 
                         {/* Heading: "Confusion to Career" */}
-                        <h1 className="text-[32px] sm:text-[40px] md:text-[46px] lg:text-[46px] xl:text-[54px] font-black tracking-tight leading-[1.08] font-sans">
+                        <h1 className="text-[36px] sm:text-[44px] md:text-[52px] lg:text-[54px] xl:text-[62px] 2xl:text-[68px] font-black tracking-tight leading-[1.06] font-sans">
                             <span className="text-[#0F172A] dark:text-white block">
                                 Confusion to
                             </span>
