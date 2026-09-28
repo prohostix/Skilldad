@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-    Plus, Edit2, Trash2, X, Briefcase, MapPin, Link as LinkIcon, Star, Save
+    Plus, Edit2, Trash2, X, Briefcase, MapPin, Link as LinkIcon, Star, Save,
+    Upload, Image as ImageIcon, Loader2
 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import DashboardHeading from '../../components/ui/DashboardHeading';
 import GlassCard from '../../components/ui/GlassCard';
 import ModernButton from '../../components/ui/ModernButton';
+import { getMediaUrl } from '../../utils/media';
 
 const EMPTY_JOB = {
-    id: '', title: '', company: '', location: '', type: 'Full-time',
+    id: '', title: '', company: '', logo: '', location: '', type: 'Full-time',
     description: '', applyLink: '', postedDate: '', deadline: '', featured: false
 };
 
@@ -28,6 +30,44 @@ const JobAlertsManager = () => {
     const [editingIndex, setEditingIndex] = useState(null);
     const [form, setForm] = useState(EMPTY_JOB);
     const [saving, setSaving] = useState(false);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+
+    const handleLogoUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select a valid image file (PNG, JPG, SVG, WebP)', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        setUploadingLogo(true);
+        try {
+            const config = {
+                ...getAuthConfig(),
+                headers: {
+                    ...getAuthConfig().headers,
+                    'Content-Type': 'multipart/form-data'
+                }
+            };
+            const { data } = await axios.post('/api/upload/media', formData, config);
+            const url = data?.url || data?.filePath;
+            if (url) {
+                setForm(prev => ({ ...prev, logo: url }));
+                showToast('Company logo uploaded successfully!', 'success');
+            } else {
+                showToast('Upload returned invalid response', 'error');
+            }
+        } catch (err) {
+            console.error('Failed to upload logo:', err);
+            showToast(err.response?.data?.message || 'Failed to upload company logo', 'error');
+        } finally {
+            setUploadingLogo(false);
+        }
+    };
 
     const fetchAll = async () => {
         try {
@@ -157,15 +197,31 @@ const JobAlertsManager = () => {
                 ) : (
                     jobs.map((job, index) => (
                         <GlassCard key={job.id || index} className="p-4 flex items-center justify-between gap-4 flex-wrap">
-                            <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <h4 className="font-bold text-white text-sm truncate">{job.title}</h4>
-                                    {job.featured && <Star size={13} className="text-amber-400 fill-amber-400 shrink-0" />}
+                            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                {/* Company Logo or Initials Avatar */}
+                                <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-bold text-xs text-white/80 overflow-hidden shrink-0 shadow-2xs">
+                                    {job.logo ? (
+                                        <img
+                                            src={job.logo.startsWith('http') ? job.logo : getMediaUrl(job.logo)}
+                                            alt={job.company}
+                                            className="w-full h-full object-contain p-1"
+                                        />
+                                    ) : (
+                                        <span className="text-white/40">
+                                            {(job.company || '?').slice(0, 2).toUpperCase()}
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-white/50">
-                                    <span>{job.company}</span>
-                                    {job.location && <span className="flex items-center gap-1"><MapPin size={11} />{job.location}</span>}
-                                    {job.type && <span className="flex items-center gap-1"><Briefcase size={11} />{job.type}</span>}
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        <h4 className="font-bold text-white text-sm truncate">{job.title}</h4>
+                                        {job.featured && <Star size={13} className="text-amber-400 fill-amber-400 shrink-0" />}
+                                    </div>
+                                    <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-white/50">
+                                        <span className="text-white/80 font-medium">{job.company}</span>
+                                        {job.location && <span className="flex items-center gap-1"><MapPin size={11} />{job.location}</span>}
+                                        {job.type && <span className="flex items-center gap-1"><Briefcase size={11} />{job.type}</span>}
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
@@ -200,6 +256,67 @@ const JobAlertsManager = () => {
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Company Logo Upload & Preview Field */}
+                            <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold text-white/50 uppercase tracking-wider block">
+                                        Company Logo (Image or URL)
+                                    </label>
+                                    {form.logo && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setForm(prev => ({ ...prev, logo: '' }))}
+                                            className="text-[10px] text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                                        >
+                                            <Trash2 size={11} /> Remove Logo
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                <div className="flex items-center gap-3">
+                                    {/* Preview box */}
+                                    <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-bold text-sm text-white/80 overflow-hidden shrink-0 shadow-2xs">
+                                        {form.logo ? (
+                                            <img
+                                                src={form.logo.startsWith('http') ? form.logo : getMediaUrl(form.logo)}
+                                                alt="Company logo preview"
+                                                className="w-full h-full object-contain p-1"
+                                            />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center text-white/30 text-[10px] font-semibold text-center p-1">
+                                                <ImageIcon size={16} className="mb-0.5 opacity-60" />
+                                                <span>No Logo</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Upload and URL inputs */}
+                                    <div className="flex-1 space-y-2 min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary hover:text-white text-xs font-bold transition-all cursor-pointer border border-primary/30 shadow-2xs">
+                                                {uploadingLogo ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                                                <span>{uploadingLogo ? 'Uploading...' : 'Upload Logo File'}</span>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={handleLogoUpload}
+                                                    disabled={uploadingLogo}
+                                                />
+                                            </label>
+                                            <span className="text-[10px] text-white/40">PNG, JPG, SVG, WebP</span>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={form.logo || ''}
+                                            onChange={e => setForm(prev => ({ ...prev, logo: e.target.value }))}
+                                            placeholder="Or paste image URL (e.g. /uploads/logo.png)"
+                                            className="w-full px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white outline-none focus:border-primary/50 font-mono"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="grid sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block mb-1.5">Job Title *</label>

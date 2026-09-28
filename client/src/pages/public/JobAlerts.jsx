@@ -10,6 +10,7 @@ import {
 import Navbar from '../../components/ui/Navbar';
 import Footer from '../../components/ui/Footer';
 import { useToast } from '../../context/ToastContext';
+import { getMediaUrl } from '../../utils/media';
 
 import learningJourneyBanner from '../../assets/learning_journey_banner.jpg';
 const learningJourneyVideo = '/assets/learning_journey_animated.mp4';
@@ -852,7 +853,11 @@ const JobAlerts = () => {
                                                 {/* Company Logo or Initials Avatar */}
                                                 <div className={`w-12 h-12 rounded-xl ${badgeStyle.bg} ${badgeStyle.border} border flex items-center justify-center font-extrabold text-sm ${badgeStyle.text} shrink-0 overflow-hidden shadow-2xs`}>
                                                     {job.logo ? (
-                                                        <img src={job.logo} alt={job.company} className="w-full h-full object-cover" />
+                                                        <img
+                                                            src={job.logo.startsWith('http') ? job.logo : getMediaUrl(job.logo)}
+                                                            alt={job.company}
+                                                            className="w-full h-full object-contain p-1.5"
+                                                        />
                                                     ) : (
                                                         (job.company || '?').slice(0, 2).toUpperCase()
                                                     )}
@@ -1065,9 +1070,13 @@ const JobAlerts = () => {
 
                             {/* Modal Header */}
                             <div className="flex items-start gap-4 mb-5">
-                                <div className={`w-14 h-14 rounded-2xl ${getCompanyBadgeStyle(selectedJobForModal.company).bg} ${getCompanyBadgeStyle(selectedJobForModal.company).border} border flex items-center justify-center font-extrabold text-base ${getCompanyBadgeStyle(selectedJobForModal.company).text} shrink-0`}>
+                                <div className={`w-14 h-14 rounded-2xl ${getCompanyBadgeStyle(selectedJobForModal.company).bg} ${getCompanyBadgeStyle(selectedJobForModal.company).border} border flex items-center justify-center font-extrabold text-base ${getCompanyBadgeStyle(selectedJobForModal.company).text} shrink-0 overflow-hidden`}>
                                     {selectedJobForModal.logo ? (
-                                        <img src={selectedJobForModal.logo} alt={selectedJobForModal.company} className="w-full h-full object-cover" />
+                                        <img
+                                            src={selectedJobForModal.logo.startsWith('http') ? selectedJobForModal.logo : getMediaUrl(selectedJobForModal.logo)}
+                                            alt={selectedJobForModal.company}
+                                            className="w-full h-full object-contain p-2"
+                                        />
                                     ) : (
                                         (selectedJobForModal.company || '?').slice(0, 2).toUpperCase()
                                     )}
