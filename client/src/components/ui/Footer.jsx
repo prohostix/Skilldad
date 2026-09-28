@@ -34,25 +34,36 @@ const Footer = ({ forceVisible = false, className = '' }) => {
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pb-6">
                 
-                {/* Modern Pre-footer Call to Action */}
-                <div className="mb-8 pb-8 border-b border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-                    <div>
-                        <h2 className="text-xl md:text-2xl font-black text-white font-space tracking-tight mb-1">
-                            Ready to transform your future?
-                        </h2>
-                        <p className="text-gray-400 font-inter text-xs md:text-sm max-w-xl">
-                            Join thousands of learners and organizations building the skills of tomorrow, today.
-                        </p>
+                {/* Compact Pre-footer CTA Banner */}
+                <div className="mb-6 pb-6 border-b border-white/5">
+                    <div className="relative flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-4 rounded-2xl bg-gradient-to-r from-primary/10 via-white/[0.03] to-primary-dark/10 border border-white/8 overflow-hidden">
+                        {/* Subtle glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary-dark/5 pointer-events-none" />
+                        {/* Left: text */}
+                        <div className="relative flex items-center gap-3">
+                            <div className="w-1 h-8 rounded-full bg-gradient-to-b from-primary to-primary-dark shrink-0" />
+                            <div>
+                                <p className="text-white font-bold font-space text-sm leading-tight tracking-tight">
+                                    Ready to transform your future?
+                                </p>
+                                <p className="text-gray-400 font-inter text-[11px] leading-snug mt-0.5">
+                                    Join thousands of learners building skills of tomorrow, today.
+                                </p>
+                            </div>
+                        </div>
+                        {/* Right: button */}
+                        <div className="relative shrink-0">
+                            {user ? (
+                                <button onClick={() => navigate(getDashboardLink())} className="px-5 py-2 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-bold font-inter text-xs shadow-glow-purple hover:scale-105 transition-transform duration-300 whitespace-nowrap">
+                                    Go to Dashboard →
+                                </button>
+                            ) : (
+                                <button onClick={() => navigate('/register')} className="px-5 py-2 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-bold font-inter text-xs shadow-glow-purple hover:scale-105 transition-transform duration-300 whitespace-nowrap">
+                                    Get Started →
+                                </button>
+                            )}
+                        </div>
                     </div>
-                    {user ? (
-                        <button onClick={() => navigate(getDashboardLink())} className="px-6 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-bold font-inter text-sm shadow-glow-purple hover:scale-105 transition-transform duration-300">
-                            Go to Dashboard
-                        </button>
-                    ) : (
-                        <button onClick={() => navigate('/register')} className="px-6 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-bold font-inter text-sm shadow-glow-purple hover:scale-105 transition-transform duration-300">
-                            Get Started Now
-                        </button>
-                    )}
                 </div>
 
                 {/* Main Footer Grid */}
