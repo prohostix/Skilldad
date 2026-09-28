@@ -703,12 +703,12 @@ const HeroSection = () => {
             <CourseBubbles texts={bubbleTexts} />
 
             {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP (REAL DATA) ── */}
-            <div className="w-full max-w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-2 sm:pt-3 pb-2.5 sm:pb-3.5 transition-colors shrink-0">
+            <div className="w-full max-w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-1 sm:pt-1.5 pb-1.5 sm:pb-2.5 transition-colors shrink-0">
                 
                 {/* Soft Lavender Curved Wave Background Transition from Hero */}
-                <div className="absolute -top-4 sm:-top-6 md:-top-9 lg:-top-10 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+                <div className="absolute -top-3.5 sm:-top-5 md:-top-7 lg:-top-8 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
                     <svg
-                        className="relative block w-full h-4 sm:h-6 md:h-9 lg:h-10"
+                        className="relative block w-full h-3.5 sm:h-5 md:h-7 lg:h-8"
                         viewBox="0 0 1440 60"
                         preserveAspectRatio="none"
                     >
@@ -723,17 +723,17 @@ const HeroSection = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                     
                     {/* Centered Small Uppercase Label with Thin Purple Dividers */}
-                    <div className="flex items-center justify-center gap-2.5 sm:gap-4 md:gap-5 mb-2.5 sm:mb-3 px-2">
-                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
-                        <span className="text-[9.5px] sm:text-[11.5px] md:text-[12.5px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
+                    <div className="flex items-center justify-center gap-2 sm:gap-3.5 md:gap-4.5 mb-1 sm:mb-1.5 px-2">
+                        <div className="w-6 sm:w-16 md:w-24 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <span className="text-[9px] sm:text-[10.5px] md:text-[11.5px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
                             TRUSTED BY LEADING UNIVERSITIES & PARTNERS
                         </span>
-                        <div className="w-8 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <div className="w-6 sm:w-16 md:w-24 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
                     </div>
 
                     {/* Mobile Marquee: Infinite Continuous Smooth Scrolling Ticker so All Real Partners Flow Fluidly */}
-                    <div className="sm:hidden relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] py-1.5">
-                        <div className="flex w-max items-center gap-7 animate-hero-marquee will-change-transform">
+                    <div className="sm:hidden relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] py-0.5">
+                        <div className="flex w-max items-center gap-6 animate-hero-marquee will-change-transform">
                             {[...partnersList, ...partnersList].map((partner, idx) => {
                                 const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
                                 return (
@@ -745,7 +745,7 @@ const HeroSection = () => {
                                         <img
                                             src={logoSrc}
                                             alt={partner.name}
-                                            className="h-7 sm:h-8 w-auto max-w-[110px] sm:max-w-[130px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                            className="h-6 sm:h-7 w-auto max-w-[105px] sm:max-w-[120px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                         />
                                     </div>
                                 );
@@ -755,18 +755,18 @@ const HeroSection = () => {
 
                     {/* Desktop / Tablet: Centered Real Partner Batch Rotation with smooth AnimatePresence */}
                     <div
-                        className="hidden sm:flex relative min-h-[44px] md:min-h-[52px] items-center justify-center w-full px-4"
+                        className="hidden sm:flex relative min-h-[36px] md:min-h-[42px] items-center justify-center w-full px-4"
                         onMouseEnter={() => setIsPartnerHovered(true)}
                         onMouseLeave={() => setIsPartnerHovered(false)}
                     >
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={partnerBatchIndex}
-                                initial={{ opacity: 0, y: 6 }}
+                                initial={{ opacity: 0, y: 4 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -6 }}
-                                transition={{ duration: 0.35, ease: "easeInOut" }}
-                                className="flex items-center justify-center gap-7 md:gap-11 lg:gap-14 xl:gap-18 w-full py-1"
+                                exit={{ opacity: 0, y: -4 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="flex items-center justify-center gap-7 md:gap-11 lg:gap-14 xl:gap-18 w-full py-0.5"
                             >
                                 {partnerBatches[partnerBatchIndex]?.map((partner, idx) => {
                                     const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
@@ -779,7 +779,7 @@ const HeroSection = () => {
                                             <img
                                                 src={logoSrc}
                                                 alt={partner.name}
-                                                className="h-8.5 sm:h-9.5 md:h-11 lg:h-12 w-auto max-w-[140px] md:max-w-[165px] lg:max-w-[185px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                                className="h-7.5 sm:h-8.5 md:h-9.5 lg:h-10.5 w-auto max-w-[130px] md:max-w-[155px] lg:max-w-[175px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
                                             />
                                         </div>
                                     );
