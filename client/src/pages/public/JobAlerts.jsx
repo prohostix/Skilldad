@@ -283,11 +283,6 @@ const JobAlerts = () => {
                                 transition={{ duration: 0.5, ease: 'easeOut' }}
                                 className="lg:col-span-7 space-y-2.5 sm:space-y-3 pb-4 sm:pb-5 md:pb-6"
                             >
-                                {/* Small Badge */}
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 dark:bg-purple-950/60 border border-white/20 dark:border-purple-800/60 [.light-mode_&]:!bg-white/90 [.light-mode_&]:!border-purple-200 text-[#C026FF] [.light-mode_&]:!text-[#4C1D95] dark:text-purple-300 text-xs font-bold uppercase tracking-wider shadow-2xs">
-                                    <BellRing size={13} className="text-[#C026FF] [.light-mode_&]:!text-[#4C1D95] dark:text-purple-300" />
-                                    <span>Job Alerts</span>
-                                </div>
 
                                 {/* Main Headline */}
                                 <h1 className="text-xl sm:text-2xl lg:text-[29px] font-extrabold text-white [.light-mode_&]:!text-[#1E0E4E] tracking-tight leading-[1.16]">
