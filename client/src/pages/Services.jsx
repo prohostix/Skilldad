@@ -737,7 +737,7 @@ const Services = () => {
                                 stiffness: 260,
                                 damping: 18
                             }}
-                            className="absolute top-3 right-4 sm:top-5 sm:right-8 z-10 pointer-events-none select-none"
+                            className="absolute top-3 right-4 sm:top-5 sm:right-8 z-20 pointer-events-none select-none"
                         >
                             <motion.div
                                 animate={{ y: [-4, 5, -4], rotate: [-12, -6, -12] }}
@@ -755,7 +755,7 @@ const Services = () => {
                             </motion.div>
                         </motion.div>
 
-                        {/* Thin Deep Purple Ribbon String (Draws from BOTTOM behind cards UP to the top-right logo) */}
+                        {/* Thin Deep Purple Ribbon String (Draws from BOTTOM behind cards UP to just below the top-right logo) */}
                         <svg
                             className="absolute top-0 right-0 w-full max-w-[480px] sm:max-w-[540px] h-[360px] sm:h-[420px] pointer-events-none overflow-visible z-0"
                             viewBox="0 0 540 420"
@@ -767,7 +767,7 @@ const Services = () => {
                                 </filter>
                             </defs>
                             <motion.path
-                                d="M 230 435 C 280 425, 325 400, 350 370 C 390 320, 400 250, 370 215 C 330 175, 265 210, 290 270 C 320 330, 400 320, 450 260 C 500 200, 470 120, 480 40"
+                                d="M 230 435 C 280 425, 325 400, 350 370 C 390 320, 400 250, 370 215 C 330 175, 265 210, 290 270 C 320 330, 400 320, 450 260 C 489 213, 479 154, 478 94"
                                 className="stroke-[#4C1D95] dark:stroke-purple-400"
                                 strokeWidth="1.6"
                                 strokeLinecap="round"
