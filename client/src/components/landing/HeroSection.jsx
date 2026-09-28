@@ -53,6 +53,18 @@ const HERO_BUBBLE_CSS = `
     86% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
     100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0.3) rotate(var(--rot)); }
 }
+@keyframes hero-marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+}
+.animate-hero-marquee {
+    display: flex;
+    width: max-content;
+    animation: hero-marquee 28s linear infinite;
+}
+.animate-hero-marquee:hover {
+    animation-play-state: paused;
+}
 `;
 
 /* ─── Floating Course & Stat Bubbles (Right Side) ──────────────── */
@@ -184,6 +196,31 @@ import coursesImg from '../../assets/hero/courses.jpg';
 import certsImg from '../../assets/hero/certifications.jpg';
 import skilldadLogoDeepPurple from '../../assets/logo_deep_purple.png';
 
+// Real partner universities & corporate partners from SkillDad CMS database
+const REAL_PARTNERS_INITIAL = [
+    { id: 'amritha', name: 'Amritha Vishwa Vidyapeedam', logo: '/uploads/logo-1788941958199.webp', type: 'university' },
+    { id: 'cit', name: 'Canadian Institute Of Technology (CIT)', logo: '/uploads/logo-1788942025448.jpg', type: 'university' },
+    { id: 'mu', name: 'Mediterranean University (MU)', logo: '/uploads/logo-1788942072427.png', type: 'university' },
+    { id: 'jain', name: 'JAIN UNIVERSITY', logo: '/uploads/logo-1788942119589.png', type: 'university' },
+    { id: 'gla', name: 'GLA UNIVERSITY', logo: '/uploads/logo-1788942159826.png', type: 'university' },
+    { id: 'manipal', name: 'MANIPAL UNIVERSITY', logo: '/uploads/logo-1788942206138.png', type: 'university' },
+    { id: 'capgemini', name: 'Capgemini', logo: '/uploads/logo-1786942696943.png', type: 'corporate' },
+    { id: 'accenture', name: 'Accenture', logo: '/uploads/logo-1786942705224.png', type: 'corporate' },
+    { id: 'infosys', name: 'Infosys', logo: '/uploads/logo-1786942732509.webp', type: 'corporate' },
+    { id: 'tcs', name: 'TCS', logo: '/uploads/logo-1786942739987.webp', type: 'corporate' },
+    { id: 'wipro', name: 'Wipro', logo: '/uploads/logo-1786942747313.png', type: 'corporate' },
+    { id: 'prohostix', name: 'ProHostix', logo: '/uploads/logo-1787132719537.png', type: 'corporate' }
+];
+
+const splitIntoBatches = (items, batchSize = 6) => {
+    if (!items || items.length === 0) return [];
+    const batches = [];
+    for (let i = 0; i < items.length; i += batchSize) {
+        batches.push(items.slice(i, i + batchSize));
+    }
+    return batches;
+};
+
 const HeroSection = () => {
     const navigate = useNavigate();
     const { user } = useUser();
@@ -197,6 +234,47 @@ const HeroSection = () => {
     };
 
     const [bubbleTexts, setBubbleTexts] = useState(['196547+Openings', '215676+Hiring Partners']);
+    const [partnersList, setPartnersList] = useState(REAL_PARTNERS_INITIAL);
+    const [partnerBatchIndex, setPartnerBatchIndex] = useState(0);
+    const [isPartnerHovered, setIsPartnerHovered] = useState(false);
+
+    const partnerBatches = useMemo(() => {
+        return splitIntoBatches(partnersList, 6);
+    }, [partnersList]);
+
+    // Rotate batches on desktop every 3.5s (pauses on hover)
+    useEffect(() => {
+        if (!partnerBatches || partnerBatches.length <= 1 || isPartnerHovered) return;
+        const interval = setInterval(() => {
+            setPartnerBatchIndex(prev => (prev + 1) % partnerBatches.length);
+        }, 3500);
+        return () => clearInterval(interval);
+    }, [partnerBatches, isPartnerHovered]);
+
+    // Fetch dynamic partner logos from DB API
+    useEffect(() => {
+        const fetchPartners = async () => {
+            try {
+                const res = await fetch('/api/public/partner-logos');
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    const active = data.filter(item => item.isActive !== false && (item.imageUrl || item.logo));
+                    if (active.length > 0) {
+                        const mapped = active.map(p => ({
+                            id: p._id || p.name,
+                            name: p.name,
+                            logo: p.imageUrl ? (p.imageUrl.startsWith('http') ? p.imageUrl : getMediaUrl(p.imageUrl)) : getMediaUrl(p.logo),
+                            type: p.type || 'partner'
+                        }));
+                        setPartnersList(mapped);
+                    }
+                }
+            } catch (e) {
+                // Keep initial real partner list
+            }
+        };
+        fetchPartners();
+    }, []);
 
     useEffect(() => {
         const fetchCmsData = async () => {
@@ -623,6 +701,95 @@ const HeroSection = () => {
 
             {/* ── RIGHT EDGE: FLOATING COURSE POP BUBBLES ── */}
             <CourseBubbles texts={bubbleTexts} />
+
+            {/* ── BOTTOM ROW: PREMIUM "TRUSTED BY LEADING UNIVERSITIES & PARTNERS" STRIP (REAL DATA) ── */}
+            <div className="w-full max-w-full relative z-20 bg-gradient-to-b from-[#ECE4FA] via-[#E8DEFA] to-[#E4D8F8] dark:from-[#140A26] dark:via-[#160D2C] dark:to-[#1B1034] pt-2 sm:pt-3 pb-2.5 sm:pb-3.5 transition-colors shrink-0">
+                
+                {/* Soft Lavender Curved Wave Background Transition from Hero */}
+                <div className="absolute -top-4 sm:-top-6 md:-top-9 lg:-top-10 left-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+                    <svg
+                        className="relative block w-full h-4 sm:h-6 md:h-9 lg:h-10"
+                        viewBox="0 0 1440 60"
+                        preserveAspectRatio="none"
+                    >
+                        <path
+                            d="M 0 28 C 220 10 440 45 720 40 C 1000 35 1220 10 1440 26 L 1440 62 L 0 62 Z"
+                            fill="#ECE4FA"
+                            className="dark:fill-[#140A26] transition-colors"
+                        />
+                    </svg>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+                    
+                    {/* Centered Small Uppercase Label with Thin Purple Dividers */}
+                    <div className="flex items-center justify-center gap-2 sm:gap-4 md:gap-5 mb-2 sm:mb-2.5 px-2">
+                        <div className="w-6 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                        <span className="text-[8.5px] sm:text-[10.5px] md:text-[11px] font-bold uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#5B21B6] dark:text-purple-300 select-none whitespace-nowrap">
+                            TRUSTED BY LEADING UNIVERSITIES & PARTNERS
+                        </span>
+                        <div className="w-6 sm:w-20 md:w-28 h-[1px] bg-purple-400/80 dark:bg-purple-700/80" />
+                    </div>
+
+                    {/* Mobile Marquee: Infinite Continuous Smooth Scrolling Ticker so All Real Partners Flow Fluidly */}
+                    <div className="sm:hidden relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] py-1">
+                        <div className="flex w-max items-center gap-6 animate-hero-marquee will-change-transform">
+                            {[...partnersList, ...partnersList].map((partner, idx) => {
+                                const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
+                                return (
+                                    <div
+                                        key={`m-${partner.id || partner.name}-${idx}`}
+                                        className="group flex items-center justify-center shrink-0 opacity-90 px-1"
+                                        title={partner.name}
+                                    >
+                                        <img
+                                            src={logoSrc}
+                                            alt={partner.name}
+                                            className="h-5 sm:h-5.5 w-auto max-w-[100px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Desktop / Tablet: Centered Real Partner Batch Rotation with smooth AnimatePresence */}
+                    <div
+                        className="hidden sm:flex relative min-h-[34px] md:min-h-[40px] items-center justify-center w-full px-4"
+                        onMouseEnter={() => setIsPartnerHovered(true)}
+                        onMouseLeave={() => setIsPartnerHovered(false)}
+                    >
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={partnerBatchIndex}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.35, ease: "easeInOut" }}
+                                className="flex items-center justify-center gap-8 md:gap-12 lg:gap-16 xl:gap-20 w-full py-1"
+                            >
+                                {partnerBatches[partnerBatchIndex]?.map((partner, idx) => {
+                                    const logoSrc = partner.logo?.startsWith('http') ? partner.logo : getMediaUrl(partner.logo);
+                                    return (
+                                        <div
+                                            key={partner.id || partner.name || idx}
+                                            className="group flex items-center justify-center cursor-default shrink-0 opacity-85 hover:opacity-100 transition-all duration-200 hover:scale-105"
+                                            title={partner.name}
+                                        >
+                                            <img
+                                                src={logoSrc}
+                                                alt={partner.name}
+                                                className="h-6 md:h-7.5 w-auto max-w-[125px] md:max-w-[150px] object-contain select-none mix-blend-multiply dark:mix-blend-screen brightness-90 contrast-125 dark:brightness-150"
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                </div>
+            </div>
 
         </section>
     );
