@@ -82,9 +82,22 @@ const JobAlerts = () => {
     // Interactive Modals state
     const [selectedJobForModal, setSelectedJobForModal] = useState(null);
     const [alertModalOpen, setAlertModalOpen] = useState(false);
+    const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
     const [subscriberEmail, setSubscriberEmail] = useState('');
     const [subscriberCategory, setSubscriberCategory] = useState('All');
     const [alertSubscribed, setAlertSubscribed] = useState(false);
+
+    // Prevent body scrolling when mobile filter drawer is open
+    useEffect(() => {
+        if (mobileFilterOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [mobileFilterOpen]);
 
     // Bookmarked jobs persisted in localStorage
     const [bookmarkedJobs, setBookmarkedJobs] = useState(() => {
@@ -178,6 +191,7 @@ const JobAlerts = () => {
     };
 
     const hasActiveFilters = search.trim() !== '' || selectedTypes.length > 0 || selectedLocations.length > 0;
+    const activeFilterCount = (search.trim() !== '' ? 1 : 0) + selectedTypes.length + selectedLocations.length;
 
     // Filter and sort jobs strictly from real data
     const filteredJobs = useMemo(() => {
@@ -345,8 +359,8 @@ const JobAlerts = () => {
                 <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 
-                    {/* ── LEFT SIDEBAR: REFINE YOUR SEARCH ── */}
-                    <aside className="lg:col-span-4 xl:col-span-3 space-y-6">
+                    {/* ── LEFT SIDEBAR: REFINE YOUR SEARCH (Desktop Only) ── */}
+                    <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 space-y-6 sticky top-24 self-start">
                         <div className="bg-white dark:bg-[#120A27] border border-slate-200/90 dark:border-purple-900/40 rounded-2xl p-5 sm:p-6 shadow-xs">
                             
                             {/* Filter Title + Clear action */}
@@ -371,7 +385,7 @@ const JobAlerts = () => {
                                     Keyword
                                 </label>
                                 <div className="relative">
-                                    <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-purple-400" />
+                                    <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-purple-400 pointer-events-none" />
                                     <input
                                         type="text"
                                         value={search}
@@ -380,12 +394,12 @@ const JobAlerts = () => {
                                             setCurrentPage(1);
                                         }}
                                         placeholder="Title, company, skill..."
-                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-purple-950/40 border border-slate-200 dark:border-purple-800/40 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-[#4C1D95] dark:focus:border-purple-500 transition-colors"
+                                        className="w-full pl-9 pr-8 py-2 bg-slate-50 dark:bg-purple-950/40 border border-slate-200 dark:border-purple-800/40 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-[#4C1D95] dark:focus:border-purple-500 transition-colors"
                                     />
                                     {search && (
                                         <button
                                             onClick={() => setSearch('')}
-                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
                                         >
                                             <X size={12} />
                                         </button>
@@ -489,14 +503,130 @@ const JobAlerts = () => {
                     </aside>
 
                     {/* ── RIGHT MAIN COLUMN: JOB ALERTS ── */}
-                    <div className="lg:col-span-8 xl:col-span-9 space-y-6">
+                    <div className="lg:col-span-8 xl:col-span-9 space-y-5">
+
+                        {/* ── SMART MOBILE FILTER CONTROLS (Mobile Only) ── */}
+                        <div className="lg:hidden space-y-3">
+                            
+                            {/* Search Bar + Filter Trigger Button */}
+                            <div className="flex items-center gap-2">
+                                <div className="relative flex-1">
+                                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-purple-400 pointer-events-none" />
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => {
+                                            setSearch(e.target.value);
+                                            setCurrentPage(1);
+                                        }}
+                                        placeholder="Search title, company, skill..."
+                                        className="w-full pl-9 pr-8 py-2.5 bg-white dark:bg-[#120A27] border border-slate-200 dark:border-purple-800/40 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-[#4C1D95] dark:focus:border-purple-500 shadow-2xs transition-colors"
+                                    />
+                                    {search && (
+                                        <button
+                                            onClick={() => setSearch('')}
+                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                                        >
+                                            <X size={13} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={() => setMobileFilterOpen(true)}
+                                    className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer ${
+                                        activeFilterCount > 0
+                                            ? 'bg-[#4C1D95] border-[#4C1D95] text-white shadow-purple-900/20'
+                                            : 'bg-white dark:bg-[#120A27] border-slate-200 dark:border-purple-800/40 text-slate-700 dark:text-purple-200 hover:bg-slate-50 dark:hover:bg-purple-900/30'
+                                    }`}
+                                >
+                                    <SlidersHorizontal size={14} />
+                                    <span>Filters</span>
+                                    {activeFilterCount > 0 && (
+                                        <span className="w-4 h-4 rounded-full bg-white text-[#4C1D95] text-[10px] font-black flex items-center justify-center ml-0.5">
+                                            {activeFilterCount}
+                                        </span>
+                                    )}
+                                </button>
+                            </div>
+
+                            {/* Horizontal Quick Chips */}
+                            <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none text-xs">
+                                <button
+                                    onClick={() => setSelectedTypes([])}
+                                    className={`px-3 py-1.5 rounded-full font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                                        selectedTypes.length === 0
+                                            ? 'bg-[#4C1D95] text-white shadow-xs'
+                                            : 'bg-white dark:bg-[#120A27] text-slate-600 dark:text-purple-200 border border-slate-200 dark:border-purple-800/40 hover:bg-slate-50 dark:hover:bg-purple-900/30'
+                                    }`}
+                                >
+                                    All Types ({jobs.length})
+                                </button>
+                                {typeFacets.map(facet => {
+                                    const isSelected = selectedTypes.includes(facet.name);
+                                    return (
+                                        <button
+                                            key={facet.name}
+                                            onClick={() => handleTypeToggle(facet.name)}
+                                            className={`px-3 py-1.5 rounded-full font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
+                                                isSelected
+                                                    ? 'bg-[#4C1D95] text-white shadow-xs'
+                                                    : 'bg-white dark:bg-[#120A27] text-slate-600 dark:text-purple-200 border border-slate-200 dark:border-purple-800/40 hover:bg-slate-50 dark:hover:bg-purple-900/30'
+                                            }`}
+                                        >
+                                            {isSelected && <Check size={11} strokeWidth={3} />}
+                                            <span>{facet.name}</span>
+                                            <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                                                isSelected
+                                                    ? 'bg-purple-800/70 text-purple-100'
+                                                    : 'bg-slate-100 dark:bg-purple-950 text-slate-500 dark:text-purple-300'
+                                            }`}>
+                                                {facet.count}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Active Filters Bar */}
+                            {hasActiveFilters && (
+                                <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-xs">
+                                    <span className="text-[11px] font-medium text-slate-400 dark:text-purple-300/70 mr-1">Active:</span>
+                                    {search && (
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-[#4C1D95] dark:text-purple-200 text-[11px] font-medium">
+                                            "{search}"
+                                            <button onClick={() => setSearch('')} className="hover:text-red-500 cursor-pointer ml-0.5"><X size={10} /></button>
+                                        </span>
+                                    )}
+                                    {selectedTypes.map(t => (
+                                        <span key={t} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-[#4C1D95] dark:text-purple-200 text-[11px] font-medium">
+                                            {t}
+                                            <button onClick={() => handleTypeToggle(t)} className="hover:text-red-500 cursor-pointer ml-0.5"><X size={10} /></button>
+                                        </span>
+                                    ))}
+                                    {selectedLocations.map(l => (
+                                        <span key={l} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/70 border border-purple-200 dark:border-purple-800 text-[#4C1D95] dark:text-purple-200 text-[11px] font-medium">
+                                            {l}
+                                            <button onClick={() => handleLocationToggle(l)} className="hover:text-red-500 cursor-pointer ml-0.5"><X size={10} /></button>
+                                        </span>
+                                    ))}
+                                    <button
+                                        onClick={clearAllFilters}
+                                        className="text-[11px] font-bold text-[#4C1D95] dark:text-purple-400 hover:underline ml-1 cursor-pointer"
+                                    >
+                                        Clear all
+                                    </button>
+                                </div>
+                            )}
+
+                        </div>
 
                         {/* Section Header with Sort Selector */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                        <div className="flex items-center justify-between gap-3 pt-1">
                             <div>
                                 <div className="flex items-center gap-2">
                                     <Briefcase size={18} className="text-[#4C1D95] dark:text-purple-400" />
-                                    <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                    <h2 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                                         Latest Job Alerts
                                     </h2>
                                 </div>
@@ -506,20 +636,193 @@ const JobAlerts = () => {
                             </div>
 
                             {/* Sort selector */}
-                            <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-purple-200">
-                                <span className="font-medium text-slate-500 dark:text-purple-400">Sort by:</span>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-purple-200">
+                                <span className="font-medium text-slate-500 dark:text-purple-400 hidden sm:inline">Sort:</span>
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
                                     aria-label="Sort job alerts"
-                                    className="px-3 py-1.5 rounded-xl bg-white dark:bg-[#120A27] border border-slate-200 dark:border-purple-800/40 text-slate-800 dark:text-purple-200 font-semibold text-xs outline-none focus:border-[#4C1D95] cursor-pointer shadow-2xs"
+                                    className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#120A27] border border-slate-200 dark:border-purple-800/40 text-slate-800 dark:text-purple-200 font-semibold text-xs outline-none focus:border-[#4C1D95] cursor-pointer shadow-2xs"
                                 >
                                     <option value="recent">Most Recent</option>
                                     <option value="az">Alphabetical (A-Z)</option>
-                                    <option value="deadline">Application Deadline</option>
+                                    <option value="deadline">Deadline</option>
                                 </select>
                             </div>
                         </div>
+
+                        {/* ── SLIDE-UP MOBILE FILTER BOTTOM SHEET / DRAWER ── */}
+                        <AnimatePresence>
+                            {mobileFilterOpen && (
+                                <>
+                                    {/* Backdrop */}
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        onClick={() => setMobileFilterOpen(false)}
+                                        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs lg:hidden"
+                                    />
+
+                                    {/* Bottom Sheet Modal */}
+                                    <motion.div
+                                        initial={{ y: '100%' }}
+                                        animate={{ y: 0 }}
+                                        exit={{ y: '100%' }}
+                                        transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                                        className="fixed bottom-0 inset-x-0 z-50 bg-white dark:bg-[#120A27] rounded-t-3xl border-t border-slate-200 dark:border-purple-800 shadow-2xl max-h-[85vh] flex flex-col lg:hidden"
+                                    >
+                                        {/* Drag handle */}
+                                        <div className="pt-3 pb-1 flex justify-center">
+                                            <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-purple-800/80" />
+                                        </div>
+
+                                        {/* Drawer Header */}
+                                        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-purple-900/30">
+                                            <div className="flex items-center gap-2">
+                                                <SlidersHorizontal size={16} className="text-[#4C1D95] dark:text-purple-400" />
+                                                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                                                    Filter Job Alerts
+                                                </h3>
+                                                {activeFilterCount > 0 && (
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#4C1D95] text-white">
+                                                        {activeFilterCount}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                {hasActiveFilters && (
+                                                    <button
+                                                        onClick={clearAllFilters}
+                                                        className="text-xs font-semibold text-[#4C1D95] dark:text-purple-300 hover:underline flex items-center gap-1 cursor-pointer"
+                                                    >
+                                                        <RotateCcw size={11} /> Reset
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={() => setMobileFilterOpen(false)}
+                                                    className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-purple-900/40 cursor-pointer"
+                                                >
+                                                    <X size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Scrollable Filters Body */}
+                                        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+                                            {/* Keyword Search */}
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-700 dark:text-purple-200 block uppercase tracking-wider mb-2">
+                                                    Keyword
+                                                </label>
+                                                <div className="relative">
+                                                    <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                                    <input
+                                                        type="text"
+                                                        value={search}
+                                                        onChange={(e) => {
+                                                            setSearch(e.target.value);
+                                                            setCurrentPage(1);
+                                                        }}
+                                                        placeholder="Title, company, skill..."
+                                                        className="w-full pl-9 pr-8 py-2.5 bg-slate-50 dark:bg-purple-950/40 border border-slate-200 dark:border-purple-800/40 rounded-xl text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none focus:border-[#4C1D95]"
+                                                    />
+                                                    {search && (
+                                                        <button
+                                                            onClick={() => setSearch('')}
+                                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                                        >
+                                                            <X size={13} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Job Type Section */}
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-700 dark:text-purple-200 block uppercase tracking-wider mb-2.5">
+                                                    Job Type
+                                                </label>
+                                                <div className="space-y-2">
+                                                    {typeFacets.map(facet => {
+                                                        const isChecked = selectedTypes.includes(facet.name);
+                                                        return (
+                                                            <button
+                                                                key={facet.name}
+                                                                onClick={() => handleTypeToggle(facet.name)}
+                                                                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-left cursor-pointer transition-colors ${
+                                                                    isChecked
+                                                                        ? 'bg-[#4C1D95]/10 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-200 font-bold border border-[#4C1D95]/30'
+                                                                        : 'bg-slate-50 dark:bg-purple-950/20 text-slate-700 dark:text-purple-200/80 border border-slate-200/50 dark:border-purple-900/30'
+                                                                }`}
+                                                            >
+                                                                <div className="flex items-center gap-2.5">
+                                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                                                        isChecked ? 'bg-[#4C1D95] border-[#4C1D95] text-white' : 'border-slate-300 dark:border-purple-800 bg-white dark:bg-purple-950'
+                                                                    }`}>
+                                                                        {isChecked && <Check size={11} strokeWidth={3} />}
+                                                                    </div>
+                                                                    <span>{facet.name}</span>
+                                                                </div>
+                                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-purple-900/60 font-semibold">
+                                                                    {facet.count}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {/* Location Section */}
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-700 dark:text-purple-200 block uppercase tracking-wider mb-2.5">
+                                                    Location
+                                                </label>
+                                                <div className="space-y-2">
+                                                    {locationFacets.map(facet => {
+                                                        const isChecked = selectedLocations.includes(facet.name);
+                                                        return (
+                                                            <button
+                                                                key={facet.name}
+                                                                onClick={() => handleLocationToggle(facet.name)}
+                                                                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium text-left cursor-pointer transition-colors ${
+                                                                    isChecked
+                                                                        ? 'bg-[#4C1D95]/10 dark:bg-purple-900/40 text-[#4C1D95] dark:text-purple-200 font-bold border border-[#4C1D95]/30'
+                                                                        : 'bg-slate-50 dark:bg-purple-950/20 text-slate-700 dark:text-purple-200/80 border border-slate-200/50 dark:border-purple-900/30'
+                                                                }`}
+                                                            >
+                                                                <div className="flex items-center gap-2.5">
+                                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                                                        isChecked ? 'bg-[#4C1D95] border-[#4C1D95] text-white' : 'border-slate-300 dark:border-purple-800 bg-white dark:bg-purple-950'
+                                                                    }`}>
+                                                                        {isChecked && <Check size={11} strokeWidth={3} />}
+                                                                    </div>
+                                                                    <span className="capitalize">{facet.name}</span>
+                                                                </div>
+                                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-200/60 dark:bg-purple-900/60 font-semibold">
+                                                                    {facet.count}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Footer Action */}
+                                        <div className="p-4 border-t border-slate-100 dark:border-purple-900/30 bg-slate-50/50 dark:bg-[#120A27]">
+                                            <button
+                                                onClick={() => setMobileFilterOpen(false)}
+                                                className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#4C1D95] to-[#7C3AED] hover:from-[#3B1675] hover:to-[#6D28D9] text-white text-xs font-bold shadow-md shadow-purple-900/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                            >
+                                                <span>Show {filteredJobs.length} {filteredJobs.length === 1 ? 'Job Alert' : 'Job Alerts'}</span>
+                                                <ChevronRight size={14} />
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>
 
                         {/* ── JOB CARDS LIST ── */}
                         {loading ? (
