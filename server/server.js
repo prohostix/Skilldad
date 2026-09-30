@@ -113,11 +113,18 @@ const allowedOrigins = [
   process.env.CLIENT_URL,
 ].filter(Boolean);
 
+// `flutter run -d chrome` (and most local dev servers) bind to a fresh,
+// random localhost port every run, so a fixed allowlist of ports can never
+// keep up. Any http://localhost:<port> or http://127.0.0.1:<port> origin is
+// local development traffic by definition - allow all of them rather than
+// maintaining a port list.
+const isLocalDevOrigin = (origin) => /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || isLocalDevOrigin(origin)) {
       return callback(null, true);
     }
     return callback(new Error(`CORS blocked: ${origin}`));

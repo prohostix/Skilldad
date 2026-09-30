@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { celebrateEnrollment } from '../utils/celebration';
 import {
     User,
     Mail,
@@ -209,6 +210,9 @@ const Register = () => {
                     console.error('Failed to validate coupon code:', couponErr.response?.data?.message || couponErr.message);
                 }
             }
+
+            // 🎉 Fire celebration burst for successful student enrollment
+            celebrateEnrollment();
 
             // Navigate to home page - Dashboard button is in Navbar
             navigate('/');
