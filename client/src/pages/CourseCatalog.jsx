@@ -927,24 +927,24 @@ const CourseCatalog = () => {
 
                 {/* SECTION 3: Bottom Course Finder Horizontal Banner (full page width, not constrained by the sidebar column) */}
                 <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-                    <div className="relative overflow-hidden rounded-2xl border border-purple-200/80 bg-gradient-to-r from-[#F4F1FE] via-[#EDE7FD] to-[#EAE3FD] p-4 sm:p-5 shadow-sm transition-all duration-300 [.dark-mode_&]:!border-purple-500/25 [.dark-mode_&]:!bg-gradient-to-r [.dark-mode_&]:!from-[#160B2A] [.dark-mode_&]:!via-[#200F3E] [.dark-mode_&]:!to-[#180A2E]">
+                    <div className="relative overflow-hidden rounded-2xl border border-purple-800/40 bg-gradient-to-r from-[#160B2A] via-[#200F3E] to-[#180A2E] p-4 sm:p-5 shadow-sm transition-all duration-300 [.light-mode_&]:!border-purple-200/80 [.light-mode_&]:!from-[#F4F1FE] [.light-mode_&]:!via-[#EDE7FD] [.light-mode_&]:!to-[#EAE3FD]">
                         {/* Subtle background ambient shapes matching the reference */}
-                        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-purple-300/20 blur-3xl [.dark-mode_&]:!bg-purple-600/15" />
-                        <div className="pointer-events-none absolute left-1/3 -bottom-20 h-56 w-56 rounded-full bg-purple-200/30 blur-2xl [.dark-mode_&]:!bg-purple-900/20" />
+                        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-purple-600/15 blur-3xl [.light-mode_&]:!bg-purple-300/20" />
+                        <div className="pointer-events-none absolute left-1/3 -bottom-20 h-56 w-56 rounded-full bg-purple-900/20 blur-2xl [.light-mode_&]:!bg-purple-200/30" />
 
                         <div className="relative z-10 w-full flex flex-col lg:flex-row items-center gap-4 lg:gap-5">
                             {/* Left Text Block & Feature Icons */}
                             <div className="w-full lg:flex-1 min-w-0">
                                 {/* Heading */}
-                                <h3 className="text-sm sm:text-base lg:text-lg font-extrabold text-[#0F172A] tracking-tight leading-snug [.dark-mode_&]:!text-white">
+                                <h3 className="text-sm sm:text-base lg:text-lg font-extrabold text-white tracking-tight leading-snug [.light-mode_&]:!text-[#0F172A]">
                                     Not sure which course fits your career?{' '}
-                                    <span className="text-[#5B21B6] [.dark-mode_&]:!text-[#C026FF]">
+                                    <span className="text-[#C026FF] [.light-mode_&]:!text-[#5B21B6]">
                                         Let's find it together.
                                     </span>
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-[11px] text-[#475569] mt-1 leading-relaxed font-normal max-w-[420px] [.dark-mode_&]:!text-purple-200/80">
+                                <p className="text-[11px] text-purple-200/80 mt-1 leading-relaxed font-normal max-w-[420px] [.light-mode_&]:!text-[#475569]">
                                     Answer a few quick questions to get personalized recommendations from 500+ accredited university programs and placement tracks.
                                 </p>
 
@@ -952,34 +952,34 @@ const CourseCatalog = () => {
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2.5">
                                     {/* Feature 1: Personalized Recommendations */}
                                     <div className="flex items-center gap-1.5 shrink-0">
-                                        <div className="w-6 h-6 rounded-full bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center shrink-0 [.dark-mode_&]:!bg-white/10 [.dark-mode_&]:!text-purple-300">
-                                            <svg className="w-3 h-3 text-[#5B21B6] [.dark-mode_&]:!text-purple-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                        <div className="w-6 h-6 rounded-full bg-white/10 text-purple-300 flex items-center justify-center shrink-0 [.light-mode_&]:!bg-[#EDE9FE] [.light-mode_&]:!text-[#5B21B6]">
+                                            <svg className="w-3 h-3 text-purple-300 [.light-mode_&]:!text-[#5B21B6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                                                 <circle cx="12" cy="12" r="10" />
                                                 <circle cx="12" cy="12" r="6" />
                                                 <circle cx="12" cy="12" r="2" />
                                             </svg>
                                         </div>
-                                        <span className="text-[9px] font-semibold text-[#334155] leading-tight whitespace-nowrap [.dark-mode_&]:!text-purple-100">
+                                        <span className="text-[9px] font-semibold text-purple-100 leading-tight whitespace-nowrap [.light-mode_&]:!text-[#334155]">
                                             Personalized Recommendations
                                         </span>
                                     </div>
 
                                     {/* Feature 2: Career-Focused Learning Path */}
                                     <div className="flex items-center gap-1.5 shrink-0">
-                                        <div className="w-6 h-6 rounded-full bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center shrink-0 [.dark-mode_&]:!bg-white/10 [.dark-mode_&]:!text-purple-300">
-                                            <GraduationCap size={13} className="text-[#5B21B6] [.dark-mode_&]:!text-purple-300" />
+                                        <div className="w-6 h-6 rounded-full bg-white/10 text-purple-300 flex items-center justify-center shrink-0 [.light-mode_&]:!bg-[#EDE9FE] [.light-mode_&]:!text-[#5B21B6]">
+                                            <GraduationCap size={13} className="text-purple-300 [.light-mode_&]:!text-[#5B21B6]" />
                                         </div>
-                                        <span className="text-[9px] font-semibold text-[#334155] leading-tight whitespace-nowrap [.dark-mode_&]:!text-purple-100">
+                                        <span className="text-[9px] font-semibold text-purple-100 leading-tight whitespace-nowrap [.light-mode_&]:!text-[#334155]">
                                             Career-Focused Learning Path
                                         </span>
                                     </div>
 
                                     {/* Feature 3: Job-Oriented Course Suggestions */}
                                     <div className="flex items-center gap-1.5 shrink-0">
-                                        <div className="w-6 h-6 rounded-full bg-[#EDE9FE] text-[#5B21B6] flex items-center justify-center shrink-0 [.dark-mode_&]:!bg-white/10 [.dark-mode_&]:!text-purple-300">
-                                            <Briefcase size={13} className="text-[#5B21B6] [.dark-mode_&]:!text-purple-300" />
+                                        <div className="w-6 h-6 rounded-full bg-white/10 text-purple-300 flex items-center justify-center shrink-0 [.light-mode_&]:!bg-[#EDE9FE] [.light-mode_&]:!text-[#5B21B6]">
+                                            <Briefcase size={13} className="text-purple-300 [.light-mode_&]:!text-[#5B21B6]" />
                                         </div>
-                                        <span className="text-[9px] font-semibold text-[#334155] leading-tight whitespace-nowrap [.dark-mode_&]:!text-purple-100">
+                                        <span className="text-[9px] font-semibold text-purple-100 leading-tight whitespace-nowrap [.light-mode_&]:!text-[#334155]">
                                             Job-Oriented Course Suggestions
                                         </span>
                                     </div>
@@ -997,10 +997,10 @@ const CourseCatalog = () => {
 
                             {/* Right White Card with CTA */}
                             <div className="shrink-0 w-full lg:w-auto">
-                                <div className="bg-white/95 backdrop-blur-md rounded-xl p-2.5 border border-white/80 shadow-[0_4px_20px_rgba(91,33,182,0.06)] flex flex-col items-center justify-center text-center w-full lg:w-[150px] gap-2 [.dark-mode_&]:!bg-white/10 [.dark-mode_&]:!border-white/15 [.dark-mode_&]:!shadow-xl">
+                                <div className="bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/15 shadow-xl flex flex-col items-center justify-center text-center w-full lg:w-[150px] gap-2 [.light-mode_&]:!bg-white/95 [.light-mode_&]:!border-white/80 [.light-mode_&]:!shadow-[0_4px_20px_rgba(91,33,182,0.06)]">
                                     {/* Takes just 2 minutes Pill */}
-                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FAF5FF] border border-[#F3E8FF] text-[9.5px] font-semibold text-[#5B21B6] whitespace-nowrap [.dark-mode_&]:!bg-purple-500/20 [.dark-mode_&]:!border-purple-400/30 [.dark-mode_&]:!text-purple-200">
-                                        <Clock size={10} className="text-[#5B21B6] [.dark-mode_&]:!text-purple-300 shrink-0" />
+                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-400/30 text-[9.5px] font-semibold text-purple-200 whitespace-nowrap [.light-mode_&]:!bg-[#FAF5FF] [.light-mode_&]:!border-[#F3E8FF] [.light-mode_&]:!text-[#5B21B6]">
+                                        <Clock size={10} className="text-purple-300 [.light-mode_&]:!text-[#5B21B6] shrink-0" />
                                         <span>Takes just 2 minutes</span>
                                     </div>
 
@@ -1008,7 +1008,7 @@ const CourseCatalog = () => {
                                     <button
                                         type="button"
                                         onClick={() => navigate('/dashboard/course-finder')}
-                                        className="px-2.5 py-1 rounded-lg bg-[#5B21B6] hover:bg-[#4C1D95] active:scale-[0.98] text-white text-[10px] font-semibold flex items-center justify-center gap-1 shadow-sm shadow-purple-950/20 hover:shadow transition-all cursor-pointer whitespace-nowrap [.dark-mode_&]:!bg-[#8B5CF6] [.dark-mode_&]:hover:!bg-[#7C3AED]"
+                                        className="px-2.5 py-1 rounded-lg bg-[#8B5CF6] hover:bg-[#7C3AED] active:scale-[0.98] text-white text-[10px] font-semibold flex items-center justify-center gap-1 shadow-sm shadow-purple-950/30 hover:shadow transition-all cursor-pointer whitespace-nowrap [.light-mode_&]:!bg-[#5B21B6] [.light-mode_&]:hover:!bg-[#4C1D95]"
                                     >
                                         <span>Start Course Finder</span>
                                         <ArrowRight size={10} />
