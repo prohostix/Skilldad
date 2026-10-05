@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import { motion } from 'framer-motion';
@@ -147,12 +148,12 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                     </div>
 
                     {/* Action Footer - Tightened spacing */}
-                    <div className="mt-16 pt-16 border-t border-white/10 text-center max-w-4xl mx-auto">
+                    <div className="mt-16 pt-16 border-t border-slate-200 dark:border-white/10 text-center max-w-4xl mx-auto">
                         <motion.h3
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-space mb-8 tracking-tight bg-gradient-to-r from-primary via-white to-secondary bg-clip-text text-transparent"
+                            className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1E1B4B] dark:text-white font-space mb-6 sm:mb-8 tracking-tight"
                         >
                             Stay synchronized with our updates.
                         </motion.h3>
@@ -161,7 +162,7 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-gray-400 mb-12 text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl mx-auto"
+                            className="text-slate-600 dark:text-gray-400 mb-10 sm:mb-12 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto"
                         >
                             We transparently communicate all policy changes to our institutional partners and individual learners through our enterprise notification node.
                         </motion.p>
@@ -170,14 +171,22 @@ const LegalPage = ({ title, subtitle, icon: Icon, content, lastUpdated }) => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
-                            className="flex flex-col sm:flex-row gap-6 justify-center"
+                            className="flex flex-col sm:flex-row gap-5 sm:gap-6 justify-center items-center"
                         >
-                            <button onClick={() => window.print()} className="px-10 py-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold transition-all flex items-center justify-center gap-3 backdrop-blur-xl">
-                                <FileText size={20} /> Download as PDF
+                            <button
+                                onClick={() => window.print()}
+                                className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-4.5 rounded-2xl bg-white dark:bg-purple-950/40 hover:bg-purple-50 dark:hover:bg-purple-900/50 border-2 border-purple-200 dark:border-purple-800/60 text-[#1E1B4B] dark:text-white font-bold transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-3 cursor-pointer group"
+                            >
+                                <FileText size={20} className="text-[#4C1D95] dark:text-purple-300 group-hover:scale-110 transition-transform" />
+                                <span>Download as PDF</span>
                             </button>
-                            <a href="mailto:support@skilldad.com" className="px-10 py-5 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold transition-all shadow-[0_0_30px_rgba(110,40,255,0.4)] flex items-center justify-center gap-3">
-                                Contact Support <ArrowRight size={20} />
-                            </a>
+                            <Link
+                                to="/support#ticket-form"
+                                className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-4.5 rounded-2xl bg-gradient-to-r from-[#6D28D9] to-[#4C1D95] hover:from-[#5B21B6] hover:to-[#3B0764] text-white font-bold transition-all shadow-[0_10px_25px_-5px_rgba(76,29,149,0.35)] hover:shadow-[0_14px_30px_-5px_rgba(76,29,149,0.45)] flex items-center justify-center gap-3 group cursor-pointer"
+                            >
+                                <span>Contact Support</span>
+                                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                            </Link>
                         </motion.div>
                     </div>
                 </div>

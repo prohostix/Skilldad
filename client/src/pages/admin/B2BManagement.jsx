@@ -342,12 +342,6 @@ const B2BManagement = () => {
                 </div>
                 <div className="flex items-center space-x-2 w-full sm:w-auto">
                     <button
-                        onClick={fetchPartners}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-white dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:border-primary/40 hover:text-primary transition-all shadow-sm"
-                    >
-                        <Activity size={14} /> <span>Refresh</span>
-                    </button>
-                    <button
                         onClick={() => setOpenOnboard(true)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold font-inter inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-white transition-all shadow-sm"
                     >

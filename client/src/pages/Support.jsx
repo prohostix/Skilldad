@@ -334,26 +334,27 @@ const Support = () => {
 
                                 <div className="space-y-4">
                                     {myTickets.map((ticket) => {
-                                        const isResolved = ticket.status?.toLowerCase() === 'resolved';
-                                        const isInProgress = ticket.status?.toLowerCase() === 'in progress' || ticket.status?.toLowerCase() === 'in_progress';
+                                        const status = (ticket.status || 'open').toLowerCase();
+                                        const isResolved = status === 'resolved' || status === 'closed';
+                                        const isInProgress = status === 'in progress' || status === 'in_progress';
                                         
                                         return (
-                                            <GlassCard key={ticket._id || ticket.id} className="p-5 border-white/10 hover:border-primary/30 transition-all">
+                                            <GlassCard key={ticket._id || ticket.id} className="p-5 border-slate-200/80 dark:border-white/10 hover:border-primary/40 transition-all shadow-sm">
                                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-mono text-white/60 font-bold uppercase">
+                                                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[10px] font-mono text-slate-700 dark:text-white/70 font-bold uppercase tracking-wider">
                                                             {ticket.subject || 'General'}
                                                         </span>
-                                                        <span className="text-xs text-white/40 font-medium">
+                                                        <span className="text-xs text-slate-500 dark:text-white/50 font-medium">
                                                             • {new Date(ticket.created_at || ticket.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                                         </span>
                                                     </div>
                                                     
                                                     <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider border shrink-0 flex items-center gap-1.5 w-fit ${
                                                         isResolved
-                                                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-emerald-950/20'
+                                                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                                                             : isInProgress
-                                                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
                                                             : 'bg-primary/10 text-primary border-primary/20'
                                                     }`}>
                                                         {isResolved ? <CheckCircle2 size={12} /> : isInProgress ? <Clock size={12} /> : <AlertCircle size={12} />}
@@ -361,31 +362,62 @@ const Support = () => {
                                                     </span>
                                                 </div>
 
-                                                <p className="text-sm font-semibold text-white/90 mb-3 leading-relaxed">
+                                                <p className="text-sm font-semibold text-slate-900 dark:text-white mb-3 leading-relaxed">
                                                     {ticket.message}
                                                 </p>
 
-                                                {/* Admin Response Box */}
+                                                {/* Standardized Admin Response Card */}
                                                 {ticket.admin_response ? (
-                                                    <div className="mt-4 p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200 space-y-1.5 backdrop-blur-md">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                                                                <CheckCircle2 size={15} /> Admin Response & Resolution
+                                                    <div className="mt-4 rounded-2xl border border-emerald-200/90 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/25 overflow-hidden shadow-xs">
+                                                        {/* Header Bar */}
+                                                        <div className="px-4 py-2.5 bg-emerald-100/60 dark:bg-emerald-900/30 border-b border-emerald-200/70 dark:border-emerald-800/40 flex items-center justify-between gap-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                                                    <CheckCircle2 size={13} strokeWidth={2.6} />
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-[11px] font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wider">
+                                                                        Official Resolution
+                                                                    </span>
+                                                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-200/80 dark:bg-emerald-800/60 text-emerald-800 dark:text-emerald-200">
+                                                                        Support Desk
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                            <span className="text-[10px] text-emerald-400/60 font-mono">Official Support</span>
+                                                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs shrink-0">
+                                                                Resolved
+                                                            </span>
                                                         </div>
-                                                        <p className="text-xs font-medium text-emerald-100/90 leading-relaxed whitespace-pre-wrap pl-0.5">
-                                                            {ticket.admin_response}
-                                                        </p>
-                                                        {ticket.updated_at && (
-                                                            <p className="text-[10px] text-emerald-400/40 pt-1">
-                                                                Resolved at: {new Date(ticket.updated_at).toLocaleString()}
+
+                                                        {/* Response Body */}
+                                                        <div className="p-4 sm:p-4.5 bg-white/90 dark:bg-slate-900/70">
+                                                            <p className="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">
+                                                                {ticket.admin_response}
                                                             </p>
+                                                        </div>
+
+                                                        {/* Footer Meta */}
+                                                        {ticket.updated_at && (
+                                                            <div className="px-4 py-2 bg-emerald-50/50 dark:bg-slate-900/40 border-t border-emerald-100/80 dark:border-emerald-900/30 flex items-center justify-between text-[10px] text-slate-500 dark:text-emerald-400/70">
+                                                                <span className="flex items-center gap-1.5">
+                                                                    <Clock size={11} className="text-emerald-600 dark:text-emerald-400" />
+                                                                    Resolved on {new Date(ticket.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                                </span>
+                                                                <span className="font-mono text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                                                    Official Response
+                                                                </span>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <div className="mt-3 p-3 rounded-xl bg-white/[0.02] border border-white/5 text-white/30 text-[11px] flex items-center gap-2 italic">
-                                                        <Clock size={13} /> Waiting for admin review and response...
+                                                    <div className="mt-3.5 p-3.5 rounded-xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3 text-amber-800 dark:text-amber-300">
+                                                        <div className="flex items-center gap-2 text-xs font-medium">
+                                                            <Clock size={14} className="text-amber-600 dark:text-amber-400 animate-pulse shrink-0" />
+                                                            <span>Under Review • An administrator will inspect and resolve your issue shortly.</span>
+                                                        </div>
+                                                        <span className="text-[10px] font-mono text-amber-600/80 dark:text-amber-400/80 uppercase tracking-wider shrink-0 hidden sm:inline">
+                                                            12-24h SLA
+                                                        </span>
                                                     </div>
                                                 )}
                                             </GlassCard>
@@ -516,18 +548,22 @@ const Support = () => {
                         {/* Contact List */}
                         <div className="space-y-3">
                             {[
-                                { label: 'Priority Support', val: '+1 (800) SKILL-DAD', icon: Phone },
-                                { label: 'Official Correspondence', val: 'support@skilldad.ai', icon: Mail },
+                                { label: 'Priority Support', val: '+91 8448119306', href: 'tel:+918448119306', icon: Phone },
+                                { label: 'Official Correspondence', val: 'skilldad12@gmail.com', href: 'mailto:skilldad12@gmail.com', icon: Mail },
                             ].map((item, i) => (
-                                <div key={i} className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] flex items-center gap-4 group cursor-pointer hover:bg-white/[0.04] transition-all">
-                                    <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/30 group-hover:text-primary transition-colors">
+                                <a
+                                    key={i}
+                                    href={item.href}
+                                    className="p-4 rounded-2xl border border-slate-200/80 dark:border-white/5 bg-slate-50/80 dark:bg-white/[0.02] flex items-center gap-4 group cursor-pointer hover:border-primary/40 hover:bg-slate-100/80 dark:hover:bg-white/[0.04] transition-all no-underline shadow-2xs"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                                         <item.icon size={18} />
                                     </div>
                                     <div>
                                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{item.label}</p>
-                                        <p className="text-xs font-bold text-white/80">{item.val}</p>
+                                        <p className="text-xs font-bold text-slate-900 dark:text-white/90 group-hover:text-primary transition-colors">{item.val}</p>
                                     </div>
-                                </div>
+                                </a>
                             ))}
                         </div>
                     </div>

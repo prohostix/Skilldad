@@ -201,11 +201,11 @@ const Footer = ({ forceVisible = false }) => {
                             <ul className="space-y-3">
 
                                 <li>
-                                    <a href="tel:+916238067220" className="text-gray-400 hover:text-white text-xs transition-colors duration-200 flex items-center group font-inter">
+                                    <a href="tel:+918448119306" className="text-gray-400 hover:text-white text-xs transition-colors duration-200 flex items-center group font-inter">
                                         <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center mr-2 group-hover:bg-primary/20 transition-colors">
                                             <Phone size={12} className="group-hover:text-primary" />
                                         </div>
-                                        <span>+91 6238067220</span>
+                                        <span>+91 8448119306</span>
                                     </a>
                                 </li>
                                 <li>

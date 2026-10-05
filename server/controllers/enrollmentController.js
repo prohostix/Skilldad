@@ -111,29 +111,53 @@ const updateProgress = asyncHandler(async (req, res) => {
         console.log(`[Progress] Updating progress for User: ${userId}, Course: ${courseId}, Video: ${videoId}`);
         
         // 1. Update completion arrays
+        // Assessment submission requires the student to have already attended/watched the lesson.
+        const enrollCheck = await query(
+            'SELECT completed_videos, completed_exercises FROM enrollments WHERE student_id = $1 AND course_id = $2',
+            [userId, courseId]
+        );
+        if (!enrollCheck.rows[0]) {
+            return res.status(404).json({ message: 'Enrollment not found' });
+        }
+
+        const currentCompletedVideos = Array.isArray(enrollCheck.rows[0].completed_videos)
+            ? enrollCheck.rows[0].completed_videos
+            : [];
+        const isWatched = currentCompletedVideos.map(String).includes(String(videoId));
+
         if (exerciseScore !== undefined) {
-             await query(`
-                UPDATE enrollments 
-                SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
-                    completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $2::jsonb,
-                    updated_at = NOW() 
-                WHERE student_id = $3 AND course_id = $4
-                AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $5)
-            `, [
-                JSON.stringify([videoId]), 
-                JSON.stringify([{ video: videoId, score: exerciseScore }]), 
-                userId, 
-                courseId,
-                videoId
-            ]);
+            if (!isWatched) {
+                return res.status(403).json({
+                    message: 'You must attend or watch this class before taking its assessment.'
+                });
+            }
+
+            const currentCompletedExercises = Array.isArray(enrollCheck.rows[0].completed_exercises)
+                ? enrollCheck.rows[0].completed_exercises
+                : [];
+            const alreadyDone = currentCompletedExercises.some(ex => String(ex?.video) === String(videoId));
+
+            if (!alreadyDone) {
+                await query(`
+                    UPDATE enrollments
+                    SET completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $1::jsonb,
+                        updated_at = NOW()
+                    WHERE student_id = $2 AND course_id = $3
+                `, [
+                    JSON.stringify([{ video: videoId, score: exerciseScore }]),
+                    userId,
+                    courseId
+                ]);
+            }
         } else {
-            await query(`
-                UPDATE enrollments 
-                SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
-                    updated_at = NOW() 
-                WHERE student_id = $2 AND course_id = $3
-                AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $4)
-            `, [JSON.stringify([videoId]), userId, courseId, videoId]);
+            if (!isWatched) {
+                await query(`
+                    UPDATE enrollments
+                    SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
+                        updated_at = NOW()
+                    WHERE student_id = $2 AND course_id = $3
+                `, [JSON.stringify([videoId]), userId, courseId]);
+            }
         }
 
         // 2. Recalculate and update the progress percentage
