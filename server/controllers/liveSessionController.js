@@ -176,18 +176,24 @@ const getSessions = asyncHandler(async (req, res) => {
     const params = [];
 
     if (req.user.role === 'student') {
-        // Students only see sessions for courses they're actively enrolled in - no
-        // institution-wide sessions regardless of enrollment (course_id IS NULL branch removed).
-        // Also excludes sessions from courses where the student's batch is inactive.
+        // Students see sessions for courses they are enrolled in (matching batch if assigned),
+        // plus platform/institution masterclasses (where course_id IS NULL).
         sql += ` AND (
-            s.course_id IN (
-                SELECT e.course_id 
-                FROM enrollments e 
-                LEFT JOIN batches b ON e.batch_id = b.id 
-                WHERE e.student_id = $1 AND e.status = 'active' 
-                AND (b.id IS NULL OR b.is_active IS NOT FALSE)
+            s.course_id IS NULL
+            OR (
+                s.course_id IN (
+                    SELECT e.course_id 
+                    FROM enrollments e 
+                    LEFT JOIN batches b ON e.batch_id = b.id 
+                    WHERE e.student_id = $1 AND e.status = 'active' 
+                    AND (b.id IS NULL OR b.is_active IS NOT FALSE)
+                )
+                AND (
+                    s.batch_id IS NULL 
+                    OR (SELECT batch_id FROM enrollments WHERE student_id = $1 AND course_id = s.course_id LIMIT 1) IS NULL 
+                    OR s.batch_id = (SELECT batch_id FROM enrollments WHERE student_id = $1 AND course_id = s.course_id LIMIT 1)
+                )
             )
-            AND (s.batch_id IS NULL OR s.batch_id = (SELECT batch_id FROM enrollments WHERE student_id = $1 AND course_id = s.course_id LIMIT 1))
         )`;
         params.push(req.user.id);
     } else if (req.user.role === 'university') {
@@ -217,9 +223,14 @@ const getSessions = asyncHandler(async (req, res) => {
             ? Number(r.dynamic_enrolled_count)
             : (Array.isArray(r.enrolled_students) ? r.enrolled_students.length : (typeof r.enrolled_students === 'number' ? r.enrolled_students : 0));
 
+        const joinLink = r.meeting_link 
+            || (zoom ? (zoom.joinUrl || (zoom.roomName ? `https://${zoom.domain || 'meet.skilldad.com'}/${zoom.roomName}` : null)) : null);
+
         return {
             ...r,
             _id: r.id,
+            id: r.id,
+            meetingLink: joinLink,
             meetingData: zoom,
             recording,
             startTime: r.start_time,
@@ -281,9 +292,14 @@ const getSession = asyncHandler(async (req, res) => {
         }
     }
 
+    const joinLink = session.meeting_link 
+        || (session.meetingData ? (session.meetingData.joinUrl || (session.meetingData.roomName ? `https://${session.meetingData.domain || 'meet.skilldad.com'}/${session.meetingData.roomName}` : null)) : null);
+
     res.json({
         ...session,
         _id: session.id,
+        id: session.id,
+        meetingLink: joinLink,
         startTime: session.start_time,
         course: { title: session.course_title },
         enrolledStudents: enrolledCount,
