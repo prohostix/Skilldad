@@ -119,39 +119,53 @@ const updateProgress = asyncHandler(async (req, res) => {
         console.log(`[Progress] Updating progress for User: ${userId}, Course: ${courseId}, Video: ${videoId}`);
         
         // 1. Update completion arrays
-        // Both queries are guarded by "AND NOT (... completed_videos ? videoId)", so
-        // rowCount > 0 only when this video was genuinely newly completed just now -
-        // that's the idempotency check we reuse to award points exactly once per video.
-        let completionResult;
-        if (exerciseScore !== undefined) {
-             completionResult = await query(`
-                UPDATE enrollments
-                SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
-                    completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $2::jsonb,
-                    updated_at = NOW()
-                WHERE student_id = $3 AND course_id = $4
-                AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $5)
-            `, [
-                JSON.stringify([videoId]),
-                JSON.stringify([{ video: videoId, score: exerciseScore }]),
-                userId,
-                courseId,
-                videoId
-            ]);
-        } else {
-            completionResult = await query(`
-                UPDATE enrollments
-                SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
-                    updated_at = NOW()
-                WHERE student_id = $2 AND course_id = $3
-                AND NOT (COALESCE(completed_videos, '[]'::jsonb) ? $4)
-            `, [JSON.stringify([videoId]), userId, courseId, videoId]);
+        // Assessment submission requires the student to have already attended/watched the lesson.
+        const enrollCheck = await query(
+            'SELECT completed_videos, completed_exercises FROM enrollments WHERE student_id = $1 AND course_id = $2',
+            [userId, courseId]
+        );
+        if (!enrollCheck.rows[0]) {
+            return res.status(404).json({ message: 'Enrollment not found' });
         }
 
-        if (completionResult.rowCount > 0) {
-            if (exerciseScore !== undefined) {
+        const currentCompletedVideos = Array.isArray(enrollCheck.rows[0].completed_videos)
+            ? enrollCheck.rows[0].completed_videos
+            : [];
+        const isWatched = currentCompletedVideos.map(String).includes(String(videoId));
+
+        if (exerciseScore !== undefined) {
+            if (!isWatched) {
+                return res.status(403).json({
+                    message: 'You must attend or watch this class before taking its assessment.'
+                });
+            }
+
+            const currentCompletedExercises = Array.isArray(enrollCheck.rows[0].completed_exercises)
+                ? enrollCheck.rows[0].completed_exercises
+                : [];
+            const alreadyDone = currentCompletedExercises.some(ex => String(ex?.video) === String(videoId));
+
+            if (!alreadyDone) {
+                await query(`
+                    UPDATE enrollments
+                    SET completed_exercises = COALESCE(completed_exercises, '[]'::jsonb) || $1::jsonb,
+                        updated_at = NOW()
+                    WHERE student_id = $2 AND course_id = $3
+                `, [
+                    JSON.stringify([{ video: videoId, score: exerciseScore }]),
+                    userId,
+                    courseId
+                ]);
                 awardPoints(userId, POINTS_PER_EXERCISE_COMPLETED, 'Completed a lesson exercise', courseId);
-            } else {
+            }
+        } else {
+            if (!isWatched) {
+                await query(`
+                    UPDATE enrollments
+                    SET completed_videos = COALESCE(completed_videos, '[]'::jsonb) || $1::jsonb,
+                        updated_at = NOW()
+                    WHERE student_id = $2 AND course_id = $3
+                `, [JSON.stringify([videoId]), userId, courseId]);
                 awardPoints(userId, POINTS_PER_VIDEO_WATCHED, 'Watched a lesson video', courseId);
             }
         }

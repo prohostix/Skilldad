@@ -298,7 +298,13 @@ const CoursePlayer = () => {
     // the section's module.quiz, or the single lesson's own video.quiz.
     const activeQuiz = quizSource === 'lesson' ? currentVideo?.quiz : currentModule?.quiz;
 
+    const isCurrentVideoCompleted = Boolean(userProgress.completedVideos?.includes(currentVideo._id || currentVideo.id));
+
     const openLessonQuiz = () => {
+        if (!isCurrentVideoCompleted) {
+            toast.error(`Please attend or watch "${currentVideo.title}" before taking its assessment.`);
+            return;
+        }
         setQuizSource('lesson');
         setQuizIndex(0);
         setQuizAnswers({});
@@ -327,9 +333,32 @@ const CoursePlayer = () => {
         }
     };
 
-    const handleVideoEnd = () => {
+    const handleVideoEnd = async () => {
+        const vidId = currentVideo?._id || currentVideo?.id;
+        if (vidId && !userProgress.completedVideos?.includes(vidId)) {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+                const resp = await axios.put('/api/enrollment/progress', {
+                    courseId,
+                    videoId: vidId,
+                }, config);
+                setUserProgress(prev => ({
+                    ...prev,
+                    completedVideos: [...(prev.completedVideos || []), vidId],
+                    progress: resp.data.progress
+                }));
+            } catch (err) {
+                console.error('Video completion update failed:', err);
+            }
+        }
+
         if (hasLessonQuiz && !userProgress.completedExercises?.some(ex => ex.video === currentVideo._id)) {
-            openLessonQuiz();
+            setQuizSource('lesson');
+            setQuizIndex(0);
+            setQuizAnswers({});
+            setQuizResult(null);
+            setShowQuiz(true);
         } else if (currentExercise && !userProgress.completedExercises?.some(ex => ex.video === currentVideo._id)) {
             setShowExercise(true);
         } else {
@@ -857,6 +886,10 @@ const CoursePlayer = () => {
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     if (!accessible) return;
+                                                                    if (!isDone) {
+                                                                        toast.error(`Please attend or watch "${video.title}" before taking this assessment.`);
+                                                                        return;
+                                                                    }
                                                                     setCurrentModuleIndex(mIndex);
                                                                     setCurrentVideoIndex(vIndex);
                                                                     setShowExercise(false);
@@ -874,9 +907,15 @@ const CoursePlayer = () => {
                                                                         setShowExercise(true);
                                                                     }
                                                                 }}
-                                                                className="text-slate-400 font-normal hover:text-primary hover:underline transition-colors cursor-pointer"
+                                                                title={!isDone ? `Watch "${video.title}" first to unlock assessment` : 'Attend Class Assessment'}
+                                                                className={`ml-1 text-[11px] font-normal transition-colors cursor-pointer inline-flex items-center gap-1 ${
+                                                                    isDone
+                                                                        ? 'text-purple-600 dark:text-purple-400 hover:text-primary hover:underline'
+                                                                        : 'text-slate-400 dark:text-slate-500 hover:text-amber-500'
+                                                                }`}
                                                             >
-                                                                {' '}• Assessment
+                                                                • Assessment
+                                                                {!isDone && <Lock size={10} className="inline text-amber-500/80 shrink-0" />}
                                                             </span>
                                                         )}
                                                     </span>
@@ -1052,7 +1091,26 @@ const CoursePlayer = () => {
                         <div className="space-y-2">
                             {showQuiz ? (
                                 <div className="w-full mx-auto max-w-[1600px]">
-                                    {(!activeQuiz?.questions || activeQuiz.questions.length === 0) ? (
+                                    {(!isCurrentVideoCompleted && quizSource === 'lesson') ? (
+                                        <div className="relative rounded-2xl bg-white dark:bg-white/[0.03] shadow-sm border border-amber-500/30 p-8 sm:p-12 text-center max-w-2xl mx-auto my-4 animate-in zoom-in-95 duration-300">
+                                            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                                <Lock size={32} />
+                                            </div>
+                                            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 font-inter">Class Attendance Required</h3>
+                                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed max-w-md mx-auto">
+                                                You must attend and finish watching <span className="font-bold text-purple-700 dark:text-purple-300">"{currentVideo.title}"</span> before you can take its assessment.
+                                            </p>
+                                            <ModernButton
+                                                onClick={() => {
+                                                    setShowQuiz(false);
+                                                    setShowExercise(false);
+                                                }}
+                                                className="!px-6 !py-2.5 !text-xs !font-bold"
+                                            >
+                                                <Play size={14} className="mr-1.5 inline" /> Watch Class Now
+                                            </ModernButton>
+                                        </div>
+                                    ) : (!activeQuiz?.questions || activeQuiz.questions.length === 0) ? (
                                         <div className="relative rounded-lg bg-white dark:bg-white/[0.03] shadow-sm border border-slate-200 dark:border-white/10 flex flex-col items-center justify-center py-12 px-6 text-center">
                                             <FileCheck size={44} className="text-slate-300 dark:text-slate-600 mb-3" />
                                             <h3 className="text-base font-bold text-slate-800 dark:text-white mb-1">No Assessment Questions Available</h3>
@@ -1362,17 +1420,39 @@ const CoursePlayer = () => {
                                                     {hasLessonQuiz && (
                                                         <ModernButton
                                                             onClick={openLessonQuiz}
-                                                            className="!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
+                                                            className={isCurrentVideoCompleted
+                                                                ? "!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
+                                                                : "!bg-slate-700/80 hover:!bg-slate-700 text-slate-300 border border-slate-600/50 shadow-md transition-all duration-300"
+                                                            }
                                                         >
-                                                            <CheckSquare size={16} className="mr-1.5 inline" /> Attend Class Assessment
+                                                            {isCurrentVideoCompleted ? (
+                                                                <CheckSquare size={16} className="mr-1.5 inline" />
+                                                            ) : (
+                                                                <Lock size={16} className="mr-1.5 inline text-amber-400" />
+                                                            )}
+                                                            Attend Class Assessment {!isCurrentVideoCompleted && '(Complete Class First)'}
                                                         </ModernButton>
                                                     )}
                                                     {!hasLessonQuiz && currentExercise && (
                                                         <ModernButton
-                                                            onClick={() => setShowExercise(true)}
-                                                            className="!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
+                                                            onClick={() => {
+                                                                if (!isCurrentVideoCompleted) {
+                                                                    toast.error(`Please complete/view "${currentVideo.title}" before taking this assessment.`);
+                                                                    return;
+                                                                }
+                                                                setShowExercise(true);
+                                                            }}
+                                                            className={isCurrentVideoCompleted
+                                                                ? "!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
+                                                                : "!bg-slate-700/80 hover:!bg-slate-700 text-slate-300 border border-slate-600/50 shadow-md transition-all duration-300"
+                                                            }
                                                         >
-                                                            <CheckSquare size={16} className="mr-1.5 inline" /> Attend Class Assessment
+                                                            {isCurrentVideoCompleted ? (
+                                                                <CheckSquare size={16} className="mr-1.5 inline" />
+                                                            ) : (
+                                                                <Lock size={16} className="mr-1.5 inline text-amber-400" />
+                                                            )}
+                                                            Attend Class Assessment {!isCurrentVideoCompleted && '(Complete Class First)'}
                                                         </ModernButton>
                                                     )}
                                                     <ModernButton
@@ -1442,6 +1522,10 @@ const CoursePlayer = () => {
                                     {currentVideo.contentType !== 'document' && currentVideo.videoType !== 'document' && (hasLessonQuiz || currentExercise) && !showExercise && !(showQuiz && quizSource === 'lesson') && (
                                         <ModernButton
                                             onClick={() => {
+                                                if (!isCurrentVideoCompleted) {
+                                                    toast.error(`Please attend or watch "${currentVideo.title}" before taking its assessment.`);
+                                                    return;
+                                                }
                                                 if (hasLessonQuiz) {
                                                     openLessonQuiz();
                                                 } else {
@@ -1450,16 +1534,39 @@ const CoursePlayer = () => {
                                                     setShowExercise(true);
                                                 }
                                             }}
-                                            className="!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
+                                            className={isCurrentVideoCompleted
+                                                ? "!bg-[#4C1D95] hover:!bg-[#6D28FF] text-white shadow-md shadow-purple-950/20 transition-all duration-300"
+                                                : "!bg-slate-700/80 hover:!bg-slate-700 text-slate-300 border border-slate-600/50 shadow-md transition-all duration-300"
+                                            }
                                         >
-                                            <CheckSquare size={16} className="mr-1.5 inline" />
+                                            {isCurrentVideoCompleted ? (
+                                                <CheckSquare size={16} className="mr-1.5 inline" />
+                                            ) : (
+                                                <Lock size={16} className="mr-1.5 inline text-amber-400" />
+                                            )}
                                             {userProgress.completedExercises?.some(ex => ex.video === (currentVideo._id || currentVideo.id))
                                                 ? 'Review Class Assessment'
-                                                : 'Attend Class Assessment'}
+                                                : isCurrentVideoCompleted
+                                                    ? 'Attend Class Assessment'
+                                                    : 'Attend Class Assessment (Watch Class First)'}
                                         </ModernButton>
                                     )}
 
                                     {showExercise && currentExercise && (
+                                        !isCurrentVideoCompleted ? (
+                                            <GlassCard className="animate-in slide-in-from-bottom-6 duration-500 bg-black/40 shadow-xl border-amber-500/30 text-center py-8 px-6">
+                                                <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center mx-auto mb-3">
+                                                    <Lock size={24} />
+                                                </div>
+                                                <h3 className="text-lg font-bold text-white mb-2 font-poppins">Class Attendance Required</h3>
+                                                <p className="text-xs text-slate-300 mb-5 max-w-sm mx-auto font-inter">
+                                                    Please attend or finish watching "{currentVideo.title}" before attempting this exercise.
+                                                </p>
+                                                <ModernButton onClick={() => setShowExercise(false)} className="!px-6 !py-2.5 !text-xs !font-bold">
+                                                    Back to Class
+                                                </ModernButton>
+                                            </GlassCard>
+                                        ) : (
                                         <GlassCard className="animate-in slide-in-from-bottom-6 duration-700 bg-black/40 shadow-xl border-emerald-500/20">
                                             <div className="flex items-center space-x-3 mb-6">
                                                 <div className="p-2 bg-emerald-100 text-emerald-600 rounded-xl">
@@ -1495,7 +1602,7 @@ const CoursePlayer = () => {
                                                 Validate Answer
                                             </ModernButton>
                                         </GlassCard>
-                                    )}
+                                    ))}
                                 </div>
                             )}
 
