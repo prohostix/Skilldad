@@ -531,20 +531,19 @@ const SupportManagement = () => {
 
                                     {/* Existing Official Response Display (If already answered) */}
                                     {(selectedTicket.admin_response || selectedTicket.adminResponse) && (
-                                        <div className="space-y-1 text-left">
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 font-inter">
-                                                    <CheckCircle2 size={11} />
+                                        <div className="rounded-xl border border-emerald-200/80 dark:border-emerald-500/30 overflow-hidden shadow-xs text-left">
+                                            <div className="px-3 py-2 bg-emerald-100/60 dark:bg-emerald-900/30 border-b border-emerald-200/70 dark:border-emerald-800/40 flex items-center justify-between">
+                                                <p className="text-[10px] font-bold text-emerald-900 dark:text-emerald-200 uppercase tracking-wider flex items-center gap-1.5 font-inter">
+                                                    <CheckCircle2 size={12} className="text-emerald-600 dark:text-emerald-400" />
                                                     Current Official Resolution
                                                 </p>
                                                 {selectedTicket.updated_at && (
-                                                    <span className="text-[10px] text-slate-400 dark:text-slate-400 font-medium font-inter">
+                                                    <span className="text-[10px] text-emerald-700/80 dark:text-emerald-400/80 font-medium font-inter">
                                                         Updated {formatRelativeTime(selectedTicket.updated_at)}
                                                     </span>
                                                 )}
                                             </div>
-
-                                            <div className="p-2.5 sm:p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-500/20 text-emerald-900 dark:text-emerald-200 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-inter">
+                                            <div className="p-3 bg-emerald-50/40 dark:bg-slate-900/60 text-slate-800 dark:text-emerald-200 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-inter">
                                                 {selectedTicket.admin_response || selectedTicket.adminResponse}
                                             </div>
                                         </div>

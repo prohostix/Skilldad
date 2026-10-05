@@ -45,7 +45,8 @@ find_student_test.js
 list_tables.js
 inspect_schema.js
 
-# Archives and patches
+# Archives, security keys and patches
+*.pem
 *.tar
 *.tar.gz
 *.zip

@@ -920,13 +920,13 @@ const Services = () => {
                                             className="h-full"
                                         >
                                             <div
-                                                className={`h-full min-h-[190px] sm:min-h-[205px] rounded-[22px] p-4.5 sm:p-5 flex flex-col justify-between transition-all duration-300 ${
+                                                className={`h-full min-h-[175px] sm:min-h-[185px] rounded-[22px] p-4.5 sm:p-5 flex flex-col justify-start transition-all duration-300 ${
                                                     isSelected
                                                         ? 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] text-[#2E1065] shadow-[0_24px_48px_-10px_rgba(147,51,234,0.38)] border-2 border-purple-300'
                                                         : 'bg-white dark:bg-[#130B24] text-slate-900 dark:text-white shadow-[0_14px_30px_-8px_rgba(76,29,149,0.12)] border border-purple-100/90 dark:border-purple-800/40 hover:border-purple-300'
                                                 }`}
                                             >
-                                                <div className="space-y-1.5 sm:space-y-2 text-left">
+                                                <div className="space-y-2 text-left">
                                                     {/* Top Tag & Icon Row */}
                                                     <div className="flex items-center justify-between">
                                                         <span
@@ -960,25 +960,12 @@ const Services = () => {
 
                                                     {/* Description */}
                                                     <p
-                                                        className={`text-[11px] sm:text-[11.5px] leading-relaxed line-clamp-3 transition-colors ${
+                                                        className={`text-[11px] sm:text-[11.5px] leading-relaxed transition-colors ${
                                                             isSelected ? 'text-[#3B0764]/90 font-medium' : 'text-slate-600 dark:text-purple-200/70'
                                                         }`}
                                                     >
                                                         {capability.description}
                                                     </p>
-                                                </div>
-
-                                                {/* Action Arrow Button */}
-                                                <div className="pt-2 mt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-end">
-                                                    <div
-                                                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xs ${
-                                                            isSelected
-                                                                ? 'bg-white/80 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95]'
-                                                                : 'bg-purple-50 dark:bg-purple-900/50 hover:bg-[#4C1D95] hover:text-white text-[#4C1D95] dark:text-purple-300'
-                                                        }`}
-                                                    >
-                                                        <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                                                    </div>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -1065,17 +1052,17 @@ const Services = () => {
                                         <div
                                             className={`h-full rounded-[22px] transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between ${
                                                 isSelected
-                                                    ? 'bg-gradient-to-br from-[#4C1D95] via-[#431785] to-[#38126E] text-white shadow-[0_16px_36px_-6px_rgba(76,29,149,0.40)] border border-purple-800/40'
+                                                    ? 'bg-gradient-to-br from-[#E9D5FF] via-[#D8B4FE] to-[#C084FC] dark:from-[#2A164D] dark:via-[#351C60] dark:to-[#431F75] text-[#2E1065] dark:text-white shadow-[0_20px_45px_-10px_rgba(147,51,234,0.32)] border-2 border-purple-300 dark:border-purple-600/60'
                                                     : 'bg-[#F8F9FA] dark:bg-[#120D24] text-slate-900 dark:text-white border border-slate-200/80 dark:border-purple-900/30 hover:border-purple-300 dark:hover:border-purple-700/60 shadow-xs hover:shadow-[0_18px_36px_-6px_rgba(76,29,149,0.14)]'
                                             }`}
                                         >
                                             <div className="text-left">
-                                                {/* Header: Circular Icon Badge (White on primary, Purple on secondary) + Toggle */}
+                                                {/* Header: Circular Icon Badge + Toggle */}
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div
                                                         className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 ${
                                                             isSelected
-                                                                 ? 'bg-white text-[#4C1D95]'
+                                                                ? 'bg-white text-[#4C1D95] shadow-xs'
                                                                 : 'bg-[#4C1D95] dark:bg-purple-600 text-white shadow-purple-900/20'
                                                         }`}
                                                     >
@@ -1094,7 +1081,7 @@ const Services = () => {
                                                         }}
                                                         className={`p-1.5 rounded-full border transition-all duration-200 hover:scale-108 active:scale-95 cursor-pointer ${
                                                             isSelected
-                                                                ? 'bg-white/15 hover:bg-white/25 text-white border-white/20'
+                                                                ? 'bg-white/70 hover:bg-white text-[#4C1D95] border-purple-300/80 shadow-2xs'
                                                                 : isExpanded
                                                                     ? 'bg-[#4C1D95]/10 text-[#4C1D95] border-[#4C1D95]/30 dark:bg-purple-900/40 dark:text-purple-300'
                                                                     : 'bg-white dark:bg-purple-950/40 border-slate-200/90 dark:border-purple-800/40 text-slate-500 hover:text-[#4C1D95] dark:hover:text-white'
@@ -1111,8 +1098,8 @@ const Services = () => {
                                                 {/* Title & Description */}
                                                 <div>
                                                     <h3
-                                                        className={`text-base sm:text-[17px] font-bold tracking-tight leading-snug mb-1.5 font-sans ${
-                                                            isSelected ? 'text-white' : 'text-slate-900 dark:text-white'
+                                                        className={`text-base sm:text-[17px] font-extrabold tracking-tight leading-snug mb-1.5 font-sans ${
+                                                            isSelected ? 'text-[#2E1065] dark:text-white' : 'text-slate-900 dark:text-white'
                                                         }`}
                                                     >
                                                         {service.title}
@@ -1120,7 +1107,7 @@ const Services = () => {
                                                     <p
                                                         className={`text-xs sm:text-[13px] leading-relaxed line-clamp-3 font-normal ${
                                                             isSelected
-                                                                ? 'text-purple-100/90'
+                                                                ? 'text-[#3B0764]/90 dark:text-purple-100 font-medium'
                                                                 : 'text-slate-500 dark:text-slate-400'
                                                         }`}
                                                     >
@@ -1133,7 +1120,7 @@ const Services = () => {
                                                     <div
                                                         className={`space-y-1.5 pt-3 mt-3 border-t ${
                                                             isSelected
-                                                                ? 'border-white/15'
+                                                                ? 'border-purple-300/60 dark:border-purple-500/20'
                                                                 : 'border-slate-200/70 dark:border-purple-900/30'
                                                         }`}
                                                     >
@@ -1142,7 +1129,7 @@ const Services = () => {
                                                                 key={fIdx}
                                                                 className={`flex items-center gap-2 text-[11px] ${
                                                                     isSelected
-                                                                        ? 'text-purple-100/90'
+                                                                        ? 'text-[#2E1065]/90 dark:text-purple-100 font-medium'
                                                                         : 'text-slate-600 dark:text-slate-300'
                                                                 }`}
                                                             >
@@ -1150,7 +1137,7 @@ const Services = () => {
                                                                     size={13}
                                                                     className={`shrink-0 ${
                                                                         isSelected
-                                                                            ? 'text-purple-200'
+                                                                            ? 'text-[#4C1D95] dark:text-purple-300'
                                                                             : 'text-[#4C1D95] dark:text-purple-400'
                                                                     }`}
                                                                 />
@@ -1165,7 +1152,7 @@ const Services = () => {
                                             <div
                                                 className={`pt-3.5 mt-3.5 border-t text-left ${
                                                     isSelected
-                                                        ? 'border-white/15'
+                                                        ? 'border-purple-300/60 dark:border-purple-500/20'
                                                         : 'border-slate-200/70 dark:border-purple-900/30'
                                                 }`}
                                             >
@@ -1175,9 +1162,9 @@ const Services = () => {
                                                         setSelectedServiceId(service.id);
                                                         setExpandedId(isExpanded ? null : service.id);
                                                     }}
-                                                    className={`text-xs font-semibold hover:underline inline-flex items-center gap-1.5 ${
+                                                    className={`text-xs font-bold hover:underline inline-flex items-center gap-1.5 ${
                                                         isSelected
-                                                            ? 'text-white hover:text-purple-200'
+                                                            ? 'text-[#4C1D95] dark:text-purple-200 hover:text-[#3B0764]'
                                                             : 'text-[#4C1D95] dark:text-purple-300'
                                                     }`}
                                                 >
@@ -1194,7 +1181,7 @@ const Services = () => {
                                                             transition={{ duration: 0.3 }}
                                                             className={`mt-3 pt-3 border-t space-y-2 overflow-hidden ${
                                                                 isSelected
-                                                                    ? 'border-white/15'
+                                                                    ? 'border-purple-300/60 dark:border-purple-500/20'
                                                                     : 'border-slate-200/70 dark:border-purple-900/30'
                                                             }`}
                                                         >
@@ -1202,7 +1189,7 @@ const Services = () => {
                                                                 <p
                                                                     className={`text-[11px] italic p-2.5 rounded-lg border-l-2 ${
                                                                         isSelected
-                                                                            ? 'text-purple-100 bg-white/10 border-white/60'
+                                                                            ? 'text-[#2E1065] bg-white/70 border-[#4C1D95]'
                                                                             : 'text-slate-600 dark:text-slate-400 bg-purple-50/70 dark:bg-purple-950/30 border-[#4C1D95] dark:border-purple-400'
                                                                     }`}
                                                                 >
@@ -1214,7 +1201,7 @@ const Services = () => {
                                                                     key={sIdx}
                                                                     className={`p-2 rounded-lg text-xs border ${
                                                                         isSelected
-                                                                            ? 'bg-white/10 border-white/15 text-white'
+                                                                            ? 'bg-white/75 border-purple-200/90 text-[#2E1065]'
                                                                             : 'bg-white dark:bg-white/[0.02] border-slate-200/80 dark:border-purple-900/20 text-slate-800 dark:text-slate-200'
                                                                     }`}
                                                                 >
@@ -1222,7 +1209,7 @@ const Services = () => {
                                                                         <span
                                                                             className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                                                                                 isSelected
-                                                                                    ? 'bg-purple-200'
+                                                                                    ? 'bg-[#4C1D95]'
                                                                                     : 'bg-[#4C1D95] dark:bg-purple-400'
                                                                             }`}
                                                                         />
@@ -1231,7 +1218,7 @@ const Services = () => {
                                                                     <p
                                                                         className={`text-[10px] pl-3 pt-0.5 leading-normal ${
                                                                             isSelected
-                                                                                ? 'text-purple-200/80'
+                                                                                ? 'text-[#3B0764]/80'
                                                                                 : 'text-slate-500 dark:text-slate-400'
                                                                         }`}
                                                                     >

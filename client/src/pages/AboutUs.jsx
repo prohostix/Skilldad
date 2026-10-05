@@ -779,7 +779,7 @@ const AboutUs = () => {
                                         },
                                         {
                                             title: 'Direct Corporate Placements',
-                                            desc: 'Seamless connections with 450+ partner companies, startup hubs, and multinational recruiters.',
+                                            desc: 'Seamless connections with 500+ hiring partners, startup hubs, and multinational recruiters.',
                                             icon: Briefcase,
                                             delay: 0.92,
                                         },

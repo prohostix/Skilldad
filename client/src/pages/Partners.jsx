@@ -223,7 +223,7 @@ const Partners = () => {
                         transition={{ duration: 0.7, delay: 0.2 }}
                         className="text-text-secondary text-base md:text-lg font-inter max-w-2xl mx-auto mb-10 leading-relaxed"
                     >
-                        Our global network of 150+ partner companies actively recruit from SkillDad's talent pool - placing graduates in roles across engineering, consulting, finance, and beyond.
+                        Our global network of 500+ hiring partners actively recruit from SkillDad's talent pool - placing graduates in roles across engineering, consulting, finance, and beyond.
                     </motion.p>
 
                     {/* Stats Row */}
@@ -234,7 +234,7 @@ const Partners = () => {
                         className="flex flex-wrap items-center justify-center gap-8"
                     >
                         {[
-                            { value: '150+', label: 'Partner Companies' },
+                            { value: '500+', label: 'Hiring Partners' },
                             { value: '94%', label: 'Placement Rate' },
                             { value: '12,000+', label: 'Students Placed' },
                             { value: '32', label: 'Countries' }

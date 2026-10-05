@@ -8,15 +8,19 @@ const socketService = require('../services/SocketService');
 // @access  Public
 const createTicket = async (req, res) => {
     try {
-        const { name, email, subject, message } = req.body;
+        let { name, email, subject, message } = req.body;
 
-        if (!name || !email || !subject || !message) {
-            return res.status(400).json({ message: 'Please fill in all fields' });
+        if (!email || !subject || !message) {
+            return res.status(400).json({ message: 'Please fill in all required fields' });
+        }
+
+        if (!name || !name.trim()) {
+            name = (req.user && req.user.name) ? req.user.name : email.split('@')[0];
         }
 
         const ticketResult = await query(
             'INSERT INTO support_tickets (user_id, name, email, subject, message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [req.user ? req.user.id : null, name, email, subject, message]
+            [req.user ? req.user.id : null, name.trim(), email.trim(), subject.trim(), message.trim()]
         );
         const ticket = ticketResult.rows[0];
         ticket._id = ticket.id; // Optional: retain backward compatibility for frontend/socket expecting _id

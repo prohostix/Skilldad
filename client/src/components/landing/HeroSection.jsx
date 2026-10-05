@@ -102,7 +102,7 @@ const getShards = (bubble) => {
 };
 
 const CourseBubbles = ({ texts }) => {
-    const defaultTexts = ['196547+Openings', '215676+Hiring Partners'];
+    const defaultTexts = ['12,000+ Students Placed', '500+ Hiring Partners'];
     const activeTexts = (Array.isArray(texts) && texts.length > 0) ? texts : defaultTexts;
 
     return (
@@ -233,7 +233,7 @@ const HeroSection = () => {
         return '/dashboard';
     };
 
-    const [bubbleTexts, setBubbleTexts] = useState(['196547+Openings', '215676+Hiring Partners']);
+    const [bubbleTexts, setBubbleTexts] = useState(['12,000+ Students Placed', '500+ Hiring Partners']);
     const [partnersList, setPartnersList] = useState(REAL_PARTNERS_INITIAL);
     const [partnerBatchIndex, setPartnerBatchIndex] = useState(0);
     const [isPartnerHovered, setIsPartnerHovered] = useState(false);

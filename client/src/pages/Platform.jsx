@@ -573,7 +573,7 @@ const Platform = () => {
                                         </div>
                                         <div className="text-[10px] leading-tight text-slate-700 dark:text-white/70">
                                             <span className="text-slate-500 dark:text-white/40 block text-[9px]">Alumni Network</span>
-                                            <div className="font-bold text-slate-900 dark:text-white">10K+ Students Placed</div>
+                                            <div className="font-bold text-slate-900 dark:text-white">12,000+ Students Placed</div>
                                         </div>
                                     </div>
                                 </div>
@@ -764,15 +764,6 @@ const Platform = () => {
                                     </button>
                                 )}
                             </div>
-
-                            {/* Reset Filters Button */}
-                            <button
-                                onClick={handleResetFilters}
-                                className="w-full py-2 px-3 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/50 dark:hover:bg-purple-900/50 text-[#4C1D95] dark:text-purple-300 text-[11px] font-bold flex items-center justify-center gap-1.5 border border-purple-200/60 dark:border-purple-800/40 transition-all cursor-pointer"
-                            >
-                                <RotateCcw size={13} />
-                                <span>Reset Filters</span>
-                            </button>
                         </aside>
 
                         {/* RIGHT COLUMN: RESULTS & CARDS */}

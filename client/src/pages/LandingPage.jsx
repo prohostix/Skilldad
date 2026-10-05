@@ -652,9 +652,30 @@ const LandingPage = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                         {(iitanLeads.length > 0 ? iitanLeads : [
-                            { name: 'Arpit Jain', alumni: 'IIT Delhi', role: 'Chief Executive Architect', image: '/assets/leadership/ceo.png', color: 'primary' },
-                            { name: 'Neeraj Sharma', alumni: 'IIT Kanpur', role: 'Head of Technology Sync', image: '/assets/leadership/cto.png', color: 'emerald-400' },
-                            { name: 'Priyanka Chopra', alumni: 'IIT Madras', role: 'Head of Operations & Excellence', image: '/assets/leadership/ops.png', color: 'amber-400' }
+                            {
+                                name: 'Arpit Jain',
+                                alumni: 'IIT Delhi',
+                                role: 'Chief Executive Architect',
+                                image: '/assets/leadership/ceo.png',
+                                color: 'primary',
+                                bio: 'Driving the core functional strategy and system reliability for SkillDad’s pan-India academic operations.'
+                            },
+                            {
+                                name: 'Neeraj Sharma',
+                                alumni: 'IIT Kanpur',
+                                role: 'Head of Technology Sync',
+                                image: '/assets/leadership/cto.png',
+                                color: 'emerald-400',
+                                bio: 'Architecting enterprise cloud infrastructure, AI synchronization, and low-latency digital classrooms powering scalable student workflows.'
+                            },
+                            {
+                                name: 'Priyanka Chopra',
+                                alumni: 'IIT Madras',
+                                role: 'Head of Operations & Excellence',
+                                image: '/assets/leadership/ops.png',
+                                color: 'amber-400',
+                                bio: 'Leading curriculum quality assurance, nationwide institutional delivery, and operational excellence to ensure verified student placement outcomes.'
+                            }
                         ]).map((lead, i) => (
                             <motion.div
                                 key={i}
@@ -685,7 +706,13 @@ const LandingPage = () => {
                                     </div>
                                     <div className="pb-5 pt-3 px-0">
                                         <p className="text-xs text-white [.light-mode_&]:!text-gray-950 leading-relaxed font-inter opacity-80 group-hover:opacity-100 transition-opacity">
-                                            {lead.bio || "Driving the core functional strategy and system reliability for SkillDad’s pan-India academic operations."}
+                                            {lead.bio || (
+                                                i === 1
+                                                    ? "Architecting enterprise cloud infrastructure, AI synchronization, and low-latency digital classrooms powering scalable student workflows."
+                                                    : i === 2
+                                                    ? "Leading curriculum quality assurance, nationwide institutional delivery, and operational excellence to ensure verified student placement outcomes."
+                                                    : "Driving the core functional strategy and system reliability for SkillDad’s pan-India academic operations."
+                                            )}
                                         </p>
                                         <div className="mt-4 pt-2 border-t border-white/5 flex items-center justify-between">
                                             <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Functional Leadership</span>
