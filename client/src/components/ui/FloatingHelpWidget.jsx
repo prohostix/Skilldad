@@ -698,7 +698,7 @@ const FloatingHelpWidget = () => {
                         </div>
 
                         {/* Standard Bottom Typing Bar - Single clean pill, zero inner borders */}
-                        <form onSubmit={handleSend} className="p-2.5 bg-white dark:bg-[#0D091F] border-t border-gray-100 dark:border-white/5 shrink-0">
+                        <form onSubmit={handleSend} className="skilldad-chat-form p-2.5 bg-white dark:bg-[#0D091F] border-t border-gray-100 dark:border-white/5 shrink-0">
                             <div className="relative flex items-center bg-[#F8F9FA] dark:bg-[#16102D] border border-gray-200/80 dark:border-white/10 rounded-full pl-4 pr-1 py-1 focus-within:bg-white dark:focus-within:bg-[#16102D] focus-within:border-[#6366F1] focus-within:ring-2 focus-within:ring-[#6366F1]/15 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                                 <input
                                     type="text"
@@ -706,21 +706,15 @@ const FloatingHelpWidget = () => {
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     disabled={isTyping}
+                                    className="skilldad-chat-input flex-1 min-w-0 bg-transparent text-[12px] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 !border-0 !border-none !outline-none !ring-0 !shadow-none pr-2 py-1"
                                     style={{
-                                        all: 'unset',
-                                        boxSizing: 'border-box',
-                                        width: '100%',
-                                        background: 'transparent',
                                         border: 'none',
+                                        borderWidth: 0,
+                                        borderStyle: 'none',
                                         outline: 'none',
                                         boxShadow: 'none',
-                                        fontSize: '12px',
-                                        padding: '2px 8px 2px 0',
-                                        color: 'inherit',
-                                        WebkitAppearance: 'none',
-                                        appearance: 'none',
+                                        background: 'transparent',
                                     }}
-                                    className="text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40"
                                 />
                                 <button
                                     type="submit"

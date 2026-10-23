@@ -1219,4 +1219,35 @@ html.light-mode .cb-status-approved {
   color: #059669 !important;
   border: 1.5px solid #a7f3d0 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* SkillDad Chatbot Input - completely eradicate any inner border or outline */
+.skilldad-chat-input,
+.skilldad-chat-input:focus,
+.skilldad-chat-input:active,
+.skilldad-chat-input:hover,
+input.skilldad-chat-input {
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  outline: 0 !important;
+  outline-style: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+.skilldad-chat-form input,
+.skilldad-chat-form input:focus,
+.skilldad-chat-form input:hover,
+.skilldad-chat-form input:active {
+  border: 0 !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  border-color: transparent !important;
+  outline: 0 !important;
+  box-shadow: none !important;
 }
