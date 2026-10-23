@@ -479,17 +479,17 @@ const FloatingHelpWidget = () => {
                         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-[350px] max-w-[360px] bg-white dark:bg-[#0D091F] border border-indigo-100/80 dark:border-purple-900/40 rounded-[24px] shadow-[0_20px_50px_-12px_rgba(79,70,229,0.28),0_4px_16px_-4px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col h-[500px] max-h-[80vh] z-[101]"
                     >
                         {/* Header Banner */}
-                        <div className="relative bg-gradient-to-r from-[#4F46E5] via-[#6366F1] to-[#8B5CF6] text-white pt-2.5 pb-3 px-3.5 shrink-0 shadow-sm select-none overflow-hidden">
+                        <div className="relative bg-gradient-to-r from-[#4F46E5] via-[#6366F1] to-[#8B5CF6] text-white pt-3 pb-3.5 px-3.5 shrink-0 shadow-sm select-none overflow-hidden">
                             {/* Decorative Sparkles */}
                             <span className="absolute top-2 left-1/3 text-white/20 text-[9px] pointer-events-none">✦</span>
                             <span className="absolute bottom-2.5 left-1/4 text-white/15 text-[10px] pointer-events-none">✦</span>
 
-                            {/* Waving AI Mascot Robot */}
-                            <div className="absolute right-11 -top-0.5 w-14 h-14 pointer-events-none select-none z-10 flex items-center justify-center">
+                            {/* Waving AI Mascot Robot - positioned cleanly with breathing room */}
+                            <div className="absolute right-14 -bottom-1 w-[58px] h-[58px] pointer-events-none select-none z-10 flex items-end justify-center">
                                 <img
                                     src={aiRobotImg}
                                     alt="SkillDad AI Mascot"
-                                    className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
+                                    className="w-full h-full object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.2)] transform hover:scale-105 transition-transform"
                                 />
                             </div>
 
@@ -697,13 +697,14 @@ const FloatingHelpWidget = () => {
                             <div ref={messagesEndRef} className="h-0.5 shrink-0" />
                         </div>
 
-                        {/* Standard Bottom Typing Bar - Clean, no emojis inside input */}
-                        <form onSubmit={handleSend} className="p-2 bg-white dark:bg-[#0D091F] border-t border-gray-100 dark:border-white/5 shrink-0">
-                            <div className="relative flex items-center bg-gray-50 dark:bg-[#16102D] border border-gray-200/80 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 focus-within:bg-white dark:focus-within:bg-[#16102D] focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/15 transition-all shadow-inner">
+                        {/* Standard Bottom Typing Bar - Clean, no square border, smooth rounded pill */}
+                        <form onSubmit={handleSend} className="p-2.5 bg-white dark:bg-[#0D091F] border-t border-gray-100 dark:border-white/5 shrink-0">
+                            <div className="relative flex items-center bg-gray-50 dark:bg-[#16102D] border border-gray-200/90 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 focus-within:bg-white dark:focus-within:bg-[#16102D] focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/15 transition-all shadow-sm">
                                 <input
                                     type="text"
                                     placeholder="Type your question..."
-                                    className="w-full bg-transparent text-[11.5px] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 outline-none pr-2 py-0.5"
+                                    className="w-full bg-transparent text-[11.5px] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 border-0 border-none outline-none focus:outline-none focus:ring-0 focus:border-none shadow-none rounded-full pr-2 py-0.5"
+                                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     disabled={isTyping}
