@@ -697,24 +697,37 @@ const FloatingHelpWidget = () => {
                             <div ref={messagesEndRef} className="h-0.5 shrink-0" />
                         </div>
 
-                        {/* Standard Bottom Typing Bar - Clean, no square border, smooth rounded pill */}
+                        {/* Standard Bottom Typing Bar - Single clean pill, zero inner borders */}
                         <form onSubmit={handleSend} className="p-2.5 bg-white dark:bg-[#0D091F] border-t border-gray-100 dark:border-white/5 shrink-0">
-                            <div className="relative flex items-center bg-gray-50 dark:bg-[#16102D] border border-gray-200/90 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 focus-within:bg-white dark:focus-within:bg-[#16102D] focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/15 transition-all shadow-sm">
+                            <div className="relative flex items-center bg-[#F8F9FA] dark:bg-[#16102D] border border-gray-200/80 dark:border-white/10 rounded-full pl-4 pr-1 py-1 focus-within:bg-white dark:focus-within:bg-[#16102D] focus-within:border-[#6366F1] focus-within:ring-2 focus-within:ring-[#6366F1]/15 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
                                 <input
                                     type="text"
                                     placeholder="Type your question..."
-                                    className="w-full bg-transparent text-[11.5px] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 border-0 border-none outline-none focus:outline-none focus:ring-0 focus:border-none shadow-none rounded-full pr-2 py-0.5"
-                                    style={{ border: 'none', outline: 'none', boxShadow: 'none' }}
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     disabled={isTyping}
+                                    style={{
+                                        all: 'unset',
+                                        boxSizing: 'border-box',
+                                        width: '100%',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        outline: 'none',
+                                        boxShadow: 'none',
+                                        fontSize: '12px',
+                                        padding: '2px 8px 2px 0',
+                                        color: 'inherit',
+                                        WebkitAppearance: 'none',
+                                        appearance: 'none',
+                                    }}
+                                    className="text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!inputValue.trim() || isTyping}
-                                    className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] text-white flex items-center justify-center shrink-0 shadow-sm transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                                    className="w-7 h-7 rounded-full bg-[#6366F1] hover:bg-[#4F46E5] active:scale-95 text-white flex items-center justify-center shrink-0 shadow-sm transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed"
                                 >
-                                    <Send size={11} className="ml-0.5" />
+                                    <Send size={12} className="ml-0.5" />
                                 </button>
                             </div>
                         </form>
