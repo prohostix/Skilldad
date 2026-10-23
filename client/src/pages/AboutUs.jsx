@@ -10,6 +10,7 @@ import Navbar from '../components/ui/Navbar';
 import Footer from '../components/ui/Footer';
 import GlassCard from '../components/ui/GlassCard';
 import ModernButton from '../components/ui/ModernButton';
+import SkillDadPetal from '../components/ui/SkillDadPetal';
 import { getMediaUrl } from '../utils/media';
 
 // Helper to resolve CMS image paths or defaults
@@ -437,22 +438,10 @@ const CollageVisual = ({
                 className="absolute -left-3 sm:-left-4 top-4 sm:top-5 w-[106%] h-[80%] bg-[#DDD6FE]/60 dark:bg-purple-950/40 rounded-[32px] sm:rounded-[38px] -rotate-10 pointer-events-none transition-transform duration-700"
             />
 
-            {/* 3 crisp radiating purple accent strokes at top-left of main card in deep purple */}
-            <svg
-                className="absolute -top-3.5 -left-3 sm:-top-4 sm:-left-3.5 w-10 sm:w-11 h-10 sm:h-11 text-[#4C1D95] dark:text-purple-300 z-40 pointer-events-none drop-shadow-xs"
-                viewBox="0 0 34 34"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3.4"
-                strokeLinecap="round"
-            >
-                {/* Top ray pointing up-right */}
-                <line x1="24" y1="16" x2="27" y2="5" />
-                {/* Middle ray pointing up-left */}
-                <line x1="17" y1="19" x2="8" y2="10" />
-                {/* Bottom ray pointing left */}
-                <line x1="15" y1="25" x2="4" y2="22" />
-            </svg>
+            {/* Single petal from official SkillDad 5-petal brand logo at top-left of main card */}
+            <SkillDadPetal
+                className="absolute -top-3.5 -left-3 sm:-top-4 sm:-left-3.5 w-7 sm:w-8 h-10 sm:h-11 text-[#4C1D95] dark:text-purple-300 z-40 pointer-events-none drop-shadow-xs -rotate-[16deg]"
+            />
 
             {/* Layered photo cards composition with crisp white frames matching reference */}
             <div className="relative w-full h-[225px] sm:h-[245px] md:h-[260px]">

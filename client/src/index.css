@@ -137,7 +137,8 @@ button[class*="h-8"],
 button[class*="h-6"],
 button[class*="h-5"],
 button[class*="h-4"],
-button[class*="h-9"] {
+button[class*="h-9"],
+.custom-yt-controls button {
   min-height: unset;
 }
 
@@ -570,6 +571,8 @@ html.light-mode .bg-\[\#020005\],
 html.light-mode .bg-\[\#040010\],
 html.light-mode .bg-\[\#0B001A\],
 html.light-mode .bg-\[\#050514\],
+html.light-mode .bg-\[\#05050A\],
+html.light-mode footer,
 html.light-mode .bg-alyra-gradient,
 html.light-mode .bg-background,
 html.light-mode .bg-background-mid,
@@ -579,6 +582,7 @@ html.light-mode .bg-background-light {
 }
 
 html.light-mode .course-catalog-page,
+html.light-mode .course-detail-page,
 html.light-mode .platform-page,
 html.light-mode .about-us-page,
 html.light-mode .job-alerts-page {

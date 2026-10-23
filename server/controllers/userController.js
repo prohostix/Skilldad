@@ -209,11 +209,20 @@ const loginUser = async (req, res) => {
 // @desc    Get current user profile
 const getMe = async (req, res) => {
     try {
-        const userRes = await query('SELECT id, name, email, role, profile, partner_code, is_verified as "isVerified", discount_rate as "discountRate" FROM users WHERE id = $1', [req.user.id]);
+        const userRes = await query('SELECT id, name, email, role, profile, profile_image as "profileImage", partner_code, is_verified as "isVerified", discount_rate as "discountRate" FROM users WHERE id = $1', [req.user.id]);
         const user = userRes.rows[0];
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        let profileObj = {};
+        if (typeof user.profile === 'string') {
+            try { profileObj = JSON.parse(user.profile); } catch (e) { }
+        } else if (user.profile && typeof user.profile === 'object') {
+            profileObj = user.profile;
+        }
+
+        const profileImage = user.profileImage || profileObj.profileImage || profileObj.avatar || profileObj.image || '';
+
         res.json({
             _id: user.id,
             name: user.name,
@@ -221,7 +230,8 @@ const getMe = async (req, res) => {
             role: user.role,
             partnerCode: user.partner_code,
             discountRate: user.discountRate || 0,
-            profile: user.profile,
+            profile: profileObj,
+            profileImage: profileImage,
             isVerified: user.isVerified
         });
     } catch (error) {

@@ -559,25 +559,54 @@ const CoursePlayer = () => {
         progressPercent = Math.min(100, Math.max(0, Math.round(Number(userProgress.progress || 0))));
     }
 
+    const isStudyMaterialItem = (video) => {
+        if (!video) return false;
+        return (
+            video.contentType === 'document' ||
+            video.videoType === 'document' ||
+            video.type === 'document' ||
+            video.type === 'pdf' ||
+            video.type === 'note' ||
+            Boolean(video.title && /study\s*material|notes?|reading|document|assignment/i.test(video.title))
+        );
+    };
+
     const isVideoAccessible = (mIndex, vIndex) => {
         try {
             const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
             if (userInfo.role === 'admin') return true;
         } catch (_) {}
 
-        if (mIndex === 0 && vIndex === 0) return true;
-        
-        const video = course.modules[mIndex]?.videos?.[vIndex];
+        const video = course.modules?.[mIndex]?.videos?.[vIndex];
         if (!video) return false;
+
+        // Notes and study materials are never locked - students can access them anytime without watching previous classes
+        if (isStudyMaterialItem(video)) return true;
+
+        if (mIndex === 0 && vIndex === 0) return true;
         if (userProgress.completedVideos?.includes(video._id)) return true;
 
         let prevVideoId = null;
-        if (vIndex > 0) {
-            prevVideoId = course.modules[mIndex]?.videos?.[vIndex - 1]?._id;
-        } else if (mIndex > 0) {
-            const prevModuleVideos = course.modules[mIndex - 1]?.videos;
-            if (prevModuleVideos && prevModuleVideos.length > 0) {
-                prevVideoId = prevModuleVideos[prevModuleVideos.length - 1]?._id;
+        // Search backwards in current module, skipping notes
+        for (let i = vIndex - 1; i >= 0; i--) {
+            const prev = course.modules[mIndex]?.videos?.[i];
+            if (prev && !isStudyMaterialItem(prev)) {
+                prevVideoId = prev._id;
+                break;
+            }
+        }
+        // If not found in current module, search backwards in preceding module(s)
+        if (!prevVideoId && mIndex > 0) {
+            for (let m = mIndex - 1; m >= 0; m--) {
+                const prevModuleVideos = course.modules[m]?.videos || [];
+                for (let i = prevModuleVideos.length - 1; i >= 0; i--) {
+                    const prev = prevModuleVideos[i];
+                    if (prev && !isStudyMaterialItem(prev)) {
+                        prevVideoId = prev._id;
+                        break;
+                    }
+                }
+                if (prevVideoId) break;
             }
         }
         return prevVideoId ? userProgress.completedVideos?.includes(prevVideoId) : true;
@@ -591,7 +620,9 @@ const CoursePlayer = () => {
 
         const module = course.modules[mIndex];
         if (!module.videos || module.videos.length === 0) return true;
-        return module.videos.every(v => userProgress.completedVideos?.includes(v._id));
+        const requiredVideos = module.videos.filter(v => !isStudyMaterialItem(v));
+        if (requiredVideos.length === 0) return true;
+        return requiredVideos.every(v => userProgress.completedVideos?.includes(v._id));
     };
 
     // Discussion Hub is extracted so it can render full-width below the exercise/sidebar
@@ -827,12 +858,7 @@ const CoursePlayer = () => {
                                         const isActive = mIndex === currentModuleIndex && vIndex === currentVideoIndex && (!showQuiz || quizSource === 'lesson');
                                         const isDone = userProgress.completedVideos?.includes(video._id);
                                         const hasAssessment = video.quiz?.questions?.length > 0 || video.exercises?.length > 0;
-                                        const isStudyMaterial = video.contentType === 'document' || 
-                                                                video.videoType === 'document' || 
-                                                                video.type === 'document' || 
-                                                                video.type === 'pdf' || 
-                                                                video.type === 'note' || 
-                                                                Boolean(video.title && /study\s*material|notes?|reading|document/i.test(video.title));
+                                        const isStudyMaterial = isStudyMaterialItem(video);
                                         return (
                                         <li key={vIndex}>
                                             <button
@@ -1392,7 +1418,7 @@ const CoursePlayer = () => {
                                     <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 to-secondary-purple/10 rounded-2xl blur-sm opacity-10 transition duration-1000"></div>
                                     <div id="lesson-video-stage" className="relative aspect-video rounded-2xl bg-black shadow-md overflow-hidden border border-white/10 w-full max-w-full">
                                         {/* Render based on video type or document contentType */}
-                                        {(currentVideo.videoType === 'document' || currentVideo.contentType === 'document') ? (
+                                        {(isStudyMaterialItem(currentVideo) || currentVideo.videoType === 'document' || currentVideo.contentType === 'document') ? (
                                             <div className="w-full h-full bg-[#0d1117] flex flex-col items-center justify-center p-8 text-center">
                                                 <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5 shadow-xl shadow-emerald-500/5">
                                                     <FileText size={40} className="text-emerald-400" />

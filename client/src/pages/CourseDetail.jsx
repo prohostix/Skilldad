@@ -332,7 +332,7 @@ const CourseDetail = () => {
     const totalLessons = course.modules?.reduce((acc, m) => acc + (m.videos?.length || 0), 0) || 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] text-white selection:bg-primary/30 relative">
+        <div className="min-h-screen course-detail-page bg-gradient-to-br from-[#05030B] via-[#080512] to-[#0B071A] [.light-mode_&]:!bg-[#FAF8FE] text-white [.light-mode_&]:!text-slate-800 selection:bg-primary/30 relative transition-colors duration-300">
             <Navbar />
 
             {/* Course Details */}

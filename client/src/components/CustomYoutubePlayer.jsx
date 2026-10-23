@@ -298,22 +298,6 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded, autoPlay = false 
       )}
 
 
-      {/* Center Play Button Overlay — shown when video is paused */}
-      {started && !isPlaying && (
-        <div 
-          className="absolute inset-0 flex items-center justify-center pointer-events-none z-25"
-        >
-          <div className="animate-in fade-in zoom-in-95 duration-200">
-            <Play 
-              size={48} 
-              className="text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]" 
-              fill="#4B2E83" 
-              stroke="white" 
-              strokeWidth={1.5} 
-            />
-          </div>
-        </div>
-      )}
 
       {/* Top Edge Blur & Gradient Overlay — only in fullscreen, tight height to cleanly cover the 16px white space */}
       {started && isFullscreen && (
@@ -342,15 +326,16 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded, autoPlay = false 
           trying to suppress them directly, which fullscreen doesn't allow
           reliably). */}
       <div
-        className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-2.5 sm:px-4 pt-3 pb-2 flex items-center gap-2 sm:gap-4 text-white transition-all duration-300 z-40 max-w-full overflow-hidden ${showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
+        className={`absolute bottom-0 inset-x-0 custom-yt-controls bg-gradient-to-t from-black/90 via-black/40 to-transparent px-2.5 sm:px-4 pt-3 pb-2 flex items-center gap-2 sm:gap-4 text-white transition-all duration-300 z-40 max-w-full overflow-hidden ${showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
           }`}
       >
-        {/* Play/Pause Button */}
+        {/* Play/Pause Button — compact balanced 30px square button (fixes 44px min-height stretch) */}
         <button
+          type="button"
           onClick={handlePlayPause}
-          className="p-1.5 rounded-lg bg-[#4B2E83] hover:bg-[#5B3A9E] text-white hover:scale-105 transition-all shadow-md shrink-0"
+          className="w-7.5 h-7.5 sm:w-8 sm:h-8 min-h-0 !min-h-0 p-0 rounded-lg bg-[#4B2E83] hover:bg-[#5B3A9E] text-white hover:scale-105 transition-all shadow-md shrink-0 flex items-center justify-center"
         >
-          {isPlaying ? <Pause size={16} fill="white" /> : <Play size={16} fill="white" className="ml-0.5" />}
+          {isPlaying ? <Pause size={15} fill="white" /> : <Play size={15} fill="white" className="ml-0.5" />}
         </button>
 
         {/* Time Indicator */}
@@ -358,7 +343,7 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded, autoPlay = false 
           {formatTime(currentTime)} <span className="text-white/30">/</span> {formatTime(duration)}
         </span>
 
-        {/* Progress Timeline bar — fills the space between the buttons */}
+        {/* Progress Timeline bar — sleek 3.5px track matching mobile app */}
         <input
           type="range"
           min={0}
@@ -368,21 +353,22 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded, autoPlay = false 
           className="flex-1 min-w-0 rounded-full appearance-none cursor-pointer transition-all"
           style={{
             minHeight: 'unset',
-            height: '10px',
-            accentColor: '#4B2E83',
-            background: `linear-gradient(to right, #4B2E83 0%, #4B2E83 ${
+            height: '3.5px',
+            accentColor: '#8B5CF6',
+            background: `linear-gradient(to right, #8B5CF6 0%, #8B5CF6 ${
               duration ? (currentTime / duration) * 100 : 0
-            }%, rgba(255,255,255,0.2) ${
+            }%, rgba(255,255,255,0.25) ${
               duration ? (currentTime / duration) * 100 : 0
-            }%, rgba(255,255,255,0.2) 100%)`
+            }%, rgba(255,255,255,0.25) 100%)`
           }}
         />
 
         {/* Mute/Volume controls */}
         <div className="flex items-center gap-2 group/volume shrink-0">
           <button
+            type="button"
             onClick={handleMuteToggle}
-            className="p-1 text-slate-300 hover:text-white transition-colors"
+            className="w-7 h-7 min-h-0 !min-h-0 flex items-center justify-center p-1 text-slate-300 hover:text-white transition-colors"
           >
             {isMuted || volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>
@@ -408,8 +394,9 @@ const CustomYoutubePlayer = ({ url, title, thumbnail, onEnded, autoPlay = false 
 
         {/* Fullscreen Button */}
         <button
+          type="button"
           onClick={toggleFullscreen}
-          className="p-1 text-slate-300 hover:text-white transition-colors hover:scale-105 shrink-0"
+          className="w-7 h-7 min-h-0 !min-h-0 flex items-center justify-center p-1 text-slate-300 hover:text-white transition-colors hover:scale-105 shrink-0"
         >
           {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </button>

@@ -119,6 +119,8 @@ const JitsiMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, on
           startScreenSharing: false,
           enableEmailInStats: false,
           prejoinPageEnabled: false,
+          enableWelcomePage: false,
+          enableClosePage: false,
           fileRecordingsEnabled: isHost,
           localRecording: {
             enabled: isHost,
@@ -140,9 +142,15 @@ const JitsiMeeting = ({ sessionId, isHost = false, token: propToken, onLeave, on
         interfaceConfigOverwrite={{
           BRAND_WATERMARK_LINK: 'https://skilldad.com',
           SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
           HIDE_DEEP_LINKING_LOGO: true,
           SHOW_BRAND_WATERMARK: false,
+          SHOW_POWERED_BY: false,
           SHOW_PROMOTIONAL_CLOSE_PAGE: false,
+          MOBILE_APP_PROMO: false,
+          DISPLAY_WELCOME_PAGE_CONTENT: false,
+          APP_NAME: 'SkillDad',
+          PROVIDER_NAME: 'SkillDad',
         }}
         userInfo={{
           displayName: config.userName,

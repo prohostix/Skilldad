@@ -400,7 +400,7 @@ const Services = () => {
             targetRotate: 0,
             entranceDelay: 0.12,
             entranceX: 0,
-            verticalOffset: 'md:-translate-y-2 lg:-translate-y-3',
+            verticalOffset: 'md:translate-y-0.5 lg:translate-y-1',
             baseZ: 'z-20'
         },
         {
@@ -856,7 +856,7 @@ const Services = () => {
                             ref={capabilitySliderRef}
                             onScroll={handleSliderScroll}
                             onMouseDown={handleMouseDown}
-                            className="flex flex-row md:flex-row items-stretch md:items-center justify-start md:justify-center overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none scroll-smooth no-scrollbar px-6 sm:px-8 md:px-0 py-3 md:py-0 md:space-y-0 gap-4 md:gap-0 md:-space-x-4 lg:-space-x-5 pt-2 pb-5 md:pb-5 relative z-10 max-w-full md:max-w-4xl mx-auto cursor-grab active:cursor-grabbing md:cursor-default select-none touch-pan-x"
+                            className="flex flex-row md:flex-row items-stretch md:items-center justify-start md:justify-center overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none scroll-smooth no-scrollbar px-6 sm:px-8 md:px-0 py-3 md:py-0 md:space-y-0 gap-4 md:gap-0 md:-space-x-4 lg:-space-x-5 pt-2 md:pt-4 pb-5 md:pb-6 relative z-10 max-w-full md:max-w-4xl mx-auto cursor-grab active:cursor-grabbing md:cursor-default select-none touch-pan-x"
                         >
                             {platformCapabilities.map((capability, idx) => {
                                 const IconComponent = capability.icon;

@@ -25,12 +25,12 @@ const Footer = ({ forceVisible = false, className = '' }) => {
     return (
         <footer
             ref={footerRef}
-            className={`relative bg-[#05050A] border-t border-white/5 overflow-hidden pt-8 mt-8 ${className}`}
+            className={`relative bg-[#05050A] [.light-mode_&]:!bg-white border-t border-white/5 [.light-mode_&]:!border-slate-200 overflow-hidden pt-8 ${className}`}
         >
             {/* Ambient Background Effects */}
-            <div className="absolute top-0 left-1/4 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-70" />
-            <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary-dark/10 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 left-1/4 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-70 [.light-mode_&]:opacity-0" />
+            <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none [.light-mode_&]:opacity-0" />
+            <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-primary-dark/10 rounded-full blur-[120px] pointer-events-none [.light-mode_&]:opacity-0" />
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pb-6">
                 
@@ -241,9 +241,9 @@ const Footer = ({ forceVisible = false, className = '' }) => {
                     </p>
                     <div className="flex items-center gap-4">
 
-                        <a href="mailto:support@skilldad.com" className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-primary transition-colors duration-200 font-inter">
+                        <a href="mailto:skilldad12@gmail.com" className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-primary transition-colors duration-200 font-inter">
                             <Mail size={11} />
-                            support@skilldad.com
+                            skilldad12@gmail.com
                         </a>
                     </div>
                 </div>

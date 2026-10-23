@@ -17,8 +17,8 @@ const DashboardFooter = () => {
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="flex items-center gap-2 text-gray-400 text-sm group">
                             <Mail size={16} className="flex-shrink-0 group-hover:text-primary transition-colors" />
-                            <a href="mailto:support@skilldad.com" className="hover:text-white transition-colors">
-                                support@skilldad.com
+                            <a href="mailto:skilldad12@gmail.com" className="hover:text-white transition-colors">
+                                skilldad12@gmail.com
                             </a>
                         </div>
                         <div className="flex items-center gap-2 text-gray-400 text-sm group">
