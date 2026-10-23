@@ -63,8 +63,8 @@ const LMS_RULES = [
     },
     {
         match: (q) => (q.includes('live') || q.includes('class')) && (q.includes('join') || q.includes('cant') || q.includes("can't") || q.includes('not') || q.includes('access')),
-        response: "To join a live class:\n1. Check your internet connection.\n2. Go to Dashboard > Live Classes.\n3. Click the session at the correct time.\n\nIf it still does not work, please contact support.",
-        options: [{ label: 'Contact Support', link: '/support' }]
+        response: "To join a live class:\n1. Check your internet connection.\n2. Go to Dashboard > Live Classes.\n3. Click the session at the scheduled time.\n\nIf it still does not work, please contact support.",
+        options: [{ label: 'Go to Live Classes', link: '/dashboard/live-classes' }, { label: 'Contact Support', link: '/support' }]
     },
     {
         match: (q) => q.includes('certificate') || q.includes('cert'),
@@ -77,7 +77,7 @@ const LMS_RULES = [
     {
         match: (q) => q.includes('course') && (q.includes('access') || q.includes('open') || q.includes('find') || q.includes('see') || q.includes('view')),
         response: "To access your courses:\nDashboard > My Courses.\n\nIf a course is missing, check your enrollment status or contact support.",
-        options: [{ label: 'Contact Support', link: '/support' }]
+        options: [{ label: 'My Courses', link: '/dashboard/my-courses' }, { label: 'Contact Support', link: '/support' }]
     },
     {
         match: (q) => q.includes('course') && (q.length < 15 || q.includes('list') || q.includes('all') || q.includes('browse') || q.includes('what')),
@@ -138,7 +138,8 @@ const INITIAL_WELCOME_OPTIONS = [
         description: 'Join or check your live sessions',
         icon: 'Video',
         color: 'sky',
-        action: 'live_class'
+        action: 'live_class',
+        link: '/dashboard/live-classes'
     },
     {
         title: 'Exams & Certificates',
@@ -186,8 +187,8 @@ const renderOptionIcon = (iconName, color = 'indigo') => {
     else if (iconName === 'User') Icon = User;
 
     return (
-        <div className={`w-8 h-8 rounded-full ${colorStyles.bg} flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105`}>
-            <Icon size={15} className={colorStyles.text} />
+        <div className={`w-6 h-6 rounded-lg ${colorStyles.bg} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
+            <Icon size={12} className={colorStyles.text} />
         </div>
     );
 };
@@ -422,12 +423,12 @@ const FloatingHelpWidget = () => {
             course_access: {
                 label: 'Course Access',
                 response: "To access your courses:\nDashboard > My Courses.\n\nIf a course is missing, check that your enrollment was confirmed. If the issue continues, please contact support.",
-                options: [{ label: 'Contact Support', link: '/support' }]
+                options: [{ label: 'My Courses', link: '/dashboard/my-courses' }, { label: 'Contact Support', link: '/support' }]
             },
             live_class: {
                 label: 'Live Classes',
                 response: "To join a live class:\n1. Ensure you are logged into your student dashboard.\n2. Navigate to Dashboard > Live Classes.\n3. Click 'Join Class' at the scheduled time.\n\nIf still not working, please contact support.",
-                options: [{ label: 'Go to Live Classes', link: '/dashboard/live' }, { label: 'Contact Support', link: '/support' }]
+                options: [{ label: 'Go to Live Classes', link: '/dashboard/live-classes' }, { label: 'Contact Support', link: '/support' }]
             },
             exams_certs: {
                 label: 'Exams & Certificates',
@@ -471,41 +472,39 @@ const FloatingHelpWidget = () => {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        initial={{ opacity: 0, y: 18, scale: 0.96 }}
+                        initial={{ opacity: 0, y: 16, scale: 0.96 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 18, scale: 0.96 }}
-                        transition={{ duration: 0.22, ease: 'easeOut' }}
-                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-[360px] max-w-[370px] bg-white dark:bg-[#0D091F] border border-indigo-100/80 dark:border-purple-900/40 rounded-[28px] shadow-[0_20px_50px_-12px_rgba(79,70,229,0.28),0_4px_16px_-4px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col h-[530px] max-h-[82vh] z-[101]"
+                        exit={{ opacity: 0, y: 16, scale: 0.96 }}
+                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-[350px] max-w-[360px] bg-white dark:bg-[#0D091F] border border-indigo-100/80 dark:border-purple-900/40 rounded-[24px] shadow-[0_20px_50px_-12px_rgba(79,70,229,0.28),0_4px_16px_-4px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col h-[500px] max-h-[80vh] z-[101]"
                     >
                         {/* Header Banner */}
-                        <div className="relative bg-gradient-to-r from-[#4F46E5] via-[#6366F1] to-[#8B5CF6] text-white pt-3.5 pb-4 px-4 shrink-0 shadow-md select-none overflow-hidden">
-                            {/* Decorative Sparkles & Ambient Glow */}
-                            <span className="absolute top-2 left-1/3 text-white/25 text-[10px] pointer-events-none">✦</span>
-                            <span className="absolute bottom-3 left-1/4 text-white/20 text-xs pointer-events-none">✦</span>
-                            <span className="absolute top-4 right-1/3 text-white/20 text-[9px] pointer-events-none">✦</span>
+                        <div className="relative bg-gradient-to-r from-[#4F46E5] via-[#6366F1] to-[#8B5CF6] text-white pt-2.5 pb-3 px-3.5 shrink-0 shadow-sm select-none overflow-hidden">
+                            {/* Decorative Sparkles */}
+                            <span className="absolute top-2 left-1/3 text-white/20 text-[9px] pointer-events-none">✦</span>
+                            <span className="absolute bottom-2.5 left-1/4 text-white/15 text-[10px] pointer-events-none">✦</span>
 
-                            {/* Cute Waving AI Mascot Robot Peeking */}
-                            <div className="absolute right-12 -top-1 w-20 h-20 pointer-events-none select-none z-10 flex items-center justify-center">
+                            {/* Waving AI Mascot Robot */}
+                            <div className="absolute right-11 -top-0.5 w-14 h-14 pointer-events-none select-none z-10 flex items-center justify-center">
                                 <img
                                     src={aiRobotImg}
                                     alt="SkillDad AI Mascot"
-                                    className="w-full h-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.18)] transform translate-y-0.5"
+                                    className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
                                 />
                             </div>
 
                             {/* Top Row: Brand Info & Action Icons */}
                             <div className="flex items-center justify-between relative z-20">
-                                <div className="flex items-center gap-2.5">
-                                    {/* White circular logo badge */}
-                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center p-1.5 shadow-md shrink-0 border border-white/40">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center p-1 shadow-sm shrink-0 border border-white/40">
                                         <img src={logoImg} alt="SkillDad" className="w-full h-full object-contain" />
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-1">
-                                            <h3 className="font-bold text-[13.5px] tracking-tight text-white leading-tight">SkillDad AI</h3>
-                                            <Sparkles size={11} className="text-yellow-300 animate-pulse" />
+                                            <h3 className="font-bold text-[12.5px] tracking-tight text-white leading-tight">SkillDad AI</h3>
+                                            <Sparkles size={10} className="text-yellow-300 animate-pulse" />
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[10.5px] text-white/90 font-medium">
+                                        <div className="flex items-center gap-1.5 text-[9.5px] text-white/90 font-medium">
                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ring-2 ring-emerald-300/40 animate-pulse"></span>
                                             <span>Online <span className="opacity-60">·</span> Always here for you</span>
                                         </div>
@@ -519,31 +518,31 @@ const FloatingHelpWidget = () => {
                                         title="Options"
                                         className="text-white/80 hover:text-white transition-all bg-white/10 hover:bg-white/20 p-1.5 rounded-full"
                                     >
-                                        <MoreVertical size={15} />
+                                        <MoreVertical size={13} />
                                     </button>
                                     <button
                                         onClick={() => setIsOpen(false)}
                                         title="Close"
                                         className="text-white/80 hover:text-white transition-all bg-white/10 hover:bg-white/20 p-1.5 rounded-full"
                                     >
-                                        <X size={15} />
+                                        <X size={14} />
                                     </button>
 
                                     {/* Dropdown Menu */}
                                     {showMenu && (
-                                        <div className="absolute top-9 right-0 w-36 bg-white dark:bg-[#1A1530] border border-gray-100 dark:border-white/10 rounded-xl shadow-xl py-1 text-gray-700 dark:text-gray-200 text-xs z-30">
+                                        <div className="absolute top-8 right-0 w-32 bg-white dark:bg-[#1A1530] border border-gray-100 dark:border-white/10 rounded-xl shadow-xl py-1 text-gray-700 dark:text-gray-200 text-xs z-30">
                                             <button
                                                 onClick={resetChat}
-                                                className="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 text-red-500"
+                                                className="w-full px-2.5 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2 text-red-500"
                                             >
-                                                <Trash2 size={13} />
+                                                <Trash2 size={12} />
                                                 <span>Clear Chat</span>
                                             </button>
                                             <button
                                                 onClick={() => { setShowMenu(false); navigate('/support'); }}
-                                                className="w-full px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
+                                                className="w-full px-2.5 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-white/5 flex items-center gap-2"
                                             >
-                                                <HelpCircle size={13} />
+                                                <HelpCircle size={12} />
                                                 <span>Help Center</span>
                                             </button>
                                         </div>
@@ -553,56 +552,56 @@ const FloatingHelpWidget = () => {
 
                             {/* Header Wave Divider to Body */}
                             <svg
-                                className="absolute -bottom-0.5 left-0 right-0 w-full h-3 fill-[#FAF9FF] dark:fill-[#0D091F] block pointer-events-none"
-                                viewBox="0 0 360 12"
+                                className="absolute -bottom-0.5 left-0 right-0 w-full h-2.5 fill-[#FAF9FF] dark:fill-[#0D091F] block pointer-events-none"
+                                viewBox="0 0 360 10"
                                 preserveAspectRatio="none"
                             >
-                                <path d="M0,0 C120,12 240,0 360,8 L360,12 L0,12 Z"></path>
+                                <path d="M0,0 C120,10 240,0 360,6 L360,10 L0,10 Z"></path>
                             </svg>
                         </div>
 
-                        {/* Chat Messages Body */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5 flex flex-col gap-3.5 text-gray-800 dark:text-white bg-[#FAF9FF] dark:bg-[#0D091F]">
+                        {/* Chat Messages Body - overflow-x-hidden prevents horizontal scrollbars */}
+                        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 flex flex-col gap-2.5 text-gray-800 dark:text-white bg-[#FAF9FF] dark:bg-[#0D091F]">
                             {messages.map((msg) => (
-                                <div key={msg.id} className={`flex flex-col max-w-[90%] ${msg.isBot ? 'self-start' : 'self-end'}`}>
-                                    <div className="flex gap-2 items-start">
+                                <div key={msg.id} className={`flex flex-col w-full ${msg.isBot ? 'items-start' : 'items-end'}`}>
+                                    <div className={`flex gap-1.5 items-start ${msg.isBot ? 'max-w-[95%]' : 'max-w-[85%]'}`}>
                                         {msg.isBot && (
-                                            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                                                <Sparkles size={11} className="text-white" />
+                                            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                                                <Sparkles size={10} className="text-white" />
                                             </div>
                                         )}
                                         <div className={`
-                                            p-3 rounded-2xl text-[12.5px] leading-relaxed shadow-sm
+                                            p-2.5 rounded-xl text-[11.5px] leading-relaxed shadow-sm w-full
                                             ${msg.isBot
-                                                ? 'bg-white dark:bg-[#16102D] border border-gray-100 dark:border-white/5 rounded-tl-sm text-gray-800 dark:text-gray-100'
-                                                : 'bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] rounded-tr-sm text-white shadow-indigo-500/10'}
+                                                ? 'bg-white dark:bg-[#16102D] border border-gray-100 dark:border-white/5 rounded-tl-none text-gray-800 dark:text-gray-100'
+                                                : 'bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] rounded-tr-none text-white shadow-indigo-500/10'}
                                         `}>
                                             {/* Welcome Greeting Banner */}
                                             {msg.type === 'welcome_cards' ? (
-                                                <div className="space-y-1">
-                                                    <div className="font-bold text-gray-900 dark:text-white text-[13px] flex items-center gap-1.5">
+                                                <div className="space-y-0.5 mb-2">
+                                                    <div className="font-bold text-gray-900 dark:text-white text-[12px] flex items-center gap-1">
                                                         <span>Hello!</span>
                                                         <span>👋</span>
                                                     </div>
-                                                    <p className="text-gray-600 dark:text-gray-300 text-[12px] leading-relaxed">
+                                                    <p className="text-gray-600 dark:text-gray-300 text-[10.5px] leading-snug">
                                                         I'm your SkillDad AI assistant.<br />How can I help you today?
                                                     </p>
                                                 </div>
                                             ) : msg.isBot ? (
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1">
                                                     {msg.text.split('\n').map((line, idx) => {
                                                         const trimmed = line.trim();
                                                         if (!trimmed) return null;
                                                         const numberedMatch = trimmed.match(/^(\d+)[.)]\s+(.+)/);
                                                         if (numberedMatch) return (
-                                                            <div key={idx} className="flex gap-2 items-start">
-                                                                <span className="shrink-0 w-3.5 h-3.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-[8.5px] font-bold flex items-center justify-center mt-0.5">{numberedMatch[1]}</span>
+                                                            <div key={idx} className="flex gap-1.5 items-start">
+                                                                <span className="shrink-0 w-3 h-3 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-[8px] font-bold flex items-center justify-center mt-0.5">{numberedMatch[1]}</span>
                                                                 <span>{numberedMatch[2]}</span>
                                                             </div>
                                                         );
                                                         if (/^[*\-•]\s+/.test(trimmed)) return (
-                                                            <div key={idx} className="flex gap-2 items-start">
-                                                                <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5"></span>
+                                                            <div key={idx} className="flex gap-1.5 items-start">
+                                                                <span className="shrink-0 w-1 h-1 rounded-full bg-indigo-500 mt-1.5"></span>
                                                                 <span>{trimmed.replace(/^[*\-•]\s+/, '')}</span>
                                                             </div>
                                                         );
@@ -613,9 +612,9 @@ const FloatingHelpWidget = () => {
                                                 <span>{msg.text}</span>
                                             )}
 
-                                            {/* Quick Option Cards (Welcome or Follow-up) */}
+                                            {/* Quick Option Cards */}
                                             {msg.options && (
-                                                <div className="mt-2.5 flex flex-col gap-2">
+                                                <div className="flex flex-col gap-1 w-full">
                                                     {msg.options.map((opt, i) => (
                                                         <button
                                                             key={i}
@@ -624,29 +623,29 @@ const FloatingHelpWidget = () => {
                                                                 else if (opt.action) handleOptionAction(opt.action);
                                                                 else if (opt.text) setMessages(prev => [...prev, { id: 'msg_' + Date.now().toString(), isBot: true, text: opt.text }]);
                                                             }}
-                                                            className="w-full text-left bg-white dark:bg-[#1A1530] hover:bg-gradient-to-r hover:from-indigo-50/60 hover:to-purple-50/60 dark:hover:bg-white/10 border border-gray-100 dark:border-white/5 hover:border-indigo-300 dark:hover:border-indigo-500/40 rounded-2xl p-2 px-2.5 flex items-center justify-between gap-2.5 shadow-[0_2px_6px_rgba(0,0,0,0.02)] hover:shadow-sm transition-all duration-200 group cursor-pointer"
+                                                            className="w-full text-left bg-white dark:bg-[#1A1530] hover:bg-indigo-50/50 dark:hover:bg-white/5 border border-gray-100 dark:border-white/5 hover:border-indigo-200 dark:hover:border-indigo-500/30 rounded-xl p-1.5 px-2.5 flex items-center justify-between gap-2 shadow-[0_1px_4px_rgba(0,0,0,0.02)] transition-all group cursor-pointer"
                                                         >
                                                             <div className="flex items-center gap-2 min-w-0">
                                                                 {opt.icon
                                                                     ? renderOptionIcon(opt.icon, opt.color)
                                                                     : (
-                                                                        <div className="w-6 h-6 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-                                                                            <Sparkles size={11} className="text-indigo-600 dark:text-indigo-400" />
+                                                                        <div className="w-5 h-5 rounded-md bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+                                                                            <Sparkles size={10} className="text-indigo-600 dark:text-indigo-400" />
                                                                         </div>
                                                                     )
                                                                 }
                                                                 <div className="min-w-0">
-                                                                    <h4 className="text-[12px] font-semibold text-gray-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                                                                    <h4 className="text-[11px] font-semibold text-gray-800 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate leading-tight">
                                                                         {opt.title || opt.label}
                                                                     </h4>
                                                                     {opt.description && (
-                                                                        <p className="text-[10px] text-gray-500 dark:text-white/50 truncate">
+                                                                        <p className="text-[9.5px] text-gray-500 dark:text-white/40 truncate leading-tight mt-0.5">
                                                                             {opt.description}
                                                                         </p>
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            <ChevronRight size={13} className="text-gray-300 dark:text-white/30 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                                            <ChevronRight size={12} className="text-gray-300 dark:text-white/30 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all shrink-0" />
                                                         </button>
                                                     ))}
                                                 </div>
@@ -654,29 +653,29 @@ const FloatingHelpWidget = () => {
 
                                             {/* Feedback for FAQ responses */}
                                             {msg.isBot && msg.faqId && (
-                                                <div className="mt-2.5 pt-2 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
-                                                    <span className="text-[9.5px] text-gray-400 dark:text-white/40 italic">Was this helpful?</span>
-                                                    <div className="flex gap-1.5">
+                                                <div className="mt-2 pt-1.5 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                                                    <span className="text-[9px] text-gray-400 dark:text-white/40 italic">Was this helpful?</span>
+                                                    <div className="flex gap-1">
                                                         <button
                                                             onClick={() => handleFeedback(msg.id, msg.faqId, true)}
-                                                            className={`p-1 rounded-md transition-all ${feedbackSent[msg.id] === 'up' ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 dark:text-white/40'}`}
+                                                            className={`p-1 rounded transition-all ${feedbackSent[msg.id] === 'up' ? 'bg-green-500/20 text-green-600 dark:text-green-400' : 'bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 dark:text-white/40'}`}
                                                             disabled={feedbackSent[msg.id]}
                                                         >
-                                                            <ThumbsUp size={11} />
+                                                            <ThumbsUp size={10} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleFeedback(msg.id, msg.faqId, false)}
-                                                            className={`p-1 rounded-md transition-all ${feedbackSent[msg.id] === 'down' ? 'bg-red-500/20 text-red-600 dark:text-red-400' : 'bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 dark:text-white/40'}`}
+                                                            className={`p-1 rounded transition-all ${feedbackSent[msg.id] === 'down' ? 'bg-red-500/20 text-red-600 dark:text-red-400' : 'bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 dark:text-white/40'}`}
                                                             disabled={feedbackSent[msg.id]}
                                                         >
-                                                            <ThumbsDown size={11} />
+                                                            <ThumbsDown size={10} />
                                                         </button>
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                    <span className={`text-[8.5px] text-gray-400 dark:text-white/30 mt-0.5 ${msg.isBot ? 'ml-8' : 'mr-1 text-right'}`}>
+                                    <span className={`text-[8px] text-gray-400 dark:text-white/30 mt-0.5 ${msg.isBot ? 'ml-7' : 'mr-1'}`}>
                                         {msg.isBot ? 'SkillDad AI' : 'You'}
                                     </span>
                                 </div>
@@ -684,30 +683,27 @@ const FloatingHelpWidget = () => {
 
                             {/* Typing Indicator */}
                             {isTyping && (
-                                <div className="flex flex-col max-w-[85%] self-start">
-                                    <div className="flex gap-2 items-center">
-                                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shrink-0 opacity-70 shadow-sm">
-                                            <Sparkles size={11} className="text-white" />
-                                        </div>
-                                        <div className="p-2.5 px-3 bg-white dark:bg-[#16102D] border border-gray-100 dark:border-white/5 rounded-2xl rounded-tl-sm flex items-center gap-1.5 h-[32px] shadow-sm">
-                                            <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                            <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                            <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                        </div>
+                                <div className="flex gap-1.5 items-center self-start">
+                                    <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shrink-0 opacity-70 shadow-sm">
+                                        <Sparkles size={10} className="text-white" />
+                                    </div>
+                                    <div className="p-2 px-2.5 bg-white dark:bg-[#16102D] border border-gray-100 dark:border-white/5 rounded-xl rounded-tl-none flex items-center gap-1 h-[28px] shadow-sm">
+                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                     </div>
                                 </div>
                             )}
-                            <div ref={messagesEndRef} className="h-0.5" />
+                            <div ref={messagesEndRef} className="h-0.5 shrink-0" />
                         </div>
 
-                        {/* Input Area */}
-                        <form onSubmit={handleSend} className="p-2.5 pt-2 bg-white dark:bg-[#0D091F] border-t border-gray-100 dark:border-white/5 shrink-0">
-                            <div className="relative flex items-center bg-[#F3F4F6] dark:bg-[#16102D] border border-gray-200/70 dark:border-white/10 rounded-full pl-3 pr-1 py-1 focus-within:bg-white dark:focus-within:bg-[#16102D] focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/15 transition-all">
-                                <Sparkles size={13} className="text-indigo-500 shrink-0 ml-0.5" />
+                        {/* Standard Bottom Typing Bar - Clean, no emojis inside input */}
+                        <form onSubmit={handleSend} className="p-2 bg-white dark:bg-[#0D091F] border-t border-gray-100 dark:border-white/5 shrink-0">
+                            <div className="relative flex items-center bg-gray-50 dark:bg-[#16102D] border border-gray-200/80 dark:border-white/10 rounded-full pl-3.5 pr-1 py-1 focus-within:bg-white dark:focus-within:bg-[#16102D] focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/15 transition-all shadow-inner">
                                 <input
                                     type="text"
                                     placeholder="Type your question..."
-                                    className="w-full bg-transparent text-[12px] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 outline-none px-2 py-0.5"
+                                    className="w-full bg-transparent text-[11.5px] text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-white/40 outline-none pr-2 py-0.5"
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     disabled={isTyping}
@@ -715,16 +711,15 @@ const FloatingHelpWidget = () => {
                                 <button
                                     type="submit"
                                     disabled={!inputValue.trim() || isTyping}
-                                    className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#4F46E5] to-[#8B5CF6] text-white flex items-center justify-center shrink-0 hover:scale-105 active:scale-95 transition-all shadow-md shadow-indigo-500/20 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                                    className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#4F46E5] to-[#7C3AED] hover:from-[#4338CA] hover:to-[#6D28D9] text-white flex items-center justify-center shrink-0 shadow-sm transition-all disabled:opacity-30 disabled:hover:scale-100 disabled:cursor-not-allowed"
                                 >
-                                    <Send size={12} className="ml-0.5" />
+                                    <Send size={11} className="ml-0.5" />
                                 </button>
                             </div>
                         </form>
 
-                        {/* Footer Accent Curve & Powered By */}
-                        <div className="relative py-1.5 px-3 bg-gradient-to-r from-indigo-50/50 via-purple-50/50 to-pink-50/50 dark:from-indigo-950/20 dark:to-purple-950/20 border-t border-indigo-50 dark:border-white/5 flex items-center justify-center gap-1.5 text-[9.5px] text-gray-400 dark:text-white/40 font-medium shrink-0">
-                            <Sparkles size={9} className="text-indigo-500" />
+                        {/* Footer - Minimal & Clean */}
+                        <div className="py-1 px-3 bg-[#FAF9FF] dark:bg-[#0D091F] border-t border-gray-100/50 dark:border-white/5 flex items-center justify-center text-[9px] text-gray-400 dark:text-white/40 font-medium shrink-0">
                             <span>Powered by SkillDad AI</span>
                         </div>
                     </motion.div>
@@ -735,31 +730,25 @@ const FloatingHelpWidget = () => {
             {!isOpen && (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="group relative w-13 h-13 md:w-14 md:h-14 rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(99,102,241,0.45)] hover:shadow-[0_12px_35px_rgba(99,102,241,0.6)] transition-all duration-300 bg-gradient-to-tr from-[#4F46E5] via-[#6366F1] to-[#8B5CF6] hover:scale-105 active:scale-95 text-white border border-white/20 z-50 overflow-visible"
+                    className="group relative w-12 h-12 md:w-13 md:h-13 rounded-full flex items-center justify-center shadow-[0_6px_20px_rgba(99,102,241,0.4)] hover:shadow-[0_10px_28px_rgba(99,102,241,0.55)] transition-all duration-300 bg-gradient-to-tr from-[#4F46E5] via-[#6366F1] to-[#8B5CF6] hover:scale-105 active:scale-95 text-white border border-white/20 z-50 overflow-visible"
                 >
                     {/* Pulsing ring */}
                     <div className="absolute inset-0 rounded-full bg-[#6366F1] animate-ping opacity-25 pointer-events-none"></div>
 
-                    {/* Micro Sparkle Accents */}
-                    <span className="absolute -top-1 -right-1 text-yellow-300 text-[10px] animate-pulse pointer-events-none">✦</span>
-                    <span className="absolute -bottom-0.5 -left-1 text-white/70 text-[9px] pointer-events-none">✦</span>
-
                     {/* Tooltip */}
-                    <div className="absolute right-full mr-4 bg-[#0D091F]/90 backdrop-blur-md border border-[#6366F1]/30 text-white text-[11px] font-medium px-3 py-1.5 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-2 group-hover:translate-x-0 shadow-lg">
+                    <div className="absolute right-full mr-3.5 bg-[#0D091F]/90 backdrop-blur-md border border-[#6366F1]/30 text-white text-[10.5px] font-medium px-2.5 py-1 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none transform translate-x-2 group-hover:translate-x-0 shadow-lg">
                         <div className="flex items-center gap-1.5">
-                            <Sparkles size={12} className="text-yellow-400" />
+                            <Sparkles size={11} className="text-yellow-400" />
                             <span>Ask SkillDad AI</span>
                         </div>
                         <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-[#0D091F]/90 border-t border-r border-[#6366F1]/30 rotate-45" />
                     </div>
 
                     {/* Center Icon */}
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center">
-                        <MessageCircle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
-                    </div>
+                    <MessageCircle size={22} className="group-hover:rotate-12 transition-transform duration-300" />
 
                     {/* Glowing Online Indicator */}
-                    <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-white dark:border-[#0D091F] shadow-sm"></div>
+                    <div className="absolute top-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-[#0D091F] shadow-sm"></div>
                 </button>
             )}
         </div>

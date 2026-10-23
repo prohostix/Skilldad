@@ -187,6 +187,7 @@ function App() {
                     <Route index element={<StudentDashboard />} />
                     <Route path="my-courses" element={<MyCourses />} />
                     <Route path="live-classes" element={<LiveClasses />} />
+                    <Route path="live" element={<Navigate to="/dashboard/live-classes" replace />} />
                     <Route path="course-finder" element={<CourseFinder />} />
                     <Route path="session/:sessionId" element={<SessionDetail />} />
                     <Route path="watch/:id" element={<WatchStream />} />
